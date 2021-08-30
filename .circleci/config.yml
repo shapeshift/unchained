@@ -9,17 +9,17 @@ executors:
       - image: pulumi/pulumi-nodejs:3.11.0
 
 aliases:
-  - &only-master
+  - &only-main
     filters:
       branches:
         only:
-          - master
+          - main
 
-  - &not-master
+  - &not-main
     filters:
       branches:
         ignore:
-          - master
+          - main
 
 commands:
   unchained-precheck:
@@ -249,18 +249,18 @@ workflows:
     jobs:
       - lint-and-test:
           name: lint and test project
-          <<: *not-master
+          <<: *not-main
   deploy:
     jobs:
       - lint-and-test-persist:
           name: lint and test project (persist to workspace)
-          <<: *only-master
+          <<: *only-main
 
       - deploy-dependencies:
           name: deploy common unchained dependencies
           requires:
             - lint and test project (persist to workspace)
-          <<: *only-master
+          <<: *only-main
 
       - deploy-coinstack:
           name: deploy ethereum coinstack
@@ -282,4 +282,4 @@ workflows:
           daemon-storage-size: 1500Gi
           requires:
             - deploy common unchained dependencies
-          <<: *only-master
+          <<: *only-main
