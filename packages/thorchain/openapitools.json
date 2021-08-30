@@ -1,0 +1,19 @@
+{
+  "$schema": "../../node_modules/@openapitools/openapi-generator-cli/config.schema.json",
+  "spaces": 2,
+  "generator-cli": {
+    "version": "5.1.1",
+    "generators": {
+      "axios": {
+        "inputSpec": "https://gitlab.com/thorchain/midgard/-/raw/develop/openapi/openapi.yaml",
+        "generatorName": "typescript-axios",
+        "output": "#{cwd}/src/generated/midgard",
+        "reservedWordsMappings": { "in": "in" },
+        "additionalProperties": {
+          "supportsES6": "true",
+          "useSingleRequestParameter": true
+        }
+      }
+    }
+  }
+}

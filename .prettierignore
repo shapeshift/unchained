@@ -1,0 +1,9 @@
+coverage
+dist
+node_modules
+README.md
+routes.ts
+swagger.json
+generated
+*.yaml
+*.xml

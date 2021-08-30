@@ -1,0 +1,23 @@
+{
+  "name": "@shapeshiftoss/logger",
+  "version": "0.1.1",
+  "license": "MIT",
+  "private": true,
+  "main": "dist/index.js",
+  "source": "src/index.ts",
+  "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist node_modules",
+    "watch": "tsc --watch"
+  },
+  "dependencies": {
+    "winston": "^2.4.4"
+  }
+}

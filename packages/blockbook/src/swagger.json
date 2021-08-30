@@ -1,0 +1,2059 @@
+{
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"BlockbookInfo": {
+				"description": "Contains info about blockbook",
+				"properties": {
+					"coin": {
+						"type": "string"
+					},
+					"host": {
+						"type": "string"
+					},
+					"version": {
+						"type": "string"
+					},
+					"gitCommit": {
+						"type": "string"
+					},
+					"buildTime": {
+						"type": "string"
+					},
+					"syncMode": {
+						"type": "boolean"
+					},
+					"initialSync": {
+						"type": "boolean"
+					},
+					"inSync": {
+						"type": "boolean"
+					},
+					"bestHeight": {
+						"type": "number",
+						"format": "double"
+					},
+					"lastBlockTime": {
+						"type": "string"
+					},
+					"inSyncMempool": {
+						"type": "boolean"
+					},
+					"lastMempoolTime": {
+						"type": "string"
+					},
+					"mempoolSize": {
+						"type": "number",
+						"format": "double"
+					},
+					"decimals": {
+						"type": "number",
+						"format": "double"
+					},
+					"dbSize": {
+						"type": "number",
+						"format": "double"
+					},
+					"dbSizeFromColumns": {
+						"type": "number",
+						"format": "double"
+					},
+					"dbColumns": {
+						"items": {},
+						"type": "array"
+					},
+					"about": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"coin",
+					"host",
+					"version",
+					"gitCommit",
+					"buildTime",
+					"syncMode",
+					"initialSync",
+					"inSync",
+					"bestHeight",
+					"lastBlockTime",
+					"inSyncMempool",
+					"lastMempoolTime",
+					"mempoolSize",
+					"decimals",
+					"dbSize",
+					"about"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"BackendInfo": {
+				"description": "Contains info about backend node",
+				"properties": {
+					"error": {
+						"type": "string"
+					},
+					"chain": {
+						"type": "string"
+					},
+					"blocks": {
+						"type": "number",
+						"format": "double"
+					},
+					"headers": {
+						"type": "number",
+						"format": "double"
+					},
+					"bestBlockHash": {
+						"type": "string"
+					},
+					"difficulty": {
+						"type": "string"
+					},
+					"sizeOnDisk": {
+						"type": "number",
+						"format": "double"
+					},
+					"version": {
+						"type": "string"
+					},
+					"subversion": {
+						"type": "string"
+					},
+					"protocolVersion": {
+						"type": "string"
+					},
+					"timeOffset": {
+						"type": "number",
+						"format": "double"
+					},
+					"warnings": {
+						"type": "string"
+					},
+					"consensus": {}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Info": {
+				"description": "Contains info about blockbook and connected backend node",
+				"properties": {
+					"blockbook": {
+						"$ref": "#/components/schemas/BlockbookInfo"
+					},
+					"backend": {
+						"$ref": "#/components/schemas/BackendInfo"
+					}
+				},
+				"required": [
+					"blockbook",
+					"backend"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"BlockIndex": {
+				"description": "Contains block hash",
+				"properties": {
+					"hash": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"hash"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Vin": {
+				"description": "Contains info about single transaction input",
+				"properties": {
+					"txid": {
+						"type": "string"
+					},
+					"vout": {
+						"type": "number",
+						"format": "double"
+					},
+					"sequence": {
+						"type": "number",
+						"format": "double"
+					},
+					"n": {
+						"type": "number",
+						"format": "double"
+					},
+					"addresses": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"isAddress": {
+						"type": "boolean"
+					},
+					"value": {
+						"type": "string"
+					},
+					"hex": {
+						"type": "string"
+					},
+					"asm": {
+						"type": "string"
+					},
+					"coinbase": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"n",
+					"isAddress"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Vout": {
+				"description": "Contains info about single transaction output",
+				"properties": {
+					"value": {
+						"type": "string"
+					},
+					"n": {
+						"type": "number",
+						"format": "double"
+					},
+					"spent": {
+						"type": "boolean"
+					},
+					"spentTxId": {
+						"type": "string"
+					},
+					"spentIndex": {
+						"type": "number",
+						"format": "double"
+					},
+					"spentHeight": {
+						"type": "number",
+						"format": "double"
+					},
+					"hex": {
+						"type": "string"
+					},
+					"asm": {
+						"type": "string"
+					},
+					"addresses": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array",
+						"nullable": true
+					},
+					"isAddress": {
+						"type": "boolean"
+					},
+					"type": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"n",
+					"addresses",
+					"isAddress"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TokenTransfer": {
+				"description": "Contains info about a token transfer done in a transaction",
+				"properties": {
+					"type": {
+						"type": "string"
+					},
+					"from": {
+						"type": "string"
+					},
+					"to": {
+						"type": "string"
+					},
+					"token": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"symbol": {
+						"type": "string"
+					},
+					"decimals": {
+						"type": "number",
+						"format": "double"
+					},
+					"value": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"type",
+					"from",
+					"to",
+					"token",
+					"name",
+					"symbol",
+					"decimals",
+					"value"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"EthereumSpecific": {
+				"description": "Contains ethereum specific transaction data",
+				"properties": {
+					"status": {
+						"type": "number",
+						"format": "double"
+					},
+					"nonce": {
+						"type": "number",
+						"format": "double"
+					},
+					"gasLimit": {
+						"type": "number",
+						"format": "double"
+					},
+					"gasUsed": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"gasPrice": {
+						"type": "string"
+					},
+					"data": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"status",
+					"nonce",
+					"gasLimit",
+					"gasUsed",
+					"gasPrice"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Tx": {
+				"description": "Contains info about a transaction",
+				"properties": {
+					"txid": {
+						"type": "string"
+					},
+					"version": {
+						"type": "number",
+						"format": "double"
+					},
+					"lockTime": {
+						"type": "number",
+						"format": "double"
+					},
+					"vin": {
+						"items": {
+							"$ref": "#/components/schemas/Vin"
+						},
+						"type": "array"
+					},
+					"vout": {
+						"items": {
+							"$ref": "#/components/schemas/Vout"
+						},
+						"type": "array"
+					},
+					"blockHash": {
+						"type": "string"
+					},
+					"blockHeight": {
+						"type": "number",
+						"format": "double"
+					},
+					"confirmations": {
+						"type": "number",
+						"format": "double"
+					},
+					"blockTime": {
+						"type": "number",
+						"format": "double"
+					},
+					"size": {
+						"type": "number",
+						"format": "double"
+					},
+					"value": {
+						"type": "string"
+					},
+					"valueIn": {
+						"type": "string"
+					},
+					"fees": {
+						"type": "string"
+					},
+					"hex": {
+						"type": "string"
+					},
+					"rbf": {
+						"type": "boolean"
+					},
+					"tokenTransfers": {
+						"items": {
+							"$ref": "#/components/schemas/TokenTransfer"
+						},
+						"type": "array"
+					},
+					"coinSpecificData": {},
+					"ethereumSpecific": {
+						"$ref": "#/components/schemas/EthereumSpecific"
+					}
+				},
+				"required": [
+					"txid",
+					"vin",
+					"vout",
+					"blockHeight",
+					"confirmations",
+					"blockTime",
+					"value"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"EthTxSpecific": {
+				"description": "Contains ethereum specific transaction info as returned from the node",
+				"properties": {
+					"tx": {
+						"properties": {
+							"transactionIndex": {
+								"type": "string"
+							},
+							"from": {
+								"type": "string"
+							},
+							"blockHash": {
+								"type": "string"
+							},
+							"blockNumber": {
+								"type": "string"
+							},
+							"hash": {
+								"type": "string"
+							},
+							"input": {
+								"type": "string"
+							},
+							"value": {
+								"type": "string"
+							},
+							"to": {
+								"type": "string"
+							},
+							"gas": {
+								"type": "string"
+							},
+							"gasPrice": {
+								"type": "string"
+							},
+							"nonce": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"transactionIndex",
+							"from",
+							"blockNumber",
+							"hash",
+							"input",
+							"value",
+							"to",
+							"gas",
+							"gasPrice",
+							"nonce"
+						],
+						"type": "object"
+					},
+					"receipt": {
+						"properties": {
+							"logs": {
+								"items": {
+									"properties": {
+										"data": {
+											"type": "string"
+										},
+										"topics": {
+											"items": {
+												"type": "string"
+											},
+											"type": "array"
+										},
+										"address": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"data",
+										"topics",
+										"address"
+									],
+									"type": "object"
+								},
+								"type": "array"
+							},
+							"status": {
+								"type": "string"
+							},
+							"gasUsed": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"logs",
+							"status",
+							"gasUsed"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"tx"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TxSpecific": {
+				"$ref": "#/components/schemas/EthTxSpecific",
+				"description": "Union of all blockchain specific transaction info"
+			},
+			"Token": {
+				"description": "Contains info about tokens held by an address",
+				"properties": {
+					"type": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"path": {
+						"type": "string"
+					},
+					"contract": {
+						"type": "string"
+					},
+					"transfers": {
+						"type": "number",
+						"format": "double"
+					},
+					"symbol": {
+						"type": "string"
+					},
+					"decimals": {
+						"type": "number",
+						"format": "double"
+					},
+					"balance": {
+						"type": "string"
+					},
+					"totalReceived": {
+						"type": "string"
+					},
+					"totalSent": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"type",
+					"name",
+					"transfers"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Erc20Contract": {
+				"description": "Contains info about an ERC20 contract",
+				"properties": {
+					"contract": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"symbol": {
+						"type": "string"
+					},
+					"decimals": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"contract",
+					"name",
+					"symbol",
+					"decimals"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Address": {
+				"description": "Contains info about an address and it's transactions",
+				"properties": {
+					"page": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalPages": {
+						"type": "number",
+						"format": "double"
+					},
+					"itemsOnPage": {
+						"type": "number",
+						"format": "double"
+					},
+					"address": {
+						"type": "string"
+					},
+					"balance": {
+						"type": "string"
+					},
+					"totalReceived": {
+						"type": "string"
+					},
+					"totalSent": {
+						"type": "string"
+					},
+					"unconfirmedBalance": {
+						"type": "string"
+					},
+					"unconfirmedTxs": {
+						"type": "number",
+						"format": "double"
+					},
+					"txs": {
+						"type": "number",
+						"format": "double"
+					},
+					"nonTokenTxs": {
+						"type": "number",
+						"format": "double"
+					},
+					"transactions": {
+						"items": {
+							"$ref": "#/components/schemas/Tx"
+						},
+						"type": "array"
+					},
+					"txids": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"nonce": {
+						"type": "string"
+					},
+					"usedTokens": {
+						"type": "number",
+						"format": "double"
+					},
+					"tokens": {
+						"items": {
+							"$ref": "#/components/schemas/Token"
+						},
+						"type": "array"
+					},
+					"erc20Contract": {
+						"$ref": "#/components/schemas/Erc20Contract"
+					}
+				},
+				"required": [
+					"address",
+					"balance",
+					"unconfirmedBalance",
+					"unconfirmedTxs",
+					"txs"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Xpub": {
+				"$ref": "#/components/schemas/Address",
+				"description": "Contains info about an xpub and it's transactions"
+			},
+			"Utxo": {
+				"description": "Contains info about an unspent transaction output",
+				"properties": {
+					"txid": {
+						"type": "string"
+					},
+					"vout": {
+						"type": "number",
+						"format": "double"
+					},
+					"value": {
+						"type": "string"
+					},
+					"height": {
+						"type": "number",
+						"format": "double"
+					},
+					"confirmations": {
+						"type": "number",
+						"format": "double"
+					},
+					"address": {
+						"type": "string"
+					},
+					"path": {
+						"type": "string"
+					},
+					"locktime": {
+						"type": "number",
+						"format": "double"
+					},
+					"coinbase": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"txid",
+					"vout",
+					"value",
+					"confirmations"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Block": {
+				"description": "Contains info about a block",
+				"properties": {
+					"page": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalPages": {
+						"type": "number",
+						"format": "double"
+					},
+					"itemsOnPage": {
+						"type": "number",
+						"format": "double"
+					},
+					"hash": {
+						"type": "string"
+					},
+					"previousBlockHash": {
+						"type": "string"
+					},
+					"nextBlockHash": {
+						"type": "string"
+					},
+					"height": {
+						"type": "number",
+						"format": "double"
+					},
+					"confirmations": {
+						"type": "number",
+						"format": "double"
+					},
+					"size": {
+						"type": "number",
+						"format": "double"
+					},
+					"time": {
+						"type": "number",
+						"format": "double"
+					},
+					"version": {
+						"type": "number",
+						"format": "double"
+					},
+					"merkleRoot": {
+						"type": "string"
+					},
+					"nonce": {
+						"type": "string"
+					},
+					"bits": {
+						"type": "string"
+					},
+					"difficulty": {
+						"type": "string"
+					},
+					"txCount": {
+						"type": "number",
+						"format": "double"
+					},
+					"tx": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"txs": {
+						"items": {
+							"$ref": "#/components/schemas/Tx"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"hash",
+					"height",
+					"confirmations",
+					"size",
+					"version",
+					"merkleRoot",
+					"nonce",
+					"bits",
+					"difficulty",
+					"txCount"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SendTx": {
+				"description": "Contains transaction id result",
+				"properties": {
+					"result": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"result"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"BalanceHistory": {
+				"description": "Contains info about one point in time of balance history",
+				"properties": {
+					"time": {
+						"type": "number",
+						"format": "double"
+					},
+					"txs": {
+						"type": "number",
+						"format": "double"
+					},
+					"received": {
+						"type": "string"
+					},
+					"sent": {
+						"type": "string"
+					},
+					"sentToSelf": {
+						"type": "string"
+					},
+					"rates": {
+						"properties": {},
+						"additionalProperties": {
+							"type": "number",
+							"format": "double"
+						},
+						"type": "object"
+					},
+					"txid": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"time",
+					"txs",
+					"received",
+					"sent",
+					"sentToSelf"
+				],
+				"type": "object",
+				"additionalProperties": false
+			}
+		},
+		"securitySchemes": {}
+	},
+	"info": {
+		"title": "@shapeshiftoss/blockbook",
+		"version": "0.1.1",
+		"license": {
+			"name": "MIT"
+		},
+		"contact": {}
+	},
+	"openapi": "3.0.0",
+	"paths": {
+		"/api/v2": {
+			"get": {
+				"operationId": "GetInfo",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Info"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"blockbook": {
+												"coin": "Bitcoin",
+												"host": "indexer-sts-1",
+												"version": "0.3.4",
+												"gitCommit": "unknown",
+												"buildTime": "unknown",
+												"syncMode": true,
+												"initialSync": false,
+												"inSync": true,
+												"bestHeight": 577261,
+												"lastBlockTime": "2019-05-22T18:03:33.547762973+02:00",
+												"inSyncMempool": true,
+												"lastMempoolTime": "2019-05-22T18:10:10.27929383+02:00",
+												"mempoolSize": 17348,
+												"decimals": 8,
+												"dbSize": 191887866502,
+												"about": "Blockbook - blockchain indexer for Trezor wallet https://trezor.io/. Do not use for any other purpose."
+											},
+											"backend": {
+												"chain": "main",
+												"blocks": 577261,
+												"headers": 577261,
+												"bestBlockHash": "0000000000000000000ca8c902aa58b3118a7f35d093e25a07f17bcacd91cabf",
+												"difficulty": "6704632680587.417",
+												"sizeOnDisk": 250504188580,
+												"version": "180000",
+												"subversion": "/Satoshi:0.18.0/",
+												"protocolVersion": "70015",
+												"timeOffset": 0,
+												"warnings": ""
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"description": "Info returns current status of blockbook and connected backend node",
+				"tags": [
+					"v2"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/api/v2/block-index/{height}": {
+			"get": {
+				"operationId": "GetBlockHash",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BlockIndex"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"hash": "0xac8e95f7483f7131261bcc0a70873f8236c27444c940defc677f74f281220193"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"description": "Get block hash returns the block hash for a specified block height\n\nExamples\n1. Ethereum",
+				"tags": [
+					"v2"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "block height",
+						"in": "path",
+						"name": "height",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						},
+						"example": 500000
+					}
+				]
+			}
+		},
+		"/api/v2/tx/{txid}": {
+			"get": {
+				"operationId": "GetTransaction",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Tx"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"txid": "75d18ecf1a785fe7d08c6092e0e57bc6b6c180da317424ed5d38dc82cdfc0966",
+											"version": 1,
+											"lockTime": 1668727698,
+											"vin": [
+												{
+													"sequence": 4294967295,
+													"n": 0,
+													"isAddress": false,
+													"coinbase": "035e100a04fbd4c65f2f706f6f6c696e2e636f6d2ffabe6d6d0451e4803ad83f4c522f35e30651d3c723b64fb0d45e5c97103b2a417deb259601000000000000003514ff11f74bf64ffccd8c6fc6d73b69119857508d00155a000000000000"
+												}
+											],
+											"vout": [
+												{
+													"value": "719587241",
+													"n": 0,
+													"hex": "a914939b86fcad883b03d54a8e47a9ce9c8f0faea30087",
+													"addresses": [
+														"3F9VZy8bnN7c8SyCsJVjMAdcn3stt1AaEc"
+													],
+													"isAddress": true
+												},
+												{
+													"value": "0",
+													"n": 1,
+													"hex": "6a24b9e11b6dbe3761e1928876367b50ece0e5e7de511bca3a14394fd66cf324e773b9f6e3c7",
+													"addresses": [
+														"OP_RETURN b9e11b6dbe3761e1928876367b50ece0e5e7de511bca3a14394fd66cf324e773b9f6e3c7"
+													],
+													"isAddress": false
+												},
+												{
+													"value": "0",
+													"n": 2,
+													"hex": "6a24aa21a9ed12fafedab7d13a7d58e373877a99657fe70be95fdd23d18b64e4a9aec84eb4cf",
+													"addresses": [
+														"OP_RETURN aa21a9ed12fafedab7d13a7d58e373877a99657fe70be95fdd23d18b64e4a9aec84eb4cf"
+													],
+													"isAddress": false
+												},
+												{
+													"value": "0",
+													"n": 3,
+													"hex": "6a2952534b424c4f434b3a846c7fc81776e0624d51470629386f1d5c9dd75714d6a0a25f813826002c6130",
+													"addresses": [
+														"OP_RETURN 52534b424c4f434b3a846c7fc81776e0624d51470629386f1d5c9dd75714d6a0a25f813826002c6130"
+													],
+													"isAddress": false
+												}
+											],
+											"blockHash": "0000000000000000000cfc71513d398fa637fc40f447b77f797fc987a2c40c73",
+											"blockHeight": 659550,
+											"confirmations": 1,
+											"blockTime": 1606866170,
+											"value": "719587241",
+											"valueIn": "0",
+											"fees": "0",
+											"hex": "0100000000010..."
+										}
+									},
+									"Example 2": {
+										"value": {
+											"txid": "0x890482efd45fcb660b8eebe42ab4d71a24b97c46c7d9c88b1e4b3cf4bef10110",
+											"vin": [
+												{
+													"n": 0,
+													"addresses": [
+														"0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
+													],
+													"isAddress": true
+												}
+											],
+											"vout": [
+												{
+													"value": "0",
+													"n": 0,
+													"addresses": [
+														"0xdAC17F958D2ee523a2206206994597C13D831ec7"
+													],
+													"isAddress": true
+												}
+											],
+											"blockHash": "0xc58510150bdc388e3e3823db61f110c009b5ccd9466b58a75fe50cd053158f70",
+											"blockHeight": 11369941,
+											"confirmations": 3,
+											"blockTime": 1606869353,
+											"value": "0",
+											"fees": "10299250000000000",
+											"tokenTransfers": [
+												{
+													"type": "ERC20",
+													"from": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa",
+													"to": "0xa64D0b5ccFdaB0e4D8Ec7C65862Aac1c78A5666c",
+													"token": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+													"name": "Tether USD",
+													"symbol": "USDT",
+													"decimals": 6,
+													"value": "504000000"
+												}
+											],
+											"ethereumSpecific": {
+												"status": 1,
+												"nonce": 10871,
+												"gasLimit": 80000,
+												"gasUsed": 41197,
+												"gasPrice": "250000000000",
+												"data": "0xa9059c..."
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"description": "Get transaction returns \"normalized\" data about transaction, which has the same general structure for all supported coins.\nIt does not return coin specific fields (for example information about Zcash shielded addresses).\n\nExamples:\n1. Bitcoin\n2. Ethereum",
+				"tags": [
+					"v2"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "transaction id",
+						"in": "path",
+						"name": "txid",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"examples": {
+							"Example 1": {
+								"value": "75d18ecf1a785fe7d08c6092e0e57bc6b6c180da317424ed5d38dc82cdfc0966"
+							},
+							"Example 2": {
+								"value": "0x890482efd45fcb660b8eebe42ab4d71a24b97c46c7d9c88b1e4b3cf4bef10110"
+							}
+						}
+					}
+				]
+			}
+		},
+		"/api/v2/tx-specific/{txid}": {
+			"get": {
+				"operationId": "GetTransactionSpecific",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TxSpecific"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"tx": {
+												"nonce": "0x11cc",
+												"gasPrice": "0x826299e000",
+												"gas": "0x4e200",
+												"to": "0x6C0B51971650D28821cE30b15B02b9826a20B129",
+												"value": "0x0",
+												"input": "0xc01a8c8400000000000000000000000000000000000000000000000000000000000011e0",
+												"hash": "0xf5ef950d597bea8c980fe5a17faeb70ed7f5030dcf58f077baede5eb0d610cdf",
+												"blockNumber": "0xad9342",
+												"blockHash": "0xe05a93f6525aa797c3e3285c27eb34852bab8bb5a12a42b5650390ec49504160",
+												"from": "0x095273aDB73E55a8710E448C49eaee16fe115527",
+												"transactionIndex": "0x0"
+											},
+											"receipt": {
+												"gasUsed": "0x1990e",
+												"status": "0x1",
+												"logs": [
+													{
+														"address": "0x6C0B51971650D28821cE30b15B02b9826a20B129",
+														"topics": [
+															"0x4a504a94899432a9846e1aa406dceb1bcfd538bb839071d49d1e5e23f5be30ef",
+															"0x000000000000000000000000095273adb73e55a8710e448c49eaee16fe115527",
+															"0x00000000000000000000000000000000000000000000000000000000000011e0"
+														],
+														"data": "0x"
+													},
+													{
+														"address": "0x76e95d97c10ADA1e3459a5780aDd55C225bD98CC",
+														"topics": [
+															"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+															"0x0000000000000000000000006c0b51971650d28821ce30b15b02b9826a20b129",
+															"0x0000000000000000000000008c4c0a06b968586434dcde95c0f673bc956dae9b"
+														],
+														"data": "0x000000000000000000000000000000000000000000005295f13ebb7127c00000"
+													},
+													{
+														"address": "0x6C0B51971650D28821cE30b15B02b9826a20B129",
+														"topics": [
+															"0x33e13ecb54c3076d8e8bb8c2881800a4d972b792045ffae98fdf46df365fed75",
+															"0x00000000000000000000000000000000000000000000000000000000000011e0"
+														],
+														"data": "0x"
+													}
+												]
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"description": "Get transaction specific returns transaction data in the exact format as returned by backend, including all coin specific fields\n\nExamples:\n1. Ethereum",
+				"tags": [
+					"v2"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "transaction id",
+						"in": "path",
+						"name": "txid",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"example": "0xf5ef950d597bea8c980fe5a17faeb70ed7f5030dcf58f077baede5eb0d610cdf"
+					}
+				]
+			}
+		},
+		"/api/v2/address/{address}": {
+			"get": {
+				"operationId": "GetAddress",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Address"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"address": "0x37863DF4712e4494dFfc4854862259399354b2BB",
+											"balance": "155365245155486598",
+											"unconfirmedBalance": "0",
+											"unconfirmedTxs": 0,
+											"txs": 12,
+											"nonTokenTxs": 12,
+											"nonce": "10"
+										}
+									},
+									"Example 2": {
+										"value": {
+											"address": "0x37863DF4712e4494dFfc4854862259399354b2BB",
+											"balance": "155365245155486598",
+											"unconfirmedBalance": "0",
+											"unconfirmedTxs": 0,
+											"txs": 12,
+											"nonTokenTxs": 12,
+											"nonce": "10",
+											"tokens": [
+												{
+													"type": "ERC20",
+													"name": "NuCypher",
+													"contract": "0x4fE83213D56308330EC302a8BD641f1d0113A4Cc",
+													"transfers": 2,
+													"symbol": "NU",
+													"decimals": 18
+												},
+												{
+													"type": "ERC20",
+													"name": "VectorspaceAI",
+													"contract": "0x7D29A64504629172a429e64183D6673b9dAcbFCe",
+													"transfers": 3,
+													"symbol": "VXV",
+													"decimals": 18
+												},
+												{
+													"type": "ERC20",
+													"name": "DefiDollar DAO",
+													"contract": "0x20c36f062a31865bED8a5B1e512D9a1A20AA333A",
+													"transfers": 1,
+													"symbol": "DFD",
+													"decimals": 18
+												}
+											]
+										}
+									},
+									"Example 3": {
+										"value": {
+											"address": "0x37863DF4712e4494dFfc4854862259399354b2BB",
+											"balance": "155365245155486598",
+											"unconfirmedBalance": "0",
+											"unconfirmedTxs": 0,
+											"txs": 12,
+											"nonTokenTxs": 12,
+											"nonce": "10",
+											"tokens": [
+												{
+													"type": "ERC20",
+													"name": "NuCypher",
+													"contract": "0x4fE83213D56308330EC302a8BD641f1d0113A4Cc",
+													"transfers": 2,
+													"symbol": "NU",
+													"decimals": 18,
+													"balance": "0"
+												},
+												{
+													"type": "ERC20",
+													"name": "VectorspaceAI",
+													"contract": "0x7D29A64504629172a429e64183D6673b9dAcbFCe",
+													"transfers": 3,
+													"symbol": "VXV",
+													"decimals": 18,
+													"balance": "0"
+												},
+												{
+													"type": "ERC20",
+													"name": "DefiDollar DAO",
+													"contract": "0x20c36f062a31865bED8a5B1e512D9a1A20AA333A",
+													"transfers": 1,
+													"symbol": "DFD",
+													"decimals": 18,
+													"balance": "1000000000000000000000"
+												}
+											]
+										}
+									},
+									"Example 4": {
+										"value": {
+											"page": 1,
+											"totalPages": 1,
+											"itemsOnPage": 1000,
+											"address": "0x37863DF4712e4494dFfc4854862259399354b2BB",
+											"balance": "155365245155486598",
+											"unconfirmedBalance": "0",
+											"unconfirmedTxs": 0,
+											"txs": 12,
+											"nonTokenTxs": 12,
+											"txids": [
+												"0x69bc89feb7a6d79fe1a1cb578d1f06bd2d4dbd334895dcba4a356d3f98d7518e",
+												"0x3e9384cd55dc5427c7c4e0cce93351b78b0c01f9253ae2808b05779aa67f5b77",
+												"0x822ae073bb27eea492b3218f09d4a26cab80e5d837b2c861133c69e4663f9fb4",
+												"0x60ceb102ef0c95c17acdf4930cc8552d39af6d0c86d2f90fe0c04f3cbb34de82",
+												"0xc17a278a1501d7b27e69a4aa4197f1894c11aac29e63c6829bfb4c7a3934d6e8",
+												"0x439b205c5a3e4eebc016717d5745aa71e3138a30e5dda018f350a32e0a39c678",
+												"0xc6639a905e1f6af1c6f3c40ac0e2b2eefb5a7f40567acf1bc729768225dd0101",
+												"0x83506c53c5ebb53e85b1f50084e008f932b7f52642158b04b19f5728ac864bf3",
+												"0x86ef391fcf54c5f1784a9355d952c7e8e784bdbff8b906ffcda798f2544b318c",
+												"0xa2124bd526af587859c2ae14ddd97ed4fc4e7dd49c801061547026d29165c73a",
+												"0x1a8180afc12a9cb60adca895936f92955e2a04eb0e53a6be72d70617149aeadc",
+												"0x0795093293dd34fdef55b909c18cd15755e3a0d1668f850dc484f09ec68b5258"
+											],
+											"nonce": "10",
+											"tokens": [
+												{
+													"type": "ERC20",
+													"name": "NuCypher",
+													"contract": "0x4fE83213D56308330EC302a8BD641f1d0113A4Cc",
+													"transfers": 2,
+													"symbol": "NU",
+													"decimals": 18,
+													"balance": "0"
+												},
+												{
+													"type": "ERC20",
+													"name": "VectorspaceAI",
+													"contract": "0x7D29A64504629172a429e64183D6673b9dAcbFCe",
+													"transfers": 3,
+													"symbol": "VXV",
+													"decimals": 18,
+													"balance": "0"
+												},
+												{
+													"type": "ERC20",
+													"name": "DefiDollar DAO",
+													"contract": "0x20c36f062a31865bED8a5B1e512D9a1A20AA333A",
+													"transfers": 1,
+													"symbol": "DFD",
+													"decimals": 18,
+													"balance": "1000000000000000000000"
+												}
+											]
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"description": "Get address returns balances and transactions of an address. The returned transactions are sorted by block height, newest blocks first.\n\nExamples:\n1. Ethereum (basic)\n2. Ethereum (tokens)\n3. Ethereum (tokenBalances)\n4. Ethereum (txids)",
+				"tags": [
+					"v2"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "account address",
+						"in": "path",
+						"name": "address",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"examples": {
+							"Example 1": {
+								"value": "0x37863DF4712e4494dFfc4854862259399354b2BB"
+							},
+							"Example 2": {
+								"value": "0x37863DF4712e4494dFfc4854862259399354b2BB"
+							},
+							"Example 3": {
+								"value": "0x37863DF4712e4494dFfc4854862259399354b2BB"
+							},
+							"Example 4": {
+								"value": "0x37863DF4712e4494dFfc4854862259399354b2BB"
+							}
+						}
+					},
+					{
+						"description": "specifies page of returned transactions, starting from 1. If out of range, Blockbook returns the closest possible page.",
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "number of transactions returned by call (default and maximum 1000)",
+						"in": "query",
+						"name": "pageSize",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "filter of the returned transactions starting at from block",
+						"in": "query",
+						"name": "from",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "filter of the returned transactions up until to block",
+						"in": "query",
+						"name": "to",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "   * **basic**: return only address balances, without any transactions\n   * **tokens**: basic + tokens belonging to the address (applicable only to some coins)\n   * **tokenBalances**: basic + tokens with balances + belonging to the address (applicable only to some coins)\n   * **txids**: tokenBalances + list of txids, subject to from, to filter and paging\n   * **txslight**: tokenBalances + list of transaction with limited details (only data from index), subject to from, to filter and paging\n   * **txs (default)**: tokenBalances + list of transaction with details, subject to from, to filter and paging",
+						"in": "query",
+						"name": "details",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"basic",
+								"tokens",
+								"tokenBalances",
+								"txids",
+								"txslight",
+								"txs"
+							]
+						}
+					},
+					{
+						"description": "return only transactions which affect specified contract (applicable only to coins which support contracts)",
+						"in": "query",
+						"name": "contract",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/v2/xpub/{xpub}": {
+			"get": {
+				"operationId": "GetXpub",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Xpub"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"address": "xpub6DQYbVJSVvJPzpYenir7zVSf2WPZRu69LxZuMezzAKuT6biPcug6Vw1zMk4knPBeNKvioutc4EGpPQ8cZiWtjcXYvJ6wPiwcGmCkihA9Jy3",
+											"balance": "729",
+											"totalReceived": "10407",
+											"totalSent": "9678",
+											"unconfirmedBalance": "0",
+											"unconfirmedTxs": 0,
+											"txs": 3,
+											"usedTokens": 2
+										}
+									},
+									"Example 2": {
+										"value": {
+											"address": "xpub6DQYbVJSVvJPzpYenir7zVSf2WPZRu69LxZuMezzAKuT6biPcug6Vw1zMk4knPBeNKvioutc4EGpPQ8cZiWtjcXYvJ6wPiwcGmCkihA9Jy3",
+											"balance": "729",
+											"totalReceived": "10407",
+											"totalSent": "9678",
+											"unconfirmedBalance": "0",
+											"unconfirmedTxs": 0,
+											"txs": 3,
+											"usedTokens": 2,
+											"tokens": [
+												{
+													"type": "XPUBAddress",
+													"name": "14mMwtZCGiAtyr8KnnAZYyHmZ9Zvj71h4t",
+													"path": "m/44'/0'/0'/1/0",
+													"transfers": 1,
+													"decimals": 8
+												}
+											]
+										}
+									},
+									"Example 3": {
+										"value": {
+											"address": "xpub6DQYbVJSVvJPzpYenir7zVSf2WPZRu69LxZuMezzAKuT6biPcug6Vw1zMk4knPBeNKvioutc4EGpPQ8cZiWtjcXYvJ6wPiwcGmCkihA9Jy3",
+											"balance": "729",
+											"totalReceived": "10407",
+											"totalSent": "9678",
+											"unconfirmedBalance": "0",
+											"unconfirmedTxs": 0,
+											"txs": 3,
+											"usedTokens": 2,
+											"tokens": [
+												{
+													"type": "XPUBAddress",
+													"name": "14mMwtZCGiAtyr8KnnAZYyHmZ9Zvj71h4t",
+													"path": "m/44'/0'/0'/1/0",
+													"transfers": 1,
+													"decimals": 8,
+													"balance": "729",
+													"totalReceived": "729",
+													"totalSent": "0"
+												}
+											]
+										}
+									},
+									"Example 4": {
+										"value": {
+											"page": 1,
+											"totalPages": 1,
+											"itemsOnPage": 1000,
+											"address": "xpub6DQYbVJSVvJPzpYenir7zVSf2WPZRu69LxZuMezzAKuT6biPcug6Vw1zMk4knPBeNKvioutc4EGpPQ8cZiWtjcXYvJ6wPiwcGmCkihA9Jy3",
+											"balance": "729",
+											"totalReceived": "10407",
+											"totalSent": "9678",
+											"unconfirmedBalance": "0",
+											"unconfirmedTxs": 0,
+											"txs": 2,
+											"txids": [
+												"02cdb69a97d1b8585797ac31a1954804b40a71c380a3ede0793f21a2cdfd300a",
+												"de5105b810d8482325d119b8e40c0cfeed43cfd273b02fb29d26a699d6b769d4"
+											],
+											"usedTokens": 2,
+											"tokens": [
+												{
+													"type": "XPUBAddress",
+													"name": "14mMwtZCGiAtyr8KnnAZYyHmZ9Zvj71h4t",
+													"path": "m/44'/0'/0'/1/0",
+													"transfers": 1,
+													"decimals": 8,
+													"balance": "729",
+													"totalReceived": "729",
+													"totalSent": "0"
+												}
+											]
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"description": "Returns balances and transactions of an xpub, applicable only for Bitcoin-type coins.\n\nBlockbook supports BIP44, BIP49 and BIP84 derivation schemes. It expects xpub at level 3 derivation path, i.e. m/purpose'/coin_type'/account'/. Blockbook completes the change/address_index part of the path when deriving addresses.\n\nThe BIP version is determined by the prefix of the xpub. The prefixes for each coin are defined by fields xpub_magic, xpub_magic_segwit_p2sh, xpub_magic_segwit_native in the trezor-common library. If the prefix is not recognized, Blockbook defaults to BIP44 derivation scheme.\n\nThe returned transactions are sorted by block height, newest blocks first.\n\nExamples:\n1. Bitcoin (basic)\n2. Bitcoin (tokens)\n3. Bitcoin (tokenBalances)\n4. Bitcoin (txids)",
+				"tags": [
+					"v2"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "extended public key",
+						"in": "path",
+						"name": "xpub",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"examples": {
+							"Example 1": {
+								"value": "xpub6DQYbVJSVvJPzpYenir7zVSf2WPZRu69LxZuMezzAKuT6biPcug6Vw1zMk4knPBeNKvioutc4EGpPQ8cZiWtjcXYvJ6wPiwcGmCkihA9Jy3"
+							},
+							"Example 2": {
+								"value": "xpub6DQYbVJSVvJPzpYenir7zVSf2WPZRu69LxZuMezzAKuT6biPcug6Vw1zMk4knPBeNKvioutc4EGpPQ8cZiWtjcXYvJ6wPiwcGmCkihA9Jy3"
+							},
+							"Example 3": {
+								"value": "xpub6DQYbVJSVvJPzpYenir7zVSf2WPZRu69LxZuMezzAKuT6biPcug6Vw1zMk4knPBeNKvioutc4EGpPQ8cZiWtjcXYvJ6wPiwcGmCkihA9Jy3"
+							},
+							"Example 4": {
+								"value": "xpub6DQYbVJSVvJPzpYenir7zVSf2WPZRu69LxZuMezzAKuT6biPcug6Vw1zMk4knPBeNKvioutc4EGpPQ8cZiWtjcXYvJ6wPiwcGmCkihA9Jy3"
+							}
+						}
+					},
+					{
+						"description": "specifies page of returned transactions, starting from 1. If out of range, Blockbook returns the closest possible page.",
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "number of transactions returned by call (default and maximum 1000)",
+						"in": "query",
+						"name": "pageSize",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "filter of the returned transactions starting at from block",
+						"in": "query",
+						"name": "from",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "filter of the returned transactions up until to block",
+						"in": "query",
+						"name": "to",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "   * **basic**: return only xpub balances, without any derived addresses and transactions\n   * **tokens**: basic + tokens (addresses) derived from the xpub, subject to tokens parameter\n   * **tokenBalances**: basic + tokens (addresses) derived from the xpub with balances, subject to tokens parameter\n   * **txids**: tokenBalances + list of txids, subject to from, to filter and paging\n   * **txs (default)**: tokenBalances + list of transaction with details, subject to from, to filter and paging",
+						"in": "query",
+						"name": "details",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"basic",
+								"tokens",
+								"tokenBalances",
+								"txids",
+								"txs"
+							]
+						}
+					},
+					{
+						"description": "specifies what tokens (xpub addresses) are returned by the request\n* **nonzero (default)**: return only addresses with nonzero balance\n* **used**: return addresses with at least one transaction\n* **derived**: return all derived addresses",
+						"in": "query",
+						"name": "tokens",
+						"required": false,
+						"schema": {
+							"type": "string",
+							"enum": [
+								"nonzero",
+								"used",
+								"derived"
+							]
+						}
+					}
+				]
+			}
+		},
+		"/api/v2/utxo/{account}": {
+			"get": {
+				"operationId": "GetUtxo",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/Utxo"
+									},
+									"type": "array"
+								},
+								"examples": {
+									"Example 1": {
+										"value": [
+											{
+												"txid": "02cdb69a97d1b8585797ac31a1954804b40a71c380a3ede0793f21a2cdfd300a",
+												"vout": 1,
+												"value": "729",
+												"height": 601428,
+												"confirmations": 58362
+											}
+										]
+									},
+									"Example 2": {
+										"value": [
+											{
+												"txid": "02cdb69a97d1b8585797ac31a1954804b40a71c380a3ede0793f21a2cdfd300a",
+												"vout": 1,
+												"value": "729",
+												"height": 601428,
+												"confirmations": 58362,
+												"address": "14mMwtZCGiAtyr8KnnAZYyHmZ9Zvj71h4t",
+												"path": "m/44'/0'/0'/1/0"
+											}
+										]
+									}
+								}
+							}
+						}
+					}
+				},
+				"description": "Returns array of unspent transaction outputs of address or xpub, applicable only for Bitcoin-type coins. By default, the list contains both confirmed and unconfirmed transactions. The query parameter confirmed=true disables return of unconfirmed transactions. The returned utxos are sorted by block height, newest blocks first. For xpubs the response also contains address and derivation path of the utxo.\nUnconfirmed utxos do not have field height, the field confirmations has value 0 and may contain field lockTime, if not zero.\nCoinbase utxos do have field coinbase set to true, however due to performance reasons only up to minimum coinbase confirmations limit (100). After this limit, utxos are not detected as coinbase.\n\nExamples\n1. Bitcoin (address)\n2. Bitcoin (xpub)",
+				"tags": [
+					"v2"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "address or xpub",
+						"in": "path",
+						"name": "account",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"examples": {
+							"Example 1": {
+								"value": "14mMwtZCGiAtyr8KnnAZYyHmZ9Zvj71h4t"
+							},
+							"Example 2": {
+								"value": "xpub6DQYbVJSVvJPzpYenir7zVSf2WPZRu69LxZuMezzAKuT6biPcug6Vw1zMk4knPBeNKvioutc4EGpPQ8cZiWtjcXYvJ6wPiwcGmCkihA9Jy3"
+							}
+						}
+					},
+					{
+						"description": "   * **false (default)**: returns both confirmed and unconfirmed transactions\n   * **true**: returns only confirmed transactions",
+						"in": "query",
+						"name": "confirmed",
+						"required": false,
+						"schema": {
+							"type": "boolean"
+						}
+					}
+				]
+			}
+		},
+		"/api/v2/block/{block}": {
+			"get": {
+				"operationId": "GetBlock",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Block"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"page": 1,
+											"totalPages": 1,
+											"itemsOnPage": 1000,
+											"hash": "0xac8e95f7483f7131261bcc0a70873f8236c27444c940defc677f74f281220193",
+											"previousBlockHash": "0x794a1bef434928ce3aadd2f5eced2bf72ac714a30e9e4ab5965d7d9760300d84",
+											"nextBlockHash": "0xf645c2ab37dd99619cd2183b6c314b9495afa157632d7ecb648ccc98cd3e82c3",
+											"height": 500000,
+											"confirmations": 10880882,
+											"size": 541,
+											"time": 1446832865,
+											"version": 0,
+											"merkleRoot": "",
+											"nonce": "0x8901a71893cb3488",
+											"bits": "",
+											"difficulty": "0x6dcc051573d",
+											"txCount": 0
+										}
+									},
+									"Example 2": {
+										"value": {
+											"page": 1,
+											"totalPages": 1,
+											"itemsOnPage": 1000,
+											"hash": "0x068c1569e89ffb3d496641617e41404c7d47c3a0ccab55e6ae0b045ff189b389",
+											"previousBlockHash": "0x5783e02a998984893a4e44139c4cd452c32d5a1f30405cca196812e787859fb9",
+											"nextBlockHash": "0x94d0de3e476c999d622531a82c33c3ea0464a9dabe6063d5e4efafdaaf0040dd",
+											"height": 600000,
+											"confirmations": 10780895,
+											"size": 656,
+											"time": 1448548070,
+											"version": 0,
+											"merkleRoot": "",
+											"nonce": "0x4d2dd664365d838b",
+											"bits": "",
+											"difficulty": "0x6dfd480d3ef",
+											"txCount": 1,
+											"txs": [
+												{
+													"txid": "0x97d99bc7729211111a21b12c933c949d4f31684f1d6954ff477d0477538ff017",
+													"vin": [
+														{
+															"n": 0,
+															"addresses": [
+																"0x4Bb96091Ee9D802ED039C4D1a5f6216F90f81B01"
+															],
+															"isAddress": true
+														}
+													],
+													"vout": [
+														{
+															"value": "4950000000000000000",
+															"n": 0,
+															"addresses": [
+																"0x45060b5ceE190661fa27D1e189f431f7b2b52275"
+															],
+															"isAddress": true
+														}
+													],
+													"blockHash": "0x068c1569e89ffb3d496641617e41404c7d47c3a0ccab55e6ae0b045ff189b389",
+													"blockHeight": 600000,
+													"confirmations": 10780895,
+													"blockTime": 1448548070,
+													"value": "4950000000000000000",
+													"fees": "1050000000000000",
+													"ethereumSpecific": {
+														"nonce": 16522,
+														"gasLimit": 41000,
+														"gasUsed": 21000,
+														"gasPrice": "50000000000",
+														"data": "0x"
+													}
+												}
+											]
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"description": "Returns information about block with transactions, subject to paging.\n\nExamples\n1. Ethereum (block height)\n2. Ethereum (block hash)",
+				"tags": [
+					"v2"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "block height or block hash",
+						"in": "path",
+						"name": "block",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"examples": {
+							"Example 1": {
+								"value": 500000
+							},
+							"Example 2": {
+								"value": "0x068c1569e89ffb3d496641617e41404c7d47c3a0ccab55e6ae0b045ff189b389"
+							}
+						}
+					},
+					{
+						"description": "specifies page of returned transactions, starting from 1. If out of range, Blockbook returns the closest possible page.",
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/api/v2/sendtx/{hex}": {
+			"get": {
+				"operationId": "SendTransaction",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/SendTx"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"result": "0x97d99bc7729211111a21b12c933c949d4f31684f1d6954ff477d0477538ff017"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"description": "Sends new transaction to backend.\n\nExamples\n1. Ethereum",
+				"tags": [
+					"v2"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "serialized transaction data",
+						"in": "path",
+						"name": "hex",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/v2/balancehistory/{account}": {
+			"get": {
+				"operationId": "BalanceHistory",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/BalanceHistory"
+									},
+									"type": "array"
+								},
+								"examples": {
+									"Example 1": {
+										"value": [
+											{
+												"time": 1602806400,
+												"txs": 4,
+												"received": "4990000000000000000",
+												"sent": "4984861615113576402",
+												"sentToSelf": "0",
+												"rates": {
+													"usd": 377.15868107868175
+												}
+											},
+											{
+												"time": 1606496400,
+												"txs": 1,
+												"received": "2000000000000000000",
+												"sent": "0",
+												"sentToSelf": "0",
+												"rates": {
+													"usd": 506.28
+												}
+											}
+										]
+									}
+								}
+							}
+						}
+					}
+				},
+				"description": "Returns a balance history for the specified XPUB or address.\n\nExamples\n1. Ethereum",
+				"tags": [
+					"v2"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "xpub or address",
+						"in": "path",
+						"name": "account",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"example": "0x37863DF4712e4494dFfc4854862259399354b2BB"
+					},
+					{
+						"description": "specifies a start date as a Unix timestamp",
+						"in": "query",
+						"name": "from",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "specifies an end data as a Unix timestamp",
+						"in": "query",
+						"name": "to",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "if specified, the response will contain fiat rate at the time of transaction. If not, all available currencies will be returned.",
+						"in": "query",
+						"name": "fiatcurrency",
+						"required": false,
+						"schema": {
+							"type": "string"
+						},
+						"example": "usd"
+					},
+					{
+						"description": "an interval in seconds, to group results by. Default is 3600 seconds.",
+						"in": "query",
+						"name": "groupBy",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	]
+}

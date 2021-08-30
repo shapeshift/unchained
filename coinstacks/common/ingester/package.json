@@ -1,0 +1,31 @@
+{
+  "name": "@shapeshiftoss/common-ingester",
+  "version": "0.1.1",
+  "license": "MIT",
+  "private": true,
+  "main": "dist/index.js",
+  "source": "src/index.ts",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist node_modules",
+    "watch": "tsc --watch"
+  },
+  "dependencies": {
+    "@shapeshiftoss/blockbook": "^0.1.1",
+    "@shapeshiftoss/common-api": "^0.1.1",
+    "@shapeshiftoss/common-mongo": "^0.1.1",
+    "@shapeshiftoss/logger": "^0.1.1",
+    "amqp-ts": "^1.8.0",
+    "mongodb": "^3.6.3",
+    "ws": "^7.4.4"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.5.16",
+    "@types/mongodb": "^3.6.3",
+    "@types/ws": "^7.4.0"
+  }
+}

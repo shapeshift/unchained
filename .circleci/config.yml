@@ -1,0 +1,270 @@
+version: 2.1
+
+executors:
+  node:
+    docker:
+      - image: circleci/node:14.16.0
+  pulumi:
+    docker:
+      - image: pulumi/pulumi-nodejs:3.11.0
+
+aliases:
+  - &only-master
+    filters:
+      branches:
+        only:
+          - master
+
+  - &not-master
+    filters:
+      branches:
+        ignore:
+          - master
+
+commands:
+  unchained-precheck:
+    description: checkout project, install dependencies, build, lint and test
+    steps:
+      - checkout
+      - run:
+          name: yarn install
+          command: yarn install --immutable
+      - run:
+          name: build
+          command: yarn build
+      - run:
+          name: lint
+          command: yarn lint
+      - run:
+          name: test
+          command: yarn test
+  pulumi-dependencies:
+    description: set up pulumi dependencies
+    steps:
+      - run:
+          name: install tools
+          command: |
+            apt update
+            apt install wget unzip
+      - run:
+          name: install aws-cli
+          command: |
+            wget -O awscliv2.zip https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+            unzip awscliv2.zip
+            ./aws/install
+      - run:
+          name: install docker cli
+          command: |
+            wget -O dockercli.deb https://download.docker.com/linux/debian/dists/buster/pool/stable/amd64/docker-ce-cli_20.10.5~3-0~debian-buster_amd64.deb
+            dpkg -i dockercli.deb
+      - run:
+          name: install helm charts
+          command: |
+            wget -O helm.tar.gz https://get.helm.sh/helm-v3.6.2-linux-amd64.tar.gz
+            tar -zxvf helm.tar.gz
+            mv linux-amd64/helm /usr/local/bin/helm
+            helm repo add bitnami https://charts.bitnami.com/bitnami
+            helm repo add traefik https://helm.traefik.io/traefik
+      - run:
+          name: create aws credentials file
+          command: |
+            mkdir ~/.aws
+            echo [default] >> ~/.aws/credentials
+            echo aws_access_key_id = $AWS_ACCESS_KEY_ID >> ~/.aws/credentials
+            echo aws_secret_access_key = $AWS_SECRET_ACCESS_KEY >> ~/.aws/credentials
+
+jobs:
+  deploy-dependencies:
+    description: deploy all common unchained dependencies
+    executor: pulumi
+    environment:
+      DOCKER_BUILDKIT: 1
+    steps:
+      - setup_remote_docker:
+          version: 20.10.2
+      - attach_workspace:
+          at: ~/
+      - pulumi-dependencies
+      - run:
+          name: pulumi up
+          working_directory: pulumi
+          command: |
+            pulumi stack select $PULUMI_ORG/dependencies
+            pulumi config set --path unchained:common.cluster eks
+            pulumi config set --path unchained:common.isLocal false
+            pulumi config set --path unchained:common.eks.allAZs true
+            pulumi config set --path unchained:common.eks.instanceTypes[0] m5.4xlarge
+            pulumi config set --path unchained:common.eks.instanceTypes[1] m5a.4xlarge
+            pulumi config set --path unchained:common.eks.instanceTypes[2] m5ad.4xlarge
+            pulumi config set --path unchained:common.eks.region $AWS_REGION
+            pulumi config set --path unchained:common.eks.cidrBlock 10.0.0.0/16
+            pulumi config set --path unchained:common.dockerhub.username $DOCKERHUB_USERNAME
+            pulumi config set --path unchained:common.dockerhub.password $DOCKERHUB_PASSWORD --plaintext
+            pulumi config set --path unchained:common.dockerhub.server docker.io
+            pulumi config set --path unchained:common.rootDomainName fiat.fail
+            pulumi config set --path unchained:common.rabbit.cpuLimit 2
+            pulumi config set --path unchained:common.rabbit.memoryLimit 4Gi
+            pulumi config set --path unchained:common.rabbit.adminPort 31672
+            pulumi config set --path unchained:common.rabbit.rabbitPort 30672
+            pulumi config set --path unchained:common.rabbit.storageSize 100Gi
+            pulumi up -f --yes --suppress-outputs
+
+  deploy-coinstack:
+    description: deploy a specific coinstack
+    executor: pulumi
+    environment:
+      DOCKER_BUILDKIT: 1
+      INDEXER_URL: https://indexer.ethereum.fiat.fail
+      INDEXER_WS_URL: wss://indexer.ethereum.fiat.fail/websocket
+      LOG_LEVEL: info
+      MIDGARD_URL: https://midgard.thorchain.info
+      MONGO_DBNAME: coinstack
+      MONGO_URL: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-2.ethereum-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
+      RPC_URL: https://daemon.ethereum.fiat.fail
+    parameters:
+      coinstack:
+        description: coinstack name
+        type: string
+      pulumi-stack:
+        description: pulumi stack to deploy to (public)
+        type: string
+      pulumi-dir:
+        description: path to pulumi directory
+        type: string
+      mongo-cpu-limit:
+        type: string
+      mongo-memory-limit:
+        type: string
+      mongo-replicas:
+        type: integer
+      mongo-storage-size:
+        type: string
+      indexer-cpu-limit:
+        type: string
+      indexer-memory-limit:
+        type: string
+      indexer-replicas:
+        type: integer
+      indexer-storage-size:
+        type: string
+      daemon-chain:
+        type: string
+        default: mainnet
+      daemon-image:
+        type: string
+      daemon-node:
+        type: string
+      daemon-cpu-limit:
+        type: string
+      daemon-memory-limit:
+        type: string
+      daemon-storage-size:
+        type: string
+    steps:
+      - setup_remote_docker:
+          version: 20.10.2
+      - attach_workspace:
+          at: ~/
+      - pulumi-dependencies
+      - run:
+          name: pulumi up
+          working_directory: << parameters.pulumi-dir >>
+          command: |
+            pulumi stack select $PULUMI_ORG/<< parameters.pulumi-stack >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.stack $PULUMI_ORG/common/dependencies
+            pulumi config set --path unchained:<< parameters.coinstack >>.cluster eks
+            pulumi config set --path unchained:<< parameters.coinstack >>.isLocal false
+            pulumi config set --path unchained:<< parameters.coinstack >>.dockerhub.username $DOCKERHUB_USERNAME
+            pulumi config set --path unchained:<< parameters.coinstack >>.dockerhub.password $DOCKERHUB_PASSWORD --plaintext
+            pulumi config set --path unchained:<< parameters.coinstack >>.dockerhub.server docker.io
+            pulumi config set --path unchained:<< parameters.coinstack >>.rootDomainName fiat.fail
+            pulumi config set --path unchained:<< parameters.coinstack >>.api.enableDatadogLogs true
+            pulumi config set --path unchained:<< parameters.coinstack >>.ingester.enableDatadogLogs true
+            pulumi config set --path unchained:<< parameters.coinstack >>.mongo.cpuLimit << parameters.mongo-cpu-limit >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.mongo.memoryLimit << parameters.mongo-memory-limit >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.mongo.helmChartVersion 10.19.0
+            pulumi config set --path unchained:<< parameters.coinstack >>.mongo.replicaCount << parameters.mongo-replicas >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.mongo.storageSize << parameters.mongo-storage-size >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.cpuLimit << parameters.indexer-cpu-limit >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.memoryLimit << parameters.indexer-memory-limit >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.replicas << parameters.indexer-replicas >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.storageSize << parameters.indexer-storage-size >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.chain << parameters.daemon-chain >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.image << parameters.daemon-image >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.node << parameters.daemon-node >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.cpuLimit << parameters.daemon-cpu-limit >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.memoryLimit << parameters.daemon-memory-limit >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.storageSize << parameters.daemon-storage-size >>
+            cat ./Pulumi.public.yaml
+            pulumi up -f --yes --suppress-outputs
+
+  lint-and-test:
+    description: lint and test project
+    executor: node
+    resource_class: xlarge
+    steps:
+      - unchained-precheck
+
+  lint-and-test-persist:
+    description: lint and test project (persist to workspace)
+    executor: node
+    resource_class: xlarge
+    steps:
+      - unchained-precheck
+      - run:
+          name: Remove devDependencies
+          command: yarn --production --ignore-scripts --prefer-offline --silent --frozen-lockfile
+      - persist_to_workspace:
+          root: '~'
+          paths:
+            - project
+
+  publish:
+    description: publish packages
+    executor: node
+    steps:
+      - attach-workspace:
+          at: ~/
+      - run: echo "//registry.npmjs.org/:-authToken=$NPM_TOKEN" > .npmrc
+      - run: yarn lerna publish from-package --yes
+
+workflows:
+  version: 2
+  check:
+    jobs:
+      - lint-and-test:
+          name: lint and test project
+          <<: *not-master
+  deploy:
+    jobs:
+      - lint-and-test-persist:
+          name: lint and test project (persist to workspace)
+          <<: *only-master
+
+      - deploy-dependencies:
+          name: deploy common unchained dependencies
+          requires:
+            - lint and test project (persist to workspace)
+          <<: *only-master
+
+      - deploy-coinstack:
+          name: deploy ethereum coinstack
+          coinstack: ethereum
+          pulumi-stack: public
+          pulumi-dir: coinstacks/ethereum/pulumi
+          mongo-cpu-limit: 512m
+          mongo-memory-limit: 512Mi
+          mongo-replicas: 3
+          mongo-storage-size: 100Gi
+          indexer-cpu-limit: '4'
+          indexer-memory-limit: 12Gi
+          indexer-replicas: 2
+          indexer-storage-size: 500Gi
+          daemon-image: ethereum/client-go:v1.10.8
+          daemon-node: geth
+          daemon-cpu-limit: '2'
+          daemon-memory-limit: 24Gi
+          daemon-storage-size: 1500Gi
+          requires:
+            - deploy common unchained dependencies
+          <<: *only-master

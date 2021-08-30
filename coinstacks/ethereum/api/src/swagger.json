@@ -1,0 +1,1383 @@
+{
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"Token": {
+				"description": "Contains token info from a given address",
+				"properties": {
+					"type": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"path": {
+						"type": "string"
+					},
+					"contract": {
+						"type": "string"
+					},
+					"transfers": {
+						"type": "number",
+						"format": "double"
+					},
+					"symbol": {
+						"type": "string"
+					},
+					"decimals": {
+						"type": "number",
+						"format": "double"
+					},
+					"balance": {
+						"type": "string"
+					},
+					"totalReceived": {
+						"type": "string"
+					},
+					"totalSent": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"type",
+					"name",
+					"transfers"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Balance": {
+				"description": "Contains info about an addresses balance",
+				"properties": {
+					"network": {
+						"type": "string"
+					},
+					"symbol": {
+						"type": "string"
+					},
+					"address": {
+						"type": "string"
+					},
+					"balance": {
+						"type": "string"
+					},
+					"totalReceived": {
+						"type": "string"
+					},
+					"totalSent": {
+						"type": "string"
+					},
+					"unconfirmedBalance": {
+						"type": "string"
+					},
+					"unconfirmedTxs": {
+						"type": "number",
+						"format": "double"
+					},
+					"txs": {
+						"type": "number",
+						"format": "double"
+					},
+					"tokens": {
+						"items": {
+							"$ref": "#/components/schemas/Token"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"network",
+					"symbol",
+					"address",
+					"balance",
+					"unconfirmedBalance",
+					"unconfirmedTxs",
+					"txs",
+					"tokens"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"BadRequestError": {
+				"description": "Contains info about a 400 Bad Request response",
+				"properties": {
+					"error": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ValidationError": {
+				"description": "Contains info about a 422 Validation Error response",
+				"properties": {
+					"message": {
+						"type": "string",
+						"enum": [
+							"Validation failed"
+						],
+						"nullable": false
+					},
+					"details": {
+						"properties": {},
+						"additionalProperties": {},
+						"type": "object"
+					}
+				},
+				"required": [
+					"message",
+					"details"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"InternalServerError": {
+				"description": "Contains info about a 500 Internal Server Error response",
+				"properties": {
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"message"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"BalanceChange": {
+				"description": "Contains info about a balance change",
+				"properties": {
+					"timestamp": {
+						"type": "number",
+						"format": "double"
+					},
+					"amount": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"timestamp",
+					"amount"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Interval": {
+				"type": "string",
+				"enum": [
+					"weekly",
+					"daily",
+					"hourly",
+					"30min",
+					"15min",
+					"10min",
+					"5min",
+					"1min"
+				]
+			},
+			"Block": {
+				"description": "Contains info about a block",
+				"properties": {
+					"network": {
+						"type": "string"
+					},
+					"hash": {
+						"type": "string"
+					},
+					"prevHash": {
+						"type": "string"
+					},
+					"nextHash": {
+						"type": "string"
+					},
+					"height": {
+						"type": "number",
+						"format": "double"
+					},
+					"confirmations": {
+						"type": "number",
+						"format": "double"
+					},
+					"timestamp": {
+						"type": "number",
+						"format": "double"
+					},
+					"txs": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"network",
+					"hash",
+					"height",
+					"confirmations",
+					"txs"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Tx": {
+				"description": "Contains info about a transaction",
+				"properties": {
+					"network": {
+						"type": "string"
+					},
+					"symbol": {
+						"type": "string"
+					},
+					"txid": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string"
+					},
+					"blockHash": {
+						"type": "string"
+					},
+					"blockHeight": {
+						"type": "number",
+						"format": "double"
+					},
+					"confirmations": {
+						"type": "number",
+						"format": "double"
+					},
+					"timestamp": {
+						"type": "number",
+						"format": "double"
+					},
+					"from": {
+						"type": "string"
+					},
+					"to": {
+						"type": "string"
+					},
+					"value": {
+						"type": "string"
+					},
+					"fee": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"network",
+					"symbol",
+					"txid",
+					"status",
+					"from",
+					"value",
+					"fee"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TxHistory": {
+				"description": "Contains paginated transaction history",
+				"properties": {
+					"page": {
+						"type": "number",
+						"format": "double"
+					},
+					"totalPages": {
+						"type": "number",
+						"format": "double"
+					},
+					"txs": {
+						"type": "number",
+						"format": "double"
+					},
+					"transactions": {
+						"items": {
+							"$ref": "#/components/schemas/Tx"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"page",
+					"totalPages",
+					"txs",
+					"transactions"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"RegistryDocument": {
+				"description": "Contains registry info and is used for un/registering addresses",
+				"properties": {
+					"client_id": {
+						"type": "string"
+					},
+					"watchtower_meta": {
+						"properties": {
+							"tracker_address_ids": {
+								"properties": {},
+								"additionalProperties": {
+									"type": "number",
+									"format": "double"
+								},
+								"type": "object"
+							},
+							"tracker_account_id": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"type": "object"
+					},
+					"ingester_meta": {
+						"properties": {
+							"syncing": {
+								"properties": {
+									"endTime": {
+										"type": "number",
+										"format": "double"
+									},
+									"startTime": {
+										"type": "number",
+										"format": "double"
+									},
+									"key": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"endTime",
+									"startTime"
+								],
+								"type": "object"
+							},
+							"block": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"type": "object"
+					},
+					"registration": {
+						"properties": {
+							"pubkey": {
+								"type": "string"
+							},
+							"addresses": {
+								"items": {
+									"type": "string"
+								},
+								"type": "array"
+							}
+						},
+						"type": "object"
+					}
+				},
+				"required": [
+					"client_id",
+					"watchtower_meta",
+					"registration"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TxReceipt": {
+				"description": "Contains info about a successfully sent transaction",
+				"properties": {
+					"network": {
+						"type": "string"
+					},
+					"txid": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"network",
+					"txid"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"RawTx": {
+				"description": "Contains the serialized raw transaction hex",
+				"properties": {
+					"hex": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"hex"
+				],
+				"type": "object",
+				"additionalProperties": false
+			}
+		},
+		"securitySchemes": {}
+	},
+	"info": {
+		"title": "@shapeshiftoss/ethereum-api",
+		"version": "0.1.1",
+		"license": {
+			"name": "MIT"
+		},
+		"contact": {}
+	},
+	"openapi": "3.0.0",
+	"paths": {
+		"/api/v1/balance/{address}": {
+			"get": {
+				"operationId": "GetBalance",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Balance"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"network": "ethereum",
+											"symbol": "ETH",
+											"address": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa",
+											"balance": "284809805024198107",
+											"unconfirmedBalance": "0",
+											"unconfirmedTxs": 0,
+											"txs": 21933,
+											"tokens": [
+												{
+													"type": "ERC20",
+													"name": "Tether USD",
+													"transfers": 1
+												}
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get balance returns the balance of an address",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "account address",
+						"in": "path",
+						"name": "address",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"example": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
+					}
+				]
+			}
+		},
+		"/api/v1/balancehistory/{address}": {
+			"get": {
+				"operationId": "GetBalanceHistory",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/BalanceChange"
+									},
+									"type": "array"
+								},
+								"examples": {
+									"Example 1": {
+										"value": [
+											{
+												"timestamp": 1492041600,
+												"amount": "0"
+											},
+											{
+												"timestamp": 1498694400,
+												"amount": "-485100000000000"
+											},
+											{
+												"timestamp": 1499904000,
+												"amount": "60012810000000000"
+											}
+										]
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get balance history returns the balance history of an address",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "account address",
+						"in": "path",
+						"name": "address",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"example": "0xdfe345e0f82c4349e2745a488e24e192c5171a9c"
+					},
+					{
+						"description": "range to group by",
+						"in": "query",
+						"name": "interval",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/Interval"
+						}
+					},
+					{
+						"description": "start date as unix timestamp",
+						"in": "query",
+						"name": "start",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "end date as unix timestamp",
+						"in": "query",
+						"name": "end",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/api/v1/block/{block}": {
+			"get": {
+				"operationId": "GetBlock",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Block"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"network": "ethereum",
+											"hash": "0x84065cdb07d71de1e75e108c3f0053a0ac5c0ff5afbbc033063285088ef135f9",
+											"prevHash": "0xa42ea5229dbceb181f4e55ee4e5babee65993a41afa7605998b3d9d653c003ba",
+											"nextHash": "0x36176806b62e6682c28dbeef1ff82ed828e2bdbdbafee15153cae20b32263900",
+											"height": 11421116,
+											"confirmations": 45,
+											"timestamp": 1607549087,
+											"txs": 149
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get block returns data about a block",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "height or hash",
+						"in": "path",
+						"name": "block",
+						"required": true,
+						"schema": {},
+						"examples": {
+							"Example 1": {
+								"value": "0x84065cdb07d71de1e75e108c3f0053a0ac5c0ff5afbbc033063285088ef135f9"
+							},
+							"Example 2": {
+								"value": "11421116"
+							}
+						}
+					}
+				]
+			}
+		},
+		"/api/v1/tx/{txid}": {
+			"get": {
+				"operationId": "GetTx",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Tx"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"network": "ethereum",
+											"symbol": "ETH",
+											"txid": "0xe9c1c7789da09af2ccf285fa175c6e37eb1d977e0b7c85e20de08043f9fe949b",
+											"status": "confirmed",
+											"from": "0x0a7A454141f86B93c76f131b7365B73027b086b7",
+											"to": "0xB27172C1d140c077ceF004832fcf4858e6AFbC76",
+											"blockHash": "0x84065cdb07d71de1e75e108c3f0053a0ac5c0ff5afbbc033063285088ef135f9",
+											"blockHeight": 11421116,
+											"confirmations": 2,
+											"timestamp": 1607549087,
+											"value": "764365700000000000",
+											"fee": "651000000000000"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get transaction returns data about a transaction",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "transaction id",
+						"in": "path",
+						"name": "txid",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"example": "0xe9c1c7789da09af2ccf285fa175c6e37eb1d977e0b7c85e20de08043f9fe949b"
+					}
+				]
+			}
+		},
+		"/api/v1/txs/{address}": {
+			"get": {
+				"operationId": "GetTxHistory",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TxHistory"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"page": 1,
+											"totalPages": 1,
+											"txs": 1,
+											"transactions": [
+												{
+													"network": "ethereum",
+													"symbol": "ETH",
+													"txid": "0x85092cf7a2ec34ba4109ef1215b5b486911163b9d3391e3508670229f4d866e7",
+													"status": "confirmed",
+													"from": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa",
+													"to": "0x34249a379Af1Fe3b53e143c0f1B5590778ce2cfC",
+													"blockHash": "0xc962b0662752ac15671512ca612c894051d8b671375de1cd84f12c5e720dc7ef",
+													"blockHeight": 11427335,
+													"confirmations": 9,
+													"timestamp": 1607632210,
+													"value": "20000000000000000",
+													"fee": "5250000000000000"
+												}
+											]
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get transaction history returns the transaction history of an address",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "account address",
+						"in": "path",
+						"name": "address",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"example": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
+					},
+					{
+						"description": "page number",
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "page number",
+						"in": "query",
+						"name": "pageSize",
+						"required": false,
+						"schema": {
+							"default": 25,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "filter by contract address (only supported by coins which support contracts)",
+						"in": "query",
+						"name": "contract",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/v1/estimategas": {
+			"get": {
+				"operationId": "GetEstimatedGas",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								},
+								"examples": {
+									"Example 1": {
+										"value": "26540"
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get transaction specific estimated gas",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "contract call data",
+						"in": "query",
+						"name": "data",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "to address",
+						"in": "query",
+						"name": "to",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "value of the tx",
+						"in": "query",
+						"name": "value",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "from address",
+						"in": "query",
+						"name": "from",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/v1/feeprice": {
+			"get": {
+				"operationId": "GetFeePrice",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								},
+								"examples": {
+									"Example 1": {
+										"value": "60000000000"
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get the current gas price from the node.",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/api/v1/register": {
+			"post": {
+				"operationId": "Register",
+				"responses": {
+					"204": {
+						"description": "Register Successful"
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Register account details for tracking incoming pending transactions and newly confirmed transactions\n\nExample 1: Register a pubkey\n\nExample 2: Register an address for pubkey\n\nExample 3: Register a single address",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"description": "Contains registry info for registering addresses and pubkeys for a client id.",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RegistryDocument"
+							},
+							"examples": {
+								"Example 1": {
+									"value": {
+										"client_id": "axiom",
+										"watchtower_meta": {
+											"tracker_account_id": 1001
+										},
+										"registration": {
+											"pubkey": "xpub6CWc1jDKjQH5wzSLz3MTeNVihW2B8sh9w9EyERYVB9f9zLpvdqdKtQDNPVhGGTK9EyTzpw35hp5qJtVoDZXDGoB7U3mShTPs2C8ce48JWJp"
+										}
+									}
+								},
+								"Example 2": {
+									"value": {
+										"client_id": "axiom",
+										"watchtower_meta": {
+											"tracker_account_id": 1001,
+											"tracker_address_ids": {
+												"0x3b53e143c0f1B5590778c34249a379Af1Fee2cfC": 2006
+											}
+										},
+										"registration": {
+											"pubkey": "xpub6CWc1jDKjQH5wzSLz3MTeNVihW2B8sh9w9EyERYVB9f9zLpvdqdKtQDNPVhGGTK9EyTzpw35hp5qJtVoDZXDGoB7U3mShTPs2C8ce48JWJp",
+											"addresses": [
+												"0x3b53e143c0f1B5590778c34249a379Af1Fee2cfC"
+											]
+										}
+									}
+								},
+								"Example 3": {
+									"value": {
+										"client_id": "axiom",
+										"watchtower_meta": {
+											"tracker_address_ids": {
+												"0xB3DD70991aF983Cf82d95c46C24979ee98348ffa": 2003
+											}
+										},
+										"registration": {
+											"addresses": [
+												"0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
+											]
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/unregister": {
+			"post": {
+				"operationId": "Unregister",
+				"responses": {
+					"204": {
+						"description": "Unregister Successful"
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Unregister accounts to stop tracking incoming pending transactions and newly confirmed transactions\n\nExample 1: Unregister a pubkey and all associated addresses\n\nExample 2: Unregister a single address from an account",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"description": "Contains registry info for unregistering addresses or pubkeys for a client id.",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RegistryDocument"
+							},
+							"examples": {
+								"Example 1": {
+									"value": {
+										"client_id": "axiom",
+										"watchtower_meta": {},
+										"registration": {
+											"pubkey": "xpub6CWc1jDKjQH5wzSLz3MTeNVihW2B8sh9w9EyERYVB9f9zLpvdqdKtQDNPVhGGTK9EyTzpw35hp5qJtVoDZXDGoB7U3mShTPs2C8ce48JWJp"
+										}
+									}
+								},
+								"Example 2": {
+									"value": {
+										"client_id": "axiom",
+										"watchtower_meta": {
+											"tracker_address_ids": {
+												"0xB3DD70991aF983Cf82d95c46C24979ee98348ffa": 2003
+											}
+										},
+										"registration": {
+											"pubkey": "xpub6CWc1jDKjQH5wzSLz3MTeNVihW2B8sh9w9EyERYVB9f9zLpvdqdKtQDNPVhGGTK9EyTzpw35hp5qJtVoDZXDGoB7U3mShTPs2C8ce48JWJp",
+											"addresses": [
+												"0x3b53e143c0f1B5590778c34249a379Af1Fee2cfC"
+											]
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/send": {
+			"post": {
+				"operationId": "SendTx",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TxReceipt"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"network": "ethereum",
+											"txid": "0xb9d4ad5408f53eac8627f9ccd840ba8fb3469d55cd9cc2a11c6e049f1eef4edd"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Sends raw transaction to be broadcast to the node.",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"description": "serialized raw transaction hex",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RawTx"
+							},
+							"example": {
+								"hex": "0xf86c0a85046c7cfe0083016dea94d1310c1e038bc12865d3d3997275b3e4737c6302880b503be34d9fe80080269fc7eaaa9c21f59adf8ad43ed66cf5ef9ee1c317bd4d32cd65401e7aaca47cfaa0387d79c65b90be6260d09dcfb780f29dd8133b9b1ceb20b83b7e442b4bfc30cb"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/nonce/{address}": {
+			"get": {
+				"operationId": "GetNonce",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"format": "double"
+								},
+								"examples": {
+									"Example 1": {
+										"value": 21933
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Returns the nonce of an address",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "account address",
+						"in": "path",
+						"name": "address",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"example": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
+					}
+				]
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	]
+}

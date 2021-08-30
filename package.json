@@ -1,0 +1,58 @@
+{
+  "name": "unchained",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "node": ">=14"
+  },
+  "workspaces": [
+    "packages/**/*",
+    "coinstacks/**/*",
+    "pulumi"
+  ],
+  "scripts": {
+    "build": "lerna run build --include-dependencies --scope @shapeshiftoss/*",
+    "clean": "lerna run clean --scope @shapeshiftoss/* && rm -rf coverage dist node_modules",
+    "dev:ethereum:up": "COINSTACK=ethereum docker-compose up",
+    "dev:ethereum:down": "COINSTACK=ethereum docker-compose down",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "lint": "eslint '*/**/*.{js,ts}' && yarn lint:ts",
+    "lint:ts": "tsc --noEmit",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "version:major": "lerna version major --yes --no-push",
+    "version:minor": "lerna version minor --yes --no-push",
+    "version:patch": "lerna version patch --yes --no-push"
+  },
+  "dependencies": {
+    "@pulumi/kubernetes": "3.6.3",
+    "@pulumi/pulumi": "3.11.0",
+    "dotenv": "^10.0.0",
+    "lerna": "^3.22.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.15",
+    "@types/node": "^14.14.7",
+    "@typescript-eslint/eslint-plugin": "^4.9.1",
+    "@typescript-eslint/parser": "^4.9.1",
+    "eslint": "^7.15.0",
+    "eslint-config-prettier": "^7.0.0",
+    "eslint-plugin-prettier": "^3.2.0",
+    "husky": "^4.3.0",
+    "jest": "^26.6.3",
+    "nodemon": "^2.0.6",
+    "prettier": "^2.2.1",
+    "pretty-quick": "^3.1.0",
+    "ts-jest": "^26.4.4",
+    "ts-node": "^9.1.1",
+    "ts-node-dev": "^1.1.6",
+    "typescript": "^4.1.3"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged",
+      "pre-push": "lerna run generate --scope @shapeshiftoss/* --ignore @shapeshiftoss/thorchain"
+    }
+  }
+}

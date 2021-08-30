@@ -1,0 +1,26 @@
+{
+  "name": "@shapeshiftoss/common-api",
+  "version": "0.1.1",
+  "license": "MIT",
+  "private": true,
+  "main": "dist/index.js",
+  "source": "src/index.ts",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist node_modules",
+    "watch": "tsc --watch"
+  },
+  "dependencies": {
+    "@shapeshiftoss/common-mongo": "^0.1.1",
+    "mongodb": "^3.6.3",
+    "tsoa": "^3.4.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.9",
+    "@types/mongodb": "^3.6.3"
+  }
+}

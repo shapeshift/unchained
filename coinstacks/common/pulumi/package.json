@@ -1,0 +1,14 @@
+{
+  "name": "@shapeshiftoss/common-pulumi",
+  "version": "0.1.1",
+  "license": "MIT",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "clean": "rm -rf node_modules"
+  },
+  "dependencies": {
+    "@types/folder-hash": "^4.0.0",
+    "folder-hash": "^4.0.0"
+  }
+}
