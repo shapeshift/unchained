@@ -150,6 +150,9 @@ export async function deployApi(
       { provider }
     )
 
+    const additionalRootDomainName = process.env.ADDITIONAL_ROOT_DOMAIN_NAME
+    const extraMatch = additionalRootDomainName ? ` || Host(\`api.${asset}.${additionalRootDomainName}\`)` : ''
+
     new k8s.apiextensions.CustomResource(
       `${name}-ingressroute`,
       {
@@ -163,7 +166,7 @@ export async function deployApi(
           entryPoints: ['web', 'websecure'],
           routes: [
             {
-              match: `Host(\`api.${asset}.${config.rootDomainName}\`)`,
+              match: `Host(\`api.${asset}.${config.rootDomainName}\`)` + extraMatch,
               kind: 'Rule',
               services: [
                 {
@@ -184,7 +187,7 @@ export async function deployApi(
       { provider }
     )
 
-    new k8s.networking.v1beta1.Ingress(
+    new k8s.networking.v1.Ingress(
       `${name}-ingress`,
       {
         metadata: {

@@ -336,6 +336,10 @@ export async function deployIndexer(
       { provider }
     )
 
+    const additionalRootDomainName = process.env.ADDITIONAL_ROOT_DOMAIN_NAME
+    const extraMatch = (service: string) =>
+      additionalRootDomainName ? ` || Host(\`${service}.${asset}.${additionalRootDomainName}\`)` : ''
+
     new k8s.apiextensions.CustomResource(
       `${name}-ingressroute`,
       {
@@ -349,7 +353,7 @@ export async function deployIndexer(
           entryPoints: ['web', 'websecure'],
           routes: [
             {
-              match: `Host(\`indexer.${asset}.${config.rootDomainName}\`)`,
+              match: `Host(\`indexer.${asset}.${config.rootDomainName}\`)` + extraMatch('indexer'),
               kind: 'Rule',
               services: [
                 {
@@ -361,7 +365,7 @@ export async function deployIndexer(
               ],
             },
             {
-              match: `Host(\`daemon.${asset}.${config.rootDomainName}\`)`,
+              match: `Host(\`daemon.${asset}.${config.rootDomainName}\`)` + extraMatch('daemon'),
               kind: 'Rule',
               services: [
                 {
@@ -385,7 +389,7 @@ export async function deployIndexer(
       { provider }
     )
 
-    new k8s.networking.v1beta1.Ingress(
+    new k8s.networking.v1.Ingress(
       `${name}-ingress`,
       {
         metadata: {
