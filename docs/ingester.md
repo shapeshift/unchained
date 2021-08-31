@@ -8,13 +8,15 @@ Performs any actions required by a client. There is a single topic exchange: `ex
 
 - Account Registration
 
-  ![Account Registration Pipeline](accountRegistrationPipeline.png) Handles \(un\)registering accounts for a client. Accounts are registered per coinstack.
+  ![Account Registration Pipeline](accountRegistrationPipeline.png)
+
+  Handles \(un\)registering accounts for a client. Accounts are registered per coinstack.
 
 ## Ingestion Pipeline
 
 Syncs all past transaction history and detects all new pending and confirmed transactions for all registered accounts.
 
-![Ingestion Pipeline](../.gitbook/assets/ingestionPipeline.png)
+![Ingestion Pipeline](ingestionPipeline.png)
 
 ### Sockets
 

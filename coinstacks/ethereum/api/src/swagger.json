@@ -316,23 +316,6 @@
 					"client_id": {
 						"type": "string"
 					},
-					"watchtower_meta": {
-						"properties": {
-							"tracker_address_ids": {
-								"properties": {},
-								"additionalProperties": {
-									"type": "number",
-									"format": "double"
-								},
-								"type": "object"
-							},
-							"tracker_account_id": {
-								"type": "number",
-								"format": "double"
-							}
-						},
-						"type": "object"
-					},
 					"ingester_meta": {
 						"properties": {
 							"syncing": {
@@ -379,7 +362,6 @@
 				},
 				"required": [
 					"client_id",
-					"watchtower_meta",
 					"registration"
 				],
 				"type": "object",
@@ -1098,10 +1080,7 @@
 							"examples": {
 								"Example 1": {
 									"value": {
-										"client_id": "axiom",
-										"watchtower_meta": {
-											"tracker_account_id": 1001
-										},
+										"client_id": "unchained",
 										"registration": {
 											"pubkey": "xpub6CWc1jDKjQH5wzSLz3MTeNVihW2B8sh9w9EyERYVB9f9zLpvdqdKtQDNPVhGGTK9EyTzpw35hp5qJtVoDZXDGoB7U3mShTPs2C8ce48JWJp"
 										}
@@ -1109,13 +1088,7 @@
 								},
 								"Example 2": {
 									"value": {
-										"client_id": "axiom",
-										"watchtower_meta": {
-											"tracker_account_id": 1001,
-											"tracker_address_ids": {
-												"0x3b53e143c0f1B5590778c34249a379Af1Fee2cfC": 2006
-											}
-										},
+										"client_id": "unchained",
 										"registration": {
 											"pubkey": "xpub6CWc1jDKjQH5wzSLz3MTeNVihW2B8sh9w9EyERYVB9f9zLpvdqdKtQDNPVhGGTK9EyTzpw35hp5qJtVoDZXDGoB7U3mShTPs2C8ce48JWJp",
 											"addresses": [
@@ -1126,12 +1099,7 @@
 								},
 								"Example 3": {
 									"value": {
-										"client_id": "axiom",
-										"watchtower_meta": {
-											"tracker_address_ids": {
-												"0xB3DD70991aF983Cf82d95c46C24979ee98348ffa": 2003
-											}
-										},
+										"client_id": "unchained",
 										"registration": {
 											"addresses": [
 												"0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
@@ -1200,8 +1168,7 @@
 							"examples": {
 								"Example 1": {
 									"value": {
-										"client_id": "axiom",
-										"watchtower_meta": {},
+										"client_id": "unchained",
 										"registration": {
 											"pubkey": "xpub6CWc1jDKjQH5wzSLz3MTeNVihW2B8sh9w9EyERYVB9f9zLpvdqdKtQDNPVhGGTK9EyTzpw35hp5qJtVoDZXDGoB7U3mShTPs2C8ce48JWJp"
 										}
@@ -1209,12 +1176,7 @@
 								},
 								"Example 2": {
 									"value": {
-										"client_id": "axiom",
-										"watchtower_meta": {
-											"tracker_address_ids": {
-												"0xB3DD70991aF983Cf82d95c46C24979ee98348ffa": 2003
-											}
-										},
+										"client_id": "unchained",
 										"registration": {
 											"pubkey": "xpub6CWc1jDKjQH5wzSLz3MTeNVihW2B8sh9w9EyERYVB9f9zLpvdqdKtQDNPVhGGTK9EyTzpw35hp5qJtVoDZXDGoB7U3mShTPs2C8ce48JWJp",
 											"addresses": [

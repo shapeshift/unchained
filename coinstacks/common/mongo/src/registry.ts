@@ -8,10 +8,6 @@ const COLLECTION = 'registry'
  */
 export interface RegistryDocument {
   client_id: string
-  watchtower_meta: {
-    tracker_account_id?: number
-    tracker_address_ids?: { [key: string]: number }
-  }
   ingester_meta?: {
     block?: number
     syncing?: {
@@ -46,7 +42,7 @@ export class RegistryService {
     this.client?.close()
   }
 
-  async getByAddress(address: string, client_id = 'axiom'): Promise<RegistryDocument | undefined> {
+  async getByAddress(address: string, client_id = 'unchained'): Promise<RegistryDocument | undefined> {
     const document = await this.collection?.findOne<RegistryDocument>({
       'registration.addresses': { $in: [address.toLowerCase()] },
       client_id: client_id,
@@ -54,14 +50,18 @@ export class RegistryService {
     return document ?? undefined
   }
 
-  async updateBlock(address: string, block: number, client_id = 'axiom'): Promise<UpdateWriteOpResult | undefined> {
+  async updateBlock(address: string, block: number, client_id = 'unchained'): Promise<UpdateWriteOpResult | undefined> {
     return this.collection?.updateOne(
       { client_id: client_id, 'registration.addresses': { $in: [address.toLowerCase()] } },
       { $set: { 'ingester_meta.block': block } }
     )
   }
 
-  async updateSyncing(address: string, key?: string, client_id = 'axiom'): Promise<UpdateWriteOpResult | undefined> {
+  async updateSyncing(
+    address: string,
+    key?: string,
+    client_id = 'unchained'
+  ): Promise<UpdateWriteOpResult | undefined> {
     return this.collection?.updateOne(
       { client_id: client_id, 'registration.addresses': { $in: [address.toLowerCase()] } },
       {
@@ -87,8 +87,6 @@ export class RegistryService {
           client_id: document.client_id,
           'registration.pubkey': document.registration.pubkey,
           'ingester_meta.block': document.ingester_meta?.block ?? 0,
-          'watchtower_meta.tracker_account_id': document.watchtower_meta.tracker_account_id,
-          ...document.watchtower_meta.tracker_address_ids,
         },
         $addToSet: {
           'registration.addresses': { $each: document.registration.addresses ?? [] },
@@ -107,9 +105,6 @@ export class RegistryService {
         'registration.pubkey': document.registration.pubkey,
       },
       {
-        $unset: {
-          ...document.watchtower_meta.tracker_address_ids,
-        },
         $pull: {
           'registration.addresses': { $in: document.registration.addresses },
         },
@@ -127,8 +122,7 @@ export class RegistryService {
   }
 
   sanitizeDocument(document: RegistryDocument): RegistryDocument {
-    const { client_id, watchtower_meta, registration } = document
-    const { tracker_address_ids = {}, tracker_account_id } = watchtower_meta
+    const { client_id, registration } = document
     const { addresses } = registration
 
     let pubkey = registration.pubkey
@@ -145,13 +139,6 @@ export class RegistryService {
       registration: {
         pubkey: pubkey, // pubkey will always be saved in the format it was received
         addresses: addresses?.map((a) => a.toLowerCase()),
-      },
-      watchtower_meta: {
-        tracker_account_id: tracker_account_id,
-        tracker_address_ids: Object.keys(tracker_address_ids).reduce<Record<string, number>>(
-          (c, k) => ((c[`watchtower_meta.tracker_address_ids.${k.toLowerCase()}`] = tracker_address_ids[k]), c),
-          {}
-        ), // transform into mongo object notation to easily store
       },
     }
   }

@@ -131,7 +131,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "client_id": {"dataType":"string","required":true},
-            "watchtower_meta": {"dataType":"nestedObjectLiteral","nestedProperties":{"tracker_address_ids":{"dataType":"nestedObjectLiteral","nestedProperties":{},"additionalProperties":{"dataType":"double"}},"tracker_account_id":{"dataType":"double"}},"required":true},
             "ingester_meta": {"dataType":"nestedObjectLiteral","nestedProperties":{"syncing":{"dataType":"nestedObjectLiteral","nestedProperties":{"endTime":{"dataType":"double","required":true},"startTime":{"dataType":"double","required":true},"key":{"dataType":"string"}}},"block":{"dataType":"double"}}},
             "registration": {"dataType":"nestedObjectLiteral","nestedProperties":{"pubkey":{"dataType":"string"},"addresses":{"dataType":"array","array":{"dataType":"string"}}},"required":true},
         },

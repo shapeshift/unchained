@@ -373,23 +373,14 @@ export class Ethereum extends CommonAPI {
    * @returns {Promise<void>}
    *
    * @example document {
-   *   "client_id": "axiom",
-   *   "watchtower_meta": {
-   *     "tracker_account_id": 1001
-   *   },
+   *   "client_id": "unchained",
    *   "registration": {
    *     "pubkey": "xpub6CWc1jDKjQH5wzSLz3MTeNVihW2B8sh9w9EyERYVB9f9zLpvdqdKtQDNPVhGGTK9EyTzpw35hp5qJtVoDZXDGoB7U3mShTPs2C8ce48JWJp"
    *   }
    * }
    *
    * @example document {
-   *   "client_id": "axiom",
-   *   "watchtower_meta": {
-   *     "tracker_account_id": 1001,
-   *     "tracker_address_ids": {
-   *      "0x3b53e143c0f1B5590778c34249a379Af1Fee2cfC": 2006
-   *     }
-   *   },
+   *   "client_id": "unchained",
    *   "registration": {
    *     "pubkey": "xpub6CWc1jDKjQH5wzSLz3MTeNVihW2B8sh9w9EyERYVB9f9zLpvdqdKtQDNPVhGGTK9EyTzpw35hp5qJtVoDZXDGoB7U3mShTPs2C8ce48JWJp",
    *     "addresses": ["0x3b53e143c0f1B5590778c34249a379Af1Fee2cfC"]
@@ -397,12 +388,7 @@ export class Ethereum extends CommonAPI {
    * }
    *
    * @example document {
-   *   "client_id": "axiom",
-   *   "watchtower_meta": {
-   *     "tracker_address_ids": {
-   *      "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa": 2003
-   *     }
-   *   },
+   *   "client_id": "unchained",
    *   "registration": {
    *     "addresses": ["0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"]
    *   }
@@ -433,20 +419,14 @@ export class Ethereum extends CommonAPI {
    * @returns {Promise<void>}
    *
    * @example document {
-   *   "client_id": "axiom",
-   *   "watchtower_meta": {},
+   *   "client_id": "unchained",
    *   "registration": {
    *     "pubkey": "xpub6CWc1jDKjQH5wzSLz3MTeNVihW2B8sh9w9EyERYVB9f9zLpvdqdKtQDNPVhGGTK9EyTzpw35hp5qJtVoDZXDGoB7U3mShTPs2C8ce48JWJp"
    *   }
    * }
    *
    * @example document {
-   *   "client_id": "axiom",
-   *   "watchtower_meta": {
-   *     "tracker_address_ids": {
-   *      "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa": 2003
-   *     }
-   *   },
+   *   "client_id": "unchained",
    *   "registration": {
    *     "pubkey": "xpub6CWc1jDKjQH5wzSLz3MTeNVihW2B8sh9w9EyERYVB9f9zLpvdqdKtQDNPVhGGTK9EyTzpw35hp5qJtVoDZXDGoB7U3mShTPs2C8ce48JWJp",
    *     "addresses": ["0x3b53e143c0f1B5590778c34249a379Af1Fee2cfC"]

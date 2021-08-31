@@ -163,8 +163,6 @@ export async function deployIngester(
     worker({ name: 'worker-tx', path: 'workers/tx', replicas: 1 }),
     worker({ name: 'worker-address', path: 'workers/address', replicas: 1 }),
     worker({ name: 'worker-registry', path: 'workers/registry', replicas: 1 }),
-    worker({ name: 'worker-axiom', path: 'workers/axiom', replicas: 1 }),
-    worker({ name: 'worker-watchtower', path: 'workers/watchtower', replicas: 0 }),
   ]
 
   return workers.map((worker) => {
