@@ -1,3 +1,7 @@
+## All uncommented configuration is required for local development
+## Reasonable defaults are provided where applicable
+## Feel free to modify as needed
+
 config:
   unchained:common:
     ## cluster - used to specify the kube context for local development and also used to set the correct storage class
@@ -5,7 +9,7 @@ config:
 
     ## isLocal - is used to specify a local development environment (docker-desktop, minikube)
     ## if set to false, eks cluster configuration and rootDomainName is required
-    #isLocal: true
+    isLocal: true
 
     ## eks - configuration for eks cluster
     #eks:
@@ -42,7 +46,6 @@ config:
     #  password:
     #  server: # docker.io/username
 
-    ## TODO: update link to master when open sourced
     ## rootDomainName - requires configured Route53 domain name and DNS Registrar (https://github.com/shapeshift/cluster-launcher/blob/main/README.md#configure-route53--dns-registrar)
     #rootDomainName:
 
