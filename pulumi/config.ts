@@ -8,7 +8,14 @@ export interface Config extends BaseConfig {
   rabbit?: RabbitConfig
 }
 
-const config = new pulumi.Config('unchained').requireObject<Config>('common')
+let config: Config
+try {
+  config = new pulumi.Config('unchained').requireObject<Config>('common')
+} catch (e) {
+  throw new pulumi.RunError(
+    `Could not find required configuration file. \n\tDid you copy the Pulumi.sample.yaml file to Pulumi.${pulumi.getStack()}.yaml and update the necessary configuration?`
+  )
+}
 
 const getStorageClassName = (cluster: string) => {
   switch (cluster) {
@@ -19,7 +26,7 @@ const getStorageClassName = (cluster: string) => {
     case 'eks':
       return 'gp2'
     default:
-      throw new Error(`cluster not supported... Use: 'docker-desktop', 'minikube', or 'eks.`)
+      throw new pulumi.RunError(`Cluster ${cluster} not supported... Use: 'docker-desktop', 'minikube', or 'eks.`)
   }
 }
 
@@ -34,7 +41,7 @@ if (config.isLocal === false) {
 }
 
 if (missingRequiredConfig.length) {
-  throw new Error(
+  throw new pulumi.RunError(
     `Missing the following configuration values from Pulumi.${pulumi.getStack()}.yaml: ${missingRequiredConfig.join(
       ', '
     )}`

@@ -19,7 +19,7 @@ import {
 export class Blockbook extends Controller {
   instance: AxiosInstance
 
-  constructor(url = 'https://indexer.ethereum.fiat.fail', timeout?: number) {
+  constructor(url = 'https://indexer.ethereum.shapeshift.com', timeout?: number) {
     super()
     this.instance = axios.create({
       timeout: timeout ?? 10000,
