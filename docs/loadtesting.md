@@ -2,37 +2,36 @@
 
 Documentation: [https://github.com/tsenart/vegeta](https://github.com/tsenart/vegeta)
 
-## REQUIREMENTS
+## Requirements
 
-* Mac: `brew install vegeta`
-* Golang: `go get -u github.com/tsenart/vegeta`
+- Mac: `brew install vegeta`
+- Golang: `go get -u github.com/tsenart/vegeta`
 
 _optionally: increase your system's file descriptor limit `ulimit -n {new-limit}` and threads limit `ulimit -u {new-limit}` to be able to run more tests concurrently_
 
-## USAGE
+## Usage
 
-* Run API Load Attack
+- Run API Load Attack
 
-```bash
+```sh
 vegeta attack -duration=1m -rate=500 -timeout=60s -targets=./targets.txt -output=results.bin
 ```
 
-* View report details
+- View report details
 
-```bash
+```sh
 vegeta report results.bin
 ```
 
-* View report histogram
+- View report histogram
 
-```bash
+```sh
 vegeta report -type="hist[100ms, 250ms, 500ms, 1000ms]" results.bin
 ```
 
-* Create and view plot graph
+- Create and view plot graph
 
-```bash
+```sh
 cat results.bin | vegeta plot > plot.html
 google-chrome plot.html
 ```
-
