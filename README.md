@@ -47,7 +47,12 @@ Unchained is a multi-blockchain backend interface with three main goals:
   * additional parsing logic not provided by the indexer or node
 * **Common API** - a [REST API](https://api.ethereum.shapeshift.com/docs/) that provides necessary data to a client in a common format across all blockchains
 
-![Coin Stack Architecture](docs/coinstack.png)
+* Blockchain node: A dedicated node per indexer and eventually a publicly accessible node cluster \(currently cointainers\)
+* Indexer: Either a suitable third party service such as blockbook, or a hand rolled service if none are available
+* [Ingester](docs/ingester.md): A rabbitmq topology to receive pending transaction and newly confirmed blocks via websocket/zmq from a node.
+* Common API: A REST API that provides necessary data to a client in a common format across all blockchains
+
+![Coin Stack Architecture](.gitbook/assets/coinstack.png)
 
 ## Dependencies
 

@@ -116,7 +116,7 @@ jobs:
             pulumi config set --path unchained:common.dockerhub.username $DOCKERHUB_USERNAME
             pulumi config set --path unchained:common.dockerhub.password $DOCKERHUB_PASSWORD --plaintext
             pulumi config set --path unchained:common.dockerhub.server docker.io
-            pulumi config set --path unchained:common.rootDomainName shapeshift.com
+            pulumi config set --path unchained:common.rootDomainName $ROOT_DOMAIN_NAME
             pulumi config set --path unchained:common.rabbit.cpuLimit 2
             pulumi config set --path unchained:common.rabbit.memoryLimit 4Gi
             pulumi config set --path unchained:common.rabbit.adminPort 31672
@@ -210,14 +210,12 @@ jobs:
   lint-and-test:
     description: lint and test project
     executor: node
-    resource_class: xlarge
     steps:
       - unchained-precheck
 
   lint-and-test-persist:
     description: lint and test project (persist to workspace)
     executor: node
-    resource_class: xlarge
     steps:
       - unchained-precheck
       - run:
