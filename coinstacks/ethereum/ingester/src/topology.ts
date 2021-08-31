@@ -27,6 +27,7 @@ const topology: Connection.Topology = {
     { name: 'queue.ethereum.txid', options: { durable: true, deadLetterExchange } },
     { name: 'queue.ethereum.txid.address', options: { durable: true, deadLetterExchange } },
     { name: 'queue.ethereum.tx', options: { durable: true, deadLetterExchange } },
+    { name: 'queue.ethereum.tx.unchained', options: { durable: true } }, // default unchained client queue for development
     { name: 'queue.ethereum.registry.deadLetter', options: { durable: true } },
     { name: 'queue.ethereum.newBlock.deadLetter', options: { durable: true } },
     { name: 'queue.ethereum.block.deadLetter', options: { durable: true } },
@@ -42,6 +43,7 @@ const topology: Connection.Topology = {
     { source: 'exchange.ethereum.txid', queue: 'queue.ethereum.txid' },
     { source: 'exchange.ethereum.txid.address', queue: 'queue.ethereum.txid.address' },
     { source: 'exchange.ethereum.tx', queue: 'queue.ethereum.tx' },
+    { source: 'exchange.ethereum.tx.client', queue: 'queue.ethereum.tx.unchained', pattern: 'unchained' },
     { source: deadLetterExchange, queue: 'queue.ethereum.registry.deadLetter', pattern: 'ethereum.registry' },
     { source: deadLetterExchange, queue: 'queue.ethereum.newBlock.deadLetter', pattern: 'newBlock' },
     { source: deadLetterExchange, queue: 'queue.ethereum.reorgBlock.deadLetter', pattern: 'reorgBlock' },
