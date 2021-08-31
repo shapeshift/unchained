@@ -6,9 +6,9 @@ Worker services process data as it routes through the RabbitMQ topology in order
 
 Performs any actions required by a client. There is a single topic exchange: `exchange.unchained`, to allow an external client to publish messages to unchained.
 
-* Account Registration
+- Account Registration
 
-  ![Account Registration Pipeline](../.gitbook/assets/accountRegistrationPipeline.png) Handles \(un\)registering accounts for a client. Accounts are registered per coinstack.
+  ![Account Registration Pipeline](accountRegistrationPipeline.png) Handles \(un\)registering accounts for a client. Accounts are registered per coinstack.
 
 ## Ingestion Pipeline
 
@@ -18,12 +18,12 @@ Syncs all past transaction history and detects all new pending and confirmed tra
 
 ### Sockets
 
-* New Block: Subscribes to be notified of any new blocks confirmed on the blockchain and publishes the block hash for the new block worker to process.
-* New Transaction: Subscribes to be notified of any new transactions broadcasted to the blockchain and publishes the transaction for the tx worker to process.
+- New Block: Subscribes to be notified of any new blocks confirmed on the blockchain and publishes the block hash for the new block worker to process.
+- New Transaction: Subscribes to be notified of any new transactions broadcasted to the blockchain and publishes the transaction for the tx worker to process.
 
 ### Workers
 
-* New Block: Processes each block hash, checking for any reorg events and performing a block delta sync.
+- New Block: Processes each block hash, checking for any reorg events and performing a block delta sync.
 
   Unchained keeps track of all blocks that have been processed in the `blocks` mongo collection. If a reorg is detected, all orphaned blocks will be marked as orphaned and the delta sync will begin at the latest block processed on the main chain fork.
 
@@ -40,18 +40,8 @@ Syncs all past transaction history and detects all new pending and confirmed tra
   Upon registration of a new account, a fake transaction is published to kick off a full initial delta sync from block 0 to current node height, including an current mempool transactions.
 
 * Address: Processes all transaction ids for an account's transaction history concurrently, fetching the full transaction details and parsing the transaction to determine all of the parts of the transaction the account was associated with. The parsed transaction is then published to the client worker to process.
-  * Send: any value sent by address
-  * Receive: any value received by address
-  * Fee: any fees paid by address
-  * Trade: any details related to a dex trade
-  * Token: any details related to the token sent or received if applicable
-
-## Client Pipeline
-
-Handles client specific logic for all detected \(and parsed\) transactions for any accounts registered by the client. ![Client Pipeline](../.gitbook/assets/clientPipeline.png)
-
-### Workers
-
-* Axiom: Formats all parsed transactions to conform with the axiom expected payload format and publishes these messages for the client to update the transaction history as a push notification.
-* Watchtower: Formats all parsed transaction to conform with the watchtower database structure in order to backfill all transaction history and balances changes into the watchtower database.
-
+  - Send: any value sent by address
+  - Receive: any value received by address
+  - Fee: any fees paid by address
+  - Trade: any details related to a dex trade
+  - Token: any details related to the token sent or received if applicable

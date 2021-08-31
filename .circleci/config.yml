@@ -116,7 +116,7 @@ jobs:
             pulumi config set --path unchained:common.dockerhub.username $DOCKERHUB_USERNAME
             pulumi config set --path unchained:common.dockerhub.password $DOCKERHUB_PASSWORD --plaintext
             pulumi config set --path unchained:common.dockerhub.server docker.io
-            pulumi config set --path unchained:common.rootDomainName fiat.fail
+            pulumi config set --path unchained:common.rootDomainName $ROOT_DOMAIN_NAME
             pulumi config set --path unchained:common.rabbit.cpuLimit 2
             pulumi config set --path unchained:common.rabbit.memoryLimit 4Gi
             pulumi config set --path unchained:common.rabbit.adminPort 31672
@@ -129,13 +129,13 @@ jobs:
     executor: pulumi
     environment:
       DOCKER_BUILDKIT: 1
-      INDEXER_URL: https://indexer.ethereum.fiat.fail
-      INDEXER_WS_URL: wss://indexer.ethereum.fiat.fail/websocket
+      INDEXER_URL: https://indexer.ethereum.shapeshift.com
+      INDEXER_WS_URL: wss://indexer.ethereum.shapeshift.com/websocket
       LOG_LEVEL: info
       MIDGARD_URL: https://midgard.thorchain.info
       MONGO_DBNAME: coinstack
       MONGO_URL: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-2.ethereum-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
-      RPC_URL: https://daemon.ethereum.fiat.fail
+      RPC_URL: https://daemon.ethereum.shapeshift.com
     parameters:
       coinstack:
         description: coinstack name
@@ -187,12 +187,6 @@ jobs:
           command: |
             pulumi stack select $PULUMI_ORG/<< parameters.pulumi-stack >>
             pulumi config set --path unchained:<< parameters.coinstack >>.stack $PULUMI_ORG/common/dependencies
-            pulumi config set --path unchained:<< parameters.coinstack >>.cluster eks
-            pulumi config set --path unchained:<< parameters.coinstack >>.isLocal false
-            pulumi config set --path unchained:<< parameters.coinstack >>.dockerhub.username $DOCKERHUB_USERNAME
-            pulumi config set --path unchained:<< parameters.coinstack >>.dockerhub.password $DOCKERHUB_PASSWORD --plaintext
-            pulumi config set --path unchained:<< parameters.coinstack >>.dockerhub.server docker.io
-            pulumi config set --path unchained:<< parameters.coinstack >>.rootDomainName fiat.fail
             pulumi config set --path unchained:<< parameters.coinstack >>.api.enableDatadogLogs true
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.enableDatadogLogs true
             pulumi config set --path unchained:<< parameters.coinstack >>.mongo.cpuLimit << parameters.mongo-cpu-limit >>
@@ -216,14 +210,12 @@ jobs:
   lint-and-test:
     description: lint and test project
     executor: node
-    resource_class: xlarge
     steps:
       - unchained-precheck
 
   lint-and-test-persist:
     description: lint and test project (persist to workspace)
     executor: node
-    resource_class: xlarge
     steps:
       - unchained-precheck
       - run:
