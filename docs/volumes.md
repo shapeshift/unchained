@@ -1,6 +1,6 @@
 # Bootstrap Node from Snapshot
 
-```sh
+```bash
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: PersistentVolume
@@ -39,3 +39,4 @@ spec:
   name: data-daemon-ethereum-indexer-sts-<pod number>-pv
 EOF
 ```
+
