@@ -15,7 +15,6 @@ services:
       - .:/app
     depends_on:
       - unchained-local
-      - rabbitmq
       - mongo
   mongo:
     image: mongo:4.2.8

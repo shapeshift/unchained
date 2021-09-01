@@ -63,10 +63,11 @@ Unchained is a multi-blockchain backend interface with three main goals:
 
 ## Initial Setup
 
-- Use correct node version as specific in `.nvmrc`:
-  ```sh
-  nvm use
-  ```
+- Install [Node.js LTS](https://nodejs.org/en/)
+  - (Optional) use nvm to automatically install the node version specified in `.nvmrc`
+    ```sh
+    nvm use
+    ```
 - Install dependencies and build:
   ```sh
   yarn && yarn build
@@ -95,9 +96,14 @@ Unchained is a multi-blockchain backend interface with three main goals:
 #### **Running**
 
 - To spin up a coinstack:
-  ```sh
-  COINSTACK=ethereum docker-compose up
-  ```
+  - API only (watcher service is for hot reloading):
+    ```sh
+    COINSTACK=ethereum docker-compose up api watcher
+    ```
+  - API + Ingester (more resource intensive):
+    ```sh
+    COINSTACK=ethereum docker-compose up
+    ```
 - To completely tear down the coinstack (including docker volumes):
   ```sh
   COINSTACK=ethereum docker-compose down -v
