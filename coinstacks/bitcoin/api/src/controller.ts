@@ -50,8 +50,8 @@ export class Ethereum extends CommonAPI {
    * @example address "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
    */
   @Example<Balance>({
-    network: 'ethereum',
-    symbol: 'ETH',
+    network: 'bitcoin',
+    symbol: 'BTC',
     address: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
     balance: '284809805024198107',
     unconfirmedBalance: '0',
@@ -68,8 +68,8 @@ export class Ethereum extends CommonAPI {
       const data = await blockbook.getAddress(address, undefined, undefined, undefined, undefined, 'tokenBalances')
 
       return {
-        network: 'ethereum',
-        symbol: 'ETH',
+        network: 'bitcoin',
+        symbol: 'BTC',
         address: data.address,
         balance: data.balance,
         unconfirmedBalance: data.unconfirmedBalance,
@@ -153,7 +153,7 @@ export class Ethereum extends CommonAPI {
    * @example block "11421116"
    */
   @Example<Block>({
-    network: 'ethereum',
+    network: 'bitcoin',
     hash: '0x84065cdb07d71de1e75e108c3f0053a0ac5c0ff5afbbc033063285088ef135f9',
     prevHash: '0xa42ea5229dbceb181f4e55ee4e5babee65993a41afa7605998b3d9d653c003ba',
     nextHash: '0x36176806b62e6682c28dbeef1ff82ed828e2bdbdbafee15153cae20b32263900',
@@ -171,7 +171,7 @@ export class Ethereum extends CommonAPI {
       const blk = await blockbook.getBlock(String(block))
 
       return {
-        network: 'ethereum',
+        network: 'bitcoin',
         hash: blk.hash,
         prevHash: blk.previousBlockHash,
         nextHash: blk.nextBlockHash,
@@ -195,8 +195,8 @@ export class Ethereum extends CommonAPI {
    * @example txid "0xe9c1c7789da09af2ccf285fa175c6e37eb1d977e0b7c85e20de08043f9fe949b"
    */
   @Example<Tx>({
-    network: 'ethereum',
-    symbol: 'ETH',
+    network: 'bitcoin',
+    symbol: 'BTC',
     txid: '0xe9c1c7789da09af2ccf285fa175c6e37eb1d977e0b7c85e20de08043f9fe949b',
     status: 'confirmed',
     from: '0x0a7A454141f86B93c76f131b7365B73027b086b7',
@@ -217,8 +217,8 @@ export class Ethereum extends CommonAPI {
       const tx = await blockbook.getTransaction(txid)
 
       return {
-        network: 'ethereum',
-        symbol: tx.tokenTransfers?.[0].symbol ?? 'ETH',
+        network: 'bitcoin',
+        symbol: tx.tokenTransfers?.[0].symbol ?? 'BTC',
         txid: tx.txid,
         status: tx.confirmations > 0 ? 'confirmed' : 'pending',
         from: tx.vin[0].addresses?.[0] ?? 'coinbase',
@@ -253,8 +253,8 @@ export class Ethereum extends CommonAPI {
     txs: 1,
     transactions: [
       {
-        network: 'ethereum',
-        symbol: 'ETH',
+        network: 'bitcoin',
+        symbol: 'BTC',
         txid: '0x85092cf7a2ec34ba4109ef1215b5b486911163b9d3391e3508670229f4d866e7',
         status: 'confirmed',
         from: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
@@ -287,8 +287,8 @@ export class Ethereum extends CommonAPI {
         txs: data.txs,
         transactions:
           data.transactions?.map((tx) => ({
-            network: 'ethereum',
-            symbol: tx.tokenTransfers?.[0].symbol ?? 'ETH',
+            network: 'bitcoin',
+            symbol: tx.tokenTransfers?.[0].symbol ?? 'BTC',
             txid: tx.txid,
             status: tx.confirmations > 0 ? 'confirmed' : 'pending',
             from: tx.vin[0].addresses?.[0] ?? 'coinbase',
@@ -458,7 +458,7 @@ export class Ethereum extends CommonAPI {
    * }
    */
   @Example<TxReceipt>({
-    network: 'ethereum',
+    network: 'bitcoin',
     txid: '0xb9d4ad5408f53eac8627f9ccd840ba8fb3469d55cd9cc2a11c6e049f1eef4edd',
   })
   @Response<BadRequestError>(400, 'Bad Request')
@@ -469,7 +469,7 @@ export class Ethereum extends CommonAPI {
     try {
       const { result } = await blockbook.sendTransaction(rawTx.hex)
       return {
-        network: 'ethereum',
+        network: 'bitcoin',
         txid: result,
       }
     } catch (err) {
