@@ -254,7 +254,7 @@ workflows:
             - lint and test project (persist to workspace)
           <<: *only-main
 
-      - deploy-coinstack-bitcoin:
+      - deploy-coinstack:
           name: deploy bitcoin coinstack
           coinstack: bitcoin
           pulumi-stack: public
@@ -276,7 +276,7 @@ workflows:
             - deploy common unchained dependencies
           <<: *only-main
 
-      - deploy-coinstack-ethereum:
+      - deploy-coinstack:
           name: deploy ethereum coinstack
           coinstack: ethereum
           pulumi-stack: public
