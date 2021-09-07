@@ -254,7 +254,29 @@ workflows:
             - lint and test project (persist to workspace)
           <<: *only-main
 
-      - deploy-coinstack:
+      - deploy-coinstack-bitcoin:
+          name: deploy bitcoin coinstack
+          coinstack: bitcoin
+          pulumi-stack: public
+          pulumi-dir: coinstacks/bitcoin/pulumi
+          mongo-cpu-limit: 512m
+          mongo-memory-limit: 512Mi
+          mongo-replicas: 3
+          mongo-storage-size: 100Gi
+          indexer-cpu-limit: '4'
+          indexer-memory-limit: 12Gi
+          indexer-replicas: 2
+          indexer-storage-size: 500Gi
+          daemon-image: ruimarinho/bitcoin-core #https://github.com/ruimarinho/docker-bitcoin-core
+          daemon-node: bitcoind
+          daemon-cpu-limit: '2'
+          daemon-memory-limit: 12Gi
+          daemon-storage-size: 1500Gi
+          requires:
+            - deploy common unchained dependencies
+          <<: *only-main
+
+      - deploy-coinstack-ethereum:
           name: deploy ethereum coinstack
           coinstack: ethereum
           pulumi-stack: public
