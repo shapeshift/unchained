@@ -92,7 +92,7 @@ export class Ethereum extends CommonAPI {
    *
    * @returns {Promise<Array<BalanceChange>>} balance change history
    *
-   * @example address "0xdfe345e0f82c4349e2745a488e24e192c5171a9c"
+   * @example address "1FH6ehAd5ZFXCM1cLGzHxK1s4dGdq1JusM"
    */
   @Example<Array<BalanceChange>>([
     {
