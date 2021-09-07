@@ -400,7 +400,7 @@
 		"securitySchemes": {}
 	},
 	"info": {
-		"title": "@shapeshiftoss/ethereum-api",
+		"title": "@shapeshiftoss/bitcoin-api",
 		"version": "0.1.1",
 		"license": {
 			"name": "MIT"
