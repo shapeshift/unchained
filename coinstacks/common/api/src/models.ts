@@ -56,7 +56,7 @@ export interface Balance {
   unconfirmedBalance: string
   unconfirmedTxs: number
   txs: number
-  tokens: Token[]
+  tokens?: Token[]
 }
 
 /**
