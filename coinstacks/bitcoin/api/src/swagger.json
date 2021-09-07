@@ -573,7 +573,7 @@
 						"schema": {
 							"type": "string"
 						},
-						"example": "0xdfe345e0f82c4349e2745a488e24e192c5171a9c"
+						"example": "1FH6ehAd5ZFXCM1cLGzHxK1s4dGdq1JusM"
 					},
 					{
 						"description": "range to group by",
