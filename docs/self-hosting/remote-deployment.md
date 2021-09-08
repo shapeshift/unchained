@@ -84,4 +84,6 @@ NPM_TOKEN=**
 
 - start building
 
-1. pulumi deploy dependencies stack
+1. pulumi init dependencies stack
+2. verify environment
+3. run circle

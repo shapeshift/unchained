@@ -86,6 +86,10 @@ jobs:
           at: ~/
       - pulumi-dependencies
       - run:
+          name: install modules
+          working_directory: pulumi
+          command: npm i
+      - run:
           name: pulumi up
           working_directory: pulumi
           command: |
