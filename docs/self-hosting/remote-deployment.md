@@ -83,3 +83,5 @@ NPM_TOKEN=**
 ```
 
 - start building
+
+1. pulumi deploy dependencies stack
