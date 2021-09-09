@@ -13,6 +13,12 @@ app.use(json())
 app.use(urlencoded({ extended: true }))
 app.use(cors())
 
+app.use('*', (_, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST')
+  next()
+})
+
 app.get('/', async (_, res) => {
   res.redirect('/docs')
 })
