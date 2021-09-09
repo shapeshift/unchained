@@ -87,3 +87,17 @@ NPM_TOKEN=**
 1. pulumi init dependencies stack
 2. verify environment
 3. run circle
+
+## troubleshooting
+
+teardown stack locally
+
+in top level pulumi dir
+
+```
+pulumi destroy
+```
+
+repeat for each coinstack
+
+re-run circle from top.
