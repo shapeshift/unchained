@@ -98,6 +98,7 @@ jobs:
             pulumi config set --path unchained:common.eks.instanceTypes[1] m5a.4xlarge
             pulumi config set --path unchained:common.eks.instanceTypes[2] m5ad.4xlarge
             pulumi config set --path unchained:common.eks.region $AWS_REGION
+            pulumi config set --path unchained:common.eks.profile default
             pulumi config set --path unchained:common.eks.cidrBlock 10.0.0.0/16
             pulumi config set --path unchained:common.traefik.whitelist[0] 173.245.48.0/20
             pulumi config set --path unchained:common.traefik.whitelist[1] 103.21.244.0/22
