@@ -10,12 +10,10 @@ config:
     ## for individual accounts, use your account name (pulumi whoami) for the organization component.
     stack: # run `pulumi stack ls` in `unchained/pulumi` and reference the url
 
-    ## TODO: do we still want this
     ## api - if specified an api service will be deployed
     api:
       enableDatadogLogs: false
 
-    ## TODO: do we still want this
     ## ingester - if specified all ingestion workers will be deployed
     ingester:
       enableDatadogLogs: false
