@@ -40,5 +40,5 @@ config:
     #    cpuLimit: '2'
     #    image: 'ruimarinho/bitcoin-core:0.21.1'
     #    memoryLimit: '24Gi'
-    #    node: 'geth'
+    #    node: 'bitcoind'
     #    storageSize: '1500Gi'
