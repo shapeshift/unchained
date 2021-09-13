@@ -60,7 +60,8 @@ export = async (): Promise<Outputs> => {
       region: config.eks.region,
       cidrBlock: config.eks.cidrBlock,
       profile: config.eks.profile,
-      whitelist: config.eks.whitelist,
+      traefik: config.eks.traefik,
+      email: config.eks.email,
     })
 
     outputs.kubeconfig = cluster.kubeconfig
