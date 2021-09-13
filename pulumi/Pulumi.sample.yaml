@@ -4,38 +4,38 @@
 
 config:
   unchained:common:
-    ## cluster - used to specify the kube context for local development and also used to set the correct storage class
+    # cluster - used to specify the kube context for local development and also used to set the correct storage class
     cluster: # docker-desktop, minikube, eks
 
-    ## isLocal - is used to specify a local development environment (docker-desktop, minikube)
-    ## if set to false, eks cluster configuration and rootDomainName is required
+    # isLocal - is used to specify a local development environment (docker-desktop, minikube)
+    # if set to false, eks cluster configuration and rootDomainName is required
     isLocal: true
 
     ## eks - configuration for eks cluster
     #eks:
-
-    ## allAzs - if true, will deploy to all AZs in specified region, otherwise deploys to 2 AZs which is the minimum required by EKS
+    #  # allAzs - if true, will deploy to all AZs in specified region, otherwise deploys to 2 AZs which is the minimum required by EKS
     #  allAZs: false
-
-    ## profile - local profile to use as configured in ~/.aws/credentials file
+    #  # profile - local profile to use as configured in ~/.aws/credentials file
     #  profile: 'default'
-
-    ## cidrBlock - private subnet cidrRange for the VPC
+    #  # cidrBlock - private subnet cidrRange for the VPC
     #  cidrBlock: '10.0.0.0/16'
-
-    ## email - email address to be associated with the ACME account. This field is optional, but it is strongly recommended to be set. It will be used to contact you in case of issues with your account or certificates, including expiry notification emails.
+    #  # email - email address to be associated with the ACME account. This field is optional, but it is strongly recommended to be set. It will be used to contact you in case of issues with your account or certificates, including expiry notification emails.
     #  email:
-
-    ## instanceTypes - list of instance types for the kublets (https://aws.amazon.com/ec2/spot/pricing/)
+    #  # instanceTypes - list of instance types for the kublets (https://aws.amazon.com/ec2/spot/pricing/)
     #  instanceTypes:
     #    - 't3.small'
     #    - 't3.medium'
     #    - 't3.large'
-
-    ## region - aws region to deploy the stack to
+    #  # region - aws region to deploy the stack to
     #  region: 'us-east-1'
 
-    ## whitelist - list of cidrs to allow ingress into the cluster
+    ## traefik - additional ingress controller configuration
+    #traefik:
+    #  replicas: 3
+    #  resources:
+    #    cpu: '300m'
+    #    memory: '256Mi'
+    #  # whitelist - list of cidrs to allow ingress into the cluster
     #  whitelist:
     #    - '0.0.0.0/0'
 
@@ -49,7 +49,7 @@ config:
     ## rootDomainName - requires configured Route53 domain name and DNS Registrar (https://github.com/shapeshift/cluster-launcher/blob/main/README.md#configure-route53--dns-registrar)
     #rootDomainName:
 
-    ## rabbit - creates an internal rabbitmq cluster (useful if you don't have a hosted rabbit cluster to point at)
+    # rabbit - creates an internal rabbitmq cluster (useful if you don't have a hosted rabbit cluster to point at)
     rabbit:
       adminPort: 31672
       rabbitPort: 30672
