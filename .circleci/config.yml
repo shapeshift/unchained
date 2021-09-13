@@ -14,7 +14,6 @@ aliases:
       branches:
         only:
           - main
-          - setup-stg-env
 
   - &not-main
     filters:
