@@ -34,11 +34,11 @@ config:
     #  cpuLimit: '2'
     #  memoryLimit: '8Gi'
     #  replicas: 1
-    #  storageSize: '250Gi'
+    #  storageSize: '400Gi'
     #  daemon:
     #    chain: 'mainnet'
     #    cpuLimit: '2'
-    #    image: ''
+    #    image: 'ruimarinho/bitcoin-core:0.21.1'
     #    memoryLimit: '24Gi'
-    #    node: 'geth'
+    #    node: 'bitcoind'
     #    storageSize: '1500Gi'
