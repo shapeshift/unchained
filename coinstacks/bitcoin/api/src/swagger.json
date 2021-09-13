@@ -50,7 +50,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"BitcoinSpecific": {
+			"BitcoinAccountSpecific": {
 				"description": "Contains Account information",
 				"properties": {
 					"utxos": {
@@ -70,6 +70,20 @@
 					"utxos",
 					"receiveIndex",
 					"changeIndex"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"EthereumAccountSpecific": {
+				"description": "Contains ethereum specific transaction data",
+				"properties": {
+					"nonce": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"nonce"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -107,7 +121,10 @@
 						"type": "array"
 					},
 					"bitcoin": {
-						"$ref": "#/components/schemas/BitcoinSpecific"
+						"$ref": "#/components/schemas/BitcoinAccountSpecific"
+					},
+					"ethereum": {
+						"$ref": "#/components/schemas/EthereumAccountSpecific"
 					}
 				},
 				"required": [

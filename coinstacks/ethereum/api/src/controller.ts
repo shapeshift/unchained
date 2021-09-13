@@ -67,7 +67,6 @@ export class Ethereum extends CommonAPI {
     try {
       const data = await blockbook.getAddress(address, undefined, undefined, undefined, undefined, 'tokenBalances')
 
-      console.log('data: ', data)
       return {
         network: 'ethereum',
         symbol: 'ETH',

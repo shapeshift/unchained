@@ -26,12 +26,20 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "BitcoinSpecific": {
+    "BitcoinAccountSpecific": {
         "dataType": "refObject",
         "properties": {
             "utxos": {"dataType":"double","required":true},
             "receiveIndex": {"dataType":"double","required":true},
             "changeIndex": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "EthereumAccountSpecific": {
+        "dataType": "refObject",
+        "properties": {
+            "nonce": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
     },
@@ -47,7 +55,8 @@ const models: TsoaRoute.Models = {
             "unconfirmedTxs": {"dataType":"double","required":true},
             "txs": {"dataType":"double","required":true},
             "tokens": {"dataType":"array","array":{"ref":"Token"}},
-            "bitcoin": {"ref":"BitcoinSpecific"},
+            "bitcoin": {"ref":"BitcoinAccountSpecific"},
+            "ethereum": {"ref":"EthereumAccountSpecific"},
         },
         "additionalProperties": false,
     },
