@@ -1883,10 +1883,10 @@
     read-package-tree "^5.2.1"
     resolve "^1.7.1"
 
-"@pulumi/awsx@^0.30.0":
-  version "0.30.0"
-  resolved "https://registry.yarnpkg.com/@pulumi/awsx/-/awsx-0.30.0.tgz#cbab6f745aa09ee7179880c99149f2d17c2e7b19"
-  integrity sha512-QtYVDFSkZxJ/JkAxaSwms9i/tJU2rA9F/VncCN6e8D0r29C5t4eYQhmB4chsLww9AjWJPRM7CXosDJs8+gy1Zg==
+"@pulumi/awsx@^0.31.0":
+  version "0.31.0"
+  resolved "https://registry.yarnpkg.com/@pulumi/awsx/-/awsx-0.31.0.tgz#f77368ccbdd76d21782d715f5a88029e5c65c57f"
+  integrity sha512-Z8WDMO0rpwPIACy0oD3m80DdHE+0/wFtBy5YdPiieMr4CekohOfc83BTix3U5dDfv6XCtEsMI+VzZvgYUM1e4w==
   dependencies:
     "@pulumi/docker" "^3.0.0"
     "@types/aws-lambda" "^8.10.23"
@@ -1980,13 +1980,13 @@
   resolved "https://registry.yarnpkg.com/@pulumi/query/-/query-0.3.0.tgz#f496608e86a18c3dd31b6c533408e2441c29071d"
   integrity sha512-xfo+yLRM2zVjVEA4p23IjQWzyWl1ZhWOGobsBqRpIarzLvwNH/RAGaoehdxlhx4X92302DrpdIFgTICMN4P38w==
 
-"@shapeshiftoss/cluster-launcher@^0.4.1":
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/@shapeshiftoss/cluster-launcher/-/cluster-launcher-0.4.1.tgz#d2fe632024f322c497cea65e13c20a4735af0a21"
-  integrity sha512-tRM9tvaw+oClNNl8VzsJVvel/U8uZnQXAdNChd5rbhDYHNwIQL2C1/7oZulgbIDB0pdXmrTVJ+ghzmfkcVepiA==
+"@shapeshiftoss/cluster-launcher@^0.6.3":
+  version "0.6.3"
+  resolved "https://registry.yarnpkg.com/@shapeshiftoss/cluster-launcher/-/cluster-launcher-0.6.3.tgz#4467040cf9fac2eb8dc8745c506971abdcf8516d"
+  integrity sha512-M33xJAN7vgfV4hkAim0vQd54k760+jejuQqWMZqPY23bhHcp2mB/kNbh/LhADtV2hFM0VrUMQQNW0hOIoBzrxw==
   dependencies:
     "@pulumi/aws" "^4.0.0"
-    "@pulumi/awsx" "^0.30.0"
+    "@pulumi/awsx" "^0.31.0"
     "@pulumi/eks" "^0.32.0"
     "@pulumi/kubernetesx" "^0.1.6"
     "@pulumi/pulumi" "^3.0.0"

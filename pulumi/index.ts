@@ -32,6 +32,13 @@ const getHashBase = async (): Promise<string> => {
   })
   hash.update(commonHash)
 
+  // hash coinstacks dependencies
+  const { hash: dependenciesHash } = await hashElement(`../coinstacks`, {
+    folders: { include: ['**'], exclude: ['.*', 'common', 'dist', 'node_modules', 'pulumi'] },
+    files: { include: ['package.json'] },
+  })
+  hash.update(dependenciesHash)
+
   return hash.digest('hex')
 }
 
@@ -60,7 +67,8 @@ export = async (): Promise<Outputs> => {
       region: config.eks.region,
       cidrBlock: config.eks.cidrBlock,
       profile: config.eks.profile,
-      whitelist: config.eks.whitelist,
+      traefik: config.eks.traefik,
+      email: config.eks.email,
     })
 
     outputs.kubeconfig = cluster.kubeconfig
