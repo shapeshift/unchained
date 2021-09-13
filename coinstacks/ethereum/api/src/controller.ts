@@ -2,9 +2,9 @@ import { Body, Example, Get, Path, Post, Query, Response, Route, SuccessResponse
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { RegistryService } from '@shapeshiftoss/common-mongo'
 import {
+  Account,
   ApiError,
   BadRequestError,
-  Balance,
   BalanceChange,
   Block,
   CommonAPI,
@@ -41,18 +41,18 @@ const jsonRpcProvider = new ethers.providers.JsonRpcProvider(RPC_URL)
 @Tags('v1')
 export class Ethereum extends CommonAPI {
   /**
-   * Get balance returns the balance of an address
+   * Get Account returns the account information of an address or xpub
    *
-   * @param address account address
+   * @param pubKey account address or xpub
    *
-   * @returns {Promise<Balance>} account balance
+   * @returns {Promise<Account>} account balance
    *
-   * @example address "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
+   * @example address "336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU"
    */
-  @Example<Balance>({
+  @Example<Account>({
     network: 'ethereum',
     symbol: 'ETH',
-    address: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
+    pubKey: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
     balance: '284809805024198107',
     unconfirmedBalance: '0',
     unconfirmedTxs: 0,
@@ -63,19 +63,23 @@ export class Ethereum extends CommonAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('balance/{address}')
-  async getBalance(@Path() address: string): Promise<Balance> {
+  async getAccount(@Path() address: string): Promise<Account> {
     try {
       const data = await blockbook.getAddress(address, undefined, undefined, undefined, undefined, 'tokenBalances')
 
+      console.log('data: ', data)
       return {
         network: 'ethereum',
         symbol: 'ETH',
-        address: data.address,
+        pubKey: data.address,
         balance: data.balance,
         unconfirmedBalance: data.unconfirmedBalance,
         unconfirmedTxs: data.unconfirmedTxs,
         txs: data.txs,
         tokens: data.tokens ?? [],
+        ethereum: {
+          nonce: Number(data.nonce),
+        },
       }
     } catch (err) {
       throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))

@@ -50,8 +50,46 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Balance": {
-				"description": "Contains info about an addresses balance",
+			"BitcoinAccountSpecific": {
+				"description": "Contains Account information",
+				"properties": {
+					"utxos": {
+						"type": "number",
+						"format": "double"
+					},
+					"receiveIndex": {
+						"type": "number",
+						"format": "double"
+					},
+					"changeIndex": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"utxos",
+					"receiveIndex",
+					"changeIndex"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"EthereumAccountSpecific": {
+				"description": "Contains ethereum specific transaction data",
+				"properties": {
+					"nonce": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"nonce"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Account": {
+				"description": "Contains Account information",
 				"properties": {
 					"network": {
 						"type": "string"
@@ -59,16 +97,10 @@
 					"symbol": {
 						"type": "string"
 					},
-					"address": {
+					"pubKey": {
 						"type": "string"
 					},
 					"balance": {
-						"type": "string"
-					},
-					"totalReceived": {
-						"type": "string"
-					},
-					"totalSent": {
 						"type": "string"
 					},
 					"unconfirmedBalance": {
@@ -87,12 +119,18 @@
 							"$ref": "#/components/schemas/Token"
 						},
 						"type": "array"
+					},
+					"bitcoin": {
+						"$ref": "#/components/schemas/BitcoinAccountSpecific"
+					},
+					"ethereum": {
+						"$ref": "#/components/schemas/EthereumAccountSpecific"
 					}
 				},
 				"required": [
 					"network",
 					"symbol",
-					"address",
+					"pubKey",
 					"balance",
 					"unconfirmedBalance",
 					"unconfirmedTxs",
@@ -411,21 +449,21 @@
 	"paths": {
 		"/api/v1/balance/{address}": {
 			"get": {
-				"operationId": "GetBalance",
+				"operationId": "GetAccount",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Balance"
+									"$ref": "#/components/schemas/Account"
 								},
 								"examples": {
 									"Example 1": {
 										"value": {
 											"network": "ethereum",
 											"symbol": "ETH",
-											"address": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa",
+											"pubKey": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa",
 											"balance": "284809805024198107",
 											"unconfirmedBalance": "0",
 											"unconfirmedTxs": 0,
@@ -474,21 +512,20 @@
 						}
 					}
 				},
-				"description": "Get balance returns the balance of an address",
+				"description": "Get Account returns the account information of an address or xpub",
 				"tags": [
 					"v1"
 				],
 				"security": [],
 				"parameters": [
 					{
-						"description": "account address",
 						"in": "path",
 						"name": "address",
 						"required": true,
 						"schema": {
 							"type": "string"
 						},
-						"example": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
+						"example": "336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU"
 					}
 				]
 			}

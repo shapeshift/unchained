@@ -2,9 +2,9 @@ import { Body, Example, Get, Path, Post, Query, Response, Route, SuccessResponse
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { RegistryService } from '@shapeshiftoss/common-mongo'
 import {
+  Account,
   ApiError,
   BadRequestError,
-  Balance,
   BalanceChange,
   Block,
   CommonAPI,
@@ -41,42 +41,71 @@ const jsonRpcProvider = new ethers.providers.JsonRpcProvider(RPC_URL)
 @Tags('v1')
 export class Ethereum extends CommonAPI {
   /**
-   * Get balance returns the balance of an address
+   * Get Account returns the account information of an address or xpub
    *
-   * @param address account address
+   * @param pubKey account address or xpub
    *
-   * @returns {Promise<Balance>} account balance
+   * @returns {Promise<Account>} account information
    *
-   * @example address "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
+   * @example address "336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU"
    */
-  @Example<Balance>({
+  @Example<Account>({
     network: 'bitcoin',
     symbol: 'BTC',
-    address: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
+    pubKey: '336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU',
     balance: '284809805024198107',
     unconfirmedBalance: '0',
     unconfirmedTxs: 0,
     txs: 21933,
-    tokens: [{ type: 'ERC20', name: 'Tether USD', transfers: 1 }],
+    tokens: [],
   })
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('balance/{address}')
-  async getBalance(@Path() address: string): Promise<Balance> {
+  @Get('account/{pubKey}')
+  async getAccount(@Path() pubKey: string): Promise<Account> {
     try {
-      const data = await blockbook.getAddress(address, undefined, undefined, undefined, undefined, 'tokenBalances')
+      const isValidXpub = validateXpub(pubKey)
+      let data
 
-      return {
+      if (isValidXpub) {
+        data = await blockbook.getXpub(pubKey, undefined, undefined, undefined, undefined, 'tokenBalances', 'used')
+      } else {
+        data = await blockbook.getAddress(pubKey)
+      }
+
+      const pubKeyData: Account = {
         network: 'bitcoin',
         symbol: 'BTC',
-        address: data.address,
+        pubKey: data.address,
         balance: data.balance,
         unconfirmedBalance: data.unconfirmedBalance,
         unconfirmedTxs: data.unconfirmedTxs,
         txs: data.txs,
-        tokens: data.tokens ?? [],
       }
+
+      if (isValidXpub && data.tokens) {
+        let changeIndex: number | null = null
+        let receiveIndex: number | null = null
+        for (let i = data.tokens.length - 1; i >= 0 && (changeIndex === null || receiveIndex === null); i--) {
+          const splitPath = data.tokens[i].path?.split('/') || []
+          const [, , , , change, index] = splitPath
+
+          if (change === '0') {
+            receiveIndex = Number(index) + 1
+          }
+          if (change === '1') {
+            changeIndex = Number(index) + 1
+          }
+        }
+        pubKeyData['bitcoin'] = {
+          utxos: data.usedTokens || 0,
+          receiveIndex: receiveIndex || 0,
+          changeIndex: changeIndex || 0,
+        }
+      }
+
+      return pubKeyData
     } catch (err) {
       throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
     }
@@ -499,4 +528,8 @@ export class Ethereum extends CommonAPI {
       throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
     }
   }
+}
+
+const validateXpub = (xpub: string): boolean => {
+  return xpub.startsWith('xpub') || xpub.startsWith('ypub') || xpub.startsWith('zpub')
 }
