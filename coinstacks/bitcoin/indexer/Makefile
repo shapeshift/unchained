@@ -3,7 +3,7 @@ PACKAGER = $(shell id -u):$(shell id -g)
 
 gen-config:
 	- mkdir -p config
-	- docker run --rm -t -e PACKAGER=$(PACKAGER) -v "$(CURDIR):/out" $(IMAGE) ./generate-config.sh ethereum
+	- docker run --rm -t -e PACKAGER=$(PACKAGER) -v "$(CURDIR):/out" $(IMAGE) ./generate-config.sh bitcoin
 
 run:
 	- mkdir -p db
