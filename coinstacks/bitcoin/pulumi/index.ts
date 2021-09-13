@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from 'fs'
 import { join } from 'path'
 import * as k8s from '@pulumi/kubernetes'
 import { all } from '@pulumi/pulumi'
-import { deployApi, deployMongo, deployIngester } from '@shapeshiftoss/common-pulumi'
+import { deployApi, deployMongo } from '@shapeshiftoss/common-pulumi'
 import { deployIndexer } from '@shapeshiftoss/blockbook-pulumi'
 import { getConfig } from './config'
 
