@@ -58,7 +58,6 @@ export = async (): Promise<Outputs> => {
   const deps = all([mongo]).apply(([mongoResources]) => mongoResources)
 
   await deployIndexer(app, asset, provider, namespace, config)
-  await deployIngester(app, asset, provider, namespace, config, deps)
   await deployApi(app, asset, provider, namespace, config, deps)
 
   return outputs
