@@ -38,7 +38,7 @@ config:
     #  daemon:
     #    chain: 'mainnet'
     #    cpuLimit: '2'
-    #    image: ''
+    #    image: 'ruimarinho/bitcoin-core:0.21.1'
     #    memoryLimit: '24Gi'
     #    node: 'geth'
     #    storageSize: '1500Gi'
