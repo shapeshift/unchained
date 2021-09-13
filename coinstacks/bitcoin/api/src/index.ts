@@ -20,7 +20,7 @@ app.get('/', async (_, res) => {
 app.get('/health', async (_, res) => {
   res.json({
     status: 'up',
-    network: 'ethereum',
+    network: 'bitcoin',
   })
 })
 
