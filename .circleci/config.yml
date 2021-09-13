@@ -267,7 +267,7 @@ workflows:
           indexer-memory-limit: 12Gi
           indexer-replicas: 2
           indexer-storage-size: 500Gi
-          daemon-image: ruimarinho/bitcoin-core #https://github.com/ruimarinho/docker-bitcoin-core
+          daemon-image: ruimarinho/bitcoin-core:0.21.0 #https://github.com/ruimarinho/docker-bitcoin-core
           daemon-node: bitcoind
           daemon-cpu-limit: '2'
           daemon-memory-limit: 12Gi
