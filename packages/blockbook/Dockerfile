@@ -44,7 +44,6 @@ RUN chmod +x generate-config.sh
 
 # create mount points 
 VOLUME /out
-VOLUME /config
 VOLUME /db
 VOLUME /logs
 

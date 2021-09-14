@@ -2,9 +2,9 @@
 
 set -e
 
-if [ $# -lt 2 ]; then
+if [ $# -lt 1 ]; then
     echo "Missing arugments" 1>&2
-    echo "Usage: <coin> [build opts]" 1>&2
+    echo "Usage: <coin>" 1>&2
     exit 1
 fi
 
