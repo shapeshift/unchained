@@ -27,7 +27,6 @@ dns registrar (ex [godaddy](https://www.godaddy.com/))
 5. sign up for npm
 6. sign up for dockerhub
 7. sign up for etherscan
-8. sign up for rabbitmq cloud service?
 
 ### Domain Registration
 
