@@ -24,7 +24,15 @@ app.get('/health', async (_, res) => {
   })
 })
 
-app.use('/docs', swaggerUi.serve, async (_req: Request, res: Response) => {
+import swaggerDocument from './swagger.json'
+const options = {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'ShapeShift API Docs',
+  customfavIcon: './favi-blue.png',
+}
+
+app.use('/coinstacks/common/api/public/favi-blue.png', express.static('./favi-blue.png'))
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, options), async (_req: Request, res: Response) => {
   return res.send(swaggerUi.generateHTML(await import('./swagger.json')))
 })
 
