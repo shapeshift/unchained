@@ -93,31 +93,14 @@ jobs:
             pulumi stack select $PULUMI_ORG/dependencies
             pulumi config set --path unchained:common.cluster eks
             pulumi config set --path unchained:common.isLocal false
-            pulumi config set --path unchained:common.eks.allAZs true
+            pulumi config set --path unchained:common.eks.allAZs false
             pulumi config set --path unchained:common.eks.instanceTypes[0] m5.4xlarge
             pulumi config set --path unchained:common.eks.instanceTypes[1] m5a.4xlarge
             pulumi config set --path unchained:common.eks.instanceTypes[2] m5ad.4xlarge
-            pulumi config set --path unchained:common.eks.region $AWS_REGION
+            pulumi config set --path unchained:common.eks.region us-west-2
             pulumi config set --path unchained:common.eks.cidrBlock 10.0.0.0/16
-            pulumi config set --path unchained:common.traefik.whitelist[0] 173.245.48.0/20
-            pulumi config set --path unchained:common.traefik.whitelist[1] 103.21.244.0/22
-            pulumi config set --path unchained:common.traefik.whitelist[2] 103.22.200.0/22
-            pulumi config set --path unchained:common.traefik.whitelist[3] 103.31.4.0/22
-            pulumi config set --path unchained:common.traefik.whitelist[4] 141.101.64.0/18
-            pulumi config set --path unchained:common.traefik.whitelist[5] 108.162.192.0/18
-            pulumi config set --path unchained:common.traefik.whitelist[6] 190.93.240.0/20
-            pulumi config set --path unchained:common.traefik.whitelist[7] 188.114.96.0/20
-            pulumi config set --path unchained:common.traefik.whitelist[8] 197.234.240.0/22
-            pulumi config set --path unchained:common.traefik.whitelist[9] 198.41.128.0/17
-            pulumi config set --path unchained:common.traefik.whitelist[10] 162.158.0.0/15
-            pulumi config set --path unchained:common.traefik.whitelist[11] 104.16.0.0/13
-            pulumi config set --path unchained:common.traefik.whitelist[12] 104.24.0.0/14
-            pulumi config set --path unchained:common.traefik.whitelist[13] 172.64.0.0/13
-            pulumi config set --path unchained:common.traefik.whitelist[14] 131.0.72.0/22
-            pulumi config set --path unchained:common.dockerhub.username $DOCKERHUB_USERNAME
-            pulumi config set --path unchained:common.dockerhub.password $DOCKERHUB_PASSWORD --plaintext
-            pulumi config set --path unchained:common.dockerhub.server docker.io
-            pulumi config set --path unchained:common.rootDomainName $ROOT_DOMAIN_NAME
+            pulumi config set --path unchained:common.traefik.whitelist[0] 0.0.0.0/0
+            pulumi config set --path unchained:common.rootDomainName usd.fail
             pulumi config set --path unchained:common.rabbit.cpuLimit 2
             pulumi config set --path unchained:common.rabbit.memoryLimit 4Gi
             pulumi config set --path unchained:common.rabbit.adminPort 31672
