@@ -117,8 +117,6 @@ jobs:
             pulumi config set --path unchained:common.traefik.whitelist[12] 104.24.0.0/14
             pulumi config set --path unchained:common.traefik.whitelist[13] 172.64.0.0/13
             pulumi config set --path unchained:common.traefik.whitelist[14] 131.0.72.0/22
-            pulumi config set --path unchained:common.dockerhub.username $DOCKERHUB_USERNAME
-            pulumi config set --path unchained:common.dockerhub.password $DOCKERHUB_PASSWORD --plaintext
             pulumi config set --path unchained:common.dockerhub.server docker.io
             pulumi config set --path unchained:common.rootDomainName $ROOT_DOMAIN_NAME
             pulumi config set --path unchained:common.rabbit.cpuLimit 2
