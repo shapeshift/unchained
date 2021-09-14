@@ -39,7 +39,7 @@ const jsonRpcProvider = new ethers.providers.JsonRpcProvider(RPC_URL)
 
 @Route('api/v1')
 @Tags('v1')
-export class Ethereum extends CommonAPI {
+export class Bitcoin extends CommonAPI {
   /**
    * Get Account returns the account information of an address or xpub
    *

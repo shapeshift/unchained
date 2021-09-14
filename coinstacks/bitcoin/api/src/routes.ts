@@ -3,7 +3,7 @@
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { Controller, ValidationService, FieldErrors, ValidateError, TsoaRoute, HttpStatusCodeLiteral, TsoaResponse } from '@tsoa/runtime';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { Ethereum } from './controller';
+import { Bitcoin } from './controller';
 import * as express from 'express';
 
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -183,7 +183,7 @@ export function RegisterRoutes(app: express.Router) {
     //      Please look into the "controllerPathGlobs" config option described in the readme: https://github.com/lukeautry/tsoa
     // ###########################################################################################################
         app.get('/api/v1/account/:pubKey',
-            function Ethereum_getAccount(request: any, response: any, next: any) {
+            function Bitcoin_getAccount(request: any, response: any, next: any) {
             const args = {
                     pubKey: {"in":"path","name":"pubKey","required":true,"dataType":"string"},
             };
@@ -197,7 +197,7 @@ export function RegisterRoutes(app: express.Router) {
                 return next(err);
             }
 
-            const controller = new Ethereum();
+            const controller = new Bitcoin();
 
 
             const promise = controller.getAccount.apply(controller, validatedArgs as any);
@@ -205,7 +205,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/balancehistory/:address',
-            function Ethereum_getBalanceHistory(request: any, response: any, next: any) {
+            function Bitcoin_getBalanceHistory(request: any, response: any, next: any) {
             const args = {
                     address: {"in":"path","name":"address","required":true,"dataType":"string"},
                     interval: {"in":"query","name":"interval","required":true,"ref":"Interval"},
@@ -222,7 +222,7 @@ export function RegisterRoutes(app: express.Router) {
                 return next(err);
             }
 
-            const controller = new Ethereum();
+            const controller = new Bitcoin();
 
 
             const promise = controller.getBalanceHistory.apply(controller, validatedArgs as any);
@@ -230,7 +230,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/block/:block',
-            function Ethereum_getBlock(request: any, response: any, next: any) {
+            function Bitcoin_getBlock(request: any, response: any, next: any) {
             const args = {
                     block: {"in":"path","name":"block","required":true,"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"string"}]},
             };
@@ -244,7 +244,7 @@ export function RegisterRoutes(app: express.Router) {
                 return next(err);
             }
 
-            const controller = new Ethereum();
+            const controller = new Bitcoin();
 
 
             const promise = controller.getBlock.apply(controller, validatedArgs as any);
@@ -252,7 +252,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/tx/:txid',
-            function Ethereum_getTx(request: any, response: any, next: any) {
+            function Bitcoin_getTx(request: any, response: any, next: any) {
             const args = {
                     txid: {"in":"path","name":"txid","required":true,"dataType":"string"},
             };
@@ -266,7 +266,7 @@ export function RegisterRoutes(app: express.Router) {
                 return next(err);
             }
 
-            const controller = new Ethereum();
+            const controller = new Bitcoin();
 
 
             const promise = controller.getTx.apply(controller, validatedArgs as any);
@@ -274,7 +274,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/txs/:address',
-            function Ethereum_getTxHistory(request: any, response: any, next: any) {
+            function Bitcoin_getTxHistory(request: any, response: any, next: any) {
             const args = {
                     address: {"in":"path","name":"address","required":true,"dataType":"string"},
                     page: {"in":"query","name":"page","dataType":"double"},
@@ -291,7 +291,7 @@ export function RegisterRoutes(app: express.Router) {
                 return next(err);
             }
 
-            const controller = new Ethereum();
+            const controller = new Bitcoin();
 
 
             const promise = controller.getTxHistory.apply(controller, validatedArgs as any);
@@ -299,7 +299,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/estimategas',
-            function Ethereum_getEstimatedGas(request: any, response: any, next: any) {
+            function Bitcoin_getEstimatedGas(request: any, response: any, next: any) {
             const args = {
                     data: {"in":"query","name":"data","required":true,"dataType":"string"},
                     to: {"in":"query","name":"to","required":true,"dataType":"string"},
@@ -316,7 +316,7 @@ export function RegisterRoutes(app: express.Router) {
                 return next(err);
             }
 
-            const controller = new Ethereum();
+            const controller = new Bitcoin();
 
 
             const promise = controller.getEstimatedGas.apply(controller, validatedArgs as any);
@@ -324,7 +324,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/feeprice',
-            function Ethereum_getFeePrice(request: any, response: any, next: any) {
+            function Bitcoin_getFeePrice(request: any, response: any, next: any) {
             const args = {
             };
 
@@ -337,7 +337,7 @@ export function RegisterRoutes(app: express.Router) {
                 return next(err);
             }
 
-            const controller = new Ethereum();
+            const controller = new Bitcoin();
 
 
             const promise = controller.getFeePrice.apply(controller, validatedArgs as any);
@@ -345,7 +345,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/register',
-            function Ethereum_register(request: any, response: any, next: any) {
+            function Bitcoin_register(request: any, response: any, next: any) {
             const args = {
                     document: {"in":"body","name":"document","required":true,"ref":"RegistryDocument"},
             };
@@ -359,7 +359,7 @@ export function RegisterRoutes(app: express.Router) {
                 return next(err);
             }
 
-            const controller = new Ethereum();
+            const controller = new Bitcoin();
 
 
             const promise = controller.register.apply(controller, validatedArgs as any);
@@ -367,7 +367,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/unregister',
-            function Ethereum_unregister(request: any, response: any, next: any) {
+            function Bitcoin_unregister(request: any, response: any, next: any) {
             const args = {
                     document: {"in":"body","name":"document","required":true,"ref":"RegistryDocument"},
             };
@@ -381,7 +381,7 @@ export function RegisterRoutes(app: express.Router) {
                 return next(err);
             }
 
-            const controller = new Ethereum();
+            const controller = new Bitcoin();
 
 
             const promise = controller.unregister.apply(controller, validatedArgs as any);
@@ -389,7 +389,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/send',
-            function Ethereum_sendTx(request: any, response: any, next: any) {
+            function Bitcoin_sendTx(request: any, response: any, next: any) {
             const args = {
                     rawTx: {"in":"body","name":"rawTx","required":true,"ref":"RawTx"},
             };
@@ -403,7 +403,7 @@ export function RegisterRoutes(app: express.Router) {
                 return next(err);
             }
 
-            const controller = new Ethereum();
+            const controller = new Bitcoin();
 
 
             const promise = controller.sendTx.apply(controller, validatedArgs as any);
@@ -411,7 +411,7 @@ export function RegisterRoutes(app: express.Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.get('/api/v1/nonce/:address',
-            function Ethereum_getNonce(request: any, response: any, next: any) {
+            function Bitcoin_getNonce(request: any, response: any, next: any) {
             const args = {
                     address: {"in":"path","name":"address","required":true,"dataType":"string"},
             };
@@ -425,7 +425,7 @@ export function RegisterRoutes(app: express.Router) {
                 return next(err);
             }
 
-            const controller = new Ethereum();
+            const controller = new Bitcoin();
 
 
             const promise = controller.getNonce.apply(controller, validatedArgs as any);
