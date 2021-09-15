@@ -132,7 +132,6 @@ jobs:
       LOG_LEVEL: info
       MIDGARD_URL: https://midgard.thorchain.info
       MONGO_DBNAME: coinstack
-      MONGO_URL:
     parameters:
       coinstack:
         description: coinstack name
