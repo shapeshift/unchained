@@ -1,6 +1,4 @@
-import { Controller } from 'tsoa'
-import { RegistryDocument } from '@shapeshiftoss/common-mongo'
-import { Balance, BalanceChange, Block, RawTx, Tx, TxHistory, TxReceipt, Utxo } from './models'
+import { Balance, BalanceChange, Block, RawTx, Tx, TxHistory } from './models'
 
 export * from './models'
 export * as middleware from './middleware'
@@ -37,34 +35,29 @@ export class ApiError extends Error {
  *
  * Typescript is unable to enforce decorators on abstract functions and also will not enforce more than the first argument for each function. Please ensure these match when adding a new coinstack api, or update all coinstack api implementations on any changes to the abstract class.
  */
-export abstract class CommonAPI extends Controller {
+export interface CommonAPI {
   /**
-   * Get balance returns the balance of an address
+   * Get balance returns the balance of a pubkey
    *
-   * @param {string} address account address
+   * @param {string} pubkey account pubkey
    *
    * @returns {Promise<Balance>} account balance
    */
-  // @Get('balance/{address}')
-  abstract getBalance(address: string): Promise<Balance>
+  // @Get('balance/{pubkey}')
+  getBalance(pubkey: string): Promise<Balance>
 
   /**
-   * Get balance history returns the balance history of an address
+   * Get balance history returns the balance history of a pubkey
    *
-   * @param {string} address account address
+   * @param {string} pubkey account pubkey
    * @param {Interval} interval range to group by
    * @param {number} [start] start date as unix timestamp
    * @param {number} [end] end date as unix timestamp
    *
    * @returns {Promise<Array<BalanceChange>>} balance change history
    */
-  // @Get('balancehistory/{address}')
-  abstract getBalanceHistory(
-    address: string,
-    interval: Interval,
-    from?: number,
-    to?: number
-  ): Promise<Array<BalanceChange>>
+  // @Get('balancehistory/{pubkey}')
+  getBalanceHistory(pubkey: string, interval: Interval, from?: number, to?: number): Promise<Array<BalanceChange>>
 
   /**
    * Get block returns data about a block
@@ -74,7 +67,15 @@ export abstract class CommonAPI extends Controller {
    * @returns {Promise<Block>} block data
    */
   // @Get('block/{block}')
-  abstract getBlock(block: number | string): Promise<Block>
+  getBlock(block: number | string): Promise<Block>
+
+  /**
+   * Get the current fee price (ex. gas price, sats/byte) from the network node.
+   *
+   * @returns {Promise<string>} current fee price for chain for next block confirmation
+   *
+   */
+  getFeePrice(): Promise<string>
 
   /**
    * Get transaction returns data about a transaction
@@ -84,15 +85,7 @@ export abstract class CommonAPI extends Controller {
    * @returns {Promise<Tx>} transaction data
    */
   // @Get('tx/{txid}')
-  abstract getTx(txid: string): Promise<Tx>
-
-  /**
-   * Get the current fee price (ex. gas price, sats/byte) from the network node.
-   *
-   * @returns {Promise<string>} current fee price for chain for next block confirmation
-   *
-   */
-  abstract getFeePrice(): Promise<string>
+  getTx(txid: string): Promise<Tx>
 
   /**
    * Get transaction history returns the transaction history of an address
@@ -105,27 +98,7 @@ export abstract class CommonAPI extends Controller {
    * @returns {Promise<TxHistory>} transaction history
    */
   // @Get('txs/{address}')
-  abstract getTxHistory(address: string, page?: number, pageSize?: number, contract?: string): Promise<TxHistory>
-
-  /**
-   * Register addresses for tracking incoming pending transactions and newly confirmed transactions
-   *
-   * @param {RegistryDocument} document Contains a list of addresses to register for a client id
-   *
-   * @returns {Promise<void>}
-   */
-  // @Post('register/')
-  abstract register(document: RegistryDocument): Promise<void>
-
-  /**
-   * Unregister addresses to stop tracking incoming pending transactions and newly confirmed transactions
-   *
-   * @param {RegistryDocument} document Contains a list of addresses to unregister for a client id. If no addresses are provided, all addresses will be unregistered.
-   *
-   * @returns {Promise<void>}
-   */
-  // @Post('unregister/')
-  abstract unregister(document: RegistryDocument): Promise<void>
+  getTxHistory(address: string, page?: number, pageSize?: number, contract?: string): Promise<TxHistory>
 
   /**
    * Sends raw transaction to be broadcast to the node.
@@ -135,18 +108,18 @@ export abstract class CommonAPI extends Controller {
    * @returns {Promise<TxReceipt>} transaction receipt
    */
   // @Post('sendTx/')
-  abstract sendTx(rawTx: RawTx): Promise<TxReceipt>
+  sendTx(rawTx: RawTx): Promise<string>
 }
 
-export abstract class UtxoCommonAPI extends CommonAPI {
-  /**
-   * Get Utxo returns an array of unspent transaction outputs of address or xpub.
-   *
-   * @param {string} account address or xpub
-   * @param {boolean} confirmed return confirmed and/or unconfirmed transactions
-   *
-   * @returns {Promise<Array<Utxo>>} utxo list
-   */
-  // @Get('utxo/{account}')
-  abstract getUtxo(account: string): Promise<Array<Utxo>>
-}
+//export interface UtxoCommonAPI extends CommonAPI {
+//  /**
+//   * Get Utxo returns an array of unspent transaction outputs of address or xpub.
+//   *
+//   * @param {string} account address or xpub
+//   * @param {boolean} confirmed return confirmed and/or unconfirmed transactions
+//   *
+//   * @returns {Promise<Array<Utxo>>} utxo list
+//   */
+//  // @Get('utxo/{account}')
+//  getUtxo(account: string): Promise<Array<Utxo>>
+//}

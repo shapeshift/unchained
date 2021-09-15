@@ -26,12 +26,10 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Balance": {
+    "EthereumBalance": {
         "dataType": "refObject",
         "properties": {
-            "network": {"dataType":"string","required":true},
-            "symbol": {"dataType":"string","required":true},
-            "address": {"dataType":"string","required":true},
+            "pubkey": {"dataType":"string","required":true},
             "balance": {"dataType":"string","required":true},
             "totalReceived": {"dataType":"string"},
             "totalSent": {"dataType":"string"},
@@ -39,6 +37,7 @@ const models: TsoaRoute.Models = {
             "unconfirmedTxs": {"dataType":"double","required":true},
             "txs": {"dataType":"double","required":true},
             "tokens": {"dataType":"array","array":{"ref":"Token"},"required":true},
+            "nonce": {"dataType":"string"},
         },
         "additionalProperties": false,
     },
@@ -85,7 +84,6 @@ const models: TsoaRoute.Models = {
     "Block": {
         "dataType": "refObject",
         "properties": {
-            "network": {"dataType":"string","required":true},
             "hash": {"dataType":"string","required":true},
             "prevHash": {"dataType":"string"},
             "nextHash": {"dataType":"string"},
@@ -100,8 +98,6 @@ const models: TsoaRoute.Models = {
     "Tx": {
         "dataType": "refObject",
         "properties": {
-            "network": {"dataType":"string","required":true},
-            "symbol": {"dataType":"string","required":true},
             "txid": {"dataType":"string","required":true},
             "status": {"dataType":"string","required":true},
             "blockHash": {"dataType":"string"},
@@ -127,25 +123,6 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "RegistryDocument": {
-        "dataType": "refObject",
-        "properties": {
-            "client_id": {"dataType":"string","required":true},
-            "ingester_meta": {"dataType":"nestedObjectLiteral","nestedProperties":{"syncing":{"dataType":"nestedObjectLiteral","nestedProperties":{"endTime":{"dataType":"double","required":true},"startTime":{"dataType":"double","required":true},"key":{"dataType":"string"}}},"block":{"dataType":"double"}}},
-            "registration": {"dataType":"nestedObjectLiteral","nestedProperties":{"pubkey":{"dataType":"string"},"addresses":{"dataType":"array","array":{"dataType":"string"}}},"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "TxReceipt": {
-        "dataType": "refObject",
-        "properties": {
-            "network": {"dataType":"string","required":true},
-            "txid": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "RawTx": {
         "dataType": "refObject",
         "properties": {
@@ -164,10 +141,10 @@ export function RegisterRoutes(app: express.Router) {
     //  NOTE: If you do not see routes for all of your controllers in this file, then you might not have informed tsoa of where to look
     //      Please look into the "controllerPathGlobs" config option described in the readme: https://github.com/lukeautry/tsoa
     // ###########################################################################################################
-        app.get('/api/v1/balance/:address',
+        app.get('/api/v1/balance/:pubkey',
             function Ethereum_getBalance(request: any, response: any, next: any) {
             const args = {
-                    address: {"in":"path","name":"address","required":true,"dataType":"string"},
+                    pubkey: {"in":"path","name":"pubkey","required":true,"dataType":"string"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -186,10 +163,10 @@ export function RegisterRoutes(app: express.Router) {
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/balancehistory/:address',
+        app.get('/api/v1/balancehistory/:pubkey',
             function Ethereum_getBalanceHistory(request: any, response: any, next: any) {
             const args = {
-                    address: {"in":"path","name":"address","required":true,"dataType":"string"},
+                    pubkey: {"in":"path","name":"pubkey","required":true,"dataType":"string"},
                     interval: {"in":"query","name":"interval","required":true,"ref":"Interval"},
                     start: {"in":"query","name":"start","dataType":"double"},
                     end: {"in":"query","name":"end","dataType":"double"},
@@ -326,10 +303,10 @@ export function RegisterRoutes(app: express.Router) {
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.post('/api/v1/register',
-            function Ethereum_register(request: any, response: any, next: any) {
+        app.get('/api/v1/nonce/:address',
+            function Ethereum_getNonce(request: any, response: any, next: any) {
             const args = {
-                    document: {"in":"body","name":"document","required":true,"ref":"RegistryDocument"},
+                    address: {"in":"path","name":"address","required":true,"dataType":"string"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -344,29 +321,7 @@ export function RegisterRoutes(app: express.Router) {
             const controller = new Ethereum();
 
 
-            const promise = controller.register.apply(controller, validatedArgs as any);
-            promiseHandler(controller, promise, response, undefined, next);
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.post('/api/v1/unregister',
-            function Ethereum_unregister(request: any, response: any, next: any) {
-            const args = {
-                    document: {"in":"body","name":"document","required":true,"ref":"RegistryDocument"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-            } catch (err) {
-                return next(err);
-            }
-
-            const controller = new Ethereum();
-
-
-            const promise = controller.unregister.apply(controller, validatedArgs as any);
+            const promise = controller.getNonce.apply(controller, validatedArgs as any);
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -389,28 +344,6 @@ export function RegisterRoutes(app: express.Router) {
 
 
             const promise = controller.sendTx.apply(controller, validatedArgs as any);
-            promiseHandler(controller, promise, response, undefined, next);
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/nonce/:address',
-            function Ethereum_getNonce(request: any, response: any, next: any) {
-            const args = {
-                    address: {"in":"path","name":"address","required":true,"dataType":"string"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-            } catch (err) {
-                return next(err);
-            }
-
-            const controller = new Ethereum();
-
-
-            const promise = controller.getNonce.apply(controller, validatedArgs as any);
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
