@@ -96,7 +96,7 @@ jobs:
             pulumi stack select $PULUMI_ORG/dependencies
             pulumi config set --path unchained:common.cluster eks
             pulumi config set --path unchained:common.isLocal false
-            pulumi config set --path unchained:common.eks.allAZs false
+            pulumi config set --path unchained:common.eks.allAZs true
             pulumi config set --path unchained:common.eks.instanceTypes[0] m5.4xlarge
             pulumi config set --path unchained:common.eks.instanceTypes[1] m5a.4xlarge
             pulumi config set --path unchained:common.eks.instanceTypes[2] m5ad.4xlarge
@@ -117,6 +117,9 @@ jobs:
             pulumi config set --path unchained:common.traefik.whitelist[12] 104.24.0.0/14
             pulumi config set --path unchained:common.traefik.whitelist[13] 172.64.0.0/13
             pulumi config set --path unchained:common.traefik.whitelist[14] 131.0.72.0/22
+            pulumi config set --path unchained:common.dockerhub.username $DOCKERHUB_USERNAME
+            pulumi config set --path unchained:common.dockerhub.password $DOCKERHUB_PASSWORD --plaintext
+            pulumi config set --path unchained:common.dockerhub.server docker.io
             pulumi config set --path unchained:common.rootDomainName $ROOT_DOMAIN_NAME
             pulumi config set --path unchained:common.rabbit.cpuLimit 2
             pulumi config set --path unchained:common.rabbit.memoryLimit 4Gi
