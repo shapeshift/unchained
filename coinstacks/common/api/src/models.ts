@@ -33,32 +33,6 @@ export interface InternalServerError {
 export interface Balance {
   pubkey: string
   balance: string
-  totalReceived?: string
-  totalSent?: string
-  unconfirmedBalance: string
-  unconfirmedTxs: number
-  txs: number
-}
-
-/**
- * Contains info about a balance change
- */
-export interface BalanceChange {
-  timestamp: number
-  amount: string
-}
-
-/**
- * Contains info about a block
- */
-export interface Block {
-  hash: string
-  prevHash?: string
-  nextHash?: string
-  height: number
-  confirmations: number
-  timestamp?: number
-  txs: number
 }
 
 /**
@@ -72,7 +46,7 @@ export interface Pagination {
 /**
  * Contains the serialized raw transaction hex
  */
-export interface RawTx {
+export interface SendTxBody {
   hex: string
 }
 

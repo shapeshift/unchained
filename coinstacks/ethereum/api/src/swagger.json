@@ -51,6 +51,7 @@
 				"additionalProperties": false
 			},
 			"EthereumBalance": {
+				"description": "Contains additional ethereum specific balance info",
 				"properties": {
 					"pubkey": {
 						"type": "string"
@@ -58,39 +59,16 @@
 					"balance": {
 						"type": "string"
 					},
-					"totalReceived": {
-						"type": "string"
-					},
-					"totalSent": {
-						"type": "string"
-					},
-					"unconfirmedBalance": {
-						"type": "string"
-					},
-					"unconfirmedTxs": {
-						"type": "number",
-						"format": "double"
-					},
-					"txs": {
-						"type": "number",
-						"format": "double"
-					},
 					"tokens": {
 						"items": {
 							"$ref": "#/components/schemas/Token"
 						},
 						"type": "array"
-					},
-					"nonce": {
-						"type": "string"
 					}
 				},
 				"required": [
 					"pubkey",
 					"balance",
-					"unconfirmedBalance",
-					"unconfirmedTxs",
-					"txs",
 					"tokens"
 				],
 				"type": "object",
@@ -141,75 +119,6 @@
 				},
 				"required": [
 					"message"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"BalanceChange": {
-				"description": "Contains info about a balance change",
-				"properties": {
-					"timestamp": {
-						"type": "number",
-						"format": "double"
-					},
-					"amount": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"timestamp",
-					"amount"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Interval": {
-				"type": "string",
-				"enum": [
-					"weekly",
-					"daily",
-					"hourly",
-					"30min",
-					"15min",
-					"10min",
-					"5min",
-					"1min"
-				]
-			},
-			"Block": {
-				"description": "Contains info about a block",
-				"properties": {
-					"hash": {
-						"type": "string"
-					},
-					"prevHash": {
-						"type": "string"
-					},
-					"nextHash": {
-						"type": "string"
-					},
-					"height": {
-						"type": "number",
-						"format": "double"
-					},
-					"confirmations": {
-						"type": "number",
-						"format": "double"
-					},
-					"timestamp": {
-						"type": "number",
-						"format": "double"
-					},
-					"txs": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"hash",
-					"height",
-					"confirmations",
-					"txs"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -292,7 +201,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"RawTx": {
+			"SendTxBody": {
 				"description": "Contains the serialized raw transaction hex",
 				"properties": {
 					"hex": {
@@ -334,10 +243,6 @@
 										"value": {
 											"pubkey": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa",
 											"balance": "284809805024198107",
-											"nonce": "0",
-											"unconfirmedBalance": "0",
-											"unconfirmedTxs": 0,
-											"txs": 21933,
 											"tokens": [
 												{
 													"type": "ERC20",
@@ -397,282 +302,6 @@
 							"type": "string"
 						},
 						"example": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
-					}
-				]
-			}
-		},
-		"/api/v1/balancehistory/{pubkey}": {
-			"get": {
-				"operationId": "GetBalanceHistory",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"items": {
-										"$ref": "#/components/schemas/BalanceChange"
-									},
-									"type": "array"
-								},
-								"examples": {
-									"Example 1": {
-										"value": [
-											{
-												"timestamp": 1492041600,
-												"amount": "0"
-											},
-											{
-												"timestamp": 1498694400,
-												"amount": "-485100000000000"
-											},
-											{
-												"timestamp": 1499904000,
-												"amount": "60012810000000000"
-											}
-										]
-									}
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Bad Request",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/BadRequestError"
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Validation Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ValidationError"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/InternalServerError"
-								}
-							}
-						}
-					}
-				},
-				"description": "Get balance history returns the balance history of a pubkey",
-				"tags": [
-					"v1"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"description": "account pubkey",
-						"in": "path",
-						"name": "pubkey",
-						"required": true,
-						"schema": {
-							"type": "string"
-						},
-						"example": "0xdfe345e0f82c4349e2745a488e24e192c5171a9c"
-					},
-					{
-						"description": "range to group by",
-						"in": "query",
-						"name": "interval",
-						"required": true,
-						"schema": {
-							"$ref": "#/components/schemas/Interval"
-						}
-					},
-					{
-						"description": "start date as unix timestamp",
-						"in": "query",
-						"name": "start",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"description": "end date as unix timestamp",
-						"in": "query",
-						"name": "end",
-						"required": false,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				]
-			}
-		},
-		"/api/v1/block/{block}": {
-			"get": {
-				"operationId": "GetBlock",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Block"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"hash": "0x84065cdb07d71de1e75e108c3f0053a0ac5c0ff5afbbc033063285088ef135f9",
-											"prevHash": "0xa42ea5229dbceb181f4e55ee4e5babee65993a41afa7605998b3d9d653c003ba",
-											"nextHash": "0x36176806b62e6682c28dbeef1ff82ed828e2bdbdbafee15153cae20b32263900",
-											"height": 11421116,
-											"confirmations": 45,
-											"timestamp": 1607549087,
-											"txs": 149
-										}
-									}
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Bad Request",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/BadRequestError"
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Validation Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ValidationError"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/InternalServerError"
-								}
-							}
-						}
-					}
-				},
-				"description": "Get block returns data about a block",
-				"tags": [
-					"v1"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"description": "height or hash",
-						"in": "path",
-						"name": "block",
-						"required": true,
-						"schema": {},
-						"examples": {
-							"Example 1": {
-								"value": "0x84065cdb07d71de1e75e108c3f0053a0ac5c0ff5afbbc033063285088ef135f9"
-							},
-							"Example 2": {
-								"value": "11421116"
-							}
-						}
-					}
-				]
-			}
-		},
-		"/api/v1/tx/{txid}": {
-			"get": {
-				"operationId": "GetTx",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/Tx"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"txid": "0xe9c1c7789da09af2ccf285fa175c6e37eb1d977e0b7c85e20de08043f9fe949b",
-											"status": "confirmed",
-											"from": "0x0a7A454141f86B93c76f131b7365B73027b086b7",
-											"to": "0xB27172C1d140c077ceF004832fcf4858e6AFbC76",
-											"blockHash": "0x84065cdb07d71de1e75e108c3f0053a0ac5c0ff5afbbc033063285088ef135f9",
-											"blockHeight": 11421116,
-											"confirmations": 2,
-											"timestamp": 1607549087,
-											"value": "764365700000000000",
-											"fee": "651000000000000"
-										}
-									}
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Bad Request",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/BadRequestError"
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Validation Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ValidationError"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/InternalServerError"
-								}
-							}
-						}
-					}
-				},
-				"description": "Get transaction returns data about a transaction",
-				"tags": [
-					"v1"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"description": "transaction id",
-						"in": "path",
-						"name": "txid",
-						"required": true,
-						"schema": {
-							"type": "string"
-						},
-						"example": "0xe9c1c7789da09af2ccf285fa175c6e37eb1d977e0b7c85e20de08043f9fe949b"
 					}
 				]
 			}
@@ -794,9 +423,9 @@
 				]
 			}
 		},
-		"/api/v1/estimategas": {
+		"/api/v1/estimate-gas": {
 			"get": {
-				"operationId": "GetEstimatedGas",
+				"operationId": "EstimateGas",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -809,16 +438,6 @@
 									"Example 1": {
 										"value": "26540"
 									}
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Bad Request",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/BadRequestError"
 								}
 							}
 						}
@@ -844,20 +463,21 @@
 						}
 					}
 				},
-				"description": "Get transaction specific estimated gas",
+				"description": "Get estimated gas cost for a transaction",
 				"tags": [
 					"v1"
 				],
 				"security": [],
 				"parameters": [
 					{
-						"description": "contract call data",
+						"description": "input data",
 						"in": "query",
 						"name": "data",
 						"required": true,
 						"schema": {
 							"type": "string"
-						}
+						},
+						"example": "0x"
 					},
 					{
 						"description": "to address",
@@ -866,32 +486,25 @@
 						"required": true,
 						"schema": {
 							"type": "string"
-						}
+						},
+						"example": "0x642F4Bda144C63f6DC47EE0fDfbac0a193e2eDb7"
 					},
 					{
-						"description": "value of the tx",
+						"description": "transaction value in ether",
 						"in": "query",
 						"name": "value",
 						"required": true,
 						"schema": {
 							"type": "string"
-						}
-					},
-					{
-						"description": "from address",
-						"in": "query",
-						"name": "from",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
+						},
+						"example": "0.0123"
 					}
 				]
 			}
 		},
-		"/api/v1/feeprice": {
+		"/api/v1/gas-price": {
 			"get": {
-				"operationId": "GetFeePrice",
+				"operationId": "GetGasPrice",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -902,7 +515,7 @@
 								},
 								"examples": {
 									"Example 1": {
-										"value": "60000000000"
+										"value": "123456789"
 									}
 								}
 							}
@@ -919,7 +532,7 @@
 						}
 					}
 				},
-				"description": "Get the current gas price from the node.",
+				"description": "Get the current gas price from the node",
 				"tags": [
 					"v1"
 				],
@@ -1059,10 +672,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/RawTx"
-							},
-							"example": {
-								"hex": "0xf86c0a85046c7cfe0083016dea94d1310c1e038bc12865d3d3997275b3e4737c6302880b503be34d9fe80080269fc7eaaa9c21f59adf8ad43ed66cf5ef9ee1c317bd4d32cd65401e7aaca47cfaa0387d79c65b90be6260d09dcfb780f29dd8133b9b1ceb20b83b7e442b4bfc30cb"
+								"$ref": "#/components/schemas/SendTxBody"
 							}
 						}
 					}

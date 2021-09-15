@@ -1,22 +1,17 @@
-import { ethers, BigNumber } from 'ethers'
+import { ethers } from 'ethers'
 import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import { TransactionRequest } from '@ethersproject/abstract-provider'
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import {
   ApiError,
   BadRequestError,
-  BalanceChange,
-  Block,
-  CommonAPI,
+  BaseAPI,
   InternalServerError,
-  Interval,
-  intervals,
-  RawTx,
-  Tx,
+  SendTxBody,
   TxHistory,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { EthereumBalance } from './models'
+import { EthereumAPI, EthereumBalance } from './models'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const MONGO_DBNAME = process.env.MONGO_DBNAME
@@ -33,11 +28,11 @@ if (NODE_ENV !== 'test') {
 }
 
 const blockbook = new Blockbook(INDEXER_URL)
-const jsonRpcProvider = new ethers.providers.JsonRpcProvider(RPC_URL)
+const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
 
 @Route('api/v1')
 @Tags('v1')
-export class Ethereum extends Controller implements CommonAPI {
+export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   /**
    * Get balance returns the balance of a pubkey
    *
@@ -50,10 +45,6 @@ export class Ethereum extends Controller implements CommonAPI {
   @Example<EthereumBalance>({
     pubkey: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
     balance: '284809805024198107',
-    nonce: '0',
-    unconfirmedBalance: '0',
-    unconfirmedTxs: 0,
-    txs: 21933,
     tokens: [{ type: 'ERC20', name: 'Tether USD', transfers: 1 }],
   })
   @Response<BadRequestError>(400, 'Bad Request')
@@ -67,158 +58,7 @@ export class Ethereum extends Controller implements CommonAPI {
       return {
         pubkey: data.address,
         balance: data.balance,
-        unconfirmedBalance: data.unconfirmedBalance,
-        unconfirmedTxs: data.unconfirmedTxs,
-        txs: data.txs,
-        nonce: data.nonce,
         tokens: data.tokens ?? [],
-      }
-    } catch (err) {
-      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
-    }
-  }
-
-  /**
-   * Get balance history returns the balance history of a pubkey
-   *
-   * @param {string} pubkey account pubkey
-   * @param {Interval} interval range to group by
-   * @param {number} [start] start date as unix timestamp
-   * @param {number} [end] end date as unix timestamp
-   *
-   * @returns {Promise<Array<BalanceChange>>} balance change history
-   *
-   * @example pubkey "0xdfe345e0f82c4349e2745a488e24e192c5171a9c"
-   */
-  @Example<Array<BalanceChange>>([
-    {
-      timestamp: 1492041600,
-      amount: '0',
-    },
-    {
-      timestamp: 1498694400,
-      amount: '-485100000000000',
-    },
-    {
-      timestamp: 1499904000,
-      amount: '60012810000000000',
-    },
-  ])
-  @Response<BadRequestError>(400, 'Bad Request')
-  @Response<ValidationError>(422, 'Validation Error')
-  @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('balancehistory/{pubkey}')
-  async getBalanceHistory(
-    @Path() pubkey: string,
-    @Query() interval: Interval,
-    @Query() start?: number,
-    @Query() end?: number
-  ): Promise<Array<BalanceChange>> {
-    try {
-      const balances = await blockbook.balanceHistory(pubkey, start, end, 'usd', intervals[interval])
-
-      return balances.map((b) => {
-        let amount = '0'
-
-        if (b.received !== '0') {
-          amount = b.received
-        }
-
-        if (b.sent !== '0') {
-          amount = `-${b.sent}`
-        }
-
-        return {
-          timestamp: b.time,
-          amount: amount,
-        }
-      })
-    } catch (err) {
-      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
-    }
-  }
-
-  /**
-   * Get block returns data about a block
-   *
-   * @param {(number|string)} block height or hash
-   *
-   * @returns {Promise<Block>} block data
-   *
-   * @example block "0x84065cdb07d71de1e75e108c3f0053a0ac5c0ff5afbbc033063285088ef135f9"
-   * @example block "11421116"
-   */
-  @Example<Block>({
-    hash: '0x84065cdb07d71de1e75e108c3f0053a0ac5c0ff5afbbc033063285088ef135f9',
-    prevHash: '0xa42ea5229dbceb181f4e55ee4e5babee65993a41afa7605998b3d9d653c003ba',
-    nextHash: '0x36176806b62e6682c28dbeef1ff82ed828e2bdbdbafee15153cae20b32263900',
-    height: 11421116,
-    confirmations: 45,
-    timestamp: 1607549087,
-    txs: 149,
-  })
-  @Response<BadRequestError>(400, 'Bad Request')
-  @Response<ValidationError>(422, 'Validation Error')
-  @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('block/{block}')
-  async getBlock(@Path() block: number | string): Promise<Block> {
-    try {
-      const blk = await blockbook.getBlock(String(block))
-
-      return {
-        hash: blk.hash,
-        prevHash: blk.previousBlockHash,
-        nextHash: blk.nextBlockHash,
-        height: blk.height,
-        confirmations: blk.confirmations,
-        timestamp: blk.time,
-        txs: blk.txCount,
-      }
-    } catch (err) {
-      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
-    }
-  }
-
-  /**
-   * Get transaction returns data about a transaction
-   *
-   * @param {string} txid transaction id
-   *
-   * @returns {Promise<Tx>} transaction data
-   *
-   * @example txid "0xe9c1c7789da09af2ccf285fa175c6e37eb1d977e0b7c85e20de08043f9fe949b"
-   */
-  @Example<Tx>({
-    txid: '0xe9c1c7789da09af2ccf285fa175c6e37eb1d977e0b7c85e20de08043f9fe949b',
-    status: 'confirmed',
-    from: '0x0a7A454141f86B93c76f131b7365B73027b086b7',
-    to: '0xB27172C1d140c077ceF004832fcf4858e6AFbC76',
-    blockHash: '0x84065cdb07d71de1e75e108c3f0053a0ac5c0ff5afbbc033063285088ef135f9',
-    blockHeight: 11421116,
-    confirmations: 2,
-    timestamp: 1607549087,
-    value: '764365700000000000',
-    fee: '651000000000000',
-  })
-  @Response<BadRequestError>(400, 'Bad Request')
-  @Response<ValidationError>(422, 'Validation Error')
-  @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('tx/{txid}')
-  async getTx(@Path() txid: string): Promise<Tx> {
-    try {
-      const tx = await blockbook.getTransaction(txid)
-
-      return {
-        txid: tx.txid,
-        status: tx.confirmations > 0 ? 'confirmed' : 'pending',
-        from: tx.vin[0].addresses?.[0] ?? 'coinbase',
-        to: tx.vout[0].addresses?.[0],
-        blockHash: tx.blockHash,
-        blockHeight: tx.blockHeight,
-        confirmations: tx.confirmations,
-        timestamp: tx.blockTime,
-        value: tx.tokenTransfers?.[0].value ?? tx.value,
-        fee: tx.fees ?? '0',
       }
     } catch (err) {
       throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
@@ -295,34 +135,31 @@ export class Ethereum extends Controller implements CommonAPI {
   }
 
   /**
-   * Get transaction specific estimated gas
+   * Get estimated gas cost for a transaction
    *
-   * @param {string} data contract call data
+   * @param {string} data input data
    * @param {string} to to address
    * @param {string} from from address
-   * @param {string} value value of the tx
-   * @returns {Promise<string>} estimated gas to be used for the transaction
+   * @param {string} value transaction value in ether
    *
+   * @returns {Promise<string>} estimated gas cost
+   *
+   * @example data "0x"
+   * @example to "0x642F4Bda144C63f6DC47EE0fDfbac0a193e2eDb7"
+   * @example value "0.0123"
    */
   @Example<string>('26540')
-  @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('/estimategas')
-  async getEstimatedGas(
-    @Query() data: string,
-    @Query() to: string,
-    @Query() value: string,
-    @Query() from: string
-  ): Promise<string> {
+  @Get('/estimate-gas')
+  async estimateGas(@Query() data: string, @Query() to: string, @Query() value: string): Promise<string> {
     try {
       const tx: TransactionRequest = {
         data,
         to,
-        from,
-        value: BigNumber.from(value).toHexString(),
+        value: ethers.utils.parseEther(value),
       }
-      const estimatedGas = await jsonRpcProvider.estimateGas(tx)
+      const estimatedGas = await provider.estimateGas(tx)
       return estimatedGas?.toString()
     } catch (err) {
       throw new ApiError('Internal Server Error', 500, JSON.stringify(err))
@@ -330,18 +167,17 @@ export class Ethereum extends Controller implements CommonAPI {
   }
 
   /**
-   * Get the current gas price from the node.
+   * Get the current gas price from the node
    *
    * @returns {Promise<string>} current gas price in wei
-   *
    */
-  @Example<string>('60000000000')
+  @Example<string>('123456789')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('/feeprice')
-  async getFeePrice(): Promise<string> {
+  @Get('/gas-price')
+  async getGasPrice(): Promise<string> {
     try {
-      const gasPrice = await jsonRpcProvider.getGasPrice()
-      return gasPrice?.toString()
+      const gasPrice = await provider.getGasPrice()
+      return gasPrice.toString()
     } catch (err) {
       throw new ApiError('Internal Server Error', 500, JSON.stringify(err))
     }
@@ -373,7 +209,7 @@ export class Ethereum extends Controller implements CommonAPI {
   /**
    * Sends raw transaction to be broadcast to the node.
    *
-   * @param {RawTx} rawTx serialized raw transaction hex
+   * @param {SendTxBody} body serialized raw transaction hex
    *
    * @returns {Promise<string>} transaction id
    *
@@ -386,9 +222,9 @@ export class Ethereum extends Controller implements CommonAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Post('send/')
-  async sendTx(@Body() rawTx: RawTx): Promise<string> {
+  async sendTx(@Body() body: SendTxBody): Promise<string> {
     try {
-      const { result } = await blockbook.sendTransaction(rawTx.hex)
+      const { result } = await blockbook.sendTransaction(body.hex)
       return result
     } catch (err) {
       throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
