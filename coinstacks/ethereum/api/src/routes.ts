@@ -26,19 +26,37 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Balance": {
+    "BitcoinAccountSpecific": {
+        "dataType": "refObject",
+        "properties": {
+            "utxos": {"dataType":"double","required":true},
+            "receiveIndex": {"dataType":"double","required":true},
+            "changeIndex": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "EthereumAccountSpecific": {
+        "dataType": "refObject",
+        "properties": {
+            "nonce": {"dataType":"double","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Account": {
         "dataType": "refObject",
         "properties": {
             "network": {"dataType":"string","required":true},
             "symbol": {"dataType":"string","required":true},
-            "address": {"dataType":"string","required":true},
+            "pubKey": {"dataType":"string","required":true},
             "balance": {"dataType":"string","required":true},
-            "totalReceived": {"dataType":"string"},
-            "totalSent": {"dataType":"string"},
             "unconfirmedBalance": {"dataType":"string","required":true},
             "unconfirmedTxs": {"dataType":"double","required":true},
             "txs": {"dataType":"double","required":true},
             "tokens": {"dataType":"array","array":{"ref":"Token"}},
+            "bitcoin": {"ref":"BitcoinAccountSpecific"},
+            "ethereum": {"ref":"EthereumAccountSpecific"},
         },
         "additionalProperties": false,
     },
@@ -165,7 +183,7 @@ export function RegisterRoutes(app: express.Router) {
     //      Please look into the "controllerPathGlobs" config option described in the readme: https://github.com/lukeautry/tsoa
     // ###########################################################################################################
         app.get('/api/v1/balance/:address',
-            function Ethereum_getBalance(request: any, response: any, next: any) {
+            function Ethereum_getAccount(request: any, response: any, next: any) {
             const args = {
                     address: {"in":"path","name":"address","required":true,"dataType":"string"},
             };
@@ -182,7 +200,7 @@ export function RegisterRoutes(app: express.Router) {
             const controller = new Ethereum();
 
 
-            const promise = controller.getBalance.apply(controller, validatedArgs as any);
+            const promise = controller.getAccount.apply(controller, validatedArgs as any);
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

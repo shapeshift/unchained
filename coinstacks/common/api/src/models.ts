@@ -1,4 +1,36 @@
 /**
+ * Contains Account information
+ */
+export interface Account {
+  network: string
+  symbol: string
+  pubKey: string
+  balance: string
+  unconfirmedBalance: string
+  unconfirmedTxs: number
+  txs: number
+  tokens?: Token[]
+  bitcoin?: BitcoinAccountSpecific
+  ethereum?: EthereumAccountSpecific
+}
+
+/**
+ * Contains Account information
+ */
+export interface BitcoinAccountSpecific {
+  utxos: number
+  receiveIndex: number
+  changeIndex: number
+}
+
+/**
+ * Contains ethereum specific transaction data
+ */
+export interface EthereumAccountSpecific {
+  nonce: number
+}
+
+/**
  * Contains info about a 400 Bad Request response
  */
 export interface BadRequestError {
@@ -84,7 +116,7 @@ export interface Block {
 /**
  * Contains ethereum specific transaction data
  */
-export interface EthereumSpecific {
+export interface EthereumTxSpecific {
   status: number
   nonce: number
   gasLimit: number
@@ -202,4 +234,22 @@ export interface Vout {
   addresses: Array<string>
   isAddress: boolean
   type?: string
+}
+
+/**
+ * Contains info about a Bitcoin Public Key
+ */
+export interface Xpub {
+  page: number
+  totalPages: number
+  itemsOnPage: number
+  address: string
+  balance: string
+  totalReceived: string
+  totalSent: string
+  unconfirmedBalance: string
+  unconfirmedTxs: number
+  txs: number
+  txids: string[]
+  usedTokens: number
 }
