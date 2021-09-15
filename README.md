@@ -114,6 +114,9 @@ Unchained is a multi-blockchain backend interface with three main goals:
   COINSTACK=ethereum docker-compose down -v
   ```
 
+Toubleshooting:
+    the api claims to be running on listening at http://localhost:3000; however in docker compose its actually running on http://localhost:31300
+
 ## Kubernetes Local Dev Instructions
 
 #### _Mirrors production kubernetes environment as closely as possible_

@@ -438,7 +438,7 @@
 		"securitySchemes": {}
 	},
 	"info": {
-		"title": "@shapeshiftoss/ethereum-api",
+		"title": "@shapeshiftoss/bitcoin-api",
 		"version": "0.1.1",
 		"license": {
 			"name": "MIT"
@@ -447,7 +447,7 @@
 	},
 	"openapi": "3.0.0",
 	"paths": {
-		"/api/v1/balance/{address}": {
+		"/api/v1/account/{pubKey}": {
 			"get": {
 				"operationId": "GetAccount",
 				"responses": {
@@ -461,20 +461,14 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"network": "ethereum",
-											"symbol": "ETH",
-											"pubKey": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa",
+											"network": "bitcoin",
+											"symbol": "BTC",
+											"pubKey": "336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU",
 											"balance": "284809805024198107",
 											"unconfirmedBalance": "0",
 											"unconfirmedTxs": 0,
 											"txs": 21933,
-											"tokens": [
-												{
-													"type": "ERC20",
-													"name": "Tether USD",
-													"transfers": 1
-												}
-											]
+											"tokens": []
 										}
 									}
 								}
@@ -519,13 +513,13 @@
 				"security": [],
 				"parameters": [
 					{
+						"description": "account address or xpub",
 						"in": "path",
-						"name": "address",
+						"name": "pubKey",
 						"required": true,
 						"schema": {
 							"type": "string"
-						},
-						"example": "336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU"
+						}
 					}
 				]
 			}
@@ -610,7 +604,7 @@
 						"schema": {
 							"type": "string"
 						},
-						"example": "0xdfe345e0f82c4349e2745a488e24e192c5171a9c"
+						"example": "1FH6ehAd5ZFXCM1cLGzHxK1s4dGdq1JusM"
 					},
 					{
 						"description": "range to group by",
@@ -658,7 +652,7 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"network": "ethereum",
+											"network": "bitcoin",
 											"hash": "0x84065cdb07d71de1e75e108c3f0053a0ac5c0ff5afbbc033063285088ef135f9",
 											"prevHash": "0xa42ea5229dbceb181f4e55ee4e5babee65993a41afa7605998b3d9d653c003ba",
 											"nextHash": "0x36176806b62e6682c28dbeef1ff82ed828e2bdbdbafee15153cae20b32263900",
@@ -741,8 +735,8 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"network": "ethereum",
-											"symbol": "ETH",
+											"network": "bitcoin",
+											"symbol": "BTC",
 											"txid": "0xe9c1c7789da09af2ccf285fa175c6e37eb1d977e0b7c85e20de08043f9fe949b",
 											"status": "confirmed",
 											"from": "0x0a7A454141f86B93c76f131b7365B73027b086b7",
@@ -828,8 +822,8 @@
 											"txs": 1,
 											"transactions": [
 												{
-													"network": "ethereum",
-													"symbol": "ETH",
+													"network": "bitcoin",
+													"symbol": "BTC",
 													"txid": "0x85092cf7a2ec34ba4109ef1215b5b486911163b9d3391e3508670229f4d866e7",
 													"status": "confirmed",
 													"from": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa",
@@ -1241,7 +1235,7 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"network": "ethereum",
+											"network": "bitcoin",
 											"txid": "0xb9d4ad5408f53eac8627f9ccd840ba8fb3469d55cd9cc2a11c6e049f1eef4edd"
 										}
 									}

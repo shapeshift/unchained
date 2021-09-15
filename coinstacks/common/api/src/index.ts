@@ -1,6 +1,6 @@
 import { Controller } from 'tsoa'
 import { RegistryDocument } from '@shapeshiftoss/common-mongo'
-import { Balance, BalanceChange, Block, RawTx, Tx, TxHistory, TxReceipt, Utxo } from './models'
+import { Account, BalanceChange, Block, RawTx, Tx, TxHistory, TxReceipt, Utxo } from './models'
 
 export * from './models'
 export * as middleware from './middleware'
@@ -39,14 +39,14 @@ export class ApiError extends Error {
  */
 export abstract class CommonAPI extends Controller {
   /**
-   * Get balance returns the balance of an address
+   * Get Account information for a given address/pubKey
    *
-   * @param {string} address account address
+   * @param {string} pubKey accounts address or an xpub
    *
-   * @returns {Promise<Balance>} account balance
+   * @returns {Promise<Account>} account information
    */
-  // @Get('balance/{address}')
-  abstract getBalance(address: string): Promise<Balance>
+  //  @Get('account/{address}')
+  abstract getAccount(pubKey: string): Promise<Account>
 
   /**
    * Get balance history returns the balance history of an address

@@ -1,0 +1,3 @@
+name: bitcoin
+runtime: nodejs
+description: coin stack indexer, ingestion and interface
