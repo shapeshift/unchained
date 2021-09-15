@@ -11,7 +11,7 @@ import {
   TxHistory,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { EthereumAPI, EthereumBalance } from './models'
+import { EthereumAPI, EthereumBalance, Token } from './models'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const MONGO_DBNAME = process.env.MONGO_DBNAME
@@ -34,7 +34,7 @@ const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
 @Tags('v1')
 export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   /**
-   * Get balance returns the balance of a pubkey
+   * Get balance of a pubkey
    *
    * @param pubkey account pubkey
    *
@@ -45,7 +45,16 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   @Example<EthereumBalance>({
     pubkey: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
     balance: '284809805024198107',
-    tokens: [{ type: 'ERC20', name: 'Tether USD', transfers: 1 }],
+    tokens: [
+      {
+        type: 'ERC20',
+        name: 'FOX',
+        contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
+        symbol: 'FOX',
+        decimals: 18,
+        balance: '1337',
+      },
+    ],
   })
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
@@ -55,10 +64,25 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
     try {
       const data = await blockbook.getAddress(pubkey, undefined, undefined, undefined, undefined, 'tokenBalances')
 
+      const tokens = (data.tokens ?? []).reduce<Array<Token>>((prev, token) => {
+        if (token.balance && token.contract && token.decimals && token.symbol) {
+          prev.push({
+            balance: token.balance,
+            contract: token.contract,
+            decimals: token.decimals,
+            name: token.name,
+            symbol: token.symbol,
+            type: token.type,
+          })
+        }
+
+        return prev
+      }, [])
+
       return {
         pubkey: data.address,
         balance: data.balance,
-        tokens: data.tokens ?? [],
+        tokens,
       }
     } catch (err) {
       throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
@@ -66,16 +90,16 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   }
 
   /**
-   * Get transaction history returns the transaction history of an address
+   * Get transaction history of a pubkey
    *
-   * @param {string} address account address
+   * @param {string} pubkey account pubkey
    * @param {number} [page] page number
-   * @param {number} [pageSize] page number
+   * @param {number} [pageSize] page size
    * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
    *
    * @returns {Promise<TxHistory>} transaction history
    *
-   * @example address "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
+   * @example pubkey "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
    */
   @Example<TxHistory>({
     page: 1,
@@ -99,15 +123,15 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('txs/{address}')
+  @Get('txs/{pubkey}')
   async getTxHistory(
-    @Path() address: string,
+    @Path() pubkey: string,
     @Query() page?: number,
     @Query() pageSize = 25,
     @Query() contract?: string
   ): Promise<TxHistory> {
     try {
-      const data = await blockbook.getAddress(address, page, pageSize, undefined, undefined, 'txs', contract)
+      const data = await blockbook.getAddress(pubkey, page, pageSize, undefined, undefined, 'txs', contract)
 
       return {
         page: data.page ?? 1,
@@ -135,11 +159,10 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   }
 
   /**
-   * Get estimated gas cost for a transaction
+   * Get the estimated gas cost of a transaction
    *
    * @param {string} data input data
    * @param {string} to to address
-   * @param {string} from from address
    * @param {string} value transaction value in ether
    *
    * @returns {Promise<string>} estimated gas cost
@@ -184,7 +207,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   }
 
   /**
-   * Returns the nonce of an address
+   * Get the current nonce of an address
    *
    * @param address account address
    *

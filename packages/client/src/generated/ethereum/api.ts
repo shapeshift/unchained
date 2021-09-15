@@ -35,145 +35,29 @@ export interface BadRequestError {
     error: string;
 }
 /**
- * Contains info about an addresses balance
+ * Contains additional ethereum specific balance info
  * @export
- * @interface Balance
+ * @interface EthereumBalance
  */
-export interface Balance {
+export interface EthereumBalance {
     /**
      * 
      * @type {string}
-     * @memberof Balance
+     * @memberof EthereumBalance
      */
-    network: string;
+    pubkey: string;
     /**
      * 
      * @type {string}
-     * @memberof Balance
-     */
-    symbol: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Balance
-     */
-    address: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Balance
+     * @memberof EthereumBalance
      */
     balance: string;
     /**
      * 
-     * @type {string}
-     * @memberof Balance
-     */
-    totalReceived?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Balance
-     */
-    totalSent?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Balance
-     */
-    unconfirmedBalance: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Balance
-     */
-    unconfirmedTxs: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Balance
-     */
-    txs: number;
-    /**
-     * 
      * @type {Array<Token>}
-     * @memberof Balance
+     * @memberof EthereumBalance
      */
     tokens: Array<Token>;
-}
-/**
- * Contains info about a balance change
- * @export
- * @interface BalanceChange
- */
-export interface BalanceChange {
-    /**
-     * 
-     * @type {number}
-     * @memberof BalanceChange
-     */
-    timestamp: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof BalanceChange
-     */
-    amount: string;
-}
-/**
- * Contains info about a block
- * @export
- * @interface Block
- */
-export interface Block {
-    /**
-     * 
-     * @type {string}
-     * @memberof Block
-     */
-    network: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Block
-     */
-    hash: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Block
-     */
-    prevHash?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Block
-     */
-    nextHash?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Block
-     */
-    height: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Block
-     */
-    confirmations: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Block
-     */
-    timestamp?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Block
-     */
-    txs: number;
 }
 /**
  * Contains info about a 500 Internal Server Error response
@@ -189,125 +73,20 @@ export interface InternalServerError {
     message: string;
 }
 /**
- * 
- * @export
- * @enum {string}
- */
-
-export enum Interval {
-    Weekly = 'weekly',
-    Daily = 'daily',
-    Hourly = 'hourly',
-    _30min = '30min',
-    _15min = '15min',
-    _10min = '10min',
-    _5min = '5min',
-    _1min = '1min'
-}
-
-/**
  * Contains the serialized raw transaction hex
  * @export
- * @interface RawTx
+ * @interface SendTxBody
  */
-export interface RawTx {
+export interface SendTxBody {
     /**
      * 
      * @type {string}
-     * @memberof RawTx
+     * @memberof SendTxBody
      */
     hex: string;
 }
 /**
- * Contains registry info and is used for un/registering addresses
- * @export
- * @interface RegistryDocument
- */
-export interface RegistryDocument {
-    /**
-     * 
-     * @type {string}
-     * @memberof RegistryDocument
-     */
-    client_id: string;
-    /**
-     * 
-     * @type {RegistryDocumentIngesterMeta}
-     * @memberof RegistryDocument
-     */
-    ingester_meta?: RegistryDocumentIngesterMeta;
-    /**
-     * 
-     * @type {RegistryDocumentRegistration}
-     * @memberof RegistryDocument
-     */
-    registration: RegistryDocumentRegistration;
-}
-/**
- * 
- * @export
- * @interface RegistryDocumentIngesterMeta
- */
-export interface RegistryDocumentIngesterMeta {
-    /**
-     * 
-     * @type {RegistryDocumentIngesterMetaSyncing}
-     * @memberof RegistryDocumentIngesterMeta
-     */
-    syncing?: RegistryDocumentIngesterMetaSyncing;
-    /**
-     * 
-     * @type {number}
-     * @memberof RegistryDocumentIngesterMeta
-     */
-    block?: number;
-}
-/**
- * 
- * @export
- * @interface RegistryDocumentIngesterMetaSyncing
- */
-export interface RegistryDocumentIngesterMetaSyncing {
-    /**
-     * 
-     * @type {number}
-     * @memberof RegistryDocumentIngesterMetaSyncing
-     */
-    endTime: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof RegistryDocumentIngesterMetaSyncing
-     */
-    startTime: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof RegistryDocumentIngesterMetaSyncing
-     */
-    key?: string;
-}
-/**
- * 
- * @export
- * @interface RegistryDocumentRegistration
- */
-export interface RegistryDocumentRegistration {
-    /**
-     * 
-     * @type {string}
-     * @memberof RegistryDocumentRegistration
-     */
-    pubkey?: string;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof RegistryDocumentRegistration
-     */
-    addresses?: Array<string>;
-}
-/**
- * Contains token info from a given address
+ * Contains info about a token including balance for an address
  * @export
  * @interface Token
  */
@@ -329,49 +108,25 @@ export interface Token {
      * @type {string}
      * @memberof Token
      */
-    path?: string;
+    contract: string;
     /**
      * 
      * @type {string}
      * @memberof Token
      */
-    contract?: string;
+    symbol: string;
     /**
      * 
      * @type {number}
      * @memberof Token
      */
-    transfers: number;
+    decimals: number;
     /**
      * 
      * @type {string}
      * @memberof Token
      */
-    symbol?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof Token
-     */
-    decimals?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof Token
-     */
-    balance?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Token
-     */
-    totalReceived?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Token
-     */
-    totalSent?: string;
+    balance: string;
 }
 /**
  * Contains info about a transaction
@@ -379,18 +134,6 @@ export interface Token {
  * @interface Tx
  */
 export interface Tx {
-    /**
-     * 
-     * @type {string}
-     * @memberof Tx
-     */
-    network: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Tx
-     */
-    symbol: string;
     /**
      * 
      * @type {string}
@@ -484,25 +227,6 @@ export interface TxHistory {
     transactions: Array<Tx>;
 }
 /**
- * Contains info about a successfully sent transaction
- * @export
- * @interface TxReceipt
- */
-export interface TxReceipt {
-    /**
-     * 
-     * @type {string}
-     * @memberof TxReceipt
-     */
-    network: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof TxReceipt
-     */
-    txid: string;
-}
-/**
  * Contains info about a 422 Validation Error response
  * @export
  * @interface ValidationError
@@ -538,140 +262,21 @@ export enum ValidationErrorMessageEnum {
 export const V1ApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Get balance returns the balance of an address
-         * @param {string} address account address
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getBalance: async (address: string, options: any = {}): Promise<RequestArgs> => {
-            // verify required parameter 'address' is not null or undefined
-            assertParamExists('getBalance', 'address', address)
-            const localVarPath = `/api/v1/balance/{address}`
-                .replace(`{${"address"}}`, encodeURIComponent(String(address)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Get balance history returns the balance history of an address
-         * @param {string} address account address
-         * @param {Interval} interval range to group by
-         * @param {number} [start] start date as unix timestamp
-         * @param {number} [end] end date as unix timestamp
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getBalanceHistory: async (address: string, interval: Interval, start?: number, end?: number, options: any = {}): Promise<RequestArgs> => {
-            // verify required parameter 'address' is not null or undefined
-            assertParamExists('getBalanceHistory', 'address', address)
-            // verify required parameter 'interval' is not null or undefined
-            assertParamExists('getBalanceHistory', 'interval', interval)
-            const localVarPath = `/api/v1/balancehistory/{address}`
-                .replace(`{${"address"}}`, encodeURIComponent(String(address)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            if (interval !== undefined) {
-                localVarQueryParameter['interval'] = interval;
-            }
-
-            if (start !== undefined) {
-                localVarQueryParameter['start'] = start;
-            }
-
-            if (end !== undefined) {
-                localVarQueryParameter['end'] = end;
-            }
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Get block returns data about a block
-         * @param {any} block height or hash
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getBlock: async (block: any, options: any = {}): Promise<RequestArgs> => {
-            // verify required parameter 'block' is not null or undefined
-            assertParamExists('getBlock', 'block', block)
-            const localVarPath = `/api/v1/block/{block}`
-                .replace(`{${"block"}}`, encodeURIComponent(String(block)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Get transaction specific estimated gas
-         * @param {string} data contract call data
+         * Get the estimated gas cost of a transaction
+         * @param {string} data input data
          * @param {string} to to address
-         * @param {string} value value of the tx
-         * @param {string} from from address
+         * @param {string} value transaction value in ether
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getEstimatedGas: async (data: string, to: string, value: string, from: string, options: any = {}): Promise<RequestArgs> => {
+        estimateGas: async (data: string, to: string, value: string, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'data' is not null or undefined
-            assertParamExists('getEstimatedGas', 'data', data)
+            assertParamExists('estimateGas', 'data', data)
             // verify required parameter 'to' is not null or undefined
-            assertParamExists('getEstimatedGas', 'to', to)
+            assertParamExists('estimateGas', 'to', to)
             // verify required parameter 'value' is not null or undefined
-            assertParamExists('getEstimatedGas', 'value', value)
-            // verify required parameter 'from' is not null or undefined
-            assertParamExists('getEstimatedGas', 'from', from)
-            const localVarPath = `/api/v1/estimategas`;
+            assertParamExists('estimateGas', 'value', value)
+            const localVarPath = `/api/v1/estimate-gas`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -695,10 +300,6 @@ export const V1ApiAxiosParamCreator = function (configuration?: Configuration) {
                 localVarQueryParameter['value'] = value;
             }
 
-            if (from !== undefined) {
-                localVarQueryParameter['from'] = from;
-            }
-
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
@@ -711,12 +312,16 @@ export const V1ApiAxiosParamCreator = function (configuration?: Configuration) {
             };
         },
         /**
-         * Get the current gas price from the node.
+         * Get balance of a pubkey
+         * @param {string} pubkey account pubkey
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getFeePrice: async (options: any = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v1/feeprice`;
+        getBalance: async (pubkey: string, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pubkey' is not null or undefined
+            assertParamExists('getBalance', 'pubkey', pubkey)
+            const localVarPath = `/api/v1/balance/{pubkey}`
+                .replace(`{${"pubkey"}}`, encodeURIComponent(String(pubkey)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -740,7 +345,36 @@ export const V1ApiAxiosParamCreator = function (configuration?: Configuration) {
             };
         },
         /**
-         * Returns the nonce of an address
+         * Get the current gas price from the node
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGasPrice: async (options: any = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/gas-price`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get the current nonce of an address
          * @param {string} address account address
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -773,52 +407,19 @@ export const V1ApiAxiosParamCreator = function (configuration?: Configuration) {
             };
         },
         /**
-         * Get transaction returns data about a transaction
-         * @param {string} txid transaction id
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getTx: async (txid: string, options: any = {}): Promise<RequestArgs> => {
-            // verify required parameter 'txid' is not null or undefined
-            assertParamExists('getTx', 'txid', txid)
-            const localVarPath = `/api/v1/tx/{txid}`
-                .replace(`{${"txid"}}`, encodeURIComponent(String(txid)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Get transaction history returns the transaction history of an address
-         * @param {string} address account address
+         * Get transaction history of a pubkey
+         * @param {string} pubkey account pubkey
          * @param {number} [page] page number
-         * @param {number} [pageSize] page number
+         * @param {number} [pageSize] page size
          * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getTxHistory: async (address: string, page?: number, pageSize?: number, contract?: string, options: any = {}): Promise<RequestArgs> => {
-            // verify required parameter 'address' is not null or undefined
-            assertParamExists('getTxHistory', 'address', address)
-            const localVarPath = `/api/v1/txs/{address}`
-                .replace(`{${"address"}}`, encodeURIComponent(String(address)));
+        getTxHistory: async (pubkey: string, page?: number, pageSize?: number, contract?: string, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pubkey' is not null or undefined
+            assertParamExists('getTxHistory', 'pubkey', pubkey)
+            const localVarPath = `/api/v1/txs/{pubkey}`
+                .replace(`{${"pubkey"}}`, encodeURIComponent(String(pubkey)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -854,49 +455,14 @@ export const V1ApiAxiosParamCreator = function (configuration?: Configuration) {
             };
         },
         /**
-         * Register account details for tracking incoming pending transactions and newly confirmed transactions  Example 1: Register a pubkey  Example 2: Register an address for pubkey  Example 3: Register a single address
-         * @param {RegistryDocument} registryDocument Contains registry info for registering addresses and pubkeys for a client id.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        register: async (registryDocument: RegistryDocument, options: any = {}): Promise<RequestArgs> => {
-            // verify required parameter 'registryDocument' is not null or undefined
-            assertParamExists('register', 'registryDocument', registryDocument)
-            const localVarPath = `/api/v1/register`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(registryDocument, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
          * Sends raw transaction to be broadcast to the node.
-         * @param {RawTx} rawTx serialized raw transaction hex
+         * @param {SendTxBody} sendTxBody serialized raw transaction hex
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        sendTx: async (rawTx: RawTx, options: any = {}): Promise<RequestArgs> => {
-            // verify required parameter 'rawTx' is not null or undefined
-            assertParamExists('sendTx', 'rawTx', rawTx)
+        sendTx: async (sendTxBody: SendTxBody, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'sendTxBody' is not null or undefined
+            assertParamExists('sendTx', 'sendTxBody', sendTxBody)
             const localVarPath = `/api/v1/send`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -916,42 +482,7 @@ export const V1ApiAxiosParamCreator = function (configuration?: Configuration) {
             setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(rawTx, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Unregister accounts to stop tracking incoming pending transactions and newly confirmed transactions  Example 1: Unregister a pubkey and all associated addresses  Example 2: Unregister a single address from an account
-         * @param {RegistryDocument} registryDocument Contains registry info for unregistering addresses or pubkeys for a client id.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        unregister: async (registryDocument: RegistryDocument, options: any = {}): Promise<RequestArgs> => {
-            // verify required parameter 'registryDocument' is not null or undefined
-            assertParamExists('unregister', 'registryDocument', registryDocument)
-            const localVarPath = `/api/v1/unregister`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(registryDocument, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(sendTxBody, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -969,62 +500,38 @@ export const V1ApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = V1ApiAxiosParamCreator(configuration)
     return {
         /**
-         * Get balance returns the balance of an address
-         * @param {string} address account address
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getBalance(address: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Balance>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getBalance(address, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * Get balance history returns the balance history of an address
-         * @param {string} address account address
-         * @param {Interval} interval range to group by
-         * @param {number} [start] start date as unix timestamp
-         * @param {number} [end] end date as unix timestamp
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getBalanceHistory(address: string, interval: Interval, start?: number, end?: number, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<BalanceChange>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getBalanceHistory(address, interval, start, end, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * Get block returns data about a block
-         * @param {any} block height or hash
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getBlock(block: any, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Block>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getBlock(block, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * Get transaction specific estimated gas
-         * @param {string} data contract call data
+         * Get the estimated gas cost of a transaction
+         * @param {string} data input data
          * @param {string} to to address
-         * @param {string} value value of the tx
-         * @param {string} from from address
+         * @param {string} value transaction value in ether
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getEstimatedGas(data: string, to: string, value: string, from: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getEstimatedGas(data, to, value, from, options);
+        async estimateGas(data: string, to: string, value: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.estimateGas(data, to, value, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Get the current gas price from the node.
+         * Get balance of a pubkey
+         * @param {string} pubkey account pubkey
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getFeePrice(options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getFeePrice(options);
+        async getBalance(pubkey: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<EthereumBalance>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getBalance(pubkey, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Returns the nonce of an address
+         * Get the current gas price from the node
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getGasPrice(options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGasPrice(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Get the current nonce of an address
          * @param {string} address account address
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -1034,56 +541,26 @@ export const V1ApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Get transaction returns data about a transaction
-         * @param {string} txid transaction id
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getTx(txid: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Tx>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getTx(txid, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * Get transaction history returns the transaction history of an address
-         * @param {string} address account address
+         * Get transaction history of a pubkey
+         * @param {string} pubkey account pubkey
          * @param {number} [page] page number
-         * @param {number} [pageSize] page number
+         * @param {number} [pageSize] page size
          * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getTxHistory(address: string, page?: number, pageSize?: number, contract?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TxHistory>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getTxHistory(address, page, pageSize, contract, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * Register account details for tracking incoming pending transactions and newly confirmed transactions  Example 1: Register a pubkey  Example 2: Register an address for pubkey  Example 3: Register a single address
-         * @param {RegistryDocument} registryDocument Contains registry info for registering addresses and pubkeys for a client id.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async register(registryDocument: RegistryDocument, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.register(registryDocument, options);
+        async getTxHistory(pubkey: string, page?: number, pageSize?: number, contract?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TxHistory>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getTxHistory(pubkey, page, pageSize, contract, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
          * Sends raw transaction to be broadcast to the node.
-         * @param {RawTx} rawTx serialized raw transaction hex
+         * @param {SendTxBody} sendTxBody serialized raw transaction hex
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async sendTx(rawTx: RawTx, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TxReceipt>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.sendTx(rawTx, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * Unregister accounts to stop tracking incoming pending transactions and newly confirmed transactions  Example 1: Unregister a pubkey and all associated addresses  Example 2: Unregister a single address from an account
-         * @param {RegistryDocument} registryDocument Contains registry info for unregistering addresses or pubkeys for a client id.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async unregister(registryDocument: RegistryDocument, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.unregister(registryDocument, options);
+        async sendTx(sendTxBody: SendTxBody, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.sendTx(sendTxBody, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     }
@@ -1097,57 +574,35 @@ export const V1ApiFactory = function (configuration?: Configuration, basePath?: 
     const localVarFp = V1ApiFp(configuration)
     return {
         /**
-         * Get balance returns the balance of an address
-         * @param {string} address account address
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getBalance(address: string, options?: any): AxiosPromise<Balance> {
-            return localVarFp.getBalance(address, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Get balance history returns the balance history of an address
-         * @param {string} address account address
-         * @param {Interval} interval range to group by
-         * @param {number} [start] start date as unix timestamp
-         * @param {number} [end] end date as unix timestamp
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getBalanceHistory(address: string, interval: Interval, start?: number, end?: number, options?: any): AxiosPromise<Array<BalanceChange>> {
-            return localVarFp.getBalanceHistory(address, interval, start, end, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Get block returns data about a block
-         * @param {any} block height or hash
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getBlock(block: any, options?: any): AxiosPromise<Block> {
-            return localVarFp.getBlock(block, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Get transaction specific estimated gas
-         * @param {string} data contract call data
+         * Get the estimated gas cost of a transaction
+         * @param {string} data input data
          * @param {string} to to address
-         * @param {string} value value of the tx
-         * @param {string} from from address
+         * @param {string} value transaction value in ether
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getEstimatedGas(data: string, to: string, value: string, from: string, options?: any): AxiosPromise<string> {
-            return localVarFp.getEstimatedGas(data, to, value, from, options).then((request) => request(axios, basePath));
+        estimateGas(data: string, to: string, value: string, options?: any): AxiosPromise<string> {
+            return localVarFp.estimateGas(data, to, value, options).then((request) => request(axios, basePath));
         },
         /**
-         * Get the current gas price from the node.
+         * Get balance of a pubkey
+         * @param {string} pubkey account pubkey
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getFeePrice(options?: any): AxiosPromise<string> {
-            return localVarFp.getFeePrice(options).then((request) => request(axios, basePath));
+        getBalance(pubkey: string, options?: any): AxiosPromise<EthereumBalance> {
+            return localVarFp.getBalance(pubkey, options).then((request) => request(axios, basePath));
         },
         /**
-         * Returns the nonce of an address
+         * Get the current gas price from the node
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getGasPrice(options?: any): AxiosPromise<string> {
+            return localVarFp.getGasPrice(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get the current nonce of an address
          * @param {string} address account address
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -1156,55 +611,56 @@ export const V1ApiFactory = function (configuration?: Configuration, basePath?: 
             return localVarFp.getNonce(address, options).then((request) => request(axios, basePath));
         },
         /**
-         * Get transaction returns data about a transaction
-         * @param {string} txid transaction id
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getTx(txid: string, options?: any): AxiosPromise<Tx> {
-            return localVarFp.getTx(txid, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Get transaction history returns the transaction history of an address
-         * @param {string} address account address
+         * Get transaction history of a pubkey
+         * @param {string} pubkey account pubkey
          * @param {number} [page] page number
-         * @param {number} [pageSize] page number
+         * @param {number} [pageSize] page size
          * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getTxHistory(address: string, page?: number, pageSize?: number, contract?: string, options?: any): AxiosPromise<TxHistory> {
-            return localVarFp.getTxHistory(address, page, pageSize, contract, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Register account details for tracking incoming pending transactions and newly confirmed transactions  Example 1: Register a pubkey  Example 2: Register an address for pubkey  Example 3: Register a single address
-         * @param {RegistryDocument} registryDocument Contains registry info for registering addresses and pubkeys for a client id.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        register(registryDocument: RegistryDocument, options?: any): AxiosPromise<void> {
-            return localVarFp.register(registryDocument, options).then((request) => request(axios, basePath));
+        getTxHistory(pubkey: string, page?: number, pageSize?: number, contract?: string, options?: any): AxiosPromise<TxHistory> {
+            return localVarFp.getTxHistory(pubkey, page, pageSize, contract, options).then((request) => request(axios, basePath));
         },
         /**
          * Sends raw transaction to be broadcast to the node.
-         * @param {RawTx} rawTx serialized raw transaction hex
+         * @param {SendTxBody} sendTxBody serialized raw transaction hex
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        sendTx(rawTx: RawTx, options?: any): AxiosPromise<TxReceipt> {
-            return localVarFp.sendTx(rawTx, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Unregister accounts to stop tracking incoming pending transactions and newly confirmed transactions  Example 1: Unregister a pubkey and all associated addresses  Example 2: Unregister a single address from an account
-         * @param {RegistryDocument} registryDocument Contains registry info for unregistering addresses or pubkeys for a client id.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        unregister(registryDocument: RegistryDocument, options?: any): AxiosPromise<void> {
-            return localVarFp.unregister(registryDocument, options).then((request) => request(axios, basePath));
+        sendTx(sendTxBody: SendTxBody, options?: any): AxiosPromise<string> {
+            return localVarFp.sendTx(sendTxBody, options).then((request) => request(axios, basePath));
         },
     };
 };
+
+/**
+ * Request parameters for estimateGas operation in V1Api.
+ * @export
+ * @interface V1ApiEstimateGasRequest
+ */
+export interface V1ApiEstimateGasRequest {
+    /**
+     * input data
+     * @type {string}
+     * @memberof V1ApiEstimateGas
+     */
+    readonly data: string
+
+    /**
+     * to address
+     * @type {string}
+     * @memberof V1ApiEstimateGas
+     */
+    readonly to: string
+
+    /**
+     * transaction value in ether
+     * @type {string}
+     * @memberof V1ApiEstimateGas
+     */
+    readonly value: string
+}
 
 /**
  * Request parameters for getBalance operation in V1Api.
@@ -1213,95 +669,11 @@ export const V1ApiFactory = function (configuration?: Configuration, basePath?: 
  */
 export interface V1ApiGetBalanceRequest {
     /**
-     * account address
+     * account pubkey
      * @type {string}
      * @memberof V1ApiGetBalance
      */
-    readonly address: string
-}
-
-/**
- * Request parameters for getBalanceHistory operation in V1Api.
- * @export
- * @interface V1ApiGetBalanceHistoryRequest
- */
-export interface V1ApiGetBalanceHistoryRequest {
-    /**
-     * account address
-     * @type {string}
-     * @memberof V1ApiGetBalanceHistory
-     */
-    readonly address: string
-
-    /**
-     * range to group by
-     * @type {Interval}
-     * @memberof V1ApiGetBalanceHistory
-     */
-    readonly interval: Interval
-
-    /**
-     * start date as unix timestamp
-     * @type {number}
-     * @memberof V1ApiGetBalanceHistory
-     */
-    readonly start?: number
-
-    /**
-     * end date as unix timestamp
-     * @type {number}
-     * @memberof V1ApiGetBalanceHistory
-     */
-    readonly end?: number
-}
-
-/**
- * Request parameters for getBlock operation in V1Api.
- * @export
- * @interface V1ApiGetBlockRequest
- */
-export interface V1ApiGetBlockRequest {
-    /**
-     * height or hash
-     * @type {any}
-     * @memberof V1ApiGetBlock
-     */
-    readonly block: any
-}
-
-/**
- * Request parameters for getEstimatedGas operation in V1Api.
- * @export
- * @interface V1ApiGetEstimatedGasRequest
- */
-export interface V1ApiGetEstimatedGasRequest {
-    /**
-     * contract call data
-     * @type {string}
-     * @memberof V1ApiGetEstimatedGas
-     */
-    readonly data: string
-
-    /**
-     * to address
-     * @type {string}
-     * @memberof V1ApiGetEstimatedGas
-     */
-    readonly to: string
-
-    /**
-     * value of the tx
-     * @type {string}
-     * @memberof V1ApiGetEstimatedGas
-     */
-    readonly value: string
-
-    /**
-     * from address
-     * @type {string}
-     * @memberof V1ApiGetEstimatedGas
-     */
-    readonly from: string
+    readonly pubkey: string
 }
 
 /**
@@ -1319,31 +691,17 @@ export interface V1ApiGetNonceRequest {
 }
 
 /**
- * Request parameters for getTx operation in V1Api.
- * @export
- * @interface V1ApiGetTxRequest
- */
-export interface V1ApiGetTxRequest {
-    /**
-     * transaction id
-     * @type {string}
-     * @memberof V1ApiGetTx
-     */
-    readonly txid: string
-}
-
-/**
  * Request parameters for getTxHistory operation in V1Api.
  * @export
  * @interface V1ApiGetTxHistoryRequest
  */
 export interface V1ApiGetTxHistoryRequest {
     /**
-     * account address
+     * account pubkey
      * @type {string}
      * @memberof V1ApiGetTxHistory
      */
-    readonly address: string
+    readonly pubkey: string
 
     /**
      * page number
@@ -1353,7 +711,7 @@ export interface V1ApiGetTxHistoryRequest {
     readonly page?: number
 
     /**
-     * page number
+     * page size
      * @type {number}
      * @memberof V1ApiGetTxHistory
      */
@@ -1368,20 +726,6 @@ export interface V1ApiGetTxHistoryRequest {
 }
 
 /**
- * Request parameters for register operation in V1Api.
- * @export
- * @interface V1ApiRegisterRequest
- */
-export interface V1ApiRegisterRequest {
-    /**
-     * Contains registry info for registering addresses and pubkeys for a client id.
-     * @type {RegistryDocument}
-     * @memberof V1ApiRegister
-     */
-    readonly registryDocument: RegistryDocument
-}
-
-/**
  * Request parameters for sendTx operation in V1Api.
  * @export
  * @interface V1ApiSendTxRequest
@@ -1389,24 +733,10 @@ export interface V1ApiRegisterRequest {
 export interface V1ApiSendTxRequest {
     /**
      * serialized raw transaction hex
-     * @type {RawTx}
+     * @type {SendTxBody}
      * @memberof V1ApiSendTx
      */
-    readonly rawTx: RawTx
-}
-
-/**
- * Request parameters for unregister operation in V1Api.
- * @export
- * @interface V1ApiUnregisterRequest
- */
-export interface V1ApiUnregisterRequest {
-    /**
-     * Contains registry info for unregistering addresses or pubkeys for a client id.
-     * @type {RegistryDocument}
-     * @memberof V1ApiUnregister
-     */
-    readonly registryDocument: RegistryDocument
+    readonly sendTxBody: SendTxBody
 }
 
 /**
@@ -1417,61 +747,39 @@ export interface V1ApiUnregisterRequest {
  */
 export class V1Api extends BaseAPI {
     /**
-     * Get balance returns the balance of an address
+     * Get the estimated gas cost of a transaction
+     * @param {V1ApiEstimateGasRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof V1Api
+     */
+    public estimateGas(requestParameters: V1ApiEstimateGasRequest, options?: any) {
+        return V1ApiFp(this.configuration).estimateGas(requestParameters.data, requestParameters.to, requestParameters.value, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get balance of a pubkey
      * @param {V1ApiGetBalanceRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof V1Api
      */
     public getBalance(requestParameters: V1ApiGetBalanceRequest, options?: any) {
-        return V1ApiFp(this.configuration).getBalance(requestParameters.address, options).then((request) => request(this.axios, this.basePath));
+        return V1ApiFp(this.configuration).getBalance(requestParameters.pubkey, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * Get balance history returns the balance history of an address
-     * @param {V1ApiGetBalanceHistoryRequest} requestParameters Request parameters.
+     * Get the current gas price from the node
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof V1Api
      */
-    public getBalanceHistory(requestParameters: V1ApiGetBalanceHistoryRequest, options?: any) {
-        return V1ApiFp(this.configuration).getBalanceHistory(requestParameters.address, requestParameters.interval, requestParameters.start, requestParameters.end, options).then((request) => request(this.axios, this.basePath));
+    public getGasPrice(options?: any) {
+        return V1ApiFp(this.configuration).getGasPrice(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * Get block returns data about a block
-     * @param {V1ApiGetBlockRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof V1Api
-     */
-    public getBlock(requestParameters: V1ApiGetBlockRequest, options?: any) {
-        return V1ApiFp(this.configuration).getBlock(requestParameters.block, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Get transaction specific estimated gas
-     * @param {V1ApiGetEstimatedGasRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof V1Api
-     */
-    public getEstimatedGas(requestParameters: V1ApiGetEstimatedGasRequest, options?: any) {
-        return V1ApiFp(this.configuration).getEstimatedGas(requestParameters.data, requestParameters.to, requestParameters.value, requestParameters.from, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Get the current gas price from the node.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof V1Api
-     */
-    public getFeePrice(options?: any) {
-        return V1ApiFp(this.configuration).getFeePrice(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Returns the nonce of an address
+     * Get the current nonce of an address
      * @param {V1ApiGetNonceRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1482,36 +790,14 @@ export class V1Api extends BaseAPI {
     }
 
     /**
-     * Get transaction returns data about a transaction
-     * @param {V1ApiGetTxRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof V1Api
-     */
-    public getTx(requestParameters: V1ApiGetTxRequest, options?: any) {
-        return V1ApiFp(this.configuration).getTx(requestParameters.txid, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Get transaction history returns the transaction history of an address
+     * Get transaction history of a pubkey
      * @param {V1ApiGetTxHistoryRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof V1Api
      */
     public getTxHistory(requestParameters: V1ApiGetTxHistoryRequest, options?: any) {
-        return V1ApiFp(this.configuration).getTxHistory(requestParameters.address, requestParameters.page, requestParameters.pageSize, requestParameters.contract, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Register account details for tracking incoming pending transactions and newly confirmed transactions  Example 1: Register a pubkey  Example 2: Register an address for pubkey  Example 3: Register a single address
-     * @param {V1ApiRegisterRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof V1Api
-     */
-    public register(requestParameters: V1ApiRegisterRequest, options?: any) {
-        return V1ApiFp(this.configuration).register(requestParameters.registryDocument, options).then((request) => request(this.axios, this.basePath));
+        return V1ApiFp(this.configuration).getTxHistory(requestParameters.pubkey, requestParameters.page, requestParameters.pageSize, requestParameters.contract, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -1522,18 +808,7 @@ export class V1Api extends BaseAPI {
      * @memberof V1Api
      */
     public sendTx(requestParameters: V1ApiSendTxRequest, options?: any) {
-        return V1ApiFp(this.configuration).sendTx(requestParameters.rawTx, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Unregister accounts to stop tracking incoming pending transactions and newly confirmed transactions  Example 1: Unregister a pubkey and all associated addresses  Example 2: Unregister a single address from an account
-     * @param {V1ApiUnregisterRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof V1Api
-     */
-    public unregister(requestParameters: V1ApiUnregisterRequest, options?: any) {
-        return V1ApiFp(this.configuration).unregister(requestParameters.registryDocument, options).then((request) => request(this.axios, this.basePath));
+        return V1ApiFp(this.configuration).sendTx(requestParameters.sendTxBody, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

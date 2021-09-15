@@ -2,26 +2,22 @@
 import { Balance } from '../../../common/api/src'
 
 /**
- * Contains info about tokens held by an address
+ * Contains info about a token including balance for an address
  */
 export interface Token {
   type: string
   name: string
-  path?: string
-  contract?: string
-  transfers: number
-  symbol?: string
-  decimals?: number
-  balance?: string
-  totalReceived?: string
-  totalSent?: string
+  contract: string
+  symbol: string
+  decimals: number
+  balance: string
 }
 
 /**
  * Contains additional ethereum specific balance info
  */
 export interface EthereumBalance extends Balance {
-  tokens: Token[]
+  tokens: Array<Token>
 }
 
 /**
@@ -29,7 +25,7 @@ export interface EthereumBalance extends Balance {
  */
 export interface EthereumAPI {
   /**
-   * Get estimated gas cost for a transaction
+   * Get the estimated gas cost of a transaction
    *
    * @param {string} data input data
    * @param {string} to to address
@@ -49,7 +45,7 @@ export interface EthereumAPI {
   getGasPrice(): Promise<string>
 
   /**
-   * Returns the nonce of an address
+   * Get the current nonce of an address
    *
    * @param address account address
    *

@@ -7,7 +7,7 @@
 		"responses": {},
 		"schemas": {
 			"Token": {
-				"description": "Contains info about tokens held by an address",
+				"description": "Contains info about a token including balance for an address",
 				"properties": {
 					"type": {
 						"type": "string"
@@ -15,15 +15,8 @@
 					"name": {
 						"type": "string"
 					},
-					"path": {
-						"type": "string"
-					},
 					"contract": {
 						"type": "string"
-					},
-					"transfers": {
-						"type": "number",
-						"format": "double"
 					},
 					"symbol": {
 						"type": "string"
@@ -34,18 +27,15 @@
 					},
 					"balance": {
 						"type": "string"
-					},
-					"totalReceived": {
-						"type": "string"
-					},
-					"totalSent": {
-						"type": "string"
 					}
 				},
 				"required": [
 					"type",
 					"name",
-					"transfers"
+					"contract",
+					"symbol",
+					"decimals",
+					"balance"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -246,8 +236,11 @@
 											"tokens": [
 												{
 													"type": "ERC20",
-													"name": "Tether USD",
-													"transfers": 1
+													"name": "FOX",
+													"contract": "0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d",
+													"symbol": "FOX",
+													"decimals": 18,
+													"balance": "1337"
 												}
 											]
 										}
@@ -287,7 +280,7 @@
 						}
 					}
 				},
-				"description": "Get balance returns the balance of a pubkey",
+				"description": "Get balance of a pubkey",
 				"tags": [
 					"v1"
 				],
@@ -306,7 +299,7 @@
 				]
 			}
 		},
-		"/api/v1/txs/{address}": {
+		"/api/v1/txs/{pubkey}": {
 			"get": {
 				"operationId": "GetTxHistory",
 				"responses": {
@@ -374,16 +367,16 @@
 						}
 					}
 				},
-				"description": "Get transaction history returns the transaction history of an address",
+				"description": "Get transaction history of a pubkey",
 				"tags": [
 					"v1"
 				],
 				"security": [],
 				"parameters": [
 					{
-						"description": "account address",
+						"description": "account pubkey",
 						"in": "path",
-						"name": "address",
+						"name": "pubkey",
 						"required": true,
 						"schema": {
 							"type": "string"
@@ -401,7 +394,7 @@
 						}
 					},
 					{
-						"description": "page number",
+						"description": "page size",
 						"in": "query",
 						"name": "pageSize",
 						"required": false,
@@ -463,7 +456,7 @@
 						}
 					}
 				},
-				"description": "Get estimated gas cost for a transaction",
+				"description": "Get the estimated gas cost of a transaction",
 				"tags": [
 					"v1"
 				],
@@ -591,7 +584,7 @@
 						}
 					}
 				},
-				"description": "Returns the nonce of an address",
+				"description": "Get the current nonce of an address",
 				"tags": [
 					"v1"
 				],

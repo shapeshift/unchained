@@ -14,14 +14,10 @@ const models: TsoaRoute.Models = {
         "properties": {
             "type": {"dataType":"string","required":true},
             "name": {"dataType":"string","required":true},
-            "path": {"dataType":"string"},
-            "contract": {"dataType":"string"},
-            "transfers": {"dataType":"double","required":true},
-            "symbol": {"dataType":"string"},
-            "decimals": {"dataType":"double"},
-            "balance": {"dataType":"string"},
-            "totalReceived": {"dataType":"string"},
-            "totalSent": {"dataType":"string"},
+            "contract": {"dataType":"string","required":true},
+            "symbol": {"dataType":"string","required":true},
+            "decimals": {"dataType":"double","required":true},
+            "balance": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -129,10 +125,10 @@ export function RegisterRoutes(app: express.Router) {
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/txs/:address',
+        app.get('/api/v1/txs/:pubkey',
             function Ethereum_getTxHistory(request: any, response: any, next: any) {
             const args = {
-                    address: {"in":"path","name":"address","required":true,"dataType":"string"},
+                    pubkey: {"in":"path","name":"pubkey","required":true,"dataType":"string"},
                     page: {"in":"query","name":"page","dataType":"double"},
                     pageSize: {"default":25,"in":"query","name":"pageSize","dataType":"double"},
                     contract: {"in":"query","name":"contract","dataType":"string"},

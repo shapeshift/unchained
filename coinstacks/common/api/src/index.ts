@@ -28,7 +28,7 @@ export class ApiError extends Error {
  */
 export interface BaseAPI {
   /**
-   * Get balance returns the balance of a pubkey
+   * Get balance of a pubkey
    *
    * @param {string} pubkey account pubkey
    *
@@ -38,17 +38,17 @@ export interface BaseAPI {
   getBalance(pubkey: string): Promise<Balance>
 
   /**
-   * Get transaction history returns the transaction history of an address
+   * Get transaction history of a pubkey
    *
-   * @param {string} address account address
+   * @param {string} pubkey account pubkey
    * @param {number} [page] page number
-   * @param {number} [pageSize] page number
+   * @param {number} [pageSize] page size
    * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
    *
    * @returns {Promise<TxHistory>} transaction history
    */
-  // @Get('txs/{address}')
-  getTxHistory(address: string, page?: number, pageSize?: number, contract?: string): Promise<TxHistory>
+  // @Get('txs/{pubkey}')
+  getTxHistory(pubkey: string, page?: number, pageSize?: number, contract?: string): Promise<TxHistory>
 
   /**
    * Sends raw transaction to be broadcast to the node.
