@@ -124,18 +124,15 @@ jobs:
             pulumi config set --path unchained:common.rabbit.storageSize 100Gi
             pulumi up -f --yes --suppress-outputs
 
-  deploy-coinstack-ethereum:
+  deploy-coinstack:
     description: deploy a specific coinstack
     executor: pulumi
     environment:
       DOCKER_BUILDKIT: 1
-      INDEXER_URL: $ETH_INDEXER_URL
-      INDEXER_WS_URL: $ETH_INDEXER_WS_URL
       LOG_LEVEL: info
       MIDGARD_URL: https://midgard.thorchain.info
       MONGO_DBNAME: coinstack
-      MONGO_URL: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-2.ethereum-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
-      RPC_URL: $ETH_RPC_URL
+      MONGO_URL:
     parameters:
       coinstack:
         description: coinstack name
@@ -154,6 +151,8 @@ jobs:
         type: integer
       mongo-storage-size:
         type: string
+      mongo-url:
+        type: string
       indexer-cpu-limit:
         type: string
       indexer-memory-limit:
@@ -161,6 +160,12 @@ jobs:
       indexer-replicas:
         type: integer
       indexer-storage-size:
+        type: string
+      indexer-url:
+        type: string
+      indexer-ws-url:
+        type: string
+      rpc-url:
         type: string
       daemon-chain:
         type: string
@@ -182,88 +187,11 @@ jobs:
           at: ~/
       - pulumi-dependencies
       - run:
-          name: pulumi up
-          working_directory: << parameters.pulumi-dir >>
+          name: add custom environment variables
           command: |
-            pulumi stack select $PULUMI_ORG/<< parameters.pulumi-stack >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.stack $PULUMI_ORG/common/dependencies
-            pulumi config set --path unchained:<< parameters.coinstack >>.api.enableDatadogLogs true
-            pulumi config set --path unchained:<< parameters.coinstack >>.ingester.enableDatadogLogs true
-            pulumi config set --path unchained:<< parameters.coinstack >>.mongo.cpuLimit << parameters.mongo-cpu-limit >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.mongo.memoryLimit << parameters.mongo-memory-limit >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.mongo.helmChartVersion 10.19.0
-            pulumi config set --path unchained:<< parameters.coinstack >>.mongo.replicaCount << parameters.mongo-replicas >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.mongo.storageSize << parameters.mongo-storage-size >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.cpuLimit << parameters.indexer-cpu-limit >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.memoryLimit << parameters.indexer-memory-limit >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.replicas << parameters.indexer-replicas >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.storageSize << parameters.indexer-storage-size >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.chain << parameters.daemon-chain >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.image << parameters.daemon-image >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.node << parameters.daemon-node >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.cpuLimit << parameters.daemon-cpu-limit >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.memoryLimit << parameters.daemon-memory-limit >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.storageSize << parameters.daemon-storage-size >>
-            cat ./Pulumi.public.yaml
-            pulumi up -f --yes --suppress-outputs
-
-  deploy-coinstack-bitcoin:
-    description: deploy a specific coinstack
-    executor: pulumi
-    environment:
-      DOCKER_BUILDKIT: 1
-      INDEXER_URL: $BTC_INDEXER_URL
-      INDEXER_WS_URL: $BTC_INDEXER_WS_URL
-      LOG_LEVEL: info
-      MIDGARD_URL: https://midgard.thorchain.info
-      MONGO_DBNAME: coinstack
-      MONGO_URL: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-2.ethereum-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
-      RPC_URL: $BTC_RPC_URL
-    parameters:
-      coinstack:
-        description: coinstack name
-        type: string
-      pulumi-stack:
-        description: pulumi stack to deploy to (public)
-        type: string
-      pulumi-dir:
-        description: path to pulumi directory
-        type: string
-      mongo-cpu-limit:
-        type: string
-      mongo-memory-limit:
-        type: string
-      mongo-replicas:
-        type: integer
-      mongo-storage-size:
-        type: string
-      indexer-cpu-limit:
-        type: string
-      indexer-memory-limit:
-        type: string
-      indexer-replicas:
-        type: integer
-      indexer-storage-size:
-        type: string
-      daemon-chain:
-        type: string
-        default: mainnet
-      daemon-image:
-        type: string
-      daemon-node:
-        type: string
-      daemon-cpu-limit:
-        type: string
-      daemon-memory-limit:
-        type: string
-      daemon-storage-size:
-        type: string
-    steps:
-      - setup_remote_docker:
-          version: 20.10.2
-      - attach_workspace:
-          at: ~/
-      - pulumi-dependencies
+            echo 'export INDEXER_URL=<< parameters.indexer-url >>' >> $BASH_ENV
+            echo 'export INDEXER_WS_URL=<< parameters.indexer-ws-url >>' >> $BASH_ENV
+            echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
       - run:
           name: pulumi up
           working_directory: << parameters.pulumi-dir >>
@@ -346,19 +274,22 @@ workflows:
           mongo-memory-limit: 512Mi
           mongo-replicas: 3
           mongo-storage-size: 100Gi
+          mongo-url: mongodb://bitcoin-mongodb-0.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017,bitcoin-mongodb-1.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017,bitcoin-mongodb-2.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
           indexer-cpu-limit: '4'
           indexer-memory-limit: 12Gi
           indexer-replicas: 2
           indexer-storage-size: 500Gi
+          indexer-url: http://bitcoin-indexer-svc.unchained.svc.cluster.local:8001
+          indexer-ws-url: http://bitcoin-indexer-svc.unchained.svc.cluster.local:8001/websocket
           daemon-image: ruimarinho/bitcoin-core:0.21.0 #https://github.com/ruimarinho/docker-bitcoin-core
           daemon-node: bitcoind
           daemon-cpu-limit: '2'
           daemon-memory-limit: 12Gi
           daemon-storage-size: 1500Gi
+          rpc-url: http://bitcoin-indexer-svc.unchained.svc.cluster.local:8332
           requires:
             - deploy common unchained dependencies
           <<: *only-main
-
       - deploy-coinstack-ethereum:
           name: deploy ethereum coinstack
           coinstack: ethereum
@@ -368,15 +299,19 @@ workflows:
           mongo-memory-limit: 512Mi
           mongo-replicas: 3
           mongo-storage-size: 100Gi
+          mongo-url: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-2.ethereum-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
           indexer-cpu-limit: '4'
           indexer-memory-limit: 12Gi
           indexer-replicas: 2
           indexer-storage-size: 500Gi
+          indexer-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8001
+          indexer-ws-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8001/websocket
           daemon-image: ethereum/client-go:v1.10.8
           daemon-node: geth
           daemon-cpu-limit: '2'
           daemon-memory-limit: 24Gi
           daemon-storage-size: 1500Gi
+          rpc-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8332
           requires:
             - deploy common unchained dependencies
           <<: *only-main
