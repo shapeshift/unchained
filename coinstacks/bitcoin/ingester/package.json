@@ -1,5 +1,5 @@
 {
-  "name": "@shapeshiftoss/ethereum-ingester",
+  "name": "@shapeshiftoss/bitcoin-ingester",
   "version": "0.1.1",
   "license": "MIT",
   "private": true,
