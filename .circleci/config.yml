@@ -13,13 +13,13 @@ aliases:
     filters:
       branches:
         only:
-          - feature-bitcoin-infra
+          - main
 
   - &not-main
     filters:
       branches:
         ignore:
-          - feature-bitcoin-infra
+          - main
 
 commands:
   unchained-precheck:

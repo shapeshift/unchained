@@ -22,11 +22,10 @@ dns registrar (ex [godaddy](https://www.godaddy.com/))
 
 1. fork unchained repo
 2. setup AWS account
-3. use cluster launcher to setup k8 cluster
-4. setup circle.
-5. sign up for npm
-6. sign up for dockerhub
-7. sign up for etherscan
+3. setup circle.
+4. sign up for npm
+5. sign up for dockerhub
+6. sign up for etherscan
 
 ### Domain Registration
 
@@ -52,8 +51,6 @@ region=us-east-1
 aws_access_key_id = ****
 aws_secret_access_key = ****
 ```
-
-deploy cluster with cluster launcher
 
 setup rout53 hosted zone
 point dns on owned domain to zone
