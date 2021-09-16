@@ -14,18 +14,10 @@ import {
 import { EthereumAPI, EthereumBalance, Token } from './models'
 
 const INDEXER_URL = process.env.INDEXER_URL
-const MONGO_DBNAME = process.env.MONGO_DBNAME
-const MONGO_URL = process.env.MONGO_URL
-const NODE_ENV = process.env.NODE_ENV
 const RPC_URL = process.env.RPC_URL
 
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
-if (!MONGO_DBNAME) throw new Error('MONGO_DBNAME env var not set')
-if (!MONGO_URL) throw new Error('MONGO_URL env var not set')
-
-if (NODE_ENV !== 'test') {
-  if (!RPC_URL) throw new Error('RPC_URL env var not set')
-}
+if (!RPC_URL) throw new Error('RPC_URL env var not set')
 
 const blockbook = new Blockbook(INDEXER_URL)
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
@@ -36,7 +28,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   /**
    * Get balance of a pubkey
    *
-   * @param pubkey account pubkey
+   * @param {string} pubkey account pubkey
    *
    * @returns {Promise<Balance>} account balance
    *
@@ -209,7 +201,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   /**
    * Get the current nonce of an address
    *
-   * @param address account address
+   * @param {string} address account address
    *
    * @returns {Promise<number>} account nonce
    *
