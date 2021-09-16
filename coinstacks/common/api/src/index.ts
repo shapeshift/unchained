@@ -16,7 +16,7 @@ export class ApiError extends Error {
 }
 
 /**
- * Common API implementation which all coinstacks must conform to.
+ * BaseAPI implementation which all coinstacks must conform to.
  *
  * Included are doc comments and a the route decorator (@Get, @Post, etc)
  * The route decorator is commented out in the interface, but should be used in the implementation class.
