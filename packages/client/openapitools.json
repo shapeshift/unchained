@@ -13,6 +13,16 @@
           "supportsES6": "true",
           "useSingleRequestParameter": true
         }
+      },
+      "bitcoin": {
+        "inputSpec": "../../coinstacks/bitcoin/api/src/swagger.json",
+        "generatorName": "typescript-axios",
+        "output": "#{cwd}/src/generated/bitcoin",
+        "reservedWordsMappings": { "in": "in" },
+        "additionalProperties": {
+          "supportsES6": "true",
+          "useSingleRequestParameter": true
+        }
       }
     }
   }
