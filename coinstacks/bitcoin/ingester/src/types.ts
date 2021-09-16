@@ -1,65 +1,31 @@
-import { Tx } from '@shapeshiftoss/blockbook'
-import { ParseTx, SyncTx } from '@shapeshiftoss/common-ingester'
 import { BlockDocument } from '@shapeshiftoss/common-mongo'
 
-export interface ETHBlock {
-  difficulty: string
-  extraData: string
-  gasLimit: string
-  gasUsed: string
+// https://developer.bitcoin.org/reference/rpc/getblock.html
+export interface BTCBlock {
   hash: string
-  logsBloom: string
-  miner: string
-  mixHash: string
+  confirmations: number
+  size: number
+  strippedsize: number
+  weight: number
+  height: number
+  version: number
+  versionHex: string
+  merkleroot: string
+  tx: Array<string> /// todo
+  time: number
+  mediantime: number
   nonce: string
-  number: string
-  parentHash: string
-  receiptsRoot: string
-  sha3Uncles: string
-  size: string
-  stateRoot: string
-  timestamp: string
-  totalDifficulty: string
-  transactions: Array<string>
-  transactionsRoot: string
-  uncles: Array<string>
+  bits: string
+  difficulty: number
+  chainwork: string
+  nTx: number
+  previousblockhash: string
+  nextblockhash: string
 }
-
-export type ETHParseTx = Tx & ParseTx
-
-export interface ETHSyncTx extends SyncTx {
-  internalTxs?: Array<InternalTx>
-}
-
-export interface EtherscanApiResponse {
-  status: string
-  message: string
-  result: unknown
-}
-
-export interface InternalTx {
-  blockNumber: string
-  timeStamp: string
-  hash: string
-  from: string
-  to: string
-  value: string
-  contractAddress: string
-  input: string
-  type: string
-  gas: string
-  gasUsed: string
-  traceId: string
-  isError: string
-  errCode: string
-}
-
-export type InternalTxHistory = Record<string, Array<InternalTx>>
-
 export interface ReorgResult {
   dbBlock: BlockDocument
   height: number
-  nodeBlock: ETHBlock
+  nodeBlock: BTCBlock
 }
 
 export type TxHistory = Array<string>
