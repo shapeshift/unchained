@@ -1,21 +1,19 @@
-import axios from 'axios'
-import { utils } from 'ethers'
-import { Blockbook, Tx } from '@shapeshiftoss/blockbook'
+import { Tx, Blockbook } from '@shapeshiftoss/blockbook'
 import { Message, Worker } from '@shapeshiftoss/common-ingester'
 import { RegistryService } from '@shapeshiftoss/common-mongo'
 import { logger } from '@shapeshiftoss/logger'
-import { ETHSyncTx, EtherscanApiResponse, InternalTx, InternalTxHistory, TxHistory } from '../types'
-import { getInternalAddress } from '../parseTx'
+import { TxHistory } from '../types'
+import { SyncTx } from '@shapeshiftoss/common-ingester'
 
-const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
 const MONGO_DBNAME = process.env.MONGO_DBNAME
 const MONGO_URL = process.env.MONGO_URL
+const COINSTACK = process.env.COINSTACK
 
-if (!ETHERSCAN_API_KEY) throw new Error('ETHERSCAN_API_KEY env var not set')
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 if (!MONGO_DBNAME) throw new Error('MONGO_DBNAME env var not set')
 if (!MONGO_URL) throw new Error('MONGO_URL env var not set')
+if (!COINSTACK) throw new Error('COINSTACK env var not set')
 
 const POOL_SIZE = 100
 const PAGE_SIZE = 1000
@@ -45,44 +43,7 @@ const getAddresses = (tx: Tx): Array<string> => {
   sendAddress && addresses.push(sendAddress)
   receiveAddress && addresses.push(receiveAddress)
 
-  tx.tokenTransfers?.forEach((transfer) => {
-    transfer.from && addresses.push(transfer.from)
-    transfer.to && addresses.push(transfer.to)
-  })
-
-  // detect internal address for contract methods we care about (TODO: detect all internal addresses)
-  if (tx.ethereumSpecific?.data) {
-    const internalAddress = getInternalAddress(tx.ethereumSpecific?.data)
-    internalAddress && addresses.push(internalAddress)
-  }
-
-  // normalize addresses to checksum format which matches backend
-  return [...new Set(addresses.map((address) => utils.getAddress(address)))]
-}
-
-const getInternalTransactions = async (
-  address: string,
-  page: number,
-  fromHeight: number,
-  toHeight?: number
-): Promise<Array<InternalTx>> => {
-  try {
-    const { data } = await axios.get<EtherscanApiResponse>(
-      `https://api.etherscan.io/api?module=account&action=txlistinternal&address=${address}&startblock=${fromHeight}&endblock=${toHeight}&page=${page}&offset=${PAGE_SIZE}&sort=desc&apikey=${ETHERSCAN_API_KEY}`
-    )
-
-    if (data.status === '0') {
-      if (data.message !== 'No transactions found') {
-        logger.warn(`${address} (page ${page}, from ${fromHeight}, to ${toHeight}): ${data.message}: ${data.result}`)
-      }
-      return []
-    }
-
-    return data.result as Array<InternalTx>
-  } catch (err) {
-    logger.error(`failed to get internal transactions: ${err}`)
-    throw err
-  }
+  return addresses
 }
 
 const getTxHistory = async (address: string, fromHeight: number, toHeight?: number): Promise<TxHistory> => {
@@ -113,39 +74,6 @@ const getTxHistory = async (address: string, fromHeight: number, toHeight?: numb
     )
 
     data.forEach((txids) => txids && (txHistory = txHistory.concat(txids)))
-  }
-
-  return txHistory
-}
-
-const getTxHistoryInternal = async (
-  address: string,
-  fromHeight: number,
-  toHeight?: number
-): Promise<InternalTxHistory> => {
-  let page = 1
-  let processing = true
-  const txHistory: InternalTxHistory = {}
-  while (processing) {
-    const start = Date.now()
-    const txs = await getInternalTransactions(address, page, fromHeight, toHeight)
-    logger.debug(
-      `getTxHistoryInternal: ${address}, from ${fromHeight} to ${toHeight}, page ${page} (${Date.now() - start} ms)`
-    )
-
-    // only support eth internal transactions at this time
-    const ethTxs = txs.filter((tx) => tx.contractAddress === '')
-
-    // normalize addresses to checksum format which matches backend
-    ethTxs.forEach((tx) => {
-      const from = utils.getAddress(tx.from)
-      const to = utils.getAddress(tx.to)
-      txHistory[tx.hash] = [...(txHistory[tx.hash] ?? []), { ...tx, from, to }]
-    })
-
-    page++
-
-    if (txs.length < PAGE_SIZE) processing = false
   }
 
   return txHistory
@@ -182,18 +110,14 @@ const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string):
 
   logger.info(`Address sync for: ${address}, from: ${fromHeight}, to: ${toHeight} started`)
 
-  const [txHistory, txHistoryInternal] = await Promise.all([
-    getTxHistory(address, fromHeight, toHeight),
-    getTxHistoryInternal(address, fromHeight, toHeight),
-  ])
+  const txHistory = await Promise.all([getTxHistory(address, fromHeight, toHeight)])
 
-  const txids = [...new Set(txHistory.concat(Object.keys(txHistoryInternal)))]
+  const txids = txHistory
   txids.forEach((txid) => {
-    const sTx: ETHSyncTx = {
+    const sTx: SyncTx = {
       address: address,
       document: document,
       txid: txid,
-      internalTxs: txHistoryInternal[txid],
     }
     worker.sendMessage(new Message(sTx), 'txid.address')
   })
@@ -221,6 +145,7 @@ const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string):
 const onMessage = (worker: Worker) => async (message: Message) => {
   const tx: Tx = message.getContent()
 
+  logger.debug(`processing bitcoin tx ${tx.txid}`)
   try {
     let requeue = false
     for await (const address of getAddresses(tx)) {
@@ -242,9 +167,9 @@ const onMessage = (worker: Worker) => async (message: Message) => {
 
 const main = async () => {
   const worker = await Worker.init({
-    queueName: 'queue.ethereum.tx',
-    exchangeName: 'exchange.ethereum.txid.address',
-    requeueName: 'exchange.ethereum.tx',
+    queueName: `queue.${COINSTACK}.tx`,
+    exchangeName: `exchange.${COINSTACK}.txid.address`,
+    requeueName: `exchange.${COINSTACK}.tx`,
   })
 
   worker.queue?.prefetch(100)
