@@ -16,6 +16,7 @@ import {
   TxHistory,
   TxReceipt,
   ValidationError,
+  Utxo,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { RegistryDocument } from '../../../common/mongo/src' // unable to import models from a module with tsoa
 import { ethers, BigNumber } from 'ethers'
@@ -106,6 +107,36 @@ export class Bitcoin extends CommonAPI {
       }
 
       return pubKeyData
+    } catch (err) {
+      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+    }
+  }
+
+  /**
+   * Get utxos returns utxos of a given account
+   *
+   * @param {(string)} account
+   *
+   * @returns {Promise<Block>} utxo data
+   *
+   * @example account "xpub6D1weXBcFAo8CqBbpP4TbH5sxQH8ZkqC5pDEvJ95rNNBZC9zrKmZP2fXMuve7ZRBe18pWQQsGg68jkq24mZchHwYENd8cCiSb71u3KD4AFH"
+   */
+  @Example<Utxo>({
+    txid: 'bitcoin',
+    vout: 0,
+    value: '1337',
+    height: 100420,
+    confirmations: 1337,
+    address: '1FH6ehAd5ZFXCM1cLGzHxK1s4dGdq1JusM',
+  })
+  @Response<BadRequestError>(400, 'Bad Request')
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Get('utxo/{account}')
+  async getUtxo(@Path() account: string): Promise<Utxo[]> {
+    try {
+      const utxos = await blockbook.getUtxo(account)
+      return utxos
     } catch (err) {
       throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
     }

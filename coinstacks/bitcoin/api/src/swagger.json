@@ -188,6 +188,50 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"Utxo": {
+				"description": "Contains info about an unspent transaction output",
+				"properties": {
+					"txid": {
+						"type": "string"
+					},
+					"vout": {
+						"type": "number",
+						"format": "double"
+					},
+					"value": {
+						"type": "string"
+					},
+					"height": {
+						"type": "number",
+						"format": "double"
+					},
+					"confirmations": {
+						"type": "number",
+						"format": "double"
+					},
+					"address": {
+						"type": "string"
+					},
+					"path": {
+						"type": "string"
+					},
+					"locktime": {
+						"type": "number",
+						"format": "double"
+					},
+					"coinbase": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"txid",
+					"vout",
+					"value",
+					"confirmations"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"BalanceChange": {
 				"description": "Contains info about a balance change",
 				"properties": {
@@ -520,6 +564,84 @@
 						"schema": {
 							"type": "string"
 						}
+					}
+				]
+			}
+		},
+		"/api/v1/utxo/{account}": {
+			"get": {
+				"operationId": "GetUtxo",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/Utxo"
+									},
+									"type": "array"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"txid": "bitcoin",
+											"vout": 0,
+											"value": "1337",
+											"height": 100420,
+											"confirmations": 1337,
+											"address": "1FH6ehAd5ZFXCM1cLGzHxK1s4dGdq1JusM"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get utxos returns utxos of a given account",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "account",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"example": "xpub6D1weXBcFAo8CqBbpP4TbH5sxQH8ZkqC5pDEvJ95rNNBZC9zrKmZP2fXMuve7ZRBe18pWQQsGg68jkq24mZchHwYENd8cCiSb71u3KD4AFH"
 					}
 				]
 			}
