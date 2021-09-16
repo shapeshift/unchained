@@ -1,20 +1,27 @@
 import { Worker, Message } from '@shapeshiftoss/common-ingester'
 import { logger } from '@shapeshiftoss/logger'
-import { ETHBlock } from '../types'
+import { BTCBlock } from '../types'
+
+const COINSTACK = process.env.COINSTACK
+if (!COINSTACK) throw new Error('COINSTACK env var not set')
 
 const onMessage = (worker: Worker) => (message: Message) => {
-  const block: ETHBlock = message.getContent()
-  logger.debug(`block: (${Number(block.number)}) ${block.hash}`)
+  const block: BTCBlock = message.getContent()
+  logger.debug(`block: (${Number(block.height)}) ${block.hash}`)
 
-  block.transactions.forEach((txid) => worker.sendMessage(new Message(txid), 'txid'))
+  // todo - just 10 for now
+  //block.tx.forEach((txid) => worker.sendMessage(new Message(txid), 'txid'))
+  const txids = block.tx.slice(10)
+  txids.forEach((txid) => worker.sendMessage(new Message(txid), 'txid'))
+  // end todo
 
   worker.ackMessage(message)
 }
 
 const main = async () => {
   const worker = await Worker.init({
-    queueName: 'queue.ethereum.block',
-    exchangeName: 'exchange.ethereum.txid',
+    queueName: `queue.${COINSTACK}.block`,
+    exchangeName: `exchange.${COINSTACK}.txid`,
   })
 
   worker.queue?.prefetch(1)

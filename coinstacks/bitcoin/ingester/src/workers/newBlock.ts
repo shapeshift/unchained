@@ -3,45 +3,91 @@ import { NewBlock } from '@shapeshiftoss/blockbook'
 import { Worker, Message, ReorgBlock, RPCResponse } from '@shapeshiftoss/common-ingester'
 import { BlockDocument, BlockService } from '@shapeshiftoss/common-mongo'
 import { logger } from '@shapeshiftoss/logger'
-import { ETHBlock, ReorgResult } from '../types'
+import { BTCBlock, ReorgResult } from '../types'
 
 const NODE_ENV = process.env.NODE_ENV
 const RPC_URL = process.env.RPC_URL as string
+const COINSTACK = process.env.COINSTACK
 
 if (NODE_ENV !== 'test') {
   if (!RPC_URL) throw new Error('RPC_URL env var not set')
 }
 
-const REORG_BUFFER = 50
+if (!COINSTACK) throw new Error('COINSTACK env var not set')
+
+const REORG_BUFFER = 1
 
 const blocks = new BlockService()
 
-const getBlock = async (hashOrHeight: string | number): Promise<ETHBlock> => {
+const getBlockByHash = async (hashOrHeight: string): Promise<BTCBlock> => {
   const { data } = await axios.post<RPCResponse>(RPC_URL, {
-    jsonrpc: '2.0',
+    jsonrpc: '1.0',
     id: hashOrHeight,
-    method: typeof hashOrHeight === 'string' ? 'eth_getBlockByHash' : 'eth_getBlockByNumber',
-    params: [typeof hashOrHeight === 'string' ? hashOrHeight : '0x' + hashOrHeight.toString(16), false],
+    method: 'getblock',
+    params: [hashOrHeight],
   })
-
+  logger.debug(`getBlockByHash() result: ${data.result}`)
   if (data.error) throw new Error(`failed to get block ${hashOrHeight}: ${data.error.message}`)
   if (!data.result) throw new Error(`failed to get block ${hashOrHeight}`)
+  return data.result as BTCBlock
+}
 
-  return data.result as ETHBlock
+const getBlockHash = async (height: number): Promise<string> => {
+  logger.debug(`getBlockHash(), height: ${height}`)
+  const { data } = await axios.post<RPCResponse>(RPC_URL, {
+    jsonrpc: '1.0',
+    id: height,
+    method: 'getblockhash',
+    params: [height],
+  })
+
+  logger.debug(`getBlockHash() result: ${data.result}`)
+  if (data.error) throw new Error(`failed to get blockhash for block number ${height}: ${data.error.message}`)
+  if (!data.result) throw new Error(`failed to get blockhash for block number ${height}`)
+  return data.result as string
 }
 
 const getHeight = async (): Promise<number> => {
+  logger.debug('getHeight()')
   const { data } = await axios.post<RPCResponse>(RPC_URL, {
-    jsonrpc: '2.0',
-    id: 'eth_blockNumber',
-    method: 'eth_blockNumber',
+    jsonrpc: '1.0',
+    id: 'getblockcount',
+    method: 'getblockcount',
     params: [],
   })
 
   if (data.error) throw new Error(`failed to get node height: ${data.error.message}`)
   if (!data.result) throw new Error('failed to get node height')
-
+  logger.debug(`getHeight() result:  ${data.result}`)
   return Number(data.result)
+}
+
+const processBlock = async (newBlockWorker: Worker, reorgWorker: Worker): Promise<boolean> => {
+  let dbBlockLatest = await blocks.getLatest()
+  logger.debug('dbBlockLatest:', dbBlockLatest?.height)
+
+  const nodeHeight = await getHeight()
+  logger.debug('nodeHeight:', nodeHeight)
+
+  let height = dbBlockLatest ? dbBlockLatest.height + 1 : nodeHeight - REORG_BUFFER
+  while (height <= nodeHeight) {
+    const hash = await getBlockHash(height)
+    let nodeBlock = await getBlockByHash(hash)
+    logger.info(`getBlock: (${Number(nodeBlock.height)}) ${nodeBlock.hash}`)
+
+    const result = await handleReorg(reorgWorker, dbBlockLatest, nodeBlock)
+
+    height = result.height
+    nodeBlock = result.nodeBlock
+    dbBlockLatest = result.dbBlock
+
+    await blocks.save(dbBlockLatest)
+
+    newBlockWorker.sendMessage(new Message(nodeBlock), 'block')
+
+    height++
+  }
+  return true
 }
 
 /**
@@ -50,16 +96,16 @@ const getHeight = async (): Promise<number> => {
 export const handleReorg = async (
   worker: Worker,
   dbBlock: BlockDocument | undefined,
-  nodeBlock: ETHBlock
+  nodeBlock: BTCBlock
 ): Promise<ReorgResult> => {
-  if (!dbBlock || nodeBlock.parentHash === dbBlock.hash) {
+  if (!dbBlock || nodeBlock.previousblockhash === dbBlock.hash) {
     return {
       dbBlock: {
         hash: nodeBlock.hash,
-        height: Number(nodeBlock.number),
-        prevHash: nodeBlock.parentHash,
+        height: Number(nodeBlock.height),
+        prevHash: nodeBlock.previousblockhash,
       },
-      height: Number(nodeBlock.number),
+      height: Number(nodeBlock.height),
       nodeBlock: nodeBlock,
     }
   }
@@ -74,37 +120,18 @@ export const handleReorg = async (
   logger.debug(`marking block as orphaned: (${dbBlock.height}) ${dbBlock.hash}`)
 
   // continue handling reorg to find common ancestor
-  return handleReorg(worker, await blocks.getByHash(dbBlock.prevHash), await getBlock(nodeBlock.parentHash))
+  return handleReorg(
+    worker,
+    await blocks.getByHash(dbBlock.prevHash),
+    await getBlockByHash(nodeBlock.previousblockhash)
+  )
 }
 
 const onMessage = (newBlockWorker: Worker, reorgWorker: Worker) => async (message: Message) => {
   const newBlock: NewBlock = message.getContent()
 
   try {
-    let dbBlockLatest = await blocks.getLatest()
-    logger.debug('dbBlockLatest:', dbBlockLatest?.height)
-
-    const nodeHeight = await getHeight()
-    logger.debug('nodeHeight:', nodeHeight)
-
-    let height = dbBlockLatest ? dbBlockLatest.height + 1 : nodeHeight - REORG_BUFFER
-    while (height <= nodeHeight) {
-      let nodeBlock = await getBlock(height)
-      logger.info(`getBlock: (${Number(nodeBlock.number)}) ${nodeBlock.hash}`)
-
-      const result = await handleReorg(reorgWorker, dbBlockLatest, nodeBlock)
-
-      height = result.height
-      nodeBlock = result.nodeBlock
-      dbBlockLatest = result.dbBlock
-
-      await blocks.save(dbBlockLatest)
-
-      newBlockWorker.sendMessage(new Message(nodeBlock), 'block')
-
-      height++
-    }
-
+    await processBlock(newBlockWorker, reorgWorker)
     newBlockWorker.ackMessage(message, newBlock.hash)
   } catch (err) {
     logger.error('onMessage.error:', err.isAxiosError ? err.message : err)
@@ -114,16 +141,18 @@ const onMessage = (newBlockWorker: Worker, reorgWorker: Worker) => async (messag
 
 const main = async () => {
   const newBlockWorker = await Worker.init({
-    queueName: 'queue.ethereum.newBlock',
-    exchangeName: 'exchange.ethereum.block',
+    queueName: `queue.${COINSTACK}.newBlock`,
+    exchangeName: `exchange.${COINSTACK}.block`,
   })
 
   const reorgWorker = await Worker.init({
-    exchangeName: 'exchange.ethereum',
+    exchangeName: `exchange.${COINSTACK}`,
   })
 
+  // prime the pump
+  await processBlock(newBlockWorker, reorgWorker)
+
   newBlockWorker.queue?.prefetch(1)
-  logger.info('newBlock.worker.queue.activateConsumer()')
   newBlockWorker.queue?.activateConsumer(onMessage(newBlockWorker, reorgWorker), { noAck: false })
 }
 

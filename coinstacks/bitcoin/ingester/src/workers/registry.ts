@@ -5,10 +5,11 @@ import { logger } from '@shapeshiftoss/logger'
 
 const MONGO_DBNAME = process.env.MONGO_DBNAME
 const MONGO_URL = process.env.MONGO_URL
+const COINSTACK = process.env.COINSTACK
 
 if (!MONGO_DBNAME) throw new Error('MONGO_DBNAME env var not set')
 if (!MONGO_URL) throw new Error('MONGO_URL env var not set')
-
+if (!COINSTACK) throw new Error('COINSTACK env var not set')
 interface RegistryMessage extends RegistryDocument {
   action: string
 }
@@ -60,8 +61,8 @@ const onMessage = (worker: Worker) => async (message: Message) => {
 
 const main = async () => {
   const worker = await Worker.init({
-    queueName: 'queue.ethereum.registry',
-    exchangeName: 'exchange.ethereum.tx',
+    queueName: `queue.${COINSTACK}.registry`,
+    exchangeName: `exchange.${COINSTACK}.tx`,
   })
 
   worker.queue?.prefetch(1)
