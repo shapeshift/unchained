@@ -3,8 +3,10 @@ import { ready, notReady, Message, MessageEvent, Socket, Subscription } from '@s
 import { logger } from '@shapeshiftoss/logger'
 
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
+const COINSTACK = process.env.COINSTACK
 
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
+if (!COINSTACK) throw new Error('COINSTACK env var not set')
 
 const subscription: Subscription = {
   id: 'newBlk',
@@ -12,7 +14,7 @@ const subscription: Subscription = {
   method: 'subscribeNewBlock',
 }
 
-const socket = new Socket(INDEXER_WS_URL, subscription, 'exchange.ethereum')
+const socket = new Socket(INDEXER_WS_URL, subscription, `exchange.${COINSTACK}`)
 
 const onMessage = async (message: MessageEvent) => {
   try {
