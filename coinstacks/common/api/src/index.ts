@@ -55,7 +55,7 @@ export interface BaseAPI {
    *
    * @param {SendTxBody} body serialized raw transaction hex
    *
-   * @returns {Promise<TxReceipt>} transaction receipt
+   * @returns {Promise<string>} transaction id
    */
   // @Post('sendTx/')
   sendTx(body: SendTxBody): Promise<string>
