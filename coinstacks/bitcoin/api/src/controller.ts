@@ -1,213 +1,81 @@
-import { Body, Example, Get, Path, Post, Query, Response, Route, SuccessResponse, Tags } from 'tsoa'
-import { Blockbook } from '@shapeshiftoss/blockbook'
-import { RegistryService } from '@shapeshiftoss/common-mongo'
+import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
+import { Address, Blockbook, Xpub } from '@shapeshiftoss/blockbook'
 import {
-  Account,
   ApiError,
   BadRequestError,
-  BalanceChange,
-  Block,
-  CommonAPI,
+  Balance,
+  BaseAPI,
   InternalServerError,
-  Interval,
-  intervals,
-  RawTx,
-  Tx,
+  SendTxBody,
   TxHistory,
-  TxReceipt,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { RegistryDocument } from '../../../common/mongo/src' // unable to import models from a module with tsoa
-import { ethers, BigNumber } from 'ethers'
-import { TransactionRequest } from '@ethersproject/abstract-provider'
+import { BitcoinAPI, BitcoinBalance, Utxo } from './models'
 
 const INDEXER_URL = process.env.INDEXER_URL
-const MONGO_DBNAME = process.env.MONGO_DBNAME
-const MONGO_URL = process.env.MONGO_URL
-const NODE_ENV = process.env.NODE_ENV
 const RPC_URL = process.env.RPC_URL
 
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
-if (!MONGO_DBNAME) throw new Error('MONGO_DBNAME env var not set')
-if (!MONGO_URL) throw new Error('MONGO_URL env var not set')
-if (NODE_ENV !== 'test') {
-  if (!RPC_URL) throw new Error('RPC_URL env var not set')
-}
+if (!RPC_URL) throw new Error('RPC_URL env var not set')
+
 const blockbook = new Blockbook(INDEXER_URL)
-const registry = new RegistryService(MONGO_URL, MONGO_DBNAME)
-const jsonRpcProvider = new ethers.providers.JsonRpcProvider(RPC_URL)
+
+const isXpub = (pubkey: string): boolean => {
+  return pubkey.startsWith('xpub') || pubkey.startsWith('ypub') || pubkey.startsWith('zpub')
+}
 
 @Route('api/v1')
 @Tags('v1')
-export class Bitcoin extends CommonAPI {
+export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   /**
-   * Get Account returns the account information of an address or xpub
+   * Get balance of a pubkey
    *
-   * @param pubKey account address or xpub
+   * Examples
+   * 1. Bitcoin (address)
+   * 2. Bitcoin (xpub)
    *
-   * @returns {Promise<Account>} account information
+   * @param {string} pubkey account pubkey
    *
-   * @example address "336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU"
+   * @returns {Promise<Balance>} account balance
+   *
+   * @example pubkey "336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU"
+   * @example pubkey "xpub6CUGRUonZSQ4TWtTMmzXdrXDtypWKiKrhko4egpiMZbpiaQL2jkwSB1icqYh2cfDfVxdx4df189oLKnC5fSwqPfgyP3hooxujYzAu3fDVmz"
    */
-  @Example<Account>({
-    network: 'bitcoin',
-    symbol: 'BTC',
-    pubKey: '336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU',
-    balance: '284809805024198107',
-    unconfirmedBalance: '0',
-    unconfirmedTxs: 0,
-    txs: 21933,
-    tokens: [],
+  @Example<BitcoinBalance>({
+    pubkey: '336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU',
+    balance: '974652',
+  })
+  @Example<BitcoinBalance>({
+    pubkey:
+      'xpub6CUGRUonZSQ4TWtTMmzXdrXDtypWKiKrhko4egpiMZbpiaQL2jkwSB1icqYh2cfDfVxdx4df189oLKnC5fSwqPfgyP3hooxujYzAu3fDVmz',
+    balance: '12688908',
+    addresses: [{ pubkey: '1EfgV2Hr5CDjXPavHDpDMjmU33BA2veHy6', balance: '10665' }],
   })
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('account/{pubKey}')
-  async getAccount(@Path() pubKey: string): Promise<Account> {
+  @Get('balance/{pubkey}')
+  async getBalance(@Path() pubkey: string): Promise<BitcoinBalance> {
     try {
-      const isValidXpub = validateXpub(pubKey)
-      let data
-
-      if (isValidXpub) {
-        data = await blockbook.getXpub(pubKey, undefined, undefined, undefined, undefined, 'tokenBalances', 'used')
+      let data: Address | Xpub
+      if (isXpub(pubkey)) {
+        data = await blockbook.getXpub(pubkey, undefined, undefined, undefined, undefined, 'tokenBalances', 'used')
       } else {
-        data = await blockbook.getAddress(pubKey)
+        data = await blockbook.getAddress(pubkey, undefined, undefined, undefined, undefined, 'basic')
       }
 
-      const pubKeyData: Account = {
-        network: 'bitcoin',
-        symbol: 'BTC',
-        pubKey: data.address,
+      const addresses = (data.tokens ?? []).reduce<Array<Balance>>((prev, token) => {
+        if (token.balance) {
+          prev.push({ pubkey: token.name, balance: token.balance })
+        }
+
+        return prev
+      }, [])
+
+      return {
+        pubkey: data.address,
         balance: data.balance,
-        unconfirmedBalance: data.unconfirmedBalance,
-        unconfirmedTxs: data.unconfirmedTxs,
-        txs: data.txs,
-      }
-
-      if (isValidXpub && data.tokens) {
-        let changeIndex: number | null = null
-        let receiveIndex: number | null = null
-        for (let i = data.tokens.length - 1; i >= 0 && (changeIndex === null || receiveIndex === null); i--) {
-          const splitPath = data.tokens[i].path?.split('/') || []
-          const [, , , , change, index] = splitPath
-
-          if (change === '0') {
-            receiveIndex = Number(index) + 1
-          }
-          if (change === '1') {
-            changeIndex = Number(index) + 1
-          }
-        }
-        pubKeyData['bitcoin'] = {
-          utxos: data.usedTokens || 0,
-          receiveIndex: receiveIndex || 0,
-          changeIndex: changeIndex || 0,
-        }
-      }
-
-      return pubKeyData
-    } catch (err) {
-      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
-    }
-  }
-
-  /**
-   * Get balance history returns the balance history of an address
-   *
-   * @param {string} address account address
-   * @param {Interval} interval range to group by
-   * @param {number} [start] start date as unix timestamp
-   * @param {number} [end] end date as unix timestamp
-   *
-   * @returns {Promise<Array<BalanceChange>>} balance change history
-   *
-   * @example address "1FH6ehAd5ZFXCM1cLGzHxK1s4dGdq1JusM"
-   */
-  @Example<Array<BalanceChange>>([
-    {
-      timestamp: 1492041600,
-      amount: '0',
-    },
-    {
-      timestamp: 1498694400,
-      amount: '-485100000000000',
-    },
-    {
-      timestamp: 1499904000,
-      amount: '60012810000000000',
-    },
-  ])
-  @Response<BadRequestError>(400, 'Bad Request')
-  @Response<ValidationError>(422, 'Validation Error')
-  @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('balancehistory/{address}')
-  async getBalanceHistory(
-    @Path() address: string,
-    @Query() interval: Interval,
-    @Query() start?: number,
-    @Query() end?: number
-  ): Promise<Array<BalanceChange>> {
-    try {
-      const balances = await blockbook.balanceHistory(address, start, end, 'usd', intervals[interval])
-
-      return balances.map((b) => {
-        let amount = '0'
-
-        if (b.received !== '0') {
-          amount = b.received
-        }
-
-        if (b.sent !== '0') {
-          amount = `-${b.sent}`
-        }
-
-        return {
-          timestamp: b.time,
-          amount: amount,
-        }
-      })
-    } catch (err) {
-      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
-    }
-  }
-
-  /**
-   * Get block returns data about a block
-   *
-   * @param {(number|string)} block height or hash
-   *
-   * @returns {Promise<Block>} block data
-   *
-   * @example block "0x84065cdb07d71de1e75e108c3f0053a0ac5c0ff5afbbc033063285088ef135f9"
-   * @example block "11421116"
-   */
-  @Example<Block>({
-    network: 'bitcoin',
-    hash: '0x84065cdb07d71de1e75e108c3f0053a0ac5c0ff5afbbc033063285088ef135f9',
-    prevHash: '0xa42ea5229dbceb181f4e55ee4e5babee65993a41afa7605998b3d9d653c003ba',
-    nextHash: '0x36176806b62e6682c28dbeef1ff82ed828e2bdbdbafee15153cae20b32263900',
-    height: 11421116,
-    confirmations: 45,
-    timestamp: 1607549087,
-    txs: 149,
-  })
-  @Response<BadRequestError>(400, 'Bad Request')
-  @Response<ValidationError>(422, 'Validation Error')
-  @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('block/{block}')
-  async getBlock(@Path() block: number | string): Promise<Block> {
-    try {
-      const blk = await blockbook.getBlock(String(block))
-
-      return {
-        network: 'bitcoin',
-        hash: blk.hash,
-        prevHash: blk.previousBlockHash,
-        nextHash: blk.nextBlockHash,
-        height: blk.height,
-        confirmations: blk.confirmations,
-        timestamp: blk.time,
-        txs: blk.txCount,
+        addresses,
       }
     } catch (err) {
       throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
@@ -215,66 +83,16 @@ export class Bitcoin extends CommonAPI {
   }
 
   /**
-   * Get transaction returns data about a transaction
+   * Get transaction history of a pubkey
    *
-   * @param {string} txid transaction id
-   *
-   * @returns {Promise<Tx>} transaction data
-   *
-   * @example txid "0xe9c1c7789da09af2ccf285fa175c6e37eb1d977e0b7c85e20de08043f9fe949b"
-   */
-  @Example<Tx>({
-    network: 'bitcoin',
-    symbol: 'BTC',
-    txid: '0xe9c1c7789da09af2ccf285fa175c6e37eb1d977e0b7c85e20de08043f9fe949b',
-    status: 'confirmed',
-    from: '0x0a7A454141f86B93c76f131b7365B73027b086b7',
-    to: '0xB27172C1d140c077ceF004832fcf4858e6AFbC76',
-    blockHash: '0x84065cdb07d71de1e75e108c3f0053a0ac5c0ff5afbbc033063285088ef135f9',
-    blockHeight: 11421116,
-    confirmations: 2,
-    timestamp: 1607549087,
-    value: '764365700000000000',
-    fee: '651000000000000',
-  })
-  @Response<BadRequestError>(400, 'Bad Request')
-  @Response<ValidationError>(422, 'Validation Error')
-  @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('tx/{txid}')
-  async getTx(@Path() txid: string): Promise<Tx> {
-    try {
-      const tx = await blockbook.getTransaction(txid)
-
-      return {
-        network: 'bitcoin',
-        symbol: tx.tokenTransfers?.[0].symbol ?? 'BTC',
-        txid: tx.txid,
-        status: tx.confirmations > 0 ? 'confirmed' : 'pending',
-        from: tx.vin[0].addresses?.[0] ?? 'coinbase',
-        to: tx.vout[0].addresses?.[0],
-        blockHash: tx.blockHash,
-        blockHeight: tx.blockHeight,
-        confirmations: tx.confirmations,
-        timestamp: tx.blockTime,
-        value: tx.tokenTransfers?.[0].value ?? tx.value,
-        fee: tx.fees ?? '0',
-      }
-    } catch (err) {
-      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
-    }
-  }
-
-  /**
-   * Get transaction history returns the transaction history of an address
-   *
-   * @param {string} address account address
+   * @param {string} pubkey account pubkey
    * @param {number} [page] page number
-   * @param {number} [pageSize] page number
+   * @param {number} [pageSize] page size
    * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
    *
    * @returns {Promise<TxHistory>} transaction history
    *
-   * @example address "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
+   * @example address "336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU"
    */
   @Example<TxHistory>({
     page: 1,
@@ -282,18 +100,16 @@ export class Bitcoin extends CommonAPI {
     txs: 1,
     transactions: [
       {
-        network: 'bitcoin',
-        symbol: 'BTC',
-        txid: '0x85092cf7a2ec34ba4109ef1215b5b486911163b9d3391e3508670229f4d866e7',
+        txid: '77810bfcb0bf66216391838772b790dde1b7419ae57f3b266c718ea937989155',
         status: 'confirmed',
-        from: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
-        to: '0x34249a379Af1Fe3b53e143c0f1B5590778ce2cfC',
-        blockHash: '0xc962b0662752ac15671512ca612c894051d8b671375de1cd84f12c5e720dc7ef',
-        blockHeight: 11427335,
-        confirmations: 9,
-        timestamp: 1607632210,
-        value: '20000000000000000',
-        fee: '5250000000000000',
+        from: '1Dmthegfep7fXVqWAPmQ5rMmKcg58GjEF1',
+        to: '336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU',
+        blockHash: '00000000000000000008b5901008aa05d05330fa54abc01a73587c0a1b1291f2',
+        blockHeight: 645850,
+        confirmations: 54972,
+        timestamp: 1598700231,
+        value: '510611',
+        fee: '224',
       },
     ],
   })
@@ -336,200 +152,66 @@ export class Bitcoin extends CommonAPI {
   }
 
   /**
-   * Get transaction specific estimated gas
+   * Get all unspent transaction outputs for a pubkey
    *
-   * @param {string} data contract call data
-   * @param {string} to to address
-   * @param {string} from from address
-   * @param {string} value value of the tx
-   * @returns {Promise<string>} estimated gas to be used for the transaction
+   * @param {string} pubkey account pubkey
    *
+   * @example pubkey "14mMwtZCGiAtyr8KnnAZYyHmZ9Zvj71h4t"
+   * @example pubkey "xpub6DQYbVJSVvJPzpYenir7zVSf2WPZRu69LxZuMezzAKuT6biPcug6Vw1zMk4knPBeNKvioutc4EGpPQ8cZiWtjcXYvJ6wPiwcGmCkihA9Jy3"
    */
-  @Example<string>('26540')
+  @Example<Array<Utxo>>([
+    {
+      address: '14mMwtZCGiAtyr8KnnAZYyHmZ9Zvj71h4t',
+      confirmations: 58362,
+      txid: '02cdb69a97d1b8585797ac31a1954804b40a71c380a3ede0793f21a2cdfd300a',
+      value: '729',
+      vout: 1,
+    },
+  ])
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('/estimategas')
-  async getEstimatedGas(
-    @Query() data: string,
-    @Query() to: string,
-    @Query() value: string,
-    @Query() from: string
-  ): Promise<string> {
+  @Get('utxo/{pubkey}')
+  async getUtxos(@Path() pubkey: string): Promise<Array<Utxo>> {
     try {
-      const tx: TransactionRequest = {
-        data,
-        to,
-        from,
-        value: BigNumber.from(value).toHexString(),
-      }
-      const estimatedGas = await jsonRpcProvider.estimateGas(tx)
-      return estimatedGas?.toString()
+      const data = await blockbook.getUtxo(pubkey, true)
+
+      const utxos = data.map<Utxo>((utxo) => ({
+        address: utxo.address ?? pubkey,
+        confirmations: utxo.confirmations,
+        txid: utxo.txid,
+        value: utxo.value,
+        vout: utxo.vout,
+      }))
+
+      return utxos
     } catch (err) {
-      throw new ApiError('Internal Server Error', 500, JSON.stringify(err))
-    }
-  }
-
-  /**
-   * Get the current gas price from the node.
-   *
-   * @returns {Promise<string>} current gas price in wei
-   *
-   */
-  @Example<string>('60000000000')
-  @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('/feeprice')
-  async getFeePrice(): Promise<string> {
-    try {
-      const gasPrice = await jsonRpcProvider.getGasPrice()
-      return gasPrice?.toString()
-    } catch (err) {
-      throw new ApiError('Internal Server Error', 500, JSON.stringify(err))
-    }
-  }
-
-  /**
-   * Register account details for tracking incoming pending transactions and newly confirmed transactions
-   *
-   * Example 1: Register a pubkey
-   *
-   * Example 2: Register an address for pubkey
-   *
-   * Example 3: Register a single address
-   *
-   * @param {RegistryDocument} document Contains registry info for registering addresses and pubkeys for a client id.
-   *
-   * @returns {Promise<void>}
-   *
-   * @example document {
-   *   "client_id": "unchained",
-   *   "registration": {
-   *     "pubkey": "xpub6CWc1jDKjQH5wzSLz3MTeNVihW2B8sh9w9EyERYVB9f9zLpvdqdKtQDNPVhGGTK9EyTzpw35hp5qJtVoDZXDGoB7U3mShTPs2C8ce48JWJp"
-   *   }
-   * }
-   *
-   * @example document {
-   *   "client_id": "unchained",
-   *   "registration": {
-   *     "pubkey": "xpub6CWc1jDKjQH5wzSLz3MTeNVihW2B8sh9w9EyERYVB9f9zLpvdqdKtQDNPVhGGTK9EyTzpw35hp5qJtVoDZXDGoB7U3mShTPs2C8ce48JWJp",
-   *     "addresses": ["0x3b53e143c0f1B5590778c34249a379Af1Fee2cfC"]
-   *   }
-   * }
-   *
-   * @example document {
-   *   "client_id": "unchained",
-   *   "registration": {
-   *     "addresses": ["0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"]
-   *   }
-   * }
-   */
-  @SuccessResponse(204, 'Register Successful')
-  @Response<BadRequestError>(400, 'Bad Request')
-  @Response<ValidationError>(422, 'Validation Error')
-  @Response<InternalServerError>(500, 'Internal Server Error')
-  @Post('register/')
-  async register(@Body() document: RegistryDocument): Promise<void> {
-    if (!document.registration.addresses?.length && !document.registration.pubkey) {
-      throw new ApiError('Bad Request', 400, JSON.stringify({ error: 'No addresses or pubkey provided' }))
-    }
-
-    await registry.add(document)
-  }
-
-  /**
-   * Unregister accounts to stop tracking incoming pending transactions and newly confirmed transactions
-   *
-   * Example 1: Unregister a pubkey and all associated addresses
-   *
-   * Example 2: Unregister a single address from an account
-   *
-   * @param {RegistryDocument} document Contains registry info for unregistering addresses or pubkeys for a client id.
-   *
-   * @returns {Promise<void>}
-   *
-   * @example document {
-   *   "client_id": "unchained",
-   *   "registration": {
-   *     "pubkey": "xpub6CWc1jDKjQH5wzSLz3MTeNVihW2B8sh9w9EyERYVB9f9zLpvdqdKtQDNPVhGGTK9EyTzpw35hp5qJtVoDZXDGoB7U3mShTPs2C8ce48JWJp"
-   *   }
-   * }
-   *
-   * @example document {
-   *   "client_id": "unchained",
-   *   "registration": {
-   *     "pubkey": "xpub6CWc1jDKjQH5wzSLz3MTeNVihW2B8sh9w9EyERYVB9f9zLpvdqdKtQDNPVhGGTK9EyTzpw35hp5qJtVoDZXDGoB7U3mShTPs2C8ce48JWJp",
-   *     "addresses": ["0x3b53e143c0f1B5590778c34249a379Af1Fee2cfC"]
-   *   }
-   * }
-   */
-  @SuccessResponse(204, 'Unregister Successful')
-  @Response<BadRequestError>(400, 'Bad Request')
-  @Response<ValidationError>(422, 'Validation Error')
-  @Response<InternalServerError>(500, 'Internal Server Error')
-  @Post('unregister/')
-  async unregister(@Body() document: RegistryDocument): Promise<void> {
-    if (!document.registration.addresses?.length) {
-      await registry.delete(document)
-    } else {
-      await registry.remove(document)
+      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
     }
   }
 
   /**
    * Sends raw transaction to be broadcast to the node.
    *
-   * @param {RawTx} rawTx serialized raw transaction hex
+   * @param {SendTxBody} body serialized raw transaction hex
    *
-   * @returns {Promise<TxReceipt>} transaction receipt
+   * @returns {Promise<string>} transaction id
    *
    * @example rawTx {
    *    "hex": "0xf86c0a85046c7cfe0083016dea94d1310c1e038bc12865d3d3997275b3e4737c6302880b503be34d9fe80080269fc7eaaa9c21f59adf8ad43ed66cf5ef9ee1c317bd4d32cd65401e7aaca47cfaa0387d79c65b90be6260d09dcfb780f29dd8133b9b1ceb20b83b7e442b4bfc30cb"
    * }
    */
-  @Example<TxReceipt>({
-    network: 'bitcoin',
-    txid: '0xb9d4ad5408f53eac8627f9ccd840ba8fb3469d55cd9cc2a11c6e049f1eef4edd',
-  })
+  @Example<string>('0xb9d4ad5408f53eac8627f9ccd840ba8fb3469d55cd9cc2a11c6e049f1eef4edd')
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Post('send/')
-  async sendTx(@Body() rawTx: RawTx): Promise<TxReceipt> {
+  async sendTx(@Body() body: SendTxBody): Promise<string> {
     try {
-      const { result } = await blockbook.sendTransaction(rawTx.hex)
-      return {
-        network: 'bitcoin',
-        txid: result,
-      }
+      const { result } = await blockbook.sendTransaction(body.hex)
+      return result
     } catch (err) {
       throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
     }
   }
-
-  /**
-   * Returns the nonce of an address
-   *
-   * @param address account address
-   *
-   * @returns {Promise<number>} account nonce
-   *
-   * @example address "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
-   */
-  @Example<number>(21933)
-  @Response<BadRequestError>(400, 'Bad Request')
-  @Response<ValidationError>(422, 'Validation Error')
-  @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('nonce/{address}')
-  async getNonce(@Path() address: string): Promise<number> {
-    try {
-      const { nonce } = await blockbook.getAddress(address, undefined, undefined, undefined, undefined, 'basic')
-      return Number(nonce ?? 0)
-    } catch (err) {
-      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
-    }
-  }
-}
-
-const validateXpub = (xpub: string): boolean => {
-  return xpub.startsWith('xpub') || xpub.startsWith('ypub') || xpub.startsWith('zpub')
 }

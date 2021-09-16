@@ -1,26 +1,17 @@
 {
-  "name": "@shapeshiftoss/thorchain",
-  "version": "0.1.1",
+  "name": "@shapeshiftoss/unchained-client",
+  "version": "0.2.3",
   "license": "MIT",
-  "private": true,
   "main": "dist/index.js",
   "source": "src/index.ts",
   "types": "dist/index.d.ts",
-  "publishConfig": {
-    "access": "restricted"
-  },
   "files": [
     "dist"
   ],
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist node_modules",
-    "generate": "openapi-generator-cli generate",
-    "watch": "tsc --watch"
-  },
-  "dependencies": {
-    "bignumber.js": "^9.0.1",
-    "ethers": "^5.4.0"
+    "generate": "openapi-generator-cli generate"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.4.4"
