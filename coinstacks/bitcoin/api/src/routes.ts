@@ -9,54 +9,21 @@ import * as express from 'express';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
-    "Token": {
+    "Balance": {
         "dataType": "refObject",
         "properties": {
-            "type": {"dataType":"string","required":true},
-            "name": {"dataType":"string","required":true},
-            "path": {"dataType":"string"},
-            "contract": {"dataType":"string"},
-            "transfers": {"dataType":"double","required":true},
-            "symbol": {"dataType":"string"},
-            "decimals": {"dataType":"double"},
-            "balance": {"dataType":"string"},
-            "totalReceived": {"dataType":"string"},
-            "totalSent": {"dataType":"string"},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "BitcoinAccountSpecific": {
-        "dataType": "refObject",
-        "properties": {
-            "utxos": {"dataType":"double","required":true},
-            "receiveIndex": {"dataType":"double","required":true},
-            "changeIndex": {"dataType":"double","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "EthereumAccountSpecific": {
-        "dataType": "refObject",
-        "properties": {
-            "nonce": {"dataType":"double","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Account": {
-        "dataType": "refObject",
-        "properties": {
-            "network": {"dataType":"string","required":true},
-            "symbol": {"dataType":"string","required":true},
-            "pubKey": {"dataType":"string","required":true},
+            "pubkey": {"dataType":"string","required":true},
             "balance": {"dataType":"string","required":true},
-            "unconfirmedBalance": {"dataType":"string","required":true},
-            "unconfirmedTxs": {"dataType":"double","required":true},
-            "txs": {"dataType":"double","required":true},
-            "tokens": {"dataType":"array","array":{"ref":"Token"}},
-            "bitcoin": {"ref":"BitcoinAccountSpecific"},
-            "ethereum": {"ref":"EthereumAccountSpecific"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "BitcoinBalance": {
+        "dataType": "refObject",
+        "properties": {
+            "pubkey": {"dataType":"string","required":true},
+            "balance": {"dataType":"string","required":true},
+            "addresses": {"dataType":"array","array":{"ref":"Balance"}},
         },
         "additionalProperties": false,
     },
@@ -86,40 +53,9 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "BalanceChange": {
-        "dataType": "refObject",
-        "properties": {
-            "timestamp": {"dataType":"double","required":true},
-            "amount": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Interval": {
-        "dataType": "refAlias",
-        "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["weekly"]},{"dataType":"enum","enums":["daily"]},{"dataType":"enum","enums":["hourly"]},{"dataType":"enum","enums":["30min"]},{"dataType":"enum","enums":["15min"]},{"dataType":"enum","enums":["10min"]},{"dataType":"enum","enums":["5min"]},{"dataType":"enum","enums":["1min"]}],"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Block": {
-        "dataType": "refObject",
-        "properties": {
-            "network": {"dataType":"string","required":true},
-            "hash": {"dataType":"string","required":true},
-            "prevHash": {"dataType":"string"},
-            "nextHash": {"dataType":"string"},
-            "height": {"dataType":"double","required":true},
-            "confirmations": {"dataType":"double","required":true},
-            "timestamp": {"dataType":"double"},
-            "txs": {"dataType":"double","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Tx": {
         "dataType": "refObject",
         "properties": {
-            "network": {"dataType":"string","required":true},
-            "symbol": {"dataType":"string","required":true},
             "txid": {"dataType":"string","required":true},
             "status": {"dataType":"string","required":true},
             "blockHash": {"dataType":"string"},
@@ -145,26 +81,19 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "RegistryDocument": {
+    "Utxo": {
         "dataType": "refObject",
         "properties": {
-            "client_id": {"dataType":"string","required":true},
-            "ingester_meta": {"dataType":"nestedObjectLiteral","nestedProperties":{"syncing":{"dataType":"nestedObjectLiteral","nestedProperties":{"endTime":{"dataType":"double","required":true},"startTime":{"dataType":"double","required":true},"key":{"dataType":"string"}}},"block":{"dataType":"double"}}},
-            "registration": {"dataType":"nestedObjectLiteral","nestedProperties":{"pubkey":{"dataType":"string"},"addresses":{"dataType":"array","array":{"dataType":"string"}}},"required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "TxReceipt": {
-        "dataType": "refObject",
-        "properties": {
-            "network": {"dataType":"string","required":true},
+            "address": {"dataType":"string","required":true},
+            "confirmations": {"dataType":"double","required":true},
             "txid": {"dataType":"string","required":true},
+            "value": {"dataType":"string","required":true},
+            "vout": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "RawTx": {
+    "SendTxBody": {
         "dataType": "refObject",
         "properties": {
             "hex": {"dataType":"string","required":true},
@@ -182,10 +111,10 @@ export function RegisterRoutes(app: express.Router) {
     //  NOTE: If you do not see routes for all of your controllers in this file, then you might not have informed tsoa of where to look
     //      Please look into the "controllerPathGlobs" config option described in the readme: https://github.com/lukeautry/tsoa
     // ###########################################################################################################
-        app.get('/api/v1/account/:pubKey',
-            function Bitcoin_getAccount(request: any, response: any, next: any) {
+        app.get('/api/v1/balance/:pubkey',
+            function Bitcoin_getBalance(request: any, response: any, next: any) {
             const args = {
-                    pubKey: {"in":"path","name":"pubKey","required":true,"dataType":"string"},
+                    pubkey: {"in":"path","name":"pubkey","required":true,"dataType":"string"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -200,76 +129,7 @@ export function RegisterRoutes(app: express.Router) {
             const controller = new Bitcoin();
 
 
-            const promise = controller.getAccount.apply(controller, validatedArgs as any);
-            promiseHandler(controller, promise, response, undefined, next);
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/balancehistory/:address',
-            function Bitcoin_getBalanceHistory(request: any, response: any, next: any) {
-            const args = {
-                    address: {"in":"path","name":"address","required":true,"dataType":"string"},
-                    interval: {"in":"query","name":"interval","required":true,"ref":"Interval"},
-                    start: {"in":"query","name":"start","dataType":"double"},
-                    end: {"in":"query","name":"end","dataType":"double"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-            } catch (err) {
-                return next(err);
-            }
-
-            const controller = new Bitcoin();
-
-
-            const promise = controller.getBalanceHistory.apply(controller, validatedArgs as any);
-            promiseHandler(controller, promise, response, undefined, next);
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/block/:block',
-            function Bitcoin_getBlock(request: any, response: any, next: any) {
-            const args = {
-                    block: {"in":"path","name":"block","required":true,"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"string"}]},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-            } catch (err) {
-                return next(err);
-            }
-
-            const controller = new Bitcoin();
-
-
-            const promise = controller.getBlock.apply(controller, validatedArgs as any);
-            promiseHandler(controller, promise, response, undefined, next);
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/tx/:txid',
-            function Bitcoin_getTx(request: any, response: any, next: any) {
-            const args = {
-                    txid: {"in":"path","name":"txid","required":true,"dataType":"string"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-            } catch (err) {
-                return next(err);
-            }
-
-            const controller = new Bitcoin();
-
-
-            const promise = controller.getTx.apply(controller, validatedArgs as any);
+            const promise = controller.getBalance.apply(controller, validatedArgs as any);
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -298,13 +158,10 @@ export function RegisterRoutes(app: express.Router) {
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/estimategas',
-            function Bitcoin_getEstimatedGas(request: any, response: any, next: any) {
+        app.get('/api/v1/utxo/:pubkey',
+            function Bitcoin_getUtxos(request: any, response: any, next: any) {
             const args = {
-                    data: {"in":"query","name":"data","required":true,"dataType":"string"},
-                    to: {"in":"query","name":"to","required":true,"dataType":"string"},
-                    value: {"in":"query","name":"value","required":true,"dataType":"string"},
-                    from: {"in":"query","name":"from","required":true,"dataType":"string"},
+                    pubkey: {"in":"path","name":"pubkey","required":true,"dataType":"string"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -319,79 +176,14 @@ export function RegisterRoutes(app: express.Router) {
             const controller = new Bitcoin();
 
 
-            const promise = controller.getEstimatedGas.apply(controller, validatedArgs as any);
-            promiseHandler(controller, promise, response, undefined, next);
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/feeprice',
-            function Bitcoin_getFeePrice(request: any, response: any, next: any) {
-            const args = {
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-            } catch (err) {
-                return next(err);
-            }
-
-            const controller = new Bitcoin();
-
-
-            const promise = controller.getFeePrice.apply(controller, validatedArgs as any);
-            promiseHandler(controller, promise, response, undefined, next);
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.post('/api/v1/register',
-            function Bitcoin_register(request: any, response: any, next: any) {
-            const args = {
-                    document: {"in":"body","name":"document","required":true,"ref":"RegistryDocument"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-            } catch (err) {
-                return next(err);
-            }
-
-            const controller = new Bitcoin();
-
-
-            const promise = controller.register.apply(controller, validatedArgs as any);
-            promiseHandler(controller, promise, response, undefined, next);
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.post('/api/v1/unregister',
-            function Bitcoin_unregister(request: any, response: any, next: any) {
-            const args = {
-                    document: {"in":"body","name":"document","required":true,"ref":"RegistryDocument"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-            } catch (err) {
-                return next(err);
-            }
-
-            const controller = new Bitcoin();
-
-
-            const promise = controller.unregister.apply(controller, validatedArgs as any);
+            const promise = controller.getUtxos.apply(controller, validatedArgs as any);
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/send',
             function Bitcoin_sendTx(request: any, response: any, next: any) {
             const args = {
-                    rawTx: {"in":"body","name":"rawTx","required":true,"ref":"RawTx"},
+                    body: {"in":"body","name":"body","required":true,"ref":"SendTxBody"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -407,28 +199,6 @@ export function RegisterRoutes(app: express.Router) {
 
 
             const promise = controller.sendTx.apply(controller, validatedArgs as any);
-            promiseHandler(controller, promise, response, undefined, next);
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/nonce/:address',
-            function Bitcoin_getNonce(request: any, response: any, next: any) {
-            const args = {
-                    address: {"in":"path","name":"address","required":true,"dataType":"string"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-            } catch (err) {
-                return next(err);
-            }
-
-            const controller = new Bitcoin();
-
-
-            const promise = controller.getNonce.apply(controller, validatedArgs as any);
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
