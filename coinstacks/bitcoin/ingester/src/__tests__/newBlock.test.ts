@@ -42,17 +42,17 @@ describe('newBlockWorker', () => {
     it('should handle a reorg if there are orphaned blocks in db', async () => {
       const worker = await Worker.init({})
 
-      const dbLatestBlock = db[12131206]
-      const nodeBlock = node[12131207]
+      const dbLatestBlock = db[700972]
+      const nodeBlock = node[700973]
 
       const expected = {
-        height: 12131204,
+        height: 700970,
         dbBlock: {
-          hash: node[12131204].hash,
-          height: Number(node[12131204].number),
-          prevHash: node[12131204].parentHash,
+          hash: node[700970].hash,
+          height: Number(node[700970].height),
+          prevHash: node[700970].previousblockhash,
         },
-        nodeBlock: node[12131204],
+        nodeBlock: node[700970],
       }
 
       const actual = await handleReorg(worker, dbLatestBlock, nodeBlock)
@@ -66,16 +66,16 @@ describe('newBlockWorker', () => {
       const worker = await Worker.init({})
 
       const dbLatestBlock = undefined
-      const nodeBlock = node[12131205]
+      const nodeBlock = node[700971]
 
       const expected = {
-        height: 12131205,
+        height: 700971,
         dbBlock: {
-          hash: node[12131205].hash,
-          height: Number(node[12131205].number),
-          prevHash: node[12131205].parentHash,
+          hash: node[700971].hash,
+          height: Number(node[700971].height),
+          prevHash: node[700971].previousblockhash,
         },
-        nodeBlock: node[12131205],
+        nodeBlock: node[700971],
       }
 
       const actual = await handleReorg(worker, dbLatestBlock, nodeBlock)
@@ -88,17 +88,17 @@ describe('newBlockWorker', () => {
     it('should use node height if no reorg detected', async () => {
       const worker = await Worker.init({})
 
-      const dbLatestBlock = db[12131203]
-      const nodeBlock = node[12131204]
+      const dbLatestBlock = db[700969]
+      const nodeBlock = node[700970]
 
       const expected = {
-        height: 12131204,
+        height: 700970,
         dbBlock: {
-          hash: node[12131204].hash,
-          height: Number(node[12131204].number),
-          prevHash: node[12131204].parentHash,
+          hash: node[700970].hash,
+          height: Number(node[700970].height),
+          prevHash: node[700970].previousblockhash,
         },
-        nodeBlock: node[12131204],
+        nodeBlock: node[700970],
       }
 
       const actual = await handleReorg(worker, dbLatestBlock, nodeBlock)
