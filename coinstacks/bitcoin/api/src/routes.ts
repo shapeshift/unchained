@@ -9,21 +9,21 @@ import * as express from 'express';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
-    "Balance": {
+    "Account": {
         "dataType": "refObject",
         "properties": {
-            "pubkey": {"dataType":"string","required":true},
             "balance": {"dataType":"string","required":true},
+            "pubkey": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "BitcoinBalance": {
+    "BitcoinAccount": {
         "dataType": "refObject",
         "properties": {
-            "pubkey": {"dataType":"string","required":true},
             "balance": {"dataType":"string","required":true},
-            "addresses": {"dataType":"array","array":{"ref":"Balance"}},
+            "pubkey": {"dataType":"string","required":true},
+            "addresses": {"dataType":"array","array":{"ref":"Account"}},
         },
         "additionalProperties": false,
     },
@@ -111,8 +111,8 @@ export function RegisterRoutes(app: express.Router) {
     //  NOTE: If you do not see routes for all of your controllers in this file, then you might not have informed tsoa of where to look
     //      Please look into the "controllerPathGlobs" config option described in the readme: https://github.com/lukeautry/tsoa
     // ###########################################################################################################
-        app.get('/api/v1/balance/:pubkey',
-            function Bitcoin_getBalance(request: any, response: any, next: any) {
+        app.get('/api/v1/account/:pubkey',
+            function Bitcoin_getAccount(request: any, response: any, next: any) {
             const args = {
                     pubkey: {"in":"path","name":"pubkey","required":true,"dataType":"string"},
             };
@@ -129,14 +129,14 @@ export function RegisterRoutes(app: express.Router) {
             const controller = new Bitcoin();
 
 
-            const promise = controller.getBalance.apply(controller, validatedArgs as any);
+            const promise = controller.getAccount.apply(controller, validatedArgs as any);
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/txs/:address',
+        app.get('/api/v1/account/:pubkey/txs',
             function Bitcoin_getTxHistory(request: any, response: any, next: any) {
             const args = {
-                    address: {"in":"path","name":"address","required":true,"dataType":"string"},
+                    pubkey: {"in":"path","name":"pubkey","required":true,"dataType":"string"},
                     page: {"in":"query","name":"page","dataType":"double"},
                     pageSize: {"default":25,"in":"query","name":"pageSize","dataType":"double"},
                     contract: {"in":"query","name":"contract","dataType":"string"},
@@ -158,7 +158,7 @@ export function RegisterRoutes(app: express.Router) {
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/utxo/:pubkey',
+        app.get('/api/v1/account/:pubkey/utxos',
             function Bitcoin_getUtxos(request: any, response: any, next: any) {
             const args = {
                     pubkey: {"in":"path","name":"pubkey","required":true,"dataType":"string"},

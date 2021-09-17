@@ -22,6 +22,25 @@ import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObj
 import { BASE_PATH, COLLECTION_FORMATS, RequestArgs, BaseAPI, RequiredError } from './base';
 
 /**
+ * Contains info about account details for an address or xpub
+ * @export
+ * @interface Account
+ */
+export interface Account {
+    /**
+     * 
+     * @type {string}
+     * @memberof Account
+     */
+    balance: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Account
+     */
+    pubkey: string;
+}
+/**
  * Contains info about a 400 Bad Request response
  * @export
  * @interface BadRequestError
@@ -35,48 +54,29 @@ export interface BadRequestError {
     error: string;
 }
 /**
- * Contains info about balance by pubkey (address or xpub)
+ * Contains additional bitcoin specific info
  * @export
- * @interface Balance
+ * @interface BitcoinAccount
  */
-export interface Balance {
+export interface BitcoinAccount {
     /**
      * 
      * @type {string}
-     * @memberof Balance
-     */
-    pubkey: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Balance
-     */
-    balance: string;
-}
-/**
- * Contains additional bitcoin specific balance info
- * @export
- * @interface BitcoinBalance
- */
-export interface BitcoinBalance {
-    /**
-     * 
-     * @type {string}
-     * @memberof BitcoinBalance
-     */
-    pubkey: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof BitcoinBalance
+     * @memberof BitcoinAccount
      */
     balance: string;
     /**
      * 
-     * @type {Array<Balance>}
-     * @memberof BitcoinBalance
+     * @type {string}
+     * @memberof BitcoinAccount
      */
-    addresses?: Array<Balance>;
+    pubkey: string;
+    /**
+     * Account details by address if BitcoinAccount was fetched by xpub
+     * @type {Array<Account>}
+     * @memberof BitcoinAccount
+     */
+    addresses?: Array<Account>;
 }
 /**
  * Contains info about a 500 Internal Server Error response
@@ -275,15 +275,15 @@ export enum ValidationErrorMessageEnum {
 export const V1ApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Get balance of a pubkey  Examples 1. Bitcoin (address) 2. Bitcoin (xpub)
-         * @param {string} pubkey account pubkey
+         * Get account details by address or xpub  Examples 1. Bitcoin (address) 2. Bitcoin (xpub)
+         * @param {string} pubkey account address or xpub
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getBalance: async (pubkey: string, options: any = {}): Promise<RequestArgs> => {
+        getAccount: async (pubkey: string, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'pubkey' is not null or undefined
-            assertParamExists('getBalance', 'pubkey', pubkey)
-            const localVarPath = `/api/v1/balance/{pubkey}`
+            assertParamExists('getAccount', 'pubkey', pubkey)
+            const localVarPath = `/api/v1/account/{pubkey}`
                 .replace(`{${"pubkey"}}`, encodeURIComponent(String(pubkey)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -308,19 +308,19 @@ export const V1ApiAxiosParamCreator = function (configuration?: Configuration) {
             };
         },
         /**
-         * Get transaction history of a pubkey
-         * @param {string} address 
+         * Get transaction history by address or xpub
+         * @param {string} pubkey account address or xpub
          * @param {number} [page] page number
          * @param {number} [pageSize] page size
          * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getTxHistory: async (address: string, page?: number, pageSize?: number, contract?: string, options: any = {}): Promise<RequestArgs> => {
-            // verify required parameter 'address' is not null or undefined
-            assertParamExists('getTxHistory', 'address', address)
-            const localVarPath = `/api/v1/txs/{address}`
-                .replace(`{${"address"}}`, encodeURIComponent(String(address)));
+        getTxHistory: async (pubkey: string, page?: number, pageSize?: number, contract?: string, options: any = {}): Promise<RequestArgs> => {
+            // verify required parameter 'pubkey' is not null or undefined
+            assertParamExists('getTxHistory', 'pubkey', pubkey)
+            const localVarPath = `/api/v1/account/{pubkey}/txs`
+                .replace(`{${"pubkey"}}`, encodeURIComponent(String(pubkey)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -356,15 +356,15 @@ export const V1ApiAxiosParamCreator = function (configuration?: Configuration) {
             };
         },
         /**
-         * Get all unspent transaction outputs for a pubkey
-         * @param {string} pubkey account pubkey
+         * Get all unspent transaction outputs for an address or xpub
+         * @param {string} pubkey account address or xpub
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
         getUtxos: async (pubkey: string, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'pubkey' is not null or undefined
             assertParamExists('getUtxos', 'pubkey', pubkey)
-            const localVarPath = `/api/v1/utxo/{pubkey}`
+            const localVarPath = `/api/v1/account/{pubkey}/utxos`
                 .replace(`{${"pubkey"}}`, encodeURIComponent(String(pubkey)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -434,31 +434,31 @@ export const V1ApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = V1ApiAxiosParamCreator(configuration)
     return {
         /**
-         * Get balance of a pubkey  Examples 1. Bitcoin (address) 2. Bitcoin (xpub)
-         * @param {string} pubkey account pubkey
+         * Get account details by address or xpub  Examples 1. Bitcoin (address) 2. Bitcoin (xpub)
+         * @param {string} pubkey account address or xpub
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getBalance(pubkey: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BitcoinBalance>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getBalance(pubkey, options);
+        async getAccount(pubkey: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BitcoinAccount>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAccount(pubkey, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Get transaction history of a pubkey
-         * @param {string} address 
+         * Get transaction history by address or xpub
+         * @param {string} pubkey account address or xpub
          * @param {number} [page] page number
          * @param {number} [pageSize] page size
          * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getTxHistory(address: string, page?: number, pageSize?: number, contract?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TxHistory>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getTxHistory(address, page, pageSize, contract, options);
+        async getTxHistory(pubkey: string, page?: number, pageSize?: number, contract?: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TxHistory>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getTxHistory(pubkey, page, pageSize, contract, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Get all unspent transaction outputs for a pubkey
-         * @param {string} pubkey account pubkey
+         * Get all unspent transaction outputs for an address or xpub
+         * @param {string} pubkey account address or xpub
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -487,29 +487,29 @@ export const V1ApiFactory = function (configuration?: Configuration, basePath?: 
     const localVarFp = V1ApiFp(configuration)
     return {
         /**
-         * Get balance of a pubkey  Examples 1. Bitcoin (address) 2. Bitcoin (xpub)
-         * @param {string} pubkey account pubkey
+         * Get account details by address or xpub  Examples 1. Bitcoin (address) 2. Bitcoin (xpub)
+         * @param {string} pubkey account address or xpub
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getBalance(pubkey: string, options?: any): AxiosPromise<BitcoinBalance> {
-            return localVarFp.getBalance(pubkey, options).then((request) => request(axios, basePath));
+        getAccount(pubkey: string, options?: any): AxiosPromise<BitcoinAccount> {
+            return localVarFp.getAccount(pubkey, options).then((request) => request(axios, basePath));
         },
         /**
-         * Get transaction history of a pubkey
-         * @param {string} address 
+         * Get transaction history by address or xpub
+         * @param {string} pubkey account address or xpub
          * @param {number} [page] page number
          * @param {number} [pageSize] page size
          * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getTxHistory(address: string, page?: number, pageSize?: number, contract?: string, options?: any): AxiosPromise<TxHistory> {
-            return localVarFp.getTxHistory(address, page, pageSize, contract, options).then((request) => request(axios, basePath));
+        getTxHistory(pubkey: string, page?: number, pageSize?: number, contract?: string, options?: any): AxiosPromise<TxHistory> {
+            return localVarFp.getTxHistory(pubkey, page, pageSize, contract, options).then((request) => request(axios, basePath));
         },
         /**
-         * Get all unspent transaction outputs for a pubkey
-         * @param {string} pubkey account pubkey
+         * Get all unspent transaction outputs for an address or xpub
+         * @param {string} pubkey account address or xpub
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -529,15 +529,15 @@ export const V1ApiFactory = function (configuration?: Configuration, basePath?: 
 };
 
 /**
- * Request parameters for getBalance operation in V1Api.
+ * Request parameters for getAccount operation in V1Api.
  * @export
- * @interface V1ApiGetBalanceRequest
+ * @interface V1ApiGetAccountRequest
  */
-export interface V1ApiGetBalanceRequest {
+export interface V1ApiGetAccountRequest {
     /**
-     * account pubkey
+     * account address or xpub
      * @type {string}
-     * @memberof V1ApiGetBalance
+     * @memberof V1ApiGetAccount
      */
     readonly pubkey: string
 }
@@ -549,11 +549,11 @@ export interface V1ApiGetBalanceRequest {
  */
 export interface V1ApiGetTxHistoryRequest {
     /**
-     * 
+     * account address or xpub
      * @type {string}
      * @memberof V1ApiGetTxHistory
      */
-    readonly address: string
+    readonly pubkey: string
 
     /**
      * page number
@@ -584,7 +584,7 @@ export interface V1ApiGetTxHistoryRequest {
  */
 export interface V1ApiGetUtxosRequest {
     /**
-     * account pubkey
+     * account address or xpub
      * @type {string}
      * @memberof V1ApiGetUtxos
      */
@@ -613,29 +613,29 @@ export interface V1ApiSendTxRequest {
  */
 export class V1Api extends BaseAPI {
     /**
-     * Get balance of a pubkey  Examples 1. Bitcoin (address) 2. Bitcoin (xpub)
-     * @param {V1ApiGetBalanceRequest} requestParameters Request parameters.
+     * Get account details by address or xpub  Examples 1. Bitcoin (address) 2. Bitcoin (xpub)
+     * @param {V1ApiGetAccountRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof V1Api
      */
-    public getBalance(requestParameters: V1ApiGetBalanceRequest, options?: any) {
-        return V1ApiFp(this.configuration).getBalance(requestParameters.pubkey, options).then((request) => request(this.axios, this.basePath));
+    public getAccount(requestParameters: V1ApiGetAccountRequest, options?: any) {
+        return V1ApiFp(this.configuration).getAccount(requestParameters.pubkey, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * Get transaction history of a pubkey
+     * Get transaction history by address or xpub
      * @param {V1ApiGetTxHistoryRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof V1Api
      */
     public getTxHistory(requestParameters: V1ApiGetTxHistoryRequest, options?: any) {
-        return V1ApiFp(this.configuration).getTxHistory(requestParameters.address, requestParameters.page, requestParameters.pageSize, requestParameters.contract, options).then((request) => request(this.axios, this.basePath));
+        return V1ApiFp(this.configuration).getTxHistory(requestParameters.pubkey, requestParameters.page, requestParameters.pageSize, requestParameters.contract, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * Get all unspent transaction outputs for a pubkey
+     * Get all unspent transaction outputs for an address or xpub
      * @param {V1ApiGetUtxosRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}

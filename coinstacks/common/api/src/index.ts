@@ -1,4 +1,4 @@
-import { Balance, SendTxBody, TxHistory } from './models'
+import { Account, SendTxBody, TxHistory } from './models'
 
 export * from './models'
 export * as middleware from './middleware'
@@ -28,26 +28,26 @@ export class ApiError extends Error {
  */
 export interface BaseAPI {
   /**
-   * Get balance of a pubkey
+   * Get account details by address or xpub
    *
-   * @param {string} pubkey account pubkey
+   * @param {string} pubkey account address or xpub
    *
-   * @returns {Promise<Balance>} account balance
+   * @returns {Promise<Account>} account details
    */
-  // @Get('balance/{pubkey}')
-  getBalance(pubkey: string): Promise<Balance>
+  // @Get('account/{pubkey}')
+  getAccount(pubkey: string): Promise<Account>
 
   /**
-   * Get transaction history of a pubkey
+   * Get transaction history by address or xpub
    *
-   * @param {string} pubkey account pubkey
+   * @param {string} pubkey account address or xpub
    * @param {number} [page] page number
    * @param {number} [pageSize] page size
    * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
    *
    * @returns {Promise<TxHistory>} transaction history
    */
-  // @Get('txs/{pubkey}')
+  // @Get('account/{pubkey}/txs')
   getTxHistory(pubkey: string, page?: number, pageSize?: number, contract?: string): Promise<TxHistory>
 
   /**

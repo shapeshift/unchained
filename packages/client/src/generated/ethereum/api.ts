@@ -35,27 +35,33 @@ export interface BadRequestError {
     error: string;
 }
 /**
- * Contains additional ethereum specific balance info
+ * Contains additional ethereum specific info
  * @export
- * @interface EthereumBalance
+ * @interface EthereumAccount
  */
-export interface EthereumBalance {
+export interface EthereumAccount {
     /**
      * 
      * @type {string}
-     * @memberof EthereumBalance
-     */
-    pubkey: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof EthereumBalance
+     * @memberof EthereumAccount
      */
     balance: string;
     /**
      * 
+     * @type {string}
+     * @memberof EthereumAccount
+     */
+    pubkey: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof EthereumAccount
+     */
+    nonce: number;
+    /**
+     * 
      * @type {Array<Token>}
-     * @memberof EthereumBalance
+     * @memberof EthereumAccount
      */
     tokens: Array<Token>;
 }
@@ -96,25 +102,13 @@ export interface Token {
      * @type {string}
      * @memberof Token
      */
-    type: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Token
-     */
-    name: string;
+    balance: string;
     /**
      * 
      * @type {string}
      * @memberof Token
      */
     contract: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Token
-     */
-    symbol: string;
     /**
      * 
      * @type {number}
@@ -126,7 +120,19 @@ export interface Token {
      * @type {string}
      * @memberof Token
      */
-    balance: string;
+    name: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Token
+     */
+    symbol: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Token
+     */
+    type: string;
 }
 /**
  * Contains info about a transaction
@@ -276,7 +282,7 @@ export const V1ApiAxiosParamCreator = function (configuration?: Configuration) {
             assertParamExists('estimateGas', 'to', to)
             // verify required parameter 'value' is not null or undefined
             assertParamExists('estimateGas', 'value', value)
-            const localVarPath = `/api/v1/estimate-gas`;
+            const localVarPath = `/api/v1/gas/estimate`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -312,15 +318,15 @@ export const V1ApiAxiosParamCreator = function (configuration?: Configuration) {
             };
         },
         /**
-         * Get balance of a pubkey
-         * @param {string} pubkey account pubkey
+         * Get account details by address
+         * @param {string} pubkey account address
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getBalance: async (pubkey: string, options: any = {}): Promise<RequestArgs> => {
+        getAccount: async (pubkey: string, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'pubkey' is not null or undefined
-            assertParamExists('getBalance', 'pubkey', pubkey)
-            const localVarPath = `/api/v1/balance/{pubkey}`
+            assertParamExists('getAccount', 'pubkey', pubkey)
+            const localVarPath = `/api/v1/account/{pubkey}`
                 .replace(`{${"pubkey"}}`, encodeURIComponent(String(pubkey)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -350,7 +356,7 @@ export const V1ApiAxiosParamCreator = function (configuration?: Configuration) {
          * @throws {RequiredError}
          */
         getGasPrice: async (options: any = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v1/gas-price`;
+            const localVarPath = `/api/v1/gas/price`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -374,41 +380,8 @@ export const V1ApiAxiosParamCreator = function (configuration?: Configuration) {
             };
         },
         /**
-         * Get the current nonce of an address
-         * @param {string} address account address
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getNonce: async (address: string, options: any = {}): Promise<RequestArgs> => {
-            // verify required parameter 'address' is not null or undefined
-            assertParamExists('getNonce', 'address', address)
-            const localVarPath = `/api/v1/nonce/{address}`
-                .replace(`{${"address"}}`, encodeURIComponent(String(address)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter, options.query);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Get transaction history of a pubkey
-         * @param {string} pubkey account pubkey
+         * Get transaction history by address
+         * @param {string} pubkey account address
          * @param {number} [page] page number
          * @param {number} [pageSize] page size
          * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
@@ -418,7 +391,7 @@ export const V1ApiAxiosParamCreator = function (configuration?: Configuration) {
         getTxHistory: async (pubkey: string, page?: number, pageSize?: number, contract?: string, options: any = {}): Promise<RequestArgs> => {
             // verify required parameter 'pubkey' is not null or undefined
             assertParamExists('getTxHistory', 'pubkey', pubkey)
-            const localVarPath = `/api/v1/txs/{pubkey}`
+            const localVarPath = `/api/v1/account/{pubkey}/txs`
                 .replace(`{${"pubkey"}}`, encodeURIComponent(String(pubkey)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -512,13 +485,13 @@ export const V1ApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Get balance of a pubkey
-         * @param {string} pubkey account pubkey
+         * Get account details by address
+         * @param {string} pubkey account address
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getBalance(pubkey: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<EthereumBalance>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getBalance(pubkey, options);
+        async getAccount(pubkey: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<EthereumAccount>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAccount(pubkey, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -531,18 +504,8 @@ export const V1ApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Get the current nonce of an address
-         * @param {string} address account address
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getNonce(address: string, options?: any): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<number>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getNonce(address, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * Get transaction history of a pubkey
-         * @param {string} pubkey account pubkey
+         * Get transaction history by address
+         * @param {string} pubkey account address
          * @param {number} [page] page number
          * @param {number} [pageSize] page size
          * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
@@ -585,13 +548,13 @@ export const V1ApiFactory = function (configuration?: Configuration, basePath?: 
             return localVarFp.estimateGas(data, to, value, options).then((request) => request(axios, basePath));
         },
         /**
-         * Get balance of a pubkey
-         * @param {string} pubkey account pubkey
+         * Get account details by address
+         * @param {string} pubkey account address
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getBalance(pubkey: string, options?: any): AxiosPromise<EthereumBalance> {
-            return localVarFp.getBalance(pubkey, options).then((request) => request(axios, basePath));
+        getAccount(pubkey: string, options?: any): AxiosPromise<EthereumAccount> {
+            return localVarFp.getAccount(pubkey, options).then((request) => request(axios, basePath));
         },
         /**
          * Get the current gas price from the node
@@ -602,17 +565,8 @@ export const V1ApiFactory = function (configuration?: Configuration, basePath?: 
             return localVarFp.getGasPrice(options).then((request) => request(axios, basePath));
         },
         /**
-         * Get the current nonce of an address
-         * @param {string} address account address
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getNonce(address: string, options?: any): AxiosPromise<number> {
-            return localVarFp.getNonce(address, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Get transaction history of a pubkey
-         * @param {string} pubkey account pubkey
+         * Get transaction history by address
+         * @param {string} pubkey account address
          * @param {number} [page] page number
          * @param {number} [pageSize] page size
          * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
@@ -663,31 +617,17 @@ export interface V1ApiEstimateGasRequest {
 }
 
 /**
- * Request parameters for getBalance operation in V1Api.
+ * Request parameters for getAccount operation in V1Api.
  * @export
- * @interface V1ApiGetBalanceRequest
+ * @interface V1ApiGetAccountRequest
  */
-export interface V1ApiGetBalanceRequest {
-    /**
-     * account pubkey
-     * @type {string}
-     * @memberof V1ApiGetBalance
-     */
-    readonly pubkey: string
-}
-
-/**
- * Request parameters for getNonce operation in V1Api.
- * @export
- * @interface V1ApiGetNonceRequest
- */
-export interface V1ApiGetNonceRequest {
+export interface V1ApiGetAccountRequest {
     /**
      * account address
      * @type {string}
-     * @memberof V1ApiGetNonce
+     * @memberof V1ApiGetAccount
      */
-    readonly address: string
+    readonly pubkey: string
 }
 
 /**
@@ -697,7 +637,7 @@ export interface V1ApiGetNonceRequest {
  */
 export interface V1ApiGetTxHistoryRequest {
     /**
-     * account pubkey
+     * account address
      * @type {string}
      * @memberof V1ApiGetTxHistory
      */
@@ -758,14 +698,14 @@ export class V1Api extends BaseAPI {
     }
 
     /**
-     * Get balance of a pubkey
-     * @param {V1ApiGetBalanceRequest} requestParameters Request parameters.
+     * Get account details by address
+     * @param {V1ApiGetAccountRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof V1Api
      */
-    public getBalance(requestParameters: V1ApiGetBalanceRequest, options?: any) {
-        return V1ApiFp(this.configuration).getBalance(requestParameters.pubkey, options).then((request) => request(this.axios, this.basePath));
+    public getAccount(requestParameters: V1ApiGetAccountRequest, options?: any) {
+        return V1ApiFp(this.configuration).getAccount(requestParameters.pubkey, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -779,18 +719,7 @@ export class V1Api extends BaseAPI {
     }
 
     /**
-     * Get the current nonce of an address
-     * @param {V1ApiGetNonceRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof V1Api
-     */
-    public getNonce(requestParameters: V1ApiGetNonceRequest, options?: any) {
-        return V1ApiFp(this.configuration).getNonce(requestParameters.address, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Get transaction history of a pubkey
+     * Get transaction history by address
      * @param {V1ApiGetTxHistoryRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}

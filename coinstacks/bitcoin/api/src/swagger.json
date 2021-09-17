@@ -6,42 +6,43 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
-			"Balance": {
-				"description": "Contains info about balance by pubkey (address or xpub)",
+			"Account": {
+				"description": "Contains info about account details for an address or xpub",
 				"properties": {
-					"pubkey": {
+					"balance": {
 						"type": "string"
 					},
-					"balance": {
+					"pubkey": {
 						"type": "string"
 					}
 				},
 				"required": [
-					"pubkey",
-					"balance"
+					"balance",
+					"pubkey"
 				],
 				"type": "object",
 				"additionalProperties": false
 			},
-			"BitcoinBalance": {
-				"description": "Contains additional bitcoin specific balance info",
+			"BitcoinAccount": {
+				"description": "Contains additional bitcoin specific info",
 				"properties": {
-					"pubkey": {
+					"balance": {
 						"type": "string"
 					},
-					"balance": {
+					"pubkey": {
 						"type": "string"
 					},
 					"addresses": {
 						"items": {
-							"$ref": "#/components/schemas/Balance"
+							"$ref": "#/components/schemas/Account"
 						},
-						"type": "array"
+						"type": "array",
+						"description": "Account details by address if BitcoinAccount was fetched by xpub"
 					}
 				},
 				"required": [
-					"pubkey",
-					"balance"
+					"balance",
+					"pubkey"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -230,16 +231,16 @@
 	},
 	"openapi": "3.0.0",
 	"paths": {
-		"/api/v1/balance/{pubkey}": {
+		"/api/v1/account/{pubkey}": {
 			"get": {
-				"operationId": "GetBalance",
+				"operationId": "GetAccount",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/BitcoinBalance"
+									"$ref": "#/components/schemas/BitcoinAccount"
 								},
 								"examples": {
 									"Example 1": {
@@ -295,14 +296,14 @@
 						}
 					}
 				},
-				"description": "Get balance of a pubkey\n\nExamples\n1. Bitcoin (address)\n2. Bitcoin (xpub)",
+				"description": "Get account details by address or xpub\n\nExamples\n1. Bitcoin (address)\n2. Bitcoin (xpub)",
 				"tags": [
 					"v1"
 				],
 				"security": [],
 				"parameters": [
 					{
-						"description": "account pubkey",
+						"description": "account address or xpub",
 						"in": "path",
 						"name": "pubkey",
 						"required": true,
@@ -321,7 +322,7 @@
 				]
 			}
 		},
-		"/api/v1/txs/{address}": {
+		"/api/v1/account/{pubkey}/txs": {
 			"get": {
 				"operationId": "GetTxHistory",
 				"responses": {
@@ -389,20 +390,28 @@
 						}
 					}
 				},
-				"description": "Get transaction history of a pubkey",
+				"description": "Get transaction history by address or xpub",
 				"tags": [
 					"v1"
 				],
 				"security": [],
 				"parameters": [
 					{
+						"description": "account address or xpub",
 						"in": "path",
-						"name": "address",
+						"name": "pubkey",
 						"required": true,
 						"schema": {
 							"type": "string"
 						},
-						"example": "336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU"
+						"examples": {
+							"Example 1": {
+								"value": "336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU"
+							},
+							"Example 2": {
+								"value": "xpub6DQYbVJSVvJPzpYenir7zVSf2WPZRu69LxZuMezzAKuT6biPcug6Vw1zMk4knPBeNKvioutc4EGpPQ8cZiWtjcXYvJ6wPiwcGmCkihA9Jy3"
+							}
+						}
 					},
 					{
 						"description": "page number",
@@ -437,7 +446,7 @@
 				]
 			}
 		},
-		"/api/v1/utxo/{pubkey}": {
+		"/api/v1/account/{pubkey}/utxos": {
 			"get": {
 				"operationId": "GetUtxos",
 				"responses": {
@@ -498,14 +507,14 @@
 						}
 					}
 				},
-				"description": "Get all unspent transaction outputs for a pubkey",
+				"description": "Get all unspent transaction outputs for an address or xpub",
 				"tags": [
 					"v1"
 				],
 				"security": [],
 				"parameters": [
 					{
-						"description": "account pubkey",
+						"description": "account address or xpub",
 						"in": "path",
 						"name": "pubkey",
 						"required": true,

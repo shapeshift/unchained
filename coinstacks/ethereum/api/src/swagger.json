@@ -9,45 +9,49 @@
 			"Token": {
 				"description": "Contains info about a token including balance for an address",
 				"properties": {
-					"type": {
-						"type": "string"
-					},
-					"name": {
+					"balance": {
 						"type": "string"
 					},
 					"contract": {
-						"type": "string"
-					},
-					"symbol": {
 						"type": "string"
 					},
 					"decimals": {
 						"type": "number",
 						"format": "double"
 					},
-					"balance": {
+					"name": {
+						"type": "string"
+					},
+					"symbol": {
+						"type": "string"
+					},
+					"type": {
 						"type": "string"
 					}
 				},
 				"required": [
-					"type",
-					"name",
+					"balance",
 					"contract",
-					"symbol",
 					"decimals",
-					"balance"
+					"name",
+					"symbol",
+					"type"
 				],
 				"type": "object",
 				"additionalProperties": false
 			},
-			"EthereumBalance": {
-				"description": "Contains additional ethereum specific balance info",
+			"EthereumAccount": {
+				"description": "Contains additional ethereum specific info",
 				"properties": {
+					"balance": {
+						"type": "string"
+					},
 					"pubkey": {
 						"type": "string"
 					},
-					"balance": {
-						"type": "string"
+					"nonce": {
+						"type": "number",
+						"format": "double"
 					},
 					"tokens": {
 						"items": {
@@ -57,8 +61,9 @@
 					}
 				},
 				"required": [
-					"pubkey",
 					"balance",
+					"pubkey",
+					"nonce",
 					"tokens"
 				],
 				"type": "object",
@@ -217,30 +222,31 @@
 	},
 	"openapi": "3.0.0",
 	"paths": {
-		"/api/v1/balance/{pubkey}": {
+		"/api/v1/account/{pubkey}": {
 			"get": {
-				"operationId": "GetBalance",
+				"operationId": "GetAccount",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/EthereumBalance"
+									"$ref": "#/components/schemas/EthereumAccount"
 								},
 								"examples": {
 									"Example 1": {
 										"value": {
-											"pubkey": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa",
 											"balance": "284809805024198107",
+											"nonce": 1,
+											"pubkey": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa",
 											"tokens": [
 												{
-													"type": "ERC20",
-													"name": "FOX",
+													"balance": "1337",
 													"contract": "0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d",
-													"symbol": "FOX",
 													"decimals": 18,
-													"balance": "1337"
+													"name": "FOX",
+													"symbol": "FOX",
+													"type": "ERC20"
 												}
 											]
 										}
@@ -280,14 +286,14 @@
 						}
 					}
 				},
-				"description": "Get balance of a pubkey",
+				"description": "Get account details by address",
 				"tags": [
 					"v1"
 				],
 				"security": [],
 				"parameters": [
 					{
-						"description": "account pubkey",
+						"description": "account address",
 						"in": "path",
 						"name": "pubkey",
 						"required": true,
@@ -299,7 +305,7 @@
 				]
 			}
 		},
-		"/api/v1/txs/{pubkey}": {
+		"/api/v1/account/{pubkey}/txs": {
 			"get": {
 				"operationId": "GetTxHistory",
 				"responses": {
@@ -367,14 +373,14 @@
 						}
 					}
 				},
-				"description": "Get transaction history of a pubkey",
+				"description": "Get transaction history by address",
 				"tags": [
 					"v1"
 				],
 				"security": [],
 				"parameters": [
 					{
-						"description": "account pubkey",
+						"description": "account address",
 						"in": "path",
 						"name": "pubkey",
 						"required": true,
@@ -416,7 +422,7 @@
 				]
 			}
 		},
-		"/api/v1/estimate-gas": {
+		"/api/v1/gas/estimate": {
 			"get": {
 				"operationId": "EstimateGas",
 				"responses": {
@@ -495,7 +501,7 @@
 				]
 			}
 		},
-		"/api/v1/gas-price": {
+		"/api/v1/gas/price": {
 			"get": {
 				"operationId": "GetGasPrice",
 				"responses": {
@@ -531,76 +537,6 @@
 				],
 				"security": [],
 				"parameters": []
-			}
-		},
-		"/api/v1/nonce/{address}": {
-			"get": {
-				"operationId": "GetNonce",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "number",
-									"format": "double"
-								},
-								"examples": {
-									"Example 1": {
-										"value": 21933
-									}
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Bad Request",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/BadRequestError"
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Validation Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ValidationError"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/InternalServerError"
-								}
-							}
-						}
-					}
-				},
-				"description": "Get the current nonce of an address",
-				"tags": [
-					"v1"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"description": "account address",
-						"in": "path",
-						"name": "address",
-						"required": true,
-						"schema": {
-							"type": "string"
-						},
-						"example": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
-					}
-				]
 			}
 		},
 		"/api/v1/send": {
