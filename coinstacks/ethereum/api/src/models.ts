@@ -1,22 +1,23 @@
 /* unable to import models from a module with tsoa */
-import { Balance } from '../../../common/api/src'
+import { Account } from '../../../common/api/src'
 
 /**
  * Contains info about a token including balance for an address
  */
 export interface Token {
-  type: string
-  name: string
-  contract: string
-  symbol: string
-  decimals: number
   balance: string
+  contract: string
+  decimals: number
+  name: string
+  symbol: string
+  type: string
 }
 
 /**
- * Contains additional ethereum specific balance info
+ * Contains additional ethereum specific info
  */
-export interface EthereumBalance extends Balance {
+export interface EthereumAccount extends Account {
+  nonce: number
   tokens: Array<Token>
 }
 
@@ -33,7 +34,7 @@ export interface EthereumAPI {
    *
    * @returns {Promise<string>} estimated gas to be used for the transaction
    */
-  //@Get('/estimate-gas')
+  //@Get('/gas/estimate')
   estimateGas(data: string, to: string, value: string): Promise<string>
 
   /**
@@ -41,16 +42,6 @@ export interface EthereumAPI {
    *
    * @returns {Promise<string>} current gas price in wei
    */
-  // @Get('/gas-price')
+  // @Get('/gas/price')
   getGasPrice(): Promise<string>
-
-  /**
-   * Get the current nonce of an address
-   *
-   * @param address account address
-   *
-   * @returns {Promise<number>} account nonce
-   */
-  // @Get('nonce/{address}')
-  getNonce(address: string): Promise<number>
 }

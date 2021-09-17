@@ -8,10 +8,11 @@ import {
   BaseAPI,
   InternalServerError,
   SendTxBody,
+  Tx,
   TxHistory,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { EthereumAPI, EthereumBalance, Token } from './models'
+import { EthereumAPI, EthereumAccount, Token } from './models'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const RPC_URL = process.env.RPC_URL
@@ -26,33 +27,34 @@ const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
 @Tags('v1')
 export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   /**
-   * Get balance of a pubkey
+   * Get account details by address
    *
-   * @param {string} pubkey account pubkey
+   * @param {string} pubkey account address
    *
-   * @returns {Promise<Balance>} account balance
+   * @returns {Promise<Account>} account details
    *
    * @example pubkey "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
    */
-  @Example<EthereumBalance>({
-    pubkey: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
+  @Example<EthereumAccount>({
     balance: '284809805024198107',
+    nonce: 1,
+    pubkey: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
     tokens: [
       {
-        type: 'ERC20',
-        name: 'FOX',
-        contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
-        symbol: 'FOX',
-        decimals: 18,
         balance: '1337',
+        contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
+        decimals: 18,
+        name: 'FOX',
+        symbol: 'FOX',
+        type: 'ERC20',
       },
     ],
   })
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('balance/{pubkey}')
-  async getBalance(@Path() pubkey: string): Promise<EthereumBalance> {
+  @Get('account/{pubkey}')
+  async getAccount(@Path() pubkey: string): Promise<EthereumAccount> {
     try {
       const data = await blockbook.getAddress(pubkey, undefined, undefined, undefined, undefined, 'tokenBalances')
 
@@ -72,8 +74,9 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
       }, [])
 
       return {
-        pubkey: data.address,
         balance: data.balance,
+        nonce: Number(data.nonce ?? 0),
+        pubkey: data.address,
         tokens,
       }
     } catch (err) {
@@ -82,9 +85,9 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   }
 
   /**
-   * Get transaction history of a pubkey
+   * Get transaction history by address
    *
-   * @param {string} pubkey account pubkey
+   * @param {string} pubkey account address
    * @param {number} [page] page number
    * @param {number} [pageSize] page size
    * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
@@ -115,7 +118,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('txs/{pubkey}')
+  @Get('account/{pubkey}/txs')
   async getTxHistory(
     @Path() pubkey: string,
     @Query() page?: number,
@@ -130,9 +133,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
         totalPages: data.totalPages ?? 1,
         txs: data.txs,
         transactions:
-          data.transactions?.map((tx) => ({
-            network: 'ethereum',
-            symbol: tx.tokenTransfers?.[0].symbol ?? 'ETH',
+          data.transactions?.map<Tx>((tx) => ({
             txid: tx.txid,
             status: tx.confirmations > 0 ? 'confirmed' : 'pending',
             from: tx.vin[0].addresses?.[0] ?? 'coinbase',
@@ -166,7 +167,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   @Example<string>('26540')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('/estimate-gas')
+  @Get('/gas/estimate')
   async estimateGas(@Query() data: string, @Query() to: string, @Query() value: string): Promise<string> {
     try {
       const tx: TransactionRequest = {
@@ -188,36 +189,13 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
    */
   @Example<string>('123456789')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('/gas-price')
+  @Get('/gas/price')
   async getGasPrice(): Promise<string> {
     try {
       const gasPrice = await provider.getGasPrice()
       return gasPrice.toString()
     } catch (err) {
       throw new ApiError('Internal Server Error', 500, JSON.stringify(err))
-    }
-  }
-
-  /**
-   * Get the current nonce of an address
-   *
-   * @param {string} address account address
-   *
-   * @returns {Promise<number>} account nonce
-   *
-   * @example address "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
-   */
-  @Example<number>(21933)
-  @Response<BadRequestError>(400, 'Bad Request')
-  @Response<ValidationError>(422, 'Validation Error')
-  @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('nonce/{address}')
-  async getNonce(@Path() address: string): Promise<number> {
-    try {
-      const { nonce } = await blockbook.getAddress(address, undefined, undefined, undefined, undefined, 'basic')
-      return Number(nonce ?? 0)
-    } catch (err) {
-      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
     }
   }
 
