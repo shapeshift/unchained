@@ -2,10 +2,8 @@ import { Connection } from 'amqp-ts'
 import { logger } from '@shapeshiftoss/logger'
 
 const BROKER_URL = process.env.BROKER_URL as string
-const COINSTACK = process.env.COINSTACK as string
 
 if (!BROKER_URL) throw new Error('BROKER_URL env var not set')
-if (!COINSTACK) throw new Error('COINSTACK env var not set')
 
 const connection = new Connection(BROKER_URL)
 const deadLetterExchange = `exchange.bitcoin.deadLetter`

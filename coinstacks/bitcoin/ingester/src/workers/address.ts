@@ -3,10 +3,8 @@ import { Message, Worker, SyncTx } from '@shapeshiftoss/common-ingester'
 import { logger } from '@shapeshiftoss/logger'
 
 const INDEXER_URL = process.env.INDEXER_URL
-const COINSTACK = process.env.INDEXER_WS_URL
 
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
-if (!COINSTACK) throw new Error('COINSTACK env var not set')
 
 const blockbook = new Blockbook(INDEXER_URL)
 

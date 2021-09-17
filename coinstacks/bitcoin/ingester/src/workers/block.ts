@@ -2,9 +2,6 @@ import { Worker, Message } from '@shapeshiftoss/common-ingester'
 import { logger } from '@shapeshiftoss/logger'
 import { BTCBlock } from '../types'
 
-const COINSTACK = process.env.COINSTACK
-if (!COINSTACK) throw new Error('COINSTACK env var not set')
-
 const onMessage = (worker: Worker) => (message: Message) => {
   const block: BTCBlock = message.getContent()
   logger.debug(`block: (${Number(block.height)}) ${block.hash}`)

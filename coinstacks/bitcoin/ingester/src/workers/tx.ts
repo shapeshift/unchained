@@ -8,12 +8,10 @@ import { SyncTx } from '@shapeshiftoss/common-ingester'
 const INDEXER_URL = process.env.INDEXER_URL
 const MONGO_DBNAME = process.env.MONGO_DBNAME
 const MONGO_URL = process.env.MONGO_URL
-const COINSTACK = process.env.COINSTACK
 
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 if (!MONGO_DBNAME) throw new Error('MONGO_DBNAME env var not set')
 if (!MONGO_URL) throw new Error('MONGO_URL env var not set')
-if (!COINSTACK) throw new Error('COINSTACK env var not set')
 
 const POOL_SIZE = 100
 const PAGE_SIZE = 1000

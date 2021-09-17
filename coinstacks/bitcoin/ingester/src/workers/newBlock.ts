@@ -7,13 +7,10 @@ import { BTCBlock, ReorgResult } from '../types'
 
 const NODE_ENV = process.env.NODE_ENV
 const RPC_URL = process.env.RPC_URL as string
-const COINSTACK = process.env.COINSTACK
 
 if (NODE_ENV !== 'test') {
   if (!RPC_URL) throw new Error('RPC_URL env var not set')
 }
-
-if (!COINSTACK) throw new Error('COINSTACK env var not set')
 
 const REORG_BUFFER = 1
 
