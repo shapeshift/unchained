@@ -26,14 +26,12 @@ const getBlockByHash = async (hashOrHeight: string): Promise<BTCBlock> => {
     method: 'getblock',
     params: [hashOrHeight],
   })
-  logger.debug(`getBlockByHash() result: ${data.result}`)
   if (data.error) throw new Error(`failed to get block ${hashOrHeight}: ${data.error.message}`)
   if (!data.result) throw new Error(`failed to get block ${hashOrHeight}`)
   return data.result as BTCBlock
 }
 
 const getBlockHash = async (height: number): Promise<string> => {
-  logger.debug(`getBlockHash(), height: ${height}`)
   const { data } = await axios.post<RPCResponse>(RPC_URL, {
     jsonrpc: '1.0',
     id: height,
@@ -41,14 +39,12 @@ const getBlockHash = async (height: number): Promise<string> => {
     params: [height],
   })
 
-  logger.debug(`getBlockHash() result: ${data.result}`)
   if (data.error) throw new Error(`failed to get blockhash for block number ${height}: ${data.error.message}`)
   if (!data.result) throw new Error(`failed to get blockhash for block number ${height}`)
   return data.result as string
 }
 
 const getHeight = async (): Promise<number> => {
-  logger.debug('getHeight()')
   const { data } = await axios.post<RPCResponse>(RPC_URL, {
     jsonrpc: '1.0',
     id: 'getblockcount',
@@ -58,7 +54,6 @@ const getHeight = async (): Promise<number> => {
 
   if (data.error) throw new Error(`failed to get node height: ${data.error.message}`)
   if (!data.result) throw new Error('failed to get node height')
-  logger.debug(`getHeight() result:  ${data.result}`)
   return Number(data.result)
 }
 

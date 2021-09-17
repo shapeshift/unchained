@@ -34,16 +34,17 @@ const getPages = (from: number, to: number, max: number): Array<number> => {
   return pages
 }
 
+// todo - can there be more than one address per vin?
 const getAddresses = (tx: Tx): Array<string> => {
-  const addresses: Array<string> = []
+  let addresses: Array<string> = []
 
-  const sendAddress = tx.vin[0]?.addresses?.[0]
-  const receiveAddress = tx.vout[0]?.addresses?.[0]
+  const sendAddresses = tx.vin.map((vin) => (vin.addresses ? vin.addresses[0] : ''))
+  const receiveAddresses = tx.vin.map((vin) => (vin.addresses ? vin.addresses[0] : ''))
+  addresses = addresses.concat(sendAddresses, receiveAddresses)
+  const addressesFiltered = addresses.filter((address) => address != '')
 
-  sendAddress && addresses.push(sendAddress)
-  receiveAddress && addresses.push(receiveAddress)
-
-  return addresses
+  logger.debug(`addresses: ${addresses}`)
+  return addressesFiltered
 }
 
 const getTxHistory = async (address: string, fromHeight: number, toHeight?: number): Promise<TxHistory> => {
@@ -145,7 +146,7 @@ const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string):
 const onMessage = (worker: Worker) => async (message: Message) => {
   const tx: Tx = message.getContent()
 
-  logger.debug(`processing bitcoin tx ${tx.txid}`)
+  logger.debug(`txid ${tx.txid}`)
   try {
     let requeue = false
     for await (const address of getAddresses(tx)) {
