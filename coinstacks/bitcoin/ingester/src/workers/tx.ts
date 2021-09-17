@@ -167,9 +167,9 @@ const onMessage = (worker: Worker) => async (message: Message) => {
 
 const main = async () => {
   const worker = await Worker.init({
-    queueName: `queue.${COINSTACK}.tx`,
-    exchangeName: `exchange.${COINSTACK}.txid.address`,
-    requeueName: `exchange.${COINSTACK}.tx`,
+    queueName: `queue.bitcoin.tx`,
+    exchangeName: `exchange.bitcoin.txid.address`,
+    requeueName: `exchange.bitcoin.tx`,
   })
 
   worker.queue?.prefetch(100)

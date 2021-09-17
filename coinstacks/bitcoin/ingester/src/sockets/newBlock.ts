@@ -14,7 +14,7 @@ const subscription: Subscription = {
   method: 'subscribeNewBlock',
 }
 
-const socket = new Socket(INDEXER_WS_URL, subscription, `exchange.${COINSTACK}`)
+const socket = new Socket(INDEXER_WS_URL, subscription, `exchange.bitcoin`)
 
 const onMessage = async (message: MessageEvent) => {
   try {

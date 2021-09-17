@@ -136,12 +136,12 @@ const onMessage = (newBlockWorker: Worker, reorgWorker: Worker) => async (messag
 
 const main = async () => {
   const newBlockWorker = await Worker.init({
-    queueName: `queue.${COINSTACK}.newBlock`,
-    exchangeName: `exchange.${COINSTACK}.block`,
+    queueName: `queue.bitcoin.newBlock`,
+    exchangeName: `exchange.bitcoin.block`,
   })
 
   const reorgWorker = await Worker.init({
-    exchangeName: `exchange.${COINSTACK}`,
+    exchangeName: `exchange.bitcoin`,
   })
 
   // prime the pump
