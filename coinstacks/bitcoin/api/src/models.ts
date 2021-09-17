@@ -1,11 +1,14 @@
 /* unable to import models from a module with tsoa */
-import { Balance } from '../../../common/api/src'
+import { Account } from '../../../common/api/src'
 
 /**
- * Contains additional bitcoin specific balance info
+ * Contains additional bitcoin specific info
  */
-export interface BitcoinBalance extends Balance {
-  addresses?: Array<Balance>
+export interface BitcoinAccount extends Account {
+  /**
+   * Account details by address if BitcoinAccount was fetched by xpub
+   */
+  addresses?: Array<Account>
 }
 
 /**
@@ -30,6 +33,6 @@ export interface BitcoinAPI {
    *
    * @returns {Promise<Array<Utxo>>} account utxos
    */
-  // @Get('utxos/{pubkey}')
+  // @Get('account/{pubkey}/utxos')
   getUtxos(pubkey: string): Promise<Array<Utxo>>
 }

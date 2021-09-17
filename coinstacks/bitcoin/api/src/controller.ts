@@ -3,20 +3,19 @@ import { Address, Blockbook, Xpub } from '@shapeshiftoss/blockbook'
 import {
   ApiError,
   BadRequestError,
-  Balance,
+  Account,
   BaseAPI,
   InternalServerError,
   SendTxBody,
+  Tx,
   TxHistory,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { BitcoinAPI, BitcoinBalance, Utxo } from './models'
+import { BitcoinAPI, BitcoinAccount, Utxo } from './models'
 
 const INDEXER_URL = process.env.INDEXER_URL
-const RPC_URL = process.env.RPC_URL
 
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
-if (!RPC_URL) throw new Error('RPC_URL env var not set')
 
 const blockbook = new Blockbook(INDEXER_URL)
 
@@ -28,24 +27,24 @@ const isXpub = (pubkey: string): boolean => {
 @Tags('v1')
 export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   /**
-   * Get balance of a pubkey
+   * Get account details by address or xpub
    *
    * Examples
    * 1. Bitcoin (address)
    * 2. Bitcoin (xpub)
    *
-   * @param {string} pubkey account pubkey
+   * @param {string} pubkey account address or xpub
    *
-   * @returns {Promise<Balance>} account balance
+   * @returns {Promise<Account>} account details
    *
    * @example pubkey "336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU"
    * @example pubkey "xpub6CUGRUonZSQ4TWtTMmzXdrXDtypWKiKrhko4egpiMZbpiaQL2jkwSB1icqYh2cfDfVxdx4df189oLKnC5fSwqPfgyP3hooxujYzAu3fDVmz"
    */
-  @Example<BitcoinBalance>({
+  @Example<BitcoinAccount>({
     pubkey: '336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU',
     balance: '974652',
   })
-  @Example<BitcoinBalance>({
+  @Example<BitcoinAccount>({
     pubkey:
       'xpub6CUGRUonZSQ4TWtTMmzXdrXDtypWKiKrhko4egpiMZbpiaQL2jkwSB1icqYh2cfDfVxdx4df189oLKnC5fSwqPfgyP3hooxujYzAu3fDVmz',
     balance: '12688908',
@@ -54,8 +53,8 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('balance/{pubkey}')
-  async getBalance(@Path() pubkey: string): Promise<BitcoinBalance> {
+  @Get('account/{pubkey}')
+  async getAccount(@Path() pubkey: string): Promise<BitcoinAccount> {
     try {
       let data: Address | Xpub
       if (isXpub(pubkey)) {
@@ -64,7 +63,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
         data = await blockbook.getAddress(pubkey, undefined, undefined, undefined, undefined, 'basic')
       }
 
-      const addresses = (data.tokens ?? []).reduce<Array<Balance>>((prev, token) => {
+      const addresses = data.tokens?.reduce<Array<Account>>((prev, token) => {
         if (token.balance) {
           prev.push({ pubkey: token.name, balance: token.balance })
         }
@@ -83,16 +82,17 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   }
 
   /**
-   * Get transaction history of a pubkey
+   * Get transaction history by address or xpub
    *
-   * @param {string} pubkey account pubkey
+   * @param {string} pubkey account address or xpub
    * @param {number} [page] page number
    * @param {number} [pageSize] page size
    * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
    *
    * @returns {Promise<TxHistory>} transaction history
    *
-   * @example address "336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU"
+   * @example pubkey "336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU"
+   * @example pubkey "xpub6DQYbVJSVvJPzpYenir7zVSf2WPZRu69LxZuMezzAKuT6biPcug6Vw1zMk4knPBeNKvioutc4EGpPQ8cZiWtjcXYvJ6wPiwcGmCkihA9Jy3"
    */
   @Example<TxHistory>({
     page: 1,
@@ -116,24 +116,27 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('txs/{address}')
+  @Get('account/{pubkey}/txs')
   async getTxHistory(
-    @Path() address: string,
+    @Path() pubkey: string,
     @Query() page?: number,
     @Query() pageSize = 25,
     @Query() contract?: string
   ): Promise<TxHistory> {
     try {
-      const data = await blockbook.getAddress(address, page, pageSize, undefined, undefined, 'txs', contract)
+      let data: Address | Xpub
+      if (isXpub(pubkey)) {
+        data = await blockbook.getXpub(pubkey, page, pageSize, undefined, undefined, 'txs')
+      } else {
+        data = await blockbook.getAddress(pubkey, page, pageSize, undefined, undefined, 'txs', contract)
+      }
 
       return {
         page: data.page ?? 1,
         totalPages: data.totalPages ?? 1,
         txs: data.txs,
         transactions:
-          data.transactions?.map((tx) => ({
-            network: 'bitcoin',
-            symbol: tx.tokenTransfers?.[0].symbol ?? 'BTC',
+          data.transactions?.map<Tx>((tx) => ({
             txid: tx.txid,
             status: tx.confirmations > 0 ? 'confirmed' : 'pending',
             from: tx.vin[0].addresses?.[0] ?? 'coinbase',
@@ -152,9 +155,9 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   }
 
   /**
-   * Get all unspent transaction outputs for a pubkey
+   * Get all unspent transaction outputs for an address or xpub
    *
-   * @param {string} pubkey account pubkey
+   * @param {string} pubkey account address or xpub
    *
    * @example pubkey "14mMwtZCGiAtyr8KnnAZYyHmZ9Zvj71h4t"
    * @example pubkey "xpub6DQYbVJSVvJPzpYenir7zVSf2WPZRu69LxZuMezzAKuT6biPcug6Vw1zMk4knPBeNKvioutc4EGpPQ8cZiWtjcXYvJ6wPiwcGmCkihA9Jy3"
@@ -171,7 +174,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('utxo/{pubkey}')
+  @Get('account/{pubkey}/utxos')
   async getUtxos(@Path() pubkey: string): Promise<Array<Utxo>> {
     try {
       const data = await blockbook.getUtxo(pubkey, true)
