@@ -111,10 +111,9 @@ const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string):
 
   logger.info(`Address sync for: ${address}, from: ${fromHeight}, to: ${toHeight} started`)
 
-  const txHistory = await Promise.all([getTxHistory(address, fromHeight, toHeight)])
+  const txHistory = await getTxHistory(address, fromHeight, toHeight)
 
-  const txids = txHistory
-  txids.forEach((txid) => {
+  txHistory.forEach((txid) => {
     const sTx: SyncTx = {
       address: address,
       document: document,
