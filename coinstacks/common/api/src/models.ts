@@ -28,11 +28,11 @@ export interface InternalServerError {
 }
 
 /**
- * Contains info about balance by pubkey (address or xpub)
+ * Contains info about account details for an address or xpub
  */
-export interface Balance {
-  pubkey: string
+export interface Account {
   balance: string
+  pubkey: string
 }
 
 /**
