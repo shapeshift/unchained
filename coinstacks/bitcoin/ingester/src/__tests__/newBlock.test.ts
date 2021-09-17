@@ -42,6 +42,7 @@ describe('newBlockWorker', () => {
     it('should handle a reorg if there are orphaned blocks in db', async () => {
       const worker = await Worker.init({})
 
+      // Note: blocks 700972, 700971, 700970 in the db have incorrect hashes in order to trigger a reorg
       const dbLatestBlock = db[700972]
       const nodeBlock = node[700973]
 
@@ -57,8 +58,8 @@ describe('newBlockWorker', () => {
 
       const actual = await handleReorg(worker, dbLatestBlock, nodeBlock)
 
-      expect(orphanMock).toHaveBeenCalledTimes(3)
-      expect(sendMessageMock).toHaveBeenCalledTimes(3)
+      expect(orphanMock).toHaveBeenCalledTimes(3) // 3,
+      expect(sendMessageMock).toHaveBeenCalledTimes(3) // 3
       expect(actual).toEqual(expected)
     })
 
