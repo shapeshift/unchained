@@ -63,6 +63,34 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
         data = await blockbook.getAddress(pubkey, undefined, undefined, undefined, undefined, 'basic')
       }
 
+      let changeIndex: number | null = null
+      let receiveIndex: number | null = null
+      if (data.tokens) {
+        for (let i = data.tokens.length - 1; i >= 0 && (changeIndex === null || receiveIndex === null); i--) {
+          const splitPath = data.tokens[i].path?.split('/') || []
+          const [, , , , change, index] = splitPath
+
+          if (change === '0') {
+            if (receiveIndex === null) {
+              receiveIndex = Number(index) + 1
+            } else {
+              if (receiveIndex < Number(index)) {
+                receiveIndex = Number(index) + 1
+              }
+            }
+          }
+          if (change === '1') {
+            if (changeIndex === null) {
+              changeIndex = Number(index) + 1
+            } else {
+              if (changeIndex < Number(index)) {
+                changeIndex = Number(index) + 1
+              }
+            }
+          }
+        }
+      }
+
       const addresses = data.tokens?.reduce<Array<Account>>((prev, token) => {
         if (token.balance) {
           prev.push({ pubkey: token.name, balance: token.balance })
@@ -75,6 +103,8 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
         pubkey: data.address,
         balance: data.balance,
         addresses,
+        receiveIndex,
+        changeIndex,
       }
     } catch (err) {
       throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))

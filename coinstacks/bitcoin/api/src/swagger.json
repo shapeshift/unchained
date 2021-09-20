@@ -38,6 +38,18 @@
 						},
 						"type": "array",
 						"description": "Account details by address if BitcoinAccount was fetched by xpub"
+					},
+					"receiveIndex": {
+						"type": "number",
+						"format": "double",
+						"nullable": true,
+						"description": "The next unused receive address if BitcoinAccount was fetched by xpub"
+					},
+					"changeIndex": {
+						"type": "number",
+						"format": "double",
+						"nullable": true,
+						"description": "The next unused change address if BitcoinAccount was fetched by xpub"
 					}
 				},
 				"required": [

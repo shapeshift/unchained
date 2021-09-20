@@ -9,6 +9,16 @@ export interface BitcoinAccount extends Account {
    * Account details by address if BitcoinAccount was fetched by xpub
    */
   addresses?: Array<Account>
+
+  /**
+   * The next unused receive address if BitcoinAccount was fetched by xpub
+   */
+  receiveIndex?: number | null
+
+  /**
+   * The next unused change address if BitcoinAccount was fetched by xpub
+   */
+  changeIndex?: number | null
 }
 
 /**

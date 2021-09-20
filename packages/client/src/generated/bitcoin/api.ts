@@ -77,6 +77,15 @@ export interface BitcoinAccount {
      * @memberof BitcoinAccount
      */
     addresses?: Array<Account>;
+    /**
+     * The next unused receive address if BitcoinAccount was fetched by xpub
+     */
+    receiveIndex?: number | null
+
+    /**
+     * The next unused change address if BitcoinAccount was fetched by xpub
+     */
+    changeIndex?: number | null
 }
 /**
  * Contains info about a 500 Internal Server Error response

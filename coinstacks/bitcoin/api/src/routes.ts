@@ -24,6 +24,8 @@ const models: TsoaRoute.Models = {
             "balance": {"dataType":"string","required":true},
             "pubkey": {"dataType":"string","required":true},
             "addresses": {"dataType":"array","array":{"ref":"Account"}},
+            "receiveIndex": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}]},
+            "changeIndex": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}]},
         },
         "additionalProperties": false,
     },
