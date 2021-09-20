@@ -24,6 +24,7 @@ export interface BaseConfig {
   dockerhub?: Dockerhub
   cluster: Cluster
   isLocal: boolean
+  additionalEnvironments: string[]
   /**
    * Creates ingress for public dns
    *
@@ -34,6 +35,7 @@ export interface BaseConfig {
 
 export interface Config extends BaseConfig {
   stack: string
+  environment?: string
   api?: ApiConfig
   indexer?: IndexerConfig
   ingester?: IngesterConfig

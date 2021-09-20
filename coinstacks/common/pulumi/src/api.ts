@@ -54,7 +54,7 @@ export async function deployApi(
   asset: string,
   provider: k8s.Provider,
   namespace: string,
-  config: Pick<Config, 'api' | 'dockerhub' | 'isLocal' | 'rootDomainName'>,
+  config: Pick<Config, 'api' | 'dockerhub' | 'isLocal' | 'rootDomainName' | 'environment'>,
   deployDependencies: Input<Array<Resource>> = []
 ): Promise<k8s.apps.v1.Deployment | undefined> {
   if (config.api === undefined) return
@@ -126,6 +126,9 @@ export async function deployApi(
   )
 
   if (config.rootDomainName) {
+    const subdomain = config.environment ? `${config.environment}.api.${asset}` : `api.${asset}`
+    const domain = `${subdomain}.${config.rootDomainName}`
+
     const secretName = `${name}-cert-secret`
 
     new k8s.apiextensions.CustomResource(
@@ -147,7 +150,7 @@ export async function deployApi(
             encoding: 'PKCS1',
             size: 2048,
           },
-          dnsNames: [`api.${asset}.${config.rootDomainName}`],
+          dnsNames: [domain],
           issuerRef: {
             name: 'lets-encrypt',
             kind: 'ClusterIssuer',
@@ -159,7 +162,7 @@ export async function deployApi(
     )
 
     const additionalRootDomainName = process.env.ADDITIONAL_ROOT_DOMAIN_NAME
-    const extraMatch = additionalRootDomainName ? ` || Host(\`api.${asset}.${additionalRootDomainName}\`)` : ''
+    const extraMatch = additionalRootDomainName ? ` || Host(\`${subdomain}.${additionalRootDomainName}\`)` : ''
 
     new k8s.apiextensions.CustomResource(
       `${name}-ingressroute`,
@@ -174,7 +177,7 @@ export async function deployApi(
           entryPoints: ['web', 'websecure'],
           routes: [
             {
-              match: `Host(\`api.${asset}.${config.rootDomainName}\`)` + extraMatch,
+              match: `Host(\`${domain}\`)` + extraMatch,
               kind: 'Rule',
               services: [
                 {
@@ -188,7 +191,7 @@ export async function deployApi(
           ],
           tls: {
             secretName: secretName,
-            domains: [{ main: `api.${asset}.${config.rootDomainName}` }],
+            domains: [{ main: domain }],
           },
         },
       },
@@ -203,7 +206,7 @@ export async function deployApi(
           labels: labels,
         },
         spec: {
-          rules: [{ host: `api.${asset}.${config.rootDomainName}` }],
+          rules: [{ host: domain }],
         },
       },
       { provider }

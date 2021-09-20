@@ -11,8 +11,8 @@ type Outputs = Record<string, any>
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
-  const app = 'unchained'
-  const namespace = 'unchained'
+  const name = 'unchained'
+  const defaultNamespace = 'unchained'
   const outputs: Outputs = {}
 
   let provider: Provider
@@ -20,11 +20,11 @@ export = async (): Promise<Outputs> => {
     const { cluster } = config
     provider = new Provider(cluster, { cluster, context: cluster })
 
-    await deployWatcher(app, provider, namespace)
+    await deployWatcher(name, provider, defaultNamespace)
   } else {
     if (!config.rootDomainName) throw new Error('rootDomainName required')
 
-    const cluster = await EKSClusterLauncher.create(app, {
+    const cluster = await EKSClusterLauncher.create(name, {
       rootDomainName: config.rootDomainName,
       instanceTypes: config.eks.instanceTypes,
       allAZs: config.eks.allAZs,
@@ -40,7 +40,7 @@ export = async (): Promise<Outputs> => {
     provider = new Provider('kube-provider', { kubeconfig: cluster.kubeconfig })
 
     if (config.dockerhub) {
-      const baseImage = `${config.dockerhub.username}/${app}-base`
+      const baseImage = `${config.dockerhub.username}/${name}-base`
       const baseTag = await getBaseHash()
 
       if (!(await hasTag(baseImage, baseTag))) {
@@ -59,7 +59,7 @@ export = async (): Promise<Outputs> => {
         })
       }
 
-      const blockbookImage = `${config.dockerhub.username}/${app}-blockbook`
+      const blockbookImage = `${config.dockerhub.username}/${name}-blockbook`
       const { hash: blockbookTag } = await hashElement(`../packages/blockbook/Dockerfile`, { encoding: 'hex' })
 
       if (!(await hasTag(blockbookImage, blockbookTag))) {
@@ -80,14 +80,28 @@ export = async (): Promise<Outputs> => {
     }
   }
 
-  new core.v1.Namespace(namespace, { metadata: { name: app } }, { provider })
-
-  await deployRabbit(app, provider, namespace, config)
+  // always create 'namespace'. Then if we have additional envs creat them too prefixed with the namespace
+  const additionalNs: string[] = []
+  if (config.additionalEnvironments?.length)
+    config.additionalEnvironments.forEach((env) => additionalNs.push(`${defaultNamespace}-${env}`))
+    // create default namespaces and all additional namespaces
+  ;[defaultNamespace, ...additionalNs].forEach(async (ns, index) => {
+    new core.v1.Namespace(ns, { metadata: { name: ns } }, { provider })
+    if (index === 0) {
+      await deployRabbit(ns, provider, ns, config)
+    } else {
+      await deployRabbit(ns, provider, ns, config, `${ns}-`)
+    }
+  })
 
   outputs.cluster = config.cluster
   outputs.isLocal = config.isLocal
   outputs.dockerhub = config.dockerhub
   outputs.rootDomainName = config.rootDomainName
+  outputs.namespaces = {
+    default: defaultNamespace,
+    additional: additionalNs,
+  }
 
   return outputs
 }

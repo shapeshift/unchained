@@ -14,14 +14,15 @@ export async function deployRabbit(
   app: string,
   provider: k8s.Provider,
   namespace: string,
-  config: Pick<Config, 'rabbit' | 'dockerhub' | 'isLocal'>
+  config: Pick<Config, 'rabbit' | 'dockerhub' | 'isLocal'>,
+  resourcePrefix?: string
 ): Promise<void> {
   if (config.rabbit === undefined) return
 
   const labels = { app: app, tier: 'rabbitmq' }
 
   new k8s.core.v1.Service(
-    `${labels.tier}-svc`,
+    `${resourcePrefix ?? ''}${labels.tier}-svc`,
     {
       metadata: {
         name: `${labels.tier}-svc`,
@@ -83,7 +84,7 @@ export async function deployRabbit(
   }
 
   new k8s.apps.v1.StatefulSet(
-    `${labels.tier}-sts`,
+    `${resourcePrefix ?? ''}${labels.tier}-sts`,
     {
       metadata: {
         namespace: namespace,

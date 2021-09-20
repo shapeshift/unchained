@@ -20,11 +20,30 @@ export const getConfig = async (): Promise<{ kubeconfig: string; config: Config 
   const kubeconfig = (await stackReference.getOutputValue('kubeconfig')) as string
 
   config.isLocal = (await stackReference.getOutputValue('isLocal')) as boolean
+  const deployedNamespaces = (await stackReference.getOutputValue('environments')) as {
+    additional: string[]
+    default: string
+  }
   config.cluster = (await stackReference.getOutputValue('cluster')) as Cluster
   config.dockerhub = (await stackReference.getOutputValue('dockerhub')) as Dockerhub
   config.rootDomainName = (await stackReference.getOutputValue('rootDomainName')) as string
 
   const missingRequiredConfig: Array<string> = []
+
+  const environmentExists = (env: string) => {
+    const envs: string[] = []
+    deployedNamespaces.additional.forEach((ns) => {
+      // namespaces with additional environments should be in format <name>-<env>
+      if (ns.includes('-')) envs.push(ns.split('-')[1])
+    })
+    return envs.includes(env)
+  }
+
+  if (config.environment && !environmentExists(config.environment)) {
+    throw new Error(
+      `Error: environment: ${config.environment} not found in cluster. Either remove to use default environment or verify environment exists`
+    )
+  }
 
   if (!config.stack) missingRequiredConfig.push('stack')
 

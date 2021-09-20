@@ -20,6 +20,7 @@ export const getConfig = async (): Promise<{ kubeconfig: string; config: Config 
   const kubeconfig = (await stackReference.getOutputValue('kubeconfig')) as string
 
   config.isLocal = (await stackReference.getOutputValue('isLocal')) as boolean
+  config.isDev = (await stackReference.getOutputValue('isDev')) as boolean
   config.cluster = (await stackReference.getOutputValue('cluster')) as Cluster
   config.dockerhub = (await stackReference.getOutputValue('dockerhub')) as Dockerhub
   config.rootDomainName = (await stackReference.getOutputValue('rootDomainName')) as string

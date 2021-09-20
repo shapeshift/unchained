@@ -11,6 +11,12 @@ config:
     # if set to false, eks cluster configuration and rootDomainName is required
     isLocal: true
 
+    ## additionalEnviornments - is used to create additional environments inside of new namespaces
+    ## by default 1 namespace is always created 'unchained'.But if there are additionalEnvironments it will create namepspaces per `<environment>-unchained`
+    ## ie. 'dev-unchained'
+    #additionalEnvironments:
+    #  - dev
+
     ## eks - configuration for eks cluster
     #eks:
     #  # allAzs - if true, will deploy to all AZs in specified region, otherwise deploys to 2 AZs which is the minimum required by EKS
