@@ -1,46 +1,10 @@
-import { createHash } from 'crypto'
 import { hashElement } from 'folder-hash'
 import { core, Provider } from '@pulumi/kubernetes'
-import { buildAndPushImage, hasTag } from '@shapeshiftoss/common-pulumi'
+import { buildAndPushImage, hasTag, getBaseHash } from '@shapeshiftoss/common-pulumi'
 import { EKSClusterLauncher } from '@shapeshiftoss/cluster-launcher'
 import { deployRabbit } from './rabbit'
 import { deployWatcher } from './watcher'
 import config from './config'
-
-// creates a hash of the content included in the final build image (base)
-const getHashBase = async (): Promise<string> => {
-  const hash = createHash('sha1')
-
-  // hash root level unchained files
-  const { hash: unchainedHash } = await hashElement(`../`, {
-    folders: { exclude: ['.*', '*'] },
-    files: { include: ['package.json', 'lerna.json'] },
-  })
-  hash.update(unchainedHash)
-
-  // hash contents of packages
-  const { hash: packagesHash } = await hashElement(`../packages`, {
-    folders: { include: ['**'], exclude: ['.*', 'dist', 'node_modules', 'pulumi'] },
-    files: { include: ['*.ts', '*.json', 'Dockerfile'] },
-  })
-  hash.update(packagesHash)
-
-  // hash contents of common-ingester
-  const { hash: commonHash } = await hashElement(`../coinstacks/common`, {
-    folders: { include: ['**'], exclude: ['.*', 'dist', 'node_modules', 'pulumi'] },
-    files: { include: ['*.ts', '*.json', 'Dockerfile'] },
-  })
-  hash.update(commonHash)
-
-  // hash coinstacks dependencies
-  const { hash: dependenciesHash } = await hashElement(`../coinstacks`, {
-    folders: { include: ['**'], exclude: ['.*', 'common', 'dist', 'node_modules', 'pulumi'] },
-    files: { include: ['package.json'] },
-  })
-  hash.update(dependenciesHash)
-
-  return hash.digest('hex')
-}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Outputs = Record<string, any>
@@ -77,7 +41,7 @@ export = async (): Promise<Outputs> => {
 
     if (config.dockerhub) {
       const baseImage = `${config.dockerhub.username}/${app}-base`
-      const baseTag = await getHashBase()
+      const baseTag = await getBaseHash()
 
       if (!(await hasTag(baseImage, baseTag))) {
         await buildAndPushImage({

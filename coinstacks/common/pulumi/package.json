@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@types/folder-hash": "^4.0.0",
+    "@types/object-hash": "^2.2.1",
     "folder-hash": "^4.0.0"
   }
 }

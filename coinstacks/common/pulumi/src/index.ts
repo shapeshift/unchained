@@ -7,6 +7,7 @@ export * from './api'
 export * from './docker'
 export * from './ingester'
 export * from './mongo'
+export * from './hasher'
 
 export interface Dockerhub {
   username: string
