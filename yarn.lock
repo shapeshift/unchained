@@ -1871,7 +1871,7 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha1-p3c2C1s5oaLlEG+OhY8v0tBgxXA=
 
-"@pulumi/aws@^4.0.0":
+"@pulumi/aws@4.17.0", "@pulumi/aws@^4.0.0":
   version "4.17.0"
   resolved "https://registry.yarnpkg.com/@pulumi/aws/-/aws-4.17.0.tgz#13c349a55bb649e2943c0b84ea471906f45284df"
   integrity sha512-avwyzCYRUGmnjFqvd6eUq2xJY1q9w2Y9aJIb79aFaWCmhUuKrCduFkzf9S+0fP0pnywmLaaROhOB4Ciavc6jAg==
@@ -1883,7 +1883,7 @@
     read-package-tree "^5.2.1"
     resolve "^1.7.1"
 
-"@pulumi/awsx@^0.31.0":
+"@pulumi/awsx@0.31.0":
   version "0.31.0"
   resolved "https://registry.yarnpkg.com/@pulumi/awsx/-/awsx-0.31.0.tgz#f77368ccbdd76d21782d715f5a88029e5c65c57f"
   integrity sha512-Z8WDMO0rpwPIACy0oD3m80DdHE+0/wFtBy5YdPiieMr4CekohOfc83BTix3U5dDfv6XCtEsMI+VzZvgYUM1e4w==
@@ -1900,7 +1900,7 @@
     "@pulumi/pulumi" "^3.0.0"
     semver "^5.4.0"
 
-"@pulumi/eks@^0.32.0":
+"@pulumi/eks@0.32.0":
   version "0.32.0"
   resolved "https://registry.yarnpkg.com/@pulumi/eks/-/eks-0.32.0.tgz#c0ca72b1d0bacb4cb83a71e74300dee344b77bf4"
   integrity sha512-7z+FyhSQAbWC7sCoXDWKroDTe/8DcNVF7KxBzQIgqUaHDcAP1u0fpD6nutiNgmCY/cqsYrhPPgwgZTRQTxHPxw==
@@ -1928,7 +1928,7 @@
     shell-quote "^1.6.1"
     tmp "^0.0.33"
 
-"@pulumi/kubernetesx@^0.1.6":
+"@pulumi/kubernetesx@0.1.6":
   version "0.1.6"
   resolved "https://registry.yarnpkg.com/@pulumi/kubernetesx/-/kubernetesx-0.1.6.tgz#61518ae6a7d37c17998561b8d5290546815bad1d"
   integrity sha512-9VL4Yi4b4aLC/obBarJuNkm86kABByUZICYPSTdV396MGZtOc066o2brsB+kWVQcVfkYVXTPrpjIkAwBXXnzGw==
@@ -1980,16 +1980,16 @@
   resolved "https://registry.yarnpkg.com/@pulumi/query/-/query-0.3.0.tgz#f496608e86a18c3dd31b6c533408e2441c29071d"
   integrity sha512-xfo+yLRM2zVjVEA4p23IjQWzyWl1ZhWOGobsBqRpIarzLvwNH/RAGaoehdxlhx4X92302DrpdIFgTICMN4P38w==
 
-"@shapeshiftoss/cluster-launcher@^0.6.3":
-  version "0.6.3"
-  resolved "https://registry.yarnpkg.com/@shapeshiftoss/cluster-launcher/-/cluster-launcher-0.6.3.tgz#4467040cf9fac2eb8dc8745c506971abdcf8516d"
-  integrity sha512-M33xJAN7vgfV4hkAim0vQd54k760+jejuQqWMZqPY23bhHcp2mB/kNbh/LhADtV2hFM0VrUMQQNW0hOIoBzrxw==
+"@shapeshiftoss/cluster-launcher@0.6.4":
+  version "0.6.4"
+  resolved "https://registry.yarnpkg.com/@shapeshiftoss/cluster-launcher/-/cluster-launcher-0.6.4.tgz#bec435a820d3b2f354b042bd129894f74d7e890f"
+  integrity sha512-SHNFOtWkoJCxbb9k1Bph2UR/T6iNcAesWWlEjq5F90Z9vz6+s647rsSSVDxQJuvAH0i4cXvvFnD8/sn4WW4OAg==
   dependencies:
-    "@pulumi/aws" "^4.0.0"
-    "@pulumi/awsx" "^0.31.0"
-    "@pulumi/eks" "^0.32.0"
-    "@pulumi/kubernetesx" "^0.1.6"
-    "@pulumi/pulumi" "^3.0.0"
+    "@pulumi/aws" "4.17.0"
+    "@pulumi/awsx" "0.31.0"
+    "@pulumi/eks" "0.32.0"
+    "@pulumi/kubernetesx" "0.1.6"
+    "@pulumi/pulumi" "3.11.0"
 
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
