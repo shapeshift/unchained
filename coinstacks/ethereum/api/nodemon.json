@@ -1,5 +1,5 @@
 {
-  "ignore": ["src/routes.ts"],
+  "ignore": ["../../../packages/client", "src/routes.ts"],
   "watch": ["../../../packages/*/dist/tsconfig.tsbuildinfo", "../../common/api/dist/tsconfig.tsbuildinfo", "src"],
   "ext": "ts",
   "exec": "yarn build && node dist/ethereum/api/src/index.js"

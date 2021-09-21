@@ -33,4 +33,4 @@ RegisterRoutes(app)
 app.use(middleware.errorHandler)
 app.use(middleware.notFoundHandler)
 
-app.listen(port, () => logger.info(`listening at http://localhost:${port}`))
+app.listen(port, () => logger.info('server listening...'))

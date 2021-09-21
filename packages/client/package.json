@@ -9,9 +9,10 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "yarn generate && tsc",
     "clean": "rm -rf dist node_modules",
-    "generate": "openapi-generator-cli generate"
+    "generate": "JAVA_OPTS='-Dlog.level=warn' openapi-generator-cli generate",
+    "watch": "nodemon"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.4.4"

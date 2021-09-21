@@ -4,6 +4,10 @@ dist
 **/test-report
 Pulumi.*.yaml
 !Pulumi.sample.yaml
+**/generated
+!packages/thorchain/src/generated
+packages/blockbook/src/swagger.json
+routes.ts
 
 # Logs
 logs

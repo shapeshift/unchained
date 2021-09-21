@@ -79,7 +79,7 @@ services:
       context: .
       dockerfile: Dockerfile.local
   watcher:
-    image: mhart/alpine-node:14.16.0
+    image: unchained-local
     working_dir: /app
     command: sh -c "yarn lerna run watch --scope @shapeshiftoss/* --parallel"
     volumes:
