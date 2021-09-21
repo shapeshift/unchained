@@ -22,7 +22,6 @@ const main = async () => {
   })
 
   worker.queue?.prefetch(1)
-  logger.info('block.worker.queue.activateConsumer()')
   worker.queue?.activateConsumer(onMessage(worker), { noAck: false })
 }
 
