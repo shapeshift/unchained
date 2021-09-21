@@ -4,6 +4,8 @@ import swaggerUi from 'swagger-ui-express'
 import { logger } from '@shapeshiftoss/logger'
 import { middleware } from '../../../common/api/src'
 import { RegisterRoutes } from './routes'
+import swaggerDocument from './swagger.json'
+import { join } from 'path'
 
 const port = process.env.PORT || 3000
 
@@ -24,14 +26,14 @@ app.get('/health', async (_, res) => {
   })
 })
 
-import swaggerDocument from './swagger.json'
 const options = {
   customCss: '.swagger-ui .topbar { display: none }',
   customSiteTitle: 'ShapeShift API Docs',
-  customfavIcon: './favi-blue.png',
+  customfavIcon: '/favi-blue.png',
 }
 
-app.use('/coinstacks/common/api/public/favi-blue.png', express.static('./favi-blue.png'))
+app.use(express.static(join(__dirname, '../../../../../../common/api/public')))
+//app.use('/coinstacks/common/api/public/favi-blue.png', express.static('./favi-blue.png'))
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, options), async (_req: Request, res: Response) => {
   return res.send(swaggerUi.generateHTML(await import('./swagger.json')))
 })
