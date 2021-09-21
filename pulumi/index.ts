@@ -27,6 +27,7 @@ export = async (): Promise<Outputs> => {
     const cluster = await EKSClusterLauncher.create(name, {
       rootDomainName: config.rootDomainName,
       instanceTypes: config.eks.instanceTypes,
+      numInstancesPerAZ: 2,
       allAZs: config.eks.allAZs,
       region: config.eks.region,
       cidrBlock: config.eks.cidrBlock,
