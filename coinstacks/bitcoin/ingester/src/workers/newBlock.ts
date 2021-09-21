@@ -54,34 +54,6 @@ const getHeight = async (): Promise<number> => {
   return Number(data.result)
 }
 
-const processBlock = async (newBlockWorker: Worker, reorgWorker: Worker): Promise<boolean> => {
-  let dbBlockLatest = await blocks.getLatest()
-  logger.debug('dbBlockLatest:', dbBlockLatest?.height)
-
-  const nodeHeight = await getHeight()
-  logger.debug('nodeHeight:', nodeHeight)
-
-  let height = dbBlockLatest ? dbBlockLatest.height + 1 : nodeHeight - REORG_BUFFER
-  while (height <= nodeHeight) {
-    const hash = await getBlockHash(height)
-    let nodeBlock = await getBlockByHash(hash)
-    logger.info(`getBlock: (${Number(nodeBlock.height)}) ${nodeBlock.hash}`)
-
-    const result = await handleReorg(reorgWorker, dbBlockLatest, nodeBlock)
-
-    height = result.height
-    nodeBlock = result.nodeBlock
-    dbBlockLatest = result.dbBlock
-
-    await blocks.save(dbBlockLatest)
-
-    newBlockWorker.sendMessage(new Message(nodeBlock), 'block')
-
-    height++
-  }
-  return true
-}
-
 /**
  * Recursively roll back any orphaned blocks in the db by tracing the nodeBlock parent (previous) hash back until it matches a dbBlock hash and returns the reorgResult which we want to begin the delta sync at.
  */
@@ -123,7 +95,31 @@ const onMessage = (newBlockWorker: Worker, reorgWorker: Worker) => async (messag
   const newBlock: NewBlock = message.getContent()
 
   try {
-    await processBlock(newBlockWorker, reorgWorker)
+    let dbBlockLatest = await blocks.getLatest()
+    logger.debug('dbBlockLatest:', dbBlockLatest?.height)
+
+    const nodeHeight = await getHeight()
+    logger.debug('nodeHeight:', nodeHeight)
+
+    let height = dbBlockLatest ? dbBlockLatest.height + 1 : nodeHeight - REORG_BUFFER
+    while (height <= nodeHeight) {
+      const hash = await getBlockHash(height)
+      let nodeBlock = await getBlockByHash(hash)
+      logger.info(`getBlock: (${Number(nodeBlock.height)}) ${nodeBlock.hash}`)
+
+      const result = await handleReorg(reorgWorker, dbBlockLatest, nodeBlock)
+
+      height = result.height
+      nodeBlock = result.nodeBlock
+      dbBlockLatest = result.dbBlock
+
+      await blocks.save(dbBlockLatest)
+
+      newBlockWorker.sendMessage(new Message(nodeBlock), 'block')
+
+      height++
+    }
+
     newBlockWorker.ackMessage(message, newBlock.hash)
   } catch (err) {
     logger.error('onMessage.error:', err.isAxiosError ? err.message : err)
@@ -140,9 +136,6 @@ const main = async () => {
   const reorgWorker = await Worker.init({
     exchangeName: `exchange.bitcoin`,
   })
-
-  // prime the pump
-  await processBlock(newBlockWorker, reorgWorker)
 
   newBlockWorker.queue?.prefetch(1)
   newBlockWorker.queue?.activateConsumer(onMessage(newBlockWorker, reorgWorker), { noAck: false })

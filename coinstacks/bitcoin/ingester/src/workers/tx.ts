@@ -32,7 +32,7 @@ const getPages = (from: number, to: number, max: number): Array<number> => {
   return pages
 }
 
-// todo - can there be more than one address per vin?
+// note - assume exactly one address per vin
 const getAddresses = (tx: Tx): Array<string> => {
   let addresses: Array<string> = []
 

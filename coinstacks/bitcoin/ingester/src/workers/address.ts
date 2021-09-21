@@ -1,7 +1,6 @@
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Message, Worker, SyncTx } from '@shapeshiftoss/common-ingester'
 import { logger } from '@shapeshiftoss/logger'
-import { parseTx } from '../parseTx'
 
 const INDEXER_URL = process.env.INDEXER_URL
 
