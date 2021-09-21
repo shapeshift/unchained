@@ -80,24 +80,22 @@ export = async (): Promise<Outputs> => {
     }
   }
 
-  // always create 'namespace'. Then if we have additional envs creat them too prefixed with the namespace
-  const additionalNs: string[] = []
-  if (config.additionalEnvironments?.length)
-    config.additionalEnvironments.forEach((env) => additionalNs.push(`${defaultNamespace}-${env}`))
-    // create default namespaces and all additional namespaces
-  ;[defaultNamespace, ...additionalNs].forEach(async (ns) => {
-    new core.v1.Namespace(ns, { metadata: { name: ns } }, { provider })
-    await deployRabbit(ns, provider, ns, config)
+  const namespaces: Array<string> = [defaultNamespace]
+  if (config.additionalEnvironments?.length) {
+    config.additionalEnvironments.forEach((env) => namespaces.push(`${defaultNamespace}-${env}`))
+  }
+
+  namespaces.forEach(async (namespace) => {
+    new core.v1.Namespace(namespace, { metadata: { name: namespace } }, { provider })
+    await deployRabbit(namespace, provider, namespace, config)
   })
 
   outputs.cluster = config.cluster
   outputs.isLocal = config.isLocal
   outputs.dockerhub = config.dockerhub
   outputs.rootDomainName = config.rootDomainName
-  outputs.namespaces = {
-    default: defaultNamespace,
-    additional: additionalNs,
-  }
+  outputs.namespaces = namespaces
+  outputs.defaultNamespace = defaultNamespace
 
   return outputs
 }

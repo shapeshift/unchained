@@ -66,17 +66,16 @@ export async function deployApi(
   let imageName = 'mhart/alpine-node:14.16.0' // local dev image
   if (!config.isLocal) {
     const repositoryName = `${app}-${asset}-${tier}`
+    const baseImageName = `${config.dockerhub?.username ?? 'shapeshiftdao'}/unchained-base:${getBaseHash()}`
+    const buildArgs = {
+      BUILDKIT_INLINE_CACHE: '1',
+      BASE_IMAGE: baseImageName, // associated base image for dockerhub user expected to exist
+    }
+    const tag = await getHash(asset, buildArgs)
 
-    // TODO do we need this?
-    //imageName = `shapeshiftdao/${repositoryName}:${tag}` // default public image
+    imageName = `shapeshiftdao/${repositoryName}:${tag}` // default public image
     if (config.dockerhub) {
       const image = `${config.dockerhub.username}/${repositoryName}`
-      const baseImageName = `${config.dockerhub.username}/unchained-base:${getBaseHash()}`
-      const buildArgs = {
-        BUILDKIT_INLINE_CACHE: '1',
-        BASE_IMAGE: baseImageName, // associated base image for dockerhub user expected to exist
-      }
-      const tag = await getHash(asset, buildArgs)
 
       imageName = `${image}:${tag}` // configured dockerhub image
 
