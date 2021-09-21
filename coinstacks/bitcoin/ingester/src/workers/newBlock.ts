@@ -12,7 +12,7 @@ if (NODE_ENV !== 'test') {
   if (!RPC_URL) throw new Error('RPC_URL env var not set')
 }
 
-const REORG_BUFFER = 1
+const REORG_BUFFER = 6
 
 const blocks = new BlockService()
 
