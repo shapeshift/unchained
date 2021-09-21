@@ -36,7 +36,7 @@ const topology: Connection.Topology = {
     { name: `queue.bitcoin.tx.deadLetter`, options: { durable: true } },
   ],
   bindings: [
-    { source: 'exchange.unchained', queue: `queue.bitcoin.registry`, pattern: 'bitcoin`.registry' },
+    { source: 'exchange.unchained', queue: `queue.bitcoin.registry`, pattern: 'bitcoin.registry' },
     { source: `exchange.bitcoin`, queue: `queue.bitcoin.newBlock`, pattern: 'newBlock' },
     { source: `exchange.bitcoin`, queue: `queue.bitcoin.reorgBlock`, pattern: 'reorgBlock' },
     { source: `exchange.bitcoin.block`, queue: `queue.bitcoin.block` },
