@@ -33,7 +33,6 @@ const options = {
 }
 
 app.use(express.static(join(__dirname, '../../../../../../common/api/public')))
-//app.use('/coinstacks/common/api/public/favi-blue.png', express.static('./favi-blue.png'))
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, options), async (_req: Request, res: Response) => {
   return res.send(swaggerUi.generateHTML(await import('./swagger.json')))
 })
