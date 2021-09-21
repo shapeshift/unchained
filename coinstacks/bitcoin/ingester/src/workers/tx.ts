@@ -41,7 +41,6 @@ const getAddresses = (tx: Tx): Array<string> => {
   addresses = addresses.concat(sendAddresses, receiveAddresses)
   const addressesFiltered = addresses.filter((address) => address != '')
 
-  logger.debug(`addresses: ${addresses}`)
   return addressesFiltered
 }
 
