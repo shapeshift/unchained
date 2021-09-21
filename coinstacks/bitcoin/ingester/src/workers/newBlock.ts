@@ -16,6 +16,21 @@ const REORG_BUFFER = 6
 
 const blocks = new BlockService()
 
+const getBlock = async (hashOrHeight: string | number): Promise<BTCBlock> => {
+  let hash
+  try {
+    if (typeof hashOrHeight === 'number') {
+      hash = await getBlockHash(hashOrHeight)
+    } else if (typeof hashOrHeight === 'string') {
+      hash = hashOrHeight
+    }
+    const block = await getBlockByHash(hash as string)
+    return block as BTCBlock
+  } catch (err) {
+    throw new Error(`failed to get block ${hashOrHeight}: ${err}`)
+  }
+}
+
 const getBlockByHash = async (hashOrHeight: string): Promise<BTCBlock> => {
   const { data } = await axios.post<RPCResponse>(RPC_URL, {
     jsonrpc: '1.0',
@@ -84,11 +99,7 @@ export const handleReorg = async (
   logger.debug(`marking block as orphaned: (${dbBlock.height}) ${dbBlock.hash}`)
 
   // continue handling reorg to find common ancestor
-  return handleReorg(
-    worker,
-    await blocks.getByHash(dbBlock.prevHash),
-    await getBlockByHash(nodeBlock.previousblockhash)
-  )
+  return handleReorg(worker, await blocks.getByHash(dbBlock.prevHash), await getBlock(nodeBlock.previousblockhash))
 }
 
 const onMessage = (newBlockWorker: Worker, reorgWorker: Worker) => async (message: Message) => {
@@ -103,8 +114,7 @@ const onMessage = (newBlockWorker: Worker, reorgWorker: Worker) => async (messag
 
     let height = dbBlockLatest ? dbBlockLatest.height + 1 : nodeHeight - REORG_BUFFER
     while (height <= nodeHeight) {
-      const hash = await getBlockHash(height)
-      let nodeBlock = await getBlockByHash(hash)
+      let nodeBlock = await getBlock(height)
       logger.info(`getBlock: (${Number(nodeBlock.height)}) ${nodeBlock.hash}`)
 
       const result = await handleReorg(reorgWorker, dbBlockLatest, nodeBlock)
