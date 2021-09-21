@@ -6,12 +6,7 @@ const onMessage = (worker: Worker) => (message: Message) => {
   const block: BTCBlock = message.getContent()
   logger.debug(`block: (${Number(block.height)}) ${block.hash}`)
 
-  // todo - just 10 for now
-  //block.tx.forEach((txid) => worker.sendMessage(new Message(txid), 'txid'))
-  const txids = block.tx.slice(10)
-  txids.forEach((txid) => worker.sendMessage(new Message(txid), 'txid'))
-  // end todo
-
+  block.tx.forEach((txid) => worker.sendMessage(new Message(txid), 'txid'))
   worker.ackMessage(message)
 }
 
