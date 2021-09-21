@@ -13,7 +13,6 @@ const onMessage = (worker: Worker) => async (message: Message) => {
 
   try {
     const tx = await blockbook.getTransaction(txid)
-    logger.debug(`txid: ${txid}`)
 
     worker.sendMessage(new Message(tx), 'tx')
     worker.ackMessage(message, txid)

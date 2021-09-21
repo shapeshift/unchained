@@ -37,7 +37,7 @@ const getAddresses = (tx: Tx): Array<string> => {
   let addresses: Array<string> = []
 
   const sendAddresses = tx.vin.map((vin) => (vin.addresses ? vin.addresses[0] : ''))
-  const receiveAddresses = tx.vin.map((vin) => (vin.addresses ? vin.addresses[0] : ''))
+  const receiveAddresses = tx.vout.map((vout) => (vout.addresses ? vout.addresses[0] : ''))
   addresses = addresses.concat(sendAddresses, receiveAddresses)
   const addressesFiltered = addresses.filter((address) => address != '')
 
