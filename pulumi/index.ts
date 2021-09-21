@@ -85,13 +85,9 @@ export = async (): Promise<Outputs> => {
   if (config.additionalEnvironments?.length)
     config.additionalEnvironments.forEach((env) => additionalNs.push(`${defaultNamespace}-${env}`))
     // create default namespaces and all additional namespaces
-  ;[defaultNamespace, ...additionalNs].forEach(async (ns, index) => {
+  ;[defaultNamespace, ...additionalNs].forEach(async (ns) => {
     new core.v1.Namespace(ns, { metadata: { name: ns } }, { provider })
-    if (index === 0) {
-      await deployRabbit(ns, provider, ns, config)
-    } else {
-      await deployRabbit(ns, provider, ns, config, `${ns}-`)
-    }
+    await deployRabbit(ns, provider, ns, config)
   })
 
   outputs.cluster = config.cluster

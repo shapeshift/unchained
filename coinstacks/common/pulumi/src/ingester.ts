@@ -13,7 +13,7 @@ export interface IngesterConfig {
 }
 
 // creates a hash of the content included in the final build image
-const getHash = async (asset: string, buildArgs: { [key: string]: string }): Promise<string> => {
+const getHash = async (asset: string, buildArgs: Record<string, string>): Promise<string> => {
   const hash = createHash('sha1')
 
   // hash root level unchained files

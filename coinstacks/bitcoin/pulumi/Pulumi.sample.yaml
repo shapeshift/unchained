@@ -10,9 +10,6 @@ config:
     ## for individual accounts, use your account name (pulumi whoami) for the organization component.
     stack: # run `pulumi stack ls` in `unchained/pulumi` and reference the url
 
-    ## isDev - if true deploy to seperate namespace and prefix all ingress with 'dev' (ie. dev.api.bitcoin.example.com)
-    isDev: true
-
     ## api - if specified an api service will be deployed
     api:
       enableDatadogLogs: false

@@ -13,7 +13,7 @@ export interface ApiConfig {
 }
 
 // creates a hash of the content included in the final build image
-const getHash = async (asset: string, buildArgs: { [key: string]: string }): Promise<string> => {
+const getHash = async (asset: string, buildArgs: Record<string, string>): Promise<string> => {
   const hash = createHash('sha1')
 
   // hash root level unchained files
@@ -89,10 +89,7 @@ export async function deployApi(
             username: config.dockerhub.username,
             server: config.dockerhub.server,
           },
-          buildArgs: {
-            BUILDKIT_INLINE_CACHE: '1',
-            BASE_IMAGE: baseImageName, // associated base image for dockerhub user expected to exist
-          },
+          buildArgs,
           env: { DOCKER_BUILDKIT: '1' },
           tags: [tag],
           cacheFroms: [`${image}:${tag}`, `${image}:latest`, baseImageName],
