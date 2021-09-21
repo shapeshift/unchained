@@ -66,7 +66,7 @@ export async function deployIngester(
   let imageName = 'mhart/alpine-node:14.16.0' // local dev image
   if (!config.isLocal) {
     const repositoryName = `${app}-${asset}-${tier}`
-    const baseImageName = `${config.dockerhub?.username ?? 'shapeshiftdao'}/unchained-base:${getBaseHash()}`
+    const baseImageName = `${config.dockerhub?.username ?? 'shapeshiftdao'}/unchained-base:${await getBaseHash()}`
     const buildArgs = {
       BUILDKIT_INLINE_CACHE: '1',
       BASE_IMAGE: baseImageName, // associated base image for dockerhub user expected to exist

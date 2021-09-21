@@ -25,22 +25,22 @@ config:
     ## mongo - if specified a mongo database will be deployed
     mongo:
       cpuLimit: '0.25'
-      helmChartVersion: '10.23.10'
-      memoryLimit: '256Mi'
-      replicaCount: 1
-      storageSize: '1Gi'
+      helmChartVersion: '10.19.0'
+      memoryLimit: '512Mi'
+      replicaCount: 3
+      storageSize: '100Gi'
 
     ## indexer - if specified an indexer service and optional node will be deployed
     ## this is very resource intensive, so you can point at public endpoints instead of running your own.
     #indexer:
-    #  cpuLimit: '2'
-    #  memoryLimit: '8Gi'
-    #  replicas: 1
-    #  storageSize: '250Gi'
+    #  cpuLimit: '4'
+    #  memoryLimit: '12Gi'
+    #  replicas: 2
+    #  storageSize: '500Gi'
     #  daemon:
     #    chain: 'mainnet'
     #    cpuLimit: '2'
-    #    image: 'ethereum/client-go:v1.10.6'
+    #    image: 'ethereum/client-go:v1.10.8'
     #    memoryLimit: '24Gi'
     #    node: 'geth'
     #    storageSize: '1500Gi'
