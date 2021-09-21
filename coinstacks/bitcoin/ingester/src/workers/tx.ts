@@ -142,7 +142,6 @@ const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string):
 const onMessage = (worker: Worker) => async (message: Message) => {
   const tx: Tx = message.getContent()
 
-  logger.debug(`txid ${tx.txid}`)
   try {
     let requeue = false
     for await (const address of getAddresses(tx)) {
