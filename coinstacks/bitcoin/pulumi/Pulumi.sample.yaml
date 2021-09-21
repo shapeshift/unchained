@@ -1,0 +1,42 @@
+## All uncommented configuration is required for local development
+## Reasonable defaults are provided where applicable
+## Feel free to modify as needed
+
+config:
+  unchained:bitcoin:
+    ## stack - reference to common stack in order to reference stack outputs (ie. kubeconfig)
+    ## names must be fully qualified, including the organization, project, and stack name components
+    ## format as <organization>/<project>/<stack>
+    ## for individual accounts, use your account name (pulumi whoami) for the organization component.
+    stack: # run `pulumi stack ls` in `unchained/pulumi` and reference the url
+
+    ## api - if specified an api service will be deployed
+    api:
+      enableDatadogLogs: false
+
+    ## ingester - if specified all ingestion workers will be deployed
+    ingester:
+      enableDatadogLogs: false
+
+    ## mongo - if specified a mongo database will be deployed
+    mongo:
+      cpuLimit: '0.25'
+      helmChartVersion: '10.23.10'
+      memoryLimit: '256Mi'
+      replicaCount: 1
+      storageSize: '1Gi'
+
+    ## indexer - if specified an indexer service and optional node will be deployed
+    ## this is very resource intensive, so you can point at public endpoints instead of running your own.
+    #indexer:
+    #  cpuLimit: '2'
+    #  memoryLimit: '8Gi'
+    #  replicas: 1
+    #  storageSize: '400Gi'
+    #  daemon:
+    #    chain: 'mainnet'
+    #    cpuLimit: '2'
+    #    image: 'ruimarinho/bitcoin-core:0.21.1'
+    #    memoryLimit: '24Gi'
+    #    node: 'bitcoind'
+    #    storageSize: '1500Gi'

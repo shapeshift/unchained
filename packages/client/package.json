@@ -1,0 +1,19 @@
+{
+  "name": "@shapeshiftoss/unchained-client",
+  "version": "1.0.1",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "source": "src/index.ts",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist node_modules",
+    "generate": "openapi-generator-cli generate"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.4.4"
+  }
+}

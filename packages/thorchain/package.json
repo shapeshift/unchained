@@ -23,6 +23,6 @@
     "ethers": "^5.4.0"
   },
   "devDependencies": {
-    "@openapitools/openapi-generator-cli": "^2.3.5"
+    "@openapitools/openapi-generator-cli": "^2.4.4"
   }
 }

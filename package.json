@@ -50,7 +50,7 @@
   "husky": {
     "hooks": {
       "pre-commit": "pretty-quick --staged",
-      "pre-push": "lerna run generate --scope @shapeshiftoss/* --ignore @shapeshiftoss/thorchain"
+      "pre-push": "lerna run generate --scope @shapeshiftoss/* --ignore @shapeshiftoss/thorchain --ignore @shapeshiftoss/unchained-client"
     }
   }
 }
