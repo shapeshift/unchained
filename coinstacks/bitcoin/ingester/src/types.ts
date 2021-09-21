@@ -22,6 +22,7 @@ export interface BTCBlock {
   previousblockhash: string
   nextblockhash: string
 }
+
 export interface ReorgResult {
   dbBlock: BlockDocument
   height: number
