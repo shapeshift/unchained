@@ -11,7 +11,7 @@ export interface BTCBlock {
   version: number
   versionHex: string
   merkleroot: string
-  tx: Array<string> /// todo
+  tx: Array<string>
   time: number
   mediantime: number
   nonce: number
