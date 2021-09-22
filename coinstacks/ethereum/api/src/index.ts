@@ -1,11 +1,11 @@
 import express, { json, urlencoded } from 'express'
 import cors from 'cors'
+import { join } from 'path'
 import swaggerUi from 'swagger-ui-express'
 import { logger } from '@shapeshiftoss/logger'
 import { middleware } from '../../../common/api/src'
 import { RegisterRoutes } from './routes'
 import swaggerDocument from './swagger.json'
-import { join } from 'path'
 
 const port = process.env.PORT || 3000
 
@@ -28,7 +28,7 @@ app.get('/health', async (_, res) => {
 
 const options = {
   customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'ShapeShift API Docs',
+  customSiteTitle: 'ShapeShift Ethereum API Docs',
   customfavIcon: '/favi-blue.png',
 }
 
