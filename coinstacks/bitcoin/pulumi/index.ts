@@ -12,12 +12,11 @@ type Outputs = Record<string, any>
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
-  const app = 'unchained'
-  const namespace = 'unchained'
+  const name = 'unchained'
   const asset = 'bitcoin'
   const outputs: Outputs = {}
 
-  const { kubeconfig, config } = await getConfig()
+  const { kubeconfig, config, namespace } = await getConfig()
   const { cluster } = config
 
   let provider: k8s.Provider
@@ -53,12 +52,12 @@ export = async (): Promise<Outputs> => {
 
   new k8s.core.v1.Secret(asset, { metadata: { name: asset, namespace }, stringData }, { provider })
 
-  const mongo = await deployMongo(app, asset, provider, namespace, config.mongo)
+  const mongo = await deployMongo(name, asset, provider, namespace, config.mongo)
 
   const deps = all([mongo]).apply(([mongoResources]) => mongoResources)
 
-  await deployIndexer(app, asset, provider, namespace, config)
-  await deployApi(app, asset, provider, namespace, config, deps)
+  await deployIndexer(name, asset, provider, namespace, config)
+  await deployApi(name, asset, provider, namespace, config, deps)
 
   return outputs
 }
