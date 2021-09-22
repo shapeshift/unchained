@@ -24,7 +24,7 @@ aliases:
   - &only-develop
     filters:
       branches:
-        ignore:
+        only:
           - develop
           - develop-environment
 
