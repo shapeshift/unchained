@@ -399,9 +399,8 @@ workflows:
           name: deploy bitcoin develop
           requires:
             - deploy common unchained dependencies
-          pulumi-command: pulumi preview
-          environment: dev
           <<: *bitcoin
+          environment: dev
           pulumi-stack: public-dev
           mongo-replicas: 2
           indexer-replicas: 1
@@ -412,9 +411,8 @@ workflows:
           name: deploy ethereum develop
           requires:
             - deploy common unchained dependencies
-          environment: dev
-          pulumi-command: pulumi preview
           <<: *ethereum
+          environment: dev
           pulumi-stack: public-dev
           mongo-replicas: 2
           indexer-replicas: 1
