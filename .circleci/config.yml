@@ -71,6 +71,12 @@ commands:
     steps:
       - checkout
       - run:
+          name: install openjdk-11
+          command: |
+            curl -O https://download.java.net/java/ga/jdk11/openjdk-11_linux-x64_bin.tar.gz
+            tar zxvf openjdk-11_linux-x64_bin.tar.gz
+            echo 'export export PATH=$PATH:$(pwd)/jdk-11/bin' >> $BASH_ENV
+      - run:
           name: yarn install
           command: yarn install --immutable
       - run:
@@ -300,7 +306,7 @@ jobs:
     description: publish packages
     executor: node
     steps:
-      - attach-workspace:
+      - attach_workspace:
           at: ~/
       - run: echo "//registry.npmjs.org/:-authToken=$NPM_TOKEN" > .npmrc
       - run: yarn lerna publish from-package --yes
@@ -362,4 +368,10 @@ workflows:
           requires:
             - approve ethereum coinstack
           <<: *ethereum
+          <<: *only-main
+      - publish:
+          name: publish packages
+          requires:
+            - deploy bitcoin coinstack
+            - deploy ethereum coinstack
           <<: *only-main
