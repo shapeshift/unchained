@@ -11,7 +11,7 @@ config:
     # if set to false, eks cluster configuration and rootDomainName is required
     isLocal: true
 
-    ## additionalEnviornments - is used to create additional environments inside of new namespaces
+    ## additionalEnvironments - is used to create additional environments inside of new namespaces
     ## by default 1 namespace is always created 'unchained'. However, if there are any additionalEnvironments it will create namepspaces per `unchained-<environment>`
     ## ie. 'unchained-dev'
     #additionalEnvironments:
