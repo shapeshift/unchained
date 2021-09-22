@@ -81,7 +81,7 @@ commands:
           command: |
             curl -O https://download.java.net/java/ga/jdk11/openjdk-11_linux-x64_bin.tar.gz
             tar zxvf openjdk-11_linux-x64_bin.tar.gz
-            echo 'export export PATH=$PATH:$(pwd)/jdk-11/bin' >> $BASH_ENV
+            echo 'export PATH=$PATH:$(pwd)/jdk-11/bin' >> $BASH_ENV
       - run:
           name: yarn install
           command: yarn install --immutable
@@ -425,6 +425,7 @@ workflows:
           <<: *ethereum
           environment: ''
           <<: *only-main
+
       - publish:
           name: publish packages
           requires:
