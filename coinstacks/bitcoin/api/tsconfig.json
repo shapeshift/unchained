@@ -4,6 +4,6 @@
     "outDir": "dist",
     "incremental": true
   },
-  "include": ["src", "swagger.json"],
+  "include": ["src", "src/swagger.json"],
   "exclude": ["node_modules", "**/__tests__", "**/__mocks__"]
 }
