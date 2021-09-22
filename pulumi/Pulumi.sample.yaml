@@ -12,8 +12,8 @@ config:
     isLocal: true
 
     ## additionalEnviornments - is used to create additional environments inside of new namespaces
-    ## by default 1 namespace is always created 'unchained'.But if there are additionalEnvironments it will create namepspaces per `<environment>-unchained`
-    ## ie. 'dev-unchained'
+    ## by default 1 namespace is always created 'unchained'. However, if there are any additionalEnvironments it will create namepspaces per `unchained-<environment>`
+    ## ie. 'unchained-dev'
     #additionalEnvironments:
     #  - dev
 
