@@ -25,7 +25,7 @@ config:
     ## mongo - if specified a mongo database will be deployed
     mongo:
       cpuLimit: '0.25'
-      helmChartVersion: '10.23.10'
+      helmChartVersion: '10.19.0'
       memoryLimit: '256Mi'
       replicaCount: 1
       storageSize: '1Gi'
