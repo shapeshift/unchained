@@ -337,7 +337,7 @@ workflows:
           <<: *only-main
 
       ######################### (BITCOIN) #########################
-      - deploy-coinstack-main:
+      - deploy-coinstack:
           name: preview bitcoin coinstack main
           pulumi-command: pulumi preview
           requires:
@@ -345,21 +345,21 @@ workflows:
           <<: *bitcoin
           <<: *only-main
 
-      - approve-coinstack-main:
+      - approve-coinstack:
           name: approve bitcoin coinstack
           type: approval
           requires:
             - preview bitcoin coinstack main
           <<: *only-main
 
-      - deploy-coinstack-main:
+      - deploy-coinstack:
           name: deploy bitcoin coinstack
           requires:
             - approve bitcoin coinstack
           <<: *bitcoin
           <<: *only-main
 
-      - deploy-coinstack-develop:
+      - deploy-coinstack:
           name: deploy bitcoin develop
           requires:
             - deploy common unchained dependencies
@@ -372,7 +372,7 @@ workflows:
           <<: *only-develop
 
       ######################### (ETHEREUM) #########################
-      - deploy-coinstack-main:
+      - deploy-coinstack:
           name: preview ethereum coinstack main
           pulumi-command: pulumi preview
           requires:
@@ -380,21 +380,21 @@ workflows:
           <<: *ethereum
           <<: *only-main
 
-      - approve-coinstack-main:
+      - approve-coinstack:
           name: approve ethereum coinstack
           type: approval
           requires:
             - preview ethereum coinstack
           <<: *only-main
 
-      - deploy-coinstack-main:
+      - deploy-coinstack:
           name: deploy ethereum coinstack
           requires:
             - approve ethereum coinstack
           <<: *ethereum
           <<: *only-main
 
-      - deploy-coinstack-develop:
+      - deploy-coinstack:
           name: deploy develop
           requires:
             - deploy common unchained dependencies
