@@ -13,11 +13,10 @@ type Outputs = Record<string, any>
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
   const app = 'unchained'
-  const namespace = 'unchained'
   const asset = 'bitcoin'
   const outputs: Outputs = {}
 
-  const { kubeconfig, config } = await getConfig()
+  const { kubeconfig, config, namespace } = await getConfig()
   const { cluster } = config
 
   let provider: k8s.Provider

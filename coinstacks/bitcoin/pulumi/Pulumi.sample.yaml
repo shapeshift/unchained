@@ -10,6 +10,10 @@ config:
     ## for individual accounts, use your account name (pulumi whoami) for the organization component.
     stack: # run `pulumi stack ls` in `unchained/pulumi` and reference the url
 
+    ## environment - specify environment if you deployed multiples into cluster. specified as 'additionalEnvironments' in the cluster stack 
+    ## if falsy use default environment created in cluster stack
+    #environment: 
+
     ## api - if specified an api service will be deployed
     api:
       enableDatadogLogs: false

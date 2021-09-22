@@ -21,6 +21,13 @@ aliases:
         ignore:
           - main
 
+  - &only-develop
+    filters:
+      branches:
+        ignore:
+          - develop
+          - develop-environment
+
   - &bitcoin
     coinstack: bitcoin
     pulumi-stack: public
@@ -148,6 +155,7 @@ jobs:
             pulumi stack select $PULUMI_ORG/dependencies
             pulumi config set --path unchained:common.cluster eks
             pulumi config set --path unchained:common.isLocal false
+            pulumi config set --path unchained:common.additionalEnvironments[0] dev
             pulumi config set --path unchained:common.eks.allAZs true
             pulumi config set --path unchained:common.eks.instanceTypes[0] m5.4xlarge
             pulumi config set --path unchained:common.eks.instanceTypes[1] m5a.4xlarge
@@ -191,6 +199,9 @@ jobs:
     parameters:
       coinstack:
         description: coinstack name
+        type: string
+      environment:
+        description: environment to deploy into
         type: string
       pulumi-stack:
         description: pulumi stack to deploy to (public)
@@ -257,6 +268,7 @@ jobs:
           command: |
             pulumi stack select $PULUMI_ORG/<< parameters.pulumi-stack >>
             pulumi config set --path unchained:<< parameters.coinstack >>.stack $PULUMI_ORG/common/dependencies
+            pulumi config set --path unchained:<< parameters.coinstack >>.environment << parameters.environment >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.enableDatadogLogs true
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.enableDatadogLogs true
             pulumi config set --path unchained:<< parameters.coinstack >>.mongo.cpuLimit << parameters.mongo-cpu-limit >>
@@ -324,42 +336,72 @@ workflows:
             - lint and test project (persist to workspace)
           <<: *only-main
 
-      - deploy-coinstack:
-          name: preview bitcoin coinstack
+      ######################### (BITCOIN) #########################
+      - deploy-coinstack-main:
+          name: preview bitcoin coinstack main
           pulumi-command: pulumi preview
           requires:
             - deploy common unchained dependencies
           <<: *bitcoin
           <<: *only-main
-      - approve-coinstack:
+
+      - approve-coinstack-main:
           name: approve bitcoin coinstack
           type: approval
           requires:
-            - preview bitcoin coinstack
+            - preview bitcoin coinstack main
           <<: *only-main
-      - deploy-coinstack:
+
+      - deploy-coinstack-main:
           name: deploy bitcoin coinstack
           requires:
             - approve bitcoin coinstack
           <<: *bitcoin
           <<: *only-main
 
-      - deploy-coinstack:
-          name: preview ethereum coinstack
+      - deploy-coinstack-develop:
+          name: deploy bitcoin develop
+          requires:
+            - deploy common unchained dependencies
+          pulumi-command: pulumi preview
+          environment: dev
+          <<: *bitcoin
+          pulumi-stack: public-dev
+          mongo-replicas: 2
+          indexer-replicas: 1
+          <<: *only-develop
+
+      ######################### (ETHEREUM) #########################
+      - deploy-coinstack-main:
+          name: preview ethereum coinstack main
           pulumi-command: pulumi preview
           requires:
             - deploy common unchained dependencies
           <<: *ethereum
           <<: *only-main
-      - approve-coinstack:
+
+      - approve-coinstack-main:
           name: approve ethereum coinstack
           type: approval
           requires:
             - preview ethereum coinstack
           <<: *only-main
-      - deploy-coinstack:
+
+      - deploy-coinstack-main:
           name: deploy ethereum coinstack
           requires:
             - approve ethereum coinstack
           <<: *ethereum
           <<: *only-main
+
+      - deploy-coinstack-develop:
+          name: deploy develop
+          requires:
+            - deploy common unchained dependencies
+          environment: dev
+          pulumi-command: pulumi preview
+          <<: *ethereum
+          pulumi-stack: public-dev
+          mongo-replicas: 2
+          indexer-replicas: 1
+          <<: *only-develop
