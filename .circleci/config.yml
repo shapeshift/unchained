@@ -339,7 +339,7 @@ workflows:
 
       ######################### (BITCOIN) #########################
       - deploy-coinstack:
-          name: preview bitcoin coinstack main
+          name: preview bitcoin coinstack
           pulumi-command: pulumi preview
           requires:
             - deploy common unchained dependencies
@@ -350,7 +350,7 @@ workflows:
           name: approve bitcoin coinstack
           type: approval
           requires:
-            - preview bitcoin coinstack main
+            - preview bitcoin coinstack
           <<: *only-main
 
       - deploy-coinstack:
@@ -374,7 +374,7 @@ workflows:
 
       ######################### (ETHEREUM) #########################
       - deploy-coinstack:
-          name: preview ethereum coinstack main
+          name: preview ethereum coinstack
           pulumi-command: pulumi preview
           requires:
             - deploy common unchained dependencies
