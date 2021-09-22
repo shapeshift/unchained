@@ -287,7 +287,6 @@ jobs:
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.cpuLimit << parameters.daemon-cpu-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.memoryLimit << parameters.daemon-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.storageSize << parameters.daemon-storage-size >>
-            cat ./Pulumi.public.yaml
             << parameters.pulumi-command >>
 
   lint-and-test:
@@ -325,19 +324,17 @@ workflows:
       - lint-and-test:
           name: lint and test project
           <<: *not-main
-  deploy:
+  deploy-main:
     jobs:
       - lint-and-test-persist:
           name: lint and test project (persist to workspace)
-          #<<: *only-main
-          <<: *only-develop
+          <<: *only-main
 
       - deploy-dependencies:
           name: deploy common unchained dependencies
           requires:
             - lint and test project (persist to workspace)
-          #<<: *only-main
-          <<: *only-develop
+          <<: *only-main
 
       ######################### (BITCOIN) #########################
       - deploy-coinstack:
@@ -362,18 +359,6 @@ workflows:
           <<: *bitcoin
           <<: *only-main
 
-      - deploy-coinstack:
-          name: deploy bitcoin develop
-          requires:
-            - deploy common unchained dependencies
-          pulumi-command: pulumi preview
-          environment: dev
-          <<: *bitcoin
-          pulumi-stack: public-dev
-          mongo-replicas: 2
-          indexer-replicas: 1
-          <<: *only-develop
-
       ######################### (ETHEREUM) #########################
       - deploy-coinstack:
           name: preview ethereum coinstack
@@ -397,8 +382,34 @@ workflows:
           <<: *ethereum
           <<: *only-main
 
+  deploy-development:
+    jobs:
+      - lint-and-test-persist:
+          name: lint and test project (persist to workspace)
+          <<: *only-develop
+
+      - deploy-dependencies:
+          name: deploy common unchained dependencies
+          requires:
+            - lint and test project (persist to workspace)
+          <<: *only-develop
+
+      ######################### (BITCOIN) #########################
       - deploy-coinstack:
-          name: deploy develop
+          name: deploy bitcoin develop
+          requires:
+            - deploy common unchained dependencies
+          pulumi-command: pulumi preview
+          environment: dev
+          <<: *bitcoin
+          pulumi-stack: public-dev
+          mongo-replicas: 2
+          indexer-replicas: 1
+          <<: *only-develop
+
+      ######################### (ETHEREUM) #########################
+      - deploy-coinstack:
+          name: deploy ethereum develop
           requires:
             - deploy common unchained dependencies
           environment: dev
