@@ -203,6 +203,7 @@ jobs:
       environment:
         description: environment to deploy into
         type: string
+        default: '' # empty string should be falsy. which will use default environment
       pulumi-stack:
         description: pulumi stack to deploy to (public)
         type: string
