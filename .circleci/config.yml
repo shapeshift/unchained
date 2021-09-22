@@ -200,9 +200,8 @@ jobs:
         description: coinstack name
         type: string
       environment:
-        description: environment to deploy into
+        description: environment to deploy into. empty string ('') is our prod
         type: string
-        default: '' # empty string should be falsy. which will use default environment
       pulumi-stack:
         description: pulumi stack to deploy to (public)
         type: string
@@ -323,64 +322,6 @@ workflows:
       - lint-and-test:
           name: lint and test project
           <<: *not-main
-  deploy-main:
-    jobs:
-      - lint-and-test-persist:
-          name: lint and test project (persist to workspace)
-          <<: *only-main
-
-      - deploy-dependencies:
-          name: deploy common unchained dependencies
-          requires:
-            - lint and test project (persist to workspace)
-          <<: *only-main
-
-      ######################### (BITCOIN) #########################
-      - deploy-coinstack:
-          name: preview bitcoin coinstack
-          pulumi-command: pulumi preview
-          requires:
-            - deploy common unchained dependencies
-          <<: *bitcoin
-          <<: *only-main
-
-      - approve-coinstack:
-          name: approve bitcoin coinstack
-          type: approval
-          requires:
-            - preview bitcoin coinstack
-          <<: *only-main
-
-      - deploy-coinstack:
-          name: deploy bitcoin coinstack
-          requires:
-            - approve bitcoin coinstack
-          <<: *bitcoin
-          <<: *only-main
-
-      ######################### (ETHEREUM) #########################
-      - deploy-coinstack:
-          name: preview ethereum coinstack
-          pulumi-command: pulumi preview
-          requires:
-            - deploy common unchained dependencies
-          <<: *ethereum
-          <<: *only-main
-
-      - approve-coinstack:
-          name: approve ethereum coinstack
-          type: approval
-          requires:
-            - preview ethereum coinstack
-          <<: *only-main
-
-      - deploy-coinstack:
-          name: deploy ethereum coinstack
-          requires:
-            - approve ethereum coinstack
-          <<: *ethereum
-          <<: *only-main
-
   deploy-development:
     jobs:
       - lint-and-test-persist:
@@ -416,3 +357,65 @@ workflows:
           mongo-replicas: 2
           indexer-replicas: 1
           <<: *only-develop
+
+  deploy-main:
+    jobs:
+      - lint-and-test-persist:
+          name: lint and test project (persist to workspace)
+          <<: *only-main
+
+      - deploy-dependencies:
+          name: deploy common unchained dependencies
+          requires:
+            - lint and test project (persist to workspace)
+          <<: *only-main
+
+      ######################### (BITCOIN) #########################
+      - deploy-coinstack:
+          name: preview bitcoin coinstack
+          pulumi-command: pulumi preview
+          requires:
+            - deploy common unchained dependencies
+          <<: *bitcoin
+          environment: ''
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve bitcoin coinstack
+          type: approval
+          requires:
+            - preview bitcoin coinstack
+          <<: *only-main
+
+      - deploy-coinstack:
+          name: deploy bitcoin coinstack
+          requires:
+            - approve bitcoin coinstack
+          <<: *bitcoin
+          environment: ''
+          <<: *only-main
+
+      ######################### (ETHEREUM) #########################
+      - deploy-coinstack:
+          name: preview ethereum coinstack
+          pulumi-command: pulumi preview
+          requires:
+            - deploy common unchained dependencies
+          <<: *ethereum
+          environment: ''
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve ethereum coinstack
+          type: approval
+          requires:
+            - preview ethereum coinstack
+          <<: *only-main
+
+      - deploy-coinstack:
+          name: deploy ethereum coinstack
+          requires:
+            - approve ethereum coinstack
+          <<: *ethereum
+          environment: ''
+          <<: *only-main
