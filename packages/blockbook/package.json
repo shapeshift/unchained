@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "build": "yarn generate && tsc",
-    "clean": "rm -rf dist node_modules",
+    "clean": "rm -rf dist node_modules src/routes.ts src/swagger.json",
     "dev": "nodemon -e ts --watch src --ignore src/routes.ts -x 'yarn build && node dist/app.js'",
     "generate": "tsoa spec-and-routes",
     "start": "node dist/app.js",

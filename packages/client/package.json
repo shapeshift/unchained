@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "build": "yarn generate && tsc",
-    "clean": "rm -rf dist node_modules",
+    "clean": "rm -rf dist node_modules src/generated",
     "generate": "JAVA_OPTS='-Dlog.level=warn' openapi-generator-cli generate",
     "watch": "nodemon"
   },
