@@ -1,4 +1,4 @@
-import express, { json, Response, Request, urlencoded } from 'express'
+import express, { json, urlencoded } from 'express'
 import cors from 'cors'
 import swaggerUi from 'swagger-ui-express'
 import { logger } from '@shapeshiftoss/logger'
@@ -33,9 +33,7 @@ const options = {
 }
 
 app.use(express.static(join(__dirname, '../../../../../../common/api/public')))
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, options), async (_req: Request, res: Response) => {
-  return res.send(swaggerUi.generateHTML(await import('./swagger.json')))
-})
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, options))
 
 RegisterRoutes(app)
 
