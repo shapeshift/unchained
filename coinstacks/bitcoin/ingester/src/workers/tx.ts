@@ -1,21 +1,6 @@
-import { Tx, Vin, Vout } from '@shapeshiftoss/blockbook'
+import { Tx } from '@shapeshiftoss/blockbook'
 import { Message, Worker } from '@shapeshiftoss/common-ingester'
 import { logger } from '@shapeshiftoss/logger'
-
-const getAddresses = (tx: Tx): Array<string> => {
-  const addresses: Array<string> = []
-
-  tx.vin.forEach((vin: Vin) => {
-    vin.addresses?.forEach((address: string) => address && addresses.push(address))
-  })
-
-  tx.vout.forEach((vout: Vout) => {
-    vout.addresses?.forEach((address: string) => address && addresses.push(address))
-  })
-
-  // remove duplicates
-  return [...new Set(addresses)]
-}
 
 const onMessage = (worker: Worker) => async (message: Message) => {
   const tx: Tx = message.getContent()
