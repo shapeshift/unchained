@@ -329,13 +329,15 @@ workflows:
     jobs:
       - lint-and-test-persist:
           name: lint and test project (persist to workspace)
-          <<: *only-main
+          #<<: *only-main
+          <<: *only-develop
 
       - deploy-dependencies:
           name: deploy common unchained dependencies
           requires:
             - lint and test project (persist to workspace)
-          <<: *only-main
+          #<<: *only-main
+          <<: *only-develop
 
       ######################### (BITCOIN) #########################
       - deploy-coinstack:
