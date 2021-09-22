@@ -1,0 +1,24 @@
+{
+  "name": "@shapeshiftoss/bitcoin-ingester",
+  "version": "0.1.0",
+  "license": "MIT",
+  "private": true,
+  "main": "dist/index.js",
+  "source": "src/index.ts",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist node_modules"
+  },
+  "dependencies": {
+    "@shapeshiftoss/blockbook": "^0.1.1",
+    "@shapeshiftoss/common-ingester": "^0.1.1",
+    "@shapeshiftoss/common-mongo": "^0.1.1",
+    "@shapeshiftoss/logger": "^0.1.1",
+    "@shapeshiftoss/thorchain": "^0.1.1",
+    "axios": "^0.19.2"
+  }
+}
