@@ -1,18 +1,19 @@
 import { createHash } from 'crypto'
 import { parse } from 'dotenv'
 import { hashElement } from 'folder-hash'
+import objectHash from 'object-hash'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import * as k8s from '@pulumi/kubernetes'
 import { Input, Resource } from '@pulumi/pulumi'
-import { buildAndPushImage, Config, hasTag } from './index'
+import { buildAndPushImage, Config, hasTag, getBaseHash } from './index'
 
 export interface ApiConfig {
   enableDatadogLogs?: boolean
 }
 
 // creates a hash of the content included in the final build image
-const getHash = async (asset: string): Promise<string> => {
+const getHash = async (asset: string, buildArgs: Record<string, string>): Promise<string> => {
   const hash = createHash('sha1')
 
   // hash root level unchained files
@@ -43,6 +44,8 @@ const getHash = async (asset: string): Promise<string> => {
   })
   hash.update(apiHash)
 
+  hash.update(objectHash(buildArgs))
+
   return hash.digest('hex')
 }
 
@@ -51,7 +54,7 @@ export async function deployApi(
   asset: string,
   provider: k8s.Provider,
   namespace: string,
-  config: Pick<Config, 'api' | 'dockerhub' | 'isLocal' | 'rootDomainName'>,
+  config: Pick<Config, 'api' | 'dockerhub' | 'isLocal' | 'rootDomainName' | 'environment'>,
   deployDependencies: Input<Array<Resource>> = []
 ): Promise<k8s.apps.v1.Deployment | undefined> {
   if (config.api === undefined) return
@@ -63,12 +66,16 @@ export async function deployApi(
   let imageName = 'mhart/alpine-node:14.16.0' // local dev image
   if (!config.isLocal) {
     const repositoryName = `${app}-${asset}-${tier}`
-    const tag = await getHash(asset)
+    const baseImageName = `${config.dockerhub?.username ?? 'shapeshiftdao'}/unchained-base:${await getBaseHash()}`
+    const buildArgs = {
+      BUILDKIT_INLINE_CACHE: '1',
+      BASE_IMAGE: baseImageName, // associated base image for dockerhub user expected to exist
+    }
+    const tag = await getHash(asset, buildArgs)
 
     imageName = `shapeshiftdao/${repositoryName}:${tag}` // default public image
     if (config.dockerhub) {
       const image = `${config.dockerhub.username}/${repositoryName}`
-      const baseImageName = `${config.dockerhub.username}/unchained-base:latest`
 
       imageName = `${image}:${tag}` // configured dockerhub image
 
@@ -81,10 +88,7 @@ export async function deployApi(
             username: config.dockerhub.username,
             server: config.dockerhub.server,
           },
-          buildArgs: {
-            BUILDKIT_INLINE_CACHE: '1',
-            BASE_IMAGE: baseImageName, // associated base image for dockerhub user expected to exist
-          },
+          buildArgs,
           env: { DOCKER_BUILDKIT: '1' },
           tags: [tag],
           cacheFroms: [`${image}:${tag}`, `${image}:latest`, baseImageName],
@@ -118,6 +122,9 @@ export async function deployApi(
   )
 
   if (config.rootDomainName) {
+    const subdomain = config.environment ? `${config.environment}.api.${asset}` : `api.${asset}`
+    const domain = `${subdomain}.${config.rootDomainName}`
+
     const secretName = `${name}-cert-secret`
 
     new k8s.apiextensions.CustomResource(
@@ -139,7 +146,7 @@ export async function deployApi(
             encoding: 'PKCS1',
             size: 2048,
           },
-          dnsNames: [`api.${asset}.${config.rootDomainName}`],
+          dnsNames: [domain],
           issuerRef: {
             name: 'lets-encrypt',
             kind: 'ClusterIssuer',
@@ -151,7 +158,7 @@ export async function deployApi(
     )
 
     const additionalRootDomainName = process.env.ADDITIONAL_ROOT_DOMAIN_NAME
-    const extraMatch = additionalRootDomainName ? ` || Host(\`api.${asset}.${additionalRootDomainName}\`)` : ''
+    const extraMatch = additionalRootDomainName ? ` || Host(\`${subdomain}.${additionalRootDomainName}\`)` : ''
 
     new k8s.apiextensions.CustomResource(
       `${name}-ingressroute`,
@@ -166,7 +173,7 @@ export async function deployApi(
           entryPoints: ['web', 'websecure'],
           routes: [
             {
-              match: `Host(\`api.${asset}.${config.rootDomainName}\`)` + extraMatch,
+              match: `Host(\`${domain}\`)` + extraMatch,
               kind: 'Rule',
               services: [
                 {
@@ -180,7 +187,7 @@ export async function deployApi(
           ],
           tls: {
             secretName: secretName,
-            domains: [{ main: `api.${asset}.${config.rootDomainName}` }],
+            domains: [{ main: domain }],
           },
         },
       },
@@ -195,7 +202,7 @@ export async function deployApi(
           labels: labels,
         },
         spec: {
-          rules: [{ host: `api.${asset}.${config.rootDomainName}` }],
+          rules: [{ host: domain }],
         },
       },
       { provider }
