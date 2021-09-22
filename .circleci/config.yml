@@ -26,7 +26,6 @@ aliases:
       branches:
         only:
           - develop
-          - develop-environment
 
   - &bitcoin
     coinstack: bitcoin
