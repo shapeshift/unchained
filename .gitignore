@@ -4,6 +4,10 @@ dist
 **/test-report
 Pulumi.*.yaml
 !Pulumi.sample.yaml
+**/generated
+!packages/thorchain/src/generated
+routes.ts
+swagger.json
 
 # Logs
 logs
@@ -76,6 +80,7 @@ web_modules/
 .yarn-integrity
 
 # dotenv environment variables file
+.env.*
 .env
 .env.test
 .env.secrets

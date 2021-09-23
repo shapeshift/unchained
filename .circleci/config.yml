@@ -21,11 +21,67 @@ aliases:
         ignore:
           - main
 
+  - &only-develop
+    filters:
+      branches:
+        only:
+          - develop
+
+  - &bitcoin
+    coinstack: bitcoin
+    pulumi-stack: public
+    pulumi-dir: coinstacks/bitcoin/pulumi
+    mongo-cpu-limit: 512m
+    mongo-memory-limit: 512Mi
+    mongo-replicas: 3
+    mongo-storage-size: 100Gi
+    mongo-url: mongodb://bitcoin-mongodb-0.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017,bitcoin-mongodb-1.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017,bitcoin-mongodb-2.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
+    indexer-cpu-limit: '4'
+    indexer-memory-limit: 12Gi
+    indexer-replicas: 2
+    indexer-storage-size: 500Gi
+    indexer-url: http://bitcoin-indexer-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: http://bitcoin-indexer-svc.unchained.svc.cluster.local:8001/websocket
+    daemon-image: ruimarinho/bitcoin-core:0.21.0 #https://github.com/ruimarinho/docker-bitcoin-core
+    daemon-node: bitcoind
+    daemon-cpu-limit: '2'
+    daemon-memory-limit: 12Gi
+    daemon-storage-size: 1500Gi
+    rpc-url: http://bitcoin-indexer-svc.unchained.svc.cluster.local:8332
+
+  - &ethereum
+    coinstack: ethereum
+    pulumi-stack: public
+    pulumi-dir: coinstacks/ethereum/pulumi
+    mongo-cpu-limit: 512m
+    mongo-memory-limit: 512Mi
+    mongo-replicas: 3
+    mongo-storage-size: 100Gi
+    mongo-url: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-2.ethereum-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
+    indexer-cpu-limit: '4'
+    indexer-memory-limit: 12Gi
+    indexer-replicas: 2
+    indexer-storage-size: 500Gi
+    indexer-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8001/websocket
+    daemon-image: ethereum/client-go:v1.10.8
+    daemon-node: geth
+    daemon-cpu-limit: '2'
+    daemon-memory-limit: 24Gi
+    daemon-storage-size: 1500Gi
+    rpc-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8332
+
 commands:
   unchained-precheck:
     description: checkout project, install dependencies, build, lint and test
     steps:
       - checkout
+      - run:
+          name: install openjdk-11
+          command: |
+            curl -O https://download.java.net/java/ga/jdk11/openjdk-11_linux-x64_bin.tar.gz
+            tar zxvf openjdk-11_linux-x64_bin.tar.gz
+            echo 'export PATH=$PATH:$(pwd)/jdk-11/bin' >> $BASH_ENV
       - run:
           name: yarn install
           command: yarn install --immutable
@@ -58,6 +114,12 @@ commands:
             wget -O dockercli.deb https://download.docker.com/linux/debian/dists/buster/pool/stable/amd64/docker-ce-cli_20.10.5~3-0~debian-buster_amd64.deb
             dpkg -i dockercli.deb
       - run:
+          name: install kubectl
+          command: |
+            wget -O kubectl "https://dl.k8s.io/release/v1.21.3/bin/linux/amd64/kubectl"
+            chmod +x kubectl
+            mv ./kubectl /usr/local/bin/kubectl
+      - run:
           name: install helm charts
           command: |
             wget -O helm.tar.gz https://get.helm.sh/helm-v3.6.2-linux-amd64.tar.gz
@@ -65,6 +127,12 @@ commands:
             mv linux-amd64/helm /usr/local/bin/helm
             helm repo add bitnami https://charts.bitnami.com/bitnami
             helm repo add traefik https://helm.traefik.io/traefik
+      - run:
+          name: install pulumi plugin resources
+          command: |
+            pulumi plugin install resource aws v4.17.0
+            pulumi plugin install resource kubernetes v3.6.3
+            pulumi plugin install resource eks 0.32.0
       - run:
           name: create aws credentials file
           command: |
@@ -92,27 +160,28 @@ jobs:
             pulumi stack select $PULUMI_ORG/dependencies
             pulumi config set --path unchained:common.cluster eks
             pulumi config set --path unchained:common.isLocal false
+            pulumi config set --path unchained:common.additionalEnvironments[0] dev
             pulumi config set --path unchained:common.eks.allAZs true
             pulumi config set --path unchained:common.eks.instanceTypes[0] m5.4xlarge
             pulumi config set --path unchained:common.eks.instanceTypes[1] m5a.4xlarge
             pulumi config set --path unchained:common.eks.instanceTypes[2] m5ad.4xlarge
             pulumi config set --path unchained:common.eks.region $AWS_REGION
             pulumi config set --path unchained:common.eks.cidrBlock 10.0.0.0/16
-            pulumi config set --path unchained:common.eks.whitelist[0] 173.245.48.0/20
-            pulumi config set --path unchained:common.eks.whitelist[1] 103.21.244.0/22
-            pulumi config set --path unchained:common.eks.whitelist[2] 103.22.200.0/22
-            pulumi config set --path unchained:common.eks.whitelist[3] 103.31.4.0/22
-            pulumi config set --path unchained:common.eks.whitelist[4] 141.101.64.0/18
-            pulumi config set --path unchained:common.eks.whitelist[5] 108.162.192.0/18
-            pulumi config set --path unchained:common.eks.whitelist[6] 190.93.240.0/20
-            pulumi config set --path unchained:common.eks.whitelist[7] 188.114.96.0/20
-            pulumi config set --path unchained:common.eks.whitelist[8] 197.234.240.0/22
-            pulumi config set --path unchained:common.eks.whitelist[9] 198.41.128.0/17
-            pulumi config set --path unchained:common.eks.whitelist[10] 162.158.0.0/15
-            pulumi config set --path unchained:common.eks.whitelist[11] 104.16.0.0/13
-            pulumi config set --path unchained:common.eks.whitelist[12] 104.24.0.0/14
-            pulumi config set --path unchained:common.eks.whitelist[13] 172.64.0.0/13
-            pulumi config set --path unchained:common.eks.whitelist[14] 131.0.72.0/22
+            pulumi config set --path unchained:common.traefik.whitelist[0] 173.245.48.0/20
+            pulumi config set --path unchained:common.traefik.whitelist[1] 103.21.244.0/22
+            pulumi config set --path unchained:common.traefik.whitelist[2] 103.22.200.0/22
+            pulumi config set --path unchained:common.traefik.whitelist[3] 103.31.4.0/22
+            pulumi config set --path unchained:common.traefik.whitelist[4] 141.101.64.0/18
+            pulumi config set --path unchained:common.traefik.whitelist[5] 108.162.192.0/18
+            pulumi config set --path unchained:common.traefik.whitelist[6] 190.93.240.0/20
+            pulumi config set --path unchained:common.traefik.whitelist[7] 188.114.96.0/20
+            pulumi config set --path unchained:common.traefik.whitelist[8] 197.234.240.0/22
+            pulumi config set --path unchained:common.traefik.whitelist[9] 198.41.128.0/17
+            pulumi config set --path unchained:common.traefik.whitelist[10] 162.158.0.0/15
+            pulumi config set --path unchained:common.traefik.whitelist[11] 104.16.0.0/13
+            pulumi config set --path unchained:common.traefik.whitelist[12] 104.24.0.0/14
+            pulumi config set --path unchained:common.traefik.whitelist[13] 172.64.0.0/13
+            pulumi config set --path unchained:common.traefik.whitelist[14] 131.0.72.0/22
             pulumi config set --path unchained:common.dockerhub.username $DOCKERHUB_USERNAME
             pulumi config set --path unchained:common.dockerhub.password $DOCKERHUB_PASSWORD --plaintext
             pulumi config set --path unchained:common.dockerhub.server docker.io
@@ -129,16 +198,15 @@ jobs:
     executor: pulumi
     environment:
       DOCKER_BUILDKIT: 1
-      INDEXER_URL: https://indexer.ethereum.shapeshift.com
-      INDEXER_WS_URL: wss://indexer.ethereum.shapeshift.com/websocket
       LOG_LEVEL: info
       MIDGARD_URL: https://midgard.thorchain.info
       MONGO_DBNAME: coinstack
-      MONGO_URL: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-2.ethereum-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
-      RPC_URL: https://daemon.ethereum.shapeshift.com
     parameters:
       coinstack:
         description: coinstack name
+        type: string
+      environment:
+        description: environment to deploy into. empty string ('') is our prod
         type: string
       pulumi-stack:
         description: pulumi stack to deploy to (public)
@@ -146,6 +214,9 @@ jobs:
       pulumi-dir:
         description: path to pulumi directory
         type: string
+      pulumi-command:
+        type: string
+        default: pulumi up -f --yes --suppress-outputs
       mongo-cpu-limit:
         type: string
       mongo-memory-limit:
@@ -154,6 +225,8 @@ jobs:
         type: integer
       mongo-storage-size:
         type: string
+      mongo-url:
+        type: string
       indexer-cpu-limit:
         type: string
       indexer-memory-limit:
@@ -161,6 +234,12 @@ jobs:
       indexer-replicas:
         type: integer
       indexer-storage-size:
+        type: string
+      indexer-url:
+        type: string
+      indexer-ws-url:
+        type: string
+      rpc-url:
         type: string
       daemon-chain:
         type: string
@@ -182,11 +261,19 @@ jobs:
           at: ~/
       - pulumi-dependencies
       - run:
+          name: add custom environment variables
+          command: |
+            echo 'export INDEXER_URL=<< parameters.indexer-url >>' >> $BASH_ENV
+            echo 'export INDEXER_WS_URL=<< parameters.indexer-ws-url >>' >> $BASH_ENV
+            echo 'export MONGO_URL=<< parameters.mongo-url >>' >> $BASH_ENV
+            echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
+      - run:
           name: pulumi up
           working_directory: << parameters.pulumi-dir >>
           command: |
             pulumi stack select $PULUMI_ORG/<< parameters.pulumi-stack >>
             pulumi config set --path unchained:<< parameters.coinstack >>.stack $PULUMI_ORG/common/dependencies
+            pulumi config set --path unchained:<< parameters.coinstack >>.environment << parameters.environment >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.enableDatadogLogs true
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.enableDatadogLogs true
             pulumi config set --path unchained:<< parameters.coinstack >>.mongo.cpuLimit << parameters.mongo-cpu-limit >>
@@ -204,8 +291,7 @@ jobs:
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.cpuLimit << parameters.daemon-cpu-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.memoryLimit << parameters.daemon-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.storageSize << parameters.daemon-storage-size >>
-            cat ./Pulumi.public.yaml
-            pulumi up -f --yes --suppress-outputs
+            << parameters.pulumi-command >>
 
   lint-and-test:
     description: lint and test project
@@ -230,9 +316,9 @@ jobs:
     description: publish packages
     executor: node
     steps:
-      - attach-workspace:
+      - attach_workspace:
           at: ~/
-      - run: echo "//registry.npmjs.org/:-authToken=$NPM_TOKEN" > .npmrc
+      - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > .npmrc
       - run: yarn lerna publish from-package --yes
 
 workflows:
@@ -242,7 +328,43 @@ workflows:
       - lint-and-test:
           name: lint and test project
           <<: *not-main
-  deploy:
+  deploy-development:
+    jobs:
+      - lint-and-test-persist:
+          name: lint and test project (persist to workspace)
+          <<: *only-develop
+
+      - deploy-dependencies:
+          name: deploy common unchained dependencies
+          requires:
+            - lint and test project (persist to workspace)
+          <<: *only-develop
+
+      ######################### (BITCOIN) #########################
+      - deploy-coinstack:
+          name: deploy bitcoin develop
+          requires:
+            - deploy common unchained dependencies
+          <<: *bitcoin
+          environment: dev
+          pulumi-stack: public-dev
+          mongo-replicas: 2
+          indexer-replicas: 1
+          <<: *only-develop
+
+      ######################### (ETHEREUM) #########################
+      - deploy-coinstack:
+          name: deploy ethereum develop
+          requires:
+            - deploy common unchained dependencies
+          <<: *ethereum
+          environment: dev
+          pulumi-stack: public-dev
+          mongo-replicas: 2
+          indexer-replicas: 1
+          <<: *only-develop
+
+  deploy-main:
     jobs:
       - lint-and-test-persist:
           name: lint and test project (persist to workspace)
@@ -254,24 +376,59 @@ workflows:
             - lint and test project (persist to workspace)
           <<: *only-main
 
+      ######################### (BITCOIN) #########################
       - deploy-coinstack:
-          name: deploy ethereum coinstack
-          coinstack: ethereum
-          pulumi-stack: public
-          pulumi-dir: coinstacks/ethereum/pulumi
-          mongo-cpu-limit: 512m
-          mongo-memory-limit: 512Mi
-          mongo-replicas: 3
-          mongo-storage-size: 100Gi
-          indexer-cpu-limit: '4'
-          indexer-memory-limit: 12Gi
-          indexer-replicas: 2
-          indexer-storage-size: 500Gi
-          daemon-image: ethereum/client-go:v1.10.8
-          daemon-node: geth
-          daemon-cpu-limit: '2'
-          daemon-memory-limit: 24Gi
-          daemon-storage-size: 1500Gi
+          name: preview bitcoin coinstack
+          pulumi-command: pulumi preview
           requires:
             - deploy common unchained dependencies
+          <<: *bitcoin
+          environment: ''
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve bitcoin coinstack
+          type: approval
+          requires:
+            - preview bitcoin coinstack
+          <<: *only-main
+
+      - deploy-coinstack:
+          name: deploy bitcoin coinstack
+          requires:
+            - approve bitcoin coinstack
+          <<: *bitcoin
+          environment: ''
+          <<: *only-main
+
+      ######################### (ETHEREUM) #########################
+      - deploy-coinstack:
+          name: preview ethereum coinstack
+          pulumi-command: pulumi preview
+          requires:
+            - deploy common unchained dependencies
+          <<: *ethereum
+          environment: ''
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve ethereum coinstack
+          type: approval
+          requires:
+            - preview ethereum coinstack
+          <<: *only-main
+
+      - deploy-coinstack:
+          name: deploy ethereum coinstack
+          requires:
+            - approve ethereum coinstack
+          <<: *ethereum
+          environment: ''
+          <<: *only-main
+
+      - publish:
+          name: publish packages
+          requires:
+            - deploy bitcoin coinstack
+            - deploy ethereum coinstack
           <<: *only-main

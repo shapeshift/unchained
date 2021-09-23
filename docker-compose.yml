@@ -8,15 +8,13 @@ services:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672
       MONGO_URL: mongodb://mongo:27017
     working_dir: /app/coinstacks/${COINSTACK}/api
-    command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.unchained -timeout 5m -wait-retry-interval 10s sh -c "yarn nodemon"
+    command: yarn nodemon
     ports:
       - 31300:3000
     volumes:
       - .:/app
     depends_on:
       - unchained-local
-      - rabbitmq
-      - mongo
   mongo:
     image: mongo:4.2.8
     logging:
@@ -81,7 +79,7 @@ services:
       context: .
       dockerfile: Dockerfile.local
   watcher:
-    image: mhart/alpine-node:14.16.0
+    image: unchained-local
     working_dir: /app
     command: sh -c "yarn lerna run watch --scope @shapeshiftoss/* --parallel"
     volumes:

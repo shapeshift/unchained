@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/common-pulumi",
-  "version": "0.1.1",
+  "version": "1.1.0",
   "license": "MIT",
   "private": true,
   "main": "src/index.ts",
@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "@types/folder-hash": "^4.0.0",
-    "folder-hash": "^4.0.0"
+    "@types/object-hash": "^2.2.1",
+    "folder-hash": "^4.0.0",
+    "object-hash": "^2.2.0"
   }
 }

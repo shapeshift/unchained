@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/ethereum-ingester",
-  "version": "0.1.1",
+  "version": "1.1.0",
   "license": "MIT",
   "private": true,
   "main": "dist/index.js",
@@ -14,11 +14,11 @@
     "clean": "rm -rf dist node_modules"
   },
   "dependencies": {
-    "@shapeshiftoss/blockbook": "^0.1.1",
-    "@shapeshiftoss/common-ingester": "^0.1.1",
-    "@shapeshiftoss/common-mongo": "^0.1.1",
-    "@shapeshiftoss/logger": "^0.1.1",
-    "@shapeshiftoss/thorchain": "^0.1.1",
+    "@shapeshiftoss/blockbook": "^1.1.0",
+    "@shapeshiftoss/common-ingester": "^1.1.0",
+    "@shapeshiftoss/common-mongo": "^1.1.0",
+    "@shapeshiftoss/logger": "^1.1.0",
+    "@shapeshiftoss/thorchain": "^1.1.0",
     "axios": "^0.19.2",
     "bignumber.js": "^9.0.1",
     "ethers": "^5.4.0"
