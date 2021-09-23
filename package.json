@@ -11,7 +11,7 @@
     "pulumi"
   ],
   "scripts": {
-    "build": "lerna run build --include-dependencies --scope @shapeshiftoss/*",
+    "build": "lerna run build --include-dependencies --scope @shapeshiftoss/* --ignore @shapeshiftoss/unchained-client && lerna run build --scope @shapeshiftoss/unchained-client",
     "clean": "lerna run clean --scope @shapeshiftoss/* && rm -rf coverage dist node_modules",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
@@ -27,7 +27,7 @@
     "@pulumi/kubernetes": "3.6.3",
     "@pulumi/pulumi": "3.11.0",
     "dotenv": "^10.0.0",
-    "lerna": "^3.22.1"
+    "lerna": "^4.0.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.15",
@@ -49,8 +49,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "pretty-quick --staged",
-      "pre-push": "lerna run generate --scope @shapeshiftoss/* --ignore @shapeshiftoss/thorchain --ignore @shapeshiftoss/unchained-client"
+      "pre-commit": "pretty-quick --staged"
     }
   }
 }

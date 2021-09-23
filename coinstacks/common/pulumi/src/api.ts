@@ -123,6 +123,7 @@ export async function deployApi(
 
   if (config.rootDomainName) {
     const subdomain = config.environment ? `${config.environment}.api.${asset}` : `api.${asset}`
+    const additionalSubdomain = config.environment ? `${config.environment}-api.${asset}` : `api.${asset}`
     const domain = `${subdomain}.${config.rootDomainName}`
 
     const secretName = `${name}-cert-secret`
@@ -158,7 +159,9 @@ export async function deployApi(
     )
 
     const additionalRootDomainName = process.env.ADDITIONAL_ROOT_DOMAIN_NAME
-    const extraMatch = additionalRootDomainName ? ` || Host(\`${subdomain}.${additionalRootDomainName}\`)` : ''
+    const extraMatch = additionalRootDomainName
+      ? ` || Host(\`${additionalSubdomain}.${additionalRootDomainName}\`)`
+      : ''
 
     new k8s.apiextensions.CustomResource(
       `${name}-ingressroute`,

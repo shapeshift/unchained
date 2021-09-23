@@ -1081,43 +1081,43 @@ export interface Network {
      */
     blockRewards: BlockRewards;
     /**
-     * Array of rune amounts (e8) bonded by each active node. 
+     * 
      * @type {Array<string>}
      * @memberof Network
      */
     activeBonds: Array<string>;
     /**
-     * Array of rune amounts (e8) bonded by each standby node. 
+     * Array of Standby Bonds
      * @type {Array<string>}
      * @memberof Network
      */
     standbyBonds: Array<string>;
     /**
-     * Int64, Number of active nodes
+     * Int64, Number of Active Nodes
      * @type {string}
      * @memberof Network
      */
     activeNodeCount: string;
     /**
-     * Int64, Number of standby nodes, some of them might become active at the next churn. 
+     * Int64, Number of Standby Nodes
      * @type {string}
      * @memberof Network
      */
     standbyNodeCount: string;
     /**
-     * Int64(e8), total Rune in all pools. Because asset and Rune value is the same amount in every pool (by definition), the total amount pooled is totalPooledRune*2. 
+     * Int64(e8), Total Rune pooled in all pools
      * @type {string}
      * @memberof Network
      */
     totalPooledRune: string;
     /**
-     * Int64(e8), Current size of the Reserve.
+     * Int64(e8), Total left in Reserve
      * @type {string}
      * @memberof Network
      */
     totalReserve: string;
     /**
-     * Int64, height (block number) of the next churn.
+     * Int64, next height of blocks
      * @type {string}
      * @memberof Network
      */
@@ -1129,19 +1129,19 @@ export interface Network {
      */
     poolActivationCountdown: string;
     /**
-     * Float [0..1], the ratio which is used to split earnings between liquidity provider and nodes. LPIncome = rewards * poolShareFactor ; BondIncome :=  rewards * (1 - poolShareFactor) 
+     * 
      * @type {string}
      * @memberof Network
      */
     poolShareFactor: string;
     /**
-     * Float, E.g. 0.01 = 1%. Estimate of the compounded bonding earnings based on the current reserve size, emmission curve, blocks per year and pool share factor = (WeeklyBondIncome/BondAmount + 1)^52 - 1 
+     * Float, (1 + (bondReward * blocksPerMonth/totalActiveBond)) ^ 12 -1
      * @type {string}
      * @memberof Network
      */
     bondingAPY: string;
     /**
-     * Float, E.g. 0.01 = 1%. Estimate of the compounded  liquidity provider earnings based on the current reserve size, emmission curve, blocks per year and pool share factor = (WeeklyLiquidityIncome/(totalPooledRune*2) + 1)^52 - 1 
+     * Float, (1 + (stakeReward * blocksPerMonth/totalDepth of active pools)) ^ 12 -1
      * @type {string}
      * @memberof Network
      */
