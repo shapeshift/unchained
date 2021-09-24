@@ -7,7 +7,8 @@ import swaggerUi from 'swagger-ui-express'
 import { logger } from '@shapeshiftoss/logger'
 import { middleware } from '../../../common/api/src'
 import { RegisterRoutes } from './routes'
-import { Message, Connection } from '@shapeshiftoss/common-ingester'
+import { Connection } from '@shapeshiftoss/common-ingester'
+import * as ws from './websocket'
 
 const port = process.env.PORT || 3000
 
@@ -49,104 +50,13 @@ const server = app.listen(port, () => logger.info('server listening...'))
 
 const wsServer = new Server({ server })
 
-interface RegisterClientData {
-  address: string
-  blockNumber?: number
-}
-
-interface Subscription {
-  method: 'subscribe' | 'unsubscribe'
-  topic: string
-  data: RegisterClientData
-}
-
-interface WebsocketError {
-  type: 'error'
-  message: string
-}
-
 wsServer.on('connection', (connection) => {
   const id = v4()
   console.log('clientID:', id)
   const rabbitConn = new Connection(process.env.BROKER_URL)
 
-  connection.on('message', async (message) => {
-    try {
-      const payload = JSON.parse(message.toString()) as Subscription
-
-      switch (payload.method) {
-        case 'subscribe': {
-          switch (payload.topic) {
-            case 'txs': {
-              const data = payload.data as RegisterClientData
-              if (!data.address) {
-                const error: WebsocketError = {
-                  type: 'error',
-                  message: 'address required',
-                }
-                connection.send(JSON.stringify(error))
-                return
-              }
-
-              const registryExchange = rabbitConn.declareExchange('exchange.unchained', '', { noCreate: true })
-
-              // Create dynamic queue with topic client_id binding
-              const txExchange = rabbitConn.declareExchange('exchange.ethereum.tx.client', '', { noCreate: true })
-
-              const queue = rabbitConn.declareQueue(`queue.ethereum.tx.${id}`)
-              console.log('created queue:', queue.name)
-              queue.bind(txExchange, id)
-
-              await rabbitConn.completeConfiguration()
-
-              const msg = new Message({
-                client_id: id,
-                action: 'register',
-                registration: {
-                  addresses: [data.address],
-                },
-              })
-
-              // Register account with unique uuid and associated address. Update ingester_meta with the appropriate block height
-              // Trigger initial sync with fake "mempool" transaction (see ingester/register.ts)
-              registryExchange.send(msg, 'ethereum.registry')
-
-              const onMessage = () => async (message: Message) => {
-                const content = message.getContent()
-                // Send all messages back over websocket to client
-                connection.send(JSON.stringify(content))
-              }
-
-              // Create a Worker to consume from dynamic queue created above
-              queue.activateConsumer(onMessage())
-              break
-            }
-            default: {
-              const error: WebsocketError = {
-                type: 'error',
-                message: 'topic not supported',
-              }
-              connection.send(JSON.stringify(error))
-            }
-          }
-          break
-        }
-        case 'unsubscribe': {
-          console.log('unsubscribe')
-          break
-        }
-        default: {
-          const error: WebsocketError = {
-            type: 'error',
-            message: 'method not supported',
-          }
-          connection.send(JSON.stringify(error))
-        }
-      }
-    } catch (err) {
-      console.log('err', err)
-      connection.emit('bad payload')
-    }
+  connection.on('message', (message) => {
+    ws.onMessage(message, connection, rabbitConn, id)
   })
 
   connection.on('close', async () => {
