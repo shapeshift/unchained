@@ -1,6 +1,8 @@
 import express, { json, urlencoded } from 'express'
 import cors from 'cors'
 import { join } from 'path'
+import { v4 } from 'uuid'
+import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
 import { logger } from '@shapeshiftoss/logger'
 import { middleware } from '../../../common/api/src'
@@ -42,4 +44,79 @@ app.get('*', async (_, res) => {
 app.use(middleware.errorHandler)
 app.use(middleware.notFoundHandler)
 
-app.listen(port, () => logger.info('server listening...'))
+const server = app.listen(port, () => logger.info('server listening...'))
+
+const wsServer = new Server({ server })
+
+interface RegisterClientData {
+  address: string
+  blockNumber?: number
+}
+
+interface Subscription {
+  method: 'subscribe' | 'unsubscribe'
+  topic: string
+  data: RegisterClientData
+}
+
+interface WebsocketError {
+  type: 'error'
+  message: string
+}
+
+wsServer.on('connection', (connection) => {
+  const id = v4()
+
+  connection.on('message', (message) => {
+    try {
+      const payload = JSON.parse(message.toString()) as Subscription
+
+      switch (payload.method) {
+        case 'subscribe': {
+          switch (payload.topic) {
+            case 'txs': {
+              const data = payload.data as RegisterClientData
+              if (!data.address) {
+                const error: WebsocketError = {
+                  type: 'error',
+                  message: 'address required',
+                }
+                connection.send(JSON.stringify(error))
+                return
+              }
+
+              console.log(data.address, data.blockNumber ?? 0, id)
+              break
+            }
+            default: {
+              const error: WebsocketError = {
+                type: 'error',
+                message: 'topic not supported',
+              }
+              connection.send(JSON.stringify(error))
+            }
+          }
+          break
+        }
+        case 'unsubscribe': {
+          console.log('unsubscribe')
+          break
+        }
+        default: {
+          const error: WebsocketError = {
+            type: 'error',
+            message: 'method not supported',
+          }
+          connection.send(JSON.stringify(error))
+        }
+      }
+    } catch (err) {
+      console.log('err', err)
+      connection.emit('bad payload')
+    }
+  })
+
+  connection.on('close', () => {
+    // cleanup queues
+  })
+})

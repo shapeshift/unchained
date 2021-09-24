@@ -1,0 +1,5 @@
+{
+  "method": "subscribe",
+  "topic": "registerClient",
+  "data": { "blockNumber": "0", "address": "0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C" }
+}
