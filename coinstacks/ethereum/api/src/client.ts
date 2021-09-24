@@ -11,7 +11,7 @@ socket.close = (code?: number, data?: string) => {
 }
 
 socket.onmessage = (event) => {
-  console.log(event.data)
+  console.log(JSON.parse(event.data.toString()))
 }
 
 const payload = {

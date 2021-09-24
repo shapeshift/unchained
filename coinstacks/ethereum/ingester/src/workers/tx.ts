@@ -156,8 +156,14 @@ const getTxHistoryInternal = async (
  *
  * @returns {boolean} requeue: should transaction be requeued if address is already syncing
  */
-const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string): Promise<boolean> => {
-  const document = await registry.getByAddress(address)
+const syncAddressIfRegistered = async (
+  worker: Worker,
+  tx: Tx,
+  address: string,
+  client_id: string
+): Promise<boolean> => {
+  const document = await registry.getByAddress(address, client_id)
+  if (client_id !== 'unchained') console.log(document)
   if (!document) return false
 
   const { blockHeight, confirmations, txid } = tx
@@ -178,7 +184,7 @@ const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string):
   const syncStart = Date.now()
 
   // track that we are currently syncing an address up to toHeight
-  await registry.updateSyncing(address, syncKey)
+  await registry.updateSyncing(address, syncKey, client_id)
 
   logger.info(`Address sync for: ${address}, from: ${fromHeight}, to: ${toHeight} started`)
 
@@ -219,12 +225,25 @@ const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string):
 }
 
 const onMessage = (worker: Worker) => async (message: Message) => {
-  const tx: Tx = message.getContent()
+  const m: any = message.getContent()
+  let tx: Tx
+  let clientId: string
+
+  // Coming from register
+  if (m.client_id) {
+    console.log('Client_id:', m.client_id)
+    tx = m.tx
+    clientId = m.client_id
+    // coming from txid
+  } else {
+    tx = m
+    clientId = 'unchained'
+  }
 
   try {
     let requeue = false
     for await (const address of getAddresses(tx)) {
-      if (await syncAddressIfRegistered(worker, tx, address)) {
+      if (await syncAddressIfRegistered(worker, tx, address, clientId)) {
         requeue = true
       }
     }

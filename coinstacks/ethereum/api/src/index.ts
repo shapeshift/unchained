@@ -7,6 +7,7 @@ import swaggerUi from 'swagger-ui-express'
 import { logger } from '@shapeshiftoss/logger'
 import { middleware } from '../../../common/api/src'
 import { RegisterRoutes } from './routes'
+import { Worker, Message } from '@shapeshiftoss/common-ingester'
 
 const port = process.env.PORT || 3000
 
@@ -67,7 +68,7 @@ interface WebsocketError {
 wsServer.on('connection', (connection) => {
   const id = v4()
 
-  connection.on('message', (message) => {
+  connection.on('message', async (message) => {
     try {
       const payload = JSON.parse(message.toString()) as Subscription
 
@@ -85,7 +86,26 @@ wsServer.on('connection', (connection) => {
                 return
               }
 
-              console.log(data.address, data.blockNumber ?? 0, id)
+              const worker = await Worker.init({
+                queueName: 'queue.ethereum.tx.unchained',
+                exchangeName: 'exchange.unchained',
+              })
+              const msg = new Message({
+                client_id: id,
+                action: 'register',
+                registration: {
+                  addresses: [data.address],
+                },
+              })
+
+              worker.exchange?.send(msg, 'ethereum.registry')
+
+              const onMessage = () => async (message: Message) => {
+                const content = message.getContent()
+                connection.send(JSON.stringify(content))
+              }
+
+              worker.queue?.activateConsumer(onMessage())
 
               // Payload parsing and types (postpone)
               // Create dynamic queue with topic client_id binding
@@ -93,7 +113,9 @@ wsServer.on('connection', (connection) => {
               // TBD - questions related to register document
               // Trigger initial sync with fake "mempool" transaction (see ingester/register.ts)
               // Create a Worker to consume from dynamic queue created above
+
               // Send all messages back over websocket to client
+              connection.send(JSON.stringify({ key1: 'val1', key2: 'val2' }))
               // **DATA CONSISTENCY/ORDERING** think about
 
               break

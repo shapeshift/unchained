@@ -18,7 +18,7 @@ const registry = new RegistryService(MONGO_URL, MONGO_DBNAME)
 const onMessage = (worker: Worker) => async (message: Message) => {
   let document: RegistryDocument | undefined
   try {
-    const msg: RegistryMessage = JSON.parse(message.getContent())
+    const msg: RegistryMessage = JSON.parse(JSON.stringify(message.getContent()))
 
     // sanitize document to ensure document.registration.pubkey is set
     const document = registry.sanitizeDocument(msg)
@@ -27,19 +27,22 @@ const onMessage = (worker: Worker) => async (message: Message) => {
       await registry.add(msg)
 
       document.registration.addresses?.forEach((address) => {
-        const tx: Tx = {
-          txid: `register-${Date.now()}`,
-          vin: [{ n: 0, addresses: [address], isAddress: true }],
-          vout: [],
-          blockHeight: 0,
-          confirmations: 0,
-          blockTime: Date.now(),
-          value: '',
+        const txMessage: { client_id: string; tx: Tx } = {
+          client_id: document.client_id,
+          tx: {
+            txid: `register-${Date.now()}`,
+            vin: [{ n: 0, addresses: [address], isAddress: true }],
+            vout: [],
+            blockHeight: 0,
+            confirmations: 0,
+            blockTime: Date.now(),
+            value: '',
+          },
         }
 
         logger.debug(`${address} registered, starting account delta sync...`)
 
-        worker.exchange?.send(new Message(tx), 'tx')
+        worker.exchange?.send(new Message(txMessage), 'tx')
       })
     }
 

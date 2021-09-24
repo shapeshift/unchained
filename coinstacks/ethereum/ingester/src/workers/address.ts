@@ -12,6 +12,7 @@ const blockbook = new Blockbook(INDEXER_URL)
 
 const onMessage = (worker: Worker) => async (message: Message) => {
   const { address, txid, internalTxs, document }: ETHSyncTx = message.getContent()
+  if (document.client_id !== 'unchained') console.log(document.client_id)
   const retryKey = `${address}:${txid}`
 
   try {
@@ -21,7 +22,7 @@ const onMessage = (worker: Worker) => async (message: Message) => {
     const pTx = await parseTx(tx, address, internalTxs)
     logger.info(`publishing tx: ${txid} for registered address: ${address} to client: ${document.client_id}`)
 
-    worker.sendMessage(new Message({ ...pTx, document } as ETHParseTx), document.client_id)
+    worker.sendMessage(new Message({ ...pTx, document } as ETHParseTx), 'unchained')
     worker.ackMessage(message, retryKey)
   } catch (err) {
     logger.error('onMessage.error:', err.isAxiosError ? err.message : err)
