@@ -33,6 +33,7 @@ export interface InternalServerError {
 export interface Account {
   balance: string
   pubkey: string
+  path?: string
 }
 
 /**
@@ -55,15 +56,15 @@ export interface SendTxBody {
  */
 export interface Tx {
   txid: string
-  status: string
+  status?: string
   blockHash?: string
   blockHeight?: number
   confirmations?: number
   timestamp?: number
-  from: string
+  from?: string
   to?: string
   value: string
-  fee: string
+  fee?: string
 }
 
 /**

@@ -14,6 +14,24 @@ const models: TsoaRoute.Models = {
         "properties": {
             "balance": {"dataType":"string","required":true},
             "pubkey": {"dataType":"string","required":true},
+            "path": {"dataType":"string"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Tx": {
+        "dataType": "refObject",
+        "properties": {
+            "txid": {"dataType":"string","required":true},
+            "status": {"dataType":"string"},
+            "blockHash": {"dataType":"string"},
+            "blockHeight": {"dataType":"double"},
+            "confirmations": {"dataType":"double"},
+            "timestamp": {"dataType":"double"},
+            "from": {"dataType":"string"},
+            "to": {"dataType":"string"},
+            "value": {"dataType":"string","required":true},
+            "fee": {"dataType":"string"},
         },
         "additionalProperties": false,
     },
@@ -23,7 +41,9 @@ const models: TsoaRoute.Models = {
         "properties": {
             "balance": {"dataType":"string","required":true},
             "pubkey": {"dataType":"string","required":true},
+            "path": {"dataType":"string"},
             "addresses": {"dataType":"array","array":{"ref":"Account"}},
+            "transactions": {"dataType":"array","array":{"ref":"Tx"}},
             "receiveIndex": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}]},
             "changeIndex": {"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}]},
         },
@@ -51,23 +71,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "message": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Tx": {
-        "dataType": "refObject",
-        "properties": {
-            "txid": {"dataType":"string","required":true},
-            "status": {"dataType":"string","required":true},
-            "blockHash": {"dataType":"string"},
-            "blockHeight": {"dataType":"double"},
-            "confirmations": {"dataType":"double"},
-            "timestamp": {"dataType":"double"},
-            "from": {"dataType":"string","required":true},
-            "to": {"dataType":"string"},
-            "value": {"dataType":"string","required":true},
-            "fee": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
@@ -179,6 +182,28 @@ export function RegisterRoutes(app: express.Router) {
 
 
             const promise = controller.getUtxos.apply(controller, validatedArgs as any);
+            promiseHandler(controller, promise, response, undefined, next);
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.get('/api/v1/transaction/:txid',
+            function Bitcoin_getTransaction(request: any, response: any, next: any) {
+            const args = {
+                    txid: {"in":"path","name":"txid","required":true,"dataType":"string"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+            } catch (err) {
+                return next(err);
+            }
+
+            const controller = new Bitcoin();
+
+
+            const promise = controller.getTransaction.apply(controller, validatedArgs as any);
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

@@ -49,6 +49,9 @@
 					"pubkey": {
 						"type": "string"
 					},
+					"path": {
+						"type": "string"
+					},
 					"nonce": {
 						"type": "number",
 						"format": "double"
@@ -157,10 +160,7 @@
 				},
 				"required": [
 					"txid",
-					"status",
-					"from",
-					"value",
-					"fee"
+					"value"
 				],
 				"type": "object",
 				"additionalProperties": false

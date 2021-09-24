@@ -43,12 +43,13 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   @Example<BitcoinAccount>({
     pubkey: '336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU',
     balance: '974652',
+    path: "m/44'/0'/0'/0/0",
   })
-  @Example<BitcoinAccount>({
+  @Example<any>({
     pubkey:
       'xpub6CUGRUonZSQ4TWtTMmzXdrXDtypWKiKrhko4egpiMZbpiaQL2jkwSB1icqYh2cfDfVxdx4df189oLKnC5fSwqPfgyP3hooxujYzAu3fDVmz',
     balance: '12688908',
-    addresses: [{ pubkey: '1EfgV2Hr5CDjXPavHDpDMjmU33BA2veHy6', balance: '10665' }],
+    addresses: [{ pubkey: '1EfgV2Hr5CDjXPavHDpDMjmU33BA2veHy6', balance: '10665', path: "m/44'/0'/0'/0/0" }],
   })
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
@@ -58,10 +59,12 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
     try {
       let data: Address | Xpub
       if (isXpub(pubkey)) {
-        data = await blockbook.getXpub(pubkey, undefined, undefined, undefined, undefined, 'tokenBalances', 'used')
+        data = await blockbook.getXpub(pubkey, undefined, undefined, undefined, undefined, 'txs', 'used')
       } else {
         data = await blockbook.getAddress(pubkey, undefined, undefined, undefined, undefined, 'basic')
       }
+
+      console.log('data: ', JSON.stringify(data.transactions))
 
       let changeIndex: number | null = null
       let receiveIndex: number | null = null
@@ -93,7 +96,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
 
       const addresses = data.tokens?.reduce<Array<Account>>((prev, token) => {
         if (token.balance) {
-          prev.push({ pubkey: token.name, balance: token.balance })
+          prev.push({ pubkey: token.name, balance: token.balance, path: token.path })
         }
 
         return prev
@@ -103,6 +106,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
         pubkey: data.address,
         balance: data.balance,
         addresses,
+        transactions: data.transactions,
         receiveIndex,
         changeIndex,
       }
@@ -218,6 +222,44 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
       }))
 
       return utxos
+    } catch (err) {
+      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+    }
+  }
+
+  /**
+   * Get transaction
+   *
+   * @param {string} txid of tx
+   *
+   * @example txid "85adac8ab79c54bad317416f6ca7729d8bcedb6af5a2491999b7daf6c257091b"
+   */
+  @Example<Array<any>>([
+    {
+      address: '14mMwtZCGiAtyr8KnnAZYyHmZ9Zvj71h4t',
+      confirmations: 58362,
+      txid: '02cdb69a97d1b8585797ac31a1954804b40a71c380a3ede0793f21a2cdfd300a',
+      value: '729',
+      vout: 1,
+    },
+  ])
+  @Response<BadRequestError>(400, 'Bad Request')
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Get('transaction/{txid}')
+  async getTransaction(@Path() txid: string): Promise<any> {
+    try {
+      const data = await blockbook.getTransaction(txid)
+
+      // const utxos = data.map<Utxo>((utxo) => ({
+      //   address: utxo.address ?? pubkey,
+      //   confirmations: utxo.confirmations,
+      //   txid: utxo.txid,
+      //   value: utxo.value,
+      //   vout: utxo.vout,
+      // }))
+
+      return data
     } catch (err) {
       throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
     }
