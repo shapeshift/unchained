@@ -225,45 +225,6 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   }
 
   /**
-   * Get all unspent transaction outputs for an address or xpub
-   *
-   * @param {string} pubkey account address or xpub
-   *
-   * @example pubkey "14mMwtZCGiAtyr8KnnAZYyHmZ9Zvj71h4t"
-   * @example pubkey "xpub6DQYbVJSVvJPzpYenir7zVSf2WPZRu69LxZuMezzAKuT6biPcug6Vw1zMk4knPBeNKvioutc4EGpPQ8cZiWtjcXYvJ6wPiwcGmCkihA9Jy3"
-   */
-  @Example<Array<Utxo>>([
-    {
-      address: '14mMwtZCGiAtyr8KnnAZYyHmZ9Zvj71h4t',
-      confirmations: 58362,
-      txid: '02cdb69a97d1b8585797ac31a1954804b40a71c380a3ede0793f21a2cdfd300a',
-      value: '729',
-      vout: 1,
-    },
-  ])
-  @Response<BadRequestError>(400, 'Bad Request')
-  @Response<ValidationError>(422, 'Validation Error')
-  @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('account/{pubkey}/utxos')
-  async broadcast(@Path() signedTx: string): Promise<Array<Utxo>> {
-    try {
-      const data = await blockbook.getUtxo(pubkey, true)
-
-      const utxos = data.map<Utxo>((utxo) => ({
-        address: utxo.address ?? pubkey,
-        confirmations: utxo.confirmations,
-        txid: utxo.txid,
-        value: utxo.value,
-        vout: utxo.vout,
-      }))
-
-      return utxos
-    } catch (err) {
-      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
-    }
-  }
-
-  /**
    * Sends raw transaction to be broadcast to the node.
    *
    * @param {SendTxBody} body serialized raw transaction hex
