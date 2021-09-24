@@ -1,5 +1,5 @@
 /* unable to import models from a module with tsoa */
-import { Account } from '../../../common/api/src'
+import { Account, Tx } from '../../../common/api/src'
 
 /**
  * Contains additional bitcoin specific info
@@ -9,6 +9,11 @@ export interface BitcoinAccount extends Account {
    * Account details by address if BitcoinAccount was fetched by xpub
    */
   addresses?: Array<Account>
+
+  /**
+   * Transactions of the given xpub
+   */
+  transactions?: Array<Tx>
 
   /**
    * The next unused receive address if BitcoinAccount was fetched by xpub
