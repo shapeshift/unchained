@@ -37,15 +37,19 @@ const getPages = (from: number, to: number, max: number): Array<number> => {
 }
 
 const getAddresses = (tx: Tx): Array<string> => {
-  // todo - check isAddress false (coinbase, op return)
   const addresses: Array<string> = []
 
   tx.vin.forEach((vin: Vin) => {
-    vin.addresses?.forEach((address: string) => address && addresses.push(address))
+    if (vin.isAddress === true) {
+      // isAddress is false for coinbase and op return
+      vin.addresses?.forEach((address: string) => address && addresses.push(address))
+    }
   })
 
   tx.vout.forEach((vout: Vout) => {
-    vout.addresses?.forEach((address: string) => address && addresses.push(address))
+    if (vout.isAddress === true) {
+      vout.addresses?.forEach((address: string) => address && addresses.push(address))
+    }
   })
 
   //logger.debug(`getAddresses: ${addresses}, for txid: ${tx.txid}`)
