@@ -38,25 +38,9 @@ describe('txWorker', () => {
   describe('syncAddressIfRegistered', () => {
     it('should process tx history if address is registered in the db', async () => {
       const worker = await Worker.init({})
-      const address = 'bc1qez4d09qctlfyntfkxl3vgs5unzqpgs29ndyu28'
-      // Note: blocks 700972, 700971, 700970 in the db have incorrect hashes in order to trigger a reorg
-      //const dbAddress = db[700972]
-      //const nodeTxHistory = node[700973]
-
-      // const expected = {
-      //   height: 700970,
-      //   dbBlock: {
-      //     hash: node[700970].hash,
-      //     height: Number(node[700970].height),
-      //     prevHash: node[700970].previousblockhash,
-      //   },
-      //   nodeBlock: node[700970],
-      // }
-
-      const actual = await syncAddressIfRegistered(worker, tx, address)
-
-      expect(sendMessageMock).toHaveBeenCalledTimes(6) // 3
-      //expect(actual).toEqual(expected)
+      const address = blockbookTxHistory.address
+      await syncAddressIfRegistered(worker, tx, address)
+      expect(sendMessageMock).toHaveBeenCalledTimes(2)
     })
   })
 })
