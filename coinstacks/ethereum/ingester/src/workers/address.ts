@@ -22,7 +22,7 @@ const onMessage = (worker: Worker) => async (message: Message) => {
     const pTx = await parseTx(tx, address, internalTxs)
     logger.info(`publishing tx: ${txid} for registered address: ${address} to client: ${document.client_id}`)
 
-    worker.sendMessage(new Message({ ...pTx, document } as ETHParseTx), 'unchained')
+    worker.sendMessage(new Message({ ...pTx, document } as ETHParseTx), document.client_id)
     worker.ackMessage(message, retryKey)
   } catch (err) {
     logger.error('onMessage.error:', err.isAxiosError ? err.message : err)

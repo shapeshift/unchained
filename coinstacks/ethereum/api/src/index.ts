@@ -7,7 +7,7 @@ import swaggerUi from 'swagger-ui-express'
 import { logger } from '@shapeshiftoss/logger'
 import { middleware } from '../../../common/api/src'
 import { RegisterRoutes } from './routes'
-import { Worker, Message } from '@shapeshiftoss/common-ingester'
+import { Message, Connection } from '@shapeshiftoss/common-ingester'
 
 const port = process.env.PORT || 3000
 
@@ -67,6 +67,7 @@ interface WebsocketError {
 
 wsServer.on('connection', (connection) => {
   const id = v4()
+  console.log('clientID:', id)
 
   connection.on('message', async (message) => {
     try {
@@ -86,10 +87,18 @@ wsServer.on('connection', (connection) => {
                 return
               }
 
-              const worker = await Worker.init({
-                queueName: 'queue.ethereum.tx.unchained',
-                exchangeName: 'exchange.unchained',
-              })
+              //const worker = await Worker.init({
+              //  queueName: `queue.ethereum.tx.${id}`,
+              //  exchangeName: 'exchange.unchained',
+              //})
+              const rabbitConn = new Connection(process.env.BROKER_URL)
+              const registryExchange = rabbitConn.declareExchange('exchange.unchained', '', { noCreate: true })
+              const txExchange = rabbitConn.declareExchange('exchange.ethereum.tx.client', '', { noCreate: true })
+              const queue = rabbitConn.declareQueue(`queue.ethereum.tx.${id}`)
+              queue.bind(txExchange, id)
+
+              await rabbitConn.completeConfiguration()
+
               const msg = new Message({
                 client_id: id,
                 action: 'register',
@@ -98,14 +107,14 @@ wsServer.on('connection', (connection) => {
                 },
               })
 
-              worker.exchange?.send(msg, 'ethereum.registry')
+              registryExchange.send(msg, 'ethereum.registry')
 
               const onMessage = () => async (message: Message) => {
                 const content = message.getContent()
                 connection.send(JSON.stringify(content))
               }
 
-              worker.queue?.activateConsumer(onMessage())
+              queue.activateConsumer(onMessage())
 
               // Payload parsing and types (postpone)
               // Create dynamic queue with topic client_id binding
