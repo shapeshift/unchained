@@ -68,6 +68,7 @@ interface WebsocketError {
 wsServer.on('connection', (connection) => {
   const id = v4()
   console.log('clientID:', id)
+  const rabbitConn = new Connection(process.env.BROKER_URL)
 
   connection.on('message', async (message) => {
     try {
@@ -87,14 +88,13 @@ wsServer.on('connection', (connection) => {
                 return
               }
 
-              //const worker = await Worker.init({
-              //  queueName: `queue.ethereum.tx.${id}`,
-              //  exchangeName: 'exchange.unchained',
-              //})
-              const rabbitConn = new Connection(process.env.BROKER_URL)
               const registryExchange = rabbitConn.declareExchange('exchange.unchained', '', { noCreate: true })
+
+              // Create dynamic queue with topic client_id binding
               const txExchange = rabbitConn.declareExchange('exchange.ethereum.tx.client', '', { noCreate: true })
+
               const queue = rabbitConn.declareQueue(`queue.ethereum.tx.${id}`)
+              console.log('created queue:', queue.name)
               queue.bind(txExchange, id)
 
               await rabbitConn.completeConfiguration()
@@ -107,26 +107,18 @@ wsServer.on('connection', (connection) => {
                 },
               })
 
+              // Register account with unique uuid and associated address. Update ingester_meta with the appropriate block height
+              // Trigger initial sync with fake "mempool" transaction (see ingester/register.ts)
               registryExchange.send(msg, 'ethereum.registry')
 
               const onMessage = () => async (message: Message) => {
                 const content = message.getContent()
+                // Send all messages back over websocket to client
                 connection.send(JSON.stringify(content))
               }
 
-              queue.activateConsumer(onMessage())
-
-              // Payload parsing and types (postpone)
-              // Create dynamic queue with topic client_id binding
-              // Register account with unique uuid and associated address. Update ingester_meta with the appropriate block height
-              // TBD - questions related to register document
-              // Trigger initial sync with fake "mempool" transaction (see ingester/register.ts)
               // Create a Worker to consume from dynamic queue created above
-
-              // Send all messages back over websocket to client
-              connection.send(JSON.stringify({ key1: 'val1', key2: 'val2' }))
-              // **DATA CONSISTENCY/ORDERING** think about
-
+              queue.activateConsumer(onMessage())
               break
             }
             default: {
@@ -157,7 +149,9 @@ wsServer.on('connection', (connection) => {
     }
   })
 
-  connection.on('close', () => {
-    // cleanup queues
+  connection.on('close', async () => {
+    const queue = rabbitConn.declareQueue(`queue.ethereum.tx.${id}`, { noCreate: true })
+    await queue.delete()
+    console.log('deleted queue:', queue.name)
   })
 })
