@@ -86,6 +86,16 @@ wsServer.on('connection', (connection) => {
               }
 
               console.log(data.address, data.blockNumber ?? 0, id)
+
+              // Payload parsing and types (postpone)
+              // Create dynamic queue with topic client_id binding
+              // Register account with unique uuid and associated address. Update ingester_meta with the appropriate block height
+              // TBD - questions related to register document
+              // Trigger initial sync with fake "mempool" transaction (see ingester/register.ts)
+              // Create a Worker to consume from dynamic queue created above
+              // Send all messages back over websocket to client
+              // **DATA CONSISTENCY/ORDERING** think about
+
               break
             }
             default: {
