@@ -13,11 +13,25 @@ const getStorageClass = (cluster: string) => {
       throw new Error(`cluster not supported... Use: 'docker-desktop', 'minikube', or 'eks.`)
   }
 }
+export interface BitcoinConfig {
+  kubeconfig: string
+  config: Config
+  namespace: string
+}
 
-export const getConfig = async (): Promise<{ kubeconfig: string; config: Config }> => {
+export const getConfig = async (): Promise<BitcoinConfig> => {
   const config = new pulumi.Config('unchained').requireObject<Config>('bitcoin')
   const stackReference = new pulumi.StackReference(config.stack)
   const kubeconfig = (await stackReference.getOutputValue('kubeconfig')) as string
+  const namespaces = (await stackReference.getOutputValue('namespaces')) as Array<string>
+  const defaultNamespace = (await stackReference.getOutputValue('defaultNamespace')) as string
+
+  const namespace = config.environment ? `${defaultNamespace}-${config.environment}` : defaultNamespace
+  if (!namespaces.includes(namespace)) {
+    throw new Error(
+      `Error: environment: ${config.environment} not found in cluster. Either remove to use default environment or verify environment exists`
+    )
+  }
 
   config.isLocal = (await stackReference.getOutputValue('isLocal')) as boolean
   config.cluster = (await stackReference.getOutputValue('cluster')) as Cluster
@@ -64,5 +78,5 @@ export const getConfig = async (): Promise<{ kubeconfig: string; config: Config 
     )
   }
 
-  return { kubeconfig, config }
+  return { kubeconfig, config, namespace }
 }

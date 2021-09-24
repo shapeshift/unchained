@@ -10,6 +10,10 @@ config:
     ## for individual accounts, use your account name (pulumi whoami) for the organization component.
     stack: # run `pulumi stack ls` in `unchained/pulumi` and reference the url
 
+    ## environment - specify environment if you deployed multiples into cluster. specified as 'additionalEnvironments' in the cluster stack 
+    ## if falsy use default environment created in cluster stack
+    #environment: 
+
     ## api - if specified an api service will be deployed
     api:
       enableDatadogLogs: false
@@ -21,7 +25,7 @@ config:
     ## mongo - if specified a mongo database will be deployed
     mongo:
       cpuLimit: '0.25'
-      helmChartVersion: '10.23.10'
+      helmChartVersion: '10.19.0'
       memoryLimit: '256Mi'
       replicaCount: 1
       storageSize: '1Gi'
@@ -36,7 +40,7 @@ config:
     #  daemon:
     #    chain: 'mainnet'
     #    cpuLimit: '2'
-    #    image: 'ethereum/client-go:v1.10.6'
+    #    image: 'ethereum/client-go:v1.10.8'
     #    memoryLimit: '24Gi'
     #    node: 'geth'
     #    storageSize: '1500Gi'

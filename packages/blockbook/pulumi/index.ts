@@ -44,7 +44,7 @@ export async function deployIndexer(
   asset: string,
   provider: k8s.Provider,
   namespace: string,
-  config: Pick<Config, 'indexer' | 'dockerhub' | 'isLocal' | 'rootDomainName'>
+  config: Pick<Config, 'indexer' | 'dockerhub' | 'isLocal' | 'rootDomainName' | 'environment'>
 ): Promise<void> {
   if (config.indexer === undefined) return
 
@@ -304,6 +304,12 @@ export async function deployIndexer(
   )
 
   if (config.rootDomainName) {
+    const domain = (service: string) => {
+      return config.environment
+        ? `${config.environment}.${service}.${asset}.${config.rootDomainName}`
+        : `${service}.${asset}.${config.rootDomainName}`
+    }
+
     const secretName = `${name}-cert-secret`
 
     new k8s.apiextensions.CustomResource(
@@ -325,7 +331,7 @@ export async function deployIndexer(
             encoding: 'PKCS1',
             size: 2048,
           },
-          dnsNames: [`indexer.${asset}.${config.rootDomainName}`, `daemon.${asset}.${config.rootDomainName}`],
+          dnsNames: [domain('indexer'), domain('daemon')],
           issuerRef: {
             name: 'lets-encrypt',
             kind: 'ClusterIssuer',
@@ -337,8 +343,13 @@ export async function deployIndexer(
     )
 
     const additionalRootDomainName = process.env.ADDITIONAL_ROOT_DOMAIN_NAME
+    const additionalDomain = (service: string) => {
+      return config.environment
+        ? `${config.environment}-${service}.${asset}.${additionalRootDomainName}`
+        : `${service}.${asset}.${additionalRootDomainName}`
+    }
     const extraMatch = (service: string) =>
-      additionalRootDomainName ? ` || Host(\`${service}.${asset}.${additionalRootDomainName}\`)` : ''
+      additionalRootDomainName ? ` || Host(\`${additionalDomain(service)}\`)` : ''
 
     new k8s.apiextensions.CustomResource(
       `${name}-ingressroute`,
@@ -353,7 +364,7 @@ export async function deployIndexer(
           entryPoints: ['web', 'websecure'],
           routes: [
             {
-              match: `Host(\`indexer.${asset}.${config.rootDomainName}\`)` + extraMatch('indexer'),
+              match: `Host(\`${domain('indexer')}\`)` + extraMatch('indexer'),
               kind: 'Rule',
               services: [
                 {
@@ -365,7 +376,7 @@ export async function deployIndexer(
               ],
             },
             {
-              match: `Host(\`daemon.${asset}.${config.rootDomainName}\`)` + extraMatch('daemon'),
+              match: `Host(\`${domain('daemon')}\`)` + extraMatch('daemon'),
               kind: 'Rule',
               services: [
                 {
@@ -379,10 +390,7 @@ export async function deployIndexer(
           ],
           tls: {
             secretName: secretName,
-            domains: [
-              { main: `indexer.${asset}.${config.rootDomainName}` },
-              { main: `daemon.${asset}.${config.rootDomainName}` },
-            ],
+            domains: [{ main: domain('indexer') }, { main: domain('daemon') }],
           },
         },
       },
@@ -397,10 +405,7 @@ export async function deployIndexer(
           labels: labels,
         },
         spec: {
-          rules: [
-            { host: `indexer.${asset}.${config.rootDomainName}` },
-            { ...(config.indexer.daemon && { host: `daemon.${asset}.${config.rootDomainName}` }) },
-          ],
+          rules: [{ host: domain('indexer') }, { ...(config.indexer.daemon && { host: domain('daemon') }) }],
         },
       },
       { provider }

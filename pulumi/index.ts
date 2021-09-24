@@ -1,54 +1,18 @@
-import { createHash } from 'crypto'
 import { hashElement } from 'folder-hash'
 import { core, Provider } from '@pulumi/kubernetes'
-import { buildAndPushImage, hasTag } from '@shapeshiftoss/common-pulumi'
+import { buildAndPushImage, hasTag, getBaseHash } from '@shapeshiftoss/common-pulumi'
 import { EKSClusterLauncher } from '@shapeshiftoss/cluster-launcher'
 import { deployRabbit } from './rabbit'
 import { deployWatcher } from './watcher'
 import config from './config'
-
-// creates a hash of the content included in the final build image (base)
-const getHashBase = async (): Promise<string> => {
-  const hash = createHash('sha1')
-
-  // hash root level unchained files
-  const { hash: unchainedHash } = await hashElement(`../`, {
-    folders: { exclude: ['.*', '*'] },
-    files: { include: ['package.json', 'lerna.json'] },
-  })
-  hash.update(unchainedHash)
-
-  // hash contents of packages
-  const { hash: packagesHash } = await hashElement(`../packages`, {
-    folders: { include: ['**'], exclude: ['.*', 'dist', 'node_modules', 'pulumi'] },
-    files: { include: ['*.ts', '*.json', 'Dockerfile'] },
-  })
-  hash.update(packagesHash)
-
-  // hash contents of common-ingester
-  const { hash: commonHash } = await hashElement(`../coinstacks/common`, {
-    folders: { include: ['**'], exclude: ['.*', 'dist', 'node_modules', 'pulumi'] },
-    files: { include: ['*.ts', '*.json', 'Dockerfile'] },
-  })
-  hash.update(commonHash)
-
-  // hash coinstacks dependencies
-  const { hash: dependenciesHash } = await hashElement(`../coinstacks`, {
-    folders: { include: ['**'], exclude: ['.*', 'common', 'dist', 'node_modules', 'pulumi'] },
-    files: { include: ['package.json'] },
-  })
-  hash.update(dependenciesHash)
-
-  return hash.digest('hex')
-}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Outputs = Record<string, any>
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
-  const app = 'unchained'
-  const namespace = 'unchained'
+  const name = 'unchained'
+  const defaultNamespace = 'unchained'
   const outputs: Outputs = {}
 
   let provider: Provider
@@ -56,13 +20,14 @@ export = async (): Promise<Outputs> => {
     const { cluster } = config
     provider = new Provider(cluster, { cluster, context: cluster })
 
-    await deployWatcher(app, provider, namespace)
+    await deployWatcher(name, provider, defaultNamespace)
   } else {
     if (!config.rootDomainName) throw new Error('rootDomainName required')
 
-    const cluster = await EKSClusterLauncher.create(app, {
+    const cluster = await EKSClusterLauncher.create(name, {
       rootDomainName: config.rootDomainName,
       instanceTypes: config.eks.instanceTypes,
+      numInstancesPerAZ: 2,
       allAZs: config.eks.allAZs,
       region: config.eks.region,
       cidrBlock: config.eks.cidrBlock,
@@ -76,8 +41,8 @@ export = async (): Promise<Outputs> => {
     provider = new Provider('kube-provider', { kubeconfig: cluster.kubeconfig })
 
     if (config.dockerhub) {
-      const baseImage = `${config.dockerhub.username}/${app}-base`
-      const baseTag = await getHashBase()
+      const baseImage = `${config.dockerhub.username}/${name}-base`
+      const baseTag = await getBaseHash()
 
       if (!(await hasTag(baseImage, baseTag))) {
         await buildAndPushImage({
@@ -95,7 +60,7 @@ export = async (): Promise<Outputs> => {
         })
       }
 
-      const blockbookImage = `${config.dockerhub.username}/${app}-blockbook`
+      const blockbookImage = `${config.dockerhub.username}/${name}-blockbook`
       const { hash: blockbookTag } = await hashElement(`../packages/blockbook/Dockerfile`, { encoding: 'hex' })
 
       if (!(await hasTag(blockbookImage, blockbookTag))) {
@@ -116,14 +81,22 @@ export = async (): Promise<Outputs> => {
     }
   }
 
-  new core.v1.Namespace(namespace, { metadata: { name: app } }, { provider })
+  const namespaces: Array<string> = [defaultNamespace]
+  if (config.additionalEnvironments?.length) {
+    config.additionalEnvironments.forEach((env) => namespaces.push(`${defaultNamespace}-${env}`))
+  }
 
-  await deployRabbit(app, provider, namespace, config)
+  namespaces.forEach(async (namespace) => {
+    new core.v1.Namespace(namespace, { metadata: { name: namespace } }, { provider })
+    await deployRabbit(namespace, provider, namespace, config)
+  })
 
   outputs.cluster = config.cluster
   outputs.isLocal = config.isLocal
   outputs.dockerhub = config.dockerhub
   outputs.rootDomainName = config.rootDomainName
+  outputs.namespaces = namespaces
+  outputs.defaultNamespace = defaultNamespace
 
   return outputs
 }

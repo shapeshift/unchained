@@ -7,6 +7,7 @@ export * from './api'
 export * from './docker'
 export * from './ingester'
 export * from './mongo'
+export * from './hasher'
 
 export interface Dockerhub {
   username: string
@@ -23,6 +24,7 @@ export interface BaseConfig {
   dockerhub?: Dockerhub
   cluster: Cluster
   isLocal: boolean
+  additionalEnvironments?: string[]
   /**
    * Creates ingress for public dns
    *
@@ -33,6 +35,7 @@ export interface BaseConfig {
 
 export interface Config extends BaseConfig {
   stack: string
+  environment?: string
   api?: ApiConfig
   indexer?: IndexerConfig
   ingester?: IngesterConfig

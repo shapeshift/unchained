@@ -20,7 +20,11 @@ aliases:
       branches:
         ignore:
           - main
-
+  - &only-develop
+    filters:
+      branches:
+        only:
+          - develop
   - &bitcoin
     coinstack: bitcoin
     pulumi-stack: public
@@ -70,6 +74,12 @@ commands:
     description: checkout project, install dependencies, build, lint and test
     steps:
       - checkout
+      - run:
+          name: install openjdk-11
+          command: |
+            curl -O https://download.java.net/java/ga/jdk11/openjdk-11_linux-x64_bin.tar.gz
+            tar zxvf openjdk-11_linux-x64_bin.tar.gz
+            echo 'export PATH=$PATH:$(pwd)/jdk-11/bin' >> $BASH_ENV
       - run:
           name: yarn install
           command: yarn install --immutable
@@ -148,6 +158,7 @@ jobs:
             pulumi stack select $PULUMI_ORG/dependencies
             pulumi config set --path unchained:common.cluster eks
             pulumi config set --path unchained:common.isLocal false
+            pulumi config set --path unchained:common.additionalEnvironments[0] dev
             pulumi config set --path unchained:common.eks.allAZs true
             pulumi config set --path unchained:common.eks.instanceTypes[0] m5.4xlarge
             pulumi config set --path unchained:common.eks.instanceTypes[1] m5a.4xlarge
@@ -191,6 +202,9 @@ jobs:
     parameters:
       coinstack:
         description: coinstack name
+        type: string
+      environment:
+        description: environment to deploy into. empty string ('') is our prod
         type: string
       pulumi-stack:
         description: pulumi stack to deploy to (public)
@@ -257,6 +271,7 @@ jobs:
           command: |
             pulumi stack select $PULUMI_ORG/<< parameters.pulumi-stack >>
             pulumi config set --path unchained:<< parameters.coinstack >>.stack $PULUMI_ORG/common/dependencies
+            [ -n "<< parameters.environment >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.environment << parameters.environment >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.enableDatadogLogs true
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.enableDatadogLogs true
             pulumi config set --path unchained:<< parameters.coinstack >>.mongo.cpuLimit << parameters.mongo-cpu-limit >>
@@ -274,7 +289,6 @@ jobs:
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.cpuLimit << parameters.daemon-cpu-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.memoryLimit << parameters.daemon-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.storageSize << parameters.daemon-storage-size >>
-            cat ./Pulumi.public.yaml
             << parameters.pulumi-command >>
 
   lint-and-test:
@@ -300,9 +314,9 @@ jobs:
     description: publish packages
     executor: node
     steps:
-      - attach-workspace:
+      - attach_workspace:
           at: ~/
-      - run: echo "//registry.npmjs.org/:-authToken=$NPM_TOKEN" > .npmrc
+      - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > .npmrc
       - run: yarn lerna publish from-package --yes
 
 workflows:
@@ -312,7 +326,43 @@ workflows:
       - lint-and-test:
           name: lint and test project
           <<: *not-main
-  deploy:
+  deploy-development:
+    jobs:
+      - lint-and-test-persist:
+          name: lint and test project (persist to workspace)
+          <<: *only-develop
+
+      - deploy-dependencies:
+          name: deploy common unchained dependencies
+          requires:
+            - lint and test project (persist to workspace)
+          <<: *only-develop
+
+      ######################### (BITCOIN) #########################
+      - deploy-coinstack:
+          name: deploy bitcoin develop
+          requires:
+            - deploy common unchained dependencies
+          <<: *bitcoin
+          environment: dev
+          pulumi-stack: public-dev
+          mongo-replicas: 2
+          indexer-replicas: 1
+          <<: *only-develop
+
+      ######################### (ETHEREUM) #########################
+      - deploy-coinstack:
+          name: deploy ethereum develop
+          requires:
+            - deploy common unchained dependencies
+          <<: *ethereum
+          environment: dev
+          pulumi-stack: public-dev
+          mongo-replicas: 2
+          indexer-replicas: 1
+          <<: *only-develop
+
+  deploy-main:
     jobs:
       - lint-and-test-persist:
           name: lint and test project (persist to workspace)
@@ -324,12 +374,14 @@ workflows:
             - lint and test project (persist to workspace)
           <<: *only-main
 
+      ######################### (BITCOIN) #########################
       - deploy-coinstack:
           name: preview bitcoin coinstack
           pulumi-command: pulumi preview
           requires:
             - deploy common unchained dependencies
           <<: *bitcoin
+          environment: ''
           <<: *only-main
       - approve-coinstack:
           name: approve bitcoin coinstack
@@ -342,14 +394,17 @@ workflows:
           requires:
             - approve bitcoin coinstack
           <<: *bitcoin
+          environment: ''
           <<: *only-main
 
+      ######################### (ETHEREUM) #########################
       - deploy-coinstack:
           name: preview ethereum coinstack
           pulumi-command: pulumi preview
           requires:
             - deploy common unchained dependencies
           <<: *ethereum
+          environment: ''
           <<: *only-main
       - approve-coinstack:
           name: approve ethereum coinstack
@@ -362,4 +417,12 @@ workflows:
           requires:
             - approve ethereum coinstack
           <<: *ethereum
+          environment: ''
+          <<: *only-main
+
+      - publish:
+          name: publish packages
+          requires:
+            - deploy bitcoin coinstack
+            - deploy ethereum coinstack
           <<: *only-main

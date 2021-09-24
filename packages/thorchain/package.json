@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/thorchain",
-  "version": "0.1.1",
+  "version": "1.1.0",
   "license": "MIT",
   "private": true,
   "main": "dist/index.js",
@@ -15,7 +15,7 @@
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist node_modules",
-    "generate": "openapi-generator-cli generate",
+    "generate": "JAVA_OPTS='-Dlog.level=warn' openapi-generator-cli generate",
     "watch": "tsc --watch"
   },
   "dependencies": {

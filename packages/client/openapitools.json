@@ -3,6 +3,7 @@
   "spaces": 2,
   "generator-cli": {
     "version": "5.2.1",
+    "storageDir": "~/.openapitools",
     "generators": {
       "ethereum": {
         "inputSpec": "../../coinstacks/ethereum/api/src/swagger.json",

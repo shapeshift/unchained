@@ -3,9 +3,10 @@
   "spaces": 2,
   "generator-cli": {
     "version": "5.2.1",
+    "storageDir": "~/.openapitools",
     "generators": {
-      "axios": {
-        "inputSpec": "https://gitlab.com/thorchain/midgard/-/raw/develop/openapi/openapi.yaml",
+      "midgard": {
+        "inputSpec": "https://gitlab.com/thorchain/midgard/-/raw/2.4.1/openapi/openapi.yaml",
         "generatorName": "typescript-axios",
         "output": "#{cwd}/src/generated/midgard",
         "reservedWordsMappings": { "in": "in" },

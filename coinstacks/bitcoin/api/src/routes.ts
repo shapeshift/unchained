@@ -185,28 +185,6 @@ export function RegisterRoutes(app: express.Router) {
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/api/v1/transaction/:txid',
-            function Bitcoin_getTransaction(request: any, response: any, next: any) {
-            const args = {
-                    txid: {"in":"path","name":"txid","required":true,"dataType":"string"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = getValidatedArgs(args, request, response);
-            } catch (err) {
-                return next(err);
-            }
-
-            const controller = new Bitcoin();
-
-
-            const promise = controller.getTransaction.apply(controller, validatedArgs as any);
-            promiseHandler(controller, promise, response, undefined, next);
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.post('/api/v1/send',
             function Bitcoin_sendTx(request: any, response: any, next: any) {
             const args = {

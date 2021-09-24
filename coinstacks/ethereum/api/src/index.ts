@@ -1,5 +1,6 @@
-import express, { json, Response, Request, urlencoded } from 'express'
+import express, { json, urlencoded } from 'express'
 import cors from 'cors'
+import { join } from 'path'
 import swaggerUi from 'swagger-ui-express'
 import { logger } from '@shapeshiftoss/logger'
 import { middleware } from '../../../common/api/src'
@@ -13,10 +14,6 @@ app.use(json())
 app.use(urlencoded({ extended: true }))
 app.use(cors())
 
-app.get('/', async (_, res) => {
-  res.redirect('/docs')
-})
-
 app.get('/health', async (_, res) => {
   res.json({
     status: 'up',
@@ -24,13 +21,25 @@ app.get('/health', async (_, res) => {
   })
 })
 
-app.use('/docs', swaggerUi.serve, async (_req: Request, res: Response) => {
-  return res.send(swaggerUi.generateHTML(await import('./swagger.json')))
-})
+const options: swaggerUi.SwaggerUiOptions = {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'ShapeShift Ethereum API Docs',
+  customfavIcon: '/public/favi-blue.png',
+  swaggerUrl: '/swagger.json',
+}
+
+app.use('/public', express.static(join(__dirname, '../../../../../../common/api/public')))
+app.use('/swagger.json', express.static(join(__dirname, './swagger.json')))
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(undefined, options))
 
 RegisterRoutes(app)
+
+// redirect any unmatched routes to docs
+app.get('*', async (_, res) => {
+  res.redirect('/docs')
+})
 
 app.use(middleware.errorHandler)
 app.use(middleware.notFoundHandler)
 
-app.listen(port, () => logger.info(`listening at http://localhost:${port}`))
+app.listen(port, () => logger.info('server listening...'))
