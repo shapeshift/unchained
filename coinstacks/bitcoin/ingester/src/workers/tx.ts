@@ -1,6 +1,9 @@
-import { Tx } from '@shapeshiftoss/blockbook'
+import { Tx, Vin, Vout, Blockbook } from '@shapeshiftoss/blockbook'
 import { Message, Worker } from '@shapeshiftoss/common-ingester'
 import { logger } from '@shapeshiftoss/logger'
+import { RegistryService } from '@shapeshiftoss/common-mongo'
+import { TxHistory } from '../types'
+import { SyncTx } from '@shapeshiftoss/common-ingester'
 
 const NODE_ENV = process.env.NODE_ENV
 
@@ -13,6 +16,7 @@ if (NODE_ENV !== 'test') {
   if (!MONGO_DBNAME) throw new Error('MONGO_DBNAME env var not set')
   if (!MONGO_URL) throw new Error('MONGO_URL env var not set')
 }
+
 const POOL_SIZE = 100
 const PAGE_SIZE = 1000
 const BATCH_SIZE = 20
@@ -33,6 +37,7 @@ const getPages = (from: number, to: number, max: number): Array<number> => {
 }
 
 const getAddresses = (tx: Tx): Array<string> => {
+  // todo - check isAddress false (coinbase, op return)
   const addresses: Array<string> = []
 
   tx.vin.forEach((vin: Vin) => {
@@ -83,7 +88,9 @@ const getTxHistory = async (address: string, fromHeight: number, toHeight?: numb
 }
 
 /**
- * Get transaction history (txids) for an address from the last point synced to (fromHeight) up until the height of the transaction being processed (toHeight) and publish txids to the address worker.
+ * Get transaction history (txids) for an address from the last point synced to (fromHeight)
+ * up until the height of the transaction being processed (toHeight) and publish txids to
+ * the address worker.
  *
  * @returns {boolean} requeue: should transaction be requeued if address is already syncing
  */
@@ -149,7 +156,18 @@ const onMessage = (worker: Worker) => async (message: Message) => {
   const tx: Tx = message.getContent()
 
   try {
-    worker.ackMessage(message, tx.txid)
+    let requeue = false
+    for await (const address of getAddresses(tx)) {
+      if (await syncAddressIfRegistered(worker, tx, address)) {
+        requeue = true
+      }
+    }
+
+    if (requeue) {
+      worker.requeueMessage(message, tx.txid, 'tx')
+    } else {
+      worker.ackMessage(message, tx.txid)
+    }
   } catch (err) {
     logger.error('onMessage.error:', err.isAxiosError ? err.message : err)
     worker.retryMessage(message, tx.txid)
