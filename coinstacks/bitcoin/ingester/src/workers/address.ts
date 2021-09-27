@@ -1,6 +1,7 @@
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Message, Worker, SyncTx } from '@shapeshiftoss/common-ingester'
 import { logger } from '@shapeshiftoss/logger'
+import { parseTx } from '../parseTx'
 
 const INDEXER_URL = process.env.INDEXER_URL
 
@@ -15,9 +16,13 @@ const onMessage = (worker: Worker) => async (message: Message) => {
   try {
     const tx = await blockbook.getTransaction(txid)
     logger.debug(`getTransaction: ${txid}, for address: ${address}`)
+
+    const pTx = await parseTx(tx, address)
     logger.info(`publishing tx: ${txid} for registered address: ${address} to client: ${document.client_id}`)
 
-    worker.sendMessage(new Message({ ...tx, document }), document.client_id)
+    //worker.sendMessage(new Message({ ...pTx, document } as ETHParseTx), document.client_id)
+    console.log({ ...pTx, document }, document.client_id)
+    worker.sendMessage(new Message({ ...pTx, document }), document.client_id)
     worker.ackMessage(message, retryKey)
   } catch (err) {
     logger.error('onMessage.error:', err.isAxiosError ? err.message : err)
