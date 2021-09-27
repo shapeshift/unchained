@@ -26,6 +26,7 @@ export interface BTCBlock {
 }
 
 export type BTCParseTx = Tx & ParseTx
+
 export interface ReorgResult {
   dbBlock: BlockDocument
   height: number

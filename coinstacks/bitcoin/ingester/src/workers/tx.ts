@@ -52,8 +52,6 @@ const getAddresses = (tx: Tx): Array<string> => {
     }
   })
 
-  //logger.debug(`getAddresses: ${addresses}, for txid: ${tx.txid}`)
-
   // remove duplicates
   return [...new Set(addresses)]
 }
@@ -101,7 +99,6 @@ const getTxHistory = async (address: string, fromHeight: number, toHeight?: numb
 export const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string): Promise<boolean> => {
   const document = await registry.getByAddress(address)
   if (!document) return false
-  logger.debug(`found registration document: ${document}, for address: ${address}`)
 
   const { blockHeight, confirmations, txid } = tx
 

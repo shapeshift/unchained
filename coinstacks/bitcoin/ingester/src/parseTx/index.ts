@@ -15,21 +15,6 @@ const aggregateTransfer = (transfer: TxTransfer, value: string, token?: Token): 
 }
 
 export const parseTx = async (tx: Tx, address: string): Promise<ParseTx> => {
-  const sendAddresses: Array<string> = []
-  tx.vin.forEach((vin: Vin) => {
-    if (vin.isAddress === true) {
-      // isAddress is false for coinbase and op return
-      vin.addresses?.forEach((address: string) => address && sendAddresses.push(address))
-    }
-  })
-
-  const receiveAddresses: Array<string> = []
-  tx.vout.forEach((vout: Vout) => {
-    if (vout.isAddress === true) {
-      vout.addresses?.forEach((address: string) => address && receiveAddresses.push(address))
-    }
-  })
-
   const pTx: ParseTx = {
     ...tx,
     address,
@@ -37,29 +22,33 @@ export const parseTx = async (tx: Tx, address: string): Promise<ParseTx> => {
     send: {},
   }
 
-  // todo - assumption - single input
+  // todo - assumptions:
+  // - all inputs spend, no change address
   // get send amount
-  if (sendAddresses.includes(pTx.address)) {
-    const sendValue = new BigNumber(tx.value)
-    if (!sendValue.isNaN() && sendValue.gt(0)) {
-      pTx.send['BTC'] = aggregateTransfer(pTx.send['BTC'], tx.value)
-    }
+  tx.vin.forEach((vin: Vin) => {
+    if (vin.isAddress === true && vin.addresses?.[0] === pTx.address) {
+      const sendValue = new BigNumber(vin.value || 0)
+      if (!sendValue.isNaN() && sendValue.gt(0)) {
+        pTx.send['BTC'] = aggregateTransfer(pTx.send['BTC'], vin.value || '0')
 
-    // network fee
-    const fees = new BigNumber(tx.fees ?? 0)
-    if (tx.fees && !fees.isNaN() && fees.gt(0)) {
-      pTx.fee = { symbol: 'BTC', value: tx.fees }
+        // network fee (only for sends)
+        const fees = new BigNumber(tx.fees ?? 0)
+        if (tx.fees && !fees.isNaN() && fees.gt(0)) {
+          pTx.fee = { symbol: 'BTC', value: tx.fees } // todo - dont use 'symbol' to identify asset
+        }
+      }
     }
-  }
+  })
 
   // get receive amount
-  if (receiveAddresses.includes(pTx.address)) {
-    // receive amount
-    const receiveValue = new BigNumber(tx.value)
-    if (!receiveValue.isNaN() && receiveValue.gt(0)) {
-      pTx.receive['BTC'] = aggregateTransfer(pTx.receive['BTC'], tx.value)
+  tx.vout.forEach((vout: Vout) => {
+    if (vout.isAddress === true && vout.addresses?.[0] === pTx.address) {
+      const receiveValue = new BigNumber(vout.value || 0)
+      if (!receiveValue.isNaN() && receiveValue.gt(0)) {
+        pTx.receive['BTC'] = aggregateTransfer(pTx.receive['BTC'], vout.value || '0')
+      }
     }
-  }
+  })
 
   return pTx
 }
