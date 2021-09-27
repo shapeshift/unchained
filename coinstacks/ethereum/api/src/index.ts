@@ -1,14 +1,12 @@
 import express, { json, urlencoded } from 'express'
 import cors from 'cors'
 import { join } from 'path'
-import { v4 } from 'uuid'
 import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
 import { logger } from '@shapeshiftoss/logger'
+import { WebSocketConnectionHandler } from './websocket'
 import { middleware } from '../../../common/api/src'
 import { RegisterRoutes } from './routes'
-import { Connection } from '@shapeshiftoss/common-ingester'
-import * as ws from './websocket'
 
 const port = process.env.PORT || 3000
 
@@ -50,18 +48,6 @@ const server = app.listen(port, () => logger.info('server listening...'))
 
 const wsServer = new Server({ server })
 
-wsServer.on('connection', (connection) => {
-  const id = v4()
-  console.log('clientID:', id)
-  const rabbitConn = new Connection(process.env.BROKER_URL)
-
-  connection.on('message', (message) => {
-    ws.onMessage(message, connection, rabbitConn, id)
-  })
-
-  connection.on('close', async () => {
-    const queue = rabbitConn.declareQueue(`queue.ethereum.tx.${id}`, { noCreate: true })
-    await queue.delete()
-    console.log('deleted queue:', queue.name)
-  })
+wsServer.on('connection', (connection: WebSocket) => {
+  new WebSocketConnectionHandler(connection).start()
 })
