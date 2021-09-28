@@ -1,5 +1,5 @@
 import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
-import { Address, Blockbook, Xpub } from '@shapeshiftoss/blockbook'
+import { Address, Blockbook, Xpub, Utxo } from '@shapeshiftoss/blockbook'
 import {
   ApiError,
   BadRequestError,
@@ -10,7 +10,7 @@ import {
   TxHistory,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { BitcoinAPI, BitcoinAccount, UtxoResponse, BtcTxSpecific } from './models'
+import { BitcoinAPI, BitcoinAccount, BtcTxSpecific } from './models'
 
 const INDEXER_URL = process.env.INDEXER_URL
 
@@ -183,7 +183,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
    * @example pubkey "14mMwtZCGiAtyr8KnnAZYyHmZ9Zvj71h4t"
    * @example pubkey "xpub6DQYbVJSVvJPzpYenir7zVSf2WPZRu69LxZuMezzAKuT6biPcug6Vw1zMk4knPBeNKvioutc4EGpPQ8cZiWtjcXYvJ6wPiwcGmCkihA9Jy3"
    */
-  @Example<Array<UtxoResponse>>([
+  @Example<Array<Utxo>>([
     {
       address: '14mMwtZCGiAtyr8KnnAZYyHmZ9Zvj71h4t',
       confirmations: 58362,
@@ -197,7 +197,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}/utxos')
-  async getUtxos(@Path() pubkey: string): Promise<Array<UtxoResponse>> {
+  async getUtxos(@Path() pubkey: string): Promise<Array<Utxo>> {
     try {
       const data = await blockbook.getUtxo(pubkey, true)
       return data

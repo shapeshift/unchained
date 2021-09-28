@@ -78,14 +78,14 @@ export type BtcTxSpecific = {
 /**
  * Contains info about an unspent transaction output
  */
-export interface UtxoResponse {
+export interface Utxo {
   txid: string
   vout: number
   value: string
   height?: number
   confirmations: number
-  address: string
-  path: string
+  address?: string
+  path?: string
   locktime?: number
   coinbase?: boolean
 }
@@ -129,8 +129,8 @@ export interface BitcoinAPI {
    *
    * @param pubkey account pubkey
    *
-   * @returns {Promise<Array<UtxoResponse>>} account utxos
+   * @returns {Promise<Array<Utxo>>} account utxos
    */
   // @Get('account/{pubkey}/utxos')
-  getUtxos(pubkey: string): Promise<Array<UtxoResponse>>
+  getUtxos(pubkey: string): Promise<Array<Utxo>>
 }

@@ -257,8 +257,8 @@ export interface Utxo {
   value: string
   height?: number
   confirmations: number
-  address: string
-  path: string
+  address?: string
+  path?: string
   locktime?: number
   coinbase?: boolean
 }
