@@ -12,24 +12,33 @@ export interface WebsocketError {
 }
 
 export interface SubscriptionPayload {
-  method: 'subscribe' | 'unsubscribe'
+  method: 'subscribe' | 'unsubscribe' | 'update'
   topic: string
   data: TxsTopicData
 }
 
 export class WebSocketConnectionHandler {
-  public id: string
+  public readonly id: string
   private rabbit: Connection
   private websocket: WebSocket
-  private routes: { [topics: string]: Record<string, (data: any) => Promise<void>> }
+  private routes: {
+    [topics: string]: {
+      subscribe?: (data: any) => Promise<void>
+      unsubscribe?: (data: any) => Promise<void>
+      update?: (data: any) => Promise<void>
+    }
+  }
   private queue?: Queue
 
   constructor(websocket: WebSocket) {
     this.id = v4()
     this.rabbit = new Connection(process.env.BROKER_URL)
     this.websocket = websocket
-    this.routes = {}
-    this.routes.txs = { subscribe: (data: TxsTopicData) => this._txs(data) }
+    this.routes = {
+      txs: {
+        subscribe: (data: TxsTopicData) => this._txs(data),
+      },
+    }
   }
 
   start(): void {
