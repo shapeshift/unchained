@@ -58,7 +58,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
     try {
       let data: Address | Xpub
       if (isXpub(pubkey)) {
-        data = await blockbook.getXpub(pubkey, undefined, undefined, undefined, undefined, 'txs', 'used')
+        data = await blockbook.getXpub(pubkey, undefined, undefined, undefined, undefined, 'tokenBalances', 'used')
       } else {
         data = await blockbook.getAddress(pubkey, undefined, undefined, undefined, undefined, 'basic')
       }
