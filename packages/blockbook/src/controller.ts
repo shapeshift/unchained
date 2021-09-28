@@ -1,7 +1,18 @@
 import axios, { AxiosInstance } from 'axios'
 import { Controller, Example, Get, Path, Query, Route, Tags } from 'tsoa'
-import { EthTxSpecific } from '.'
-import { Address, ApiError, BalanceHistory, Block, BlockIndex, Info, SendTx, Tx, Utxo, Xpub } from './models'
+import {
+  Address,
+  ApiError,
+  BalanceHistory,
+  Block,
+  BlockIndex,
+  EthTxSpecific,
+  Info,
+  SendTx,
+  Tx,
+  Utxo,
+  Xpub,
+} from './models'
 
 @Route('api/v2')
 @Tags('v2')
