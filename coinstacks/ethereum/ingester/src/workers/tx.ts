@@ -164,62 +164,64 @@ const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string):
 
   const { blockHeight, confirmations, txid } = tx
 
-  documents.forEach(async (document) => {
-    const metadata = document.ingester_meta?.[address]
-    const fromHeight = metadata?.block ? metadata.block + 1 : 0
-    const toHeight = confirmations === 0 ? undefined : blockHeight
-    const syncKey = `${toHeight}:${txid}`
+  await Promise.all(
+    documents.map(async (document) => {
+      const metadata = document.ingester_meta?.[address]
+      const fromHeight = metadata?.block ? metadata.block + 1 : 0
+      const toHeight = confirmations === 0 ? undefined : blockHeight
+      const syncKey = `${toHeight}:${txid}`
 
-    // requeue transaction if we are already syncing an address to another transaction's block height and have not exceeded the sync timeout
-    if (
-      metadata?.syncing?.key &&
-      metadata.syncing.key !== syncKey &&
-      Date.now() - metadata.syncing.startTime <= SYNC_TIMEOUT
-    ) {
-      requeue = true
-      return
-    }
-
-    const syncStart = Date.now()
-
-    // track that we are currently syncing an address up to toHeight
-    await registry.updateSyncing(address, document.client_id, syncKey)
-
-    logger.info(`Address sync for: ${address}, from: ${fromHeight}, to: ${toHeight} started`)
-
-    const [txHistory, txHistoryInternal] = await Promise.all([
-      getTxHistory(address, fromHeight, toHeight),
-      getTxHistoryInternal(address, fromHeight, toHeight),
-    ])
-
-    const txids = [...new Set(txHistory.concat(Object.keys(txHistoryInternal)))]
-    txids.forEach((txid) => {
-      const sTx: ETHSyncTx = {
-        address: address,
-        client_id: document.client_id,
-        txid: txid,
-        internalTxs: txHistoryInternal[txid],
+      // requeue transaction if we are already syncing an address to another transaction's block height and have not exceeded the sync timeout
+      if (
+        metadata?.syncing?.key &&
+        metadata.syncing.key !== syncKey &&
+        Date.now() - metadata.syncing.startTime <= SYNC_TIMEOUT
+      ) {
+        requeue = true
+        return
       }
-      worker.sendMessage(new Message(sTx), 'txid.address')
+
+      const syncStart = Date.now()
+
+      // track that we are currently syncing an address up to toHeight
+      await registry.updateSyncing(address, document.client_id, syncKey)
+
+      logger.info(`Address sync for: ${address}, from: ${fromHeight}, to: ${toHeight} started`)
+
+      const [txHistory, txHistoryInternal] = await Promise.all([
+        getTxHistory(address, fromHeight, toHeight),
+        getTxHistoryInternal(address, fromHeight, toHeight),
+      ])
+
+      const txids = [...new Set(txHistory.concat(Object.keys(txHistoryInternal)))]
+      txids.forEach((txid) => {
+        const sTx: ETHSyncTx = {
+          address: address,
+          client_id: document.client_id,
+          txid: txid,
+          internalTxs: txHistoryInternal[txid],
+        }
+        worker.sendMessage(new Message(sTx), 'txid.address')
+      })
+
+      // use current toHeight for confirmed transaction or use the best block from the node mempool transaction (fall back to best blockbook height if node info doesn't exist for some reason)
+      let block = toHeight
+      if (!block) {
+        const info = await blockbook.getInfo()
+        block = info.backend.blocks ?? info.blockbook.bestHeight
+      }
+
+      // track that address has been fully synced up to toHeight or best block if mempool
+      await registry.updateBlock(address, block, document.client_id)
+
+      // track that we are no longer currently syncing address
+      await registry.updateSyncing(address, document.client_id)
+
+      logger.info(
+        `Address sync for: ${address}, from: ${fromHeight}, to: ${toHeight} finished (${Date.now() - syncStart} ms)`
+      )
     })
-
-    // use current toHeight for confirmed transaction or use the best block from the node mempool transaction (fall back to best blockbook height if node info doesn't exist for some reason)
-    let block = toHeight
-    if (!block) {
-      const info = await blockbook.getInfo()
-      block = info.backend.blocks ?? info.blockbook.bestHeight
-    }
-
-    // track that address has been fully synced up to toHeight or best block if mempool
-    await registry.updateBlock(address, block, document.client_id)
-
-    // track that we are no longer currently syncing address
-    await registry.updateSyncing(address, document.client_id)
-
-    logger.info(
-      `Address sync for: ${address}, from: ${fromHeight}, to: ${toHeight} finished (${Date.now() - syncStart} ms)`
-    )
-  })
+  )
 
   return requeue
 }

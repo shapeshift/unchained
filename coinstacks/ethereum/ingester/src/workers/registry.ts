@@ -19,12 +19,10 @@ const onMessage = (worker: Worker) => async (message: Message) => {
   const msg: RegistryMessage = message.getContent()
 
   try {
-    const document = registry.sanitizeDocument(msg)
-
     if (msg.action === 'register') {
       await registry.add(msg)
 
-      document.registration.addresses?.forEach((address) => {
+      msg.registration.addresses?.forEach((address) => {
         const tx: Tx = {
           txid: `register-${Date.now()}`,
           vin: [{ n: 0, addresses: [address], isAddress: true }],

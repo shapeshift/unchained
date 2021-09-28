@@ -38,7 +38,6 @@ export class RegistryService {
 
       this.client = client
       this.collection = this.client.db(db).collection(COLLECTION)
-      this.collection.createIndex({ client_id: 1 }, { unique: true })
       this.collection.createIndex({ client_id: 1, 'registration.pubkey': 1 }, { unique: true })
       this.collection.createIndex({ client_id: 1, 'registration.addresses': 1 })
     })
@@ -132,17 +131,10 @@ export class RegistryService {
     const { client_id, registration } = document
     const { addresses } = registration
 
-    let pubkey = registration.pubkey
-    if (!pubkey) {
-      if (addresses?.length === 1) {
-        pubkey = addresses[0]
-      }
-    }
-
     return {
-      client_id: client_id.toLowerCase(),
+      client_id, // client_id will always be saved in the format it was received
       registration: {
-        pubkey: pubkey, // pubkey will always be saved in the format it was received
+        pubkey: registration.pubkey, // pubkey will always be saved in the format it was received
         addresses: addresses?.map((a) => a.toLowerCase()),
       },
     }
