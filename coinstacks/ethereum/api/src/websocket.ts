@@ -1,8 +1,8 @@
 import { v4 } from 'uuid'
 import { Connection, Message, Queue } from '@shapeshiftoss/common-ingester'
 
-export interface RegisterClientData {
-  address: string
+export interface TxsTopicData {
+  addresses: Array<string>
   blockNumber?: number
 }
 
@@ -14,19 +14,22 @@ export interface WebsocketError {
 export interface SubscriptionPayload {
   method: 'subscribe' | 'unsubscribe'
   topic: string
-  data: RegisterClientData
+  data: TxsTopicData
 }
 
 export class WebSocketConnectionHandler {
   public id: string
   private rabbit: Connection
   private websocket: WebSocket
+  private routes: { [topics: string]: Record<string, (data: any) => Promise<void>> }
   private queue?: Queue
 
   constructor(websocket: WebSocket) {
     this.id = v4()
     this.rabbit = new Connection(process.env.BROKER_URL)
     this.websocket = websocket
+    this.routes = {}
+    this.routes.txs = { subscribe: (data: TxsTopicData) => this._txs(data) }
   }
 
   start(): void {
@@ -38,17 +41,14 @@ export class WebSocketConnectionHandler {
     try {
       const payload = JSON.parse(event.data.toString()) as SubscriptionPayload
 
-      const routes: { [topics: string]: Record<string, () => Promise<void>> } = {
-        txs: {
-          subscribe: async () => this._txs(payload.data),
-        },
-      }
-
-      const callback = routes[payload.topic][payload.method] as () => Promise<void>
-      if (callback) await callback()
+      const callback = this.routes[payload.topic][payload.method]
+      if (callback) await callback(payload.data)
       else
         this.websocket.send(
-          JSON.stringify({ type: 'error', message: `topic:${payload.topic} method:${payload.method} not found ` })
+          JSON.stringify({
+            type: 'error',
+            message: `route topic (${payload.topic}) method (${payload.method}) not found`,
+          })
         )
     } catch (err) {
       console.error('err', err)
@@ -60,11 +60,11 @@ export class WebSocketConnectionHandler {
     await this.queue?.delete()
   }
 
-  private async _txs(data: RegisterClientData) {
-    if (!data.address) {
+  private async _txs(data: TxsTopicData) {
+    if (!data.addresses || !data.addresses.length) {
       const error: WebsocketError = {
         type: 'error',
-        message: 'address required',
+        message: 'addresses required',
       }
       this.websocket.send(JSON.stringify(error))
       return
@@ -85,7 +85,7 @@ export class WebSocketConnectionHandler {
       client_id: this.id,
       action: 'register',
       registration: {
-        addresses: [data.address],
+        addresses: data.addresses,
       },
     })
 
