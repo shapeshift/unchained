@@ -1,6 +1,7 @@
 import { BigNumber } from 'bignumber.js'
 import { Tx, Vin, Vout } from '@shapeshiftoss/blockbook'
-import { ParseTx, TxTransfer, Token } from '@shapeshiftoss/common-ingester'
+import { TxTransfer, Token } from '@shapeshiftoss/common-ingester'
+import { BTCParseTx } from '../types'
 
 // keep track of all individual tx components and add up the total value transferred
 const aggregateTransfer = (transfer: TxTransfer, value: string, token?: Token): TxTransfer => {
@@ -14,8 +15,8 @@ const aggregateTransfer = (transfer: TxTransfer, value: string, token?: Token): 
   return { ...transfer, token }
 }
 
-export const parseTx = async (tx: Tx, address: string): Promise<ParseTx> => {
-  const pTx: ParseTx = {
+export const parseTx = async (tx: Tx, address: string): Promise<BTCParseTx> => {
+  const pTx: BTCParseTx = {
     ...tx,
     address,
     receive: {},
@@ -27,14 +28,14 @@ export const parseTx = async (tx: Tx, address: string): Promise<ParseTx> => {
   // get send amount
   tx.vin.forEach((vin: Vin) => {
     if (vin.isAddress === true && vin.addresses?.[0] === pTx.address) {
-      const sendValue = new BigNumber(vin.value || 0)
+      const sendValue = new BigNumber(vin.value ?? 0)
       if (!sendValue.isNaN() && sendValue.gt(0)) {
         pTx.send['BTC'] = aggregateTransfer(pTx.send['BTC'], vin.value || '0')
 
         // network fee (only for sends)
         const fees = new BigNumber(tx.fees ?? 0)
         if (tx.fees && !fees.isNaN() && fees.gt(0)) {
-          pTx.fee = { symbol: 'BTC', value: tx.fees } // todo - dont use 'symbol' to identify asset
+          pTx.fee = { symbol: 'BTC', value: tx.fees }
         }
       }
     }
@@ -43,7 +44,7 @@ export const parseTx = async (tx: Tx, address: string): Promise<ParseTx> => {
   // get receive amount
   tx.vout.forEach((vout: Vout) => {
     if (vout.isAddress === true && vout.addresses?.[0] === pTx.address) {
-      const receiveValue = new BigNumber(vout.value || 0)
+      const receiveValue = new BigNumber(vout.value ?? 0)
       if (!receiveValue.isNaN() && receiveValue.gt(0)) {
         pTx.receive['BTC'] = aggregateTransfer(pTx.receive['BTC'], vout.value || '0')
       }

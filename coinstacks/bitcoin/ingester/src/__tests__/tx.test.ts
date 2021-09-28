@@ -40,7 +40,7 @@ describe('txWorker', () => {
       const worker = await Worker.init({})
       const address = blockbookTxHistory.address
       await syncAddressIfRegistered(worker, tx, address)
-      expect(sendMessageMock).toHaveBeenCalledTimes(2)
+      expect(sendMessageMock).toHaveBeenCalledTimes(blockbookTxHistory.txids.length)
     })
   })
 })

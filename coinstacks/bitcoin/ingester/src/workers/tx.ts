@@ -42,13 +42,13 @@ const getAddresses = (tx: Tx): Array<string> => {
   tx.vin.forEach((vin: Vin) => {
     if (vin.isAddress === true) {
       // isAddress is false for coinbase and op return
-      vin.addresses?.forEach((address: string) => address && addresses.push(address))
+      vin.addresses?.forEach((address: string) => addresses.push(address))
     }
   })
 
   tx.vout.forEach((vout: Vout) => {
     if (vout.isAddress === true) {
-      vout.addresses?.forEach((address: string) => address && addresses.push(address))
+      vout.addresses?.forEach((address: string) => addresses.push(address))
     }
   })
 
