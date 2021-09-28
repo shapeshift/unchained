@@ -1,18 +1,7 @@
 import axios, { AxiosInstance } from 'axios'
 import { Controller, Example, Get, Path, Query, Route, Tags } from 'tsoa'
-import {
-  Address,
-  ApiError,
-  BalanceHistory,
-  Block,
-  BlockIndex,
-  Info,
-  SendTx,
-  Tx,
-  TxSpecific,
-  Utxo,
-  Xpub,
-} from './models'
+import { EthTxSpecific } from '.'
+import { Address, ApiError, BalanceHistory, Block, BlockIndex, Info, SendTx, Tx, Utxo, Xpub } from './models'
 
 @Route('api/v2')
 @Tags('v2')
@@ -229,7 +218,7 @@ export class Blockbook extends Controller {
    *
    * @example txid "0xf5ef950d597bea8c980fe5a17faeb70ed7f5030dcf58f077baede5eb0d610cdf"
    */
-  @Example<TxSpecific>({
+  @Example<EthTxSpecific>({
     tx: {
       nonce: '0x11cc',
       gasPrice: '0x826299e000',
@@ -277,9 +266,9 @@ export class Blockbook extends Controller {
     },
   })
   @Get('tx-specific/{txid}')
-  async getTransactionSpecific(@Path() txid: string): Promise<TxSpecific> {
+  async getTransactionSpecific(@Path() txid: string): Promise<Tx> {
     try {
-      const { data } = await this.instance.get<TxSpecific>(`api/v2/tx-specific/${txid}`)
+      const { data } = await this.instance.get<Tx>(`api/v2/tx-specific/${txid}`)
       return data
     } catch (err) {
       throw new ApiError(err)
@@ -642,15 +631,6 @@ export class Blockbook extends Controller {
    * @example account "14mMwtZCGiAtyr8KnnAZYyHmZ9Zvj71h4t"
    * @example account "xpub6DQYbVJSVvJPzpYenir7zVSf2WPZRu69LxZuMezzAKuT6biPcug6Vw1zMk4knPBeNKvioutc4EGpPQ8cZiWtjcXYvJ6wPiwcGmCkihA9Jy3"
    */
-  @Example<Array<Utxo>>([
-    {
-      txid: '02cdb69a97d1b8585797ac31a1954804b40a71c380a3ede0793f21a2cdfd300a',
-      vout: 1,
-      value: '729',
-      height: 601428,
-      confirmations: 58362,
-    },
-  ])
   @Example<Array<Utxo>>([
     {
       txid: '02cdb69a97d1b8585797ac31a1954804b40a71c380a3ede0793f21a2cdfd300a',
