@@ -152,7 +152,9 @@ const getTxHistoryInternal = async (
 }
 
 /**
- * Get transaction history (txids) for an address from the last point synced to (fromHeight) up until the height of the transaction being processed (toHeight) and publish txids to the address worker.
+ * Get transaction history (txids) for an address from the last point synced to (fromHeight)
+ * up until the height of the transaction being processed (toHeight) and publish txids to
+ * the address worker.
  *
  * @returns {boolean} requeue: should transaction be requeued if address is already syncing
  */
