@@ -15,7 +15,7 @@ socket.onmessage = (event) => {
 }
 
 const payload = {
-  method: 'subscribed',
+  method: 'subscribe',
   topic: 'txs',
   data: { addresses: ['0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C'] },
 }

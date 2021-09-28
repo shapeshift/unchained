@@ -1,5 +1,16 @@
 import { v4 } from 'uuid'
-import { Connection, Message, Queue } from '@shapeshiftoss/common-ingester'
+import { Connection, Exchange, Message, Queue } from 'amqp-ts'
+import { logger } from '@shapeshiftoss/logger'
+import { RegistryDocument } from '@shapeshiftoss/common-mongo'
+
+const BROKER_URL = process.env.BROKER_URL as string
+
+if (!BROKER_URL) throw new Error('BROKER_URL env var not set')
+
+// TODO: refactor out necessary rabbit types for reuse and exposing to client
+export interface RegistryMessage extends RegistryDocument {
+  action: string
+}
 
 export interface TxsTopicData {
   addresses: Array<string>
@@ -11,104 +22,123 @@ export interface WebsocketError {
   message: string
 }
 
-export interface SubscriptionPayload {
+type Topics = 'txs'
+
+export interface Methods {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  subscribe: (data: any) => Promise<void>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  unsubscribe?: (data: any) => Promise<void>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  update?: (data: any) => Promise<void>
+}
+
+export interface RequestPayload {
   method: 'subscribe' | 'unsubscribe' | 'update'
-  topic: string
+  // TODO: link topic with required data type
+  topic: Topics
   data: TxsTopicData
 }
 
 export class WebSocketConnectionHandler {
   public readonly id: string
-  private rabbit: Connection
-  private websocket: WebSocket
-  private routes: {
-    [topics: string]: {
-      subscribe?: (data: any) => Promise<void>
-      unsubscribe?: (data: any) => Promise<void>
-      update?: (data: any) => Promise<void>
-    }
-  }
+  private readonly rabbit: Connection
+  private readonly websocket: WebSocket
+  private readonly routes: Record<Topics, Methods>
+  private readonly unchainedExchange: Exchange
   private queue?: Queue
 
   constructor(websocket: WebSocket) {
     this.id = v4()
-    this.rabbit = new Connection(process.env.BROKER_URL)
+    this.rabbit = new Connection(BROKER_URL)
+    this.unchainedExchange = this.rabbit.declareExchange('exchange.unchained', '', { noCreate: true })
     this.websocket = websocket
     this.routes = {
       txs: {
-        subscribe: (data: TxsTopicData) => this._txs(data),
+        subscribe: (data: TxsTopicData) => this.handleSubscribeTxs(data),
       },
     }
   }
 
   start(): void {
-    this.websocket.onmessage = (event: MessageEvent<SubscriptionPayload>) => this._onMessage(event)
+    this.websocket.onmessage = (event: MessageEvent<string>) => this._onMessage(event)
     this.websocket.onclose = () => this._onClose()
+    this.websocket.onerror = () => this._onClose()
   }
 
-  private async _onMessage(event: MessageEvent<SubscriptionPayload>): Promise<void> {
+  private sendError(message: string): void {
+    const error: WebsocketError = { type: 'error', message }
+    this.websocket.send(JSON.stringify(error))
+  }
+
+  private async _onMessage(event: MessageEvent<string>): Promise<void> {
     try {
-      const payload = JSON.parse(event.data.toString()) as SubscriptionPayload
+      const payload: RequestPayload = JSON.parse(event.data)
 
       const callback = this.routes[payload.topic][payload.method]
-      if (callback) await callback(payload.data)
-      else
-        this.websocket.send(
-          JSON.stringify({
-            type: 'error',
-            message: `route topic (${payload.topic}) method (${payload.method}) not found`,
-          })
-        )
+      if (callback) {
+        await callback(payload.data)
+      } else {
+        this.sendError(`route topic (${payload.topic}) method (${payload.method}) not found`)
+      }
     } catch (err) {
-      console.error('err', err)
-      this.websocket.close()
+      logger.error('onMessageError:', err)
+      this.sendError('failed to handle message')
     }
   }
 
   private async _onClose() {
+    const msg: RegistryMessage = {
+      action: 'unregister',
+      client_id: this.id,
+      registration: {},
+    }
+
+    this.unchainedExchange.send(new Message(msg), 'ethereum.registry')
+
     await this.queue?.delete()
   }
 
-  private async _txs(data: TxsTopicData) {
-    if (!data.addresses || !data.addresses.length) {
-      const error: WebsocketError = {
-        type: 'error',
-        message: 'addresses required',
-      }
-      this.websocket.send(JSON.stringify(error))
+  private async handleSubscribeTxs(data: TxsTopicData) {
+    if (this.queue) return
+
+    if (!data.addresses?.length) {
+      this.sendError('addresses required')
       return
     }
 
-    const registryExchange = this.rabbit.declareExchange('exchange.unchained', '', { noCreate: true })
-
-    // Create dynamic queue with topic client_id binding
     const txExchange = this.rabbit.declareExchange('exchange.ethereum.tx.client', '', { noCreate: true })
 
     this.queue = this.rabbit.declareQueue(`queue.ethereum.tx.${this.id}`)
-    console.log('created queue:', this.queue.name)
     this.queue.bind(txExchange, this.id)
 
-    await this.rabbit.completeConfiguration()
+    try {
+      await this.rabbit.completeConfiguration()
+    } catch (err) {
+      this.queue = undefined
+      logger.error('failed to complete rabbit configuration:', err)
+      this.sendError('failed to complete rabbit configuration')
+      return
+    }
 
-    const msg = new Message({
-      client_id: this.id,
+    const msg: RegistryMessage = {
       action: 'register',
+      client_id: this.id,
+      ingester_meta: {
+        block: data.blockNumber,
+      },
       registration: {
         addresses: data.addresses,
       },
-    })
+    }
 
-    // Register account with unique uuid and associated address. Update ingester_meta with the appropriate block height
-    // Trigger initial sync with fake "mempool" transaction (see ingester/register.ts)
-    registryExchange.send(msg, 'ethereum.registry')
+    this.unchainedExchange.send(new Message(msg), 'ethereum.registry')
 
-    const onMessage = () => async (message: Message) => {
+    const onMessage = (message: Message) => {
       const content = message.getContent()
-      // Send all messages back over websocket to client
       this.websocket.send(JSON.stringify(content))
     }
 
-    // Create a Worker to consume from dynamic queue created above
-    this.queue.activateConsumer(onMessage())
+    this.queue.activateConsumer(onMessage)
   }
 }
