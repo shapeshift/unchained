@@ -9,10 +9,7 @@
   "files": [
     "dist"
   ],
-  "scripts": {
-    "build": "tsc",
-    "clean": "rm -rf dist node_modules"
-  },
+  "scripts": {},
   "dependencies": {
     "@shapeshiftoss/blockbook": "^1.1.0",
     "@shapeshiftoss/common-ingester": "^1.1.0",

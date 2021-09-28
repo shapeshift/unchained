@@ -4,18 +4,23 @@ import { Collection, DeleteWriteOpResultObject, MongoClient, UpdateWriteOpResult
 const COLLECTION = 'registry'
 
 /**
+ * Contains ingester metadata to keep track of sync status for an address
+ */
+export interface IngesterMetadata {
+  block?: number
+  syncing?: {
+    key?: string
+    startTime: number
+    endTime: number
+  }
+}
+
+/**
  * Contains registry info and is used for un/registering addresses
  */
 export interface RegistryDocument {
   client_id: string
-  ingester_meta?: {
-    block?: number
-    syncing?: {
-      key?: string
-      startTime: number
-      endTime: number
-    }
-  }
+  ingester_meta?: Record<string, IngesterMetadata>
   registration: {
     addresses?: string[]
     pubkey?: string
@@ -33,6 +38,7 @@ export class RegistryService {
 
       this.client = client
       this.collection = this.client.db(db).collection(COLLECTION)
+      this.collection.createIndex({ client_id: 1 }, { unique: true })
       this.collection.createIndex({ client_id: 1, 'registration.pubkey': 1 }, { unique: true })
       this.collection.createIndex({ client_id: 1, 'registration.addresses': 1 })
     })
@@ -42,33 +48,34 @@ export class RegistryService {
     this.client?.close()
   }
 
-  async getByAddress(address: string, client_id = 'unchained'): Promise<RegistryDocument | undefined> {
-    const document = await this.collection?.findOne<RegistryDocument>({
-      'registration.addresses': { $in: [address.toLowerCase()] },
-      client_id: client_id,
-    })
-    return document ?? undefined
+  async getByAddress(address: string): Promise<Array<RegistryDocument> | undefined> {
+    const documents = await this.collection
+      ?.find<RegistryDocument>(
+        {
+          'registration.addresses': { $in: [address.toLowerCase()] },
+        },
+        {}
+      )
+      .toArray()
+
+    return documents ?? undefined
   }
 
-  async updateBlock(address: string, block: number, client_id = 'unchained'): Promise<UpdateWriteOpResult | undefined> {
+  async updateBlock(address: string, block: number, client_id: string): Promise<UpdateWriteOpResult | undefined> {
     return this.collection?.updateOne(
       { client_id: client_id, 'registration.addresses': { $in: [address.toLowerCase()] } },
-      { $set: { 'ingester_meta.block': block } }
+      { $set: { [`ingester_meta.${address}.block`]: block } }
     )
   }
 
-  async updateSyncing(
-    address: string,
-    key?: string,
-    client_id = 'unchained'
-  ): Promise<UpdateWriteOpResult | undefined> {
+  async updateSyncing(address: string, client_id: string, key?: string): Promise<UpdateWriteOpResult | undefined> {
     return this.collection?.updateOne(
       { client_id: client_id, 'registration.addresses': { $in: [address.toLowerCase()] } },
       {
         $set: {
-          'ingester_meta.syncing.key': key,
-          'ingester_meta.syncing.startTime': key ? Date.now() : 0,
-          'ingester_meta.syncing.endTime': key ? 0 : Date.now(),
+          [`ingester_meta.${address}.syncing.key`]: key,
+          [`ingester_meta.${address}.syncing.startTime`]: key ? Date.now() : 0,
+          [`ingester_meta.${address}.syncing.endTime`]: key ? 0 : Date.now(),
         },
       }
     )
@@ -129,8 +136,6 @@ export class RegistryService {
     if (!pubkey) {
       if (addresses?.length === 1) {
         pubkey = addresses[0]
-      } else {
-        throw new Error('pubkey must be specified')
       }
     }
 
