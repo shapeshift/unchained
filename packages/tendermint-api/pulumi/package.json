@@ -1,0 +1,11 @@
+{
+  "name": "@shapeshiftoss/tendermint-pulumi",
+  "version": "1.1.0",
+  "license": "MIT",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist node_modules"
+  }
+}

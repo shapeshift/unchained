@@ -1,0 +1,26 @@
+{
+  "name": "@shapeshiftoss/thorchain-ingester",
+  "version": "1.1.0",
+  "license": "MIT",
+  "private": true,
+  "main": "dist/index.js",
+  "source": "src/index.ts",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist node_modules"
+  },
+  "dependencies": {
+    "@shapeshiftoss/blockbook": "^1.1.0",
+    "@shapeshiftoss/common-ingester": "^1.1.0",
+    "@shapeshiftoss/common-mongo": "^1.1.0",
+    "@shapeshiftoss/logger": "^1.1.0",
+    "@shapeshiftoss/thorchain": "^1.1.0",
+    "axios": "^0.19.2",
+    "bignumber.js": "^9.0.1",
+    "ethers": "^5.4.0"
+  }
+}
