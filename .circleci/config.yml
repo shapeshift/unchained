@@ -127,6 +127,7 @@ commands:
             mv linux-amd64/helm /usr/local/bin/helm
             helm repo add bitnami https://charts.bitnami.com/bitnami
             helm repo add traefik https://helm.traefik.io/traefik
+            helm repo add eks https://aws.github.io/eks-charts
       - run:
           name: install pulumi plugin resources
           command: |
