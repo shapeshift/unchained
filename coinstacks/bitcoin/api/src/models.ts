@@ -113,6 +113,11 @@ export interface BitcoinAccount extends Account {
    * The next unused change address if BitcoinAccount was fetched by xpub
    */
   changeIndex?: number | null
+
+  /**
+   * The path of the account
+   */
+  path?: string
 }
 
 /**
