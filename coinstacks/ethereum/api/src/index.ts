@@ -1,10 +1,12 @@
 import express, { json, urlencoded } from 'express'
 import cors from 'cors'
 import { join } from 'path'
+import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
 import { logger } from '@shapeshiftoss/logger'
 import { middleware } from '../../../common/api/src'
 import { RegisterRoutes } from './routes'
+import { WebSocketConnectionHandler } from './websocket'
 
 const port = process.env.PORT || 3000
 
@@ -42,4 +44,10 @@ app.get('*', async (_, res) => {
 app.use(middleware.errorHandler)
 app.use(middleware.notFoundHandler)
 
-app.listen(port, () => logger.info('server listening...'))
+const server = app.listen(port, () => logger.info('server listening...'))
+
+const wsServer = new Server({ server })
+
+wsServer.on('connection', (connection: WebSocket) => {
+  new WebSocketConnectionHandler(connection).start()
+})
