@@ -23,14 +23,12 @@ export const parseTx = async (tx: Tx, address: string): Promise<BTCParseTx> => {
     send: {},
   }
 
-  // todo - assumptions:
-  // - all inputs spend, no change address
   // get send amount
   tx.vin.forEach((vin: Vin) => {
-    if (vin.isAddress === true && vin.addresses?.[0] === pTx.address) {
+    if (vin.isAddress === true && vin.addresses?.includes(pTx.address)) {
       const sendValue = new BigNumber(vin.value ?? 0)
       if (!sendValue.isNaN() && sendValue.gt(0)) {
-        pTx.send['BTC'] = aggregateTransfer(pTx.send['BTC'], vin.value || '0')
+        pTx.send['BTC'] = aggregateTransfer(pTx.send['BTC'], vin.value ?? '0')
 
         // network fee (only for sends)
         const fees = new BigNumber(tx.fees ?? 0)
@@ -43,10 +41,10 @@ export const parseTx = async (tx: Tx, address: string): Promise<BTCParseTx> => {
 
   // get receive amount
   tx.vout.forEach((vout: Vout) => {
-    if (vout.isAddress === true && vout.addresses?.[0] === pTx.address) {
+    if (vout.isAddress === true && vout.addresses?.includes(pTx.address)) {
       const receiveValue = new BigNumber(vout.value ?? 0)
       if (!receiveValue.isNaN() && receiveValue.gt(0)) {
-        pTx.receive['BTC'] = aggregateTransfer(pTx.receive['BTC'], vout.value || '0')
+        pTx.receive['BTC'] = aggregateTransfer(pTx.receive['BTC'], vout.value ?? '0')
       }
     }
   })
