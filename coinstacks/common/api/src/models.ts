@@ -33,7 +33,6 @@ export interface InternalServerError {
 export interface Account {
   balance: string
   pubkey: string
-  path?: string
 }
 
 /**
