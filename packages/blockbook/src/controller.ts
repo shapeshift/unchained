@@ -1,18 +1,6 @@
 import axios, { AxiosInstance } from 'axios'
 import { Controller, Example, Get, Path, Query, Route, Tags } from 'tsoa'
-import {
-  Address,
-  ApiError,
-  BalanceHistory,
-  Block,
-  BlockIndex,
-  Info,
-  SendTx,
-  Tx,
-  TxSpecific,
-  Utxo,
-  Xpub,
-} from './models'
+import { Address, ApiError, BalanceHistory, Block, BlockIndex, Info, SendTx, Tx, Utxo, Xpub } from './models'
 
 @Route('api/v2')
 @Tags('v2')
@@ -222,64 +210,12 @@ export class Blockbook extends Controller {
   /**
    * Get transaction specific returns transaction data in the exact format as returned by backend, including all coin specific fields
    *
-   * Examples:
-   * 1. Ethereum
-   *
    * @param txid transaction id
-   *
-   * @example txid "0xf5ef950d597bea8c980fe5a17faeb70ed7f5030dcf58f077baede5eb0d610cdf"
    */
-  @Example<TxSpecific>({
-    tx: {
-      nonce: '0x11cc',
-      gasPrice: '0x826299e000',
-      gas: '0x4e200',
-      to: '0x6C0B51971650D28821cE30b15B02b9826a20B129',
-      value: '0x0',
-      input: '0xc01a8c8400000000000000000000000000000000000000000000000000000000000011e0',
-      hash: '0xf5ef950d597bea8c980fe5a17faeb70ed7f5030dcf58f077baede5eb0d610cdf',
-      blockNumber: '0xad9342',
-      blockHash: '0xe05a93f6525aa797c3e3285c27eb34852bab8bb5a12a42b5650390ec49504160',
-      from: '0x095273aDB73E55a8710E448C49eaee16fe115527',
-      transactionIndex: '0x0',
-    },
-    receipt: {
-      gasUsed: '0x1990e',
-      status: '0x1',
-      logs: [
-        {
-          address: '0x6C0B51971650D28821cE30b15B02b9826a20B129',
-          topics: [
-            '0x4a504a94899432a9846e1aa406dceb1bcfd538bb839071d49d1e5e23f5be30ef',
-            '0x000000000000000000000000095273adb73e55a8710e448c49eaee16fe115527',
-            '0x00000000000000000000000000000000000000000000000000000000000011e0',
-          ],
-          data: '0x',
-        },
-        {
-          address: '0x76e95d97c10ADA1e3459a5780aDd55C225bD98CC',
-          topics: [
-            '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
-            '0x0000000000000000000000006c0b51971650d28821ce30b15b02b9826a20b129',
-            '0x0000000000000000000000008c4c0a06b968586434dcde95c0f673bc956dae9b',
-          ],
-          data: '0x000000000000000000000000000000000000000000005295f13ebb7127c00000',
-        },
-        {
-          address: '0x6C0B51971650D28821cE30b15B02b9826a20B129',
-          topics: [
-            '0x33e13ecb54c3076d8e8bb8c2881800a4d972b792045ffae98fdf46df365fed75',
-            '0x00000000000000000000000000000000000000000000000000000000000011e0',
-          ],
-          data: '0x',
-        },
-      ],
-    },
-  })
   @Get('tx-specific/{txid}')
-  async getTransactionSpecific(@Path() txid: string): Promise<TxSpecific> {
+  async getTransactionSpecific(@Path() txid: string): Promise<unknown> {
     try {
-      const { data } = await this.instance.get<TxSpecific>(`api/v2/tx-specific/${txid}`)
+      const { data } = await this.instance.get(`api/v2/tx-specific/${txid}`)
       return data
     } catch (err) {
       throw new ApiError(err)
