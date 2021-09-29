@@ -3,11 +3,14 @@ import { Tx, Vin, Vout } from '@shapeshiftoss/blockbook'
 import { TxTransfer, Token } from '@shapeshiftoss/common-ingester'
 import { BTCParseTx } from '../types'
 
+const NODE_ENV = process.env.NODE_ENV
 const COINSTACK = process.env.COINSTACK
-const NETWORK = 'MAINNET' //process.env.NETWORK
+const NETWORK = process.env.NETWORK
 
-if (!COINSTACK) throw new Error('COINSTACK env var not set')
-if (!NETWORK) throw new Error('NETWORK env var not set')
+if (NODE_ENV !== 'test') {
+  if (!COINSTACK) throw new Error('COINSTACK env var not set')
+  if (!NETWORK) throw new Error('NETWORK env var not set')
+}
 
 const nativeToken = `${COINSTACK}_${NETWORK}`
 

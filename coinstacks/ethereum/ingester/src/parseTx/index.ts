@@ -8,11 +8,14 @@ import * as thor from './thor'
 import * as multiSig from './multiSig'
 import * as uniV2 from './uniV2'
 
+const NODE_ENV = process.env.NODE_ENV
 const COINSTACK = process.env.COINSTACK
-const NETWORK = 'MAINNET' //process.env.NETWORK
+const NETWORK = process.env.NETWORK
 
-if (!COINSTACK) throw new Error('COINSTACK env var not set')
-if (!NETWORK) throw new Error('NETWORK env var not set')
+if (NODE_ENV !== 'test') {
+  if (!COINSTACK) throw new Error('COINSTACK env var not set')
+  if (!NETWORK) throw new Error('NETWORK env var not set')
+}
 
 const nativeToken = `${COINSTACK}_${NETWORK}`
 
