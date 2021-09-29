@@ -12,7 +12,7 @@ const blockbook = new Blockbook(INDEXER_URL)
 
 const onMessage = (worker: Worker) => async (message: Message) => {
   const { address, txid, internalTxs, client_id }: ETHSyncTx = message.getContent()
-  const retryKey = `${address}:${txid}`
+  const retryKey = `${client_id}:${address}:${txid}`
 
   try {
     const tx = await blockbook.getTransaction(txid)

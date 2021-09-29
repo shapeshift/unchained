@@ -48,28 +48,23 @@ export class RegistryService {
   }
 
   async getByAddress(address: string): Promise<Array<RegistryDocument> | undefined> {
-    const documents = await this.collection
-      ?.find<RegistryDocument>(
-        {
-          'registration.addresses': { $in: [address.toLowerCase()] },
-        },
-        {}
-      )
-      .toArray()
-
-    return documents ?? undefined
+    address = address.toLowerCase()
+    const cursors = this.collection?.find<RegistryDocument>({ 'registration.addresses': { $in: [address] } }, {})
+    return cursors?.toArray()
   }
 
   async updateBlock(address: string, block: number, client_id: string): Promise<UpdateWriteOpResult | undefined> {
+    address = address.toLowerCase()
     return this.collection?.updateOne(
-      { client_id: client_id, 'registration.addresses': { $in: [address.toLowerCase()] } },
+      { client_id: client_id, 'registration.addresses': { $in: [address] } },
       { $set: { [`ingester_meta.${address}.block`]: block } }
     )
   }
 
   async updateSyncing(address: string, client_id: string, key?: string): Promise<UpdateWriteOpResult | undefined> {
+    address = address.toLowerCase()
     return this.collection?.updateOne(
-      { client_id: client_id, 'registration.addresses': { $in: [address.toLowerCase()] } },
+      { client_id: client_id, 'registration.addresses': { $in: [address] } },
       {
         $set: {
           [`ingester_meta.${address}.syncing.key`]: key,
@@ -82,6 +77,7 @@ export class RegistryService {
 
   async add(document: RegistryDocument): Promise<UpdateWriteOpResult | undefined> {
     document = this.sanitizeDocument(document)
+    const addresses = document.registration.addresses ?? []
 
     return this.collection?.updateOne(
       {
@@ -92,10 +88,14 @@ export class RegistryService {
         $set: {
           client_id: document.client_id,
           'registration.pubkey': document.registration.pubkey,
-          'ingester_meta.block': document.ingester_meta?.block ?? 0,
+          ...addresses.reduce((prev, address) => {
+            const key = `ingester_meta.${address}.block`
+            const block = document.ingester_meta?.[address].block ?? 0
+            return { ...prev, [key]: block }
+          }, {}),
         },
         $addToSet: {
-          'registration.addresses': { $each: document.registration.addresses ?? [] },
+          'registration.addresses': { $each: addresses },
         },
       },
       { upsert: true }
