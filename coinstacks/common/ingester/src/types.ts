@@ -86,8 +86,8 @@ export interface RPCSubscriptionReceiptResponse {
 // Contains data required to perform an address delta sync
 export interface SyncTx {
   address: string
+  client_id: string
   txid: string
-  document: RegistryDocument
 }
 
 // Contains data about a token

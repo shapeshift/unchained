@@ -115,7 +115,12 @@ export const db = [
       $oid: '6142bfaf9f5ebde04767b99d',
     },
     client_id: 'unchained',
-    ingester_meta: { syncing: { key: null, endTime: 1631764402004, startTime: 0 }, block: 700749 },
+    ingester_meta: {
+      bc1qez4d09qctlfyntfkxl3vgs5unzqpgs29ndyu28: {
+        syncing: { key: null, endTime: 1631764402004, startTime: 0 },
+        block: 700749,
+      },
+    },
     registration: {
       pubkey: 'bc1qez4d09qctlfyntfkxl3vgs5unzqpgs29ndyu28',
       addresses: ['bc1qez4d09qctlfyntfkxl3vgs5unzqpgs29ndyu28'],

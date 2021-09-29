@@ -24,7 +24,7 @@ services:
     volumes:
       - mongodb:/data/db
   rabbitmq:
-    image: rabbitmq:3.8.2-management-alpine
+    image: rabbitmq:3-management
     environment:
       RABBITMQ_DEFAULT_VHOST: /
     logging:
