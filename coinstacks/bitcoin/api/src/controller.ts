@@ -210,11 +210,13 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   }
 
   /**
-   * Get transaction data
+   * Get transaction specific data directly from the node
    *
    * @param {string} txid transaction hash
    *
    * @example txid "feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580"
+   *
+   * @returns {Promise<BitcoinTxSpecific>} transaction payload
    */
   @Example<Array<BitcoinTxSpecific>>([
     {
