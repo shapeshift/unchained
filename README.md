@@ -70,6 +70,11 @@ Unchained is a multi-blockchain backend interface with three main goals:
     nvm use
     ```
 
+- Install [Yarn](https://classic.yarnpkg.com/en/docs/install)
+  ```sh
+  npm install --global yarn
+  ```
+
 - Install dependencies and build:
   ```sh
   yarn && yarn build
