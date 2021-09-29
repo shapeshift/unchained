@@ -118,7 +118,7 @@ export type TransactionType = 'receive' | 'send' | 'fee'
 
 // Contains data about the transaction fee
 export interface TxFee {
-  symbol: string
+  assetId: string
   value: string
 }
 

@@ -48,7 +48,7 @@ export const parse = async (tx: Tx): Promise<ParseTxUnique | undefined> => {
         [symbol]: {
           totalValue: value,
           components: [{ value }],
-          token: { contract: tokenAddress, decimals, name },
+          token: { contract: tokenAddress, decimals, name, symbol },
         },
       }
 
@@ -69,7 +69,7 @@ export const parse = async (tx: Tx): Promise<ParseTxUnique | undefined> => {
         [symbol]: {
           totalValue: value,
           components: [{ value }],
-          token: { contract: lpTokenAddress, decimals, name },
+          token: { contract: lpTokenAddress, decimals, name, symbol },
         },
       }
 

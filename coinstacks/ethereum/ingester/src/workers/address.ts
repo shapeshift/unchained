@@ -11,7 +11,7 @@ if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 const blockbook = new Blockbook(INDEXER_URL)
 
 const onMessage = (worker: Worker) => async (message: Message) => {
-  const { address, txid, internalTxs, document }: ETHSyncTx = message.getContent() // todo - fix
+  const { address, txid, internalTxs, document }: ETHSyncTx = message.getContent()
   const retryKey = `${address}:${txid}`
 
   try {

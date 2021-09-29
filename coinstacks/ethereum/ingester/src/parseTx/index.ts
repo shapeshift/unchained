@@ -9,10 +9,10 @@ import * as multiSig from './multiSig'
 import * as uniV2 from './uniV2'
 
 const COINSTACK = process.env.COINSTACK
-const NETWORK = 'MAINNET' //process.env.COINSTACK
+const NETWORK = 'MAINNET' //process.env.NETWORK
 
 if (!COINSTACK) throw new Error('COINSTACK env var not set')
-if (!NETWORK) throw new Error('COINSTACK env var not set')
+if (!NETWORK) throw new Error('NETWORK env var not set')
 
 const nativeToken = `${COINSTACK}_${NETWORK}`
 
@@ -78,7 +78,7 @@ export const parseTx = async (tx: Tx, address: string, internalTxs?: Array<Inter
     // eth network fee
     const fees = new BigNumber(tx.fees ?? 0)
     if (tx.fees && !fees.isNaN() && fees.gt(0)) {
-      pTx.fee = { asset: nativeToken, value: tx.fees }
+      pTx.fee = { assetId: nativeToken, value: tx.fees }
     }
   }
 
@@ -90,8 +90,8 @@ export const parseTx = async (tx: Tx, address: string, internalTxs?: Array<Inter
     }
   }
 
-  tx.tokenTransfers?.forEach((transfer: TxTransfer) => {
-    const assetId = `${chain}.${network}.${transfer.token}`
+  tx.tokenTransfers?.forEach((transfer) => {
+    const assetId = `${COINSTACK}.${NETWORK}.${transfer.token}`
 
     // FTX Token (FTT) name and symbol was set backwards on the ERC20 contract
     if (transfer.token == '0x50D1c9771902476076eCFc8B2A83Ad6b9355a4c9') {
