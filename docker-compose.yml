@@ -112,7 +112,6 @@ services:
     depends_on:
       - unchained-local
       - rabbitmq
-      - mongo
   worker-txid:
     image: unchained-local
     env_file: ./coinstacks/${COINSTACK}/.env
