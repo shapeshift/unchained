@@ -78,13 +78,13 @@ export const parseTx = async (tx: Tx, address: string, internalTxs?: Array<Inter
     // send amount
     const sendValue = new BigNumber(tx.value)
     if (!sendValue.isNaN() && sendValue.gt(0)) {
-      pTx.send['ETH'] = aggregateTransfer(pTx.send['ETH'], sendValue.toString(10))
+      pTx.send[nativeAssetId] = aggregateTransfer(pTx.send[nativeAssetId], sendValue.toString(10))
     }
 
     // network fee
     const fees = new BigNumber(tx.fees ?? 0)
     if (!fees.isNaN() && fees.gt(0)) {
-      pTx.fee = { symbol: 'ETH', value: fees.toString(10) }
+      pTx.fee = { assetId: nativeAssetId, value: fees.toString(10) }
     }
   }
 
@@ -92,7 +92,7 @@ export const parseTx = async (tx: Tx, address: string, internalTxs?: Array<Inter
     // receive amount
     const receiveValue = new BigNumber(tx.value)
     if (!receiveValue.isNaN() && receiveValue.gt(0)) {
-      pTx.receive['ETH'] = aggregateTransfer(pTx.receive['ETH'], receiveValue.toString(10))
+      pTx.receive[nativeAssetId] = aggregateTransfer(pTx.receive[nativeAssetId], receiveValue.toString(10))
     }
   }
 

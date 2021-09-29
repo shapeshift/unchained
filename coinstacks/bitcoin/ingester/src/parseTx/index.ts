@@ -1,6 +1,6 @@
 import { BigNumber } from 'bignumber.js'
 import { Tx, Vin, Vout } from '@shapeshiftoss/blockbook'
-import { TxTransfer, Token, TxFee } from '@shapeshiftoss/common-ingester'
+import { TxTransfer, Token } from '@shapeshiftoss/common-ingester'
 import { BTCParseTx } from '../types'
 
 const NODE_ENV = process.env.NODE_ENV
@@ -39,12 +39,12 @@ export const parseTx = async (tx: Tx, address: string): Promise<BTCParseTx> => {
       // send amount
       const sendValue = new BigNumber(vin.value ?? 0)
       if (!sendValue.isNaN() && sendValue.gt(0)) {
-        pTx.send['BTC'] = aggregateTransfer(pTx.send['BTC'], sendValue.toString(10))
+        pTx.send[nativeAssetId] = aggregateTransfer(pTx.send[nativeAssetId], sendValue.toString(10))
 
         // network fee (only for sends)
         const fees = new BigNumber(tx.fees ?? 0)
         if (!fees.isNaN() && fees.gt(0)) {
-          pTx.fee = { symbol: 'BTC', value: fees.toString(10) }
+          pTx.fee = { assetId: nativeAssetId, value: fees.toString(10) }
         }
       }
     }
@@ -55,7 +55,7 @@ export const parseTx = async (tx: Tx, address: string): Promise<BTCParseTx> => {
       // receive amount
       const receiveValue = new BigNumber(vout.value ?? 0)
       if (!receiveValue.isNaN() && receiveValue.gt(0)) {
-        pTx.receive['BTC'] = aggregateTransfer(pTx.receive['BTC'], receiveValue.toString(10))
+        pTx.receive[nativeAssetId] = aggregateTransfer(pTx.receive[nativeAssetId], receiveValue.toString(10))
       }
     }
   })
