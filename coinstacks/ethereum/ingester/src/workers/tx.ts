@@ -186,7 +186,9 @@ const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string):
       // track that we are currently syncing an address up to toHeight
       await registry.updateSyncing(address, document.client_id, syncKey)
 
-      logger.info(`Address sync for: ${address}, from: ${fromHeight}, to: ${toHeight} started`)
+      logger.info(
+        `Address sync for: ${address} (client_id: ${document.client_id}), from: ${fromHeight}, to: ${toHeight} started`
+      )
 
       const [txHistory, txHistoryInternal] = await Promise.all([
         getTxHistory(address, fromHeight, toHeight),
@@ -218,7 +220,9 @@ const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string):
       await registry.updateSyncing(address, document.client_id)
 
       logger.info(
-        `Address sync for: ${address}, from: ${fromHeight}, to: ${toHeight} finished (${Date.now() - syncStart} ms)`
+        `Address sync for: ${address} (client_id: ${
+          document.client_id
+        }), from: ${fromHeight}, to: ${toHeight} finished (${Date.now() - syncStart} ms)`
       )
     })
   )

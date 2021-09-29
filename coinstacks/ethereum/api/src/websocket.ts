@@ -1,7 +1,7 @@
 import { v4 } from 'uuid'
 import { Connection, Exchange, Message, Queue } from 'amqp-ts'
 import { logger } from '@shapeshiftoss/logger'
-import { RegistryDocument } from '@shapeshiftoss/common-mongo'
+import { RegistryDocument, IngesterMetadata } from '@shapeshiftoss/common-mongo'
 
 const BROKER_URL = process.env.BROKER_URL as string
 
@@ -124,9 +124,9 @@ export class WebSocketConnectionHandler {
     const msg: RegistryMessage = {
       action: 'register',
       client_id: this.id,
-      ingester_meta: {
-        block: data.blockNumber,
-      },
+      ingester_meta: data.addresses.reduce<Record<string, IngesterMetadata>>((prev, address) => {
+        return { ...prev, [address]: { block: data.blockNumber } }
+      }, {}),
       registration: {
         addresses: data.addresses,
       },
@@ -136,7 +136,9 @@ export class WebSocketConnectionHandler {
 
     const onMessage = (message: Message) => {
       const content = message.getContent()
+      // TODO: can we ensure message has been sent successfully? If not we would want to requeue message
       this.websocket.send(JSON.stringify(content))
+      message.ack()
     }
 
     this.queue.activateConsumer(onMessage)
