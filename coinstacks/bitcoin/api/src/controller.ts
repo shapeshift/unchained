@@ -3,7 +3,6 @@ import { Address, Blockbook, Xpub } from '@shapeshiftoss/blockbook'
 import {
   ApiError,
   BadRequestError,
-  Account,
   BaseAPI,
   InternalServerError,
   SendTxBody,
@@ -11,7 +10,7 @@ import {
   TxHistory,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { BitcoinAPI, BitcoinAccount, Utxo } from './models'
+import { BitcoinAPI, BitcoinAccount, BitcoinTxSpecific, Utxo } from './models'
 
 const INDEXER_URL = process.env.INDEXER_URL
 
@@ -49,6 +48,8 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
       'xpub6CUGRUonZSQ4TWtTMmzXdrXDtypWKiKrhko4egpiMZbpiaQL2jkwSB1icqYh2cfDfVxdx4df189oLKnC5fSwqPfgyP3hooxujYzAu3fDVmz',
     balance: '12688908',
     addresses: [{ pubkey: '1EfgV2Hr5CDjXPavHDpDMjmU33BA2veHy6', balance: '10665' }],
+    nextReceiveAddressIndex: 0,
+    nextChangeAddressIndex: 0,
   })
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
@@ -63,9 +64,17 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
         data = await blockbook.getAddress(pubkey, undefined, undefined, undefined, undefined, 'basic')
       }
 
-      const addresses = data.tokens?.reduce<Array<Account>>((prev, token) => {
-        if (token.balance) {
-          prev.push({ pubkey: token.name, balance: token.balance })
+      // For any change indexes detected by blockbook, we want to find the next unused address.
+      // To do this we will add 1 to any address indexes found and keep track of the highest index.
+      const nextAddressIndexes = (data.tokens ?? []).reduce<Array<number>>((prev, token) => {
+        if (!token.path) return prev
+
+        const [, , , , change, addressIndex] = token.path.split('/')
+        const changeIndex = Number(change)
+        const nextAddressIndex = Number(addressIndex) + 1
+
+        if (!prev[changeIndex] || nextAddressIndex > prev[changeIndex]) {
+          prev[changeIndex] = nextAddressIndex
         }
 
         return prev
@@ -74,7 +83,8 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
       return {
         pubkey: data.address,
         balance: data.balance,
-        addresses,
+        nextReceiveAddressIndex: nextAddressIndexes[0],
+        nextChangeAddressIndex: nextAddressIndexes[1],
       }
     } catch (err) {
       throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
@@ -157,18 +167,33 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   /**
    * Get all unspent transaction outputs for an address or xpub
    *
+   * Examples
+   * 1. Bitcoin (address)
+   * 2. Bitcoin (xpub)
+   *
    * @param {string} pubkey account address or xpub
    *
    * @example pubkey "14mMwtZCGiAtyr8KnnAZYyHmZ9Zvj71h4t"
-   * @example pubkey "xpub6DQYbVJSVvJPzpYenir7zVSf2WPZRu69LxZuMezzAKuT6biPcug6Vw1zMk4knPBeNKvioutc4EGpPQ8cZiWtjcXYvJ6wPiwcGmCkihA9Jy3"
+   * @example pubkey "xpub6CDvS4rkJBfqEyBdTo7omDxv3BwDr5XmWeKsU9HAaLSG28GztaywbAsm6SBWPyEsZ6QDubVnXtNEfDZ74RkDVeLUSkjdZDbsLZCqNWqy7wQ"
    */
   @Example<Array<Utxo>>([
     {
-      address: '14mMwtZCGiAtyr8KnnAZYyHmZ9Zvj71h4t',
-      confirmations: 58362,
       txid: '02cdb69a97d1b8585797ac31a1954804b40a71c380a3ede0793f21a2cdfd300a',
-      value: '729',
       vout: 1,
+      value: '729',
+      height: 601428,
+      confirmations: 101330,
+    },
+  ])
+  @Example<Array<Utxo>>([
+    {
+      txid: 'feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580',
+      vout: 1,
+      value: '90118',
+      height: 702033,
+      confirmations: 723,
+      address: '1BEyYmi9Vmv3UV6AN76RAfWpzXY23p7ikS',
+      path: "m/44'/0'/0'/1/2",
     },
   ])
   @Response<BadRequestError>(400, 'Bad Request')
@@ -178,16 +203,72 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   async getUtxos(@Path() pubkey: string): Promise<Array<Utxo>> {
     try {
       const data = await blockbook.getUtxo(pubkey, true)
+      return data
+    } catch (err) {
+      throw new ApiError(err.response, err.response.status, JSON.stringify(err.response.data))
+    }
+  }
 
-      const utxos = data.map<Utxo>((utxo) => ({
-        address: utxo.address ?? pubkey,
-        confirmations: utxo.confirmations,
-        txid: utxo.txid,
-        value: utxo.value,
-        vout: utxo.vout,
-      }))
-
-      return utxos
+  /**
+   * Get transaction specific data directly from the node
+   *
+   * @param {string} txid transaction hash
+   *
+   * @example txid "feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580"
+   *
+   * @returns {Promise<BitcoinTxSpecific>} transaction payload
+   */
+  @Example<Array<BitcoinTxSpecific>>([
+    {
+      txid: 'feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580',
+      hash: 'feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580',
+      version: 1,
+      size: 225,
+      vsize: 225,
+      weight: 900,
+      locktime: 0,
+      vin: [
+        {
+          txid: 'e5e9a8bfd71bbf3c36da01cb513a26f094885849c29b41ef8400d9a4f9684156',
+          vout: 1,
+          scriptSig: {
+            asm:
+              '3044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9[ALL] 02eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35',
+            hex:
+              '473044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9012102eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35',
+          },
+          sequence: 4294967295,
+        },
+      ],
+      vout: [
+        {
+          value: '0.00002',
+          n: 0,
+          scriptPubKey: {
+            asm: 'OP_DUP OP_HASH160 9c9d21f47382762df3ad81391ee0964b28dd9517 OP_EQUALVERIFY OP_CHECKSIG',
+            hex: '76a9149c9d21f47382762df3ad81391ee0964b28dd951788ac',
+            reqSigs: 1,
+            type: 'pubkeyhash',
+            addresses: ['1FH6ehAd5ZFXCM1cLGzHxK1s4dGdq1JusM'],
+          },
+        },
+      ],
+      hex:
+        '0100000001564168f9a4d90084ef419bc249588894f0263a51cb01da363cbf1bd7bfa8e9e5010000006a473044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9012102eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35ffffffff02d0070000000000001976a9149c9d21f47382762df3ad81391ee0964b28dd951788ac06600100000000001976a9147055de79bc47a9f91e4c488170da7666e900731288ac00000000',
+      blockhash: '0000000000000000000a468a69aedb50269f1dd48048bfa94c175465d5de2548',
+      confirmations: 498,
+      time: 1632513682,
+      blocktime: 1632513682,
+    },
+  ])
+  @Response<BadRequestError>(400, 'Bad Request')
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Get('transaction/{txid}')
+  async getTransaction(@Path() txid: string): Promise<BitcoinTxSpecific> {
+    try {
+      const data = await blockbook.getTransactionSpecific(txid)
+      return data as BitcoinTxSpecific
     } catch (err) {
       throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
     }
