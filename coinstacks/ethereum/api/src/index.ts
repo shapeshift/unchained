@@ -1,6 +1,6 @@
 import express, { json, urlencoded } from 'express'
-import { join } from 'path'
 import cors from 'cors'
+import { join } from 'path'
 import swaggerUi from 'swagger-ui-express'
 import { logger } from '@shapeshiftoss/logger'
 import { middleware } from '../../../common/api/src'
@@ -12,7 +12,6 @@ const app = express()
 
 app.use(json())
 app.use(urlencoded({ extended: true }))
-
 app.use(cors())
 
 app.get('/health', async (_, res) => {

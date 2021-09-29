@@ -167,11 +167,24 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   /**
    * Get all unspent transaction outputs for an address or xpub
    *
+   * Examples
+   * 1. Bitcoin (address)
+   * 2. Bitcoin (xpub)
+   *
    * @param {string} pubkey account address or xpub
    *
-   * @example pubkey "xpub6CDvS4rkJBfqEyBdTo7omDxv3BwDr5XmWeKsU9HAaLSG28GztaywbAsm6SBWPyEsZ6QDubVnXtNEfDZ74RkDVeLUSkjdZDbsLZCqNWqy7wQ"
    * @example pubkey "14mMwtZCGiAtyr8KnnAZYyHmZ9Zvj71h4t"
+   * @example pubkey "xpub6CDvS4rkJBfqEyBdTo7omDxv3BwDr5XmWeKsU9HAaLSG28GztaywbAsm6SBWPyEsZ6QDubVnXtNEfDZ74RkDVeLUSkjdZDbsLZCqNWqy7wQ"
    */
+  @Example<Array<Utxo>>([
+    {
+      txid: '02cdb69a97d1b8585797ac31a1954804b40a71c380a3ede0793f21a2cdfd300a',
+      vout: 1,
+      value: '729',
+      height: 601428,
+      confirmations: 101330,
+    },
+  ])
   @Example<Array<Utxo>>([
     {
       txid: 'feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580',
@@ -181,33 +194,6 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
       confirmations: 723,
       address: '1BEyYmi9Vmv3UV6AN76RAfWpzXY23p7ikS',
       path: "m/44'/0'/0'/1/2",
-    },
-    {
-      txid: 'bc0e0f12c821c6d1d16af863b8ee8d8a09e4c023ffeeea6c5ce0c7d38c21d356',
-      vout: 0,
-      value: '11482',
-      height: 701457,
-      confirmations: 1299,
-      address: '15uud35JNGQboswqGeGGhTttGcX413VGcw',
-      path: "m/44'/0'/0'/0/3",
-    },
-    {
-      txid: '2aae487bb1f3159ade4b30bc27659f0a14757dc2e17a50e955f9667634041f64',
-      vout: 0,
-      value: '103548',
-      height: 701456,
-      confirmations: 1300,
-      address: '1G9jAsXHqrmngvSw3vKBXBTj6RAcDFfc1A',
-      path: "m/44'/0'/0'/0/2",
-    },
-  ])
-  @Example<Array<Utxo>>([
-    {
-      txid: '02cdb69a97d1b8585797ac31a1954804b40a71c380a3ede0793f21a2cdfd300a',
-      vout: 1,
-      value: '729',
-      height: 601428,
-      confirmations: 101330,
     },
   ])
   @Response<BadRequestError>(400, 'Bad Request')
@@ -262,17 +248,6 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
             reqSigs: 1,
             type: 'pubkeyhash',
             addresses: ['1FH6ehAd5ZFXCM1cLGzHxK1s4dGdq1JusM'],
-          },
-        },
-        {
-          value: '0.00090118',
-          n: 1,
-          scriptPubKey: {
-            asm: 'OP_DUP OP_HASH160 7055de79bc47a9f91e4c488170da7666e9007312 OP_EQUALVERIFY OP_CHECKSIG',
-            hex: '76a9147055de79bc47a9f91e4c488170da7666e900731288ac',
-            reqSigs: 1,
-            type: 'pubkeyhash',
-            addresses: ['1BEyYmi9Vmv3UV6AN76RAfWpzXY23p7ikS'],
           },
         },
       ],

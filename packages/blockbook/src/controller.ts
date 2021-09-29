@@ -585,6 +585,15 @@ export class Blockbook extends Controller {
       value: '729',
       height: 601428,
       confirmations: 58362,
+    },
+  ])
+  @Example<Array<Utxo>>([
+    {
+      txid: '02cdb69a97d1b8585797ac31a1954804b40a71c380a3ede0793f21a2cdfd300a',
+      vout: 1,
+      value: '729',
+      height: 601428,
+      confirmations: 58362,
       address: '14mMwtZCGiAtyr8KnnAZYyHmZ9Zvj71h4t',
       path: "m/44'/0'/0'/1/0",
     },

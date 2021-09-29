@@ -15,7 +15,6 @@ services:
       - .:/app
     depends_on:
       - unchained-local
-      - mongo
   mongo:
     image: mongo:4.2.8
     logging:
@@ -112,6 +111,7 @@ services:
     depends_on:
       - unchained-local
       - rabbitmq
+      - mongo
   worker-txid:
     image: unchained-local
     env_file: ./coinstacks/${COINSTACK}/.env

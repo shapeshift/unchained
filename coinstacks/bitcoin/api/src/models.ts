@@ -57,7 +57,7 @@ export interface Utxo {
 }
 
 /**
- * Contains additional bitcoin specific info
+ * Contains additional bitcoin specific account info
  */
 export interface BitcoinAccount extends Account {
   /**
