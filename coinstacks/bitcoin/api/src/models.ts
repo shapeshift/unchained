@@ -95,29 +95,19 @@ export interface Utxo {
  */
 export interface BitcoinAccount extends Account {
   /**
-   * Account details by address if BitcoinAccount was fetched by xpub
+   * List of associated addresses for an xpub
    */
   addresses?: Array<Account>
 
   /**
-   * Transactions of the given xpub
+   * The next unused receive address index for an xpub (change index 0)
    */
-  transactions?: Array<Tx>
+  nextReceiveAddressIndex?: number
 
   /**
-   * The next unused receive address if BitcoinAccount was fetched by xpub
+   * The next unused change address index for an xpub (change index 1)
    */
-  receiveIndex?: number | null
-
-  /**
-   * The next unused change address if BitcoinAccount was fetched by xpub
-   */
-  changeIndex?: number | null
-
-  /**
-   * The path of the account
-   */
-  path?: string
+  nextChangeAddressIndex?: number
 }
 
 /**

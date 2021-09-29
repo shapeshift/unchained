@@ -42,13 +42,14 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   @Example<BitcoinAccount>({
     pubkey: '336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU',
     balance: '974652',
-    path: "m/44'/0'/0'/0/0",
   })
   @Example<BitcoinAccount>({
     pubkey:
       'xpub6CUGRUonZSQ4TWtTMmzXdrXDtypWKiKrhko4egpiMZbpiaQL2jkwSB1icqYh2cfDfVxdx4df189oLKnC5fSwqPfgyP3hooxujYzAu3fDVmz',
     balance: '12688908',
     addresses: [{ pubkey: '1EfgV2Hr5CDjXPavHDpDMjmU33BA2veHy6', balance: '10665' }],
+    nextReceiveAddressIndex: 0,
+    nextChangeAddressIndex: 0,
   })
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
@@ -63,39 +64,27 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
         data = await blockbook.getAddress(pubkey, undefined, undefined, undefined, undefined, 'basic')
       }
 
-      let changeIndex: number | null = null
-      let receiveIndex: number | null = null
-      if (data.tokens) {
-        for (let i = data.tokens.length - 1; i >= 0 && (changeIndex === null || receiveIndex === null); i--) {
-          const splitPath = data.tokens[i].path?.split('/') || []
-          const [, , , , change, index] = splitPath
+      // For any change indexes detected by blockbook, we want to find the next unused address.
+      // To do this we will add 1 to any address indexes found and keep track of the highest index.
+      const nextAddressIndexes = (data.tokens ?? []).reduce<Array<number>>((prev, token) => {
+        if (!token.path) return prev
 
-          if (change === '0') {
-            if (receiveIndex === null) {
-              receiveIndex = Number(index) + 1
-            } else {
-              if (receiveIndex < Number(index)) {
-                receiveIndex = Number(index) + 1
-              }
-            }
-          }
-          if (change === '1') {
-            if (changeIndex === null) {
-              changeIndex = Number(index) + 1
-            } else {
-              if (changeIndex < Number(index)) {
-                changeIndex = Number(index) + 1
-              }
-            }
-          }
+        const [, , , , change, addressIndex] = token.path.split('/')
+        const changeIndex = Number(change)
+        const nextAddressIndex = Number(addressIndex) + 1
+
+        if (!prev[changeIndex] || nextAddressIndex > prev[changeIndex]) {
+          prev[changeIndex] = nextAddressIndex
         }
-      }
+
+        return prev
+      }, [])
 
       return {
         pubkey: data.address,
         balance: data.balance,
-        receiveIndex,
-        changeIndex,
+        nextChangeAddressIndex: nextAddressIndexes[0],
+        nextReceiveAddressIndex: nextAddressIndexes[1],
       }
     } catch (err) {
       throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
