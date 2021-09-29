@@ -1,6 +1,6 @@
 import { BigNumber } from 'bignumber.js'
 import { Tx, Vin, Vout } from '@shapeshiftoss/blockbook'
-import { TxTransfer, Token } from '@shapeshiftoss/common-ingester'
+import { TxTransfer, Token, TxFee } from '@shapeshiftoss/common-ingester'
 import { BTCParseTx } from '../types'
 
 const NODE_ENV = process.env.NODE_ENV
@@ -12,7 +12,7 @@ if (NODE_ENV !== 'test') {
   if (!NETWORK) throw new Error('NETWORK env var not set')
 }
 
-const nativeToken = `${COINSTACK}_${NETWORK}`
+const nativeAssetId = `${COINSTACK}_${NETWORK}`
 
 // keep track of all individual tx components and add up the total value transferred
 const aggregateTransfer = (transfer: TxTransfer, value: string, token?: Token): TxTransfer => {
@@ -39,12 +39,12 @@ export const parseTx = async (tx: Tx, address: string): Promise<BTCParseTx> => {
     if (vin.isAddress === true && vin.addresses?.includes(pTx.address)) {
       const sendValue = new BigNumber(vin.value ?? 0)
       if (!sendValue.isNaN() && sendValue.gt(0)) {
-        pTx.send[nativeToken] = aggregateTransfer(pTx.send[nativeToken], vin.value ?? '0')
+        pTx.send[nativeAssetId] = aggregateTransfer(pTx.send[nativeAssetId], vin.value ?? '0')
 
         // network fee (only for sends)
         const fees = new BigNumber(tx.fees ?? 0)
         if (tx.fees && !fees.isNaN() && fees.gt(0)) {
-          pTx.fee = { assetId: nativeToken, value: tx.fees }
+          pTx.fee = { assetId: nativeAssetId, value: tx.fees }
         }
       }
     }
@@ -55,7 +55,7 @@ export const parseTx = async (tx: Tx, address: string): Promise<BTCParseTx> => {
     if (vout.isAddress === true && vout.addresses?.includes(pTx.address)) {
       const receiveValue = new BigNumber(vout.value ?? 0)
       if (!receiveValue.isNaN() && receiveValue.gt(0)) {
-        pTx.receive[nativeToken] = aggregateTransfer(pTx.receive[nativeToken], vout.value ?? '0')
+        pTx.receive[nativeAssetId] = aggregateTransfer(pTx.receive[nativeAssetId], vout.value ?? '0')
       }
     }
   })
