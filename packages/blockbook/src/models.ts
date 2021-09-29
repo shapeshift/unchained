@@ -138,7 +138,7 @@ export interface EthereumSpecific {
 /**
  * Contains ethereum specific transaction info as returned from the node
  */
-export interface EthTxSpecific {
+export interface EthereumTxSpecific {
   tx: {
     nonce: string
     gasPrice: string
@@ -161,6 +161,26 @@ export interface EthTxSpecific {
       data: string
     }>
   }
+}
+
+/**
+ * Contains Bitcoin specific transaction info as returned from the node
+ */
+export interface BitcoinTxSpecific {
+  txid: string
+  hash: string
+  version: number
+  size: number
+  vsize: number
+  weight: number
+  locktime: number
+  vin: Array<Vin>
+  vout: Array<Vout>
+  hex: string
+  blockhash: string
+  confirmations: number
+  time: number
+  blocktime: number
 }
 
 /**
@@ -246,7 +266,7 @@ export interface Tx {
 /**
  * Union of all blockchain specific transaction info
  */
-export type TxSpecific = EthTxSpecific
+export type TxSpecific = EthereumTxSpecific | BitcoinTxSpecific
 
 /**
  * Contains info about an unspent transaction output
@@ -266,34 +286,56 @@ export interface Utxo {
 /**
  * Contains info about single transaction input
  */
+export interface ScriptSig {
+  asm: string
+  hex: string
+}
+
+/**
+ * Contains info about ScriptPubKey
+ */
+export interface ScriptPubKey {
+  asm: string
+  hex: string
+  reqSigs: number
+  type: string
+  addresses: string[]
+}
+
+/**
+ * Contains info about single transaction input
+ */
 export interface Vin {
   txid?: string
   vout?: number
   sequence?: number
-  n: number
+  n?: number
   addresses?: Array<string>
-  isAddress: boolean
+  isAddress?: boolean
   value?: string
   hex?: string
   asm?: string
   coinbase?: string
+  scriptSig?: ScriptSig
+  txinwitness?: string[]
 }
 
 /**
  * Contains info about single transaction output
  */
 export interface Vout {
-  value?: string
-  n: number
+  value?: string | number
+  n?: number
   spent?: boolean
   spentTxId?: string
   spentIndex?: number
   spentHeight?: number
   hex?: string
   asm?: string
-  addresses: Array<string> | null // null value for contract creation transaction
-  isAddress: boolean
+  addresses?: Array<string> | null // null value for contract creation transaction
+  isAddress?: boolean
   type?: string
+  scriptPubKey?: ScriptPubKey
 }
 
 /**

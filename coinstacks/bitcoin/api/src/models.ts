@@ -58,7 +58,7 @@ export type Vout = {
 /**
  * Contains detailed info about a Bitcoin transaction
  */
-export type BtcTxSpecific = {
+export type BitcoinTxSpecific = {
   txid: string
   hash?: string
   version?: number

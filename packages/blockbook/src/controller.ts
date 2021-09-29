@@ -1,15 +1,17 @@
 import axios, { AxiosInstance } from 'axios'
 import { Controller, Example, Get, Path, Query, Route, Tags } from 'tsoa'
+import { BitcoinTxSpecific } from '.'
 import {
   Address,
   ApiError,
   BalanceHistory,
   Block,
   BlockIndex,
-  EthTxSpecific,
+  EthereumTxSpecific,
   Info,
   SendTx,
   Tx,
+  TxSpecific,
   Utxo,
   Xpub,
 } from './models'
@@ -223,13 +225,66 @@ export class Blockbook extends Controller {
    * Get transaction specific returns transaction data in the exact format as returned by backend, including all coin specific fields
    *
    * Examples:
-   * 1. Ethereum
+   * 1. Bitcoin
+   * 2. Ethereum
    *
    * @param txid transaction id
    *
+   * @example txid "bc0e0f12c821c6d1d16af863b8ee8d8a09e4c023ffeeea6c5ce0c7d38c21d356"
    * @example txid "0xf5ef950d597bea8c980fe5a17faeb70ed7f5030dcf58f077baede5eb0d610cdf"
    */
-  @Example<EthTxSpecific>({
+  @Example<BitcoinTxSpecific>({
+    txid: 'bc0e0f12c821c6d1d16af863b8ee8d8a09e4c023ffeeea6c5ce0c7d38c21d356',
+    hash: '3854e427b33c17d618c020d6b320e7608a8c7e7ba8ab48f0956283b58ef85b7a',
+    version: 1,
+    size: 225,
+    vsize: 144,
+    weight: 573,
+    locktime: 0,
+    vin: [
+      {
+        txid: 'bbcb3d9ee079d7d9a5d97f928c00f9a36c14f96501c5e199aa777d57a8f96510',
+        vout: 1,
+        scriptSig: { asm: '', hex: '' },
+        txinwitness: [
+          '3044022034dd7f8071f8d5466e6921af262c9dff24f34ba970c9855fb8a908b4b855fce602203122390fada8cde3ba9edb90d542c118552f06787a93e3f8b2a9e4fc3ba3dc6401',
+          '022f7b124fa7ba4c107e81f32c91e4a10abf8858a19ffe7064a7863f6647f388a8',
+        ],
+        sequence: 4294967295,
+      },
+    ],
+    vout: [
+      {
+        value: 0.00011482,
+        n: 0,
+        scriptPubKey: {
+          asm: 'OP_DUP OP_HASH160 35e20f27e4e25a795e2846eb4c9b3cb79d3198f2 OP_EQUALVERIFY OP_CHECKSIG',
+          hex: '76a91435e20f27e4e25a795e2846eb4c9b3cb79d3198f288ac',
+          reqSigs: 1,
+          type: 'pubkeyhash',
+          addresses: ['15uud35JNGQboswqGeGGhTttGcX413VGcw'],
+        },
+      },
+      {
+        value: 0.00530648,
+        n: 1,
+        scriptPubKey: {
+          asm: '0 603465d067b8c65b85ace2bdff06c6a7dd0ba1b2',
+          hex: '0014603465d067b8c65b85ace2bdff06c6a7dd0ba1b2',
+          reqSigs: 1,
+          type: 'witness_v0_keyhash',
+          addresses: ['bc1qvq6xt5r8hrr9hpdvu27l7pkx5lwshgdjj3hnn3'],
+        },
+      },
+    ],
+    hex:
+      '010000000001011065f9a8577d77aa99e1c50165f9146ca3f9008c927fd9a5d9d779e09e3dcbbb0100000000ffffffff02da2c0000000000001976a91435e20f27e4e25a795e2846eb4c9b3cb79d3198f288acd818080000000000160014603465d067b8c65b85ace2bdff06c6a7dd0ba1b202473044022034dd7f8071f8d5466e6921af262c9dff24f34ba970c9855fb8a908b4b855fce602203122390fada8cde3ba9edb90d542c118552f06787a93e3f8b2a9e4fc3ba3dc640121022f7b124fa7ba4c107e81f32c91e4a10abf8858a19ffe7064a7863f6647f388a800000000',
+    blockhash: '000000000000000000027c5902f6f1b7d9c9bc46adc33bbe806db50a579b5d70',
+    confirmations: 1184,
+    time: 1632164292,
+    blocktime: 1632164292,
+  })
+  @Example<EthereumTxSpecific>({
     tx: {
       nonce: '0x11cc',
       gasPrice: '0x826299e000',
@@ -277,9 +332,9 @@ export class Blockbook extends Controller {
     },
   })
   @Get('tx-specific/{txid}')
-  async getTransactionSpecific(@Path() txid: string): Promise<Tx> {
+  async getTransactionSpecific(@Path() txid: string): Promise<TxSpecific> {
     try {
-      const { data } = await this.instance.get<Tx>(`api/v2/tx-specific/${txid}`)
+      const { data } = await this.instance.get<TxSpecific>(`api/v2/tx-specific/${txid}`)
       return data
     } catch (err) {
       throw new ApiError(err)

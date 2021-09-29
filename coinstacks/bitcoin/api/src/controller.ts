@@ -10,7 +10,7 @@ import {
   TxHistory,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { BitcoinAPI, BitcoinAccount, BtcTxSpecific } from './models'
+import { BitcoinAPI, BitcoinAccount, BitcoinTxSpecific } from './models'
 
 const INDEXER_URL = process.env.INDEXER_URL
 
@@ -202,7 +202,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
    *
    * @example txid "feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580"
    */
-  @Example<Array<BtcTxSpecific>>([
+  @Example<Array<BitcoinTxSpecific>>([
     {
       txid: 'feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580',
       hash: 'feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580',
@@ -264,10 +264,10 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('transaction/{txid}')
-  async getTransaction(@Path() txid: string): Promise<BtcTxSpecific> {
+  async getTransaction(@Path() txid: string): Promise<BitcoinTxSpecific> {
     try {
       const data = await blockbook.getTransactionSpecific(txid)
-      return data
+      return data as BitcoinTxSpecific
     } catch (err) {
       throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
     }
