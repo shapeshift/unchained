@@ -25,6 +25,30 @@ const COINSTACK = 'ethereum'
 const NETWORK = 'MAINNET'
 const nativeToken = `${COINSTACK}_${NETWORK}`
 
+const uniV2Token = {
+  contract: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
+  decimals: 18,
+  name: 'Uniswap V2',
+  symbol: 'UNI-V2',
+}
+const uniV2assetId = `${COINSTACK}_${NETWORK}_${uniV2Token.contract}`
+
+const usdcToken = {
+  contract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+  decimals: 6,
+  name: 'USD Coin',
+  symbol: 'USDC',
+}
+const usdcAssetId = `${COINSTACK}_${NETWORK}_${usdcToken.contract}`
+
+const foxToken = {
+  contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
+  decimals: 18,
+  name: 'FOX',
+  symbol: 'FOX',
+}
+const foxAssetId = `${COINSTACK}_${NETWORK}_${foxToken.contract}`
+
 describe('parseTx', () => {
   describe('multiSig', () => {
     it('should be able to parse eth multi sig send', async () => {
@@ -72,7 +96,7 @@ describe('parseTx', () => {
           value: '1700235000000000',
         },
         send: {
-          [`${nativeToken}`]: {
+          [nativeToken]: {
             totalValue: '295040000000000000',
             components: [{ value: '295040000000000000' }],
           },
@@ -99,13 +123,7 @@ describe('parseTx', () => {
         sellAsset: 'USDC',
         sellAmount: '16598881497',
       }
-      const usdcToken = {
-        contract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-        decimals: 6,
-        name: 'USD Coin',
-        symbol: 'USDC',
-      }
-      const usdcAssetId = `${COINSTACK}_${NETWORK}_${usdcToken.contract}`
+
       const expected: ParseTx = {
         ...tx,
         address: address,
@@ -152,7 +170,7 @@ describe('parseTx', () => {
         address: address,
         send: {},
         receive: {
-          [`${nativeToken}`]: {
+          [nativeToken]: {
             totalValue: '1579727090000000000',
             components: [{ value: '1579727090000000000' }],
           },
@@ -182,13 +200,7 @@ describe('parseTx', () => {
         sellAmount: '510423341825',
         sellNetwork: 'THOR',
       }
-      const usdcToken = {
-        contract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-        decimals: 6,
-        name: 'USD Coin',
-        symbol: 'USDC',
-      }
-      const usdcAssetId = `${COINSTACK}_${NETWORK}_${usdcToken.contract}`
+
       const expected: ParseTx = {
         ...tx,
         address: address,
@@ -230,7 +242,7 @@ describe('parseTx', () => {
         address: address,
         send: {},
         receive: {
-          [`${nativeToken}`]: {
+          [nativeToken]: {
             totalValue: '6412730000000000',
             components: [{ value: '6412730000000000' }],
           },
@@ -264,7 +276,7 @@ describe('parseTx', () => {
         symbol: 'TRIBE',
       }
 
-      const assetId = `${COINSTACK}_${NETWORK}_${tribeToken.contract}`
+      const tribeAssetId = `${COINSTACK}_${NETWORK}_${tribeToken.contract}`
 
       const expected: ParseTx = {
         ...tx,
@@ -274,14 +286,14 @@ describe('parseTx', () => {
           assetId: nativeToken,
         },
         send: {
-          [assetId]: {
+          [tribeAssetId]: {
             totalValue: '1000000000000000000000',
             components: [{ value: '1000000000000000000000' }],
             token: tribeToken,
           },
         },
         receive: {
-          [`${nativeToken}`]: {
+          [nativeToken]: {
             totalValue: '541566754246167133',
             components: [{ value: '541566754246167133' }],
           },
@@ -313,7 +325,7 @@ describe('parseTx', () => {
         symbol: 'MATIC',
       }
 
-      const assetId = `${COINSTACK}_${NETWORK}_${maticToken.contract}`
+      const maticAssetId = `${COINSTACK}_${NETWORK}_${maticToken.contract}`
       const expected: ParseTx = {
         ...tx,
         address: address,
@@ -322,13 +334,13 @@ describe('parseTx', () => {
           assetId: nativeToken,
         },
         send: {
-          [`${nativeToken}`]: {
+          [nativeToken]: {
             totalValue: '10000000000000000000',
             components: [{ value: '10000000000000000000' }],
           },
         },
         receive: {
-          [assetId]: {
+          [maticAssetId]: {
             totalValue: '50000000000000000000000',
             components: [{ value: '50000000000000000000000' }],
             token: maticToken,
@@ -465,13 +477,13 @@ describe('parseTx', () => {
         ...txMempool,
         address: address,
         send: {
-          [`${nativeToken}`]: {
+          [nativeToken]: {
             totalValue: '503100000000000',
             components: [{ value: '503100000000000' }],
           },
         },
         receive: {
-          [`${nativeToken}`]: {
+          [nativeToken]: {
             totalValue: '503100000000000',
             components: [{ value: '503100000000000' }],
           },
@@ -495,13 +507,13 @@ describe('parseTx', () => {
           assetId: nativeToken,
         },
         send: {
-          [`${nativeToken}`]: {
+          [nativeToken]: {
             totalValue: '503100000000000',
             components: [{ value: '503100000000000' }],
           },
         },
         receive: {
-          [`${nativeToken}`]: {
+          [nativeToken]: {
             totalValue: '503100000000000',
             components: [{ value: '503100000000000' }],
           },
@@ -516,13 +528,6 @@ describe('parseTx', () => {
     it('should be able to parse token mempool', async () => {
       const { txMempool } = tokenSelfSend
       const address = '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C'
-      const usdcToken = {
-        contract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-        decimals: 6,
-        name: 'USD Coin',
-        symbol: 'USDC',
-      }
-      const usdcAssetId = `${COINSTACK}_${NETWORK}_${usdcToken.contract}`
 
       const expected: ParseTx = {
         ...txMempool,
@@ -551,13 +556,6 @@ describe('parseTx', () => {
     it('should be able to parse token', async () => {
       const { tx } = tokenSelfSend
       const address = '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C'
-      const usdcToken = {
-        contract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-        decimals: 6,
-        name: 'USD Coin',
-        symbol: 'USDC',
-      }
-      const usdcAssetId = `${COINSTACK}_${NETWORK}_${usdcToken.contract}`
 
       const expected: ParseTx = {
         ...tx,
@@ -613,19 +611,11 @@ describe('parseTx', () => {
       const { txMempool } = uniAddLiquidity
       const address = '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C'
 
-      const foxToken = {
-        contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
-        decimals: 18,
-        name: 'FOX',
-        symbol: 'FOX',
-      }
-      const foxAssetId = `${COINSTACK}_${NETWORK}_${foxToken.contract}`
-
       const expected: ParseTx = {
         ...txMempool,
         address: address,
         send: {
-          [`${nativeToken}`]: {
+          [nativeToken]: {
             totalValue: '42673718176645189',
             components: [{ value: '42673718176645189' }],
           },
@@ -646,21 +636,6 @@ describe('parseTx', () => {
     it('should be able to parse add liquidity', async () => {
       const { tx } = uniAddLiquidity
       const address = '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C'
-      const foxToken = {
-        contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
-        decimals: 18,
-        name: 'FOX',
-        symbol: 'FOX',
-      }
-      const foxAssetId = `${COINSTACK}_${NETWORK}_${foxToken.contract}`
-
-      const uniV2Token = {
-        contract: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
-        decimals: 18,
-        name: 'Uniswap V2',
-        symbol: 'UNI-V2',
-      }
-      const uniV2AssetId = `${COINSTACK}_${NETWORK}_${uniV2Token.contract}`
 
       const expected: ParseTx = {
         ...tx,
@@ -670,7 +645,7 @@ describe('parseTx', () => {
           assetId: nativeToken,
         },
         send: {
-          [`${nativeToken}`]: {
+          [nativeToken]: {
             totalValue: '42673718176645189',
             components: [{ value: '42673718176645189' }],
           },
@@ -681,7 +656,7 @@ describe('parseTx', () => {
           },
         },
         receive: {
-          [uniV2AssetId]: {
+          [uniV2assetId]: {
             totalValue: '1888842410762840601',
             components: [{ value: '1888842410762840601' }],
             token: uniV2Token,
@@ -697,13 +672,6 @@ describe('parseTx', () => {
     it('should be able to parse remove liquidity mempool', async () => {
       const { txMempool } = uniRemoveLiquidity
       const address = '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C'
-      const uniV2Token = {
-        contract: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
-        decimals: 18,
-        name: 'Uniswap V2',
-        symbol: 'UNI-V2',
-      }
-      const uniV2assetId = `${COINSTACK}_${NETWORK}_${uniV2Token.contract}`
 
       const expected: ParseTx = {
         ...txMempool,
@@ -725,21 +693,6 @@ describe('parseTx', () => {
     it('should be able to parse remove liquidity', async () => {
       const { tx, internalTxs } = uniRemoveLiquidity
       const address = '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C'
-      const foxToken = {
-        contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
-        decimals: 18,
-        name: 'FOX',
-        symbol: 'FOX',
-      }
-      const foxAssetId = `${COINSTACK}_${NETWORK}_${foxToken.contract}`
-
-      const uniV2Token = {
-        contract: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
-        decimals: 18,
-        name: 'Uniswap V2',
-        symbol: 'UNI-V2',
-      }
-      const uniV2assetId = `${COINSTACK}_${NETWORK}_${uniV2Token.contract}`
 
       const expected: ParseTx = {
         ...tx,
@@ -756,7 +709,7 @@ describe('parseTx', () => {
           },
         },
         receive: {
-          [`${nativeToken}`]: {
+          [nativeToken]: {
             totalValue: '6761476182340434',
             components: [{ value: '6761476182340434' }],
           },
@@ -778,13 +731,7 @@ describe('parseTx', () => {
     it('should be able to parse claim', async () => {
       const { tx } = foxClaim
       const address = '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C'
-      const foxToken = {
-        contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
-        decimals: 18,
-        name: 'FOX',
-        symbol: 'FOX',
-      }
-      const foxAssetId = `${COINSTACK}_${NETWORK}_${foxToken.contract}`
+
       const expected: ParseTx = {
         ...tx,
         address: address,
@@ -827,13 +774,6 @@ describe('parseTx', () => {
     it('should be able to parse stake', async () => {
       const { tx } = foxStake
       const address = '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C'
-      const uniV2Token = {
-        contract: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
-        decimals: 18,
-        name: 'Uniswap V2',
-        symbol: 'UNI-V2',
-      }
-      const uniV2assetId = `${COINSTACK}_${NETWORK}_${uniV2Token.contract}`
       const expected: ParseTx = {
         ...tx,
         address: address,
@@ -875,22 +815,6 @@ describe('parseTx', () => {
     it('should be able to parse exit', async () => {
       const { tx } = foxExit
       const address = '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C'
-      const foxToken = {
-        contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
-        decimals: 18,
-        name: 'FOX',
-        symbol: 'FOX',
-      }
-      const foxAssetId = `${COINSTACK}_${NETWORK}_${foxToken.contract}`
-
-      const uniV2Token = {
-        contract: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
-        decimals: 18,
-        name: 'Uniswap V2',
-        symbol: 'UNI-V2',
-      }
-      const uniV2assetId = `${COINSTACK}_${NETWORK}_${uniV2Token.contract}`
-
       const expected: ParseTx = {
         ...tx,
         address: address,
