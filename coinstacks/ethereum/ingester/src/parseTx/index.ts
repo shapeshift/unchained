@@ -61,24 +61,24 @@ export const parseTx = async (tx: Tx, address: string, internalTxs?: Array<Inter
   }
 
   if (address === sendAddress) {
-    // eth send amount
+    // send amount
     const sendValue = new BigNumber(tx.value)
     if (!sendValue.isNaN() && sendValue.gt(0)) {
-      pTx.send['ETH'] = aggregateTransfer(pTx.send['ETH'], tx.value)
+      pTx.send['ETH'] = aggregateTransfer(pTx.send['ETH'], sendValue.toString(10))
     }
 
-    // eth network fee
+    // network fee
     const fees = new BigNumber(tx.fees ?? 0)
-    if (tx.fees && !fees.isNaN() && fees.gt(0)) {
-      pTx.fee = { symbol: 'ETH', value: tx.fees }
+    if (!fees.isNaN() && fees.gt(0)) {
+      pTx.fee = { symbol: 'ETH', value: fees.toString(10) }
     }
   }
 
   if (address === receiveAddress) {
-    // eth receive amount
+    // receive amount
     const receiveValue = new BigNumber(tx.value)
     if (!receiveValue.isNaN() && receiveValue.gt(0)) {
-      pTx.receive['ETH'] = aggregateTransfer(pTx.receive['ETH'], tx.value)
+      pTx.receive['ETH'] = aggregateTransfer(pTx.receive['ETH'], receiveValue.toString(10))
     }
   }
 
