@@ -18,7 +18,7 @@ jest.mock('@shapeshiftoss/common-ingester', () => ({
 
 jest.mock('@shapeshiftoss/common-mongo', () => ({
   RegistryService: jest.fn().mockImplementation(() => ({
-    getByAddress: (address: string) => Object.values(db).find((v) => address === v.registration.pubkey), //promise
+    getByAddress: (address: string) => Object.values(db).filter((v) => address === v.registration.pubkey), //promise
     updateBlock: jest.fn(),
     updateSyncing: jest.fn(),
   })),
