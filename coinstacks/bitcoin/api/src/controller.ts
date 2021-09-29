@@ -1,5 +1,5 @@
 import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
-import { Address, Blockbook, Xpub, Utxo } from '@shapeshiftoss/blockbook'
+import { Address, Blockbook, Xpub } from '@shapeshiftoss/blockbook'
 import {
   ApiError,
   BadRequestError,
@@ -10,7 +10,7 @@ import {
   TxHistory,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { BitcoinAPI, BitcoinAccount, BitcoinTxSpecific } from './models'
+import { BitcoinAPI, BitcoinAccount, BitcoinTxSpecific, Utxo } from './models'
 
 const INDEXER_URL = process.env.INDEXER_URL
 
@@ -254,8 +254,6 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
       ],
       vout: [
         {
-          addresses: ['123'],
-          isAddress: true,
           value: '0.00002',
           n: 0,
           scriptPubKey: {
@@ -267,8 +265,6 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
           },
         },
         {
-          addresses: ['123'],
-          isAddress: true,
           value: '0.00090118',
           n: 1,
           scriptPubKey: {

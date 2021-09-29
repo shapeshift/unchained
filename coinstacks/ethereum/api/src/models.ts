@@ -22,6 +22,34 @@ export interface EthereumAccount extends Account {
 }
 
 /**
+ * Contains ethereum specific transaction info as returned from the node
+ */
+export interface EthereumTxSpecific {
+  tx: {
+    nonce: string
+    gasPrice: string
+    gas: string
+    to: string
+    value: string
+    input: string
+    hash: string
+    blockNumber: string
+    blockHash?: string
+    from: string
+    transactionIndex: string
+  }
+  receipt?: {
+    gasUsed: string
+    status: string
+    logs: Array<{
+      address: string
+      topics: Array<string>
+      data: string
+    }>
+  }
+}
+
+/**
  * EthereumAPI coin specific implementation
  */
 export interface EthereumAPI {

@@ -2,25 +2,6 @@
 import { Account } from '../../../common/api/src'
 
 /**
- * Contains info about a transactions ScriptSig
- */
-export type ScriptSig = {
-  asm: string
-  hex: string
-}
-
-/**
- * Contains info about a transactions ScriptPubKey
- */
-export type ScriptPubKey = {
-  asm: string
-  hex: string
-  reqSigs: number
-  type: string
-  addresses: string[]
-}
-
-/**
  * Contains Bitcoin specific transaction info as returned from the node
  */
 export interface BitcoinTxSpecific {
@@ -35,32 +16,16 @@ export interface BitcoinTxSpecific {
     txid?: string
     vout?: number
     sequence?: number
-    n: number
-    addresses?: Array<string>
-    isAddress?: boolean
-    value?: string
     coinbase?: string
     scriptSig?: {
       asm: string
       hex: string
-      reqSigs: number
-      type: string
-      addresses: string[]
     }
     txinwitness?: string
   }>
   vout: Array<{
     value?: string | number
     n?: number
-    spent?: boolean
-    spentTxId?: string
-    spentIndex?: number
-    spentHeight?: number
-    hex?: string
-    asm?: string
-    addresses?: Array<string> | null // null value for contract creation transaction
-    isAddress?: boolean
-    type?: string
     scriptPubKey?: {
       asm: string
       hex: string
@@ -74,41 +39,6 @@ export interface BitcoinTxSpecific {
   confirmations: number
   time: number
   blocktime: number
-}
-
-/**
- * Contains info about a transactions inputs
- */
-export type Vin = {
-  txid?: string
-  vout?: number
-  sequence?: number
-  n?: number
-  addresses?: Array<string>
-  isAddress?: boolean
-  value?: string
-  hex?: string
-  asm?: string
-  coinbase?: string
-  scriptSig?: ScriptSig
-}
-
-/**
- * Contains info about a transactions outputs
- */
-export type Vout = {
-  value?: string
-  n: number
-  spent?: boolean
-  spentTxId?: string
-  spentIndex?: number
-  spentHeight?: number
-  hex?: string
-  asm?: string
-  addresses: Array<string> | null
-  isAddress: boolean
-  type?: string
-  scriptPubKey?: ScriptPubKey
 }
 
 /**
