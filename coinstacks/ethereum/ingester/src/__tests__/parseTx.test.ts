@@ -23,7 +23,7 @@ jest.mock('@shapeshiftoss/thorchain')
 
 const COINSTACK = 'ethereum'
 const NETWORK = 'MAINNET'
-const nativeToken = `${COINSTACK}_${NETWORK}`
+const nativeAssetId = `${COINSTACK}_${NETWORK}`
 
 const uniV2Token = {
   contract: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
@@ -60,7 +60,7 @@ describe('parseTx', () => {
         address: address,
         send: {},
         receive: {
-          [nativeToken]: {
+          [nativeAssetId]: {
             totalValue: '1201235000000000000',
             components: [{ value: '1201235000000000000' }],
           },
@@ -92,11 +92,11 @@ describe('parseTx', () => {
         ...tx,
         address: address,
         fee: {
-          assetId: nativeToken,
+          assetId: nativeAssetId,
           value: '1700235000000000',
         },
         send: {
-          [nativeToken]: {
+          [nativeAssetId]: {
             totalValue: '295040000000000000',
             components: [{ value: '295040000000000000' }],
           },
@@ -128,7 +128,7 @@ describe('parseTx', () => {
         ...tx,
         address: address,
         fee: {
-          assetId: nativeToken,
+          assetId: nativeAssetId,
           value: '4700280000000000',
         },
         send: {
@@ -170,7 +170,7 @@ describe('parseTx', () => {
         address: address,
         send: {},
         receive: {
-          [nativeToken]: {
+          [nativeAssetId]: {
             totalValue: '1579727090000000000',
             components: [{ value: '1579727090000000000' }],
           },
@@ -242,7 +242,7 @@ describe('parseTx', () => {
         address: address,
         send: {},
         receive: {
-          [nativeToken]: {
+          [nativeAssetId]: {
             totalValue: '6412730000000000',
             components: [{ value: '6412730000000000' }],
           },
@@ -283,7 +283,7 @@ describe('parseTx', () => {
         address: address,
         fee: {
           value: '8308480000000000',
-          assetId: nativeToken,
+          assetId: nativeAssetId,
         },
         send: {
           [tribeAssetId]: {
@@ -293,7 +293,7 @@ describe('parseTx', () => {
           },
         },
         receive: {
-          [nativeToken]: {
+          [nativeAssetId]: {
             totalValue: '541566754246167133',
             components: [{ value: '541566754246167133' }],
           },
@@ -331,10 +331,10 @@ describe('parseTx', () => {
         address: address,
         fee: {
           value: '19815285000000000',
-          assetId: nativeToken,
+          assetId: nativeAssetId,
         },
         send: {
-          [nativeToken]: {
+          [nativeAssetId]: {
             totalValue: '10000000000000000000',
             components: [{ value: '10000000000000000000' }],
           },
@@ -387,7 +387,7 @@ describe('parseTx', () => {
         address: address,
         fee: {
           value: '78183644000000000',
-          assetId: nativeToken,
+          assetId: nativeAssetId,
         },
         send: {
           [usdtAssetId]: {
@@ -443,7 +443,7 @@ describe('parseTx', () => {
         address: address,
         fee: {
           value: '18399681000000000',
-          assetId: nativeToken,
+          assetId: nativeAssetId,
         },
         send: {
           [bondAssetId]: {
@@ -477,13 +477,13 @@ describe('parseTx', () => {
         ...txMempool,
         address: address,
         send: {
-          [nativeToken]: {
+          [nativeAssetId]: {
             totalValue: '503100000000000',
             components: [{ value: '503100000000000' }],
           },
         },
         receive: {
-          [nativeToken]: {
+          [nativeAssetId]: {
             totalValue: '503100000000000',
             components: [{ value: '503100000000000' }],
           },
@@ -504,16 +504,16 @@ describe('parseTx', () => {
         address: address,
         fee: {
           value: '399000000000000',
-          assetId: nativeToken,
+          assetId: nativeAssetId,
         },
         send: {
-          [nativeToken]: {
+          [nativeAssetId]: {
             totalValue: '503100000000000',
             components: [{ value: '503100000000000' }],
           },
         },
         receive: {
-          [nativeToken]: {
+          [nativeAssetId]: {
             totalValue: '503100000000000',
             components: [{ value: '503100000000000' }],
           },
@@ -562,7 +562,7 @@ describe('parseTx', () => {
         address: address,
         fee: {
           value: '1011738000000000',
-          assetId: nativeToken,
+          assetId: nativeAssetId,
         },
         send: {
           [usdcAssetId]: {
@@ -596,7 +596,7 @@ describe('parseTx', () => {
         address: address,
         fee: {
           value: '1447243200000000',
-          assetId: nativeToken,
+          assetId: nativeAssetId,
         },
         send: {},
         receive: {},
@@ -615,7 +615,7 @@ describe('parseTx', () => {
         ...txMempool,
         address: address,
         send: {
-          [nativeToken]: {
+          [nativeAssetId]: {
             totalValue: '42673718176645189',
             components: [{ value: '42673718176645189' }],
           },
@@ -642,10 +642,10 @@ describe('parseTx', () => {
         address: address,
         fee: {
           value: '26926494400000000',
-          assetId: nativeToken,
+          assetId: nativeAssetId,
         },
         send: {
-          [nativeToken]: {
+          [nativeAssetId]: {
             totalValue: '42673718176645189',
             components: [{ value: '42673718176645189' }],
           },
@@ -699,7 +699,7 @@ describe('parseTx', () => {
         address: address,
         fee: {
           value: '4082585000000000',
-          assetId: nativeToken,
+          assetId: nativeAssetId,
         },
         send: {
           [uniV2assetId]: {
@@ -709,7 +709,7 @@ describe('parseTx', () => {
           },
         },
         receive: {
-          [nativeToken]: {
+          [nativeAssetId]: {
             totalValue: '6761476182340434',
             components: [{ value: '6761476182340434' }],
           },
@@ -737,7 +737,7 @@ describe('parseTx', () => {
         address: address,
         fee: {
           value: '2559843000000000',
-          assetId: nativeToken,
+          assetId: nativeAssetId,
         },
         send: {},
         receive: {
@@ -779,7 +779,7 @@ describe('parseTx', () => {
         address: address,
         fee: {
           value: '4650509500000000',
-          assetId: nativeToken,
+          assetId: nativeAssetId,
         },
         send: {
           [uniV2assetId]: {
@@ -820,7 +820,7 @@ describe('parseTx', () => {
         address: address,
         fee: {
           value: '6136186875000000',
-          assetId: nativeToken,
+          assetId: nativeAssetId,
         },
         send: {},
         receive: {

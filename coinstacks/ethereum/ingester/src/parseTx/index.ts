@@ -20,7 +20,7 @@ if (NODE_ENV !== 'test') {
   NETWORK = 'MAINNET'
 }
 
-const nativeToken = `${COINSTACK}_${NETWORK}`
+const nativeAssetId = `${COINSTACK}_${NETWORK}`
 
 export const getInternalAddress = (inputData: string): string | undefined => {
   switch (getSigHash(inputData)) {
@@ -78,13 +78,13 @@ export const parseTx = async (tx: Tx, address: string, internalTxs?: Array<Inter
     // eth send amount
     const sendValue = new BigNumber(tx.value)
     if (!sendValue.isNaN() && sendValue.gt(0)) {
-      pTx.send[nativeToken] = aggregateTransfer(pTx.send[nativeToken], tx.value)
+      pTx.send[nativeAssetId] = aggregateTransfer(pTx.send[nativeAssetId], tx.value)
     }
 
     // eth network fee
     const fees = new BigNumber(tx.fees ?? 0)
     if (tx.fees && !fees.isNaN() && fees.gt(0)) {
-      pTx.fee = { assetId: nativeToken, value: tx.fees }
+      pTx.fee = { assetId: nativeAssetId, value: tx.fees }
     }
   }
 
@@ -92,7 +92,7 @@ export const parseTx = async (tx: Tx, address: string, internalTxs?: Array<Inter
     // eth receive amount
     const receiveValue = new BigNumber(tx.value)
     if (!receiveValue.isNaN() && receiveValue.gt(0)) {
-      pTx.receive[nativeToken] = aggregateTransfer(pTx.receive[nativeToken], tx.value)
+      pTx.receive[nativeAssetId] = aggregateTransfer(pTx.receive[nativeAssetId], tx.value)
     }
   }
 
@@ -126,12 +126,12 @@ export const parseTx = async (tx: Tx, address: string, internalTxs?: Array<Inter
   internalTxs?.forEach((internalTx) => {
     // internal eth send
     if (address === internalTx.from) {
-      pTx.send[nativeToken] = aggregateTransfer(pTx.send[nativeToken], internalTx.value)
+      pTx.send[nativeAssetId] = aggregateTransfer(pTx.send[nativeAssetId], internalTx.value)
     }
 
     // internal eth receive
     if (address === internalTx.to) {
-      pTx.receive[nativeToken] = aggregateTransfer(pTx.receive[nativeToken], internalTx.value)
+      pTx.receive[nativeAssetId] = aggregateTransfer(pTx.receive[nativeAssetId], internalTx.value)
     }
   })
 
