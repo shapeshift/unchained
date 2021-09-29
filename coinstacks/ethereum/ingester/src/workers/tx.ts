@@ -56,7 +56,7 @@ const getAddresses = (tx: Tx): Array<string> => {
     internalAddress && addresses.push(internalAddress)
   }
 
-  // normalize addresses to checksum format which matches backend
+  // normalize addresses to checksum format which matches backend and remove duplicates
   return [...new Set(addresses.map((address) => utils.getAddress(address)))]
 }
 

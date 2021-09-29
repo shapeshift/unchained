@@ -17,7 +17,7 @@ export interface TxsTopicData {
   blockNumber?: number
 }
 
-export interface WebsocketError {
+export interface ErrorResponse {
   type: 'error'
   message: string
 }
@@ -40,7 +40,7 @@ export interface RequestPayload {
   data: TxsTopicData
 }
 
-export class WebSocketConnectionHandler {
+export class ConnectionHandler {
   public readonly id: string
   private readonly rabbit: Connection
   private readonly websocket: WebSocket
@@ -67,7 +67,7 @@ export class WebSocketConnectionHandler {
   }
 
   private sendError(message: string): void {
-    const error: WebsocketError = { type: 'error', message }
+    const error: ErrorResponse = { type: 'error', message }
     this.websocket.send(JSON.stringify(error))
   }
 
