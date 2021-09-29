@@ -1,6 +1,5 @@
 import axios, { AxiosInstance } from 'axios'
 import { Controller, Example, Get, Path, Query, Route, Tags } from 'tsoa'
-import { BitcoinTxSpecific } from '.'
 import {
   Address,
   ApiError,
@@ -8,6 +7,7 @@ import {
   Block,
   BlockIndex,
   EthereumTxSpecific,
+  BitcoinTxSpecific,
   Info,
   SendTx,
   Tx,
