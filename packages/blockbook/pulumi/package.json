@@ -7,5 +7,9 @@
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist node_modules"
+  },
+  "dependencies": {
+    "@types/folder-hash": "^4.0.0",
+    "folder-hash": "^4.0.0"
   }
 }

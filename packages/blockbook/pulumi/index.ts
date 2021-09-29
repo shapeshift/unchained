@@ -1,3 +1,4 @@
+import { hashElement } from 'folder-hash'
 import { readFileSync } from 'fs'
 import * as k8s from '@pulumi/kubernetes'
 import { Config } from '@shapeshiftoss/common-pulumi'
@@ -104,6 +105,8 @@ export async function deployIndexer(
     { provider }
   )
 
+  const { hash: tag } = await hashElement(`../../../packages/blockbook/Dockerfile`, { encoding: 'hex' })
+
   const podSpec: k8s.types.input.core.v1.PodTemplateSpec = {
     metadata: {
       namespace: namespace,
@@ -114,8 +117,8 @@ export async function deployIndexer(
         {
           name: name,
           image: config.dockerhub
-            ? `${config.dockerhub.server}/${config.dockerhub.username}/unchained-blockbook:latest`
-            : 'docker.io/shapeshiftdao/unchained-blockbook:latest',
+            ? `${config.dockerhub.server}/${config.dockerhub.username}/unchained-blockbook:${tag}`
+            : `docker.io/shapeshiftdao/unchained-blockbook:${tag}`,
           ...(config.isLocal && { imagePullPolicy: 'Never' }),
           ports: [{ containerPort: 8001, name: 'public' }],
           command: [
@@ -148,7 +151,7 @@ export async function deployIndexer(
         },
         {
           name: `${name}-monitor`,
-          image: 'shapeshiftdao/unchained-probe:latest',
+          image: 'shapeshiftdao/unchained-probe:1.0.0',
           readinessProbe: {
             exec: {
               command: ['/readiness.sh'],
@@ -209,7 +212,7 @@ export async function deployIndexer(
               },
               {
                 name: `${asset}-daemon-monitor`,
-                image: 'shapeshiftdao/unchained-probe:latest',
+                image: 'shapeshiftdao/unchained-probe:1.0.0',
                 env: [{ name: 'NODE', value: config.indexer.daemon.node }],
                 readinessProbe: {
                   exec: {
