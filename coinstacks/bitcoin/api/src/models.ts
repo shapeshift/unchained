@@ -21,6 +21,62 @@ export type ScriptPubKey = {
 }
 
 /**
+ * Contains Bitcoin specific transaction info as returned from the node
+ */
+export interface BitcoinTxSpecific {
+  txid: string
+  hash: string
+  version: number
+  size: number
+  vsize: number
+  weight: number
+  locktime: number
+  vin: Array<{
+    txid?: string
+    vout?: number
+    sequence?: number
+    n: number
+    addresses?: Array<string>
+    isAddress?: boolean
+    value?: string
+    coinbase?: string
+    scriptSig?: {
+      asm: string
+      hex: string
+      reqSigs: number
+      type: string
+      addresses: string[]
+    }
+    txinwitness?: string
+  }>
+  vout: Array<{
+    value?: string | number
+    n?: number
+    spent?: boolean
+    spentTxId?: string
+    spentIndex?: number
+    spentHeight?: number
+    hex?: string
+    asm?: string
+    addresses?: Array<string> | null // null value for contract creation transaction
+    isAddress?: boolean
+    type?: string
+    scriptPubKey?: {
+      asm: string
+      hex: string
+      reqSigs: number
+      type: string
+      addresses: string[]
+    }
+  }>
+  hex: string
+  blockhash: string
+  confirmations: number
+  time: number
+  blocktime: number
+}
+
+/**
  * Contains info about a transactions inputs
  */
 export type Vin = {
@@ -53,26 +109,6 @@ export type Vout = {
   isAddress: boolean
   type?: string
   scriptPubKey?: ScriptPubKey
-}
-
-/**
- * Contains detailed info about a Bitcoin transaction
- */
-export type BitcoinTxSpecific = {
-  txid: string
-  hash?: string
-  version?: number
-  size?: number
-  vsize?: number
-  weight?: number
-  locktime?: number
-  vin: Array<Vin>
-  vout: Array<Vout>
-  hex?: string
-  blockhash?: string
-  confirmations: number
-  time?: number
-  blocktime?: number
 }
 
 /**
