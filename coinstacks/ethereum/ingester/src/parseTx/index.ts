@@ -8,6 +8,12 @@ import * as thor from './thor'
 import * as multiSig from './multiSig'
 import * as uniV2 from './uniV2'
 
+// todo - these should be global configs
+const chain = 'ethereum'
+const network = 'MAINNET'
+const tokenId = ''
+const nativeToken = `${chain}_${network}_${tokenId}`
+
 export const getInternalAddress = (inputData: string): string | undefined => {
   switch (getSigHash(inputData)) {
     case thor.TRANSFEROUT_SIG_HASH:
@@ -64,13 +70,13 @@ export const parseTx = async (tx: Tx, address: string, internalTxs?: Array<Inter
     // eth send amount
     const sendValue = new BigNumber(tx.value)
     if (!sendValue.isNaN() && sendValue.gt(0)) {
-      pTx.send['ETH'] = aggregateTransfer(pTx.send['ETH'], tx.value)
+      pTx.send[nativeToken] = aggregateTransfer(pTx.send[nativeToken], tx.value)
     }
 
     // eth network fee
     const fees = new BigNumber(tx.fees ?? 0)
     if (tx.fees && !fees.isNaN() && fees.gt(0)) {
-      pTx.fee = { symbol: 'ETH', value: tx.fees }
+      pTx.fee = { asset: nativeToken, value: tx.fees }
     }
   }
 
@@ -78,11 +84,13 @@ export const parseTx = async (tx: Tx, address: string, internalTxs?: Array<Inter
     // eth receive amount
     const receiveValue = new BigNumber(tx.value)
     if (!receiveValue.isNaN() && receiveValue.gt(0)) {
-      pTx.receive['ETH'] = aggregateTransfer(pTx.receive['ETH'], tx.value)
+      pTx.receive[nativeToken] = aggregateTransfer(pTx.receive[nativeToken], tx.value)
     }
   }
 
-  tx.tokenTransfers?.forEach((transfer) => {
+  tx.tokenTransfers?.forEach((transfer: TxTransfer) => {
+    const assetId = `${chain}.${network}.${transfer.token}`
+
     // FTX Token (FTT) name and symbol was set backwards on the ERC20 contract
     if (transfer.token == '0x50D1c9771902476076eCFc8B2A83Ad6b9355a4c9') {
       transfer.name = transfer.symbol
@@ -93,28 +101,29 @@ export const parseTx = async (tx: Tx, address: string, internalTxs?: Array<Inter
       contract: transfer.token,
       decimals: transfer.decimals,
       name: transfer.name,
+      symbol: transfer.symbol,
     }
 
     // token send amount
     if (address === transfer.from) {
-      pTx.send[transfer.symbol] = aggregateTransfer(pTx.send[transfer.symbol], transfer.value, token)
+      pTx.send[assetId] = aggregateTransfer(pTx.send[assetId], transfer.value, token)
     }
 
     // token receive amount
     if (address === transfer.to) {
-      pTx.receive[transfer.symbol] = aggregateTransfer(pTx.receive[transfer.symbol], transfer.value, token)
+      pTx.receive[assetId] = aggregateTransfer(pTx.receive[assetId], transfer.value, token)
     }
   })
 
   internalTxs?.forEach((internalTx) => {
     // internal eth send
     if (address === internalTx.from) {
-      pTx.send['ETH'] = aggregateTransfer(pTx.send['ETH'], internalTx.value)
+      pTx.send[nativeToken] = aggregateTransfer(pTx.send[nativeToken], internalTx.value)
     }
 
     // internal eth receive
     if (address === internalTx.to) {
-      pTx.receive['ETH'] = aggregateTransfer(pTx.receive['ETH'], internalTx.value)
+      pTx.receive[nativeToken] = aggregateTransfer(pTx.receive[nativeToken], internalTx.value)
     }
   })
 

@@ -11,7 +11,7 @@ if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 const blockbook = new Blockbook(INDEXER_URL)
 
 const onMessage = (worker: Worker) => async (message: Message) => {
-  const { address, txid, internalTxs, document }: ETHSyncTx = message.getContent()
+  const { address, txid, internalTxs, document }: ETHSyncTx = message.getContent() // todo - fix
   const retryKey = `${address}:${txid}`
 
   try {
@@ -20,6 +20,7 @@ const onMessage = (worker: Worker) => async (message: Message) => {
 
     const pTx = await parseTx(tx, address, internalTxs)
     logger.info(`publishing tx: ${txid} for registered address: ${address} to client: ${document.client_id}`)
+    console.log(JSON.stringify(pTx, null, '\t'))
 
     worker.sendMessage(new Message({ ...pTx, document } as ETHParseTx), document.client_id)
     worker.ackMessage(message, retryKey)

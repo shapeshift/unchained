@@ -95,6 +95,7 @@ export interface Token {
   contract: string
   decimals: number
   name: string
+  symbol: string
 }
 
 // Contains data about a dex trade
