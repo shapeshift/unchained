@@ -7,9 +7,16 @@ import { getSigHash } from './utils'
 
 const NODE_ENV = process.env.NODE_ENV
 const RPC_URL = process.env.RPC_URL as string
+let COINSTACK = process.env.COINSTACK
+let NETWORK = process.env.NETWORK
 
 if (NODE_ENV !== 'test') {
   if (!RPC_URL) throw new Error('RPC_URL env var not set')
+  if (!COINSTACK) throw new Error('COINSTACK env var not set')
+  if (!NETWORK) throw new Error('NETWORK env var not set')
+} else {
+  COINSTACK = 'ethereum'
+  NETWORK = 'MAINNET'
 }
 
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
@@ -43,9 +50,10 @@ export const parse = async (tx: Tx): Promise<ParseTxUnique | undefined> => {
       const name = await contract.name()
       const symbol = await contract.symbol()
       const value = result.amountTokenDesired.toString()
+      const assetId = `${COINSTACK}_${NETWORK}_${tokenAddress}`
 
       const send: TxTransfers = {
-        [symbol]: {
+        [assetId]: {
           totalValue: value,
           components: [{ value }],
           token: { contract: tokenAddress, decimals, name, symbol },
@@ -64,9 +72,10 @@ export const parse = async (tx: Tx): Promise<ParseTxUnique | undefined> => {
       const name = await contract.name()
       const symbol = await contract.symbol()
       const value = result.liquidity.toString()
+      const assetId = `${COINSTACK}_${NETWORK}_${lpTokenAddress}`
 
       const send: TxTransfers = {
-        [symbol]: {
+        [assetId]: {
           totalValue: value,
           components: [{ value }],
           token: { contract: lpTokenAddress, decimals, name, symbol },

@@ -21,6 +21,10 @@ import foxExit from './__mocks__/foxExit'
 
 jest.mock('@shapeshiftoss/thorchain')
 
+const COINSTACK = 'ethereum'
+const NETWORK = 'MAINNET'
+const nativeToken = `${COINSTACK}_${NETWORK}`
+
 describe('parseTx', () => {
   describe('multiSig', () => {
     it('should be able to parse eth multi sig send', async () => {
@@ -32,7 +36,7 @@ describe('parseTx', () => {
         address: address,
         send: {},
         receive: {
-          ETH: {
+          [nativeToken]: {
             totalValue: '1201235000000000000',
             components: [{ value: '1201235000000000000' }],
           },
@@ -64,11 +68,11 @@ describe('parseTx', () => {
         ...tx,
         address: address,
         fee: {
-          symbol: 'ETH',
+          assetId: nativeToken,
           value: '1700235000000000',
         },
         send: {
-          ETH: {
+          [`${nativeToken}`]: {
             totalValue: '295040000000000000',
             components: [{ value: '295040000000000000' }],
           },
@@ -99,17 +103,18 @@ describe('parseTx', () => {
         contract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         decimals: 6,
         name: 'USD Coin',
+        symbol: 'USDC',
       }
-
+      const usdcAssetId = `${COINSTACK}_${NETWORK}_${usdcToken.contract}`
       const expected: ParseTx = {
         ...tx,
         address: address,
         fee: {
-          symbol: 'ETH',
+          assetId: nativeToken,
           value: '4700280000000000',
         },
         send: {
-          USDC: {
+          [usdcAssetId]: {
             totalValue: '16598881497',
             components: [{ value: '16598881497' }],
             token: usdcToken,
@@ -147,7 +152,7 @@ describe('parseTx', () => {
         address: address,
         send: {},
         receive: {
-          ETH: {
+          [`${nativeToken}`]: {
             totalValue: '1579727090000000000',
             components: [{ value: '1579727090000000000' }],
           },
@@ -181,14 +186,15 @@ describe('parseTx', () => {
         contract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         decimals: 6,
         name: 'USD Coin',
+        symbol: 'USDC',
       }
-
+      const usdcAssetId = `${COINSTACK}_${NETWORK}_${usdcToken.contract}`
       const expected: ParseTx = {
         ...tx,
         address: address,
         send: {},
         receive: {
-          USDC: {
+          [usdcAssetId]: {
             totalValue: '47596471640',
             components: [{ value: '47596471640' }],
             token: usdcToken,
@@ -224,7 +230,7 @@ describe('parseTx', () => {
         address: address,
         send: {},
         receive: {
-          ETH: {
+          [`${nativeToken}`]: {
             totalValue: '6412730000000000',
             components: [{ value: '6412730000000000' }],
           },
@@ -255,24 +261,27 @@ describe('parseTx', () => {
         contract: '0xc7283b66Eb1EB5FB86327f08e1B5816b0720212B',
         decimals: 18,
         name: 'Tribe',
+        symbol: 'TRIBE',
       }
+
+      const assetId = `${COINSTACK}_${NETWORK}_${tribeToken.contract}`
 
       const expected: ParseTx = {
         ...tx,
         address: address,
         fee: {
           value: '8308480000000000',
-          symbol: 'ETH',
+          assetId: nativeToken,
         },
         send: {
-          TRIBE: {
+          [assetId]: {
             totalValue: '1000000000000000000000',
             components: [{ value: '1000000000000000000000' }],
             token: tribeToken,
           },
         },
         receive: {
-          ETH: {
+          [`${nativeToken}`]: {
             totalValue: '541566754246167133',
             components: [{ value: '541566754246167133' }],
           },
@@ -301,23 +310,25 @@ describe('parseTx', () => {
         contract: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0',
         decimals: 18,
         name: 'Matic Token',
+        symbol: 'MATIC',
       }
 
+      const assetId = `${COINSTACK}_${NETWORK}_${maticToken.contract}`
       const expected: ParseTx = {
         ...tx,
         address: address,
         fee: {
           value: '19815285000000000',
-          symbol: 'ETH',
+          assetId: nativeToken,
         },
         send: {
-          ETH: {
+          [`${nativeToken}`]: {
             totalValue: '10000000000000000000',
             components: [{ value: '10000000000000000000' }],
           },
         },
         receive: {
-          MATIC: {
+          [assetId]: {
             totalValue: '50000000000000000000000',
             components: [{ value: '50000000000000000000000' }],
             token: maticToken,
@@ -347,29 +358,34 @@ describe('parseTx', () => {
         contract: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
         decimals: 6,
         name: 'Tether USD',
+        symbol: 'USDT',
       }
+      const usdtAssetId = `${COINSTACK}_${NETWORK}_${usdtToken.contract}`
+
       const kishuToken = {
         contract: '0xA2b4C0Af19cC16a6CfAcCe81F192B024d625817D',
         decimals: 9,
         name: 'Kishu Inu',
+        symbol: 'KISHU',
       }
+      const kishuAssetId = `${COINSTACK}_${NETWORK}_${kishuToken.contract}`
 
       const expected: ParseTx = {
         ...tx,
         address: address,
         fee: {
           value: '78183644000000000',
-          symbol: 'ETH',
+          assetId: nativeToken,
         },
         send: {
-          USDT: {
+          [usdtAssetId]: {
             totalValue: '45000000000',
             components: [{ value: '45000000000' }],
             token: usdtToken,
           },
         },
         receive: {
-          KISHU: {
+          [kishuAssetId]: {
             totalValue: '9248567698016204727450',
             components: [{ value: '9248567698016204727450' }],
             token: kishuToken,
@@ -399,29 +415,33 @@ describe('parseTx', () => {
         contract: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
         decimals: 18,
         name: 'Uniswap',
+        symbol: 'UNI',
       }
+      const uniAssetId = `${COINSTACK}_${NETWORK}_${uniToken.contract}`
       const bondToken = {
         contract: '0x0391D2021f89DC339F60Fff84546EA23E337750f',
         decimals: 18,
         name: 'BarnBridge Governance Token',
+        symbol: 'BOND',
       }
+      const bondAssetId = `${COINSTACK}_${NETWORK}_${bondToken.contract}`
 
       const expected: ParseTx = {
         ...tx,
         address: address,
         fee: {
           value: '18399681000000000',
-          symbol: 'ETH',
+          assetId: nativeToken,
         },
         send: {
-          BOND: {
+          [bondAssetId]: {
             totalValue: '100000000000000000000',
             components: [{ value: '53910224825217010944' }, { value: '46089775174782989056' }],
             token: bondToken,
           },
         },
         receive: {
-          UNI: {
+          [uniAssetId]: {
             totalValue: '104088257588936074249',
             components: [{ value: '56639587020747520629' }, { value: '47448670568188553620' }],
             token: uniToken,
@@ -445,13 +465,13 @@ describe('parseTx', () => {
         ...txMempool,
         address: address,
         send: {
-          ETH: {
+          [`${nativeToken}`]: {
             totalValue: '503100000000000',
             components: [{ value: '503100000000000' }],
           },
         },
         receive: {
-          ETH: {
+          [`${nativeToken}`]: {
             totalValue: '503100000000000',
             components: [{ value: '503100000000000' }],
           },
@@ -472,16 +492,16 @@ describe('parseTx', () => {
         address: address,
         fee: {
           value: '399000000000000',
-          symbol: 'ETH',
+          assetId: nativeToken,
         },
         send: {
-          ETH: {
+          [`${nativeToken}`]: {
             totalValue: '503100000000000',
             components: [{ value: '503100000000000' }],
           },
         },
         receive: {
-          ETH: {
+          [`${nativeToken}`]: {
             totalValue: '503100000000000',
             components: [{ value: '503100000000000' }],
           },
@@ -500,20 +520,22 @@ describe('parseTx', () => {
         contract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         decimals: 6,
         name: 'USD Coin',
+        symbol: 'USDC',
       }
+      const usdcAssetId = `${COINSTACK}_${NETWORK}_${usdcToken.contract}`
 
       const expected: ParseTx = {
         ...txMempool,
         address: address,
         send: {
-          USDC: {
+          [usdcAssetId]: {
             totalValue: '1502080',
             components: [{ value: '1502080' }],
             token: usdcToken,
           },
         },
         receive: {
-          USDC: {
+          [usdcAssetId]: {
             totalValue: '1502080',
             components: [{ value: '1502080' }],
             token: usdcToken,
@@ -533,24 +555,26 @@ describe('parseTx', () => {
         contract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         decimals: 6,
         name: 'USD Coin',
+        symbol: 'USDC',
       }
+      const usdcAssetId = `${COINSTACK}_${NETWORK}_${usdcToken.contract}`
 
       const expected: ParseTx = {
         ...tx,
         address: address,
         fee: {
           value: '1011738000000000',
-          symbol: 'ETH',
+          assetId: nativeToken,
         },
         send: {
-          USDC: {
+          [usdcAssetId]: {
             totalValue: '1502080',
             components: [{ value: '1502080' }],
             token: usdcToken,
           },
         },
         receive: {
-          USDC: {
+          [usdcAssetId]: {
             totalValue: '1502080',
             components: [{ value: '1502080' }],
             token: usdcToken,
@@ -574,7 +598,7 @@ describe('parseTx', () => {
         address: address,
         fee: {
           value: '1447243200000000',
-          symbol: 'ETH',
+          assetId: nativeToken,
         },
         send: {},
         receive: {},
@@ -589,22 +613,26 @@ describe('parseTx', () => {
       const { txMempool } = uniAddLiquidity
       const address = '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C'
 
+      const foxToken = {
+        contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
+        decimals: 18,
+        name: 'FOX',
+        symbol: 'FOX',
+      }
+      const foxAssetId = `${COINSTACK}_${NETWORK}_${foxToken.contract}`
+
       const expected: ParseTx = {
         ...txMempool,
         address: address,
         send: {
-          ETH: {
+          [`${nativeToken}`]: {
             totalValue: '42673718176645189',
             components: [{ value: '42673718176645189' }],
           },
-          FOX: {
+          [foxAssetId]: {
             totalValue: '100000000000000000000',
             components: [{ value: '100000000000000000000' }],
-            token: {
-              contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
-              decimals: 18,
-              name: 'FOX',
-            },
+            token: foxToken,
           },
         },
         receive: {},
@@ -622,33 +650,38 @@ describe('parseTx', () => {
         contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
         decimals: 18,
         name: 'FOX',
+        symbol: 'FOX',
       }
+      const foxAssetId = `${COINSTACK}_${NETWORK}_${foxToken.contract}`
+
       const uniV2Token = {
         contract: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
         decimals: 18,
         name: 'Uniswap V2',
+        symbol: 'UNI-V2',
       }
+      const uniV2AssetId = `${COINSTACK}_${NETWORK}_${uniV2Token.contract}`
 
       const expected: ParseTx = {
         ...tx,
         address: address,
         fee: {
           value: '26926494400000000',
-          symbol: 'ETH',
+          assetId: nativeToken,
         },
         send: {
-          ETH: {
+          [`${nativeToken}`]: {
             totalValue: '42673718176645189',
             components: [{ value: '42673718176645189' }],
           },
-          FOX: {
+          [foxAssetId]: {
             totalValue: '100000000000000000000',
             components: [{ value: '100000000000000000000' }],
             token: foxToken,
           },
         },
         receive: {
-          'UNI-V2': {
+          [uniV2AssetId]: {
             totalValue: '1888842410762840601',
             components: [{ value: '1888842410762840601' }],
             token: uniV2Token,
@@ -668,13 +701,15 @@ describe('parseTx', () => {
         contract: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
         decimals: 18,
         name: 'Uniswap V2',
+        symbol: 'UNI-V2',
       }
+      const uniV2assetId = `${COINSTACK}_${NETWORK}_${uniV2Token.contract}`
 
       const expected: ParseTx = {
         ...txMempool,
         address: address,
         send: {
-          'UNI-V2': {
+          [uniV2assetId]: {
             totalValue: '298717642142382954',
             components: [{ value: '298717642142382954' }],
             token: uniV2Token,
@@ -684,7 +719,6 @@ describe('parseTx', () => {
       }
 
       const actual = await parseTx(txMempool, address)
-
       expect(expected).toEqual(actual)
     })
 
@@ -695,33 +729,38 @@ describe('parseTx', () => {
         contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
         decimals: 18,
         name: 'FOX',
+        symbol: 'FOX',
       }
+      const foxAssetId = `${COINSTACK}_${NETWORK}_${foxToken.contract}`
+
       const uniV2Token = {
         contract: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
         decimals: 18,
         name: 'Uniswap V2',
+        symbol: 'UNI-V2',
       }
+      const uniV2assetId = `${COINSTACK}_${NETWORK}_${uniV2Token.contract}`
 
       const expected: ParseTx = {
         ...tx,
         address: address,
         fee: {
           value: '4082585000000000',
-          symbol: 'ETH',
+          assetId: nativeToken,
         },
         send: {
-          'UNI-V2': {
+          [uniV2assetId]: {
             totalValue: '298717642142382954',
             components: [{ value: '298717642142382954' }],
             token: uniV2Token,
           },
         },
         receive: {
-          ETH: {
+          [`${nativeToken}`]: {
             totalValue: '6761476182340434',
             components: [{ value: '6761476182340434' }],
           },
-          FOX: {
+          [foxAssetId]: {
             totalValue: '15785079906515930982',
             components: [{ value: '15785079906515930982' }],
             token: foxToken,
@@ -743,18 +782,19 @@ describe('parseTx', () => {
         contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
         decimals: 18,
         name: 'FOX',
+        symbol: 'FOX',
       }
-
+      const foxAssetId = `${COINSTACK}_${NETWORK}_${foxToken.contract}`
       const expected: ParseTx = {
         ...tx,
         address: address,
         fee: {
           value: '2559843000000000',
-          symbol: 'ETH',
+          assetId: nativeToken,
         },
         send: {},
         receive: {
-          FOX: {
+          [foxAssetId]: {
             totalValue: '1500000000000000000000',
             components: [{ value: '1500000000000000000000' }],
             token: foxToken,
@@ -791,17 +831,18 @@ describe('parseTx', () => {
         contract: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
         decimals: 18,
         name: 'Uniswap V2',
+        symbol: 'UNI-V2',
       }
-
+      const uniV2assetId = `${COINSTACK}_${NETWORK}_${uniV2Token.contract}`
       const expected: ParseTx = {
         ...tx,
         address: address,
         fee: {
           value: '4650509500000000',
-          symbol: 'ETH',
+          assetId: nativeToken,
         },
         send: {
-          'UNI-V2': {
+          [uniV2assetId]: {
             totalValue: '99572547380794318',
             components: [{ value: '99572547380794318' }],
             token: uniV2Token,
@@ -838,28 +879,33 @@ describe('parseTx', () => {
         contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
         decimals: 18,
         name: 'FOX',
+        symbol: 'FOX',
       }
+      const foxAssetId = `${COINSTACK}_${NETWORK}_${foxToken.contract}`
+
       const uniV2Token = {
         contract: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
         decimals: 18,
         name: 'Uniswap V2',
+        symbol: 'UNI-V2',
       }
+      const uniV2assetId = `${COINSTACK}_${NETWORK}_${uniV2Token.contract}`
 
       const expected: ParseTx = {
         ...tx,
         address: address,
         fee: {
           value: '6136186875000000',
-          symbol: 'ETH',
+          assetId: nativeToken,
         },
         send: {},
         receive: {
-          FOX: {
+          [foxAssetId]: {
             totalValue: '317669338073988',
             components: [{ value: '317669338073988' }],
             token: foxToken,
           },
-          'UNI-V2': {
+          [uniV2assetId]: {
             totalValue: '531053586030903030',
             components: [{ value: '531053586030903030' }],
             token: uniV2Token,

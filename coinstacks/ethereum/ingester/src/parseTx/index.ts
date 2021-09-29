@@ -9,12 +9,15 @@ import * as multiSig from './multiSig'
 import * as uniV2 from './uniV2'
 
 const NODE_ENV = process.env.NODE_ENV
-const COINSTACK = process.env.COINSTACK
-const NETWORK = process.env.NETWORK
+let COINSTACK = process.env.COINSTACK
+let NETWORK = process.env.NETWORK
 
 if (NODE_ENV !== 'test') {
   if (!COINSTACK) throw new Error('COINSTACK env var not set')
   if (!NETWORK) throw new Error('NETWORK env var not set')
+} else {
+  COINSTACK = 'ethereum'
+  NETWORK = 'MAINNET'
 }
 
 const nativeToken = `${COINSTACK}_${NETWORK}`
@@ -94,7 +97,7 @@ export const parseTx = async (tx: Tx, address: string, internalTxs?: Array<Inter
   }
 
   tx.tokenTransfers?.forEach((transfer) => {
-    const assetId = `${COINSTACK}.${NETWORK}.${transfer.token}`
+    const assetId = `${COINSTACK}_${NETWORK}_${transfer.token}`
 
     // FTX Token (FTT) name and symbol was set backwards on the ERC20 contract
     if (transfer.token == '0x50D1c9771902476076eCFc8B2A83Ad6b9355a4c9') {
