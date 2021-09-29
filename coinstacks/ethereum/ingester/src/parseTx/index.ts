@@ -8,11 +8,13 @@ import * as thor from './thor'
 import * as multiSig from './multiSig'
 import * as uniV2 from './uniV2'
 
-// todo - these should be global configs
-const chain = 'ethereum'
-const network = 'MAINNET'
-const tokenId = ''
-const nativeToken = `${chain}_${network}_${tokenId}`
+const COINSTACK = process.env.COINSTACK
+const NETWORK = 'MAINNET' //process.env.COINSTACK
+
+if (!COINSTACK) throw new Error('COINSTACK env var not set')
+if (!NETWORK) throw new Error('COINSTACK env var not set')
+
+const nativeToken = `${COINSTACK}_${NETWORK}`
 
 export const getInternalAddress = (inputData: string): string | undefined => {
   switch (getSigHash(inputData)) {
