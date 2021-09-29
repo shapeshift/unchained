@@ -1,5 +1,4 @@
 import express, { json, urlencoded } from 'express'
-import cors from 'cors'
 import { join } from 'path'
 import swaggerUi from 'swagger-ui-express'
 import { logger } from '@shapeshiftoss/logger'
@@ -12,7 +11,16 @@ const app = express()
 
 app.use(json())
 app.use(urlencoded({ extended: true }))
-app.use(cors())
+
+app.use('*', (_, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST')
+  next()
+})
+
+app.get('/', async (_, res) => {
+  res.redirect('/docs')
+})
 
 app.get('/health', async (_, res) => {
   res.json({

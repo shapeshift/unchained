@@ -15,6 +15,7 @@ services:
       - .:/app
     depends_on:
       - unchained-local
+      - mongo
   mongo:
     image: mongo:4.2.8
     logging:
