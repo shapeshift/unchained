@@ -2,24 +2,78 @@
 import { Account } from '../../../common/api/src'
 
 /**
- * Contains additional bitcoin specific info
+ * Contains bitcoin specific transaction info as returned from the node
  */
-export interface BitcoinAccount extends Account {
-  /**
-   * Account details by address if BitcoinAccount was fetched by xpub
-   */
-  addresses?: Array<Account>
+export interface BitcoinTxSpecific {
+  txid: string
+  hash: string
+  version: number
+  size: number
+  vsize: number
+  weight: number
+  locktime: number
+  vin: Array<{
+    txid?: string
+    vout?: number
+    sequence?: number
+    coinbase?: string
+    scriptSig?: {
+      asm: string
+      hex: string
+    }
+    txinwitness?: string
+  }>
+  vout: Array<{
+    value?: string | number
+    n?: number
+    scriptPubKey?: {
+      asm: string
+      hex: string
+      reqSigs: number
+      type: string
+      addresses: string[]
+    }
+  }>
+  hex: string
+  blockhash: string
+  confirmations: number
+  time: number
+  blocktime: number
 }
 
 /**
  * Contains info about an unspent transaction output
  */
 export interface Utxo {
-  address: string
-  confirmations: number
   txid: string
-  value: string
   vout: number
+  value: string
+  height?: number
+  confirmations: number
+  address?: string
+  path?: string
+  locktime?: number
+  coinbase?: boolean
+}
+
+/**
+ * Contains additional bitcoin specific account info
+ */
+export interface BitcoinAccount extends Account {
+  /**
+   * List of associated addresses for an xpub
+   */
+  addresses?: Array<Account>
+
+  /**
+   * The next unused receive address index for an xpub (change index 0)
+   */
+  nextReceiveAddressIndex?: number
+
+  /**
+   * The next unused change address index for an xpub (change index 1)
+   */
+  nextChangeAddressIndex?: number
 }
 
 /**
@@ -35,4 +89,14 @@ export interface BitcoinAPI {
    */
   // @Get('account/{pubkey}/utxos')
   getUtxos(pubkey: string): Promise<Array<Utxo>>
+
+  /**
+   * Get transaction specific data directly from the node
+   *
+   * @param {string} txid transaction hash
+   *
+   * @returns {Promise<BitcoinTxSpecific>} transaction payload
+   */
+  // @Get('transaction/{txid}')
+  getTransaction(txid: string): Promise<BitcoinTxSpecific>
 }

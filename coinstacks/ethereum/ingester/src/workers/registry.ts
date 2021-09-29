@@ -16,17 +16,13 @@ interface RegistryMessage extends RegistryDocument {
 const registry = new RegistryService(MONGO_URL, MONGO_DBNAME)
 
 const onMessage = (worker: Worker) => async (message: Message) => {
-  let document: RegistryDocument | undefined
+  const msg: RegistryMessage = message.getContent()
+
   try {
-    const msg: RegistryMessage = JSON.parse(message.getContent())
-
-    // sanitize document to ensure document.registration.pubkey is set
-    const document = registry.sanitizeDocument(msg)
-
     if (msg.action === 'register') {
       await registry.add(msg)
 
-      document.registration.addresses?.forEach((address) => {
+      msg.registration.addresses?.forEach((address) => {
         const tx: Tx = {
           txid: `register-${Date.now()}`,
           vin: [{ n: 0, addresses: [address], isAddress: true }],
@@ -51,10 +47,10 @@ const onMessage = (worker: Worker) => async (message: Message) => {
       }
     }
 
-    worker.ackMessage(message, document.registration.pubkey)
+    worker.ackMessage(message, msg.client_id)
   } catch (err) {
     logger.error('onMessage.error:', err)
-    worker.retryMessage(message, document?.registration.pubkey as string)
+    worker.retryMessage(message, msg.client_id)
   }
 }
 

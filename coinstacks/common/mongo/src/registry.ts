@@ -4,18 +4,23 @@ import { Collection, DeleteWriteOpResultObject, MongoClient, UpdateWriteOpResult
 const COLLECTION = 'registry'
 
 /**
+ * Contains ingester metadata to keep track of sync status for an address
+ */
+export interface IngesterMetadata {
+  block?: number
+  syncing?: {
+    key?: string
+    startTime: number
+    endTime: number
+  }
+}
+
+/**
  * Contains registry info and is used for un/registering addresses
  */
 export interface RegistryDocument {
   client_id: string
-  ingester_meta?: {
-    block?: number
-    syncing?: {
-      key?: string
-      startTime: number
-      endTime: number
-    }
-  }
+  ingester_meta?: Record<string, IngesterMetadata>
   registration: {
     addresses?: string[]
     pubkey?: string
@@ -42,33 +47,29 @@ export class RegistryService {
     this.client?.close()
   }
 
-  async getByAddress(address: string, client_id = 'unchained'): Promise<RegistryDocument | undefined> {
-    const document = await this.collection?.findOne<RegistryDocument>({
-      'registration.addresses': { $in: [address.toLowerCase()] },
-      client_id: client_id,
-    })
-    return document ?? undefined
+  async getByAddress(address: string): Promise<Array<RegistryDocument> | undefined> {
+    address = address.toLowerCase()
+    const cursors = this.collection?.find<RegistryDocument>({ 'registration.addresses': { $in: [address] } }, {})
+    return cursors?.toArray()
   }
 
-  async updateBlock(address: string, block: number, client_id = 'unchained'): Promise<UpdateWriteOpResult | undefined> {
+  async updateBlock(address: string, block: number, client_id: string): Promise<UpdateWriteOpResult | undefined> {
+    address = address.toLowerCase()
     return this.collection?.updateOne(
-      { client_id: client_id, 'registration.addresses': { $in: [address.toLowerCase()] } },
-      { $set: { 'ingester_meta.block': block } }
+      { client_id: client_id, 'registration.addresses': { $in: [address] } },
+      { $set: { [`ingester_meta.${address}.block`]: block } }
     )
   }
 
-  async updateSyncing(
-    address: string,
-    key?: string,
-    client_id = 'unchained'
-  ): Promise<UpdateWriteOpResult | undefined> {
+  async updateSyncing(address: string, client_id: string, key?: string): Promise<UpdateWriteOpResult | undefined> {
+    address = address.toLowerCase()
     return this.collection?.updateOne(
-      { client_id: client_id, 'registration.addresses': { $in: [address.toLowerCase()] } },
+      { client_id: client_id, 'registration.addresses': { $in: [address] } },
       {
         $set: {
-          'ingester_meta.syncing.key': key,
-          'ingester_meta.syncing.startTime': key ? Date.now() : 0,
-          'ingester_meta.syncing.endTime': key ? 0 : Date.now(),
+          [`ingester_meta.${address}.syncing.key`]: key,
+          [`ingester_meta.${address}.syncing.startTime`]: key ? Date.now() : 0,
+          [`ingester_meta.${address}.syncing.endTime`]: key ? 0 : Date.now(),
         },
       }
     )
@@ -76,6 +77,7 @@ export class RegistryService {
 
   async add(document: RegistryDocument): Promise<UpdateWriteOpResult | undefined> {
     document = this.sanitizeDocument(document)
+    const addresses = document.registration.addresses ?? []
 
     return this.collection?.updateOne(
       {
@@ -86,10 +88,14 @@ export class RegistryService {
         $set: {
           client_id: document.client_id,
           'registration.pubkey': document.registration.pubkey,
-          'ingester_meta.block': document.ingester_meta?.block ?? 0,
+          ...addresses.reduce((prev, address) => {
+            const key = `ingester_meta.${address}.block`
+            const block = document.ingester_meta?.[address].block ?? 0
+            return { ...prev, [key]: block }
+          }, {}),
         },
         $addToSet: {
-          'registration.addresses': { $each: document.registration.addresses ?? [] },
+          'registration.addresses': { $each: addresses },
         },
       },
       { upsert: true }
@@ -125,19 +131,10 @@ export class RegistryService {
     const { client_id, registration } = document
     const { addresses } = registration
 
-    let pubkey = registration.pubkey
-    if (!pubkey) {
-      if (addresses?.length === 1) {
-        pubkey = addresses[0]
-      } else {
-        throw new Error('pubkey must be specified')
-      }
-    }
-
     return {
-      client_id: client_id.toLowerCase(),
+      client_id, // client_id will always be saved in the format it was received
       registration: {
-        pubkey: pubkey, // pubkey will always be saved in the format it was received
+        pubkey: registration.pubkey, // pubkey will always be saved in the format it was received
         addresses: addresses?.map((a) => a.toLowerCase()),
       },
     }
