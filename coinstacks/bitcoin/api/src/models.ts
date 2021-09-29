@@ -1,5 +1,5 @@
 /* unable to import models from a module with tsoa */
-import { Account, Tx } from '../../../common/api/src'
+import { Account } from '../../../common/api/src'
 
 /**
  * Contains info about a transactions ScriptSig
