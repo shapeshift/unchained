@@ -4,12 +4,15 @@ import { TxTransfer, Token } from '@shapeshiftoss/common-ingester'
 import { BTCParseTx } from '../types'
 
 const NODE_ENV = process.env.NODE_ENV
-const COINSTACK = process.env.COINSTACK
-const NETWORK = process.env.NETWORK
+let COINSTACK = process.env.COINSTACK
+let NETWORK = process.env.NETWORK
 
 if (NODE_ENV !== 'test') {
   if (!COINSTACK) throw new Error('COINSTACK env var not set')
   if (!NETWORK) throw new Error('NETWORK env var not set')
+} else {
+  COINSTACK = 'ethereum'
+  NETWORK = 'MAINNET'
 }
 
 const nativeAssetId = `${COINSTACK}_${NETWORK}`
