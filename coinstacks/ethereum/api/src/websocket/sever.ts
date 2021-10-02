@@ -1,16 +1,13 @@
+import WebSocket from 'ws'
 import { v4 } from 'uuid'
 import { Connection, Exchange, Message, Queue } from 'amqp-ts'
+import { RegistryMessage } from '@shapeshiftoss/common-ingester'
+import { IngesterMetadata } from '@shapeshiftoss/common-mongo'
 import { logger } from '@shapeshiftoss/logger'
-import { RegistryDocument, IngesterMetadata } from '@shapeshiftoss/common-mongo'
 
 const BROKER_URL = process.env.BROKER_URL as string
 
 if (!BROKER_URL) throw new Error('BROKER_URL env var not set')
-
-// TODO: refactor out necessary rabbit types for reuse and exposing to client
-export interface RegistryMessage extends RegistryDocument {
-  action: string
-}
 
 export interface TxsTopicData {
   addresses: Array<string>
@@ -22,7 +19,7 @@ export interface ErrorResponse {
   message: string
 }
 
-type Topics = 'txs'
+export type Topics = 'txs'
 
 export interface Methods {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -37,7 +34,7 @@ export interface RequestPayload {
   method: 'subscribe' | 'unsubscribe' | 'update'
   // TODO: link topic with required data type
   topic: Topics
-  data: TxsTopicData
+  data: TxsTopicData | undefined
 }
 
 export class ConnectionHandler {
@@ -61,19 +58,18 @@ export class ConnectionHandler {
   }
 
   start(): void {
-    this.websocket.onmessage = (event: MessageEvent<string>) => this._onMessage(event)
-    this.websocket.onclose = () => this._onClose()
-    this.websocket.onerror = () => this._onClose()
+    this.websocket.onmessage = (event) => this.onMessage(event)
+    this.websocket.onclose = () => this.onClose()
+    this.websocket.onerror = () => this.onClose()
   }
 
   private sendError(message: string): void {
-    const error: ErrorResponse = { type: 'error', message }
-    this.websocket.send(JSON.stringify(error))
+    this.websocket.send(JSON.stringify({ type: 'error', message } as ErrorResponse))
   }
 
-  private async _onMessage(event: MessageEvent<string>): Promise<void> {
+  private async onMessage(event: WebSocket.MessageEvent): Promise<void> {
     try {
-      const payload: RequestPayload = JSON.parse(event.data)
+      const payload: RequestPayload = JSON.parse(event.data.toString())
 
       const callback = this.routes[payload.topic][payload.method]
       if (callback) {
@@ -82,12 +78,12 @@ export class ConnectionHandler {
         this.sendError(`route topic (${payload.topic}) method (${payload.method}) not found`)
       }
     } catch (err) {
-      logger.error('onMessageError:', err)
+      logger.error('onMessage error:', err)
       this.sendError('failed to handle message')
     }
   }
 
-  private async _onClose() {
+  private async onClose() {
     const msg: RegistryMessage = {
       action: 'unregister',
       client_id: this.id,

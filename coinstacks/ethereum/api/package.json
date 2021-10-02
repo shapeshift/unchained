@@ -17,6 +17,8 @@
   "dependencies": {
     "@shapeshiftoss/blockbook": "^1.2.0",
     "@shapeshiftoss/common-api": "^1.2.0",
+    "@shapeshiftoss/common-ingester": "^1.2.0",
+    "@shapeshiftoss/ethereum-ingester": "^1.2.0",
     "@shapeshiftoss/logger": "^1.2.0",
     "amqp-ts": "^1.8.0",
     "cors": "^2.8.5",

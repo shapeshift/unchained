@@ -5,8 +5,8 @@ import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
 import { logger } from '@shapeshiftoss/logger'
 import { middleware } from '../../../common/api/src'
+import { ConnectionHandler } from './websocket/sever'
 import { RegisterRoutes } from './routes'
-import { ConnectionHandler } from './websocket'
 
 const port = process.env.PORT || 3000
 
@@ -48,6 +48,6 @@ const server = app.listen(port, () => logger.info('server listening...'))
 
 const wsServer = new Server({ server })
 
-wsServer.on('connection', (connection: WebSocket) => {
+wsServer.on('connection', (connection) => {
   new ConnectionHandler(connection).start()
 })
