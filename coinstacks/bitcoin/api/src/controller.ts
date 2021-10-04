@@ -83,8 +83,8 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
       return {
         pubkey: data.address,
         balance: data.balance,
-        nextReceiveAddressIndex: nextAddressIndexes[0] || 0,
-        nextChangeAddressIndex: nextAddressIndexes[1] || 0,
+        nextReceiveAddressIndex: nextAddressIndexes[0] ?? 0,
+        nextChangeAddressIndex: nextAddressIndexes[1] ?? 0,
       }
     } catch (err) {
       throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
