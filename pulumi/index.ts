@@ -24,16 +24,31 @@ export = async (): Promise<Outputs> => {
   } else {
     if (!config.rootDomainName) throw new Error('rootDomainName required')
 
+    if (
+      config.eks.autoscaling &&
+      (!config.eks.autoscaling?.enabled || !config.eks.autoscaling.minInstances || !config.eks.autoscaling.maxInstances)
+    )
+      throw new Error('missing required autoscaling parameter')
+
+    const autoscaling = config.eks.autoscaling
+      ? {
+          enabled: config.eks.autoscaling.enabled,
+          minInstances: config.eks.autoscaling.minInstances,
+          maxInstances: config.eks.autoscaling.maxInstances,
+        }
+      : undefined
+
     const cluster = await EKSClusterLauncher.create(name, {
-      rootDomainName: config.rootDomainName,
-      instanceTypes: config.eks.instanceTypes,
-      numInstancesPerAZ: 2,
       allAZs: config.eks.allAZs,
-      region: config.eks.region,
+      autoscaling: autoscaling,
       cidrBlock: config.eks.cidrBlock,
-      profile: config.eks.profile,
-      traefik: config.eks.traefik,
       email: config.eks.email,
+      instanceTypes: config.eks.instanceTypes,
+      numInstancesPerAZ: config.eks.numInstancesPerAZ,
+      profile: config.eks.profile,
+      region: config.eks.region,
+      rootDomainName: config.rootDomainName,
+      traefik: config.eks.traefik,
     })
 
     outputs.kubeconfig = cluster.kubeconfig
