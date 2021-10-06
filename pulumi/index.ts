@@ -24,12 +24,6 @@ export = async (): Promise<Outputs> => {
   } else {
     if (!config.rootDomainName) throw new Error('rootDomainName required')
 
-    if (
-      config.eks.autoscaling &&
-      (!config.eks.autoscaling?.enabled || !config.eks.autoscaling.minInstances || !config.eks.autoscaling.maxInstances)
-    )
-      throw new Error('missing required autoscaling parameter')
-
     const autoscaling = config.eks.autoscaling
       ? {
           enabled: config.eks.autoscaling.enabled,
