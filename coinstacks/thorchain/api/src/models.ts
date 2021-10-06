@@ -2,7 +2,7 @@
 import { Account } from '../../../common/api/src'
 
 /**
- * Contains additional ethereum specific info
+ * Contains additional thorchain specific info
  */
 export interface ThorchainAccount extends Account {
   account_number: number

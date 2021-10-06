@@ -13,7 +13,7 @@ type Outputs = Record<string, any>
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
   const name = 'unchained'
-  const asset = 'ethereum'
+  const asset = 'thorchain'
   const outputs: Outputs = {}
 
   const { kubeconfig, config, namespace } = await getConfig()
@@ -30,7 +30,7 @@ export = async (): Promise<Outputs> => {
     getEnv({ path: join(__dirname, '../.env') })
   } else if (config.isLocal) {
     throw new Error(
-      'you must run `cp sample.env .env` from the ethereum coinstack directory and fill out any empty values.'
+      'you must run `cp sample.env .env` from the thorchain coinstack directory and fill out any empty values.'
     )
   }
 

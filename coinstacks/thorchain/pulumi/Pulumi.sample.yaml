@@ -3,7 +3,7 @@
 ## Feel free to modify as needed
 
 config:
-  unchained:ethereum:
+  unchained:thorchain:
     ## stack - reference to common stack in order to reference stack outputs (ie. kubeconfig)
     ## names must be fully qualified, including the organization, project, and stack name components
     ## format as <organization>/<project>/<stack>

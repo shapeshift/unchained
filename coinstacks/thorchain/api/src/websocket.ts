@@ -94,7 +94,7 @@ export class ConnectionHandler {
       registration: {},
     }
 
-    this.unchainedExchange.send(new Message(msg), 'ethereum.registry')
+    this.unchainedExchange.send(new Message(msg), 'thorchain.registry')
 
     await this.queue?.delete()
   }
@@ -132,7 +132,7 @@ export class ConnectionHandler {
       },
     }
 
-    this.unchainedExchange.send(new Message(msg), 'ethereum.registry')
+    this.unchainedExchange.send(new Message(msg), 'thorchain.registry')
 
     const onMessage = (message: Message) => {
       const content = message.getContent()

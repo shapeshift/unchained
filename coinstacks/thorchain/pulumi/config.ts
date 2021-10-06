@@ -14,14 +14,14 @@ const getStorageClass = (cluster: string) => {
   }
 }
 
-export interface EthereumConfig {
+export interface ThorchainConfig {
   kubeconfig: string
   config: Config
   namespace: string
 }
 
-export const getConfig = async (): Promise<EthereumConfig> => {
-  const config = new pulumi.Config('unchained').requireObject<Config>('ethereum')
+export const getConfig = async (): Promise<ThorchainConfig> => {
+  const config = new pulumi.Config('unchained').requireObject<Config>('thorchain')
   const stackReference = new pulumi.StackReference(config.stack)
   const kubeconfig = (await stackReference.getOutputValue('kubeconfig')) as string
   const namespaces = (await stackReference.getOutputValue('namespaces')) as Array<string>
