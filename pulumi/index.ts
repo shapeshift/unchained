@@ -24,17 +24,9 @@ export = async (): Promise<Outputs> => {
   } else {
     if (!config.rootDomainName) throw new Error('rootDomainName required')
 
-    const autoscaling = config.eks.autoscaling
-      ? {
-          enabled: config.eks.autoscaling.enabled,
-          minInstances: config.eks.autoscaling.minInstances,
-          maxInstances: config.eks.autoscaling.maxInstances,
-        }
-      : undefined
-
     const cluster = await EKSClusterLauncher.create(name, {
       allAZs: config.eks.allAZs,
-      autoscaling: autoscaling,
+      autoscaling: config.eks.autoscaling,
       cidrBlock: config.eks.cidrBlock,
       email: config.eks.email,
       instanceTypes: config.eks.instanceTypes,
