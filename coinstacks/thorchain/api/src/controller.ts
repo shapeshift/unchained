@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from 'axios'
 
 import { Controller, Example, Get, Path, Post, Response, Route, Tags } from 'tsoa'
 import { ApiError, BadRequestError, BaseAPI, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { ThorchainAPI, ThorchainAccount, ThorchainTx, ThorchainTxHistory, ThorchainMsgType } from './models'
+import { ThorchainAPI, ThorchainAccount, ThorchainTx, ThorchainTxHistory } from './models'
 import { TxHistory } from '../../../common/api/src'
 
 const INDEXER_URL = process.env.INDEXER_URL

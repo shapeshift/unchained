@@ -124,10 +124,9 @@ const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string):
         `Address sync for: ${address} (client_id: ${document.client_id}), from: ${fromHeight}, to: ${toHeight} started`
       )
 
-      const txHistory = await Promise.all([getTxHistory(address, fromHeight, toHeight)])
+      const txHistory = await getTxHistory(address, fromHeight, toHeight)
 
-      const txids = [...new Set(txHistory)]
-      txids.forEach((txid) => {
+      txHistory.forEach((txid) => {
         const sTx: SyncTx = {
           address: address,
           client_id: document.client_id,
