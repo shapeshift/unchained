@@ -38,14 +38,18 @@ export interface RequestPayload {
 }
 
 export class ConnectionHandler {
+  public readonly coinstack: string
   public readonly id: string
+
   private readonly rabbit: Connection
   private readonly websocket: WebSocket
   private readonly routes: Record<Topics, Methods>
   private readonly unchainedExchange: Exchange
+
   private queue?: Queue
 
-  constructor(websocket: WebSocket) {
+  constructor(coinstack: string, websocket: WebSocket) {
+    this.coinstack = coinstack
     this.id = v4()
     this.rabbit = new Connection(BROKER_URL)
     this.unchainedExchange = this.rabbit.declareExchange('exchange.unchained', '', { noCreate: true })
@@ -85,7 +89,7 @@ export class ConnectionHandler {
 
   private async onClose() {
     const msg: RegistryMessage = { action: 'unregister', client_id: this.id, registration: {} }
-    this.unchainedExchange.send(new Message(msg), 'ethereum.registry')
+    this.unchainedExchange.send(new Message(msg), `${this.coinstack}.registry`)
     await this.queue?.delete()
   }
 
@@ -97,9 +101,9 @@ export class ConnectionHandler {
       return
     }
 
-    const txExchange = this.rabbit.declareExchange('exchange.ethereum.tx.client', '', { noCreate: true })
+    const txExchange = this.rabbit.declareExchange(`exchange.${this.coinstack}.tx.client`, '', { noCreate: true })
 
-    this.queue = this.rabbit.declareQueue(`queue.ethereum.tx.${this.id}`)
+    this.queue = this.rabbit.declareQueue(`queue.${this.coinstack}.tx.${this.id}`)
     this.queue.bind(txExchange, this.id)
 
     try {
@@ -124,7 +128,7 @@ export class ConnectionHandler {
       },
     }
 
-    this.unchainedExchange.send(new Message(msg), 'ethereum.registry')
+    this.unchainedExchange.send(new Message(msg), `${this.coinstack}.registry`)
 
     const onMessage = (message: Message) => {
       const content = message.getContent()
