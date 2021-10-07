@@ -55,8 +55,13 @@ export interface RPCResponse {
   error?: Record<string, unknown>
 }
 
+export interface SequencedData {
+  sequence: number
+  total: number
+}
+
 // Contains data required to perform an address delta sync
-export interface SyncTx {
+export interface SyncTx extends SequencedData {
   address: string
   client_id: string
   txid: string

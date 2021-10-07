@@ -1,5 +1,5 @@
 import { Tx } from '@shapeshiftoss/blockbook'
-import { ParseTx, SyncTx } from '@shapeshiftoss/common-ingester'
+import { ParseTx, SequencedData, SyncTx } from '@shapeshiftoss/common-ingester'
 import { BlockDocument } from '@shapeshiftoss/common-mongo'
 
 export interface ETHBlock {
@@ -26,6 +26,7 @@ export interface ETHBlock {
 }
 
 export type ETHParseTx = Tx & ParseTx
+export type SequencedETHParseTx = ETHParseTx & SequencedData
 
 export interface ETHSyncTx extends SyncTx {
   internalTxs?: Array<InternalTx>

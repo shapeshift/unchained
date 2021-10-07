@@ -198,9 +198,11 @@ const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string):
       ])
 
       const txids = [...new Set(txHistory.concat(Object.keys(txHistoryInternal)))]
-      txids.forEach((txid) => {
+      txids.forEach((txid, index) => {
         const sTx: ETHSyncTx = {
           address: address,
+          sequence: index,
+          total: txids.length - 1,
           client_id: document.client_id,
           txid: txid,
           internalTxs: txHistoryInternal[txid],

@@ -84,14 +84,8 @@ export class ConnectionHandler {
   }
 
   private async onClose() {
-    const msg: RegistryMessage = {
-      action: 'unregister',
-      client_id: this.id,
-      registration: {},
-    }
-
+    const msg: RegistryMessage = { action: 'unregister', client_id: this.id, registration: {} }
     this.unchainedExchange.send(new Message(msg), 'ethereum.registry')
-
     await this.queue?.delete()
   }
 
@@ -117,12 +111,14 @@ export class ConnectionHandler {
       return
     }
 
+    const ingesterMeta = data.addresses.reduce<Record<string, IngesterMetadata>>((prev, address) => {
+      return { ...prev, [address]: { block: data.blockNumber } }
+    }, {})
+
     const msg: RegistryMessage = {
       action: 'register',
       client_id: this.id,
-      ingester_meta: data.addresses.reduce<Record<string, IngesterMetadata>>((prev, address) => {
-        return { ...prev, [address]: { block: data.blockNumber } }
-      }, {}),
+      ingester_meta: ingesterMeta,
       registration: {
         addresses: data.addresses,
       },
