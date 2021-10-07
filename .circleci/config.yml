@@ -128,6 +128,7 @@ commands:
             helm repo add bitnami https://charts.bitnami.com/bitnami
             helm repo add traefik https://helm.traefik.io/traefik
             helm repo add eks https://aws.github.io/eks-charts
+            helm repo add autoscaler https://kubernetes.github.io/autoscaler
       - run:
           name: install pulumi plugin resources
           command: |
