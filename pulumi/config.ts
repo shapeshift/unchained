@@ -38,6 +38,11 @@ const missingRequiredConfig: Array<string> = []
 if (config.isLocal === false) {
   if (!config.rootDomainName) missingRequiredConfig.push('rootDomainName')
   if (!config.eks.instanceTypes) missingRequiredConfig.push('eks.instanceTypes')
+  if (config.eks.autoscaling) {
+    if (config.eks.autoscaling.enabled === undefined) missingRequiredConfig.push('eks.autoscaling.enabled')
+    if (config.eks.autoscaling.minInstances === undefined) missingRequiredConfig.push('eks.autoscaling.minInstances')
+    if (config.eks.autoscaling.maxInstances === undefined) missingRequiredConfig.push('eks.autoscaling.maxInstances')
+  }
 }
 
 if (missingRequiredConfig.length) {
