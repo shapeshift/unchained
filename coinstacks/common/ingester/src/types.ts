@@ -2,7 +2,6 @@ import { RegistryDocument } from '@shapeshiftoss/common-mongo'
 
 export interface ParseTx extends ParseTxUnique {
   address: string
-  document?: RegistryDocument
   fee?: TxFee
   receive: TxTransfers
   send: TxTransfers
@@ -30,6 +29,11 @@ export interface Refund {
   sellNetwork?: string
 }
 
+// Contains data for managing client registration state
+export interface RegistryMessage extends RegistryDocument {
+  action: string
+}
+
 // Contains data about a detected reorg block (orphan/uncle)
 export interface ReorgBlock {
   hash: string
@@ -51,40 +55,13 @@ export interface RPCResponse {
   error?: Record<string, unknown>
 }
 
-export interface RPCResultResponse {
-  jsonrpc: '2.0'
-  method: string
-  params: {
-    result?: unknown
-    error?: Record<string, unknown>
-    subscription: string
-  }
-}
-
-export interface RPCBatchResponse {
-  jsonrpc: '2.0'
-  id: string
-  data?: RPCResponse[]
-  error?: Record<string, unknown>
-}
-
-export interface RPCBatchResultResponse {
-  jsonrpc: '2.0'
-  id: string
-  result?: unknown
-  error?: Record<string, unknown>
-}
-
-export interface RPCSubscriptionReceiptResponse {
-  jsonrpc: '2.0'
-  id: string
-  params: {
-    result: unknown
-  }
+export interface SequencedData {
+  sequence: number
+  total: number
 }
 
 // Contains data required to perform an address delta sync
-export interface SyncTx {
+export interface SyncTx extends SequencedData {
   address: string
   client_id: string
   txid: string
@@ -112,8 +89,6 @@ export interface Trade {
   sellAmount: string
   sellNetwork?: string
 }
-
-export type TransactionType = 'receive' | 'send' | 'fee'
 
 // Contains data about the transaction fee
 export interface TxFee {
