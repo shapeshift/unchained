@@ -132,7 +132,7 @@ export class ConnectionHandler {
 
     const onMessage = (message: Message) => {
       const content = message.getContent()
-      // TODO: can we ensure message has been sent successfully? If not we would want to requeue message
+      // TODO: requeue on error callback
       this.websocket.send(JSON.stringify(content))
       message.ack()
     }

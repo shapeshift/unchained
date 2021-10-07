@@ -23,6 +23,8 @@ export class Client {
     }
   }
 
+  // TODO: add onError callback for any error cases
+  // TODO: add batch key
   async subscribeTxs(
     data: TxsTopicData,
     onMessage: (message: SequencedETHParseTx | ErrorResponse) => void
@@ -40,6 +42,7 @@ export class Client {
     const payload: RequestPayload = { method: 'subscribe', topic: 'txs', data }
 
     ws.onmessage = (event) => {
+      // TODO: Reset timeout
       const message = JSON.parse(event.data.toString()) as SequencedETHParseTx | ErrorResponse
 
       if ('sequence' in message) {
@@ -49,7 +52,8 @@ export class Client {
 
         this.sequencedData.txs[message.sequence] = true
 
-        if (this.sequencedData.txs.some((val) => val)) {
+        if (this.sequencedData.txs.every((val) => val)) {
+          // TODO: Clear timeout
           console.log('all data received!')
         }
       }
@@ -58,15 +62,18 @@ export class Client {
     }
 
     ws.send(JSON.stringify(payload))
+    // TODO: Set initial timeout
   }
 
   unsubscribeTxs(): void {
+    this.sequencedData.txs = undefined
     this.websockets.txs?.send(
       JSON.stringify({ method: 'unsubscribe', topic: 'txs', data: undefined } as RequestPayload)
     )
   }
 
   close(topic: Topics): void {
+    this.sequencedData[topic] = undefined
     this.websockets[topic]?.close()
   }
 }
