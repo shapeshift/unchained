@@ -4,6 +4,7 @@ dist
 **/test-report
 Pulumi.*.yaml
 !Pulumi.sample.yaml
+!Pulumi.docker-desktop.yaml
 **/generated
 !packages/thorchain/src/generated
 routes.ts
