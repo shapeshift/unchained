@@ -7,7 +7,6 @@ export { SequencedETHParseTx, ErrorResponse, RequestPayload, TxsTopicData }
 export class Client {
   private readonly url: string
   private readonly websockets: Record<Topics, WebSocket | undefined>
-  private readonly sequencedData: Record<Topics, Array<boolean> | undefined>
   private readonly opts?: WebSocket.ClientOptions
 
   constructor(url: string, opts?: WebSocket.ClientOptions) {
@@ -17,14 +16,9 @@ export class Client {
     this.websockets = {
       txs: undefined,
     }
-
-    this.sequencedData = {
-      txs: undefined,
-    }
   }
 
   // TODO: add onError callback for any error cases
-  // TODO: add batch key
   async subscribeTxs(
     data: TxsTopicData,
     onMessage: (message: SequencedETHParseTx | ErrorResponse) => void
@@ -42,38 +36,20 @@ export class Client {
     const payload: RequestPayload = { method: 'subscribe', topic: 'txs', data }
 
     ws.onmessage = (event) => {
-      // TODO: Reset timeout
       const message = JSON.parse(event.data.toString()) as SequencedETHParseTx | ErrorResponse
-
-      if ('sequence' in message) {
-        if (!this.sequencedData.txs) {
-          this.sequencedData.txs = Array(message.total).fill(false)
-        }
-
-        this.sequencedData.txs[message.sequence] = true
-
-        if (this.sequencedData.txs.every((val) => val)) {
-          // TODO: Clear timeout
-          console.log('all data received!')
-        }
-      }
-
       onMessage(message)
     }
 
     ws.send(JSON.stringify(payload))
-    // TODO: Set initial timeout
   }
 
   unsubscribeTxs(): void {
-    this.sequencedData.txs = undefined
     this.websockets.txs?.send(
       JSON.stringify({ method: 'unsubscribe', topic: 'txs', data: undefined } as RequestPayload)
     )
   }
 
   close(topic: Topics): void {
-    this.sequencedData[topic] = undefined
     this.websockets[topic]?.close()
   }
 }
