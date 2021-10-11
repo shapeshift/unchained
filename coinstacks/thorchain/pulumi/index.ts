@@ -3,8 +3,7 @@ import { existsSync, readFileSync } from 'fs'
 import { join } from 'path'
 import * as k8s from '@pulumi/kubernetes'
 import { all } from '@pulumi/pulumi'
-import { deployApi, deployMongo, deployIngester } from '@shapeshiftoss/common-pulumi'
-import { deployIndexer } from '@shapeshiftoss/blockbook-pulumi'
+import { deployApi, deployMongo } from '@shapeshiftoss/common-pulumi'
 import { getConfig } from './config'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -56,8 +55,8 @@ export = async (): Promise<Outputs> => {
 
   const deps = all([mongo]).apply(([mongoResources]) => mongoResources)
 
-  await deployIndexer(name, asset, provider, namespace, config)
-  await deployIngester(name, asset, provider, namespace, config, deps)
+  // await deployIndexer(name, asset, provider, namespace, config)
+  // await deployIngester(name, asset, provider, namespace, config, deps)
   await deployApi(name, asset, provider, namespace, config, deps)
 
   return outputs
