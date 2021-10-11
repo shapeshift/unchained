@@ -236,7 +236,7 @@ export async function deployApi(
           image: imageName,
           ports: [{ containerPort: 3000, name: 'http' }],
           env: [...secretEnvs],
-          command: config.isLocal ? ['sh', '-c', 'yarn nodemon'] : ['node', `dist/${asset}/api/src/index.js`],
+          command: config.isLocal ? ['sh', '-c', 'yarn nodemon'] : ['node', `dist/${asset}/api/src/app.js`],
           readinessProbe: {
             httpGet: { path: '/health', port: 3000 },
             initialDelaySeconds: 10,

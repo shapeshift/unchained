@@ -16,7 +16,6 @@
   },
   "dependencies": {
     "@shapeshiftoss/blockbook": "^1.2.0",
-    "@shapeshiftoss/common-api": "^1.2.0",
     "@shapeshiftoss/common-mongo": "^1.2.0",
     "@shapeshiftoss/logger": "^1.2.0",
     "amqp-ts": "^1.8.0",

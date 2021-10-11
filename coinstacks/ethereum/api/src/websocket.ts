@@ -1,146 +1,79 @@
-import { v4 } from 'uuid'
-import { Connection, Exchange, Message, Queue } from 'amqp-ts'
-import { logger } from '@shapeshiftoss/logger'
-import { RegistryDocument, IngesterMetadata } from '@shapeshiftoss/common-mongo'
+import WebSocket from 'ws'
+import { ErrorResponse, RequestPayload, Topics, TxsTopicData } from '@shapeshiftoss/common-api'
+import { SequencedETHParseTx } from '@shapeshiftoss/ethereum-ingester'
 
-const BROKER_URL = process.env.BROKER_URL as string
+export { SequencedETHParseTx, ErrorResponse, RequestPayload, TxsTopicData }
 
-if (!BROKER_URL) throw new Error('BROKER_URL env var not set')
+export class Client {
+  private readonly url: string
+  private readonly websockets: Record<Topics, WebSocket | undefined>
+  private readonly sequencedData: Record<Topics, Array<boolean> | undefined>
+  private readonly opts?: WebSocket.ClientOptions
 
-// TODO: refactor out necessary rabbit types for reuse and exposing to client
-export interface RegistryMessage extends RegistryDocument {
-  action: string
-}
+  constructor(url: string, opts?: WebSocket.ClientOptions) {
+    this.url = url
+    this.opts = opts
 
-export interface TxsTopicData {
-  addresses: Array<string>
-  blockNumber?: number
-}
+    this.websockets = {
+      txs: undefined,
+    }
 
-export interface ErrorResponse {
-  type: 'error'
-  message: string
-}
-
-type Topics = 'txs'
-
-export interface Methods {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  subscribe: (data: any) => Promise<void>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  unsubscribe?: (data: any) => Promise<void>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  update?: (data: any) => Promise<void>
-}
-
-export interface RequestPayload {
-  method: 'subscribe' | 'unsubscribe' | 'update'
-  // TODO: link topic with required data type
-  topic: Topics
-  data: TxsTopicData
-}
-
-export class ConnectionHandler {
-  public readonly id: string
-  private readonly rabbit: Connection
-  private readonly websocket: WebSocket
-  private readonly routes: Record<Topics, Methods>
-  private readonly unchainedExchange: Exchange
-  private queue?: Queue
-
-  constructor(websocket: WebSocket) {
-    this.id = v4()
-    this.rabbit = new Connection(BROKER_URL)
-    this.unchainedExchange = this.rabbit.declareExchange('exchange.unchained', '', { noCreate: true })
-    this.websocket = websocket
-    this.routes = {
-      txs: {
-        subscribe: (data: TxsTopicData) => this.handleSubscribeTxs(data),
-      },
+    this.sequencedData = {
+      txs: undefined,
     }
   }
 
-  start(): void {
-    this.websocket.onmessage = (event: MessageEvent<string>) => this._onMessage(event)
-    this.websocket.onclose = () => this._onClose()
-    this.websocket.onerror = () => this._onClose()
-  }
+  // TODO: add onError callback for any error cases
+  // TODO: add batch key
+  async subscribeTxs(
+    data: TxsTopicData,
+    onMessage: (message: SequencedETHParseTx | ErrorResponse) => void
+  ): Promise<void> {
+    if (this.websockets.txs) return
 
-  private sendError(message: string): void {
-    const error: ErrorResponse = { type: 'error', message }
-    this.websocket.send(JSON.stringify(error))
-  }
+    const ws = new WebSocket(this.url, this.opts)
 
-  private async _onMessage(event: MessageEvent<string>): Promise<void> {
-    try {
-      const payload: RequestPayload = JSON.parse(event.data)
+    ws.onerror = (event) => console.log('error', event)
 
-      const callback = this.routes[payload.topic][payload.method]
-      if (callback) {
-        await callback(payload.data)
-      } else {
-        this.sendError(`route topic (${payload.topic}) method (${payload.method}) not found`)
+    this.websockets.txs = ws
+
+    await new Promise((resolve) => (ws.onopen = () => resolve(true)))
+
+    const payload: RequestPayload = { method: 'subscribe', topic: 'txs', data }
+
+    ws.onmessage = (event) => {
+      // TODO: Reset timeout
+      const message = JSON.parse(event.data.toString()) as SequencedETHParseTx | ErrorResponse
+
+      if ('sequence' in message) {
+        if (!this.sequencedData.txs) {
+          this.sequencedData.txs = Array(message.total).fill(false)
+        }
+
+        this.sequencedData.txs[message.sequence] = true
+
+        if (this.sequencedData.txs.every((val) => val)) {
+          // TODO: Clear timeout
+          console.log('all data received!')
+        }
       }
-    } catch (err) {
-      logger.error('onMessageError:', err)
-      this.sendError('failed to handle message')
+
+      onMessage(message)
     }
+
+    ws.send(JSON.stringify(payload))
+    // TODO: Set initial timeout
   }
 
-  private async _onClose() {
-    const msg: RegistryMessage = {
-      action: 'unregister',
-      client_id: this.id,
-      registration: {},
-    }
-
-    this.unchainedExchange.send(new Message(msg), 'ethereum.registry')
-
-    await this.queue?.delete()
+  unsubscribeTxs(): void {
+    this.sequencedData.txs = undefined
+    this.websockets.txs?.send(
+      JSON.stringify({ method: 'unsubscribe', topic: 'txs', data: undefined } as RequestPayload)
+    )
   }
 
-  private async handleSubscribeTxs(data: TxsTopicData) {
-    if (this.queue) return
-
-    if (!data.addresses?.length) {
-      this.sendError('addresses required')
-      return
-    }
-
-    const txExchange = this.rabbit.declareExchange('exchange.ethereum.tx.client', '', { noCreate: true })
-
-    this.queue = this.rabbit.declareQueue(`queue.ethereum.tx.${this.id}`)
-    this.queue.bind(txExchange, this.id)
-
-    try {
-      await this.rabbit.completeConfiguration()
-    } catch (err) {
-      this.queue = undefined
-      logger.error('failed to complete rabbit configuration:', err)
-      this.sendError('failed to complete rabbit configuration')
-      return
-    }
-
-    const msg: RegistryMessage = {
-      action: 'register',
-      client_id: this.id,
-      ingester_meta: data.addresses.reduce<Record<string, IngesterMetadata>>((prev, address) => {
-        return { ...prev, [address]: { block: data.blockNumber } }
-      }, {}),
-      registration: {
-        addresses: data.addresses,
-      },
-    }
-
-    this.unchainedExchange.send(new Message(msg), 'ethereum.registry')
-
-    const onMessage = (message: Message) => {
-      const content = message.getContent()
-      // TODO: can we ensure message has been sent successfully? If not we would want to requeue message
-      this.websocket.send(JSON.stringify(content))
-      message.ack()
-    }
-
-    this.queue.activateConsumer(onMessage)
+  close(topic: Topics): void {
+    this.sequencedData[topic] = undefined
+    this.websockets[topic]?.close()
   }
 }
