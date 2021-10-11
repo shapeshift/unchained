@@ -19,6 +19,6 @@
     "@shapeshiftoss/common-mongo": "^1.2.0",
     "@shapeshiftoss/logger": "^1.2.0",
     "@shapeshiftoss/thorchain": "^1.2.0",
-    "axios": "^0.19.2"
+    "axios": "~0.21.4"
   }
 }
