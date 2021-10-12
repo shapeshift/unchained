@@ -156,7 +156,8 @@ export class ConnectionHandler {
       this.websocket.send(JSON.stringify(content), (err) => {
         if (err) {
           logger.error(`error sending message to client ${this.id}: ${err}: ${JSON.stringify(content)}`)
-          return message.nack(false, false)
+          message.nack(false, false)
+          return
         }
 
         message.ack()
