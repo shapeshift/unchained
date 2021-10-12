@@ -14,9 +14,6 @@
     "generate": "JAVA_OPTS='-Dlog.level=warn' openapi-generator-cli generate",
     "watch": "nodemon"
   },
-  "dependencies": {
-    "@shapeshiftoss/ethereum-api": "^1.3.0"
-  },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.4.4"
   }
