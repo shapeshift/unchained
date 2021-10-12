@@ -6,7 +6,7 @@
     "storageDir": "~/.openapitools",
     "generators": {
       "midgard": {
-        "inputSpec": "https://gitlab.com/thorchain/midgard/-/raw/2.4.1/openapi/openapi.yaml",
+        "inputSpec": "https://gitlab.com/thorchain/midgard/-/raw/2.5.4/openapi/openapi.yaml",
         "generatorName": "typescript-axios",
         "output": "#{cwd}/src/generated/midgard",
         "reservedWordsMappings": { "in": "in" },

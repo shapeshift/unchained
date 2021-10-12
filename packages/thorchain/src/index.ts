@@ -4,7 +4,7 @@ import ABI from './erc20ABI'
 import { DefaultApi, Configuration } from './generated/midgard'
 import { ActionType, Precision, Network, ThorchainArgs, TxDetails, Value } from './types'
 
-export * as ThornodeAPI from './generated/thornode'
+export * as Thornode from './generated/thornode'
 
 const NODE_ENV = process.env.NODE_ENV
 const RPC_URL = process.env.RPC_URL as string
