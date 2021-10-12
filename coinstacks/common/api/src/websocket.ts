@@ -62,7 +62,6 @@ export class ConnectionHandler {
     }
 
     const interval = setInterval(() => {
-      console.log('isAlive', this.isAlive)
       if (!this.isAlive) return this.websocket.terminate()
 
       this.isAlive = false
@@ -71,7 +70,10 @@ export class ConnectionHandler {
 
     this.websocket = websocket
     this.websocket.onmessage = (event) => this.onMessage(event)
-    this.websocket.onerror = () => this.onClose(interval)
+    this.websocket.onerror = (event) => {
+      logger.error(`onerror (${this.id}): ${event.error}: ${event.message}`)
+      this.onClose(interval)
+    }
     this.websocket.onclose = () => this.onClose(interval)
     this.websocket.on('pong', () => this.heartbeat())
   }
@@ -152,8 +154,13 @@ export class ConnectionHandler {
     const onMessage = (message: Message) => {
       const content = message.getContent()
       this.websocket.send(JSON.stringify(content), (err) => {
-        // TODO: test error case and determine correct handling
-        err ? message.nack(false, true) : message.ack()
+        if (err) {
+          logger.error(`error sending message to client ${this.id}: ${err}: ${JSON.stringify(content)}`)
+          message.nack(false, false)
+          return
+        }
+
+        message.ack()
       })
     }
 
