@@ -47,6 +47,4 @@ const server = app.listen(port, () => logger.info('server listening...'))
 
 const wsServer = new Server({ server })
 
-wsServer.on('connection', (connection) => {
-  new ConnectionHandler('ethereum', connection).start()
-})
+wsServer.on('connection', (connection) => ConnectionHandler.start('ethereum', connection))
