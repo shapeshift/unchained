@@ -1,5 +1,5 @@
 {
-  "name": "@shapeshiftoss/thorchain",
+  "name": "@shapeshiftoss/gaia",
   "version": "1.2.0",
   "license": "MIT",
   "private": true,
@@ -17,10 +17,6 @@
     "clean": "rm -rf dist node_modules src/generated",
     "generate": "JAVA_OPTS='-Dlog.level=warn' openapi-generator-cli generate",
     "watch": "tsc --watch"
-  },
-  "dependencies": {
-    "bignumber.js": "^9.0.1",
-    "ethers": "^5.4.0"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.4.4"
