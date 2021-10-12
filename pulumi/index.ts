@@ -25,15 +25,16 @@ export = async (): Promise<Outputs> => {
     if (!config.rootDomainName) throw new Error('rootDomainName required')
 
     const cluster = await EKSClusterLauncher.create(name, {
-      rootDomainName: config.rootDomainName,
-      instanceTypes: config.eks.instanceTypes,
-      numInstancesPerAZ: 2,
       allAZs: config.eks.allAZs,
-      region: config.eks.region,
+      autoscaling: config.eks.autoscaling,
       cidrBlock: config.eks.cidrBlock,
-      profile: config.eks.profile,
-      traefik: config.eks.traefik,
       email: config.eks.email,
+      instanceTypes: config.eks.instanceTypes,
+      numInstancesPerAZ: config.eks.numInstancesPerAZ,
+      profile: config.eks.profile,
+      region: config.eks.region,
+      rootDomainName: config.rootDomainName,
+      traefik: config.eks.traefik,
     })
 
     outputs.kubeconfig = cluster.kubeconfig

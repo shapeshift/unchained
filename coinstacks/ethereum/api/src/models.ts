@@ -57,13 +57,14 @@ export interface EthereumAPI {
    * Get the estimated gas cost of a transaction
    *
    * @param {string} data input data
+   * @param {string} from from address
    * @param {string} to to address
-   * @param {string} value transaction value
+   * @param {string} value transaction value in ether
    *
    * @returns {Promise<string>} estimated gas to be used for the transaction
    */
   //@Get('/gas/estimate')
-  estimateGas(data: string, to: string, value: string): Promise<string>
+  estimateGas(data: string, from: string, to: string, value: string): Promise<string>
 
   /**
    * Get the current gas price from the node

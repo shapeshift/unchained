@@ -1,6 +1,6 @@
 import { Tx } from '@shapeshiftoss/blockbook'
-import { Worker, Message } from '@shapeshiftoss/common-ingester'
-import { RegistryDocument, RegistryService } from '@shapeshiftoss/common-mongo'
+import { Worker, Message, RegistryMessage } from '@shapeshiftoss/common-ingester'
+import { RegistryService } from '@shapeshiftoss/common-mongo'
 import { logger } from '@shapeshiftoss/logger'
 
 const MONGO_DBNAME = process.env.MONGO_DBNAME
@@ -8,10 +8,6 @@ const MONGO_URL = process.env.MONGO_URL
 
 if (!MONGO_DBNAME) throw new Error('MONGO_DBNAME env var not set')
 if (!MONGO_URL) throw new Error('MONGO_URL env var not set')
-
-interface RegistryMessage extends RegistryDocument {
-  action: string
-}
 
 const registry = new RegistryService(MONGO_URL, MONGO_DBNAME)
 

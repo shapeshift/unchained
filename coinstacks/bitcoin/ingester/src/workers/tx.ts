@@ -131,9 +131,11 @@ export const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: s
 
       const txHistory = await getTxHistory(address, fromHeight, toHeight)
 
-      txHistory.forEach((txid) => {
+      txHistory.forEach((txid, index) => {
         const sTx: SyncTx = {
           address: address,
+          sequence: index,
+          total: txHistory.length - 1,
           client_id: document.client_id,
           txid: txid,
         }
