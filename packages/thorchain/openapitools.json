@@ -14,6 +14,17 @@
           "supportsES6": "true",
           "useSingleRequestParameter": true
         }
+      },
+      "thornode": {
+        "inputSpec": "https://gitlab.com/thorchain/thornode/-/raw/v0.69.3-chaosnet/docs/swagger-ui/swagger.json",
+        "generatorName": "typescript-axios",
+        "output": "#{cwd}/src/generated/thornode",
+        "reservedWordsMappings": { "in": "in" },
+        "additionalProperties": {
+          "supportsES6": "true",
+          "useSingleRequestParameter": true
+        },
+        "skipValidateSpec": true
       }
     }
   }
