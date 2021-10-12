@@ -13,8 +13,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
-    "clean": "rm -rf dist node_modules",
+    "build": "yarn generate && tsc",
+    "clean": "rm -rf dist node_modules src/generated",
     "generate": "JAVA_OPTS='-Dlog.level=warn' openapi-generator-cli generate",
     "watch": "tsc --watch"
   },
