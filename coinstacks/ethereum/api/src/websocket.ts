@@ -59,7 +59,6 @@ export class Client {
         }
         onMessage(message)
       } catch (err) {
-        console.log('data', event.data)
         if (onError && err instanceof Error) onError({ type: 'error', message: err.message })
       }
     }
