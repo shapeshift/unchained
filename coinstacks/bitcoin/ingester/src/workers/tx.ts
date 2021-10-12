@@ -135,7 +135,7 @@ export const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: s
         const sTx: SyncTx = {
           address: address,
           sequence: index,
-          total: txHistory.length - 1,
+          total: txHistory.length,
           client_id: document.client_id,
           txid: txid,
         }
