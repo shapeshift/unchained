@@ -27,6 +27,16 @@ aliases:
         only:
           - develop
 
+  - &thorchain
+    coinstack: thorchain
+    pulumi-stack: public
+    pulumi-dir: coinstacks/thorchain/pulumi
+    mongo-cpu-limit: 512m
+    mongo-memory-limit: 512Mi
+    mongo-replicas: 3
+    mongo-storage-size: 100Gi
+    mongo-url: mongodb://thorchain-mongodb-0.thorchain-mongodb-headless.unchained.svc.cluster.local:27017,thorchain-mongodb-1.thorchain-mongodb-headless.unchained.svc.cluster.local:27017,thorchain-mongodb-2.thorchain-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
+
   - &bitcoin
     coinstack: bitcoin
     pulumi-stack: public
@@ -345,6 +355,18 @@ workflows:
             - lint and test project (persist to workspace)
           <<: *only-develop
 
+      ######################### (THORCHAIN) #########################
+      - deploy-coinstack:
+          name: deploy thorchain develop
+          requires:
+            - deploy common unchained dependencies
+          <<: *thorchain
+          environment: dev
+          pulumi-stack: public-dev
+          mongo-replicas: 2
+          indexer-replicas: 1
+          <<: *only-develop
+
       ######################### (BITCOIN) #########################
       - deploy-coinstack:
           name: deploy bitcoin develop
@@ -379,6 +401,31 @@ workflows:
           name: deploy common unchained dependencies
           requires:
             - lint and test project (persist to workspace)
+          <<: *only-main
+
+      ######################### (THORCHAIN) #########################
+      - deploy-coinstack:
+          name: preview thorchain coinstack
+          pulumi-command: pulumi preview
+          requires:
+            - deploy common unchained dependencies
+          <<: *thorchain
+          environment: ''
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve thorchain coinstack
+          type: approval
+          requires:
+            - preview thorchain coinstack
+          <<: *only-main
+
+      - deploy-coinstack:
+          name: deploy thorchain coinstack
+          requires:
+            - approve thorchain coinstack
+          <<: *thorchain
+          environment: ''
           <<: *only-main
 
       ######################### (BITCOIN) #########################
@@ -434,6 +481,7 @@ workflows:
       - publish:
           name: publish packages
           requires:
+            - deploy thorchain coinstack
             - deploy bitcoin coinstack
             - deploy ethereum coinstack
           <<: *only-main
