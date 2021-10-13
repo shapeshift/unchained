@@ -14,8 +14,8 @@ config:
     ## additionalEnvironments - is used to create additional environments inside of new namespaces
     ## by default 1 namespace is always created 'unchained'. However, if there are any additionalEnvironments it will create namepspaces per `unchained-<environment>`
     ## ie. 'unchained-dev'
-    additionalEnvironments:
-     - dev
+    # additionalEnvironments:
+    #  - dev
 
     ## eks - configuration for eks cluster
     #eks:

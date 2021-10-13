@@ -12,8 +12,8 @@ config:
 
     ## environment - specify environment if you deployed multiples into cluster. specified as 'additionalEnvironments' in the cluster stack 
     ## if falsy use default environment created in cluster stack
-    environment:
-      - dev
+    # environment:
+    #   - dev
 
     ## api - if specified an api service will be deployed
     api:
