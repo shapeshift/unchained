@@ -46,25 +46,44 @@ export class ConnectionHandler {
   private readonly routes: Record<Topics, Methods>
   private readonly unchainedExchange: Exchange
 
+  private isAlive: boolean
   private queue?: Queue
 
-  constructor(coinstack: string, websocket: WebSocket) {
+  private constructor(coinstack: string, websocket: WebSocket) {
     this.coinstack = coinstack
     this.id = v4()
+    this.isAlive = true
     this.rabbit = new Connection(BROKER_URL)
     this.unchainedExchange = this.rabbit.declareExchange('exchange.unchained', '', { noCreate: true })
-    this.websocket = websocket
     this.routes = {
       txs: {
         subscribe: (data: TxsTopicData) => this.handleSubscribeTxs(data),
       },
     }
+
+    const interval = setInterval(() => {
+      if (!this.isAlive) return this.websocket.terminate()
+
+      this.isAlive = false
+      this.websocket.ping()
+    }, 10000)
+
+    this.websocket = websocket
+    this.websocket.onmessage = (event) => this.onMessage(event)
+    this.websocket.onerror = (event) => {
+      logger.error(`onerror (${this.id}): ${event.error}: ${event.message}`)
+      this.onClose(interval)
+    }
+    this.websocket.onclose = () => this.onClose(interval)
+    this.websocket.on('pong', () => this.heartbeat())
   }
 
-  start(): void {
-    this.websocket.onmessage = (event) => this.onMessage(event)
-    this.websocket.onclose = () => this.onClose()
-    this.websocket.onerror = () => this.onClose()
+  static start(coinstack: string, websocket: WebSocket): void {
+    new ConnectionHandler(coinstack, websocket)
+  }
+
+  private heartbeat(): void {
+    this.isAlive = true
   }
 
   private sendError(message: string): void {
@@ -87,10 +106,12 @@ export class ConnectionHandler {
     }
   }
 
-  private async onClose() {
+  private async onClose(interval: NodeJS.Timeout) {
     const msg: RegistryMessage = { action: 'unregister', client_id: this.id, registration: {} }
     this.unchainedExchange.send(new Message(msg), `${this.coinstack}.registry`)
+
     await this.queue?.delete()
+    clearInterval(interval)
   }
 
   private async handleSubscribeTxs(data: TxsTopicData) {
@@ -132,9 +153,15 @@ export class ConnectionHandler {
 
     const onMessage = (message: Message) => {
       const content = message.getContent()
-      // TODO: requeue on error callback
-      this.websocket.send(JSON.stringify(content))
-      message.ack()
+      this.websocket.send(JSON.stringify(content), (err) => {
+        if (err) {
+          logger.error(`error sending message to client ${this.id}: ${err}: ${JSON.stringify(content)}`)
+          message.nack(false, false)
+          return
+        }
+
+        message.ack()
+      })
     }
 
     this.queue.activateConsumer(onMessage)

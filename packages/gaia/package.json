@@ -1,10 +1,14 @@
 {
-  "name": "@shapeshiftoss/unchained-client",
+  "name": "@shapeshiftoss/gaia",
   "version": "1.3.0",
   "license": "MIT",
-  "main": "dist/packages/client/src/index.js",
+  "private": true,
+  "main": "dist/index.js",
   "source": "src/index.ts",
-  "types": "dist/packages/client/src/index.d.ts",
+  "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "restricted"
+  },
   "files": [
     "dist"
   ],
@@ -12,7 +16,7 @@
     "build": "yarn generate && tsc",
     "clean": "rm -rf dist node_modules src/generated",
     "generate": "JAVA_OPTS='-Dlog.level=warn' openapi-generator-cli generate",
-    "watch": "nodemon"
+    "watch": "tsc --watch"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.4.4"
