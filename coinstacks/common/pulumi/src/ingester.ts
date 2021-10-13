@@ -63,7 +63,7 @@ export async function deployIngester(
   const labels = { app, asset, tier }
   const name = `${asset}-${tier}`
 
-  let imageName = 'mhart/alpine-node:14.16.0' // local dev image
+  let imageName = 'mhart/alpine-node:14.18.0' // local dev image
   if (!config.isLocal) {
     const repositoryName = `${app}-${asset}-${tier}`
     const baseImageName = `${config.dockerhub?.username ?? 'shapeshiftdao'}/unchained-base:${await getBaseHash()}`

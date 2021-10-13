@@ -3,7 +3,7 @@ version: 2.1
 executors:
   node:
     docker:
-      - image: circleci/node:14.16.0
+      - image: circleci/node:14.18.0
   pulumi:
     docker:
       - image: pulumi/pulumi-nodejs:3.11.0

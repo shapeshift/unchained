@@ -1,4 +1,4 @@
-FROM mhart/alpine-node:14.16.0
+FROM mhart/alpine-node:14.18.0
 
 RUN apk add --no-cache curl jq bash
 

@@ -16,7 +16,7 @@ export async function deployWatcher(app: string, provider: k8s.Provider, namespa
       containers: [
         {
           name: `${labels.tier}`,
-          image: 'mhart/alpine-node:14.16.0',
+          image: 'mhart/alpine-node:14.18.0',
           workingDir: '/app',
           command: ['sh', '-c', 'yarn lerna run watch --scope @shapeshiftoss/* --parallel'],
           volumeMounts: [{ name: 'app', mountPath: '/app' }],
