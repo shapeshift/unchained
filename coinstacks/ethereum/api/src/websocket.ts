@@ -4,76 +4,78 @@ import { SequencedETHParseTx } from '@shapeshiftoss/ethereum-ingester'
 
 export { SequencedETHParseTx, ErrorResponse, RequestPayload, TxsTopicData }
 
+export interface Connection {
+  ws: WebSocket
+  pingTimeout?: NodeJS.Timeout
+}
+
 export class Client {
   private readonly url: string
-  private readonly websockets: Record<Topics, WebSocket | undefined>
-  private readonly sequencedData: Record<Topics, Array<boolean> | undefined>
+  private readonly connections: Record<Topics, Connection | undefined>
   private readonly opts?: WebSocket.ClientOptions
 
   constructor(url: string, opts?: WebSocket.ClientOptions) {
     this.url = url
-    this.opts = opts
+    this.opts = { ...opts, sessionTimeout: 10000 }
 
-    this.websockets = {
-      txs: undefined,
-    }
-
-    this.sequencedData = {
+    this.connections = {
       txs: undefined,
     }
   }
 
-  // TODO: add onError callback for any error cases
-  // TODO: add batch key
+  private heartbeat(topic: Topics): void {
+    const connection = this.connections[topic]
+    if (!connection) return
+
+    connection.pingTimeout && clearTimeout(connection.pingTimeout)
+    connection.pingTimeout = setTimeout(() => connection?.ws.terminate(), 10000 + 1000)
+  }
+
+  private onOpen(topic: Topics, resolve: (value: unknown) => void): void {
+    this.heartbeat(topic)
+    resolve(true)
+  }
+
   async subscribeTxs(
     data: TxsTopicData,
-    onMessage: (message: SequencedETHParseTx | ErrorResponse) => void
+    onMessage: (message: SequencedETHParseTx) => void,
+    onError?: (err: ErrorResponse) => void
   ): Promise<void> {
-    if (this.websockets.txs) return
+    if (this.connections.txs) return
 
     const ws = new WebSocket(this.url, this.opts)
+    this.connections.txs = { ws }
 
-    ws.onerror = (event) => console.log('error', event)
+    onError && ws.on('error', (event) => onError({ type: 'error', message: event.message }))
 
-    this.websockets.txs = ws
-
-    await new Promise((resolve) => (ws.onopen = () => resolve(true)))
-
-    const payload: RequestPayload = { method: 'subscribe', topic: 'txs', data }
-
+    ws.on('ping', () => this.heartbeat('txs'))
+    ws.onclose = () => this.connections.txs?.pingTimeout && clearTimeout(this.connections.txs.pingTimeout)
     ws.onmessage = (event) => {
-      // TODO: Reset timeout
-      const message = JSON.parse(event.data.toString()) as SequencedETHParseTx | ErrorResponse
-
-      if ('sequence' in message) {
-        if (!this.sequencedData.txs) {
-          this.sequencedData.txs = Array(message.total).fill(false)
+      try {
+        const message = JSON.parse(event.data.toString()) as SequencedETHParseTx | ErrorResponse
+        if ('type' in message) {
+          onError && onError(message)
+          return
         }
-
-        this.sequencedData.txs[message.sequence] = true
-
-        if (this.sequencedData.txs.every((val) => val)) {
-          // TODO: Clear timeout
-          console.log('all data received!')
-        }
+        onMessage(message)
+      } catch (err) {
+        if (onError && err instanceof Error) onError({ type: 'error', message: err.message })
       }
-
-      onMessage(message)
     }
 
+    await new Promise((resolve) => (ws.onopen = () => this.onOpen('txs', resolve)))
+
+    const payload: RequestPayload = { method: 'subscribe', topic: 'txs', data }
     ws.send(JSON.stringify(payload))
-    // TODO: Set initial timeout
   }
 
   unsubscribeTxs(): void {
-    this.sequencedData.txs = undefined
-    this.websockets.txs?.send(
+    this.connections.txs?.ws.send(
       JSON.stringify({ method: 'unsubscribe', topic: 'txs', data: undefined } as RequestPayload)
     )
   }
 
   close(topic: Topics): void {
-    this.sequencedData[topic] = undefined
-    this.websockets[topic]?.close()
+    this.connections[topic]?.ws.close()
   }
 }

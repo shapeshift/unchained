@@ -202,7 +202,7 @@ const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string):
         const sTx: ETHSyncTx = {
           address: address,
           sequence: index,
-          total: txids.length - 1,
+          total: txids.length,
           client_id: document.client_id,
           txid: txid,
           internalTxs: txHistoryInternal[txid],

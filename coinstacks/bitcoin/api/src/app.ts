@@ -3,7 +3,7 @@ import cors from 'cors'
 import { join } from 'path'
 import swaggerUi from 'swagger-ui-express'
 import { logger } from '@shapeshiftoss/logger'
-import { middleware } from '@shapeshiftoss/common-api/src'
+import { middleware } from '@shapeshiftoss/common-api'
 import { RegisterRoutes } from './routes'
 
 const port = process.env.PORT || 3000

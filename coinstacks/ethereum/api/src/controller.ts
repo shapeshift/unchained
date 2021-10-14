@@ -155,12 +155,14 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
    * Get the estimated gas cost of a transaction
    *
    * @param {string} data input data
+   * @param {string} from from address
    * @param {string} to to address
    * @param {string} value transaction value in ether
    *
    * @returns {Promise<string>} estimated gas cost
    *
    * @example data "0x"
+   * @example from "0x0000000000000000000000000000000000000000"
    * @example to "0x642F4Bda144C63f6DC47EE0fDfbac0a193e2eDb7"
    * @example value "0.0123"
    */
@@ -168,13 +170,14 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/estimate')
-  async estimateGas(@Query() data: string, @Query() to: string, @Query() value: string): Promise<string> {
+  async estimateGas(
+    @Query() data: string,
+    @Query() from: string,
+    @Query() to: string,
+    @Query() value: string
+  ): Promise<string> {
     try {
-      const tx: TransactionRequest = {
-        data,
-        to,
-        value: ethers.utils.parseEther(value),
-      }
+      const tx: TransactionRequest = { data, from, to, value: ethers.utils.parseEther(value) }
       const estimatedGas = await provider.estimateGas(tx)
       return estimatedGas?.toString()
     } catch (err) {

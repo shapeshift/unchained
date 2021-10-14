@@ -5,7 +5,6 @@ dist
 Pulumi.*.yaml
 !Pulumi.sample.yaml
 **/generated
-!packages/thorchain/src/generated
 routes.ts
 swagger.json
 
