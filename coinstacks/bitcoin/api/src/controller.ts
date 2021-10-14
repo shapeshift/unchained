@@ -10,7 +10,7 @@ import {
   TxHistory,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { BitcoinAPI, BitcoinAccount, BitcoinTxSpecific, Utxo } from './models'
+import { BitcoinAPI, BitcoinAccount, BitcoinTxSpecific, BTCNetworkFees, Utxo } from './models'
 
 const INDEXER_URL = process.env.INDEXER_URL
 
@@ -294,6 +294,28 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
     try {
       const { result } = await blockbook.sendTransaction(body.hex)
       return result
+    } catch (err) {
+      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+    }
+  }
+
+  @Get('/fees')
+  async getNetworkFees(): Promise<BTCNetworkFees> {
+    try {
+      let ret: BTCNetworkFees = {}
+      const blockTimes: Record<string, number> = {
+        fast: 2,
+        average: 5,
+        slow: 10,
+      }
+      const result = await blockbook.estimateFees(Object.values(blockTimes))
+      Object.keys(blockTimes).forEach((blockTime) => {
+        ret[blockTime as keyof BTCNetworkFees] = {
+          blocksUntilConfirmation: blockTimes[blockTime],
+          satsPerByte: Number(result[Object.keys(blockTimes).indexOf(blockTime)].feePerUnit),
+        }
+      })
+      return ret
     } catch (err) {
       throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
     }
