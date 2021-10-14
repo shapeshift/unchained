@@ -12,12 +12,13 @@ type Outputs = Record<string, any>
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
-  const name = 'unchained'
-  const asset = 'ethereum'
-  const outputs: Outputs = {}
-
   const { kubeconfig, config, namespace } = await getConfig()
   const { cluster } = config
+
+  const name = 'unchained'
+  const chain = config.indexer?.daemon?.chain
+  const asset = chain && chain !== 'mainnet' ? `ethereum-${chain}` : 'ethereum'
+  const outputs: Outputs = {}
 
   let provider: k8s.Provider
   if (config.isLocal) {

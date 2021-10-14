@@ -20,12 +20,14 @@ aliases:
       branches:
         ignore:
           - main
+          - eth-ropsten
 
   - &only-develop
     filters:
       branches:
         only:
           - develop
+          - eth-ropsten
 
   - &bitcoin
     coinstack: bitcoin
@@ -70,6 +72,29 @@ aliases:
     daemon-memory-limit: 24Gi
     daemon-storage-size: 1500Gi
     rpc-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8332
+
+  - &ethereum-ropsten
+    coinstack: ethereum
+    pulumi-stack: public-ropsten
+    pulumi-dir: coinstacks/ethereum/pulumi
+    mongo-cpu-limit: 512m
+    mongo-memory-limit: 512Mi
+    mongo-replicas: 3
+    mongo-storage-size: 100Gi
+    mongo-url: mongodb://ethereum-ropsten-mongodb-0.ethereum-ropsten-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-ropsten-mongodb-1.ethereum-ropsten-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-ropsten-mongodb-2.ethereum-ropsten-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
+    indexer-cpu-limit: '4'
+    indexer-memory-limit: 12Gi
+    indexer-replicas: 2
+    indexer-storage-size: 250Gi
+    indexer-url: http://ethereum-ropsten-indexer-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: http://ethereum-ropsten-indexer-svc.unchained.svc.cluster.local:8001/websocket
+    daemon-chain: ropsten
+    daemon-image: ethereum/client-go:v1.10.8
+    daemon-node: geth
+    daemon-cpu-limit: '2'
+    daemon-memory-limit: 24Gi
+    daemon-storage-size: 500Gi
+    rpc-url: http://ethereum-ropsten-indexer-svc.unchained.svc.cluster.local:8332
 
 commands:
   unchained-precheck:
@@ -149,12 +174,20 @@ jobs:
     executor: pulumi
     environment:
       DOCKER_BUILDKIT: 1
+    parameters:
+      broker-url:
+        type: string
+        default: amqp://guest:guest@rabbitmq-svc.unchained.svc.cluster.local:5672
     steps:
       - setup_remote_docker:
           version: 20.10.2
       - attach_workspace:
           at: ~/
       - pulumi-dependencies
+      - run:
+          name: add custom environment variables
+          command: |
+            echo 'export BROKER_URL=<< parameters.broker-url >>' >> $BASH_ENV
       - run:
           name: pulumi up
           working_directory: pulumi
@@ -213,6 +246,7 @@ jobs:
       environment:
         description: environment to deploy into. empty string ('') is our prod
         type: string
+        default: ''
       pulumi-stack:
         description: pulumi stack to deploy to (public)
         type: string
@@ -341,6 +375,7 @@ workflows:
 
       - deploy-dependencies:
           name: deploy common unchained dependencies
+          broker-url: amqp://guest:guest@rabbitmq-svc.unchained-dev.svc.cluster.local:5672
           requires:
             - lint and test project (persist to workspace)
           <<: *only-develop
@@ -348,25 +383,49 @@ workflows:
       ######################### (BITCOIN) #########################
       - deploy-coinstack:
           name: deploy bitcoin develop
-          requires:
-            - deploy common unchained dependencies
           <<: *bitcoin
           environment: dev
           pulumi-stack: public-dev
           mongo-replicas: 2
+          mongo-url: mongodb://bitcoin-mongodb-0.bitcoin-mongodb-headless.unchained-dev.svc.cluster.local:27017,bitcoin-mongodb-1.bitcoin-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
           indexer-replicas: 1
-          <<: *only-develop
-
-      ######################### (ETHEREUM) #########################
-      - deploy-coinstack:
-          name: deploy ethereum develop
+          indexer-url: http://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001
+          indexer-ws-url: http://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
+          rpc-url: http://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8332
           requires:
             - deploy common unchained dependencies
+          <<: *only-develop
+
+      ######################### (ETHEREUM) ########################
+      - deploy-coinstack:
+          name: deploy ethereum develop
           <<: *ethereum
           environment: dev
           pulumi-stack: public-dev
           mongo-replicas: 2
+          mongo-url: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained-dev.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
           indexer-replicas: 1
+          indexer-url: http://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8001
+          indexer-ws-url: http://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
+          rpc-url: http://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8332
+          requires:
+            - deploy common unchained dependencies
+          <<: *only-develop
+
+      ######################### (ETHEREUM-ROPSTEN) ################
+      - deploy-coinstack:
+          name: deploy ethereum-ropsten develop
+          <<: *ethereum-ropsten
+          environment: dev
+          pulumi-stack: public-dev-ropsten
+          mongo-replicas: 2
+          mongo-url: mongodb://ethereum-ropsten-mongodb-0.ethereum-ropsten-mongodb-headless.unchained-dev.svc.cluster.local:27017,ethereum-ropsten-mongodb-1.ethereum-ropsten-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
+          indexer-replicas: 1
+          indexer-url: http://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8001
+          indexer-ws-url: http://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
+          rpc-url: http://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8332
+          requires:
+            - deploy common unchained dependencies
           <<: *only-develop
 
   deploy-main:
@@ -385,10 +444,9 @@ workflows:
       - deploy-coinstack:
           name: preview bitcoin coinstack
           pulumi-command: pulumi preview
+          <<: *bitcoin
           requires:
             - deploy common unchained dependencies
-          <<: *bitcoin
-          environment: ''
           <<: *only-main
 
       - approve-coinstack:
@@ -400,20 +458,18 @@ workflows:
 
       - deploy-coinstack:
           name: deploy bitcoin coinstack
+          <<: *bitcoin
           requires:
             - approve bitcoin coinstack
-          <<: *bitcoin
-          environment: ''
           <<: *only-main
 
       ######################### (ETHEREUM) #########################
       - deploy-coinstack:
           name: preview ethereum coinstack
           pulumi-command: pulumi preview
+          <<: *ethereum
           requires:
             - deploy common unchained dependencies
-          <<: *ethereum
-          environment: ''
           <<: *only-main
 
       - approve-coinstack:
@@ -425,12 +481,12 @@ workflows:
 
       - deploy-coinstack:
           name: deploy ethereum coinstack
+          <<: *ethereum
           requires:
             - approve ethereum coinstack
-          <<: *ethereum
-          environment: ''
           <<: *only-main
 
+      ######################### (POST DEPLOY) ######################
       - publish:
           name: publish packages
           requires:
