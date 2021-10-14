@@ -1,6 +1,19 @@
 import axios, { AxiosInstance } from 'axios'
 import { Controller, Example, Get, Path, Query, Route, Tags } from 'tsoa'
-import { Address, ApiError, BalanceHistory, Block, BlockIndex, Info, SendTx, Tx, Utxo, Xpub } from './models'
+import WebSocket from 'ws'
+import {
+  Address,
+  ApiError,
+  BalanceHistory,
+  Block,
+  BlockIndex,
+  Info,
+  NetworkFee,
+  SendTx,
+  Tx,
+  Utxo,
+  Xpub,
+} from './models'
 
 @Route('api/v2')
 @Tags('v2')
@@ -788,5 +801,58 @@ export class Blockbook extends Controller {
     } catch (err) {
       throw new ApiError(err)
     }
+  }
+
+  /**
+   * Returns estimated network fees for the specified confirmation times (in blocks)
+   */
+  @Example<Array<NetworkFee>>([
+    {
+      feePerUnit: '14186',
+    },
+    {
+      feePerUnit: '13727',
+    },
+    {
+      feePerUnit: '10719',
+    },
+    {
+      feePerUnit: '2015',
+    },
+  ])
+  @Get('estimatefees')
+  async estimateFees(@Query() blockTimes: number[]): Promise<Array<NetworkFee>> {
+    return new Promise<Array<NetworkFee>>((resolve, reject) => {
+      let wss: WebSocket
+      try {
+        wss = new WebSocket('wss://indexer.bitcoin.shapeshift.com/websocket')
+
+        wss.on('open', () => {
+          wss.send(
+            JSON.stringify({
+              id: '0',
+              method: 'estimateFee',
+              params: {
+                blocks: blockTimes,
+              },
+            })
+          )
+        })
+
+        wss.on('message', (message) => {
+          const resp = JSON.parse(message.toString())
+          wss.close()
+          resolve(resp['data'])
+        })
+
+        wss.on('error', (err) => {
+          wss.close()
+          reject(err)
+        })
+      } catch (err) {
+        reject(err)
+        throw new ApiError(err)
+      }
+    })
   }
 }

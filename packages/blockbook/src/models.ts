@@ -267,3 +267,11 @@ export interface Vout {
  * Contains info about an xpub and it's transactions
  */
 export type Xpub = Address
+
+/**
+ * Contains info about current network fees
+ */
+
+export type NetworkFee = {
+  feePerUnit: string
+}
