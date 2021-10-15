@@ -302,7 +302,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   @Get('/fees')
   async getNetworkFees(): Promise<BTCNetworkFees> {
     try {
-      let ret: BTCNetworkFees = {}
+      const ret: BTCNetworkFees = {}
       const blockTimes: Record<string, number> = {
         fast: 2,
         average: 5,
