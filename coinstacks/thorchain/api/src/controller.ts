@@ -1,9 +1,9 @@
 import axios, { AxiosInstance } from 'axios'
-
-import { Controller, Example, Get, Path, Post, Response, Route, Tags } from 'tsoa'
+import { Body, Controller, Example, Get, Path, Post, Response, Route, Tags } from 'tsoa'
 import { ApiError, BadRequestError, BaseAPI, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { ThorchainAPI, ThorchainAccount, ThorchainTx, ThorchainTxHistory } from './models'
+import { ThorchainAccount, ThorchainAmount, ThorchainTx, ThorchainTxHistory, ThorchainSendTxBody } from './models'
 import { TxHistory } from '../../../common/api/src'
+//import * as thornode from '@shapeshiftoss/gaia'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const RPC_URL = process.env.RPC_URL
@@ -13,7 +13,7 @@ if (!RPC_URL) throw new Error('RPC_URL env var not set')
 
 @Route('api/v1')
 @Tags('v1')
-export class Thorchain extends Controller implements BaseAPI, ThorchainAPI {
+export class Thorchain extends Controller implements BaseAPI {
   instance: AxiosInstance
 
   constructor(url = INDEXER_URL, timeout?: number) {
@@ -39,8 +39,8 @@ export class Thorchain extends Controller implements BaseAPI, ThorchainAPI {
    */
   @Example<ThorchainAccount>({
     balance: '9805024',
-    account_number: 6456,
-    sequence: 22,
+    account_number: '6456',
+    sequence: '22',
     pubkey: 'thor1gz5krpemm0ce4kj8jafjvjv04hmhle576x8gms',
   })
   @Response<BadRequestError>(400, 'Bad Request')
@@ -63,12 +63,19 @@ export class Thorchain extends Controller implements BaseAPI, ThorchainAPI {
         }
       }
     }
+    interface BankBalances {
+      height: string
+      result: Array<ThorchainAmount>
+    }
+
     try {
-      const { data } = await this.instance.get<AuthAccounts>(`auth/accounts/${pubkey}`)
+      // tODO: handle errors, and defaults
+      const { data: accounts } = await this.instance.get<AuthAccounts>(`auth/accounts/${pubkey}`)
+      const { data: balances } = await this.instance.get<BankBalances>(`bank/balances/${pubkey}`)
       return {
-        balance: 'todo',
-        account_number: Number(data.result.value.account_number),
-        sequence: Number(data.result.value.sequence),
+        balance: balances.result[0].amount,
+        account_number: accounts.result.value.account_number,
+        sequence: accounts.result.value.sequence,
         pubkey: pubkey,
       }
     } catch (err) {
@@ -86,7 +93,7 @@ export class Thorchain extends Controller implements BaseAPI, ThorchainAPI {
    *
    * @returns {Promise<ThorchainTxHistory>} transaction history
    *
-   * @example pubkey "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
+   * @example pubkey "thor1gz5krpemm0ce4kj8jafjvjv04hmhle576x8gms"
    */
   @Example<ThorchainTxHistory>({
     page: 1,
@@ -191,55 +198,63 @@ export class Thorchain extends Controller implements BaseAPI, ThorchainAPI {
   }
 
   /**
-   * Get the estimated gas cost of a transaction
-   *
-   * @param {string} data input data
-   * @param {string} to to address
-   * @param {string} value transaction value in ether
-   *
-   * @returns {Promise<string>} estimated gas cost
-   *
-   * @example data "0x"
-   * @example to "0x642F4Bda144C63f6DC47EE0fDfbac0a193e2eDb7"
-   * @example value "0.0123"
-   */
-  @Example<string>('26540')
-  @Response<ValidationError>(422, 'Validation Error')
-  @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('/gas/estimate')
-  async estimateGas(/*@Query() data: string, @Query() to: string, @Query() value: string*/): Promise<string> {
-    return 'todo'
-  }
-
-  /**
-   * Get the current gas price from the node
-   *
-   * @returns {Promise<string>} current gas price in wei
-   */
-  @Example<string>('123456789')
-  @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('/gas/price')
-  async getGasPrice(): Promise<string> {
-    return 'todo'
-  }
-
-  /**
    * Sends raw transaction to be broadcast to the node.
    *
    * @param {SendTxBody} body serialized raw transaction hex
    *
    * @returns {Promise<string>} transaction id
    *
-   * @example rawTx {
-   *    "hex": "0xf86c0a85046c7cfe0083016dea94d1310c1e038bc12865d3d3997275b3e4737c6302880b503be34d9fe80080269fc7eaaa9c21f59adf8ad43ed66cf5ef9ee1c317bd4d32cd65401e7aaca47cfaa0387d79c65b90be6260d09dcfb780f29dd8133b9b1ceb20b83b7e442b4bfc30cb"
+   * @example {
+   * "tx": {
+   *   "memo": "",
+   *   "fee": {
+   *     "amount":[{"amount":"0","denom":"rune"}],
+   *     "gas":"650000"
+   *   },
+   *   "msg":[{
+   *     "type": "thorchain/MsgSend",
+   *     "value": {
+   *       "amount": [{"amount":"12706267","denom":"rune"}],
+   *       "from_address": "thor1cdpznmwtpz3qt9t4823rkg5wamhq7df28qu69z",
+   *       "to_address": "thor1gz5krpemm0ce4kj8jafjvjv04hmhle576x8gms"
+   *     }
+   *   }],
+   *   "signatures":[{
+   *     "signature":"uzZ5dgJVMjOK6BZHslK6cfdB3wD9IrG9wt+BcGQhoiUg2+JpT4IPQoTK0RBUqcQaq67gQ7uvbTa/S9xQmjRzSg==",
+   *     "pub_key":{"type":"tendermint/PubKeySecp256k1","value":"ArvUYSkr8N00d1gcsnhRrSaC0B8SOxz+AISWo5I1ZJnJ"}
+   *   }]
+   * },
+   * "mode":"sync",
+   * "type":"cosmos-sdk/StdTx"
    * }
    */
-  @Example<string>('0xb9d4ad5408f53eac8627f9ccd840ba8fb3469d55cd9cc2a11c6e049f1eef4edd')
+  @Example<string>('txid')
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Post('send/')
-  async sendTx(/*@Body() body: SendTxBody*/): Promise<string> {
-    return 'todo'
+  async sendTx(@Body() body: ThorchainSendTxBody): Promise<string> {
+    interface BroadcastTxResponse {
+      txhash: string
+    }
+
+    const { data } = await this.instance.post<BroadcastTxResponse>('/txs/', body.hex)
+    return data.txhash
+
+    // try {
+    //   const { txsPost } = thornode.Gaia.TransactionsApiFactory()
+    //   const obj = {
+    //     tx: {
+    //       msg: [body.hex],
+    //     },
+    //   }
+    //   const result = await txsPost(obj)
+    //   return result.hash
+    // } catch (err) {
+    //   throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+    // }
   }
 }
+
+// todo
+// - test with example tx to node (capture signed tx in sim and use it as example)

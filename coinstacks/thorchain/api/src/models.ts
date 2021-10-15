@@ -5,8 +5,8 @@ import { Account } from '../../../common/api/src'
  * Contains additional thorchain specific info
  */
 export interface ThorchainAccount extends Account {
-  account_number: number
-  sequence: number
+  account_number: string
+  sequence: string
 }
 
 export type ThorchainMsgType = 'thorchain/MsgDeposit' | 'thorchain/MsgSend'
@@ -87,6 +87,17 @@ export interface ThorchainTxHistory {
   totalPages: number
   txs: number
   transactions: Array<ThorchainTx>
+}
+
+export interface ThorchainSendTxBody {
+  tx: {
+    memo: string
+    fee: ThorchainFee
+    msg: Array<MsgSend>
+    signatures: Array<ThorchainSignature>
+  }
+  mode: string
+  type: string
 }
 
 /**

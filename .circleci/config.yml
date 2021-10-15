@@ -36,6 +36,18 @@ aliases:
     mongo-replicas: 3
     mongo-storage-size: 100Gi
     mongo-url: mongodb://thorchain-mongodb-0.thorchain-mongodb-headless.unchained.svc.cluster.local:27017,thorchain-mongodb-1.thorchain-mongodb-headless.unchained.svc.cluster.local:27017,thorchain-mongodb-2.thorchain-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
+    indexer-cpu-limit: '4'
+    indexer-memory-limit: 12Gi
+    indexer-replicas: 2
+    indexer-storage-size: 500Gi
+    indexer-url: http://thorchain-indexer-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: http://thorchain-indexer-svc.unchained.svc.cluster.local:8001/websocket
+    daemon-image: ruimarinho/bitcoin-core:0.21.0 #https://github.com/ruimarinho/docker-bitcoin-core
+    daemon-node: bitcoind
+    daemon-cpu-limit: '2'
+    daemon-memory-limit: 12Gi
+    daemon-storage-size: 1500Gi
+    rpc-url: http://thorchain-indexer-svc.unchained.svc.cluster.local:8332
 
   - &bitcoin
     coinstack: bitcoin
@@ -364,7 +376,7 @@ workflows:
           environment: dev
           pulumi-stack: public-dev
           mongo-replicas: 2
-          indexer-replicas: 1
+          indexer-replicas: 0
           <<: *only-develop
 
       ######################### (BITCOIN) #########################
