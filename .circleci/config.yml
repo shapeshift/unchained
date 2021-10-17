@@ -234,6 +234,7 @@ jobs:
       environment:
         description: environment to deploy into. empty string ('') is our prod
         type: string
+        default: ''
       network:
         type: string
         default: mainnet
@@ -287,8 +288,7 @@ jobs:
       - run:
           name: add custom environment variables
           command: |
-            [ -z "<<parameters.environment >>" ] && amqp://guest:guest@rabbitmq-svc.unchained.svc.cluster.local:5672 || amqp://guest:guest@rabbitmq-svc.unchained-<< parameters.environment >>.svc.cluster.local:5672
-            echo 'export BROKER_URL=<< parameters.broker-url >>' >> $BASH_ENV
+            [ -z "<<parameters.environment >>" ] && echo 'export BROKER_URL=amqp://guest:guest@rabbitmq-svc.unchained.svc.cluster.local:5672' || echo 'export BROKER_URL=amqp://guest:guest@rabbitmq-svc.unchained-<< parameters.environment >>.svc.cluster.local:5672' >> $BASH_ENV
             echo 'export INDEXER_URL=<< parameters.indexer-url >>' >> $BASH_ENV
             echo 'export INDEXER_WS_URL=<< parameters.indexer-ws-url >>' >> $BASH_ENV
             echo 'export MONGO_URL=<< parameters.mongo-url >>' >> $BASH_ENV
