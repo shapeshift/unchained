@@ -170,20 +170,12 @@ jobs:
     executor: pulumi
     environment:
       DOCKER_BUILDKIT: 1
-    parameters:
-      broker-url:
-        type: string
-        default: amqp://guest:guest@rabbitmq-svc.unchained.svc.cluster.local:5672
     steps:
       - setup_remote_docker:
           version: 20.10.2
       - attach_workspace:
           at: ~/
       - pulumi-dependencies
-      - run:
-          name: add custom environment variables
-          command: |
-            echo 'export BROKER_URL=<< parameters.broker-url >>' >> $BASH_ENV
       - run:
           name: pulumi up
           working_directory: pulumi
@@ -242,7 +234,6 @@ jobs:
       environment:
         description: environment to deploy into. empty string ('') is our prod
         type: string
-        default: ''
       network:
         type: string
         default: mainnet
@@ -296,6 +287,8 @@ jobs:
       - run:
           name: add custom environment variables
           command: |
+            [ -z "<<parameters.environment >>" ] && amqp://guest:guest@rabbitmq-svc.unchained.svc.cluster.local:5672 || amqp://guest:guest@rabbitmq-svc.unchained-<< parameters.environment >>.svc.cluster.local:5672
+            echo 'export BROKER_URL=<< parameters.broker-url >>' >> $BASH_ENV
             echo 'export INDEXER_URL=<< parameters.indexer-url >>' >> $BASH_ENV
             echo 'export INDEXER_WS_URL=<< parameters.indexer-ws-url >>' >> $BASH_ENV
             echo 'export MONGO_URL=<< parameters.mongo-url >>' >> $BASH_ENV
@@ -369,7 +362,6 @@ workflows:
 
       - deploy-dependencies:
           name: deploy common unchained dependencies
-          broker-url: amqp://guest:guest@rabbitmq-svc.unchained-dev.svc.cluster.local:5672
           requires:
             - lint and test project (persist to workspace)
           <<: *only-develop
