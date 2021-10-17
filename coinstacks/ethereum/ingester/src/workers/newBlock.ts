@@ -5,10 +5,12 @@ import { BlockDocument, BlockService } from '@shapeshiftoss/common-mongo'
 import { logger } from '@shapeshiftoss/logger'
 import { ETHBlock, ReorgResult } from '../types'
 
+const ASSET = process.env.ASSET
 const NODE_ENV = process.env.NODE_ENV
 const RPC_URL = process.env.RPC_URL as string
 
 if (NODE_ENV !== 'test') {
+  if (!ASSET) throw new Error('ASSET env var not set')
   if (!RPC_URL) throw new Error('RPC_URL env var not set')
 }
 
@@ -114,12 +116,12 @@ const onMessage = (newBlockWorker: Worker, reorgWorker: Worker) => async (messag
 
 const main = async () => {
   const newBlockWorker = await Worker.init({
-    queueName: 'queue.ethereum.newBlock',
-    exchangeName: 'exchange.ethereum.block',
+    queueName: `queue.${ASSET}.newBlock`,
+    exchangeName: `exchange.${ASSET}.block`,
   })
 
   const reorgWorker = await Worker.init({
-    exchangeName: 'exchange.ethereum',
+    exchangeName: `exchange.${ASSET}`,
   })
 
   newBlockWorker.queue?.prefetch(1)

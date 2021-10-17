@@ -14,6 +14,8 @@ const getStorageClass = (cluster: string) => {
   }
 }
 
+const supportedNetworks = ['mainnet', 'ropsten']
+
 export interface EthereumConfig {
   kubeconfig: string
   config: Config
@@ -42,6 +44,10 @@ export const getConfig = async (): Promise<EthereumConfig> => {
   const missingRequiredConfig: Array<string> = []
 
   if (!config.stack) missingRequiredConfig.push('stack')
+
+  if (!config.network || !supportedNetworks.includes(config.network)) {
+    missingRequiredConfig.push(`network (${supportedNetworks})`)
+  }
 
   if (config.mongo) {
     config.mongo.storageClass = getStorageClass(config.cluster)

@@ -35,6 +35,7 @@ export interface BaseConfig {
 
 export interface Config extends BaseConfig {
   stack: string
+  network: string
   environment?: string
   api?: ApiConfig
   indexer?: IndexerConfig

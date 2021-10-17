@@ -7,11 +7,13 @@ import { logger } from '@shapeshiftoss/logger'
 import { ETHSyncTx, EtherscanApiResponse, InternalTx, InternalTxHistory, TxHistory } from '../types'
 import { getInternalAddress } from '../parseTx'
 
+const ASSET = process.env.ASSET
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
 const MONGO_DBNAME = process.env.MONGO_DBNAME
 const MONGO_URL = process.env.MONGO_URL
 
+if (!ASSET) throw new Error('ASSET env var not set')
 if (!ETHERSCAN_API_KEY) throw new Error('ETHERSCAN_API_KEY env var not set')
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 if (!MONGO_DBNAME) throw new Error('MONGO_DBNAME env var not set')
@@ -258,9 +260,9 @@ const onMessage = (worker: Worker) => async (message: Message) => {
 
 const main = async () => {
   const worker = await Worker.init({
-    queueName: 'queue.ethereum.tx',
-    exchangeName: 'exchange.ethereum.txid.address',
-    requeueName: 'exchange.ethereum.tx',
+    queueName: `queue.${ASSET}.tx`,
+    exchangeName: `exchange.${ASSET}.txid.address`,
+    requeueName: `exchange.${ASSET}.tx`,
   })
 
   worker.queue?.prefetch(100)

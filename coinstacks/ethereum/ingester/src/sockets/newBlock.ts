@@ -2,8 +2,10 @@ import { NewBlock, WebsocketRepsonse } from '@shapeshiftoss/blockbook'
 import { ready, notReady, Message, MessageEvent, Socket, Subscription } from '@shapeshiftoss/common-ingester'
 import { logger } from '@shapeshiftoss/logger'
 
+const ASSET = process.env.ASSET
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
 
+if (!ASSET) throw new Error('ASSET env var not set')
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 
 const subscription: Subscription = {
@@ -12,7 +14,7 @@ const subscription: Subscription = {
   method: 'subscribeNewBlock',
 }
 
-const socket = new Socket(INDEXER_WS_URL, subscription, 'exchange.ethereum')
+const socket = new Socket(INDEXER_WS_URL, subscription, `exchange.${ASSET}`)
 
 const onMessage = async (message: MessageEvent) => {
   try {
