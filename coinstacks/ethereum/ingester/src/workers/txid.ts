@@ -2,12 +2,13 @@ import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Worker, Message } from '@shapeshiftoss/common-ingester'
 import { logger } from '@shapeshiftoss/logger'
 
-const ASSET = process.env.ASSET
 const INDEXER_URL = process.env.INDEXER_URL
+const NETWORK = process.env.NETWORK
 
-if (!ASSET) throw new Error('ASSET env var not set')
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
+if (!NETWORK) throw new Error('NETWORK env var not set')
 
+const asset = NETWORK !== 'mainnet' ? `ethereum-${NETWORK}` : 'ethereum'
 const blockbook = new Blockbook(INDEXER_URL)
 
 const onMessage = (worker: Worker) => async (message: Message) => {
@@ -26,8 +27,8 @@ const onMessage = (worker: Worker) => async (message: Message) => {
 
 const main = async () => {
   const worker = await Worker.init({
-    queueName: `queue.${ASSET}.txid`,
-    exchangeName: `exchange.${ASSET}.tx`,
+    queueName: `queue.${asset}.txid`,
+    exchangeName: `exchange.${asset}.tx`,
   })
 
   worker.queue?.prefetch(100)

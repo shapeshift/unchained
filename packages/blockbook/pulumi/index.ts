@@ -33,6 +33,7 @@ export async function deployIndexer(
   const labels = { app, asset, tier }
   const name = `${asset}-${tier}`
 
+  const configFile = config.network !== 'mainnet' ? `config-${config.network}.json` : 'config.json'
   const appConfig = new k8s.core.v1.ConfigMap(
     `${name}-config`,
     {
@@ -40,7 +41,7 @@ export async function deployIndexer(
         namespace: namespace,
       },
       data: {
-        'config.json': readFileSync(`../indexer/config.json`).toString(),
+        'config.json': readFileSync(`../indexer/${configFile}`).toString(),
       },
     },
     { provider }

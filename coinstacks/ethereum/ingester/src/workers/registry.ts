@@ -3,14 +3,15 @@ import { Worker, Message, RegistryMessage } from '@shapeshiftoss/common-ingester
 import { RegistryService } from '@shapeshiftoss/common-mongo'
 import { logger } from '@shapeshiftoss/logger'
 
-const ASSET = process.env.ASSET
 const MONGO_DBNAME = process.env.MONGO_DBNAME
 const MONGO_URL = process.env.MONGO_URL
+const NETWORK = process.env.NETWORK
 
-if (!ASSET) throw new Error('ASSET env var not set')
 if (!MONGO_DBNAME) throw new Error('MONGO_DBNAME env var not set')
 if (!MONGO_URL) throw new Error('MONGO_URL env var not set')
+if (!NETWORK) throw new Error('NETWORK env var not set')
 
+const asset = NETWORK !== 'mainnet' ? `ethereum-${NETWORK}` : 'ethereum'
 const registry = new RegistryService(MONGO_URL, MONGO_DBNAME)
 
 const onMessage = (worker: Worker) => async (message: Message) => {
@@ -54,8 +55,8 @@ const onMessage = (worker: Worker) => async (message: Message) => {
 
 const main = async () => {
   const worker = await Worker.init({
-    queueName: `queue.${ASSET}.registry`,
-    exchangeName: `exchange.${ASSET}.tx`,
+    queueName: `queue.${asset}.registry`,
+    exchangeName: `exchange.${asset}.tx`,
   })
 
   worker.queue?.prefetch(1)

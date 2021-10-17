@@ -20,14 +20,12 @@ aliases:
       branches:
         ignore:
           - main
-          - eth-ropsten
 
   - &only-develop
     filters:
       branches:
         only:
           - develop
-          - eth-ropsten
 
   - &bitcoin
     coinstack: bitcoin

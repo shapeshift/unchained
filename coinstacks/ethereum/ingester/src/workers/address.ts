@@ -4,12 +4,13 @@ import { logger } from '@shapeshiftoss/logger'
 import { parseTx } from '../parseTx'
 import { ETHSyncTx, SequencedETHParseTx } from '../types'
 
-const ASSET = process.env.ASSET
 const INDEXER_URL = process.env.INDEXER_URL
+const NETWORK = process.env.NETWORK
 
-if (!ASSET) throw new Error('ASSET env var not set')
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
+if (!NETWORK) throw new Error('NETWORK env var not set')
 
+const asset = NETWORK !== 'mainnet' ? `ethereum-${NETWORK}` : 'ethereum'
 const blockbook = new Blockbook(INDEXER_URL)
 
 const onMessage = (worker: Worker) => async (message: Message) => {
@@ -33,8 +34,8 @@ const onMessage = (worker: Worker) => async (message: Message) => {
 
 const main = async () => {
   const worker = await Worker.init({
-    queueName: `queue.${ASSET}.txid.address`,
-    exchangeName: `exchange.${ASSET}.tx.client`,
+    queueName: `queue.${asset}.txid.address`,
+    exchangeName: `exchange.${asset}.tx.client`,
   })
 
   worker.queue?.prefetch(100)

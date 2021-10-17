@@ -7,11 +7,12 @@ import { logger } from '@shapeshiftoss/logger'
 import { middleware, ConnectionHandler } from '@shapeshiftoss/common-api'
 import { RegisterRoutes } from './routes'
 
-const ASSET = process.env.ASSET as string
+const NETWORK = process.env.NETWORK
 
-if (!ASSET) throw new Error('ASSET env var not set')
+if (!NETWORK) throw new Error('NETWORK env var not set')
 
-const PORT = process.env.PORT ?? 3000
+const port = process.env.PORT ?? 3000
+const asset = NETWORK !== 'mainnet' ? `ethereum-${NETWORK}` : 'ethereum'
 
 const app = express()
 
@@ -19,12 +20,7 @@ app.use(json())
 app.use(urlencoded({ extended: true }))
 app.use(cors())
 
-app.get('/health', async (_, res) => {
-  res.json({
-    status: 'up',
-    asset: ASSET,
-  })
-})
+app.get('/health', async (_, res) => res.json({ status: 'up', asset }))
 
 const options: swaggerUi.SwaggerUiOptions = {
   customCss: '.swagger-ui .topbar { display: none }',
@@ -47,8 +43,8 @@ app.get('*', async (_, res) => {
 app.use(middleware.errorHandler)
 app.use(middleware.notFoundHandler)
 
-const server = app.listen(PORT, () => logger.info('server listening...'))
+const server = app.listen(port, () => logger.info('server listening...'))
 
 const wsServer = new Server({ server })
 
-wsServer.on('connection', (connection) => ConnectionHandler.start(ASSET, connection))
+wsServer.on('connection', (connection) => ConnectionHandler.start(asset, connection))

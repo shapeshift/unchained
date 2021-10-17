@@ -2,59 +2,58 @@ import { Connection } from 'amqp-ts'
 import { logger } from '@shapeshiftoss/logger'
 
 const BROKER_URL = process.env.BROKER_URL
-const ASSET = process.env.ASSET
+const NETWORK = process.env.NETWORK
 
 if (!BROKER_URL) throw new Error('BROKER_URL env var not set')
-if (!ASSET) throw new Error('ASSET env var not set')
+if (!NETWORK) throw new Error('NETWORK env var not set')
 
+const asset = NETWORK !== 'mainnet' ? `ethereum-${NETWORK}` : 'ethereum'
 const connection = new Connection(BROKER_URL)
-const deadLetterExchange = `exchange.${ASSET}.deadLetter`
-
-console.log('ASSET:', ASSET)
+const deadLetterExchange = `exchange.${asset}.deadLetter`
 
 const topology: Connection.Topology = {
   exchanges: [
     { name: 'exchange.unchained', type: 'topic', options: { durable: true } },
-    { name: `exchange.${ASSET}`, type: 'topic', options: { durable: true } },
-    { name: `exchange.${ASSET}.deadLetter`, type: 'topic', options: { durable: true } },
-    { name: `exchange.${ASSET}.block`, type: 'fanout', options: { durable: true } },
-    { name: `exchange.${ASSET}.txid`, type: 'fanout', options: { durable: true } },
-    { name: `exchange.${ASSET}.txid.address`, type: 'fanout', options: { durable: true } },
-    { name: `exchange.${ASSET}.tx`, type: 'fanout', options: { durable: true } },
-    { name: `exchange.${ASSET}.tx.client`, type: 'topic', options: { durable: true } },
+    { name: `exchange.${asset}`, type: 'topic', options: { durable: true } },
+    { name: `exchange.${asset}.deadLetter`, type: 'topic', options: { durable: true } },
+    { name: `exchange.${asset}.block`, type: 'fanout', options: { durable: true } },
+    { name: `exchange.${asset}.txid`, type: 'fanout', options: { durable: true } },
+    { name: `exchange.${asset}.txid.address`, type: 'fanout', options: { durable: true } },
+    { name: `exchange.${asset}.tx`, type: 'fanout', options: { durable: true } },
+    { name: `exchange.${asset}.tx.client`, type: 'topic', options: { durable: true } },
   ],
   queues: [
-    { name: `queue.${ASSET}.registry`, options: { durable: true, deadLetterExchange } },
-    { name: `queue.${ASSET}.newBlock`, options: { durable: true, deadLetterExchange } },
-    { name: `queue.${ASSET}.reorgBlock`, options: { durable: true, deadLetterExchange } },
-    { name: `queue.${ASSET}.block`, options: { durable: true, deadLetterExchange } },
-    { name: `queue.${ASSET}.txid`, options: { durable: true, deadLetterExchange } },
-    { name: `queue.${ASSET}.txid.address`, options: { durable: true, deadLetterExchange } },
-    { name: `queue.${ASSET}.tx`, options: { durable: true, deadLetterExchange } },
-    { name: `queue.${ASSET}.tx.unchained`, options: { durable: true } }, // default unchained client queue for development
-    { name: `queue.${ASSET}.registry.deadLetter`, options: { durable: true } },
-    { name: `queue.${ASSET}.newBlock.deadLetter`, options: { durable: true } },
-    { name: `queue.${ASSET}.block.deadLetter`, options: { durable: true } },
-    { name: `queue.${ASSET}.txid.deadLetter`, options: { durable: true } },
-    { name: `queue.${ASSET}.txid.address.deadLetter`, options: { durable: true } },
-    { name: `queue.${ASSET}.tx.deadLetter`, options: { durable: true } },
+    { name: `queue.${asset}.registry`, options: { durable: true, deadLetterExchange } },
+    { name: `queue.${asset}.newBlock`, options: { durable: true, deadLetterExchange } },
+    { name: `queue.${asset}.reorgBlock`, options: { durable: true, deadLetterExchange } },
+    { name: `queue.${asset}.block`, options: { durable: true, deadLetterExchange } },
+    { name: `queue.${asset}.txid`, options: { durable: true, deadLetterExchange } },
+    { name: `queue.${asset}.txid.address`, options: { durable: true, deadLetterExchange } },
+    { name: `queue.${asset}.tx`, options: { durable: true, deadLetterExchange } },
+    { name: `queue.${asset}.tx.unchained`, options: { durable: true } }, // default unchained client queue for development
+    { name: `queue.${asset}.registry.deadLetter`, options: { durable: true } },
+    { name: `queue.${asset}.newBlock.deadLetter`, options: { durable: true } },
+    { name: `queue.${asset}.block.deadLetter`, options: { durable: true } },
+    { name: `queue.${asset}.txid.deadLetter`, options: { durable: true } },
+    { name: `queue.${asset}.txid.address.deadLetter`, options: { durable: true } },
+    { name: `queue.${asset}.tx.deadLetter`, options: { durable: true } },
   ],
   bindings: [
-    { source: 'exchange.unchained', queue: `queue.${ASSET}.registry`, pattern: `${ASSET}.registry` },
-    { source: `exchange.${ASSET}`, queue: `queue.${ASSET}.newBlock`, pattern: 'newBlock' },
-    { source: `exchange.${ASSET}`, queue: `queue.${ASSET}.reorgBlock`, pattern: 'reorgBlock' },
-    { source: `exchange.${ASSET}.block`, queue: `queue.${ASSET}.block` },
-    { source: `exchange.${ASSET}.txid`, queue: `queue.${ASSET}.txid` },
-    { source: `exchange.${ASSET}.txid.address`, queue: `queue.${ASSET}.txid.address` },
-    { source: `exchange.${ASSET}.tx`, queue: `queue.${ASSET}.tx` },
-    { source: `exchange.${ASSET}.tx.client`, queue: `queue.${ASSET}.tx.unchained`, pattern: 'unchained' },
-    { source: deadLetterExchange, queue: `queue.${ASSET}.registry.deadLetter`, pattern: `${ASSET}.registry` },
-    { source: deadLetterExchange, queue: `queue.${ASSET}.newBlock.deadLetter`, pattern: 'newBlock' },
-    { source: deadLetterExchange, queue: `queue.${ASSET}.reorgBlock.deadLetter`, pattern: 'reorgBlock' },
-    { source: deadLetterExchange, queue: `queue.${ASSET}.block.deadLetter`, pattern: 'block' },
-    { source: deadLetterExchange, queue: `queue.${ASSET}.txid.deadLetter`, pattern: 'txid' },
-    { source: deadLetterExchange, queue: `queue.${ASSET}.txid.address.deadLetter`, pattern: 'txid.address' },
-    { source: deadLetterExchange, queue: `queue.${ASSET}.tx.deadLetter`, pattern: 'tx' },
+    { source: 'exchange.unchained', queue: `queue.${asset}.registry`, pattern: `${asset}.registry` },
+    { source: `exchange.${asset}`, queue: `queue.${asset}.newBlock`, pattern: 'newBlock' },
+    { source: `exchange.${asset}`, queue: `queue.${asset}.reorgBlock`, pattern: 'reorgBlock' },
+    { source: `exchange.${asset}.block`, queue: `queue.${asset}.block` },
+    { source: `exchange.${asset}.txid`, queue: `queue.${asset}.txid` },
+    { source: `exchange.${asset}.txid.address`, queue: `queue.${asset}.txid.address` },
+    { source: `exchange.${asset}.tx`, queue: `queue.${asset}.tx` },
+    { source: `exchange.${asset}.tx.client`, queue: `queue.${asset}.tx.unchained`, pattern: 'unchained' },
+    { source: deadLetterExchange, queue: `queue.${asset}.registry.deadLetter`, pattern: `${asset}.registry` },
+    { source: deadLetterExchange, queue: `queue.${asset}.newBlock.deadLetter`, pattern: 'newBlock' },
+    { source: deadLetterExchange, queue: `queue.${asset}.reorgBlock.deadLetter`, pattern: 'reorgBlock' },
+    { source: deadLetterExchange, queue: `queue.${asset}.block.deadLetter`, pattern: 'block' },
+    { source: deadLetterExchange, queue: `queue.${asset}.txid.deadLetter`, pattern: 'txid' },
+    { source: deadLetterExchange, queue: `queue.${asset}.txid.address.deadLetter`, pattern: 'txid.address' },
+    { source: deadLetterExchange, queue: `queue.${asset}.tx.deadLetter`, pattern: 'tx' },
   ],
 }
 
