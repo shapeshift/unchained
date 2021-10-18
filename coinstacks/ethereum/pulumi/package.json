@@ -1,14 +1,14 @@
 {
   "name": "@shapeshiftoss/ethereum-pulumi",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "license": "MIT",
   "private": true,
   "scripts": {
     "clean": "rm -rf dist node_modules"
   },
   "dependencies": {
-    "@shapeshiftoss/blockbook-pulumi": "^1.4.0",
-    "@shapeshiftoss/common-pulumi": "^1.4.0",
+    "@shapeshiftoss/blockbook-pulumi": "^1.4.1",
+    "@shapeshiftoss/common-pulumi": "^1.4.1",
     "@types/folder-hash": "^4.0.0",
     "folder-hash": "^4.0.0"
   }
