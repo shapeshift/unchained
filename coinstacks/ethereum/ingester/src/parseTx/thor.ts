@@ -8,20 +8,25 @@ import ABI from './abi/thor'
 import { aggregateSell, getSigHash } from './utils'
 
 const MIDGARD_URL = process.env.MIDGARD_URL as string
+const NETWORK = process.env.NETWORK as 'mainnet' | 'ropsten'
 const NODE_ENV = process.env.NODE_ENV
 const RPC_URL = process.env.RPC_URL as string
 
 if (NODE_ENV !== 'test') {
   if (!MIDGARD_URL) throw new Error('MIDGARD_URL env var not set')
+  if (!NETWORK) throw new Error('NETWORK env var not set')
   if (!RPC_URL) throw new Error('RPC_URL env var not set')
 }
 
 const thorchain = new Thorchain({ midgardUrl: MIDGARD_URL })
 const abiInterface = new ethers.utils.Interface(ABI)
 
-export const ROUTER_CONTRACT = '0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B'
 export const DEPOSIT_SIG_HASH = abiInterface.getSighash('deposit')
 export const TRANSFEROUT_SIG_HASH = abiInterface.getSighash('transferOut')
+export const ROUTER_CONTRACT = {
+  mainnet: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
+  ropsten: '0xefA28233838f46a80AaaC8c309077a9ba70D123A',
+}[NETWORK]
 
 const SWAP_TYPES = ['SWAP', '=', 's']
 

@@ -1,11 +1,9 @@
 import * as pulumi from '@pulumi/pulumi'
 import { BaseConfig } from '@shapeshiftoss/common-pulumi'
 import { EKSClusterLauncherArgs } from '@shapeshiftoss/cluster-launcher'
-import { RabbitConfig } from './rabbit'
 
 export interface Config extends BaseConfig {
   eks: Omit<EKSClusterLauncherArgs, 'rootDomainName'>
-  rabbit?: RabbitConfig
 }
 
 let config: Config
@@ -17,20 +15,6 @@ try {
   )
 }
 
-const getStorageClassName = (cluster: string) => {
-  switch (cluster) {
-    case 'docker-desktop':
-      return 'hostpath'
-    case 'minikube':
-      return 'standard'
-    case 'eks':
-      return 'gp2'
-    default:
-      throw new pulumi.RunError(`Cluster ${cluster} not supported... Use: 'docker-desktop', 'minikube', or 'eks.`)
-  }
-}
-
-if (config.rabbit !== undefined) config.rabbit.storageClassName = getStorageClassName(config.cluster)
 if (config.isLocal === undefined) config.isLocal = true
 
 const missingRequiredConfig: Array<string> = []

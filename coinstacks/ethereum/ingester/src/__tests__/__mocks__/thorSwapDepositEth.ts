@@ -12,7 +12,7 @@ export default {
       {
         value: '295040000000000000',
         n: 0,
-        addresses: ['0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B'],
+        addresses: ['0xC145990E84155416144C532E31f89B840Ca8c2cE'],
         isAddress: true,
       },
     ],

@@ -12,7 +12,7 @@ const subscription: Subscription = {
   method: 'subscribeNewTransaction',
 }
 
-const socket = new Socket(INDEXER_WS_URL, subscription, 'exchange.ethereum.tx')
+const socket = new Socket(INDEXER_WS_URL, subscription, 'exchange.tx')
 
 const onMessage = async (message: MessageEvent) => {
   try {

@@ -2,7 +2,6 @@ import { hashElement } from 'folder-hash'
 import { core, Provider } from '@pulumi/kubernetes'
 import { buildAndPushImage, hasTag, getBaseHash } from '@shapeshiftoss/common-pulumi'
 import { EKSClusterLauncher } from '@shapeshiftoss/cluster-launcher'
-import { deployRabbit } from './rabbit'
 import { deployWatcher } from './watcher'
 import config from './config'
 
@@ -89,7 +88,6 @@ export = async (): Promise<Outputs> => {
 
   namespaces.forEach(async (namespace) => {
     new core.v1.Namespace(namespace, { metadata: { name: namespace } }, { provider })
-    await deployRabbit(namespace, provider, namespace, config)
   })
 
   outputs.cluster = config.cluster
