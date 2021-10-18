@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/common-ingester",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "license": "MIT",
   "private": true,
   "main": "dist/index.js",
@@ -15,9 +15,9 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@shapeshiftoss/blockbook": "^1.4.1",
-    "@shapeshiftoss/common-mongo": "^1.4.1",
-    "@shapeshiftoss/logger": "^1.4.1",
+    "@shapeshiftoss/blockbook": "^1.4.2",
+    "@shapeshiftoss/common-mongo": "^1.4.2",
+    "@shapeshiftoss/logger": "^1.4.2",
     "amqp-ts": "^1.8.0",
     "mongodb": "^3.6.3",
     "ws": "^8.2.3"
