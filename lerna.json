@@ -1,12 +1,17 @@
 {
-  "version": "1.3.0",
+  "version": "1.4.0",
   "npmClient": "yarn",
   "command": {
     "publish": {
       "message": "chore(release): publish %v",
-      "ignoreChanges": ["**/*.md"]
+      "ignoreChanges": [
+        "**/*.md"
+      ]
     }
   },
-  "packages": ["packages/*", "coinstacks/**/*"],
+  "packages": [
+    "packages/*",
+    "coinstacks/**/*"
+  ],
   "useWorkspaces": true
 }

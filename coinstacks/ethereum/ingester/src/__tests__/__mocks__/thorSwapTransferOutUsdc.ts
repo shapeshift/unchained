@@ -12,7 +12,7 @@ export default {
       {
         value: '0',
         n: 0,
-        addresses: ['0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B'],
+        addresses: ['0xC145990E84155416144C532E31f89B840Ca8c2cE'],
         isAddress: true,
       },
     ],
@@ -25,7 +25,7 @@ export default {
     tokenTransfers: [
       {
         type: 'ERC20',
-        from: '0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B',
+        from: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
         to: '0x5a8C5afbCC1A58cCbe17542957b587F46828B38E',
         token: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         name: 'USD Coin',

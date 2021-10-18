@@ -135,7 +135,7 @@ export const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: s
         const sTx: SyncTx = {
           address: address,
           sequence: index,
-          total: txHistory.length - 1,
+          total: txHistory.length,
           client_id: document.client_id,
           txid: txid,
         }
@@ -190,9 +190,9 @@ const onMessage = (worker: Worker) => async (message: Message) => {
 
 const main = async () => {
   const worker = await Worker.init({
-    queueName: `queue.bitcoin.tx`,
-    exchangeName: `exchange.bitcoin.txid.address`,
-    requeueName: `exchange.bitcoin.tx`,
+    queueName: 'queue.tx',
+    exchangeName: 'exchange.txid.address',
+    requeueName: 'exchange.tx',
   })
 
   worker.queue?.prefetch(100)

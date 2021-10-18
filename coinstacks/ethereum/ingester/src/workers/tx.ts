@@ -202,7 +202,7 @@ const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string):
         const sTx: ETHSyncTx = {
           address: address,
           sequence: index,
-          total: txids.length - 1,
+          total: txids.length,
           client_id: document.client_id,
           txid: txid,
           internalTxs: txHistoryInternal[txid],
@@ -258,9 +258,9 @@ const onMessage = (worker: Worker) => async (message: Message) => {
 
 const main = async () => {
   const worker = await Worker.init({
-    queueName: 'queue.ethereum.tx',
-    exchangeName: 'exchange.ethereum.txid.address',
-    requeueName: 'exchange.ethereum.tx',
+    queueName: 'queue.tx',
+    exchangeName: 'exchange.txid.address',
+    requeueName: 'exchange.tx',
   })
 
   worker.queue?.prefetch(100)

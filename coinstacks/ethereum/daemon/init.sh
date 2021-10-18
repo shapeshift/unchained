@@ -4,7 +4,7 @@ set -e
 
 start_coin_bg() {
   geth \
-    --$CHAIN \
+    --$NETWORK \
     --syncmode full \
     --datadir /data \
     --cache 4096 \

@@ -2,19 +2,19 @@ import WebSocket from 'ws'
 import { ErrorResponse, RequestPayload, Topics, TxsTopicData } from '@shapeshiftoss/common-api'
 import { SequencedETHParseTx } from '@shapeshiftoss/ethereum-ingester'
 
-export { SequencedETHParseTx, ErrorResponse, RequestPayload, TxsTopicData }
-
 export interface Connection {
   ws: WebSocket
   pingTimeout?: NodeJS.Timeout
 }
 
+export type ClientOptions = WebSocket.ClientOptions
+
 export class Client {
   private readonly url: string
   private readonly connections: Record<Topics, Connection | undefined>
-  private readonly opts?: WebSocket.ClientOptions
+  private readonly opts?: ClientOptions
 
-  constructor(url: string, opts?: WebSocket.ClientOptions) {
+  constructor(url: string, opts?: ClientOptions) {
     this.url = url
     this.opts = { ...opts, sessionTimeout: 10000 }
 
@@ -36,29 +36,36 @@ export class Client {
     resolve(true)
   }
 
-  // TODO: add onError callback for any error cases
   async subscribeTxs(
     data: TxsTopicData,
-    onMessage: (message: SequencedETHParseTx | ErrorResponse) => void
+    onMessage: (message: SequencedETHParseTx) => void,
+    onError?: (err: ErrorResponse) => void
   ): Promise<void> {
     if (this.connections.txs) return
 
     const ws = new WebSocket(this.url, this.opts)
-
     this.connections.txs = { ws }
+
+    onError && ws.on('error', (event) => onError({ type: 'error', message: event.message }))
+
+    ws.on('ping', () => this.heartbeat('txs'))
+    ws.onclose = () => this.connections.txs?.pingTimeout && clearTimeout(this.connections.txs.pingTimeout)
+    ws.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data.toString()) as SequencedETHParseTx | ErrorResponse
+        if ('type' in message) {
+          onError && onError(message)
+          return
+        }
+        onMessage(message)
+      } catch (err) {
+        if (onError && err instanceof Error) onError({ type: 'error', message: err.message })
+      }
+    }
 
     await new Promise((resolve) => (ws.onopen = () => this.onOpen('txs', resolve)))
 
-    ws.onclose = () => this.connections.txs?.pingTimeout && clearTimeout(this.connections.txs.pingTimeout)
-    ws.on('ping', () => this.heartbeat('txs'))
-
     const payload: RequestPayload = { method: 'subscribe', topic: 'txs', data }
-
-    ws.onmessage = (event) => {
-      const message = JSON.parse(event.data.toString()) as SequencedETHParseTx | ErrorResponse
-      onMessage(message)
-    }
-
     ws.send(JSON.stringify(payload))
   }
 
