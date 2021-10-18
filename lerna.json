@@ -10,8 +10,9 @@
     }
   },
   "packages": [
-    "packages/*",
-    "coinstacks/**/*"
+    "packages/**",
+    "coinstacks/**/**",
+    "pulumi/**"
   ],
   "useWorkspaces": true
 }
