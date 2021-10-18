@@ -1,6 +1,6 @@
 import WebSocket from 'ws'
-import { ErrorResponse, RequestPayload, Topics, TxsTopicData } from '../../../common/api'
-import { SequencedETHParseTx } from '../../ingester'
+import { ErrorResponse, RequestPayload, Topics, TxsTopicData } from '../../../common/api/src'
+import { SequencedETHParseTx } from '../../ingester/src/types'
 
 export { ErrorResponse, SequencedETHParseTx, Topics, TxsTopicData }
 
