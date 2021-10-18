@@ -2,6 +2,8 @@ import WebSocket from 'ws'
 import { ErrorResponse, RequestPayload, Topics, TxsTopicData } from '@shapeshiftoss/common-api'
 import { SequencedETHParseTx } from '@shapeshiftoss/ethereum-ingester'
 
+export { ErrorResponse, SequencedETHParseTx, Topics, TxsTopicData }
+
 export interface Connection {
   ws: WebSocket
   pingTimeout?: NodeJS.Timeout
