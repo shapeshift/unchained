@@ -2,19 +2,19 @@ import WebSocket from 'ws'
 import { ErrorResponse, RequestPayload, Topics, TxsTopicData } from '@shapeshiftoss/common-api'
 import { SequencedETHParseTx } from '@shapeshiftoss/ethereum-ingester'
 
-export { SequencedETHParseTx, ErrorResponse, RequestPayload, TxsTopicData }
-
 export interface Connection {
   ws: WebSocket
   pingTimeout?: NodeJS.Timeout
 }
 
+export type ClientOptions = WebSocket.ClientOptions
+
 export class Client {
   private readonly url: string
   private readonly connections: Record<Topics, Connection | undefined>
-  private readonly opts?: WebSocket.ClientOptions
+  private readonly opts?: ClientOptions
 
-  constructor(url: string, opts?: WebSocket.ClientOptions) {
+  constructor(url: string, opts?: ClientOptions) {
     this.url = url
     this.opts = { ...opts, sessionTimeout: 10000 }
 
