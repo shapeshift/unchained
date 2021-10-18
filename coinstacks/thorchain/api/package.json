@@ -17,6 +17,7 @@
   "dependencies": {
     "@shapeshiftoss/common-api": "^1.2.0",
     "@shapeshiftoss/logger": "^1.2.0",
+    "@shapeshiftoss/gaia": "^1.3.0",
     "amqp-ts": "^1.8.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",

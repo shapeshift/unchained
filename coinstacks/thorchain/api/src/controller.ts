@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from 'axios'
 import { Body, Controller, Example, Get, Path, Post, Response, Route, Tags } from 'tsoa'
 import { ApiError, BadRequestError, BaseAPI, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { ThorchainAccount, ThorchainAmount, ThorchainTx, ThorchainTxHistory, ThorchainSendTxBody } from './models'
-import { TxHistory } from '../../../common/api/src'
+import { TxHistory, SendTxBody } from '../../../common/api/src'
 //import * as thornode from '@shapeshiftoss/gaia'
 
 const INDEXER_URL = process.env.INDEXER_URL
@@ -232,13 +232,13 @@ export class Thorchain extends Controller implements BaseAPI {
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Post('send/')
-  async sendTx(@Body() body: ThorchainSendTxBody): Promise<string> {
+  @Post('sendthor/')
+  async sendTxThorchain(@Body() body: ThorchainSendTxBody): Promise<string> {
     interface BroadcastTxResponse {
       txhash: string
     }
 
-    const { data } = await this.instance.post<BroadcastTxResponse>('/txs/', body.hex)
+    const { data } = await this.instance.post<BroadcastTxResponse>('/txs/', body)
     return data.txhash
 
     // try {
@@ -253,6 +253,51 @@ export class Thorchain extends Controller implements BaseAPI {
     // } catch (err) {
     //   throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
     // }
+  }
+
+  /**
+   * Sends raw transaction to be broadcast to the node.
+   *
+   * @param {SendTxBody} body serialized raw transaction hex
+   *
+   * @returns {Promise<string>} transaction id
+   *
+   * @example {
+   * "tx": {
+   *   "memo": "",
+   *   "fee": {
+   *     "amount":[{"amount":"0","denom":"rune"}],
+   *     "gas":"650000"
+   *   },
+   *   "msg":[{
+   *     "type": "thorchain/MsgSend",
+   *     "value": {
+   *       "amount": [{"amount":"12706267","denom":"rune"}],
+   *       "from_address": "thor1cdpznmwtpz3qt9t4823rkg5wamhq7df28qu69z",
+   *       "to_address": "thor1gz5krpemm0ce4kj8jafjvjv04hmhle576x8gms"
+   *     }
+   *   }],
+   *   "signatures":[{
+   *     "signature":"uzZ5dgJVMjOK6BZHslK6cfdB3wD9IrG9wt+BcGQhoiUg2+JpT4IPQoTK0RBUqcQaq67gQ7uvbTa/S9xQmjRzSg==",
+   *     "pub_key":{"type":"tendermint/PubKeySecp256k1","value":"ArvUYSkr8N00d1gcsnhRrSaC0B8SOxz+AISWo5I1ZJnJ"}
+   *   }]
+   * },
+   * "mode":"sync",
+   * "type":"cosmos-sdk/StdTx"
+   * }
+   */
+  @Example<string>('txid')
+  @Response<BadRequestError>(400, 'Bad Request')
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Post('send/')
+  async sendTx(@Body() body: SendTxBody): Promise<string> {
+    interface BroadcastTxResponse {
+      txhash: string
+    }
+
+    const { data } = await this.instance.post<BroadcastTxResponse>('/txs/', body)
+    return data.txhash
   }
 }
 
