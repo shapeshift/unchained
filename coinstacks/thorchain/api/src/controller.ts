@@ -3,11 +3,11 @@ import { Body, Controller, Example, Get, Path, Post, Response, Route, Tags } fro
 import { ApiError, BadRequestError, BaseAPI, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
 import {
   ThorchainAccount,
-  ThorchainTxs,
+  ThorchainTxsResponse,
   ThorchainTxHistory,
   BroadcastTxResponse,
-  AuthAccounts,
-  BankBalances,
+  AuthAccountsResponse,
+  BankBalancesResponse,
 } from './models'
 import { TxHistory } from '../../../common/api/src'
 
@@ -61,8 +61,8 @@ export class Thorchain extends Controller implements BaseAPI {
   @Get('account/{pubkey}')
   async getAccount(@Path() pubkey: string): Promise<ThorchainAccount> {
     try {
-      const { data: accounts } = await this.instance.get<AuthAccounts>(`auth/accounts/${pubkey}`)
-      const { data: balances } = await this.instance.get<BankBalances>(`bank/balances/${pubkey}`)
+      const { data: accounts } = await this.instance.get<AuthAccountsResponse>(`auth/accounts/${pubkey}`)
+      const { data: balances } = await this.instance.get<BankBalancesResponse>(`bank/balances/${pubkey}`)
 
       // find RUNE balance
       const runeBalance = balances.result.find((bal) => bal.denom === 'rune')
@@ -159,7 +159,7 @@ export class Thorchain extends Controller implements BaseAPI {
     //  - Tx type is differnt than blockbook (make a package?)
 
     try {
-      const { data } = await this.instance.get<ThorchainTxs>(`/txs?message.sender=${pubkey}`)
+      const { data } = await this.instance.get<ThorchainTxsResponse>(`/txs?message.sender=${pubkey}`)
 
       const transactions = data.txs.map((tx) => {
         return {
