@@ -5,7 +5,7 @@ import ABI from './abi/uniV2'
 import ERC20_ABI from './abi/erc20'
 import { getSigHash } from './utils'
 
-const NETWORK = process.env.NODE_ENV as 'mainnet' | 'ropsten'
+const NETWORK = process.env.NETWORK as 'mainnet' | 'ropsten'
 const NODE_ENV = process.env.NODE_ENV
 const RPC_URL = process.env.RPC_URL as string
 
