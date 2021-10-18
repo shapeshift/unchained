@@ -38,7 +38,6 @@ export interface RequestPayload {
 }
 
 export class ConnectionHandler {
-  public readonly coinstack: string
   public readonly id: string
 
   private readonly rabbit: Connection
@@ -49,12 +48,11 @@ export class ConnectionHandler {
   private isAlive: boolean
   private queue?: Queue
 
-  private constructor(coinstack: string, websocket: WebSocket) {
-    this.coinstack = coinstack
+  private constructor(websocket: WebSocket) {
     this.id = v4()
     this.isAlive = true
     this.rabbit = new Connection(BROKER_URL)
-    this.unchainedExchange = this.rabbit.declareExchange(`exchange.${coinstack}`, '', { noCreate: true })
+    this.unchainedExchange = this.rabbit.declareExchange('exchange.coinstack', '', { noCreate: true })
     this.routes = {
       txs: {
         subscribe: (data: TxsTopicData) => this.handleSubscribeTxs(data),
@@ -78,8 +76,8 @@ export class ConnectionHandler {
     this.websocket.on('pong', () => this.heartbeat())
   }
 
-  static start(coinstack: string, websocket: WebSocket): void {
-    new ConnectionHandler(coinstack, websocket)
+  static start(websocket: WebSocket): void {
+    new ConnectionHandler(websocket)
   }
 
   private heartbeat(): void {
@@ -108,7 +106,7 @@ export class ConnectionHandler {
 
   private async onClose(interval: NodeJS.Timeout) {
     const msg: RegistryMessage = { action: 'unregister', client_id: this.id, registration: {} }
-    this.unchainedExchange.send(new Message(msg), `${this.coinstack}.registry`)
+    this.unchainedExchange.send(new Message(msg), 'registry')
 
     await this.queue?.delete()
     clearInterval(interval)
@@ -122,9 +120,9 @@ export class ConnectionHandler {
       return
     }
 
-    const txExchange = this.rabbit.declareExchange(`exchange.${this.coinstack}.tx.client`, '', { noCreate: true })
+    const txExchange = this.rabbit.declareExchange('exchange.tx.client', '', { noCreate: true })
 
-    this.queue = this.rabbit.declareQueue(`queue.${this.coinstack}.tx.${this.id}`)
+    this.queue = this.rabbit.declareQueue(`queue.tx.${this.id}`)
     this.queue.bind(txExchange, this.id)
 
     try {
@@ -149,7 +147,7 @@ export class ConnectionHandler {
       },
     }
 
-    this.unchainedExchange.send(new Message(msg), `${this.coinstack}.registry`)
+    this.unchainedExchange.send(new Message(msg), 'registry')
 
     const onMessage = (message: Message) => {
       const content = message.getContent()
