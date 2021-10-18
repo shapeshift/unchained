@@ -99,16 +99,26 @@ export interface BitcoinAPI {
    */
   // @Get('transaction/{txid}')
   getTransaction(txid: string): Promise<BitcoinTxSpecific>
+
+  /**
+   * Get current network fee estimates from Blockbook
+   *
+   * @returns {Promise<BTCNetworkFees>} network fee estimates
+   */
+  getNetworkFees(): Promise<BTCNetworkFees>
 }
 
 /**
- * Contains info about current BTC network fees
+ * Information about BTC network fee at a specific confirmation speed
  */
 export type BTCNetworkFee = {
   blocksUntilConfirmation: number
   satsPerByte: number
 }
 
+/**
+ * Contains info about current BTC network fees
+ */
 export interface BTCNetworkFees {
   fast?: BTCNetworkFee
   average?: BTCNetworkFee

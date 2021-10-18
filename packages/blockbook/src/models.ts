@@ -271,7 +271,14 @@ export type Xpub = Address
 /**
  * Contains info about current network fees
  */
-
-export type NetworkFee = {
+export interface NetworkFee {
   feePerUnit: string
+}
+
+/**
+ * Response data for fees endpoint on websocket API
+ */
+export interface FeeResponse {
+  id: number
+  data: NetworkFee[]
 }

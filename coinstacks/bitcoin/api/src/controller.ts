@@ -10,7 +10,7 @@ import {
   TxHistory,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { BitcoinAPI, BitcoinAccount, BitcoinTxSpecific, BTCNetworkFees, Utxo } from './models'
+import { BitcoinAPI, BitcoinAccount, BitcoinTxSpecific, BTCNetworkFee, BTCNetworkFees, Utxo } from './models'
 
 const INDEXER_URL = process.env.INDEXER_URL
 
@@ -299,25 +299,24 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
     }
   }
 
+  /**
+   * Gets current network fee estimates for 'fast', 'average', and 'slow' tx confirmation times
+   *
+   * @returns {Promise<BTCNetworkFees>}
+   *
+   * @example
+   */
   @Get('/fees')
   async getNetworkFees(): Promise<BTCNetworkFees> {
-    try {
-      const ret: BTCNetworkFees = {}
-      const blockTimes: Record<string, number> = {
-        fast: 2,
-        average: 5,
-        slow: 10,
+    const blockTimes = { fast: 2, average: 5, slow: 10 }
+
+    const result = await blockbook.estimateFees(Object.values(blockTimes))
+    return Object.entries(blockTimes).reduce<BTCNetworkFees>((prev, [key, val], index) => {
+      const networkFee: BTCNetworkFee = {
+        blocksUntilConfirmation: val,
+        satsPerByte: Number(result[index].feePerUnit),
       }
-      const result = await blockbook.estimateFees(Object.values(blockTimes))
-      Object.keys(blockTimes).forEach((blockTime) => {
-        ret[blockTime as keyof BTCNetworkFees] = {
-          blocksUntilConfirmation: blockTimes[blockTime],
-          satsPerByte: Number(result[Object.keys(blockTimes).indexOf(blockTime)].feePerUnit),
-        }
-      })
-      return ret
-    } catch (err) {
-      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
-    }
+      return { ...prev, [key]: networkFee }
+    }, {})
   }
 }

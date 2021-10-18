@@ -7,6 +7,7 @@ import {
   BalanceHistory,
   Block,
   BlockIndex,
+  FeeResponse,
   Info,
   NetworkFee,
   SendTx,
@@ -19,9 +20,11 @@ import {
 @Tags('v2')
 export class Blockbook extends Controller {
   instance: AxiosInstance
+  wsURL: string
 
   constructor(url = 'https://indexer.ethereum.shapeshift.com', timeout?: number) {
     super()
+    this.wsURL = 'wss://' + url.split('//')[1] + '/websocket'
     this.instance = axios.create({
       timeout: timeout ?? 10000,
       baseURL: url,
@@ -823,12 +826,11 @@ export class Blockbook extends Controller {
   @Get('estimatefees')
   async estimateFees(@Query() blockTimes: number[]): Promise<Array<NetworkFee>> {
     return new Promise<Array<NetworkFee>>((resolve, reject) => {
-      let wss: WebSocket
       try {
-        wss = new WebSocket('wss://indexer.bitcoin.shapeshift.com/websocket')
+        const ws: WebSocket = new WebSocket(this.wsURL)
 
-        wss.on('open', () => {
-          wss.send(
+        ws.on('open', () => {
+          ws.send(
             JSON.stringify({
               id: '0',
               method: 'estimateFee',
@@ -839,19 +841,18 @@ export class Blockbook extends Controller {
           )
         })
 
-        wss.on('message', (message) => {
-          const resp = JSON.parse(message.toString())
-          wss.close()
-          resolve(resp['data'])
+        ws.on('message', (message) => {
+          const resp = JSON.parse(message.toString()) as FeeResponse
+          ws.close()
+          resolve(resp.data)
         })
 
-        wss.on('error', (err) => {
-          wss.close()
-          reject(err)
+        ws.on('error', (err) => {
+          ws.close()
+          reject({ statusText: undefined, status: undefined, data: JSON.stringify(err) })
         })
       } catch (err) {
-        reject(err)
-        throw new ApiError(err)
+        reject({ statusText: undefined, status: undefined, data: JSON.stringify(err) })
       }
     })
   }
