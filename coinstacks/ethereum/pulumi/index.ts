@@ -35,19 +35,16 @@ export = async (): Promise<Outputs> => {
   }
 
   const missingKeys: Array<string> = []
-  const stringData = Object.keys(parse(readFileSync('../sample.env'))).reduce<Record<string, string>>(
-    (prev, key) => {
-      const value = process.env[key] ?? prev[key]
+  const stringData = Object.keys(parse(readFileSync('../sample.env'))).reduce((prev, key) => {
+    const value = process.env[key]
 
-      if (!value) {
-        missingKeys.push(key)
-        return prev
-      }
+    if (!value) {
+      missingKeys.push(key)
+      return prev
+    }
 
-      return { ...prev, [key]: value }
-    },
-    { ASSET: asset }
-  )
+    return { ...prev, [key]: value }
+  }, {})
 
   if (missingKeys.length) {
     throw new Error(`Missing the following required environment variables: ${missingKeys.join(', ')}`)
