@@ -1,6 +1,6 @@
 import WebSocket from 'ws'
-import { ErrorResponse, RequestPayload, Topics, TxsTopicData } from '@shapeshiftoss/common-api'
-import { SequencedETHParseTx } from '@shapeshiftoss/ethereum-ingester'
+import { ErrorResponse, RequestPayload, Topics, TxsTopicData } from '../../../common/api'
+import { SequencedETHParseTx } from '../../ingester'
 
 export { ErrorResponse, SequencedETHParseTx, Topics, TxsTopicData }
 
