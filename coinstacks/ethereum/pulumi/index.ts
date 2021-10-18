@@ -52,8 +52,8 @@ export = async (): Promise<Outputs> => {
 
   new k8s.core.v1.Secret(asset, { metadata: { name: asset, namespace }, stringData }, { provider })
 
-  const mongo = await deployMongo(name, asset, provider, namespace, config.mongo)
-  const rabbit = await deployRabbit(name, asset, provider, namespace, config.rabbit)
+  const mongo = await deployMongo(name, asset, provider, namespace, config)
+  const rabbit = await deployRabbit(name, asset, provider, namespace, config)
 
   const deps = all([mongo, rabbit]).apply(([mongoResources]) => mongoResources)
 
