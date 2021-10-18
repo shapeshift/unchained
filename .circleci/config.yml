@@ -26,6 +26,7 @@ aliases:
       branches:
         only:
           - develop
+          - spike-thorchain
 
   - &thorchain
     coinstack: thorchain
