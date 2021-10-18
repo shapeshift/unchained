@@ -44,5 +44,4 @@ config:
     #    cpuLimit: '2'
     #    image: 'ethereum/client-go:v1.10.8'
     #    memoryLimit: '24Gi'
-    #    node: 'geth'
     #    storageSize: '1500Gi'

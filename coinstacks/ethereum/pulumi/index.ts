@@ -55,7 +55,7 @@ export = async (): Promise<Outputs> => {
   const mongo = await deployMongo(name, asset, provider, namespace, config)
   const rabbit = await deployRabbit(name, asset, provider, namespace, config)
 
-  const deps = all([mongo, rabbit]).apply(([mongoResources]) => mongoResources)
+  const deps = all([mongo, rabbit]).apply(([mongoResources, rabbitResource]) => [...mongoResources, rabbitResource])
 
   await deployIndexer(name, asset, provider, namespace, config)
   await deployIngester(name, asset, provider, namespace, config, deps)

@@ -1,4 +1,5 @@
 import * as k8s from '@pulumi/kubernetes'
+import { CustomResource } from '@pulumi/pulumi'
 import { Config } from './index'
 
 export interface RabbitConfig {
@@ -16,7 +17,7 @@ export async function deployRabbit(
   provider: k8s.Provider,
   namespace: string,
   config: Pick<Config, 'rabbit' | 'isLocal'>
-): Promise<void> {
+): Promise<CustomResource | undefined> {
   if (config.rabbit === undefined) return
 
   const tier = 'rabbitmq'
@@ -85,7 +86,7 @@ export async function deployRabbit(
     },
   }
 
-  new k8s.apps.v1.StatefulSet(
+  return new k8s.apps.v1.StatefulSet(
     name,
     {
       metadata: {
