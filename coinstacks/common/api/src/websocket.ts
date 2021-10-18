@@ -54,7 +54,7 @@ export class ConnectionHandler {
     this.id = v4()
     this.isAlive = true
     this.rabbit = new Connection(BROKER_URL)
-    this.unchainedExchange = this.rabbit.declareExchange('exchange.unchained', '', { noCreate: true })
+    this.unchainedExchange = this.rabbit.declareExchange(`exchange.${coinstack}`, '', { noCreate: true })
     this.routes = {
       txs: {
         subscribe: (data: TxsTopicData) => this.handleSubscribeTxs(data),

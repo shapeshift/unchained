@@ -52,7 +52,7 @@ services:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672
       MONGO_URL: mongodb://mongo:27017
     working_dir: /app/coinstacks/${COINSTACK}/ingester
-    command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.unchained -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/sockets/newBlock.ts"
+    command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.${COINSTACK} -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/sockets/newBlock.ts"
     volumes:
       - .:/app
     depends_on:
@@ -66,7 +66,7 @@ services:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672
       MONGO_URL: mongodb://mongo:27017
     working_dir: /app/coinstacks/${COINSTACK}/ingester
-    command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.unchained -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/sockets/newTransaction.ts"
+    command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.${COINSTACK} -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/sockets/newTransaction.ts"
     volumes:
       - .:/app
     depends_on:
@@ -91,7 +91,7 @@ services:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672
       MONGO_URL: mongodb://mongo:27017
     working_dir: /app/coinstacks/${COINSTACK}/ingester
-    command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.unchained -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/workers/newBlock.ts"
+    command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.${COINSTACK} -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/workers/newBlock.ts"
     volumes:
       - .:/app
     depends_on:
@@ -105,7 +105,7 @@ services:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672
       MONGO_URL: mongodb://mongo:27017
     working_dir: /app/coinstacks/${COINSTACK}/ingester
-    command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.unchained -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/workers/block.ts"
+    command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.${COINSTACK} -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/workers/block.ts"
     volumes:
       - .:/app
     depends_on:
@@ -119,7 +119,7 @@ services:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672
       MONGO_URL: mongodb://mongo:27017
     working_dir: /app/coinstacks/${COINSTACK}/ingester
-    command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.unchained -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/workers/txid.ts"
+    command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.${COINSTACK} -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/workers/txid.ts"
     volumes:
       - .:/app
     depends_on:
@@ -133,7 +133,7 @@ services:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672
       MONGO_URL: mongodb://mongo:27017
     working_dir: /app/coinstacks/${COINSTACK}/ingester
-    command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.unchained -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/workers/tx.ts"
+    command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.${COINSTACK} -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/workers/tx.ts"
     volumes:
       - .:/app
     depends_on:
@@ -147,7 +147,7 @@ services:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672
       MONGO_URL: mongodb://mongo:27017
     working_dir: /app/coinstacks/${COINSTACK}/ingester
-    command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.unchained -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/workers/address.ts"
+    command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.${COINSTACK} -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/workers/address.ts"
     volumes:
       - .:/app
     depends_on:
@@ -161,7 +161,7 @@ services:
       BROKER_URL: amqp://guest:guest@rabbitmq:5672
       MONGO_URL: mongodb://mongo:27017
     working_dir: /app/coinstacks/${COINSTACK}/ingester
-    command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.unchained -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/workers/registry.ts"
+    command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.${COINSTACK} -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/workers/registry.ts"
     volumes:
       - .:/app
     depends_on:

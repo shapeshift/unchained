@@ -5,12 +5,9 @@ import { parseTx } from '../parseTx'
 import { ETHSyncTx, SequencedETHParseTx } from '../types'
 
 const INDEXER_URL = process.env.INDEXER_URL
-const NETWORK = process.env.NETWORK
 
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
-if (!NETWORK) throw new Error('NETWORK env var not set')
 
-const asset = NETWORK !== 'mainnet' ? `ethereum-${NETWORK}` : 'ethereum'
 const blockbook = new Blockbook(INDEXER_URL)
 
 const onMessage = (worker: Worker) => async (message: Message) => {
@@ -34,8 +31,8 @@ const onMessage = (worker: Worker) => async (message: Message) => {
 
 const main = async () => {
   const worker = await Worker.init({
-    queueName: `queue.${asset}.txid.address`,
-    exchangeName: `exchange.${asset}.tx.client`,
+    queueName: 'queue.ethereum.txid.address',
+    exchangeName: 'exchange.ethereum.tx.client',
   })
 
   worker.queue?.prefetch(100)

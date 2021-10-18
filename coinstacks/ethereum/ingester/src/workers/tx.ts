@@ -11,20 +11,17 @@ const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
 const MONGO_DBNAME = process.env.MONGO_DBNAME
 const MONGO_URL = process.env.MONGO_URL
-const NETWORK = process.env.NETWORK
 
 if (!ETHERSCAN_API_KEY) throw new Error('ETHERSCAN_API_KEY env var not set')
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 if (!MONGO_DBNAME) throw new Error('MONGO_DBNAME env var not set')
 if (!MONGO_URL) throw new Error('MONGO_URL env var not set')
-if (!NETWORK) throw new Error('NETWORK env var not set')
 
 const POOL_SIZE = 100
 const PAGE_SIZE = 1000
 const BATCH_SIZE = 20
 const SYNC_TIMEOUT = 1000 * 60 * 5
 
-const asset = NETWORK !== 'mainnet' ? `ethereum-${NETWORK}` : 'ethereum'
 const blockbook = new Blockbook(INDEXER_URL)
 const registry = new RegistryService(MONGO_URL, MONGO_DBNAME, POOL_SIZE)
 
@@ -261,9 +258,9 @@ const onMessage = (worker: Worker) => async (message: Message) => {
 
 const main = async () => {
   const worker = await Worker.init({
-    queueName: `queue.${asset}.tx`,
-    exchangeName: `exchange.${asset}.txid.address`,
-    requeueName: `exchange.${asset}.tx`,
+    queueName: 'queue.ethereum.tx',
+    exchangeName: 'exchange.ethereum.txid.address',
+    requeueName: 'exchange.ethereum.tx',
   })
 
   worker.queue?.prefetch(100)

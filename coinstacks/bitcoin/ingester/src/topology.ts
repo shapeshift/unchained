@@ -10,7 +10,6 @@ const deadLetterExchange = 'exchange.bitcoin.deadLetter'
 
 const topology: Connection.Topology = {
   exchanges: [
-    { name: 'exchange.unchained', type: 'topic', options: { durable: true } },
     { name: 'exchange.bitcoin', type: 'topic', options: { durable: true } },
     { name: 'exchange.bitcoin.deadLetter', type: 'topic', options: { durable: true } },
     { name: 'exchange.bitcoin.block', type: 'fanout', options: { durable: true } },
@@ -36,7 +35,7 @@ const topology: Connection.Topology = {
     { name: 'queue.bitcoin.tx.deadLetter', options: { durable: true } },
   ],
   bindings: [
-    { source: 'exchange.unchained', queue: 'queue.bitcoin.registry', pattern: 'bitcoin.registry' },
+    { source: 'exchange.bitcoin', queue: 'queue.bitcoin.registry', pattern: 'registry' },
     { source: 'exchange.bitcoin', queue: 'queue.bitcoin.newBlock', pattern: 'newBlock' },
     { source: 'exchange.bitcoin', queue: 'queue.bitcoin.reorgBlock', pattern: 'reorgBlock' },
     { source: 'exchange.bitcoin.block', queue: 'queue.bitcoin.block' },

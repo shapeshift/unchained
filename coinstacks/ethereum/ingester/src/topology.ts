@@ -2,58 +2,54 @@ import { Connection } from 'amqp-ts'
 import { logger } from '@shapeshiftoss/logger'
 
 const BROKER_URL = process.env.BROKER_URL
-const NETWORK = process.env.NETWORK
 
 if (!BROKER_URL) throw new Error('BROKER_URL env var not set')
-if (!NETWORK) throw new Error('NETWORK env var not set')
 
-const asset = NETWORK !== 'mainnet' ? `ethereum-${NETWORK}` : 'ethereum'
 const connection = new Connection(BROKER_URL)
-const deadLetterExchange = `exchange.${asset}.deadLetter`
+const deadLetterExchange = 'exchange.ethereum.deadLetter'
 
 const topology: Connection.Topology = {
   exchanges: [
-    { name: 'exchange.unchained', type: 'topic', options: { durable: true } },
-    { name: `exchange.${asset}`, type: 'topic', options: { durable: true } },
-    { name: `exchange.${asset}.deadLetter`, type: 'topic', options: { durable: true } },
-    { name: `exchange.${asset}.block`, type: 'fanout', options: { durable: true } },
-    { name: `exchange.${asset}.txid`, type: 'fanout', options: { durable: true } },
-    { name: `exchange.${asset}.txid.address`, type: 'fanout', options: { durable: true } },
-    { name: `exchange.${asset}.tx`, type: 'fanout', options: { durable: true } },
-    { name: `exchange.${asset}.tx.client`, type: 'topic', options: { durable: true } },
+    { name: 'exchange.ethereum', type: 'topic', options: { durable: true } },
+    { name: 'exchange.ethereum.deadLetter', type: 'topic', options: { durable: true } },
+    { name: 'exchange.ethereum.block', type: 'fanout', options: { durable: true } },
+    { name: 'exchange.ethereum.txid', type: 'fanout', options: { durable: true } },
+    { name: 'exchange.ethereum.txid.address', type: 'fanout', options: { durable: true } },
+    { name: 'exchange.ethereum.tx', type: 'fanout', options: { durable: true } },
+    { name: 'exchange.ethereum.tx.client', type: 'topic', options: { durable: true } },
   ],
   queues: [
-    { name: `queue.${asset}.registry`, options: { durable: true, deadLetterExchange } },
-    { name: `queue.${asset}.newBlock`, options: { durable: true, deadLetterExchange } },
-    { name: `queue.${asset}.reorgBlock`, options: { durable: true, deadLetterExchange } },
-    { name: `queue.${asset}.block`, options: { durable: true, deadLetterExchange } },
-    { name: `queue.${asset}.txid`, options: { durable: true, deadLetterExchange } },
-    { name: `queue.${asset}.txid.address`, options: { durable: true, deadLetterExchange } },
-    { name: `queue.${asset}.tx`, options: { durable: true, deadLetterExchange } },
-    { name: `queue.${asset}.tx.unchained`, options: { durable: true } }, // default unchained client queue for development
-    { name: `queue.${asset}.registry.deadLetter`, options: { durable: true } },
-    { name: `queue.${asset}.newBlock.deadLetter`, options: { durable: true } },
-    { name: `queue.${asset}.block.deadLetter`, options: { durable: true } },
-    { name: `queue.${asset}.txid.deadLetter`, options: { durable: true } },
-    { name: `queue.${asset}.txid.address.deadLetter`, options: { durable: true } },
-    { name: `queue.${asset}.tx.deadLetter`, options: { durable: true } },
+    { name: 'queue.ethereum.registry', options: { durable: true, deadLetterExchange } },
+    { name: 'queue.ethereum.newBlock', options: { durable: true, deadLetterExchange } },
+    { name: 'queue.ethereum.reorgBlock', options: { durable: true, deadLetterExchange } },
+    { name: 'queue.ethereum.block', options: { durable: true, deadLetterExchange } },
+    { name: 'queue.ethereum.txid', options: { durable: true, deadLetterExchange } },
+    { name: 'queue.ethereum.txid.address', options: { durable: true, deadLetterExchange } },
+    { name: 'queue.ethereum.tx', options: { durable: true, deadLetterExchange } },
+    { name: 'queue.ethereum.tx.unchained', options: { durable: true } }, // default unchained client queue for development
+    { name: 'queue.ethereum.registry.deadLetter', options: { durable: true } },
+    { name: 'queue.ethereum.newBlock.deadLetter', options: { durable: true } },
+    { name: 'queue.ethereum.block.deadLetter', options: { durable: true } },
+    { name: 'queue.ethereum.txid.deadLetter', options: { durable: true } },
+    { name: 'queue.ethereum.txid.address.deadLetter', options: { durable: true } },
+    { name: 'queue.ethereum.tx.deadLetter', options: { durable: true } },
   ],
   bindings: [
-    { source: 'exchange.unchained', queue: `queue.${asset}.registry`, pattern: `${asset}.registry` },
-    { source: `exchange.${asset}`, queue: `queue.${asset}.newBlock`, pattern: 'newBlock' },
-    { source: `exchange.${asset}`, queue: `queue.${asset}.reorgBlock`, pattern: 'reorgBlock' },
-    { source: `exchange.${asset}.block`, queue: `queue.${asset}.block` },
-    { source: `exchange.${asset}.txid`, queue: `queue.${asset}.txid` },
-    { source: `exchange.${asset}.txid.address`, queue: `queue.${asset}.txid.address` },
-    { source: `exchange.${asset}.tx`, queue: `queue.${asset}.tx` },
-    { source: `exchange.${asset}.tx.client`, queue: `queue.${asset}.tx.unchained`, pattern: 'unchained' },
-    { source: deadLetterExchange, queue: `queue.${asset}.registry.deadLetter`, pattern: `${asset}.registry` },
-    { source: deadLetterExchange, queue: `queue.${asset}.newBlock.deadLetter`, pattern: 'newBlock' },
-    { source: deadLetterExchange, queue: `queue.${asset}.reorgBlock.deadLetter`, pattern: 'reorgBlock' },
-    { source: deadLetterExchange, queue: `queue.${asset}.block.deadLetter`, pattern: 'block' },
-    { source: deadLetterExchange, queue: `queue.${asset}.txid.deadLetter`, pattern: 'txid' },
-    { source: deadLetterExchange, queue: `queue.${asset}.txid.address.deadLetter`, pattern: 'txid.address' },
-    { source: deadLetterExchange, queue: `queue.${asset}.tx.deadLetter`, pattern: 'tx' },
+    { source: 'exchange.ethereum', queue: 'queue.ethereum.registry', pattern: 'registry' },
+    { source: 'exchange.ethereum', queue: 'queue.ethereum.newBlock', pattern: 'newBlock' },
+    { source: 'exchange.ethereum', queue: 'queue.ethereum.reorgBlock', pattern: 'reorgBlock' },
+    { source: 'exchange.ethereum.block', queue: 'queue.ethereum.block' },
+    { source: 'exchange.ethereum.txid', queue: 'queue.ethereum.txid' },
+    { source: 'exchange.ethereum.txid.address', queue: 'queue.ethereum.txid.address' },
+    { source: 'exchange.ethereum.tx', queue: 'queue.ethereum.tx' },
+    { source: 'exchange.ethereum.tx.client', queue: 'queue.ethereum.tx.unchained', pattern: 'unchained' },
+    { source: deadLetterExchange, queue: 'queue.ethereum.registry.deadLetter', pattern: 'ethereum.registry' },
+    { source: deadLetterExchange, queue: 'queue.ethereum.newBlock.deadLetter', pattern: 'newBlock' },
+    { source: deadLetterExchange, queue: 'queue.ethereum.reorgBlock.deadLetter', pattern: 'reorgBlock' },
+    { source: deadLetterExchange, queue: 'queue.ethereum.block.deadLetter', pattern: 'block' },
+    { source: deadLetterExchange, queue: 'queue.ethereum.txid.deadLetter', pattern: 'txid' },
+    { source: deadLetterExchange, queue: 'queue.ethereum.txid.address.deadLetter', pattern: 'txid.address' },
+    { source: deadLetterExchange, queue: 'queue.ethereum.tx.deadLetter', pattern: 'tx' },
   ],
 }
 
