@@ -64,7 +64,7 @@ export async function deployApi(
   const [coinstack] = asset.split('-')
   const name = `${asset}-${tier}`
 
-  let imageName = 'mhart/alpine-node:14.17.0' // local dev image
+  let imageName = 'mhart/alpine-node:14.17.3' // local dev image
   if (!config.isLocal) {
     const repositoryName = `${app}-${coinstack}-${tier}`
     const baseImageName = `${config.dockerhub?.username ?? 'shapeshiftdao'}/unchained-base:${await getBaseHash()}`
