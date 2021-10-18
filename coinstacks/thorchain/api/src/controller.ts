@@ -1,9 +1,15 @@
 import axios, { AxiosInstance } from 'axios'
 import { Body, Controller, Example, Get, Path, Post, Response, Route, Tags } from 'tsoa'
 import { ApiError, BadRequestError, BaseAPI, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { ThorchainAccount, ThorchainAmount, ThorchainTx, ThorchainTxHistory, ThorchainSendTxBody } from './models'
-import { TxHistory, SendTxBody } from '../../../common/api/src'
-//import * as thornode from '@shapeshiftoss/gaia'
+import {
+  ThorchainAccount,
+  ThorchainTxs,
+  ThorchainTxHistory,
+  BroadcastTxResponse,
+  AuthAccounts,
+  BankBalances,
+} from './models'
+import { TxHistory } from '../../../common/api/src'
 
 // todo
 // - fix sendtxbody types
@@ -54,32 +60,15 @@ export class Thorchain extends Controller implements BaseAPI {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}')
   async getAccount(@Path() pubkey: string): Promise<ThorchainAccount> {
-    interface AuthAccounts {
-      height: string
-      result: {
-        type: string
-        value: {
-          address: string
-          public_key: {
-            type: string
-            value: string
-          }
-          account_number: string
-          sequence: string
-        }
-      }
-    }
-    interface BankBalances {
-      height: string
-      result: Array<ThorchainAmount>
-    }
-
     try {
-      // tODO: handle errors, and defaults
       const { data: accounts } = await this.instance.get<AuthAccounts>(`auth/accounts/${pubkey}`)
       const { data: balances } = await this.instance.get<BankBalances>(`bank/balances/${pubkey}`)
+
+      // find RUNE balance
+      const runeBalance = balances.result.find((bal) => bal.denom === 'rune')
+
       return {
-        balance: balances.result[0].amount,
+        balance: runeBalance?.amount ?? '',
         account_number: accounts.result.value.account_number,
         sequence: accounts.result.value.sequence,
         pubkey: pubkey,
@@ -168,17 +157,9 @@ export class Thorchain extends Controller implements BaseAPI {
     //  - get recieved messages, interleave
     //  - handle paging
     //  - Tx type is differnt than blockbook (make a package?)
-    interface Txs {
-      total_count: string
-      count: string
-      page_number: string
-      page_total: string
-      limit: string
-      txs: Array<ThorchainTx>
-    }
 
     try {
-      const { data } = await this.instance.get<Txs>(`/txs?message.sender=${pubkey}`)
+      const { data } = await this.instance.get<ThorchainTxs>(`/txs?message.sender=${pubkey}`)
 
       const transactions = data.txs.map((tx) => {
         return {
@@ -238,24 +219,7 @@ export class Thorchain extends Controller implements BaseAPI {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Post('send/')
   async sendTx(@Body() body: unknown): Promise<string> {
-    interface BroadcastTxResponse {
-      txhash: string
-    }
-
     const { data } = await this.instance.post<BroadcastTxResponse>('/txs/', body)
     return data.txhash
-
-    // try {
-    //   const { txsPost } = thornode.Gaia.TransactionsApiFactory()
-    //   const obj = {
-    //     tx: {
-    //       msg: [body.hex],
-    //     },
-    //   }
-    //   const result = await txsPost(obj)
-    //   return result.hash
-    // } catch (err) {
-    //   throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
-    // }
   }
 }

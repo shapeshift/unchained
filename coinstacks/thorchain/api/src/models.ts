@@ -1,6 +1,38 @@
 /* unable to import models from a module with tsoa */
 import { Account } from '../../../common/api/src'
 
+export interface BroadcastTxResponse {
+  txhash: string
+}
+
+export interface ThorchainTxs {
+  total_count: string
+  count: string
+  page_number: string
+  page_total: string
+  limit: string
+  txs: Array<ThorchainTx>
+}
+export interface AuthAccounts {
+  height: string
+  result: {
+    type: string
+    value: {
+      address: string
+      public_key: {
+        type: string
+        value: string
+      }
+      account_number: string
+      sequence: string
+    }
+  }
+}
+export interface BankBalances {
+  height: string
+  result: Array<ThorchainAmount>
+}
+
 /**
  * Contains additional thorchain specific info
  */
