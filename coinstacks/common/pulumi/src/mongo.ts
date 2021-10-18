@@ -1,5 +1,6 @@
 import * as k8s from '@pulumi/kubernetes'
 import { CustomResource, Output } from '@pulumi/pulumi'
+import { Config } from './index'
 
 export interface MongoConfig {
   cpuLimit: string
@@ -15,9 +16,9 @@ export async function deployMongo(
   asset: string,
   provider: k8s.Provider,
   namespace: string,
-  config?: MongoConfig
+  config: Pick<Config, 'mongo'>
 ): Promise<Output<Array<CustomResource>> | undefined> {
-  if (config === undefined) return
+  if (config.mongo === undefined) return
 
   const labels = { app, asset, tier: 'mongo' }
 
@@ -27,7 +28,7 @@ export async function deployMongo(
       repo: 'bitnami',
       chart: 'mongodb',
       namespace: namespace,
-      version: config.helmChartVersion,
+      version: config.mongo.helmChartVersion,
       values: {
         labels: labels,
         affinity: {
@@ -55,19 +56,19 @@ export async function deployMongo(
         architecture: 'replicaset',
         auth: { enabled: false },
         persistence: {
-          storageClass: config.storageClass,
-          size: config.storageSize,
+          storageClass: config.mongo.storageClass,
+          size: config.mongo.storageSize,
           volumeClaimTemplates: {
             requests: {
-              storage: config.storageSize,
+              storage: config.mongo.storageSize,
             },
           },
         },
-        replicaCount: config.replicaCount,
+        replicaCount: config.mongo.replicaCount,
         resources: {
           limits: {
-            cpu: config.cpuLimit,
-            memory: config.memoryLimit,
+            cpu: config.mongo.cpuLimit,
+            memory: config.mongo.memoryLimit,
           },
         },
       },

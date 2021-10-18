@@ -1,7 +1,7 @@
 import * as pulumi from '@pulumi/pulumi'
 import { Config, Cluster, Dockerhub } from '@shapeshiftoss/common-pulumi'
 
-const getStorageClass = (cluster: string) => {
+const getStorageClassName = (cluster: string) => {
   switch (cluster) {
     case 'docker-desktop':
       return 'hostpath'
@@ -14,7 +14,7 @@ const getStorageClass = (cluster: string) => {
   }
 }
 
-const supportedNetworks = ['mainnet', 'ropsten']
+const SUPPORTED_NETWORKS = ['mainnet', 'ropsten']
 
 export interface EthereumConfig {
   kubeconfig: string
@@ -23,7 +23,15 @@ export interface EthereumConfig {
 }
 
 export const getConfig = async (): Promise<EthereumConfig> => {
-  const config = new pulumi.Config('unchained').requireObject<Config>('ethereum')
+  let config: Config
+  try {
+    config = new pulumi.Config('unchained').requireObject<Config>('ethereum')
+  } catch (e) {
+    throw new pulumi.RunError(
+      `Could not find required configuration file. \n\tDid you copy the Pulumi.sample.yaml file to Pulumi.${pulumi.getStack()}.yaml and update the necessary configuration?`
+    )
+  }
+
   const stackReference = new pulumi.StackReference(config.stack)
   const kubeconfig = (await stackReference.getOutputValue('kubeconfig')) as string
   const namespaces = (await stackReference.getOutputValue('namespaces')) as Array<string>
@@ -45,12 +53,12 @@ export const getConfig = async (): Promise<EthereumConfig> => {
 
   if (!config.stack) missingRequiredConfig.push('stack')
 
-  if (!config.network || !supportedNetworks.includes(config.network)) {
-    missingRequiredConfig.push(`network (${supportedNetworks})`)
+  if (!config.network || !SUPPORTED_NETWORKS.includes(config.network)) {
+    missingRequiredConfig.push(`network (${SUPPORTED_NETWORKS})`)
   }
 
   if (config.mongo) {
-    config.mongo.storageClass = getStorageClass(config.cluster)
+    config.mongo.storageClass = getStorageClassName(config.cluster)
 
     if (!config.mongo.cpuLimit) missingRequiredConfig.push('mongo.cpuLimit')
     if (!config.mongo.helmChartVersion) missingRequiredConfig.push('mongo.helmChartVersion')
@@ -60,7 +68,7 @@ export const getConfig = async (): Promise<EthereumConfig> => {
   }
 
   if (config.indexer) {
-    config.indexer.storageClass = getStorageClass(config.cluster)
+    config.indexer.storageClass = getStorageClassName(config.cluster)
 
     if (!config.indexer.cpuLimit) missingRequiredConfig.push('indexer.cpuLimit')
     if (!config.indexer.memoryLimit) missingRequiredConfig.push('indexer.memoryLimit')
@@ -69,12 +77,20 @@ export const getConfig = async (): Promise<EthereumConfig> => {
   }
 
   if (config.indexer?.daemon) {
-    config.indexer.daemon.storageClass = getStorageClass(config.cluster)
+    config.indexer.daemon.storageClass = getStorageClassName(config.cluster)
 
     if (!config.indexer.daemon.cpuLimit) missingRequiredConfig.push('indexer.daemon.cpuLimit')
     if (!config.indexer.daemon.image) missingRequiredConfig.push('indexer.daemon.image')
     if (!config.indexer.daemon.memoryLimit) missingRequiredConfig.push('indexer.daemon.memoryLimit')
     if (!config.indexer.daemon.storageSize) missingRequiredConfig.push('indexer.daemon.storageSize')
+  }
+
+  if (config.rabbit) {
+    config.rabbit.storageClassName = getStorageClassName(config.cluster)
+
+    if (!config.rabbit.cpuLimit) missingRequiredConfig.push('rabbit.cpuLimit')
+    if (!config.rabbit.memoryLimit) missingRequiredConfig.push('rabbit.memoryLimit')
+    if (!config.rabbit.storageSize) missingRequiredConfig.push('rabbit.storageSize')
   }
 
   if (missingRequiredConfig.length) {

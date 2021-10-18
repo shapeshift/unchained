@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from 'fs'
 import { join } from 'path'
 import * as k8s from '@pulumi/kubernetes'
 import { all } from '@pulumi/pulumi'
-import { deployApi, deployIngester, deployMongo } from '@shapeshiftoss/common-pulumi'
+import { deployApi, deployIngester, deployMongo, deployRabbit } from '@shapeshiftoss/common-pulumi'
 import { deployIndexer } from '@shapeshiftoss/blockbook-pulumi'
 import { getConfig } from './config'
 
@@ -12,12 +12,12 @@ type Outputs = Record<string, any>
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
-  const name = 'unchained'
-  const asset = 'bitcoin'
-  const outputs: Outputs = {}
-
   const { kubeconfig, config, namespace } = await getConfig()
   const { cluster } = config
+
+  const name = 'unchained'
+  const asset = config.network !== 'mainnet' ? `bitcoin-${config.network}` : 'bitcoin'
+  const outputs: Outputs = {}
 
   let provider: k8s.Provider
   if (config.isLocal) {
@@ -52,9 +52,10 @@ export = async (): Promise<Outputs> => {
 
   new k8s.core.v1.Secret(asset, { metadata: { name: asset, namespace }, stringData }, { provider })
 
-  const mongo = await deployMongo(name, asset, provider, namespace, config.mongo)
+  const mongo = await deployMongo(name, asset, provider, namespace, config)
+  const rabbit = await deployRabbit(name, asset, provider, namespace, config)
 
-  const deps = all([mongo]).apply(([mongoResources]) => mongoResources)
+  const deps = all([mongo, rabbit]).apply(([mongoResources]) => mongoResources)
 
   await deployIndexer(name, asset, provider, namespace, config)
   await deployIngester(name, asset, provider, namespace, config, deps)
