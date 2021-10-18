@@ -5,6 +5,12 @@ import { ThorchainAccount, ThorchainAmount, ThorchainTx, ThorchainTxHistory, Tho
 import { TxHistory, SendTxBody } from '../../../common/api/src'
 //import * as thornode from '@shapeshiftoss/gaia'
 
+// todo
+// - fix sendtxbody types
+// - account - use generated types
+// - send - use generated types
+// - deploy to staging
+
 const INDEXER_URL = process.env.INDEXER_URL
 const RPC_URL = process.env.RPC_URL
 
@@ -158,6 +164,10 @@ export class Thorchain extends Controller implements BaseAPI {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}/txs')
   async getTxHistory(@Path() pubkey: string): Promise<TxHistory> {
+    // TODO:
+    //  - get recieved messages, interleave
+    //  - handle paging
+    //  - Tx type is differnt than blockbook (make a package?)
     interface Txs {
       total_count: string
       count: string
@@ -168,20 +178,16 @@ export class Thorchain extends Controller implements BaseAPI {
     }
 
     try {
-      // todo -- get recieved messages, interleave
-      // handle paging
-      // Tx type is differnt than blockbook (make a package?)
       const { data } = await this.instance.get<Txs>(`/txs?message.sender=${pubkey}`)
 
       const transactions = data.txs.map((tx) => {
-        //const from = tx.tx.type === 'thorchain/MsgSend' ? tx?.tx?.value?.msg[0]?.value?.from_address : 'n/a'
         return {
           txid: tx.txhash,
           blockHeight: Number(tx.height),
           status: 'comfirmed',
           timestamp: Number(tx.timestamp),
           from: 'todo',
-          value: 'todo', //tx?.tx?.value?.msg[0]?.value?.amount[0]?.amount,
+          value: 'todo',
           fee: 'todo',
         }
       })
@@ -200,40 +206,38 @@ export class Thorchain extends Controller implements BaseAPI {
   /**
    * Sends raw transaction to be broadcast to the node.
    *
-   * @param {SendTxBody} body serialized raw transaction hex
-   *
    * @returns {Promise<string>} transaction id
    *
    * @example {
-   * "tx": {
-   *   "memo": "",
-   *   "fee": {
-   *     "amount":[{"amount":"0","denom":"rune"}],
-   *     "gas":"650000"
-   *   },
-   *   "msg":[{
-   *     "type": "thorchain/MsgSend",
-   *     "value": {
-   *       "amount": [{"amount":"12706267","denom":"rune"}],
-   *       "from_address": "thor1cdpznmwtpz3qt9t4823rkg5wamhq7df28qu69z",
-   *       "to_address": "thor1gz5krpemm0ce4kj8jafjvjv04hmhle576x8gms"
-   *     }
-   *   }],
-   *   "signatures":[{
-   *     "signature":"uzZ5dgJVMjOK6BZHslK6cfdB3wD9IrG9wt+BcGQhoiUg2+JpT4IPQoTK0RBUqcQaq67gQ7uvbTa/S9xQmjRzSg==",
-   *     "pub_key":{"type":"tendermint/PubKeySecp256k1","value":"ArvUYSkr8N00d1gcsnhRrSaC0B8SOxz+AISWo5I1ZJnJ"}
-   *   }]
-   * },
-   * "mode":"sync",
-   * "type":"cosmos-sdk/StdTx"
+   *    "tx": {
+   *      "memo": "",
+   *      "fee": {
+   *        "amount":[{"amount":"0","denom":"rune"}],
+   *        "gas":"650000"
+   *      },
+   *      "msg":[{
+   *        "type": "thorchain/MsgSend",
+   *        "value": {
+   *          "amount": [{"amount":"12706267","denom":"rune"}],
+   *          "from_address": "thor1cdpznmwtpz3qt9t4823rkg5wamhq7df28qu69z",
+   *          "to_address": "thor1gz5krpemm0ce4kj8jafjvjv04hmhle576x8gms"
+   *        }
+   *      }],
+   *      "signatures":[{
+   *        "signature":"uzZ5dgJVMjOK6BZHslK6cfdB3wD9IrG9wt+BcGQhoiUg2+JpT4IPQoTK0RBUqcQaq67gQ7uvbTa/S9xQmjRzSg==",
+   *        "pub_key":{"type":"tendermint/PubKeySecp256k1","value":"ArvUYSkr8N00d1gcsnhRrSaC0B8SOxz+AISWo5I1ZJnJ"}
+   *      }]
+   *    },
+   *    "mode":"sync",
+   *    "type":"cosmos-sdk/StdTx"
    * }
    */
   @Example<string>('txid')
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Post('sendthor/')
-  async sendTxThorchain(@Body() body: ThorchainSendTxBody): Promise<string> {
+  @Post('send/')
+  async sendTx(@Body() body: unknown): Promise<string> {
     interface BroadcastTxResponse {
       txhash: string
     }
@@ -254,52 +258,4 @@ export class Thorchain extends Controller implements BaseAPI {
     //   throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
     // }
   }
-
-  /**
-   * Sends raw transaction to be broadcast to the node.
-   *
-   * @param {SendTxBody} body serialized raw transaction hex
-   *
-   * @returns {Promise<string>} transaction id
-   *
-   * @example {
-   * "tx": {
-   *   "memo": "",
-   *   "fee": {
-   *     "amount":[{"amount":"0","denom":"rune"}],
-   *     "gas":"650000"
-   *   },
-   *   "msg":[{
-   *     "type": "thorchain/MsgSend",
-   *     "value": {
-   *       "amount": [{"amount":"12706267","denom":"rune"}],
-   *       "from_address": "thor1cdpznmwtpz3qt9t4823rkg5wamhq7df28qu69z",
-   *       "to_address": "thor1gz5krpemm0ce4kj8jafjvjv04hmhle576x8gms"
-   *     }
-   *   }],
-   *   "signatures":[{
-   *     "signature":"uzZ5dgJVMjOK6BZHslK6cfdB3wD9IrG9wt+BcGQhoiUg2+JpT4IPQoTK0RBUqcQaq67gQ7uvbTa/S9xQmjRzSg==",
-   *     "pub_key":{"type":"tendermint/PubKeySecp256k1","value":"ArvUYSkr8N00d1gcsnhRrSaC0B8SOxz+AISWo5I1ZJnJ"}
-   *   }]
-   * },
-   * "mode":"sync",
-   * "type":"cosmos-sdk/StdTx"
-   * }
-   */
-  @Example<string>('txid')
-  @Response<BadRequestError>(400, 'Bad Request')
-  @Response<ValidationError>(422, 'Validation Error')
-  @Response<InternalServerError>(500, 'Internal Server Error')
-  @Post('send/')
-  async sendTx(@Body() body: SendTxBody): Promise<string> {
-    interface BroadcastTxResponse {
-      txhash: string
-    }
-
-    const { data } = await this.instance.post<BroadcastTxResponse>('/txs/', body)
-    return data.txhash
-  }
 }
-
-// todo
-// - test with example tx to node (capture signed tx in sim and use it as example)
