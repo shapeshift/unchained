@@ -8,13 +8,13 @@ PEER_RESULT=$(echo "$ETH_PEER" | jq -r .result)
 if [ "$SYNCING_RESULT" == "false" ]; then
   # Make sure we have peers
   if [ "$PEER_RESULT" != "0x0" ]; then
-    echo "$NODE is ready to start accepting traffic, with $PEER_RESULT peers"
+    echo "node is synced, with $PEER_RESULT peers"
     exit 0
   else
-    echo "$NODE is reporting synced, however it has 0 peer connections"
+    echo "node is synced, but has 0 peer connections"
     exit 1
   fi
 else
-  echo "$NODE is still syncing the blockchain"
+  echo "node is still syncing"
   exit 1
-fi;
+fi
