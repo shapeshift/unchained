@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/unchained-client",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "license": "MIT",
   "main": "dist/index.js",
   "source": "src/index.ts",
@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@shapeshiftoss/common-ingester": "^2.0.0",
-    "@shapeshiftoss/ethereum-api": "^2.0.0"
+    "@shapeshiftoss/ethereum-api": "^2.0.3"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.4.4"

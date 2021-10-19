@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/ethereum-ingester",
-  "version": "2.0.0",
+  "version": "2.0.3",
   "license": "MIT",
   "types": "dist/types.d.ts",
   "files": [
