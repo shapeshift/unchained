@@ -112,7 +112,7 @@ export interface ThorchainTxHistory {
   page: number
   totalPages: number
   txs: number
-  transactions: Array<ThorchainTx>
+  transactions: Array<ThorTx>
 }
 
 export interface ThorchainAccount extends Account {
@@ -120,6 +120,19 @@ export interface ThorchainAccount extends Account {
   account_number: string
   sequence: string
   pubkey: string
+}
+
+export interface ThorTx {
+  txid: string
+  status: string
+  from: string
+  to: string
+  blockHash: string
+  blockHeight: number
+  confirmations: number
+  timestamp: number
+  value: string
+  fee: string
 }
 
 /**

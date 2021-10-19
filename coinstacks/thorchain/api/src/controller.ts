@@ -11,13 +11,12 @@ import {
   ThorchainAmount,
   ThorchainTx,
 } from './models'
-import { TxHistory } from '../../../common/api/src'
 
 // todo
 // - send endpoint type -- unknown?
 // - move types to package?  (defer)
-// - tx history -- 1st cut
-// - multiple asset balances
+// - tx history -- 1st cut cleanup
+// - multiple asset balances per ETH tokens (defer)
 
 const INDEXER_URL = process.env.INDEXER_URL
 
@@ -63,6 +62,8 @@ export class Thorchain extends Controller implements BaseAPI {
     try {
       const { data: accounts } = await this.instance.get<AuthAccountsResponse>(`auth/accounts/${pubkey}`)
       const { data: balances } = await this.instance.get<BankBalancesResponse>(`bank/balances/${pubkey}`)
+
+      // TODO - return multiple balances
       const runeBalance = balances.result.find((bal: ThorchainAmount) => bal.denom === 'rune')
 
       return {
@@ -94,55 +95,16 @@ export class Thorchain extends Controller implements BaseAPI {
     txs: 1,
     transactions: [
       {
-        height: '1031610',
-        txhash: 'BB4C487DCF37CBCF3E27D4C1DF7427E4C2C32E4CE5DA20631936786C4F368943',
-        data: '0A090A076465706F736974',
-        raw_log:
-          '[{"events":[{"type":"message","attributes":[{"key":"action","value":"deposit"},{"key":"sender","value":"thor1gz5krpemm0ce4kj8jafjvjv04hmhle576x8gms"},{"key":"sender","value":"thor1gz5krpemm0ce4kj8jafjvjv04hmhle576x8gms"}]},{"type":"transfer","attributes":[{"key":"recipient","value":"thor1dheycdevq39qlkxs2a6wuuzyn4aqxhve4qxtxt"},{"key":"sender","value":"thor1gz5krpemm0ce4kj8jafjvjv04hmhle576x8gms"},{"key":"amount","value":"2000000rune"},{"key":"recipient","value":"thor1g98cy3n9mmjrpn0sxmn63lztelera37n8n67c0"},{"key":"sender","value":"thor1gz5krpemm0ce4kj8jafjvjv04hmhle576x8gms"},{"key":"amount","value":"75513875rune"}]}]}]',
-        logs: [],
-        gas_wanted: '650000',
-        gas_used: '429186',
-        tx: {
-          type: 'cosmos-sdk/StdTx',
-          value: {
-            msg: [
-              {
-                type: 'thorchain/MsgDeposit',
-                value: {
-                  coins: [
-                    {
-                      asset: 'THOR.RUNE',
-                      amount: '75513875',
-                    },
-                  ],
-                  memo: 'SWAP:BCH.BCH:qrcxsgrfvsc6l9nqc6yswykeu8kspnae0czhvpy5tu:1145020',
-                  signer: 'thor1gz5krpemm0ce4kj8jafjvjv04hmhle576x8gms',
-                },
-              },
-            ],
-            fee: {
-              amount: [
-                {
-                  denom: 'rune',
-                  amount: '2000000',
-                },
-              ],
-              gas: '650000',
-            },
-            signatures: [
-              {
-                pub_key: {
-                  type: 'tendermint/PubKeySecp256k1',
-                  value: 'AxRae5QA0jDYulcpufqzdSnVZk0vH0Mk6M7ezkBi3Zec',
-                },
-                signature: 'xP/cNadff9QAJiOcCRtQVqKNZTJZ78yoZ04ZWS1PRRBwi40RhnCJd2+9JSLkF6E76IM4joY9h6FFfvRymEy1Nw==',
-              },
-            ],
-            memo: '',
-            timeout_height: '0',
-          },
-        },
-        timestamp: '2021-06-15T21:16:39Z',
+        txid: 'AF1D57FCF2DDA44C193552F783018E9A49AF6D7C04BCEDC2A90BD22432E55370',
+        status: 'confirmed',
+        from: 'thor1gz5krpemm0ce4kj8jafjvjv04hmhle576x8gms',
+        to: 'thor1yjawrz2dmhdyzz439gr5xtefsu6jm6n6h3mdaf',
+        blockHash: '0x94228c1b7052720846e2d7b9f36de30acf45d9a06ec483bd4433c5c38c8673a8',
+        blockHeight: 1031771,
+        confirmations: 1,
+        timestamp: 1,
+        value: '10000000',
+        fee: '0',
       },
     ],
   })
@@ -150,7 +112,7 @@ export class Thorchain extends Controller implements BaseAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}/txs')
-  async getTxHistory(@Path() pubkey: string): Promise<TxHistory> {
+  async getTxHistory(@Path() pubkey: string): Promise<ThorchainTxHistory> {
     // TODO:
     // - include receives (thornode api)
     // - include swaps (midgard api)
@@ -158,25 +120,32 @@ export class Thorchain extends Controller implements BaseAPI {
     // - handle paging
 
     try {
-      const { data } = await this.instance.get<ThorchainTxsResponse>(`/txs?message.sender=${pubkey}`)
+      const { data: sends } = await this.instance.get<ThorchainTxsResponse>(
+        `/txs?message.sender=${pubkey}&page=1&limit=30`
+      )
 
-      const transactions = data.txs.map((tx: ThorchainTx) => {
-        const timestamp = Date.parse(tx.timestamp)
+      const transactions = sends.txs.map((transaction: ThorchainTx) => {
+        const timestamp = Date.parse(transaction?.timestamp)
+        const runeFee = transaction?.tx?.value?.fee?.amount?.find((fee) => fee?.denom === 'rune')
+
         return {
-          txid: tx.txhash,
-          blockHeight: Number(tx.height),
+          txid: transaction.txhash,
           status: 'confirmed',
-          timestamp: Number(timestamp),
           from: 'todo',
+          to: 'todo',
+          blockHash: 'todo',
+          blockHeight: Number(transaction.height),
+          confirmations: 1,
+          timestamp: Number(timestamp / 1000), // convert ms to sec
           value: 'todo',
-          fee: tx?.tx?.value?.fee?.amount[0]?.amount ?? 'unknown', // TODO - parse out rune fee specifically
+          fee: runeFee?.amount ?? 'unknown',
         }
       })
 
       return {
-        page: Number(data.page_number),
-        totalPages: Number(data.page_total),
-        txs: Number(data.count),
+        page: 1,
+        totalPages: 1,
+        txs: Number(sends.count),
         transactions,
       }
     } catch (err) {
