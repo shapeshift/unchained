@@ -2,7 +2,6 @@
   "name": "@shapeshiftoss/blockbook",
   "version": "1.4.0",
   "license": "MIT",
-  "private": true,
   "main": "dist/index.js",
   "source": "src/index.ts",
   "types": "dist/index.d.ts",

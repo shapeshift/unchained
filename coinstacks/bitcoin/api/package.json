@@ -2,7 +2,6 @@
   "name": "@shapeshiftoss/bitcoin-api",
   "version": "1.4.0",
   "license": "MIT",
-  "private": true,
   "main": "dist/bitcoin/api/src/index.js",
   "source": "src/index.ts",
   "types": "dist/bitcoin/api/src/index.d.ts",
