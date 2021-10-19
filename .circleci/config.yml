@@ -32,19 +32,22 @@ aliases:
     coinstack: thorchain
     pulumi-stack: public
     pulumi-dir: coinstacks/thorchain/pulumi
+    broker-url: amqp://guest:guest@thorchain-rabbitmq-svc.unchained.svc.cluster.local:5672
     mongo-cpu-limit: 512m
     mongo-memory-limit: 512Mi
     mongo-replicas: 3
     mongo-storage-size: 100Gi
     mongo-url: mongodb://thorchain-mongodb-0.thorchain-mongodb-headless.unchained.svc.cluster.local:27017,thorchain-mongodb-1.thorchain-mongodb-headless.unchained.svc.cluster.local:27017,thorchain-mongodb-2.thorchain-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
+    rabbit-cpu-limit: '1'
+    rabbit-memory-limit: '2Gi'
+    rabbit-storage-size: '100Gi'
     indexer-cpu-limit: '4'
     indexer-memory-limit: 12Gi
     indexer-replicas: 2
     indexer-storage-size: 500Gi
     indexer-url: http://thorchain-indexer-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: http://thorchain-indexer-svc.unchained.svc.cluster.local:8001/websocket
-    daemon-image: ruimarinho/bitcoin-core:0.21.0 #https://github.com/ruimarinho/docker-bitcoin-core
-    daemon-node: bitcoind
+    indexer-ws-url: ws://thorchain-indexer-svc.unchained.svc.cluster.local:8001/websocket
+    daemon-image: ruimarinho/bitcoin-core:0.21.0
     daemon-cpu-limit: '2'
     daemon-memory-limit: 12Gi
     daemon-storage-size: 1500Gi
