@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/common-ingester",
-  "version": "2.0.0",
+  "version": "2.0.4",
   "license": "MIT",
   "main": "dist/index.js",
   "source": "src/index.ts",
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@shapeshiftoss/blockbook": "^2.0.0",
-    "@shapeshiftoss/common-mongo": "^2.0.0",
+    "@shapeshiftoss/common-mongo": "^2.0.4",
     "@shapeshiftoss/logger": "^2.0.0",
     "amqp-ts": "^1.8.0",
     "mongodb": "^3.6.3",
