@@ -14,6 +14,9 @@ config:
     ## if falsy use default environment created in cluster stack
     #environment: 
 
+    ## network - chain network (ie. mainnet, testnet, etc.)
+    network: mainnet
+
     ## api - if specified an api service will be deployed
     api:
       enableDatadogLogs: false
@@ -38,9 +41,7 @@ config:
     #  replicas: 1
     #  storageSize: '400Gi'
     #  daemon:
-    #    chain: 'mainnet'
     #    cpuLimit: '2'
     #    image: 'ruimarinho/bitcoin-core:0.21.1'
     #    memoryLimit: '24Gi'
-    #    node: 'bitcoind'
     #    storageSize: '1500Gi'

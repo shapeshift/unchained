@@ -7,11 +7,13 @@ import { SyncTx } from '@shapeshiftoss/common-ingester'
 
 const NODE_ENV = process.env.NODE_ENV
 const INDEXER_URL = process.env.INDEXER_URL as string
+const INDEXER_WS_URL = process.env.INDEXER_WS_URL as string
 const MONGO_DBNAME = process.env.MONGO_DBNAME as string
 const MONGO_URL = process.env.MONGO_URL as string
 
 if (NODE_ENV !== 'test') {
   if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
+  if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
   if (!MONGO_DBNAME) throw new Error('MONGO_DBNAME env var not set')
   if (!MONGO_URL) throw new Error('MONGO_URL env var not set')
 }
@@ -21,7 +23,7 @@ const PAGE_SIZE = 1000
 const BATCH_SIZE = 20
 const SYNC_TIMEOUT = 1000 * 60 * 5
 
-const blockbook = new Blockbook(INDEXER_URL)
+const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 const registry = new RegistryService(MONGO_URL, MONGO_DBNAME, POOL_SIZE)
 
 const getPages = (from: number, to: number, max: number): Array<number> => {
@@ -190,9 +192,9 @@ const onMessage = (worker: Worker) => async (message: Message) => {
 
 const main = async () => {
   const worker = await Worker.init({
-    queueName: `queue.bitcoin.tx`,
-    exchangeName: `exchange.bitcoin.txid.address`,
-    requeueName: `exchange.bitcoin.tx`,
+    queueName: 'queue.tx',
+    exchangeName: 'exchange.txid.address',
+    requeueName: 'exchange.tx',
   })
 
   worker.queue?.prefetch(100)

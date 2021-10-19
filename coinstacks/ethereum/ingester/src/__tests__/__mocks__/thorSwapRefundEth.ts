@@ -12,7 +12,7 @@ export default {
       {
         value: '6412730000000000',
         n: 0,
-        addresses: ['0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B'],
+        addresses: ['0xC145990E84155416144C532E31f89B840Ca8c2cE'],
         isAddress: true,
       },
     ],
@@ -37,7 +37,7 @@ export default {
       blockNumber: '12604164',
       timeStamp: '1623293292',
       hash: '0xa1e6d3cd2e4c5bc06af21835065a44eb2d207962ebf36b9e24a366eb20e906da',
-      from: '0x42A5Ed456650a09Dc10EBc6361A7480fDd61f27B', // normalized to checksum format
+      from: '0xC145990E84155416144C532E31f89B840Ca8c2cE', // normalized to checksum format
       to: '0xfc0Cc6E85dFf3D75e3985e0CB83B090cfD498dd1', // normalized to checksum format
       value: '6412730000000000',
       contractAddress: '',

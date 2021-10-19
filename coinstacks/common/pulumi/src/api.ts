@@ -13,7 +13,7 @@ export interface ApiConfig {
 }
 
 // creates a hash of the content included in the final build image
-const getHash = async (asset: string, buildArgs: Record<string, string>): Promise<string> => {
+const getHash = async (coinstack: string, buildArgs: Record<string, string>): Promise<string> => {
   const hash = createHash('sha1')
 
   // hash root level unchained files
@@ -37,8 +37,8 @@ const getHash = async (asset: string, buildArgs: Record<string, string>): Promis
   })
   hash.update(commonApiHash)
 
-  // hash contents of asset-api
-  const { hash: apiHash } = await hashElement(`../../${asset}/api`, {
+  // hash contents of coinstack-api
+  const { hash: apiHash } = await hashElement(`../../${coinstack}/api`, {
     folders: { include: ['**'], exclude: ['.*', 'dist', 'node_modules', 'pulumi'] },
     files: { include: ['*.ts', '*.json', 'Dockerfile'] },
   })
@@ -61,17 +61,18 @@ export async function deployApi(
 
   const tier = 'api'
   const labels = { app, asset, tier }
+  const [coinstack] = asset.split('-')
   const name = `${asset}-${tier}`
 
-  let imageName = 'mhart/alpine-node:14.16.0' // local dev image
+  let imageName = 'mhart/alpine-node:14.17.3' // local dev image
   if (!config.isLocal) {
-    const repositoryName = `${app}-${asset}-${tier}`
+    const repositoryName = `${app}-${coinstack}-${tier}`
     const baseImageName = `${config.dockerhub?.username ?? 'shapeshiftdao'}/unchained-base:${await getBaseHash()}`
     const buildArgs = {
       BUILDKIT_INLINE_CACHE: '1',
       BASE_IMAGE: baseImageName, // associated base image for dockerhub user expected to exist
     }
-    const tag = await getHash(asset, buildArgs)
+    const tag = await getHash(coinstack, buildArgs)
 
     imageName = `shapeshiftdao/${repositoryName}:${tag}` // default public image
     if (config.dockerhub) {
@@ -82,7 +83,7 @@ export async function deployApi(
       if (!(await hasTag(image, tag))) {
         await buildAndPushImage({
           image,
-          context: `../../${asset}/api`,
+          context: `../../${coinstack}/api`,
           auth: {
             password: config.dockerhub.password,
             username: config.dockerhub.username,
@@ -236,7 +237,7 @@ export async function deployApi(
           image: imageName,
           ports: [{ containerPort: 3000, name: 'http' }],
           env: [...secretEnvs],
-          command: config.isLocal ? ['sh', '-c', 'yarn nodemon'] : ['node', `dist/${asset}/api/src/app.js`],
+          command: config.isLocal ? ['sh', '-c', 'yarn nodemon'] : ['node', `dist/${coinstack}/api/src/app.js`],
           readinessProbe: {
             httpGet: { path: '/health', port: 3000 },
             initialDelaySeconds: 10,
@@ -253,7 +254,7 @@ export async function deployApi(
           },
           ...(config.isLocal && {
             volumeMounts: [{ name: 'app', mountPath: '/app' }],
-            workingDir: `/app/coinstacks/${asset}/api`,
+            workingDir: `/app/coinstacks/${coinstack}/api`,
           }),
         },
       ],
