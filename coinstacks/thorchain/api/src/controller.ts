@@ -8,16 +8,16 @@ import {
   BroadcastTxResponse,
   AuthAccountsResponse,
   BankBalancesResponse,
+  ThorchainAmount,
+  ThorchainTx,
 } from './models'
 import { TxHistory } from '../../../common/api/src'
 
 // todo
-// - fix sendtxbody types
-// - deploy to staging
-
-// n/a
-// - account - use generated types XXX
-// - send - use generated types XXXX
+// - send endpoint type -- unknown?
+// - move types to package?  (defer)
+// - tx history -- 1st cut
+// - multiple asset balances
 
 const INDEXER_URL = process.env.INDEXER_URL
 
@@ -63,9 +63,7 @@ export class Thorchain extends Controller implements BaseAPI {
     try {
       const { data: accounts } = await this.instance.get<AuthAccountsResponse>(`auth/accounts/${pubkey}`)
       const { data: balances } = await this.instance.get<BankBalancesResponse>(`bank/balances/${pubkey}`)
-
-      // find RUNE balance
-      const runeBalance = balances.result.find((bal) => bal.denom === 'rune')
+      const runeBalance = balances.result.find((bal: ThorchainAmount) => bal.denom === 'rune')
 
       return {
         balance: runeBalance?.amount ?? 'undefined',
@@ -154,22 +152,24 @@ export class Thorchain extends Controller implements BaseAPI {
   @Get('account/{pubkey}/txs')
   async getTxHistory(@Path() pubkey: string): Promise<TxHistory> {
     // TODO:
-    //  - get recieved messages, interleave
-    //  - handle paging
-    //  - Tx type is differnt than blockbook (make a package?)
+    // - include receives (thornode api)
+    // - include swaps (midgard api)
+    // - interleave sends, receives and swaps
+    // - handle paging
 
     try {
       const { data } = await this.instance.get<ThorchainTxsResponse>(`/txs?message.sender=${pubkey}`)
 
-      const transactions = data.txs.map((tx) => {
+      const transactions = data.txs.map((tx: ThorchainTx) => {
+        const timestamp = Date.parse(tx.timestamp)
         return {
           txid: tx.txhash,
           blockHeight: Number(tx.height),
-          status: 'comfirmed',
-          timestamp: Number(tx.timestamp),
+          status: 'confirmed',
+          timestamp: Number(timestamp),
           from: 'todo',
           value: 'todo',
-          fee: 'todo',
+          fee: tx?.tx?.value?.fee?.amount[0]?.amount ?? 'unknown', // TODO - parse out rune fee specifically
         }
       })
 
