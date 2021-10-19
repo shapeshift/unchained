@@ -20,10 +20,8 @@ import { TxHistory } from '../../../common/api/src'
 // - send - use generated types XXXX
 
 const INDEXER_URL = process.env.INDEXER_URL
-const RPC_URL = process.env.RPC_URL
 
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
-if (!RPC_URL) throw new Error('RPC_URL env var not set')
 
 @Route('api/v1')
 @Tags('v1')
