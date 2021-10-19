@@ -11,10 +11,11 @@
     "pulumi"
   ],
   "scripts": {
-    "build": "lerna run build --include-dependencies --scope @shapeshiftoss/* --ignore @shapeshiftoss/unchained-client && lerna run build --scope @shapeshiftoss/unchained-client",
+    "build": "yarn generate && tsc --build && lerna run generate --scope @shapeshiftoss/unchained-client",
     "clean": "lerna run clean --scope @shapeshiftoss/* && rm -rf coverage dist node_modules",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
+    "generate": "lerna run generate --scope @shapeshiftoss/*",
     "lint": "eslint '*/**/*.{js,ts}' && yarn lint:ts",
     "lint:ts": "tsc --noEmit",
     "test": "jest",

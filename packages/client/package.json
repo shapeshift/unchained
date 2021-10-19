@@ -9,10 +9,14 @@
     "dist"
   ],
   "scripts": {
-    "build": "yarn generate && tsc",
+    "build": "yarn generate && tsc --build",
     "clean": "rm -rf dist node_modules src/generated",
     "generate": "JAVA_OPTS='-Dlog.level=warn' openapi-generator-cli generate",
     "watch": "nodemon"
+  },
+  "dependencies": {
+    "@shapeshiftoss/common-ingester": "^1.4.4",
+    "@shapeshiftoss/ethereum-api": "^1.4.4"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.4.4"

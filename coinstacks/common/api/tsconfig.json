@@ -1,9 +1,11 @@
 {
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
+    "rootDir": "src",
     "outDir": "dist",
-    "incremental": true
+    "composite": true
   },
   "include": ["src"],
-  "exclude": ["node_modules", "**/__tests__", "**/__mocks__"]
+  "exclude": ["node_modules", "**/__tests__", "**/__mocks__"],
+  "references": [{ "path": "../../../coinstacks/common/ingester" }, { "path": "../../../coinstacks/common/mongo" }]
 }

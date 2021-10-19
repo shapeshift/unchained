@@ -36,6 +36,29 @@
     "forceConsistentCasingInFileNames": true,
 
     /* Experimental Features */
-    "experimentalDecorators": true
-  }
+    "experimentalDecorators": true,
+
+    /* Project */
+    "baseUrl": ".",
+    "paths": {
+      "@shapeshiftoss/*": ["packages/*/src"],
+      "@shapeshiftoss/common-*": ["coinstacks/common/*/src"],
+      "@shapeshiftoss/bitcoin-*": ["coinstacks/bitcoin/*/src"],
+      "@shapeshiftoss/ethereum-*": ["coinstacks/ethereum/*/src"]
+    }
+  },
+  "references": [
+    { "path": "./packages/blockbook" },
+    { "path": "./packages/client" },
+    { "path": "./packages/gaia" },
+    { "path": "./packages/logger" },
+    { "path": "./packages/thorchain" },
+    { "path": "./coinstacks/common/api" },
+    { "path": "./coinstacks/common/ingester" },
+    { "path": "./coinstacks/common/mongo" },
+    { "path": "./coinstacks/bitcoin/api" },
+    { "path": "./coinstacks/bitcoin/ingester" },
+    { "path": "./coinstacks/ethereum/api" },
+    { "path": "./coinstacks/ethereum/ingester" }
+  ]
 }
