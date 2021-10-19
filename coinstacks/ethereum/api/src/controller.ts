@@ -159,7 +159,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
    * @param {string} data input data
    * @param {string} from from address
    * @param {string} to to address
-   * @param {string} value transaction value in ether
+   * @param {string} value transaction value in wei
    *
    * @returns {Promise<string>} estimated gas cost
    *
@@ -179,7 +179,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
     @Query() value: string
   ): Promise<string> {
     try {
-      const tx: TransactionRequest = { data, from, to, value: ethers.utils.parseEther(value) }
+      const tx: TransactionRequest = { data, from, to, value: ethers.utils.parseUnits(value, 'wei') }
       const estimatedGas = await provider.estimateGas(tx)
       return estimatedGas?.toString()
     } catch (err) {
