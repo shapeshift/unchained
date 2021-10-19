@@ -1,10 +1,16 @@
 import axios, { AxiosInstance } from 'axios'
 import { Body, Controller, Example, Get, Path, Post, Response, Route, Tags } from 'tsoa'
-import { ApiError, BadRequestError, BaseAPI, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
+import {
+  ApiError,
+  BadRequestError,
+  BaseAPI,
+  InternalServerError,
+  ValidationError,
+  TxHistory,
+} from '../../../common/api/src' // unable to import models from a module with tsoa
 import {
   ThorchainAccount,
   ThorchainTxsResponse,
-  ThorchainTxHistory,
   BroadcastTxResponse,
   AuthAccountsResponse,
   BankBalancesResponse,
@@ -12,11 +18,10 @@ import {
   ThorchainTx,
 } from './models'
 
-// todo
+// TODO
 // - send endpoint type -- unknown?
-// - move types to package?  (defer)
-// - tx history -- 1st cut cleanup
-// - multiple asset balances per ETH tokens (defer)
+// - move types to package?
+// - generalize types for Cosmos and beyond
 
 const INDEXER_URL = process.env.INDEXER_URL
 
@@ -62,8 +67,6 @@ export class Thorchain extends Controller implements BaseAPI {
     try {
       const { data: accounts } = await this.instance.get<AuthAccountsResponse>(`auth/accounts/${pubkey}`)
       const { data: balances } = await this.instance.get<BankBalancesResponse>(`bank/balances/${pubkey}`)
-
-      // TODO - return multiple balances
       const runeBalance = balances.result.find((bal: ThorchainAmount) => bal.denom === 'rune')
 
       return {
@@ -89,7 +92,7 @@ export class Thorchain extends Controller implements BaseAPI {
    *
    * @example pubkey "thor1gz5krpemm0ce4kj8jafjvjv04hmhle576x8gms"
    */
-  @Example<ThorchainTxHistory>({
+  @Example<TxHistory>({
     page: 1,
     totalPages: 1,
     txs: 1,
@@ -112,7 +115,7 @@ export class Thorchain extends Controller implements BaseAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}/txs')
-  async getTxHistory(@Path() pubkey: string): Promise<ThorchainTxHistory> {
+  async getTxHistory(@Path() pubkey: string): Promise<TxHistory> {
     // TODO:
     // - include receives (thornode api)
     // - include swaps (midgard api)
