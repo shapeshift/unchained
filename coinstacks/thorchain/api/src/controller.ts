@@ -16,6 +16,7 @@ import {
   BankBalancesResponse,
   ThorchainAmount,
   ThorchainTx,
+  ThorchainSendTxBody,
 } from './models'
 
 // TODO
@@ -161,7 +162,7 @@ export class Thorchain extends Controller implements BaseAPI {
    *
    * @returns {Promise<string>} transaction id
    *
-   * @example {
+   * @example body {
    *    "tx": {
    *      "memo": "",
    *      "fee": {
@@ -185,13 +186,17 @@ export class Thorchain extends Controller implements BaseAPI {
    *    "type":"cosmos-sdk/StdTx"
    * }
    */
-  @Example<string>('txid')
+  @Example<string>('2878C0264E339D40C5723777F4D3A23C51AB5116FBECB843C39B3DCD9BA5A141')
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Post('send/')
-  async sendTx(@Body() body: unknown): Promise<string> {
-    const { data } = await this.instance.post<BroadcastTxResponse>('/txs/', body)
-    return data.txhash
+  async sendTx(@Body() body: ThorchainSendTxBody): Promise<string> {
+    try {
+      const { data } = await this.instance.post<BroadcastTxResponse>('/txs', body)
+      return data.txhash
+    } catch (err) {
+      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+    }
   }
 }
