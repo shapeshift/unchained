@@ -2,7 +2,7 @@
   "name": "@shapeshiftoss/ethereum-ingester",
   "version": "2.0.0",
   "license": "MIT",
-  "types": "src/types.ts",
+  "types": "dist/types.d.ts",
   "files": [
     "dist"
   ],
