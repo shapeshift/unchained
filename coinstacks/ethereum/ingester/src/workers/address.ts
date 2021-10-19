@@ -33,8 +33,8 @@ const onMessage = (worker: Worker) => async (message: Message) => {
 
 const main = async () => {
   const worker = await Worker.init({
-    queueName: 'queue.ethereum.txid.address',
-    exchangeName: 'exchange.ethereum.tx.client',
+    queueName: 'queue.txid.address',
+    exchangeName: 'exchange.tx.client',
   })
 
   worker.queue?.prefetch(100)

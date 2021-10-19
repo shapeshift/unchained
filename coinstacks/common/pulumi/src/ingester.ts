@@ -13,7 +13,7 @@ export interface IngesterConfig {
 }
 
 // creates a hash of the content included in the final build image
-const getHash = async (asset: string, buildArgs: Record<string, string>): Promise<string> => {
+const getHash = async (coinstack: string, buildArgs: Record<string, string>): Promise<string> => {
   const hash = createHash('sha1')
 
   // hash root level unchained files
@@ -37,8 +37,8 @@ const getHash = async (asset: string, buildArgs: Record<string, string>): Promis
   })
   hash.update(commonIngesterHash)
 
-  // hash contents of asset-ingester
-  const { hash: ingesterHash } = await hashElement(`../../${asset}/ingester`, {
+  // hash contents of coinstack-ingester
+  const { hash: ingesterHash } = await hashElement(`../../${coinstack}/ingester`, {
     folders: { include: ['**'], exclude: ['.*', 'dist', 'node_modules', 'pulumi'] },
     files: { include: ['*.ts', '*.json', 'Dockerfile'] },
   })
@@ -61,17 +61,18 @@ export async function deployIngester(
 
   const tier = 'ingester'
   const labels = { app, asset, tier }
+  const [coinstack] = asset.split('-')
   const name = `${asset}-${tier}`
 
-  let imageName = 'mhart/alpine-node:14.16.0' // local dev image
+  let imageName = 'mhart/alpine-node:14.17.3' // local dev image
   if (!config.isLocal) {
-    const repositoryName = `${app}-${asset}-${tier}`
+    const repositoryName = `${app}-${coinstack}-${tier}`
     const baseImageName = `${config.dockerhub?.username ?? 'shapeshiftdao'}/unchained-base:${await getBaseHash()}`
     const buildArgs = {
       BUILDKIT_INLINE_CACHE: '1',
       BASE_IMAGE: baseImageName, // associated base image for dockerhub user expected to exist
     }
-    const tag = await getHash(asset, buildArgs)
+    const tag = await getHash(coinstack, buildArgs)
 
     imageName = `shapeshiftdao/${repositoryName}:${tag}` // default public image
     if (config.dockerhub) {
@@ -82,7 +83,7 @@ export async function deployIngester(
       if (!(await hasTag(image, tag))) {
         await buildAndPushImage({
           image,
-          context: `../../${asset}/ingester`,
+          context: `../../${coinstack}/ingester`,
           auth: {
             password: config.dockerhub.password,
             username: config.dockerhub.username,
@@ -130,7 +131,7 @@ export async function deployIngester(
                   ? ['sh', '-c', 'yarn tsc && node dist/topology.js']
                   : ['node', 'dist/topology.js'],
                 volumeMounts: volumeMounts,
-                workingDir: `/app/coinstacks/${asset}/ingester`,
+                workingDir: `/app/coinstacks/${coinstack}/ingester`,
               },
             ],
             volumes: volumes,
@@ -199,7 +200,7 @@ export async function deployIngester(
             name: `${name}-${worker.name}`,
             image: imageName,
             env: [...secretEnvs],
-            workingDir: config.isLocal ? `/app/coinstacks/${asset}/ingester` : undefined,
+            workingDir: config.isLocal ? `/app/coinstacks/${coinstack}/ingester` : undefined,
             command: config.isLocal
               ? localCommand
               : ['sh', '-c', `node --max-old-space-size=1024 dist/${worker.path}.js`],

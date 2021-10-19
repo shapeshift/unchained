@@ -12,7 +12,7 @@ const subscription: Subscription = {
   method: 'subscribeNewBlock',
 }
 
-const socket = new Socket(INDEXER_WS_URL, subscription, 'exchange.ethereum')
+const socket = new Socket(INDEXER_WS_URL, subscription, 'exchange.coinstack')
 
 const onMessage = async (message: MessageEvent) => {
   try {
