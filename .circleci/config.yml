@@ -45,13 +45,13 @@ aliases:
     indexer-memory-limit: 12Gi
     indexer-replicas: 1
     indexer-storage-size: 500Gi
-    indexer-url: http://thorchain-indexer-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://thorchain-indexer-svc.unchained.svc.cluster.local:8001/websocket
+    indexer-url: https://thornode.thorchain.info
+    indexer-ws-url: wss://thornode.thorchain.info
     daemon-image: ruimarinho/bitcoin-core:0.21.0
     daemon-cpu-limit: '2'
     daemon-memory-limit: 12Gi
     daemon-storage-size: 1500Gi
-    rpc-url: http://thorchain-indexer-svc.unchained.svc.cluster.local:8332
+    rpc-url: https://thornode.thorchain.info
 
   - &bitcoin
     coinstack: bitcoin
@@ -418,9 +418,9 @@ workflows:
           mongo-replicas: 2
           mongo-url: mongodb://thorchain-mongodb-0.thorchain-mongodb-headless.unchained-dev.svc.cluster.local:27017,thorchain-mongodb-1.thorchain-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
           indexer-replicas: 1
-          indexer-url: http://thorchain-indexer-svc.unchained-dev.svc.cluster.local:8001
-          indexer-ws-url: ws://thorchain-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
-          rpc-url: http://thorchain-indexer-svc.unchained-dev.svc.cluster.local:8332
+          indexer-url: https://thornode.thorchain.info
+          indexer-ws-url: wss://thornode.thorchain.info
+          rpc-url: https://thornode.thorchain.info
           requires:
             - deploy common unchained dependencies
           <<: *only-develop
