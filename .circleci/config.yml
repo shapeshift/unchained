@@ -43,7 +43,7 @@ aliases:
     rabbit-storage-size: '100Gi'
     indexer-cpu-limit: '4'
     indexer-memory-limit: 12Gi
-    indexer-replicas: 0
+    indexer-replicas: 1
     indexer-storage-size: 500Gi
     indexer-url: http://thorchain-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://thorchain-indexer-svc.unchained.svc.cluster.local:8001/websocket
@@ -417,7 +417,7 @@ workflows:
           broker-url: amqp://guest:guest@thorchain-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
           mongo-replicas: 2
           mongo-url: mongodb://thorchain-mongodb-0.thorchain-mongodb-headless.unchained-dev.svc.cluster.local:27017,thorchain-mongodb-1.thorchain-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
-          indexer-replicas: 0
+          indexer-replicas: 1
           indexer-url: http://thorchain-indexer-svc.unchained-dev.svc.cluster.local:8001
           indexer-ws-url: ws://thorchain-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
           rpc-url: http://thorchain-indexer-svc.unchained-dev.svc.cluster.local:8332

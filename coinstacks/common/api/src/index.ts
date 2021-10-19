@@ -54,7 +54,7 @@ export interface BaseAPI {
   /**
    * Sends raw transaction to be broadcast to the node.
    *
-   * @param {unkown} body serialized raw transaction hex
+   * @param {unknown} body serialized raw transaction hex
    *
    * @returns {Promise<string>} transaction id
    */

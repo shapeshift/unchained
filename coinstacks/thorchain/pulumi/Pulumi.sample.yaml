@@ -22,8 +22,8 @@ config:
       enableDatadogLogs: false
 
     ## ingester - if specified all ingestion workers will be deployed
-    ingester:
-      enableDatadogLogs: false
+    # ingester:
+    #  enableDatadogLogs: false
 
     ## mongo - if specified a mongo database will be deployed
     mongo:
