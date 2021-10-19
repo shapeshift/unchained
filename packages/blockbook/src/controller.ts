@@ -6,6 +6,7 @@ import {
   ApiError,
   BalanceHistory,
   Block,
+  BlockbookArgs,
   BlockIndex,
   FeeResponse,
   Info,
@@ -22,12 +23,18 @@ export class Blockbook extends Controller {
   instance: AxiosInstance
   wsURL: string
 
-  constructor(url = 'https://indexer.ethereum.shapeshift.com', timeout?: number) {
+  constructor(
+    args: BlockbookArgs = {
+      httpURL: 'https://indexer.ethereum.shapeshift.com',
+      wsURL: 'wss://indexer.ethereum.shapeshift.com/websocket',
+    },
+    timeout?: number
+  ) {
     super()
-    this.wsURL = 'wss://' + url.split('//')[1] + '/websocket'
+    this.wsURL = args.wsURL
     this.instance = axios.create({
       timeout: timeout ?? 10000,
-      baseURL: url,
+      baseURL: args.httpURL,
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
@@ -811,16 +818,24 @@ export class Blockbook extends Controller {
    */
   @Example<Array<NetworkFee>>([
     {
+      feePerTx: '23424',
       feePerUnit: '14186',
+      feeLimit: '99999',
     },
     {
+      feePerTx: '11245',
       feePerUnit: '13727',
+      feeLimit: '99999',
     },
     {
+      feePerTx: '8263',
       feePerUnit: '10719',
+      feeLimit: '99999',
     },
     {
+      feePerTx: '1243',
       feePerUnit: '2015',
+      feeLimit: '99999',
     },
   ])
   @Get('estimatefees')
@@ -849,10 +864,10 @@ export class Blockbook extends Controller {
 
         ws.on('error', (err) => {
           ws.close()
-          reject({ statusText: undefined, status: undefined, data: JSON.stringify(err) })
+          reject({ statusText: 'Internal Server Error', status: 500, data: JSON.stringify(err) })
         })
       } catch (err) {
-        reject({ statusText: undefined, status: undefined, data: JSON.stringify(err) })
+        reject({ statusText: 'Internal Server Error', status: 500, data: JSON.stringify(err) })
       }
     })
   }

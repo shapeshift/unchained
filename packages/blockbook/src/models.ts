@@ -272,7 +272,9 @@ export type Xpub = Address
  * Contains info about current network fees
  */
 export interface NetworkFee {
-  feePerUnit: string
+  feePerTx?: string
+  feePerUnit?: string
+  feeLimit?: string
 }
 
 /**
@@ -281,4 +283,12 @@ export interface NetworkFee {
 export interface FeeResponse {
   id: number
   data: NetworkFee[]
+}
+
+/**
+ * Arguments to Blockbook constructor
+ */
+export interface BlockbookArgs {
+  httpURL: string
+  wsURL: string
 }

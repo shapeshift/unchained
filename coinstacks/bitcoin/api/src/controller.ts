@@ -13,10 +13,12 @@ import {
 import { BitcoinAPI, BitcoinAccount, BitcoinTxSpecific, BTCNetworkFee, BTCNetworkFees, Utxo } from './models'
 
 const INDEXER_URL = process.env.INDEXER_URL
+const INDEXER_WS_URL = process.env.INDEXER_WS_URL
 
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
+if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 
-const blockbook = new Blockbook(INDEXER_URL)
+const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 
 const isXpub = (pubkey: string): boolean => {
   return pubkey.startsWith('xpub') || pubkey.startsWith('ypub') || pubkey.startsWith('zpub')
@@ -303,20 +305,28 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
    * Gets current network fee estimates for 'fast', 'average', and 'slow' tx confirmation times
    *
    * @returns {Promise<BTCNetworkFees>}
-   *
-   * @example
    */
+  @Example<BTCNetworkFees>({
+    fast: { blocksUntilConfirmation: 2, satsPerKiloByte: 14231 },
+    average: { blocksUntilConfirmation: 5, satsPerKiloByte: 9574 },
+    slow: { blocksUntilConfirmation: 10, satsPerKiloByte: 3045 },
+  })
+  @Response<BadRequestError>(400, 'Bad Request')
+  @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/fees')
   async getNetworkFees(): Promise<BTCNetworkFees> {
-    const blockTimes = { fast: 2, average: 5, slow: 10 }
-
-    const result = await blockbook.estimateFees(Object.values(blockTimes))
-    return Object.entries(blockTimes).reduce<BTCNetworkFees>((prev, [key, val], index) => {
-      const networkFee: BTCNetworkFee = {
-        blocksUntilConfirmation: val,
-        satsPerByte: Number(result[index].feePerUnit),
-      }
-      return { ...prev, [key]: networkFee }
-    }, {})
+    try {
+      const blockTimes = { fast: 2, average: 5, slow: 10 }
+      const result = await blockbook.estimateFees(Object.values(blockTimes))
+      return Object.entries(blockTimes).reduce<BTCNetworkFees>((prev, [key, val], index) => {
+        const networkFee: BTCNetworkFee = {
+          blocksUntilConfirmation: val,
+          satsPerKiloByte: Number(result[index].feePerUnit),
+        }
+        return { ...prev, [key]: networkFee }
+      }, {})
+    } catch (err) {
+      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+    }
   }
 }

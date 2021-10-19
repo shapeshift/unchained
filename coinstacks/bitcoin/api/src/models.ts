@@ -113,12 +113,13 @@ export interface BitcoinAPI {
  */
 export type BTCNetworkFee = {
   blocksUntilConfirmation: number
-  satsPerByte: number
+  satsPerKiloByte: number
 }
 
 /**
- * Contains info about current BTC network fees
+ * Gets current network fee estimates for 'fast', 'average', and 'slow' tx confirmation times
  */
+//@Get('/fees')
 export interface BTCNetworkFees {
   fast?: BTCNetworkFee
   average?: BTCNetworkFee

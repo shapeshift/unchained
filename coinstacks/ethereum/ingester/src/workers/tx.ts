@@ -9,11 +9,13 @@ import { getInternalAddress } from '../parseTx'
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
+const INDEXER_WS_URL = process.env.INDEXER_WS_URL
 const MONGO_DBNAME = process.env.MONGO_DBNAME
 const MONGO_URL = process.env.MONGO_URL
 
 if (!ETHERSCAN_API_KEY) throw new Error('ETHERSCAN_API_KEY env var not set')
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
+if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 if (!MONGO_DBNAME) throw new Error('MONGO_DBNAME env var not set')
 if (!MONGO_URL) throw new Error('MONGO_URL env var not set')
 
@@ -22,7 +24,7 @@ const PAGE_SIZE = 1000
 const BATCH_SIZE = 20
 const SYNC_TIMEOUT = 1000 * 60 * 5
 
-const blockbook = new Blockbook(INDEXER_URL)
+const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 const registry = new RegistryService(MONGO_URL, MONGO_DBNAME, POOL_SIZE)
 
 const getPages = (from: number, to: number, max: number): Array<number> => {
