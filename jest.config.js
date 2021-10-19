@@ -7,6 +7,7 @@ module.exports = {
   moduleNameMapper: {
     '^@shapeshiftoss\\/([^/]+)': '@shapeshiftoss/$1/src',
   },
+  setupFiles: ['<rootDir>/.jest/setEnvVars.js'],
   globals: {
     'ts-jest': {
       isolatedModules: true,

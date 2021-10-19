@@ -1,3 +1,3 @@
-export * as BitcoinAPI from './generated/bitcoin'
-export * as EthereumAPI from './generated/ethereum'
-export { websocket as EthereumWS } from '../../../coinstacks/ethereum/api/src'
+export * as bitcoin from './bitcoin'
+export * as ethereum from './ethereum'
+export * as unchained from './unchained'

@@ -114,12 +114,12 @@ const onMessage = (newBlockWorker: Worker, reorgWorker: Worker) => async (messag
 
 const main = async () => {
   const newBlockWorker = await Worker.init({
-    queueName: 'queue.ethereum.newBlock',
-    exchangeName: 'exchange.ethereum.block',
+    queueName: 'queue.newBlock',
+    exchangeName: 'exchange.block',
   })
 
   const reorgWorker = await Worker.init({
-    exchangeName: 'exchange.ethereum',
+    exchangeName: 'exchange.coinstack',
   })
 
   newBlockWorker.queue?.prefetch(1)

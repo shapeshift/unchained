@@ -7,7 +7,7 @@ import { logger } from '@shapeshiftoss/logger'
 import { middleware, ConnectionHandler } from '@shapeshiftoss/common-api'
 import { RegisterRoutes } from './routes'
 
-const port = process.env.PORT || 3000
+const port = process.env.PORT ?? 3000
 
 const app = express()
 
@@ -15,12 +15,7 @@ app.use(json())
 app.use(urlencoded({ extended: true }))
 app.use(cors())
 
-app.get('/health', async (_, res) => {
-  res.json({
-    status: 'up',
-    network: 'ethereum',
-  })
-})
+app.get('/health', async (_, res) => res.json({ status: 'up', asset: 'ethereum' }))
 
 const options: swaggerUi.SwaggerUiOptions = {
   customCss: '.swagger-ui .topbar { display: none }',
@@ -47,4 +42,4 @@ const server = app.listen(port, () => logger.info('server listening...'))
 
 const wsServer = new Server({ server })
 
-wsServer.on('connection', (connection) => ConnectionHandler.start('ethereum', connection))
+wsServer.on('connection', (connection) => ConnectionHandler.start(connection))

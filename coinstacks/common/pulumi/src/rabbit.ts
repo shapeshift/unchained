@@ -1,5 +1,6 @@
 import * as k8s from '@pulumi/kubernetes'
-import { Config } from './config'
+import { CustomResource } from '@pulumi/pulumi'
+import { Config } from './index'
 
 export interface RabbitConfig {
   adminPort?: number
@@ -11,20 +12,23 @@ export interface RabbitConfig {
 }
 
 export async function deployRabbit(
-  name: string,
+  app: string,
+  asset: string,
   provider: k8s.Provider,
   namespace: string,
-  config: Pick<Config, 'rabbit' | 'dockerhub' | 'isLocal'>
-): Promise<void> {
+  config: Pick<Config, 'rabbit' | 'isLocal'>
+): Promise<CustomResource | undefined> {
   if (config.rabbit === undefined) return
 
-  const labels = { app: 'unchained', tier: 'rabbitmq' }
+  const tier = 'rabbitmq'
+  const labels = { app, asset, tier }
+  const name = `${asset}-${tier}`
 
   new k8s.core.v1.Service(
-    `${name}-rabbitmq`,
+    `${name}-svc`,
     {
       metadata: {
-        name: `${labels.tier}-svc`,
+        name: `${name}-svc`,
         namespace: namespace,
         labels: labels,
       },
@@ -82,8 +86,8 @@ export async function deployRabbit(
     },
   }
 
-  new k8s.apps.v1.StatefulSet(
-    `${name}-rabbitmq`,
+  return new k8s.apps.v1.StatefulSet(
+    name,
     {
       metadata: {
         namespace: namespace,
@@ -91,7 +95,7 @@ export async function deployRabbit(
       },
       spec: {
         selector: { matchLabels: labels },
-        serviceName: `${labels.tier}-svc`,
+        serviceName: `${name}-svc`,
         replicas: 1,
         template: podSpec,
         volumeClaimTemplates: [
