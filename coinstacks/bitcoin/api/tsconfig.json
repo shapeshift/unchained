@@ -3,9 +3,10 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
-    "composite": true
+    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
   },
-  "include": ["src", "src/swagger.json"],
+  "include": ["src/**/*"],
+  "files": ["src/swagger.json"],
   "exclude": ["node_modules", "**/__tests__", "**/__mocks__"],
   "references": [
     { "path": "../../../packages/blockbook" },

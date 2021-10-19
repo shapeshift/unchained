@@ -8,6 +8,7 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
+    "composite": true,
 
     /* Strict Type-Checking Options */
     "strict": true,
