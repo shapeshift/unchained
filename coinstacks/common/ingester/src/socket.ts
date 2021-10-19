@@ -3,13 +3,6 @@ import WebSocket from 'ws'
 import { logger } from '@shapeshiftoss/logger'
 import { notReady } from './utils/probes'
 
-const NODE_ENV = process.env.NODE_ENV
-const BROKER_URL = process.env.BROKER_URL as string
-
-if (NODE_ENV !== 'test') {
-  if (!BROKER_URL) throw new Error('BROKER_URL env var not set')
-}
-
 export interface Subscription {
   id: string
   jsonrpc: string
@@ -25,6 +18,13 @@ export class Socket {
   public pingpong?: 'ping' | 'pong'
 
   constructor(url: string, subscription: Subscription, exchangeName: string) {
+    const NODE_ENV = process.env.NODE_ENV
+    const BROKER_URL = process.env.BROKER_URL as string
+
+    if (NODE_ENV !== 'test') {
+      if (!BROKER_URL) throw new Error('BROKER_URL env var not set')
+    }
+
     this.connection = new Connection(BROKER_URL)
     this.exchange = this.connection.declareExchange(exchangeName, '', { noCreate: true })
 

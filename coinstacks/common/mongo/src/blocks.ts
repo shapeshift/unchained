@@ -1,15 +1,6 @@
 import assert from 'assert'
 import { Collection, MongoClient } from 'mongodb'
 
-const NODE_ENV = process.env.NODE_ENV
-const MONGO_DBNAME = process.env.MONGO_DBNAME as string
-const MONGO_URL = process.env.MONGO_URL as string
-
-if (NODE_ENV !== 'test') {
-  if (!MONGO_DBNAME) throw new Error('MONGO_DBNAME env var not set')
-  if (!MONGO_URL) throw new Error('MONGO_URL env var not set')
-}
-
 const COLLECTION = 'blocks'
 
 /**
@@ -28,7 +19,16 @@ export class BlockService {
 
   // currently set up to create a single client connection so we can use pooling, however, this is an asynchronous callback which is not ideal to use in a constructor
   constructor(poolsize?: number) {
-    MongoClient.connect(MONGO_URL as string, { useUnifiedTopology: true, poolSize: poolsize }, (err, client) => {
+    const NODE_ENV = process.env.NODE_ENV
+    const MONGO_DBNAME = process.env.MONGO_DBNAME as string
+    const MONGO_URL = process.env.MONGO_URL as string
+
+    if (NODE_ENV !== 'test') {
+      if (!MONGO_DBNAME) throw new Error('MONGO_DBNAME env var not set')
+      if (!MONGO_URL) throw new Error('MONGO_URL env var not set')
+    }
+
+    MongoClient.connect(MONGO_URL, { useUnifiedTopology: true, poolSize: poolsize }, (err, client) => {
       assert.strictEqual(null, err)
 
       this.client = client
