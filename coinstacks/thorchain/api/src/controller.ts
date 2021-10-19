@@ -13,9 +13,11 @@ import { TxHistory } from '../../../common/api/src'
 
 // todo
 // - fix sendtxbody types
-// - account - use generated types
-// - send - use generated types
 // - deploy to staging
+
+// n/a
+// - account - use generated types XXX
+// - send - use generated types XXXX
 
 const INDEXER_URL = process.env.INDEXER_URL
 const RPC_URL = process.env.RPC_URL
@@ -68,9 +70,9 @@ export class Thorchain extends Controller implements BaseAPI {
       const runeBalance = balances.result.find((bal) => bal.denom === 'rune')
 
       return {
-        balance: runeBalance?.amount ?? '',
-        account_number: accounts.result.value.account_number,
-        sequence: accounts.result.value.sequence,
+        balance: runeBalance?.amount ?? 'undefined',
+        account_number: accounts?.result?.value?.account_number ?? 'undefined',
+        sequence: accounts?.result?.value?.sequence ?? 'undefined',
         pubkey: pubkey,
       }
     } catch (err) {
