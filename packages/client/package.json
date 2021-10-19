@@ -2,9 +2,9 @@
   "name": "@shapeshiftoss/unchained-client",
   "version": "2.0.1",
   "license": "MIT",
-  "main": "dist/packages/client/src/index.js",
+  "main": "dist/index.js",
   "source": "src/index.ts",
-  "types": "dist/packages/client/src/index.d.ts",
+  "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
