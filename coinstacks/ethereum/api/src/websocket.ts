@@ -1,4 +1,4 @@
-import WebSocket from 'ws'
+import WebSocket from 'isomorphic-ws'
 import { ErrorResponse, RequestPayload, Topics, TxsTopicData } from '@shapeshiftoss/common-api'
 import { SequencedETHParseTx } from '@shapeshiftoss/ethereum-ingester'
 

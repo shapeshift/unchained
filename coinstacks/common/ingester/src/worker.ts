@@ -2,13 +2,6 @@ import { Connection, Exchange, Message, Queue } from 'amqp-ts'
 import { logger } from '@shapeshiftoss/logger'
 import { ready } from './utils/probes'
 
-const NODE_ENV = process.env.NODE_ENV
-const BROKER_URL = process.env.BROKER_URL as string
-
-if (NODE_ENV !== 'test') {
-  if (!BROKER_URL) throw new Error('BROKER_URL env var not set')
-}
-
 interface WorkerDeclaration {
   queueName?: string
   exchangeName?: string
@@ -32,6 +25,13 @@ export class Worker {
   }
 
   static async init({ queueName, exchangeName, requeueName }: WorkerDeclaration): Promise<Worker> {
+    const NODE_ENV = process.env.NODE_ENV
+    const BROKER_URL = process.env.BROKER_URL as string
+
+    if (NODE_ENV !== 'test') {
+      if (!BROKER_URL) throw new Error('BROKER_URL env var not set')
+    }
+
     const connection = new Connection(BROKER_URL)
     const queue = queueName ? connection.declareQueue(queueName, { noCreate: true }) : undefined
     const requeue = requeueName ? connection.declareExchange(requeueName, '', { noCreate: true }) : undefined
