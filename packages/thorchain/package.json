@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/thorchain",
-  "version": "2.0.7",
+  "version": "2.1.0",
   "license": "MIT",
   "main": "dist/index.js",
   "source": "src/index.ts",

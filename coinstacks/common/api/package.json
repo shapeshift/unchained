@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/common-api",
-  "version": "2.0.7",
+  "version": "2.1.0",
   "license": "MIT",
   "main": "dist/index.js",
   "source": "src/index.ts",
@@ -14,8 +14,8 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@shapeshiftoss/common-ingester": "^2.0.7",
-    "@shapeshiftoss/common-mongo": "^2.0.7",
+    "@shapeshiftoss/common-ingester": "^2.1.0",
+    "@shapeshiftoss/common-mongo": "^2.1.0",
     "amqp-ts": "^1.8.0",
     "mongodb": "^3.6.3",
     "tsoa": "^3.4.0",
