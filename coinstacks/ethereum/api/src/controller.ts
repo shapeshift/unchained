@@ -15,12 +15,14 @@ import {
 import { EthereumAPI, EthereumAccount, Token } from './models'
 
 const INDEXER_URL = process.env.INDEXER_URL
+const INDEXER_WS_URL = process.env.INDEXER_WS_URL
 const RPC_URL = process.env.RPC_URL
 
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
+if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
 
-const blockbook = new Blockbook(INDEXER_URL)
+const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
 
 @Route('api/v1')
@@ -157,7 +159,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
    * @param {string} data input data
    * @param {string} from from address
    * @param {string} to to address
-   * @param {string} value transaction value in ether
+   * @param {string} value transaction value in wei
    *
    * @returns {Promise<string>} estimated gas cost
    *
@@ -177,7 +179,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
     @Query() value: string
   ): Promise<string> {
     try {
-      const tx: TransactionRequest = { data, from, to, value: ethers.utils.parseEther(value) }
+      const tx: TransactionRequest = { data, from, to, value: ethers.utils.parseUnits(value, 'wei') }
       const estimatedGas = await provider.estimateGas(tx)
       return estimatedGas?.toString()
     } catch (err) {
