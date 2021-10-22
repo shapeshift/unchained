@@ -78,12 +78,16 @@ Unchained is a multi-blockchain backend interface with three main goals:
   yarn && yarn build
   ```
 
-## Ports
+## Local Networking 
 
-- API: `31300`
-- MongoDB: `27017`
-- RabbitMQ: `30672`
-- RabbitMQ Admin: `31672`
+We use traefik as a reverse-proxy to expose all of our docker containers. Traefik is exposed at port `80`. Traefik Dashboard is exposed at port `8080`
+
+Traefik routes requests based on host name. which includes the coinstack name. For Example:
+- `api.bitcoin.localhost`
+- `mongo.bitcoin.localhost`
+- `rabbit-admin.bitcoin.localhost`
+
+
 
 ## Docker-Compose Local Dev Instructions
 
@@ -92,6 +96,10 @@ Unchained is a multi-blockchain backend interface with three main goals:
 #### **Prerequisites**
 
 - Install [docker-compose](https://docs.docker.com/compose/install/)
+- To start up the reverse proxy and hot reloading for files run from the root of the project
+  ```sh
+  docker-compose up
+  ```
 - Copy sample env file:
   ```sh
   cp coinstacks/ethereum/sample.env coinstacks/ethereum/.env
@@ -103,19 +111,16 @@ Unchained is a multi-blockchain backend interface with three main goals:
 - To spin up a coinstack:
   - API only (watcher service is for hot reloading):
     ```sh
-    COINSTACK=ethereum docker-compose up api watcher
+    cd coinstacks/ethereum && docker-compose up api watcher
     ```
   - API + Ingester (more resource intensive):
     ```sh
-    COINSTACK=ethereum docker-compose up
+    cd coinstacks/ethereum && docker-compose up
     ```
 - To completely tear down the coinstack (including docker volumes):
   ```sh
-  COINSTACK=ethereum docker-compose down -v
+  cd coinstacks/ethereum && docker-compose down -v
   ```
-
-Toubleshooting:
-    the api claims to be running on listening at http://localhost:3000; however in docker compose its actually running on http://localhost:31300
 
 ## Kubernetes Local Dev Instructions
 
