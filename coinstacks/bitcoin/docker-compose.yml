@@ -29,7 +29,6 @@ services:
     labels:
       - 'traefik.http.routers.bitcoin-rabbit.rule=Host(`rabbit-admin.bitcoin.localhost`)'
       - 'traefik.http.services.bitcoin-rabbit.loadbalancer.server.port=15672'
-      - "traefik.docker.network=bitcoin_default"
     image: rabbitmq:3-management
     environment:
       RABBITMQ_DEFAULT_VHOST: /

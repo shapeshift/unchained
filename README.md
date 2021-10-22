@@ -96,10 +96,6 @@ Traefik routes requests based on host name. which includes the coinstack name. F
 #### **Prerequisites**
 
 - Install [docker-compose](https://docs.docker.com/compose/install/)
-- To start up the reverse proxy and hot reloading for files run from the root of the project
-  ```sh
-  docker-compose up
-  ```
 - Copy sample env file:
   ```sh
   cp coinstacks/ethereum/sample.env coinstacks/ethereum/.env
@@ -108,10 +104,15 @@ Traefik routes requests based on host name. which includes the coinstack name. F
 
 #### **Running**
 
+- To start up the reverse proxy and hot reloading for files run from the root of the project
+  ```sh
+  docker-compose up
+  ```
+
 - To spin up a coinstack:
-  - API only (watcher service is for hot reloading):
+  - API only:
     ```sh
-    cd coinstacks/ethereum && docker-compose up api watcher
+    cd coinstacks/ethereum && docker-compose up api
     ```
   - API + Ingester (more resource intensive):
     ```sh
