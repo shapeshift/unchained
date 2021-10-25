@@ -1,16 +1,9 @@
 {
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
-    "rootDir": "src",
     "outDir": "dist",
-    "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
+    "incremental": true
   },
   "include": ["src", "src/swagger.json"],
-  "exclude": ["node_modules", "**/__tests__", "**/__mocks__"],
-  "references": [
-    { "path": "../../../packages/blockbook" },
-    { "path": "../../../packages/logger" },
-    { "path": "../../../coinstacks/common/api" },
-    { "path": "../../../coinstacks/ethereum/ingester" }
-  ]
+  "exclude": ["node_modules", "**/__tests__", "**/__mocks__"]
 }
