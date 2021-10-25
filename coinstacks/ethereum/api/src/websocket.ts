@@ -24,7 +24,7 @@ export class Client {
     if (!connection) return
 
     connection.pingTimeout && clearTimeout(connection.pingTimeout)
-    connection.pingTimeout = setTimeout(() => connection?.ws.terminate(), 10000 + 1000)
+    connection.pingTimeout = setTimeout(() => connection?.ws.close(), 10000 + 1000)
   }
 
   private onOpen(topic: Topics, resolve: (value: unknown) => void): void {
@@ -42,7 +42,9 @@ export class Client {
     const ws = new WebSocket(this.url)
     this.connections.txs = { ws }
 
-    onError && ws.on('error', (event) => onError({ type: 'error', message: event.message }))
+    if (onError) {
+      ws.onerror = (event) => onError({ type: 'error', message: event.message })
+    }
 
     ws.onclose = () => this.connections.txs?.pingTimeout && clearTimeout(this.connections.txs.pingTimeout)
     ws.onmessage = (event) => {
