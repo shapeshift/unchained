@@ -46,6 +46,11 @@ export class Client {
 
     ws.onclose = () => this.connections.txs?.pingTimeout && clearTimeout(this.connections.txs.pingTimeout)
     ws.onmessage = (event) => {
+      if (event.data === 'ping') {
+        this.heartbeat('txs')
+        return
+      }
+
       try {
         const message = JSON.parse(event.data.toString()) as SequencedETHParseTx | ErrorResponse
         if ('type' in message) {
