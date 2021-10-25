@@ -35,7 +35,7 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(undefined, options))
 RegisterRoutes(app)
 
 // redirect any unmatched routes to docs
-app.get('*', async (_, res) => {
+app.get('/', async (_, res) => {
   res.redirect('/docs')
 })
 

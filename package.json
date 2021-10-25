@@ -19,9 +19,10 @@
     "lint:ts": "tsc --noEmit",
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "version:major": "lerna version major --yes --no-push",
-    "version:minor": "lerna version minor --yes --no-push",
-    "version:patch": "lerna version patch --yes --no-push"
+    "version:major": "lerna version major --force-publish --no-push",
+    "version:minor": "lerna version minor --force-publish --no-push",
+    "version:patch": "lerna version patch --force-publish --no-push",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@pulumi/kubernetes": "3.6.3",

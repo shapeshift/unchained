@@ -9,7 +9,10 @@ const BROKER_URL = process.env.BROKER_URL as string
 
 if (!BROKER_URL) throw new Error('BROKER_URL env var not set')
 
+export type Topics = 'txs'
+
 export interface TxsTopicData {
+  topic: 'txs'
   addresses: Array<string>
   blockNumber?: number
 }
@@ -18,8 +21,6 @@ export interface ErrorResponse {
   type: 'error'
   message: string
 }
-
-export type Topics = 'txs'
 
 export interface Methods {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -31,10 +32,8 @@ export interface Methods {
 }
 
 export interface RequestPayload {
-  method: 'subscribe' | 'unsubscribe' | 'update'
-  // TODO: link topic with required data type
-  topic: Topics
-  data: TxsTopicData | undefined
+  method: 'subscribe' | 'unsubscribe' | 'update' | 'ping'
+  data?: TxsTopicData
 }
 
 export class ConnectionHandler {
@@ -64,6 +63,7 @@ export class ConnectionHandler {
 
       this.isAlive = false
       this.websocket.ping()
+      this.websocket.send('ping')
     }, 10000)
 
     this.websocket = websocket
@@ -92,11 +92,28 @@ export class ConnectionHandler {
     try {
       const payload: RequestPayload = JSON.parse(event.data.toString())
 
-      const callback = this.routes[payload.topic][payload.method]
-      if (callback) {
-        await callback(payload.data)
-      } else {
-        this.sendError(`route topic (${payload.topic}) method (${payload.method}) not found`)
+      switch (payload.method) {
+        case 'ping': {
+          this.websocket.send('pong')
+          break
+        }
+        case 'subscribe':
+        case 'unsubscribe':
+        case 'update': {
+          const topic = payload.data?.topic
+
+          if (!topic) {
+            this.sendError(`no topic specified for method: ${payload.method}`)
+            break
+          }
+
+          const callback = this.routes[topic][payload.method]
+          if (callback) {
+            await callback(payload.data)
+          } else {
+            this.sendError(`${payload.method} method not implemented for topic: ${topic}`)
+          }
+        }
       }
     } catch (err) {
       logger.error('onMessage error:', err)

@@ -1,5 +1,5 @@
 {
-  "version": "1.4.0",
+  "version": "3.0.0",
   "npmClient": "yarn",
   "command": {
     "publish": {
@@ -11,7 +11,8 @@
   },
   "packages": [
     "packages/*",
-    "coinstacks/**/*"
+    "coinstacks/**/*",
+    "pulumi/*"
   ],
   "useWorkspaces": true
 }

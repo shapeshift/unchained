@@ -59,7 +59,7 @@ export interface EthereumAPI {
    * @param {string} data input data
    * @param {string} from from address
    * @param {string} to to address
-   * @param {string} value transaction value in ether
+   * @param {string} value transaction value in wei
    *
    * @returns {Promise<string>} estimated gas to be used for the transaction
    */
