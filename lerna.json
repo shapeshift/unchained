@@ -7,6 +7,6 @@
       "ignoreChanges": ["**/*.md"]
     }
   },
-  "packages": ["packages/*", "coinstacks/**/*"],
+  "packages": [ "packages/*", "coinstacks/**/*", "pulumi/*"],
   "useWorkspaces": true
 }
