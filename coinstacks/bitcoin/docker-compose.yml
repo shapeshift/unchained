@@ -14,8 +14,6 @@ services:
     command: yarn nodemon
     volumes:
       - ../..:/app
-    depends_on:
-      - unchained-local
   mongo:
     labels:
       - 'traefik.http.routers.bitcoin-mongo.rule=Host(`mongo.bitcoin.localhost`)'
@@ -45,7 +43,6 @@ services:
     volumes:
       - ../..:/app
     depends_on:
-      - unchained-local
       - rabbitmq
   socket-new-block:
     image: unchained-local
@@ -58,7 +55,6 @@ services:
     volumes:
       - ../..:/app
     depends_on:
-      - unchained-local
       - rabbitmq
       - mongo
   socket-new-transaction:
@@ -72,7 +68,6 @@ services:
     volumes:
       - ../..:/app
     depends_on:
-      - unchained-local
       - rabbitmq
       - mongo
   worker-newBlock:
@@ -86,7 +81,6 @@ services:
     volumes:
       - ../..:/app
     depends_on:
-      - unchained-local
       - rabbitmq
       - mongo
   worker-block:
@@ -100,7 +94,6 @@ services:
     volumes:
       - ../..:/app
     depends_on:
-      - unchained-local
       - rabbitmq
       - mongo
   worker-txid:
@@ -114,7 +107,6 @@ services:
     volumes:
       - ../..:/app
     depends_on:
-      - unchained-local
       - rabbitmq
       - mongo
   worker-tx:
@@ -128,7 +120,6 @@ services:
     volumes:
       - ../..:/app
     depends_on:
-      - unchained-local
       - rabbitmq
       - mongo
   worker-address:
@@ -142,7 +133,6 @@ services:
     volumes:
       - ../..:/app
     depends_on:
-      - unchained-local
       - rabbitmq
       - mongo
   worker-registry:
@@ -156,7 +146,6 @@ services:
     volumes:
       - ../..:/app
     depends_on:
-      - unchained-local
       - rabbitmq
       - mongo
 
