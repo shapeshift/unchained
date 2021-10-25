@@ -42,6 +42,6 @@ config:
     #  storageSize: '250Gi'
     #  daemon:
     #    cpuLimit: '2'
-    #    image: 'ethereum/client-go:v1.10.8'
+    #    image: 'ethereum/client-go:v1.10.11'
     #    memoryLimit: '24Gi'
     #    storageSize: '1500Gi'
