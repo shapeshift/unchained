@@ -1,8 +1,6 @@
-import WebSocket from 'ws'
-import { ErrorResponse, RequestPayload, Topics, TxsTopicData } from '../../../common/api/src'
-import { SequencedETHParseTx } from '../../ingester/src/types'
-
-export { ErrorResponse, SequencedETHParseTx, Topics, TxsTopicData }
+import WebSocket from 'isomorphic-ws'
+import { ErrorResponse, RequestPayload, Topics, TxsTopicData } from '@shapeshiftoss/common-api'
+import { SequencedETHParseTx } from '@shapeshiftoss/ethereum-ingester'
 
 export interface Connection {
   ws: WebSocket

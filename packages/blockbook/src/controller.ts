@@ -1,17 +1,40 @@
 import axios, { AxiosInstance } from 'axios'
 import { Controller, Example, Get, Path, Query, Route, Tags } from 'tsoa'
-import { Address, ApiError, BalanceHistory, Block, BlockIndex, Info, SendTx, Tx, Utxo, Xpub } from './models'
+import WebSocket from 'ws'
+import {
+  Address,
+  ApiError,
+  BalanceHistory,
+  Block,
+  BlockbookArgs,
+  BlockIndex,
+  FeeResponse,
+  Info,
+  NetworkFee,
+  SendTx,
+  Tx,
+  Utxo,
+  Xpub,
+} from './models'
 
 @Route('api/v2')
 @Tags('v2')
 export class Blockbook extends Controller {
   instance: AxiosInstance
+  wsURL: string
 
-  constructor(url = 'https://indexer.ethereum.shapeshift.com', timeout?: number) {
+  constructor(
+    args: BlockbookArgs = {
+      httpURL: 'https://indexer.ethereum.shapeshift.com',
+      wsURL: 'wss://indexer.ethereum.shapeshift.com/websocket',
+    },
+    timeout?: number
+  ) {
     super()
+    this.wsURL = args.wsURL
     this.instance = axios.create({
       timeout: timeout ?? 10000,
-      baseURL: url,
+      baseURL: args.httpURL,
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
@@ -788,5 +811,64 @@ export class Blockbook extends Controller {
     } catch (err) {
       throw new ApiError(err)
     }
+  }
+
+  /**
+   * Returns estimated network fees for the specified confirmation times (in blocks)
+   */
+  @Example<Array<NetworkFee>>([
+    {
+      feePerTx: '23424',
+      feePerUnit: '14186',
+      feeLimit: '99999',
+    },
+    {
+      feePerTx: '11245',
+      feePerUnit: '13727',
+      feeLimit: '99999',
+    },
+    {
+      feePerTx: '8263',
+      feePerUnit: '10719',
+      feeLimit: '99999',
+    },
+    {
+      feePerTx: '1243',
+      feePerUnit: '2015',
+      feeLimit: '99999',
+    },
+  ])
+  @Get('estimatefees')
+  async estimateFees(@Query() blockTimes: number[]): Promise<Array<NetworkFee>> {
+    return new Promise<Array<NetworkFee>>((resolve, reject) => {
+      try {
+        const ws: WebSocket = new WebSocket(this.wsURL)
+
+        ws.on('open', () => {
+          ws.send(
+            JSON.stringify({
+              id: '0',
+              method: 'estimateFee',
+              params: {
+                blocks: blockTimes,
+              },
+            })
+          )
+        })
+
+        ws.on('message', (message) => {
+          const resp = JSON.parse(message.toString()) as FeeResponse
+          ws.close()
+          resolve(resp.data)
+        })
+
+        ws.on('error', (err) => {
+          ws.close()
+          reject({ statusText: 'Internal Server Error', status: 500, data: JSON.stringify(err) })
+        })
+      } catch (err) {
+        reject({ statusText: 'Internal Server Error', status: 500, data: JSON.stringify(err) })
+      }
+    })
   }
 }

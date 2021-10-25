@@ -3,10 +3,12 @@ import { Worker, Message } from '@shapeshiftoss/common-ingester'
 import { logger } from '@shapeshiftoss/logger'
 
 const INDEXER_URL = process.env.INDEXER_URL
+const INDEXER_WS_URL = process.env.INDEXER_WS_URL
 
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
+if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 
-const blockbook = new Blockbook(INDEXER_URL)
+const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 
 const onMessage = (worker: Worker) => async (message: Message) => {
   const txid: string = message.getContent()
