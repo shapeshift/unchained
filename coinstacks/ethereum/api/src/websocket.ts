@@ -7,16 +7,12 @@ export interface Connection {
   pingTimeout?: NodeJS.Timeout
 }
 
-export type ClientOptions = WebSocket.ClientOptions
-
 export class Client {
   private readonly url: string
   private readonly connections: Record<Topics, Connection | undefined>
-  private readonly opts?: ClientOptions
 
-  constructor(url: string, opts?: ClientOptions) {
+  constructor(url: string) {
     this.url = url
-    this.opts = { ...opts, sessionTimeout: 10000 }
 
     this.connections = {
       txs: undefined,
@@ -43,12 +39,11 @@ export class Client {
   ): Promise<void> {
     if (this.connections.txs) return
 
-    const ws = new WebSocket(this.url, this.opts)
+    const ws = new WebSocket(this.url)
     this.connections.txs = { ws }
 
     onError && ws.on('error', (event) => onError({ type: 'error', message: event.message }))
 
-    ws.on('ping', () => this.heartbeat('txs'))
     ws.onclose = () => this.connections.txs?.pingTimeout && clearTimeout(this.connections.txs.pingTimeout)
     ws.onmessage = (event) => {
       try {
@@ -65,7 +60,7 @@ export class Client {
 
     await new Promise((resolve) => (ws.onopen = () => this.onOpen('txs', resolve)))
 
-    const payload: RequestPayload = { method: 'subscribe', topic: 'txs', data }
+    const payload: RequestPayload = { method: 'subscribe', data }
     ws.send(JSON.stringify(payload))
   }
 
