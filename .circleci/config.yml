@@ -71,7 +71,7 @@ aliases:
     indexer-storage-size: 500Gi
     indexer-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-indexer-svc.unchained.svc.cluster.local:8001/websocket
-    daemon-image: ethereum/client-go:v1.10.8
+    daemon-image: ethereum/client-go:v1.10.11
     daemon-cpu-limit: '2'
     daemon-memory-limit: 24Gi
     daemon-storage-size: 1500Gi
@@ -96,7 +96,7 @@ aliases:
     indexer-storage-size: 250Gi
     indexer-url: http://ethereum-ropsten-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-ropsten-indexer-svc.unchained.svc.cluster.local:8001/websocket
-    daemon-image: ethereum/client-go:v1.10.8
+    daemon-image: ethereum/client-go:v1.10.11
     daemon-cpu-limit: '2'
     daemon-memory-limit: 24Gi
     daemon-storage-size: 500Gi
