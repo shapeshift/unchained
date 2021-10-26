@@ -1,8 +1,8 @@
 import { ethers } from 'ethers'
 import { Tx } from '@shapeshiftoss/blockbook'
 import { ParseTxUnique, Refund, Trade } from '@shapeshiftoss/common-ingester'
-import { logger } from '@shapeshiftoss/logger'
 import { Thorchain } from '@shapeshiftoss/thorchain'
+import { logger } from '../logger'
 import { InternalTx } from '../types'
 import ABI from './abi/thor'
 import { aggregateSell, getSigHash } from './utils'
@@ -42,6 +42,7 @@ export const getInternalAddress = (inputData: string): string | undefined => {
   return result.to
 }
 
+const moduleLogger = logger.child({ namespace: ['parseTx', 'thor'] })
 export const parse = async (
   tx: Tx,
   address: string,
@@ -70,7 +71,7 @@ export const parse = async (
     const { sellAmount, sellAsset } = aggregateSell(tx, address, internalTxs)
 
     if (result.amount.toString() !== sellAmount) {
-      logger.warn(`swap amount specified differs from amount sent for tx: ${tx.txid}`)
+      moduleLogger.warn({ fn: 'parse', tx, address }, 'Swap amount specified differs from amount sent for tx')
     }
 
     const trade: Trade = {

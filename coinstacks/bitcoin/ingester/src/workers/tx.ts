@@ -1,7 +1,7 @@
 import { Tx, Vin, Vout, Blockbook } from '@shapeshiftoss/blockbook'
 import { Message, Worker } from '@shapeshiftoss/common-ingester'
-import { logger } from '@shapeshiftoss/logger'
 import { RegistryService } from '@shapeshiftoss/common-mongo'
+import { logger } from '../logger'
 import { TxHistory } from '../types'
 import { SyncTx } from '@shapeshiftoss/common-ingester'
 
@@ -25,6 +25,8 @@ const SYNC_TIMEOUT = 1000 * 60 * 5
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 const registry = new RegistryService(MONGO_URL, MONGO_DBNAME, POOL_SIZE)
+
+const moduleLogger = logger.child({ namespace: ['workers', 'tx'] })
 
 const getPages = (from: number, to: number, max: number): Array<number> => {
   const toOrMax = to <= max ? to : max
@@ -75,10 +77,9 @@ const getTxHistory = async (address: string, fromHeight: number, toHeight?: numb
       getPages(page, page + BATCH_SIZE - 1, totalPages).map(async (p) => {
         const start = Date.now()
         const { txids } = await blockbook.getAddress(address, p, PAGE_SIZE, fromHeight, toHeight, 'txids')
-        logger.debug(
-          `getTxHistory: ${address}, from ${fromHeight} to ${toHeight}, page ${p} out of ${totalPages} (${
-            Date.now() - start
-          } ms)`
+        moduleLogger.debug(
+          { fn: 'getTxHistory', address, fromHeight, toHeight, page: p, totalPages, duration: Date.now() - start },
+          'getTxHistory'
         )
         return txids
       })
@@ -98,6 +99,7 @@ const getTxHistory = async (address: string, fromHeight: number, toHeight?: numb
  * @returns {boolean} requeue: should transaction be requeued if address is already syncing
  */
 export const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string): Promise<boolean> => {
+  const fnLogger = moduleLogger.child({ fn: 'syncAddressIfRegistered' })
   let requeue = false
 
   const documents = await registry.getByAddress(address)
@@ -127,9 +129,7 @@ export const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: s
       // track that we are currently syncing an address up to toHeight
       await registry.updateSyncing(address, document.client_id, syncKey)
 
-      logger.info(
-        `Address sync for: ${address} (client_id: ${document.client_id}), from: ${fromHeight}, to: ${toHeight} started`
-      )
+      fnLogger.debug({ address, client_id: document.client_id, fromHeight, toHeight }, 'Sync started')
 
       const txHistory = await getTxHistory(address, fromHeight, toHeight)
 
@@ -157,10 +157,9 @@ export const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: s
       // track that we are no longer currently syncing address
       await registry.updateSyncing(address, document.client_id)
 
-      logger.info(
-        `Address sync for: ${address} (client_id: ${
-          document.client_id
-        }), from: ${fromHeight}, to: ${toHeight} finished (${Date.now() - syncStart} ms)`
+      fnLogger.debug(
+        { address, client_id: document.client_id, fromHeight, toHeight, duration: Date.now() - syncStart },
+        'Sync finished'
       )
     })
   )
@@ -185,7 +184,7 @@ const onMessage = (worker: Worker) => async (message: Message) => {
       worker.ackMessage(message, tx.txid)
     }
   } catch (err) {
-    logger.error('onMessage.error:', err.isAxiosError ? err.message : err)
+    moduleLogger.error(err, { fn: 'onMessage' }, 'Error processing tx history')
     worker.retryMessage(message, tx.txid)
   }
 }

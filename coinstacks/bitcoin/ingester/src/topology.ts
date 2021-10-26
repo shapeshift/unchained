@@ -1,7 +1,7 @@
 import { Connection } from 'amqp-ts'
-import { logger } from '@shapeshiftoss/logger'
+import { logger } from './logger'
 
-const BROKER_URL = process.env.BROKER_URL as string
+const BROKER_URL = process.env.BROKER_URL
 
 if (!BROKER_URL) throw new Error('BROKER_URL env var not set')
 
@@ -54,7 +54,7 @@ const topology: Connection.Topology = {
 }
 
 connection.declareTopology(topology).then(() => {
-  logger.info('connection.declareTopology:', topology)
+  logger.info({ topology, fn: 'declareTopology' }, 'RabbitMQ topology configured')
   connection.close()
   process.exit(0)
 })
