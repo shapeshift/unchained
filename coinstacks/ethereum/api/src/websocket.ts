@@ -1,6 +1,7 @@
-import WebSocket from 'isomorphic-ws'
 import { ErrorResponse, RequestPayload, Topics, TxsTopicData } from '@shapeshiftoss/common-api'
 import { SequencedETHParseTx } from '@shapeshiftoss/ethereum-ingester'
+import { Observable } from 'rxjs'
+import WebSocket from 'ws'
 
 export interface Connection {
   ws: WebSocket
@@ -9,75 +10,67 @@ export interface Connection {
 
 export class Client {
   private readonly url: string
-  private readonly connections: Record<Topics, Connection | undefined>
 
   constructor(url: string) {
     this.url = url
-
-    this.connections = {
-      txs: undefined,
-    }
   }
 
-  private heartbeat(topic: Topics): void {
-    const connection = this.connections[topic]
-    if (!connection) return
+  async subscribe(topic: 'txs', data: TxsTopicData): Promise<Observable<SequencedETHParseTx>>
+  async subscribe(topic: Topics, data: unknown): Promise<Observable<unknown>> {
+    let readyResolver: () => void
+    const readyPromise = new Promise<void>((resolve) => (readyResolver = resolve))
+    const out = new Observable((subscriber) => {
+      const ws = new WebSocket(this.url)
 
-    connection.pingTimeout && clearTimeout(connection.pingTimeout)
-    connection.pingTimeout = setTimeout(() => connection?.ws.close(), 10000 + 1000)
-  }
+      const send = (payload: RequestPayload) => {
+        ws.send(JSON.stringify(payload))
+      }
+      const unsubscribe = () => send({ method: 'unsubscribe', topic })
 
-  private onOpen(topic: Topics, resolve: (value: unknown) => void): void {
-    this.heartbeat(topic)
-    resolve(true)
-  }
-
-  async subscribeTxs(
-    data: TxsTopicData,
-    onMessage: (message: SequencedETHParseTx) => void,
-    onError?: (err: ErrorResponse) => void
-  ): Promise<void> {
-    if (this.connections.txs) return
-
-    const ws = new WebSocket(this.url)
-    this.connections.txs = { ws }
-
-    if (onError) {
-      ws.onerror = (event) => onError({ type: 'error', message: event.message })
-    }
-
-    ws.onclose = () => this.connections.txs?.pingTimeout && clearTimeout(this.connections.txs.pingTimeout)
-    ws.onmessage = (event) => {
-      if (event.data === 'ping') {
-        this.heartbeat('txs')
-        return
+      let pingTimeout: NodeJS.Timeout
+      const heartbeat = () => {
+        clearTimeout(pingTimeout)
+        pingTimeout = setTimeout(() => ws.terminate(), 10000 + 1000)
       }
 
-      try {
-        const message = JSON.parse(event.data.toString()) as SequencedETHParseTx | ErrorResponse
-        if ('type' in message) {
-          onError && onError(message)
+      ws.onopen = () => {
+        heartbeat()
+        subscriber.add(unsubscribe)
+        readyResolver()
+      }
+      ws.onclose = () => {
+        clearTimeout(pingTimeout)
+        subscriber.remove(unsubscribe)
+        subscriber.complete()
+      }
+
+      ws.on('ping', () => heartbeat())
+      ws.on('error', (event) => subscriber.error(event.message))
+
+      ws.onmessage = (event) => {
+        if (event.data === 'ping') {
+          heartbeat()
           return
         }
-        onMessage(message)
-      } catch (err) {
-        if (onError && err instanceof Error) onError({ type: 'error', message: err.message })
+        try {
+          const message = JSON.parse(event.data.toString()) as SequencedETHParseTx | ErrorResponse
+          if (message.type === 'error') {
+            subscriber.error(message.message)
+          } else {
+            subscriber.next(message)
+          }
+        } catch (err) {
+          if (err instanceof Error) {
+            subscriber.error(err.message)
+          } else {
+            subscriber.error(String(err))
+          }
+        }
       }
-    }
 
-    await new Promise((resolve) => (ws.onopen = () => this.onOpen('txs', resolve)))
-
-    const payload: RequestPayload = { method: 'subscribe', data }
-    ws.send(JSON.stringify(payload))
-  }
-
-  unsubscribeTxs(): void {
-    this.connections.txs?.ws.send(
-      JSON.stringify({ method: 'unsubscribe', topic: 'txs', data: undefined } as RequestPayload)
-    )
-  }
-
-  close(topic: Topics): void {
-    this.connections[topic]?.ws.close()
+      send({ method: 'subscribe', topic, data })
+    })
+    await readyPromise
+    return out
   }
 }
