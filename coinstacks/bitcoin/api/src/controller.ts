@@ -204,7 +204,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   @Get('account/{pubkey}/utxos')
   async getUtxos(@Path() pubkey: string): Promise<Array<Utxo>> {
     try {
-      const data = await blockbook.getUtxo(pubkey, true)
+      const data = await blockbook.getUtxo(pubkey)
       return data
     } catch (err) {
       throw new ApiError(err.response, err.response.status, JSON.stringify(err.response.data))
