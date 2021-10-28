@@ -14,6 +14,7 @@ start_coin_bg() {
     --http.port 8332 \
     --http.api eth,net,web3,debug,txpool \
     --http.vhosts '*' \
+    --http.corsdomain '*' \
     --ws \
     --ws.port 8333 \
     --ipcdisable \
