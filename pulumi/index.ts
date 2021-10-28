@@ -29,6 +29,7 @@ export = async (): Promise<Outputs> => {
       cidrBlock: config.eks.cidrBlock,
       email: config.eks.email,
       instanceTypes: config.eks.instanceTypes,
+      logging: config.eks.logging,
       numInstancesPerAZ: config.eks.numInstancesPerAZ,
       profile: config.eks.profile,
       region: config.eks.region,
