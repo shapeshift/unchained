@@ -9,6 +9,7 @@ export * from './docker'
 export * from './ingester'
 export * from './mongo'
 export * from './hasher'
+export * as rabbit from './rabbitmq'
 export * from './rabbit'
 
 export interface Dockerhub {
