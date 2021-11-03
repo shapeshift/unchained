@@ -27,8 +27,6 @@ config:
     #    # min/max instances per availability zone, if using 3 AZ's this cluster would have min 3 max 9 instances 
     #    minInstances: 1
     #    maxInstances: 3
-    #  # profile - local profile to use as configured in ~/.aws/credentials file
-    #  profile: 'default'
     #  # cidrBlock - private subnet cidrRange for the VPC
     #  cidrBlock: '10.0.0.0/16'
     #  # email - email address to be associated with the ACME account. This field is optional, but it is strongly recommended to be set. It will be used to contact you in case of issues with your account or certificates, including expiry notification emails.
@@ -38,8 +36,26 @@ config:
     #    - 't3.small'
     #    - 't3.medium'
     #    - 't3.large'
+    #  # logging - if enabled, a PLG (Promtail, Loki, Grafana) stack will be deployed
+    #  logging:
+    #    enabled: false
+    #    persistentVolume: false
+    #    pvSize: '10Gi'
+    #    retentionPeriod: '366h'
+    #    resources:
+    #      grafana:
+    #        cpu: '200m'
+    #        memory: '256Mi'
+    #      loki:
+    #        cpu: '250m'
+    #        memory: '256Mi'
+    #      promtail:
+    #        cpu: '100m'
+    #        memory: '128Mi'
     #  # numInstancesPerAZ - the number of desired instances to run in each AZ, if autoscaling is enabled ensure this value is within the bounds of min/max instances per AZ
     #  numInstancesPerAZ: 1
+    #  # profile - local profile to use as configured in ~/.aws/credentials file
+    #  profile: 'default'
     #  # region - aws region to deploy the stack to
     #  region: 'us-east-1'
 
