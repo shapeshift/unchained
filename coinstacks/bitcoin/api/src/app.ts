@@ -47,4 +47,4 @@ app.get('/', async (_, res) => {
 app.use(middleware.errorHandler)
 app.use(middleware.notFoundHandler)
 
-app.listen(port, () => logger.info({ port }, 'Server started'))
+app.listen(port, () => logger.info('Server started'))
