@@ -4,11 +4,10 @@ set -e
 
 start_coin() {
   bitcoind \
-    -rpcuser=user \
-    -rpcpassword=password \
     -datadir=/data \
     -printtoconsole=1 \
     -server=1 \
+    -whitelist=0.0.0.0/0 \
     -nolisten=1 \
     -txindex=1 \
     -disablewallet=1 \
