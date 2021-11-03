@@ -4,6 +4,8 @@ set -e
 
 start_coin() {
   bitcoind \
+    -rpcuser=user \
+    -rpcpassword=password \
     -datadir=/data \
     -printtoconsole=1 \
     -server=1 \
