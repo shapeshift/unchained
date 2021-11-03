@@ -2,6 +2,15 @@
 import { Account } from '../../../common/api/src'
 
 /**
+ * Contains info about current recommended fees to use in a transaction
+ */
+export interface FeeData {
+  gasPrice: string
+  maxFeePerGas: string
+  maxPriorityFeePerGas: string
+}
+
+/**
  * Contains info about a token including balance for an address
  */
 export interface Token {
@@ -61,16 +70,19 @@ export interface EthereumAPI {
    * @param {string} to to address
    * @param {string} value transaction value in wei
    *
-   * @returns {Promise<string>} estimated gas to be used for the transaction
+   * @returns {Promise<string>} estimated gas cost
    */
   //@Get('/gas/estimate')
   estimateGas(data: string, from: string, to: string, value: string): Promise<string>
 
   /**
-   * Get the current gas price from the node
+   * Get the current recommended gas fees to use in a transaction
    *
-   * @returns {Promise<string>} current gas price in wei
+   * * For EIP-1559 transactions, use `maxFeePerGas` and `maxPriorityFeePerGas`
+   * * For Legacy transactions, use `gasPrice`
+   *
+   * @returns {Promise<FeeData>} current fees specified in wei
    */
-  // @Get('/gas/price')
-  getGasPrice(): Promise<string>
+  // @Get('/gas/fees')
+  getGasPrice(): Promise<FeeData>
 }

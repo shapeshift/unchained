@@ -12,7 +12,7 @@ import {
   TxHistory,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { EthereumAPI, EthereumAccount, Token } from './models'
+import { EthereumAPI, EthereumAccount, Token, FeeData } from './models'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -166,7 +166,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
    * @example data "0x"
    * @example from "0x0000000000000000000000000000000000000000"
    * @example to "0x642F4Bda144C63f6DC47EE0fDfbac0a193e2eDb7"
-   * @example value "0.0123"
+   * @example value "123"
    */
   @Example<string>('26540')
   @Response<ValidationError>(422, 'Validation Error')
@@ -188,17 +188,32 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   }
 
   /**
-   * Get the current gas price from the node
+   * Get the current recommended gas fees to use in a transaction
    *
-   * @returns {Promise<string>} current gas price in wei
+   * * For EIP-1559 transactions, use `maxFeePerGas` and `maxPriorityFeePerGas`
+   * * For Legacy transactions, use `gasPrice`
+   *
+   * @returns {Promise<FeeData>} current fees specified in wei
    */
-  @Example<string>('123456789')
+  @Example<FeeData>({
+    gasPrice: '172301756423',
+    maxFeePerGas: '342603512846',
+    maxPriorityFeePerGas: '1000000000',
+  })
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('/gas/price')
-  async getGasPrice(): Promise<string> {
+  @Get('/gas/fees')
+  async getGasPrice(): Promise<FeeData> {
     try {
-      const gasPrice = await provider.getGasPrice()
-      return gasPrice.toString()
+      const feeData = await provider.getFeeData()
+      if (!feeData.gasPrice || !feeData.maxFeePerGas || !feeData.maxPriorityFeePerGas) {
+        throw { message: 'no fee data returned from node' }
+      }
+
+      return {
+        gasPrice: feeData.gasPrice.toString(),
+        maxFeePerGas: feeData.maxFeePerGas.toString(),
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas.toString(),
+      }
     } catch (err) {
       throw new ApiError('Internal Server Error', 500, JSON.stringify(err))
     }
