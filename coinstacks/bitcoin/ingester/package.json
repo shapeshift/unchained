@@ -14,7 +14,7 @@
     "@shapeshiftoss/blockbook": "^3.0.0",
     "@shapeshiftoss/common-ingester": "^3.0.0",
     "@shapeshiftoss/common-mongo": "^3.0.0",
-    "@shapeshiftoss/logger": "^3.0.0",
+    "@shapeshiftoss/logger": "^1.0.0",
     "@shapeshiftoss/thorchain": "^3.0.0",
     "axios": "^0.21.2"
   }
