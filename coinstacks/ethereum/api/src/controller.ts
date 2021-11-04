@@ -12,7 +12,7 @@ import {
   TxHistory,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { EthereumAPI, EthereumAccount, Token, FeeData } from './models'
+import { EthereumAPI, EthereumAccount, Token, GasFees } from './models'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -193,16 +193,16 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
    * * For EIP-1559 transactions, use `maxFeePerGas` and `maxPriorityFeePerGas`
    * * For Legacy transactions, use `gasPrice`
    *
-   * @returns {Promise<FeeData>} current fees specified in wei
+   * @returns {Promise<GasFees>} current fees specified in wei
    */
-  @Example<FeeData>({
+  @Example<GasFees>({
     gasPrice: '172301756423',
     maxFeePerGas: '342603512846',
     maxPriorityFeePerGas: '1000000000',
   })
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
-  async getGasFees(): Promise<FeeData> {
+  async getGasFees(): Promise<GasFees> {
     try {
       const feeData = await provider.getFeeData()
       if (!feeData.gasPrice || !feeData.maxFeePerGas || !feeData.maxPriorityFeePerGas) {

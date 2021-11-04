@@ -4,7 +4,7 @@ import { Account } from '../../../common/api/src'
 /**
  * Contains info about current recommended fees to use in a transaction
  */
-export interface FeeData {
+export interface GasFees {
   gasPrice: string
   maxFeePerGas: string
   maxPriorityFeePerGas: string
@@ -81,8 +81,8 @@ export interface EthereumAPI {
    * * For EIP-1559 transactions, use `maxFeePerGas` and `maxPriorityFeePerGas`
    * * For Legacy transactions, use `gasPrice`
    *
-   * @returns {Promise<FeeData>} current fees specified in wei
+   * @returns {Promise<GasFees>} current fees specified in wei
    */
   // @Get('/gas/fees')
-  getGasPrice(): Promise<FeeData>
+  getGasFees(): Promise<GasFees>
 }
