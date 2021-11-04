@@ -2,11 +2,16 @@ import express, { json, urlencoded } from 'express'
 import cors from 'cors'
 import { join } from 'path'
 import swaggerUi from 'swagger-ui-express'
-import { logger } from '@shapeshiftoss/logger'
+import { Logger } from '@shapeshiftoss/logger'
 import { middleware } from '@shapeshiftoss/common-api'
 import { RegisterRoutes } from './routes'
 
 const port = process.env.PORT || 3000
+
+const logger = new Logger({
+  namespace: ['unchained', 'coinstacks', 'bitcoin', 'api'],
+  level: process.env.LOG_LEVEL,
+})
 
 const app = express()
 
@@ -42,4 +47,4 @@ app.get('/', async (_, res) => {
 app.use(middleware.errorHandler)
 app.use(middleware.notFoundHandler)
 
-app.listen(port, () => logger.info('server listening...'))
+app.listen(port, () => logger.info('Server started'))

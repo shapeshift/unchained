@@ -1,5 +1,5 @@
 import { Connection } from 'amqp-ts'
-import { logger } from '@shapeshiftoss/logger'
+import { logger } from './logger'
 
 const BROKER_URL = process.env.BROKER_URL
 
@@ -54,7 +54,7 @@ const topology: Connection.Topology = {
 }
 
 connection.declareTopology(topology).then(() => {
-  logger.info('connection.declareTopology:', topology)
+  logger.info({ topology, fn: 'declareTopology' }, 'RabbitMQ topology configured')
   connection.close()
   process.exit(0)
 })

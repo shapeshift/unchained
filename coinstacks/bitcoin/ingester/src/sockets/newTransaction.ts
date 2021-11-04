@@ -1,6 +1,6 @@
 import { WebsocketRepsonse } from '@shapeshiftoss/blockbook'
 import { ready, notReady, Message, MessageEvent, Socket, Subscription } from '@shapeshiftoss/common-ingester'
-import { logger } from '@shapeshiftoss/logger'
+import { logger } from '../logger'
 
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
 
@@ -14,6 +14,7 @@ const subscription: Subscription = {
 
 const socket = new Socket(INDEXER_WS_URL, subscription, 'exchange.tx')
 
+const msgLogger = logger.child({ namespace: ['sockets'], sub: 'newTx', fn: 'onMessage' })
 const onMessage = async (message: MessageEvent) => {
   try {
     const res: WebsocketRepsonse = JSON.parse(message.data.toString())
@@ -27,10 +28,10 @@ const onMessage = async (message: MessageEvent) => {
     } else if ('txid' in res.data) {
       socket.exchange.send(new Message(res.data), 'tx')
     } else {
-      logger.warn('unhandled websocket response:', res)
+      msgLogger.warn({ res }, 'Unhandled websocket response')
     }
   } catch (err) {
-    logger.error('socket.onmessage error:', err)
+    msgLogger.error(err, 'Error processing transaction')
     notReady()
   }
 }
