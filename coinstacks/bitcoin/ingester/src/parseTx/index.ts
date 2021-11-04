@@ -1,10 +1,10 @@
 import { BigNumber } from 'bignumber.js'
-import { Tx, Vin, Vout } from '@shapeshiftoss/blockbook'
-import { TxTransfer, Token } from '@shapeshiftoss/common-ingester'
+import { Tx } from '@shapeshiftoss/blockbook'
+import { TxTransfer } from '@shapeshiftoss/common-ingester'
 import { BTCParseTx } from '../types'
 
 // keep track of all individual tx components and add up the total value transferred
-const aggregateTransfer = (transfer: TxTransfer, value: string, token?: Token): TxTransfer => {
+const aggregateTransfer = (transfer: TxTransfer, value: string): TxTransfer => {
   if (transfer) {
     transfer.totalValue = new BigNumber(transfer.totalValue).plus(new BigNumber(value)).toString(10)
     transfer.components.push({ value: value })
@@ -12,7 +12,7 @@ const aggregateTransfer = (transfer: TxTransfer, value: string, token?: Token): 
     transfer = { totalValue: value, components: [{ value: value }] }
   }
 
-  return { ...transfer, token }
+  return transfer
 }
 
 export const parseTx = async (tx: Tx, address: string): Promise<BTCParseTx> => {
@@ -23,23 +23,23 @@ export const parseTx = async (tx: Tx, address: string): Promise<BTCParseTx> => {
     send: {},
   }
 
-  tx.vin.forEach((vin: Vin) => {
+  tx.vin.forEach((vin) => {
     if (vin.isAddress === true && vin.addresses?.includes(address)) {
       // send amount
       const sendValue = new BigNumber(vin.value ?? 0)
       if (!sendValue.isNaN() && sendValue.gt(0)) {
         pTx.send['BTC'] = aggregateTransfer(pTx.send['BTC'], sendValue.toString(10))
+      }
 
-        // network fee (only for sends)
-        const fees = new BigNumber(tx.fees ?? 0)
-        if (!fees.isNaN() && fees.gt(0)) {
-          pTx.fee = { symbol: 'BTC', value: fees.toString(10) }
-        }
+      // network fee
+      const fees = new BigNumber(tx.fees ?? 0)
+      if (!fees.isNaN() && fees.gt(0)) {
+        pTx.fee = { symbol: 'BTC', value: fees.toString(10) }
       }
     }
   })
 
-  tx.vout.forEach((vout: Vout) => {
+  tx.vout.forEach((vout) => {
     if (vout.isAddress === true && vout.addresses?.includes(address)) {
       // receive amount
       const receiveValue = new BigNumber(vout.value ?? 0)

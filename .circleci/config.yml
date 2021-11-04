@@ -9,23 +9,24 @@ executors:
       - image: pulumi/pulumi-nodejs:3.11.0
 
 aliases:
-  - &only-main
-    filters:
-      branches:
-        only:
-          - main
-
-  - &not-main
+  - &only-feature
     filters:
       branches:
         ignore:
           - main
+          - develop
 
   - &only-develop
     filters:
       branches:
         only:
           - develop
+
+  - &only-main
+    filters:
+      branches:
+        only:
+          - main
 
   - &bitcoin
     coinstack: bitcoin
@@ -374,7 +375,7 @@ workflows:
     jobs:
       - lint-and-test:
           name: lint and test project
-          <<: *not-main
+          <<: *only-feature
   deploy-development:
     jobs:
       - lint-and-test-persist:
