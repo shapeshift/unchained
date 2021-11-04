@@ -202,7 +202,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   })
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
-  async getGasPrice(): Promise<FeeData> {
+  async getGasFees(): Promise<FeeData> {
     try {
       const feeData = await provider.getFeeData()
       if (!feeData.gasPrice || !feeData.maxFeePerGas || !feeData.maxPriorityFeePerGas) {
