@@ -3,8 +3,8 @@ import cors from 'cors'
 import { join } from 'path'
 import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
-import { logger } from '@shapeshiftoss/logger'
 import { middleware, ConnectionHandler } from '@shapeshiftoss/common-api'
+import { logger } from './logger'
 import { RegisterRoutes } from './routes'
 
 const port = process.env.PORT ?? 3000
@@ -38,7 +38,7 @@ app.get('/', async (_, res) => {
 app.use(middleware.errorHandler)
 app.use(middleware.notFoundHandler)
 
-const server = app.listen(port, () => logger.info('server listening...'))
+const server = app.listen(port, () => logger.info({ port }, 'Server started'))
 
 const wsServer = new Server({ server })
 

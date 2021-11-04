@@ -1,6 +1,6 @@
 import { Connection, Exchange } from 'amqp-ts'
 import WebSocket from 'ws'
-import { logger } from '@shapeshiftoss/logger'
+import { logger } from './utils/logger'
 import { notReady } from './utils/probes'
 
 export interface Subscription {
@@ -31,17 +31,17 @@ export class Socket {
     this.socket = new WebSocket(url, { handshakeTimeout: 5000 })
 
     this.socket.onerror = (error: WebSocket.ErrorEvent) => {
-      logger.error('socket.onerror:', error.message)
+      logger.error({ error, fn: 'onError' }, 'Websocket error')
       notReady()
     }
 
     this.socket.close = (code?: number, data?: string) => {
-      logger.error('socket.close:', code, data)
+      logger.error({ code, data, fn: 'onError' }, 'Websocket closed')
       notReady()
     }
 
     this.socket.onopen = () => {
-      logger.debug('socket.onopen')
+      logger.debug({ fn: 'onOpen' }, 'Websocket opened')
       this.keepAlive()
       this.socket.send(JSON.stringify(subscription))
     }

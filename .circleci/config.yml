@@ -50,7 +50,7 @@ aliases:
     daemon-cpu-limit: '2'
     daemon-memory-limit: 12Gi
     daemon-storage-size: 1500Gi
-    rpc-url: http://bitcoin-indexer-svc.unchained.svc.cluster.local:8332
+    rpc-url: http://user:password@bitcoin-indexer-svc.unchained.svc.cluster.local:8332
 
   - &ethereum
     coinstack: ethereum
@@ -399,7 +399,7 @@ workflows:
           indexer-replicas: 1
           indexer-url: http://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001
           indexer-ws-url: ws://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
-          rpc-url: http://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8332
+          rpc-url: http://user:password@bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8332
           requires:
             - deploy common unchained dependencies
           <<: *only-develop
