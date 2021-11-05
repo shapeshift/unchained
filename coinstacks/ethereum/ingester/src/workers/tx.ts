@@ -77,7 +77,10 @@ const getInternalTransactions = async (
 
     if (data.status === '0') {
       if (data.message !== 'No transactions found') {
-        moduleLogger.warn({ address, page, fromHeight, toHeight, data }, 'Invalid message')
+        moduleLogger.warn(
+          { fn: 'getInternalTransactions', address, page, fromHeight, toHeight, data },
+          'Unhandled data'
+        )
       }
       return []
     }
@@ -109,7 +112,7 @@ const getTxHistory = async (address: string, fromHeight: number, toHeight?: numb
         const { txids } = await blockbook.getAddress(address, p, PAGE_SIZE, fromHeight, toHeight, 'txids')
         moduleLogger.debug(
           { fn: 'getTxHistory', address, fromHeight, toHeight, page: p, totalPages, duration: Date.now() - start },
-          'getTxHistory'
+          'Get transaction history'
         )
         return txids
       })
@@ -134,7 +137,7 @@ const getTxHistoryInternal = async (
     const txs = await getInternalTransactions(address, page, fromHeight, toHeight)
     moduleLogger.debug(
       { fn: 'getTxHistoryInternal', address, fromHeight, toHeight, page, duration: Date.now() - start },
-      'getTxHistoryInternal'
+      'Get internal transaction history'
     )
 
     // only support eth internal transactions at this time
@@ -236,8 +239,10 @@ const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string):
   return requeue
 }
 
+const msgLogger = moduleLogger.child({ fn: 'onMessage' })
 const onMessage = (worker: Worker) => async (message: Message) => {
   const tx: Tx = message.getContent()
+  msgLogger.trace({ blockHash: tx.blockHash, blockHeight: tx.blockHeight, txid: tx.txid }, 'Transaction')
 
   try {
     let requeue = false
@@ -253,7 +258,7 @@ const onMessage = (worker: Worker) => async (message: Message) => {
       worker.ackMessage(message, tx.txid)
     }
   } catch (err) {
-    moduleLogger.error(err, { fn: 'onMessage' }, 'Error processing tx history')
+    msgLogger.error(err, 'Error processing tx history')
     worker.retryMessage(message, tx.txid)
   }
 }
