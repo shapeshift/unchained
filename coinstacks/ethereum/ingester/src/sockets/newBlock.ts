@@ -28,7 +28,7 @@ const onMessage = async (message: MessageEvent) => {
       ready()
       socket.exchange.send(new Message({ hash: '', height: -1 } as NewBlock), 'newBlock') // trigger delta sync on subscribe
     } else if ('hash' in res.data || 'height' in res.data) {
-      msgLogger.debug({ res }, 'newBlock')
+      msgLogger.debug({ height: res.data.height }, `New block`)
       socket.exchange.send(new Message(res.data), 'newBlock')
     } else {
       msgLogger.warn({ res }, 'Unhandled websocket response')

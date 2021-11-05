@@ -14,7 +14,7 @@ const subscription: Subscription = {
 
 const socket = new Socket(INDEXER_WS_URL, subscription, 'exchange.tx')
 
-const msgLogger = logger.child({ namespace: ['sockets'], sub: 'newTx', fn: 'onMessage' })
+const msgLogger = logger.child({ namespace: ['sockets', 'newTransaction'], fn: 'onMessage' })
 const onMessage = async (message: MessageEvent) => {
   try {
     const res: WebsocketRepsonse = JSON.parse(message.data.toString())

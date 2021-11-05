@@ -19,15 +19,16 @@ const onMessage = (worker: Worker) => async (message: Message) => {
 
   try {
     const tx = await blockbook.getTransaction(txid)
-    msgLogger.debug({ txid, address }, 'getTransaction')
+    msgLogger.trace({ blockHash: tx.blockHash, blockHeight: tx.blockHeight, txid: tx.txid }, 'Transaction')
 
     const pTx = await parseTx(tx, address, internalTxs)
-    msgLogger.info({ txid, address, client_id }, 'Publishing transactions')
 
     worker.sendMessage(new Message({ ...pTx, sequence, total } as SequencedETHParseTx), client_id)
     worker.ackMessage(message, retryKey)
+
+    msgLogger.debug({ address, txid, client_id }, 'Transaction published')
   } catch (err) {
-    msgLogger.error(err, 'Error processing message')
+    msgLogger.error(err, 'Error processing address')
     worker.retryMessage(message, retryKey)
   }
 }

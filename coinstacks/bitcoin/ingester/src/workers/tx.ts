@@ -79,7 +79,7 @@ const getTxHistory = async (address: string, fromHeight: number, toHeight?: numb
         const { txids } = await blockbook.getAddress(address, p, PAGE_SIZE, fromHeight, toHeight, 'txids')
         moduleLogger.debug(
           { fn: 'getTxHistory', address, fromHeight, toHeight, page: p, totalPages, duration: Date.now() - start },
-          'getTxHistory'
+          'Get transaction history'
         )
         return txids
       })
@@ -100,6 +100,7 @@ const getTxHistory = async (address: string, fromHeight: number, toHeight?: numb
  */
 export const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string): Promise<boolean> => {
   const fnLogger = moduleLogger.child({ fn: 'syncAddressIfRegistered' })
+
   let requeue = false
 
   const documents = await registry.getByAddress(address)
@@ -167,8 +168,10 @@ export const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: s
   return requeue
 }
 
+const msgLogger = moduleLogger.child({ fn: 'onMessage' })
 const onMessage = (worker: Worker) => async (message: Message) => {
   const tx: Tx = message.getContent()
+  msgLogger.trace({ blockHash: tx.blockHash, blockHeight: tx.blockHeight, txid: tx.txid }, 'Transaction')
 
   try {
     let requeue = false
@@ -184,7 +187,7 @@ const onMessage = (worker: Worker) => async (message: Message) => {
       worker.ackMessage(message, tx.txid)
     }
   } catch (err) {
-    moduleLogger.error(err, { fn: 'onMessage' }, 'Error processing tx history')
+    msgLogger.error(err, 'Error processing tx history')
     worker.retryMessage(message, tx.txid)
   }
 }
