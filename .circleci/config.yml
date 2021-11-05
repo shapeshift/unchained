@@ -9,23 +9,24 @@ executors:
       - image: pulumi/pulumi-nodejs:3.11.0
 
 aliases:
-  - &only-main
-    filters:
-      branches:
-        only:
-          - main
-
-  - &not-main
+  - &only-feature
     filters:
       branches:
         ignore:
           - main
+          - develop
 
   - &only-develop
     filters:
       branches:
         only:
           - develop
+
+  - &only-main
+    filters:
+      branches:
+        only:
+          - main
 
   - &bitcoin
     coinstack: bitcoin
@@ -50,7 +51,7 @@ aliases:
     daemon-cpu-limit: '2'
     daemon-memory-limit: 12Gi
     daemon-storage-size: 1500Gi
-    rpc-url: http://bitcoin-indexer-svc.unchained.svc.cluster.local:8332
+    rpc-url: http://user:password@bitcoin-indexer-svc.unchained.svc.cluster.local:8332
 
   - &ethereum
     coinstack: ethereum
@@ -156,10 +157,11 @@ commands:
             wget -O helm.tar.gz https://get.helm.sh/helm-v3.6.2-linux-amd64.tar.gz
             tar -zxvf helm.tar.gz
             mv linux-amd64/helm /usr/local/bin/helm
-            helm repo add bitnami https://charts.bitnami.com/bitnami
-            helm repo add traefik https://helm.traefik.io/traefik
-            helm repo add eks https://aws.github.io/eks-charts
             helm repo add autoscaler https://kubernetes.github.io/autoscaler
+            helm repo add bitnami https://charts.bitnami.com/bitnami
+            helm repo add eks https://aws.github.io/eks-charts
+            helm repo add grafana https://grafana.github.io/helm-charts
+            helm repo add traefik https://helm.traefik.io/traefik
       - run:
           name: install pulumi plugin resources
           command: |
@@ -201,6 +203,10 @@ jobs:
             pulumi config set --path unchained:common.eks.instanceTypes[0] m5.4xlarge
             pulumi config set --path unchained:common.eks.instanceTypes[1] m5a.4xlarge
             pulumi config set --path unchained:common.eks.instanceTypes[2] m5ad.4xlarge
+            pulumi config set --path unchained:common.eks.logging.enabled true
+            pulumi config set --path unchained:common.eks.logging.persistentVolume true
+            pulumi config set --path unchained:common.eks.logging.pvSize 50Gi
+            pulumi config set --path unchained:common.eks.logging.retentionPeriod 336h
             pulumi config set --path unchained:common.eks.region $AWS_REGION
             pulumi config set --path unchained:common.eks.cidrBlock 10.0.0.0/16
             pulumi config set --path unchained:common.traefik.whitelist[0] 173.245.48.0/20
@@ -369,7 +375,7 @@ workflows:
     jobs:
       - lint-and-test:
           name: lint and test project
-          <<: *not-main
+          <<: *only-feature
   deploy-development:
     jobs:
       - lint-and-test-persist:
@@ -394,7 +400,7 @@ workflows:
           indexer-replicas: 1
           indexer-url: http://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001
           indexer-ws-url: ws://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
-          rpc-url: http://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8332
+          rpc-url: http://user:password@bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8332
           requires:
             - deploy common unchained dependencies
           <<: *only-develop

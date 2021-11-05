@@ -3,6 +3,7 @@ version: '3.6'
 services:
   api:
     labels:
+      - 'traefik.enable=true'
       - 'traefik.http.routers.bitcoin-api.rule=Host(`api.bitcoin.localhost`)'
       - 'traefik.http.services.bitcoin-api.loadbalancer.server.port=3000'
     image: unchained-local
@@ -16,6 +17,7 @@ services:
       - ../..:/app
   mongo:
     labels:
+      - 'traefik.enable=true'
       - 'traefik.http.routers.bitcoin-mongo.rule=Host(`mongo.bitcoin.localhost`)'
       - 'traefik.http.services.bitcoin-mongo.loadbalancer.server.port=27017'
     image: mongo:4.2.8
@@ -25,6 +27,7 @@ services:
       - mongodb:/data/db
   rabbitmq:
     labels:
+      - 'traefik.enable=true'
       - 'traefik.http.routers.bitcoin-rabbit.rule=Host(`rabbit-admin.bitcoin.localhost`)'
       - 'traefik.http.services.bitcoin-rabbit.loadbalancer.server.port=15672'
     image: rabbitmq:3-management

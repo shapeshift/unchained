@@ -1,13 +1,13 @@
 {
   "name": "@shapeshiftoss/unchained-pulumi",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "license": "MIT",
   "private": true,
   "scripts": {
     "clean": "rm -rf dist node_modules"
   },
   "dependencies": {
-    "@shapeshiftoss/cluster-launcher": "0.6.5",
+    "@shapeshiftoss/cluster-launcher": "0.6.7",
     "@types/folder-hash": "^4.0.0",
     "folder-hash": "^4.0.0"
   }

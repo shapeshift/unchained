@@ -1,13 +1,13 @@
 import { Worker, Message } from '@shapeshiftoss/common-ingester'
-import { logger } from '@shapeshiftoss/logger'
+import { logger } from '../logger'
 import { ETHBlock } from '../types'
 
+const msgLogger = logger.child({ namespace: ['workers', 'block'], fn: 'onMessage' })
 const onMessage = (worker: Worker) => (message: Message) => {
   const block: ETHBlock = message.getContent()
-  logger.debug(`block: (${Number(block.number)}) ${block.hash}`)
+  msgLogger.debug({ height: Number(block.number) }, 'Block')
 
   block.transactions.forEach((txid) => worker.sendMessage(new Message(txid), 'txid'))
-
   worker.ackMessage(message)
 }
 

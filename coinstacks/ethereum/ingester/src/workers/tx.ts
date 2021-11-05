@@ -3,7 +3,7 @@ import { utils } from 'ethers'
 import { Blockbook, Tx } from '@shapeshiftoss/blockbook'
 import { Message, Worker } from '@shapeshiftoss/common-ingester'
 import { RegistryService } from '@shapeshiftoss/common-mongo'
-import { logger } from '@shapeshiftoss/logger'
+import { logger } from '../logger'
 import { ETHSyncTx, EtherscanApiResponse, InternalTx, InternalTxHistory, TxHistory } from '../types'
 import { getInternalAddress } from '../parseTx'
 
@@ -26,6 +26,8 @@ const SYNC_TIMEOUT = 1000 * 60 * 5
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 const registry = new RegistryService(MONGO_URL, MONGO_DBNAME, POOL_SIZE)
+
+const moduleLogger = logger.child({ namespace: ['workers', 'tx'] })
 
 const getPages = (from: number, to: number, max: number): Array<number> => {
   const toOrMax = to <= max ? to : max
@@ -75,14 +77,17 @@ const getInternalTransactions = async (
 
     if (data.status === '0') {
       if (data.message !== 'No transactions found') {
-        logger.warn(`${address} (page ${page}, from ${fromHeight}, to ${toHeight}): ${data.message}: ${data.result}`)
+        moduleLogger.warn(
+          { fn: 'getInternalTransactions', address, page, fromHeight, toHeight, data },
+          'Unhandled data'
+        )
       }
       return []
     }
 
     return data.result as Array<InternalTx>
   } catch (err) {
-    logger.error(`failed to get internal transactions: ${err}`)
+    moduleLogger.error(err, 'Failed to get internal transactions')
     throw err
   }
 }
@@ -105,10 +110,9 @@ const getTxHistory = async (address: string, fromHeight: number, toHeight?: numb
       getPages(page, page + BATCH_SIZE - 1, totalPages).map(async (p) => {
         const start = Date.now()
         const { txids } = await blockbook.getAddress(address, p, PAGE_SIZE, fromHeight, toHeight, 'txids')
-        logger.debug(
-          `getTxHistory: ${address}, from ${fromHeight} to ${toHeight}, page ${p} out of ${totalPages} (${
-            Date.now() - start
-          } ms)`
+        moduleLogger.debug(
+          { fn: 'getTxHistory', address, fromHeight, toHeight, page: p, totalPages, duration: Date.now() - start },
+          'Get transaction history'
         )
         return txids
       })
@@ -131,8 +135,9 @@ const getTxHistoryInternal = async (
   while (processing) {
     const start = Date.now()
     const txs = await getInternalTransactions(address, page, fromHeight, toHeight)
-    logger.debug(
-      `getTxHistoryInternal: ${address}, from ${fromHeight} to ${toHeight}, page ${page} (${Date.now() - start} ms)`
+    moduleLogger.debug(
+      { fn: 'getTxHistoryInternal', address, fromHeight, toHeight, page, duration: Date.now() - start },
+      'Get internal transaction history'
     )
 
     // only support eth internal transactions at this time
@@ -161,6 +166,8 @@ const getTxHistoryInternal = async (
  * @returns {boolean} requeue: should transaction be requeued if address is already syncing
  */
 const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string): Promise<boolean> => {
+  const fnLogger = moduleLogger.child({ fn: 'syncAddressIfRegistered' })
+
   let requeue = false
 
   const documents = await registry.getByAddress(address)
@@ -190,9 +197,7 @@ const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string):
       // track that we are currently syncing an address up to toHeight
       await registry.updateSyncing(address, document.client_id, syncKey)
 
-      logger.info(
-        `Address sync for: ${address} (client_id: ${document.client_id}), from: ${fromHeight}, to: ${toHeight} started`
-      )
+      fnLogger.debug({ address, client_id: document.client_id, fromHeight, toHeight }, 'Sync started')
 
       const [txHistory, txHistoryInternal] = await Promise.all([
         getTxHistory(address, fromHeight, toHeight),
@@ -225,10 +230,9 @@ const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string):
       // track that we are no longer currently syncing address
       await registry.updateSyncing(address, document.client_id)
 
-      logger.info(
-        `Address sync for: ${address} (client_id: ${
-          document.client_id
-        }), from: ${fromHeight}, to: ${toHeight} finished (${Date.now() - syncStart} ms)`
+      fnLogger.debug(
+        { address, client_id: document.client_id, fromHeight, toHeight, duration: Date.now() - syncStart },
+        'Sync finished'
       )
     })
   )
@@ -236,8 +240,10 @@ const syncAddressIfRegistered = async (worker: Worker, tx: Tx, address: string):
   return requeue
 }
 
+const msgLogger = moduleLogger.child({ fn: 'onMessage' })
 const onMessage = (worker: Worker) => async (message: Message) => {
   const tx: Tx = message.getContent()
+  msgLogger.trace({ blockHash: tx.blockHash, blockHeight: tx.blockHeight, txid: tx.txid }, 'Transaction')
 
   try {
     let requeue = false
@@ -253,7 +259,7 @@ const onMessage = (worker: Worker) => async (message: Message) => {
       worker.ackMessage(message, tx.txid)
     }
   } catch (err) {
-    logger.error('onMessage.error:', err.isAxiosError ? err.message : err)
+    msgLogger.error(err, 'Error processing tx history')
     worker.retryMessage(message, tx.txid)
   }
 }
