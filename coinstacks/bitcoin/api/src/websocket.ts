@@ -1,6 +1,6 @@
 import WebSocket from 'isomorphic-ws'
 import { ErrorResponse, RequestPayload, Topics, TxsTopicData } from '@shapeshiftoss/common-api'
-import { SequencedETHParseTx } from '@shapeshiftoss/ethereum-ingester'
+import { SequencedBTCParseTx } from '@shapeshiftoss/bitcoin-ingester'
 
 export interface Connection {
   ws: WebSocket
@@ -34,7 +34,7 @@ export class Client {
 
   async subscribeTxs(
     data: TxsTopicData,
-    onMessage: (message: SequencedETHParseTx) => void,
+    onMessage: (message: SequencedBTCParseTx) => void,
     onError?: (err: ErrorResponse) => void
   ): Promise<void> {
     if (this.connections.txs) return
@@ -54,7 +54,7 @@ export class Client {
       }
 
       try {
-        const message = JSON.parse(event.data.toString()) as SequencedETHParseTx | ErrorResponse
+        const message = JSON.parse(event.data.toString()) as SequencedBTCParseTx | ErrorResponse
 
         // narrow type to ErrorResponse if key `type` exists
         if ('type' in message) {
