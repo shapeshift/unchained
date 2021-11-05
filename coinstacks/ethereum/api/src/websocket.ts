@@ -55,10 +55,13 @@ export class Client {
 
       try {
         const message = JSON.parse(event.data.toString()) as SequencedETHParseTx | ErrorResponse
+
+        // narrow type to ErrorResponse if key `type` exists
         if ('type' in message) {
           onError && onError(message)
           return
         }
+
         onMessage(message)
       } catch (err) {
         if (onError && err instanceof Error) onError({ type: 'error', message: err.message })
