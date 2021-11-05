@@ -71,7 +71,10 @@ export const parse = async (
     const { sellAmount, sellAsset } = aggregateSell(tx, address, internalTxs)
 
     if (result.amount.toString() !== sellAmount) {
-      moduleLogger.warn({ fn: 'parse', tx, address }, 'Swap amount specified differs from amount sent for tx')
+      moduleLogger.warn(
+        { fn: 'parse', txid: tx.txid, address },
+        'Swap amount specified differs from amount sent for tx'
+      )
     }
 
     const trade: Trade = {

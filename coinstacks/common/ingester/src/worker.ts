@@ -11,8 +11,8 @@ interface WorkerDeclaration {
 export class Worker {
   private connection: Connection
   private retryAttempts: Record<string, number> = {}
-  private retryCount = 10
-  private _logger = logger.child({ namespace: ['worker'] })
+  private maxRetries = 10
+  private logger = logger.child({ namespace: ['worker'] })
 
   public queue?: Queue
   public exchange?: Exchange
@@ -56,24 +56,18 @@ export class Worker {
    * **Only 1 ack or nack should occur per message (ackMessage, retryMessage, or requeueMessage)**
    */
   async retryMessage(message: Message, identifier: string): Promise<void> {
-    const fnLogger = this._logger.child({
-      identifier,
-      message,
-      fn: 'retryMessage',
-      retryCount: this.retryCount,
-      attempts: this.retryAttempts[identifier] ?? 1,
-    })
+    const fnLogger = this.logger.child({ fn: 'retryMessage', identifier, message })
 
     try {
       const attempts = this.retryAttempts[identifier] ?? 1
 
-      if (attempts <= this.retryCount) {
+      if (attempts <= this.maxRetries) {
         await this.sleep(attempts ** 2 * 100)
-        fnLogger.debug('Retrying')
+        fnLogger.debug({ attempts, maxRetries: this.maxRetries }, 'Retrying')
         message.nack(false, true)
         this.retryAttempts[identifier] = attempts + 1
       } else {
-        fnLogger.error('Retry failed')
+        fnLogger.error({ attempts, maxRetries: this.maxRetries }, 'Retry failed')
         message.reject()
         delete this.retryAttempts[identifier]
       }
@@ -91,11 +85,11 @@ export class Worker {
    * _If no requeue exchange is declared, message will be rejected._
    */
   requeueMessage(message: Message, identifier: string, routingKey?: string): void {
-    const fnLogger = this._logger.child({ identifier, message, routingKey, fn: 'requeueMessage' })
+    const fnLogger = this.logger.child({ fn: 'requeueMessage', identifier, message, routingKey })
 
     try {
       if (!this.requeue) {
-        fnLogger.error('No requeue declared. Rejecting message.')
+        this.logger.error('No requeue queue declared. Rejecting message.')
         message.reject()
         delete this.retryAttempts[identifier]
         return
@@ -117,7 +111,7 @@ export class Worker {
    */
   sendMessage(message: Message, routingKey?: string): void {
     if (!this.exchange) {
-      this._logger.warn({ fn: 'sendMessage' }, 'No exchange declared')
+      this.logger.warn({ fn: 'sendMessage' }, 'No exchange declared')
       return
     }
 
