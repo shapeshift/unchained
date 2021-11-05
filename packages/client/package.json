@@ -15,6 +15,7 @@
     "watch": "nodemon"
   },
   "dependencies": {
+    "@shapeshiftoss/bitcoin-api": "^3.1.0",
     "@shapeshiftoss/common-ingester": "^3.1.0",
     "@shapeshiftoss/ethereum-api": "^3.1.0"
   },
