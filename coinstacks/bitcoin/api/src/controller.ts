@@ -11,6 +11,7 @@ import {
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { BitcoinAPI, BitcoinAccount, BitcoinTxSpecific, BTCNetworkFee, BTCNetworkFees, Utxo } from './models'
+import { Account } from '@shapeshiftoss/common-api'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -61,15 +62,21 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
     try {
       let data: Address | Xpub
       if (isXpub(pubkey)) {
-        data = await blockbook.getXpub(pubkey, undefined, undefined, undefined, undefined, 'tokenBalances', 'used')
+        data = await blockbook.getXpub(pubkey, undefined, undefined, undefined, undefined, 'tokenBalances', 'derived')
       } else {
         data = await blockbook.getAddress(pubkey, undefined, undefined, undefined, undefined, 'basic')
       }
 
+      // list of all used addresses with additional derived addresses up to gap limit of 20, including any detected balances
+      const addresses = (data.tokens ?? []).map<Account>((token) => ({
+        balance: token.balance ?? '0',
+        pubkey: token.name,
+      }))
+
       // For any change indexes detected by blockbook, we want to find the next unused address.
       // To do this we will add 1 to any address indexes found and keep track of the highest index.
       const nextAddressIndexes = (data.tokens ?? []).reduce<Array<number>>((prev, token) => {
-        if (!token.path) return prev
+        if (!token.path || token.transfers === 0) return prev
 
         const [, , , , change, addressIndex] = token.path.split('/')
         const changeIndex = Number(change)
@@ -85,6 +92,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
       return {
         pubkey: data.address,
         balance: data.balance,
+        addresses,
         nextReceiveAddressIndex: nextAddressIndexes[0] ?? 0,
         nextChangeAddressIndex: nextAddressIndexes[1] ?? 0,
       }
