@@ -107,17 +107,17 @@ export async function deployIngester(
   const rabbitCredentials: k8s.types.input.core.v1.EnvVar[] = [
     {
       name: 'BROKER_USER',
-      valueFrom: { secretKeyRef: { name: `${asset}-rabbitmq-default-user`, key: 'username'}}
+      valueFrom: { secretKeyRef: { name: `${asset}-rabbitmq-default-user`, key: 'username' } },
     },
     {
       name: 'BROKER_PASS',
-      valueFrom: { secretKeyRef: { name: `${asset}-rabbitmq-default-user`, key: 'password'}}
+      valueFrom: { secretKeyRef: { name: `${asset}-rabbitmq-default-user`, key: 'password' } },
     },
     {
       name: 'BROKER_URI',
-      value: 'amqp://$(BROKER_USER):$(BROKER_PASS)@$(BROKER_URL)'
-    }
-]
+      value: 'amqp://$(BROKER_USER):$(BROKER_PASS)@$(BROKER_URL)',
+    },
+  ]
 
   const volumes = config.isLocal ? [{ name: 'app', hostPath: { path: join(__dirname, '../../../../') } }] : undefined
   const volumeMounts = config.isLocal ? [{ name: 'app', mountPath: '/app' }] : undefined

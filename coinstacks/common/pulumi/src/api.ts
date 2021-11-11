@@ -222,17 +222,17 @@ export async function deployApi(
   const rabbitCredentials: k8s.types.input.core.v1.EnvVar[] = [
     {
       name: 'BROKER_USER',
-      valueFrom: { secretKeyRef: { name: `${asset}-rabbitmq-default-user`, key: 'username'}}
+      valueFrom: { secretKeyRef: { name: `${asset}-rabbitmq-default-user`, key: 'username' } },
     },
     {
       name: 'BROKER_PASS',
-      valueFrom: { secretKeyRef: { name: `${asset}-rabbitmq-default-user`, key: 'password'}}
+      valueFrom: { secretKeyRef: { name: `${asset}-rabbitmq-default-user`, key: 'password' } },
     },
     {
       name: 'BROKER_URI',
-      value: 'amqp://$(BROKER_USER):$(BROKER_PASS)@$(BROKER_URL)'
-    }
-]
+      value: 'amqp://$(BROKER_USER):$(BROKER_PASS)@$(BROKER_URL)',
+    },
+  ]
   const datadogAnnotation = config.api.enableDatadogLogs
     ? {
         [`ad.datadoghq.com/${tier}.logs`]: `[{"source": "${app}", "service": "${name}"}]`,

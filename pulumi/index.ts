@@ -91,7 +91,7 @@ export = async (): Promise<Outputs> => {
   new yaml.ConfigFile(
     'rabbitmq-cluster-operator',
     {
-      file: `${__dirname}/src/rabbitmq.yaml`
+      file: `${__dirname}/src/rabbitmq.yaml`,
     },
     { provider }
   )
