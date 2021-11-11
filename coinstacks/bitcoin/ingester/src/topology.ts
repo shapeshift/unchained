@@ -1,11 +1,7 @@
 import { Connection } from 'amqp-ts'
 import { logger } from './logger'
 
-<<<<<<< HEAD
-const BROKER_URI = process.env.BROKER_URI as string
-=======
-const BROKER_URL = process.env.BROKER_URL
->>>>>>> develop
+const BROKER_URI = process.env.BROKER_URI
 
 if (!BROKER_URI) throw new Error('BROKER_URI env var not set')
 
