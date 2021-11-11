@@ -18,19 +18,20 @@ export async function deployRabbit(
   provider: k8s.Provider,
   namespace: string,
   config: Pick<Config, 'rabbit'>
-  ): Promise<CustomResource | undefined> {
+): Promise<CustomResource | undefined> {
+  if (config.rabbit === undefined) return
 
   const clusterName = `${asset}-rabbitmq`
 
   const resources: pulumi.Input<types.input.rabbitmq.v1beta1.RabbitmqClusterSpecResourcesArgs> = {
     limits: {
       cpu: config.rabbit?.cpuLimit as pulumi.Input<string>,
-      memory: config.rabbit?.memoryLimit as pulumi.Input<string>
+      memory: config.rabbit?.memoryLimit as pulumi.Input<string>,
     },
     requests: {
       cpu: config.rabbit?.cpuLimit as pulumi.Input<string>,
-      memory: config.rabbit?.memoryLimit as pulumi.Input<string>
-    }
+      memory: config.rabbit?.memoryLimit as pulumi.Input<string>,
+    },
   }
 
   const additionalConfig = `
@@ -48,7 +49,7 @@ export async function deployRabbit(
       metadata: {
         namespace: namespace,
         name: clusterName,
-        labels: { app, asset, tier: 'rabbit' }
+        labels: { app, asset, tier: 'rabbit' },
       },
       spec: {
         replicas: config.rabbit?.replicaCount,
@@ -57,7 +58,7 @@ export async function deployRabbit(
         },
         persistence: {
           storageClassName: config.rabbit?.storageClass,
-          storage: config.rabbit?.storageSize
+          storage: config.rabbit?.storageSize,
         },
         resources: resources,
         service: {

@@ -38,7 +38,7 @@ config:
       cpuLimit: '500m'
       memoryLimit: '512Mi'
       replicaCount: 1
-      storageSize: '5Gi'
+      storageSize: '1Gi'
 
     ## indexer - if specified an indexer service and optional node will be deployed
     ## this is very resource intensive, so you can point at public endpoints instead of running your own.
