@@ -7,6 +7,7 @@ x-env: &env
 services:
   api:
     labels:
+      - 'traefik.enable=true'
       - 'traefik.http.routers.ethereum-api.rule=Host(`api.ethereum.localhost`)'
       - 'traefik.http.services.ethereum-api.loadbalancer.server.port=3000'
     image: unchained-local
@@ -19,6 +20,7 @@ services:
       - ../..:/app
   mongo:
     labels:
+      - 'traefik.enable=true'
       - 'traefik.http.routers.ethereum-mongo.rule=Host(`mongo.ethereum.localhost`)'
       - 'traefik.http.services.ethereum-mongo.loadbalancer.server.port=27017'
     image: mongo:4.2.8
@@ -28,6 +30,7 @@ services:
       - mongodb:/data/db
   rabbitmq:
     labels:
+      - 'traefik.enable=true'
       - 'traefik.http.routers.ethereum-rabbit.rule=Host(`rabbit-admin.ethereum.localhost`)'
       - 'traefik.http.services.ethereum-rabbit.loadbalancer.server.port=15672'
     image: rabbitmq:3-management

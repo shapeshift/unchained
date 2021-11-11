@@ -18,7 +18,12 @@ services:
     # The official v2 Traefik docker image
     image: traefik:v2.5
     # Enables the web UI and tells Traefik to listen to docker
-    command: --api.insecure=true --providers.docker
+    command:
+      - '--api.insecure=true'
+      # Enabling docker provider
+      - '--providers.docker=true'
+      # Do not expose containers unless explicitly told so
+      - '--providers.docker.exposedbydefault=false'
     networks:
       - bitcoin_default
       - ethereum_default
@@ -32,8 +37,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
 networks:
-   bitcoin_default:
+  bitcoin_default:
     name: bitcoin_default
-   ethereum_default:
+  ethereum_default:
     name: ethereum_default
-

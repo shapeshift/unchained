@@ -1,12 +1,18 @@
 import express, { json, urlencoded } from 'express'
 import cors from 'cors'
 import { join } from 'path'
+import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
-import { logger } from '@shapeshiftoss/logger'
-import { middleware } from '@shapeshiftoss/common-api'
+import { Logger } from '@shapeshiftoss/logger'
+import { middleware, ConnectionHandler } from '@shapeshiftoss/common-api'
 import { RegisterRoutes } from './routes'
 
-const port = process.env.PORT || 3000
+const port = process.env.PORT ?? 3000
+
+const logger = new Logger({
+  namespace: ['unchained', 'coinstacks', 'bitcoin', 'api'],
+  level: process.env.LOG_LEVEL,
+})
 
 const app = express()
 
@@ -14,12 +20,7 @@ app.use(json())
 app.use(urlencoded({ extended: true }))
 app.use(cors())
 
-app.get('/health', async (_, res) => {
-  res.json({
-    status: 'up',
-    network: 'bitcoin',
-  })
-})
+app.get('/health', async (_, res) => res.json({ status: 'up', network: 'bitcoin' }))
 
 const options = {
   customCss: '.swagger-ui .topbar { display: none }',
@@ -42,4 +43,8 @@ app.get('/', async (_, res) => {
 app.use(middleware.errorHandler)
 app.use(middleware.notFoundHandler)
 
-app.listen(port, () => logger.info('server listening...'))
+const server = app.listen(port, () => logger.info('Server started'))
+
+const wsServer = new Server({ server })
+
+wsServer.on('connection', (connection) => ConnectionHandler.start(connection))

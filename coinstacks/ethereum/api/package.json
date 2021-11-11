@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/ethereum-api",
-  "version": "3.0.0",
+  "version": "3.3.0",
   "license": "MIT",
   "main": "dist/ethereum/api/src/index.js",
   "source": "src/index.ts",
@@ -14,10 +14,10 @@
     "generate": "tsoa spec-and-routes"
   },
   "dependencies": {
-    "@shapeshiftoss/blockbook": "^3.0.0",
-    "@shapeshiftoss/common-api": "^3.0.0",
-    "@shapeshiftoss/ethereum-ingester": "^3.0.0",
-    "@shapeshiftoss/logger": "^3.0.0",
+    "@shapeshiftoss/blockbook": "^3.3.0",
+    "@shapeshiftoss/common-api": "^3.3.0",
+    "@shapeshiftoss/ethereum-ingester": "^3.3.0",
+    "@shapeshiftoss/logger": "^1.0.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "isomorphic-ws": "^4.0.1",

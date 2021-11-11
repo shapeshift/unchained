@@ -2177,6 +2177,11 @@
     "@pulumi/kubernetesx" "0.1.6"
     "@pulumi/pulumi" "3.11.0"
 
+"@shapeshiftoss/logger@^1.0.0":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@shapeshiftoss/logger/-/logger-1.0.1.tgz#fc9d9f68a626e526bd55053dbd56b14e4b63edf1"
+  integrity sha512-xxAHoUozg1WtSI6XzaPAJDFJOkMkWIAWKUCadwIMXHYjxP9FPYWoOBcwftnb5B81gZyxT6FEScIduwNq2laH+Q==
+
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
@@ -9551,7 +9556,7 @@ widest-line@^3.1.0:
   dependencies:
     string-width "^4.0.0"
 
-winston@^2.2.0, winston@^2.4.4:
+winston@^2.2.0:
   version "2.4.5"
   resolved "https://registry.yarnpkg.com/winston/-/winston-2.4.5.tgz#f2e431d56154c4ea765545fc1003bd340c95b59a"
   integrity sha512-TWoamHt5yYvsMarGlGEQE59SbJHqGsZV8/lwC+iCcGeAe0vUaOh+Lv6SYM17ouzC/a/LB1/hz/7sxFBtlu1l4A==

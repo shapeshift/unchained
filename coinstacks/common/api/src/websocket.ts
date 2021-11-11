@@ -3,7 +3,7 @@ import { v4 } from 'uuid'
 import { Connection, Exchange, Message, Queue } from 'amqp-ts'
 import { RegistryMessage } from '@shapeshiftoss/common-ingester'
 import { IngesterMetadata } from '@shapeshiftoss/common-mongo'
-import { logger } from '@shapeshiftoss/logger'
+import { Logger } from '@shapeshiftoss/logger'
 
 const BROKER_URI = process.env.BROKER_URI as string
 
@@ -46,6 +46,10 @@ export class ConnectionHandler {
 
   private isAlive: boolean
   private queue?: Queue
+  private logger = new Logger({
+    namespace: ['unchained', 'coinstacks', 'common', 'api'],
+    level: process.env.LOG_LEVEL,
+  })
 
   private constructor(websocket: WebSocket) {
     this.id = v4()
@@ -69,7 +73,7 @@ export class ConnectionHandler {
     this.websocket = websocket
     this.websocket.onmessage = (event) => this.onMessage(event)
     this.websocket.onerror = (event) => {
-      logger.error(`onerror (${this.id}): ${event.error}: ${event.message}`)
+      this.logger.error({ id: this.id, event }, 'Websocket error')
       this.onClose(interval)
     }
     this.websocket.onclose = () => this.onClose(interval)
@@ -116,7 +120,7 @@ export class ConnectionHandler {
         }
       }
     } catch (err) {
-      logger.error('onMessage error:', err)
+      this.logger.error(err, { fn: 'onMessage', event }, 'Error processing message')
       this.sendError('failed to handle message')
     }
   }
@@ -146,8 +150,8 @@ export class ConnectionHandler {
       await this.rabbit.completeConfiguration()
     } catch (err) {
       this.queue = undefined
-      logger.error('failed to complete rabbit configuration:', err)
-      this.sendError('failed to complete rabbit configuration')
+      this.logger.error(err, { fn: 'handleSubscribeTxs', data }, 'Failed to complete RabbitMQ configuration')
+      this.sendError('failed to complete RabbitMQ configuration')
       return
     }
 
@@ -170,7 +174,7 @@ export class ConnectionHandler {
       const content = message.getContent()
       this.websocket.send(JSON.stringify(content), (err) => {
         if (err) {
-          logger.error(`error sending message to client ${this.id}: ${err}: ${JSON.stringify(content)}`)
+          this.logger.error(err, { fn: 'onMessage', message, id: this.id, content }, 'Error sending message to client')
           message.nack(false, false)
           return
         }

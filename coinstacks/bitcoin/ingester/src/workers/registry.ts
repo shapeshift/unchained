@@ -1,7 +1,7 @@
 import { Tx } from '@shapeshiftoss/blockbook'
 import { Worker, Message } from '@shapeshiftoss/common-ingester'
 import { RegistryDocument, RegistryService } from '@shapeshiftoss/common-mongo'
-import { logger } from '@shapeshiftoss/logger'
+import { logger } from '../logger'
 
 const MONGO_DBNAME = process.env.MONGO_DBNAME
 const MONGO_URL = process.env.MONGO_URL
@@ -15,6 +15,7 @@ interface RegistryMessage extends RegistryDocument {
 
 const registry = new RegistryService(MONGO_URL, MONGO_DBNAME)
 
+const msgLogger = logger.child({ namespace: ['workers', 'registry'], fn: 'onMessage' })
 const onMessage = (worker: Worker) => async (message: Message) => {
   const msg: RegistryMessage = message.getContent()
 
@@ -33,7 +34,7 @@ const onMessage = (worker: Worker) => async (message: Message) => {
           value: '',
         }
 
-        logger.debug(`${address} registered, starting account delta sync...`)
+        msgLogger.debug({ address }, 'Address registered')
 
         worker.exchange?.send(new Message(tx), 'tx')
       })
@@ -49,7 +50,7 @@ const onMessage = (worker: Worker) => async (message: Message) => {
 
     worker.ackMessage(message, msg.client_id)
   } catch (err) {
-    logger.error('onMessage.error:', err)
+    logger.error(err, 'Error processing registry message')
     worker.retryMessage(message, msg.client_id)
   }
 }
