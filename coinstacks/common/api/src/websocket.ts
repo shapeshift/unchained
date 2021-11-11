@@ -14,6 +14,7 @@ export type Topics = 'txs'
 export interface TxsTopicData {
   topic: 'txs'
   addresses: Array<string>
+  id?: string
   blockNumber?: number
 }
 
@@ -172,7 +173,7 @@ export class ConnectionHandler {
 
     const onMessage = (message: Message) => {
       const content = message.getContent()
-      this.websocket.send(JSON.stringify(content), (err) => {
+      this.websocket.send(JSON.stringify({ ...content, subsciptionId: data.id }), (err) => {
         if (err) {
           this.logger.error(err, { fn: 'onMessage', message, id: this.id, content }, 'Error sending message to client')
           message.nack(false, false)

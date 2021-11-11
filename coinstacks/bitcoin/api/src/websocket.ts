@@ -7,6 +7,8 @@ export interface Connection {
   pingTimeout?: NodeJS.Timeout
 }
 
+export type TransactionMessage = SequencedBTCParseTx & { subscriptionId?: string }
+
 export class Client {
   private readonly url: string
   private readonly connections: Record<Topics, Connection | undefined>
@@ -34,7 +36,7 @@ export class Client {
 
   async subscribeTxs(
     data: TxsTopicData,
-    onMessage: (message: SequencedBTCParseTx) => void,
+    onMessage: (message: TransactionMessage) => void,
     onError?: (err: ErrorResponse) => void
   ): Promise<void> {
     if (this.connections.txs) return
@@ -54,7 +56,7 @@ export class Client {
       }
 
       try {
-        const message = JSON.parse(event.data.toString()) as SequencedBTCParseTx | ErrorResponse
+        const message = JSON.parse(event.data.toString()) as TransactionMessage | ErrorResponse
 
         // narrow type to ErrorResponse if key `type` exists
         if ('type' in message) {
