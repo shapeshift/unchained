@@ -19,13 +19,13 @@ export class Socket {
 
   constructor(url: string, subscription: Subscription, exchangeName: string) {
     const NODE_ENV = process.env.NODE_ENV
-    const BROKER_URL = process.env.BROKER_URL as string
+    const BROKER_URI = process.env.BROKER_URI as string
 
     if (NODE_ENV !== 'test') {
-      if (!BROKER_URL) throw new Error('BROKER_URL env var not set')
+      if (!BROKER_URI) throw new Error('BROKER_URI env var not set')
     }
 
-    this.connection = new Connection(BROKER_URL)
+    this.connection = new Connection(BROKER_URI)
     this.exchange = this.connection.declareExchange(exchangeName, '', { noCreate: true })
 
     this.socket = new WebSocket(url, { handshakeTimeout: 5000 })

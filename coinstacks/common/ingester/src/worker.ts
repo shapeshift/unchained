@@ -26,13 +26,13 @@ export class Worker {
 
   static async init({ queueName, exchangeName, requeueName }: WorkerDeclaration): Promise<Worker> {
     const NODE_ENV = process.env.NODE_ENV
-    const BROKER_URL = process.env.BROKER_URL as string
+    const BROKER_URI = process.env.BROKER_URI as string
 
     if (NODE_ENV !== 'test') {
-      if (!BROKER_URL) throw new Error('BROKER_URL env var not set')
+      if (!BROKER_URI) throw new Error('BROKER_URI env var not set')
     }
 
-    const connection = new Connection(BROKER_URL)
+    const connection = new Connection(BROKER_URI)
     const queue = queueName ? connection.declareQueue(queueName, { noCreate: true }) : undefined
     const requeue = requeueName ? connection.declareExchange(requeueName, '', { noCreate: true }) : undefined
     const exchange = exchangeName ? connection.declareExchange(exchangeName, '', { noCreate: true }) : undefined

@@ -1,42 +1,65 @@
 import * as pulumi from '@pulumi/pulumi'
+import * as k8s from '@pulumi/kubernetes'
+import { CustomResource } from '@pulumi/pulumi'
 import { rabbitmq, types } from './crds/types/rabbitmq'
+import { Config } from './index'
 
-interface RabbitmqArgs {
-  name: string
-  namespace?: string
-  replicas?: number
-  resources?: pulumi.Input<types.input.rabbitmq.v1beta1.RabbitmqClusterSpecResourcesArgs>
-  persistence?: pulumi.Input<types.input.rabbitmq.v1beta1.RabbitmqClusterSpecPersistenceArgs>
+export interface RabbitConfig {
+  cpuLimit: string
+  memoryLimit: string
+  replicaCount: number
+  storageClass: 'gp2' | 'hostpath' | 'standard'
+  storageSize: string
 }
 
-export function deployRabbit(args: RabbitmqArgs, opts?: pulumi.CustomResourceOptions) {
-  // Set reasonable defaults if anything optional is not set
-  args = setDefaults(args)
-  const clusterName = `${args.name}-rabbitmq`
+export async function deployRabbit(
+  app: string,
+  asset: string,
+  provider: k8s.Provider,
+  namespace: string,
+  config: Pick<Config, 'rabbit'>
+  ): Promise<CustomResource | undefined> {
+
+  const clusterName = `${asset}-rabbitmq`
+
+  const resources: pulumi.Input<types.input.rabbitmq.v1beta1.RabbitmqClusterSpecResourcesArgs> = {
+    limits: {
+      cpu: config.rabbit?.cpuLimit as pulumi.Input<string>,
+      memory: config.rabbit?.memoryLimit as pulumi.Input<string>
+    },
+    requests: {
+      cpu: config.rabbit?.cpuLimit as pulumi.Input<string>,
+      memory: config.rabbit?.memoryLimit as pulumi.Input<string>
+    }
+  }
 
   const additionalConfig = `
-cluster_partition_handling = pause_minority
-vm_memory_high_watermark_paging_ratio = 0.99
-disk_free_limit.relative = 1.0
-collect_statistics_interval = 10000
-`
+  cluster_partition_handling = pause_minority
+  vm_memory_high_watermark_paging_ratio = 0.99
+  disk_free_limit.relative = 1.0
+  collect_statistics_interval = 10000
+  `
 
   // https://www.rabbitmq.com/kubernetes/operator/using-operator.html#create
   // with some configuration inspired by production-ready example https://github.com/rabbitmq/cluster-operator/blob/main/docs/examples/production-ready/rabbitmq.yaml
   new rabbitmq.v1beta1.RabbitmqCluster(
-    args.name,
+    clusterName,
     {
       metadata: {
-        namespace: args.namespace,
+        namespace: namespace,
         name: clusterName,
+        labels: { app, asset, tier: 'rabbit' }
       },
       spec: {
-        replicas: args.replicas,
+        replicas: config.rabbit?.replicaCount,
         rabbitmq: {
           additionalConfig,
         },
-        persistence: args.persistence,
-        resources: args.resources,
+        persistence: {
+          storageClassName: config.rabbit?.storageClass,
+          storage: config.rabbit?.storageSize
+        },
+        resources: resources,
         service: {
           type: 'ClusterIP',
         },
@@ -77,34 +100,7 @@ collect_statistics_interval = 10000
         },
       },
     },
-    opts
+    { provider }
   )
-}
-
-function setDefaults(args: RabbitmqArgs) {
-  const result: RabbitmqArgs = args
-
-  if (!result.namespace) result.namespace = 'default'
-
-  if (!result.persistence)
-    result.persistence = {
-      storage: '50Gi',
-      storageClassName: 'gp2',
-    }
-
-  if (!result.replicas) result.replicas = 3
-
-  if (!result.resources)
-    result.resources = {
-      limits: {
-        cpu: '2000m',
-        memory: '4Gi',
-      },
-      requests: {
-        cpu: '2000m',
-        memory: '4Gi',
-      },
-    }
-
-  return result
+  return
 }
