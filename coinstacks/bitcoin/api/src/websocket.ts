@@ -7,11 +7,15 @@ export interface Connection {
   pingTimeout?: NodeJS.Timeout
 }
 
-export type TransactionMessage = SequencedBTCParseTx & { subscriptionId?: string }
+export interface TransactionMessage {
+  id: string
+  data: SequencedBTCParseTx
+}
 
 export class Client {
   private readonly url: string
   private readonly connections: Record<Topics, Connection | undefined>
+  private onMessageTxs: Record<string, (message: SequencedBTCParseTx) => void> = {}
 
   constructor(url: string) {
     this.url = url
@@ -36,10 +40,16 @@ export class Client {
 
   async subscribeTxs(
     data: TxsTopicData,
-    onMessage: (message: TransactionMessage) => void,
+    onMessage: (message: SequencedBTCParseTx) => void,
     onError?: (err: ErrorResponse) => void
   ): Promise<void> {
-    if (this.connections.txs) return
+    this.onMessageTxs[data.id] = onMessage
+
+    if (this.connections.txs) {
+      const payload: RequestPayload = { method: 'subscribe', data }
+      this.connections.txs.ws.send(JSON.stringify(payload))
+      return
+    }
 
     const ws = new WebSocket(this.url)
     this.connections.txs = { ws }
@@ -64,7 +74,7 @@ export class Client {
           return
         }
 
-        onMessage(message)
+        this.onMessageTxs[message.id](message.data)
       } catch (err) {
         if (onError && err instanceof Error) onError({ type: 'error', message: err.message })
       }
