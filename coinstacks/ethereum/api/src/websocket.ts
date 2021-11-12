@@ -74,7 +74,8 @@ export class Client {
           return
         }
 
-        this.onMessageTxs[message.id](message.data)
+        const onMessage = this.onMessageTxs[message.id]
+        onMessage && onMessage(message.data)
       } catch (err) {
         if (onError && err instanceof Error) onError({ type: 'error', message: err.message })
       }
@@ -87,12 +88,18 @@ export class Client {
   }
 
   unsubscribeTxs(): void {
+    this.onMessageTxs = {}
     this.connections.txs?.ws.send(
       JSON.stringify({ method: 'unsubscribe', topic: 'txs', data: undefined } as RequestPayload)
     )
   }
 
   close(topic: Topics): void {
+    switch (topic) {
+      case 'txs':
+        this.unsubscribeTxs()
+        break
+    }
     this.connections[topic]?.ws.close()
   }
 }

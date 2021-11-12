@@ -132,6 +132,7 @@ export class ConnectionHandler {
       this.unchainedExchange.send(new Message(msg), 'registry')
       await queue.delete()
     }
+    this.queues = {}
     clearInterval(interval)
   }
 
