@@ -1,0 +1,13 @@
+{
+    "name": "@pulumi/rabbitmq-crd",
+    "version": "1.0.0",
+    "scripts": {
+        "build": "tsc"
+    },
+    "peerDependencies": {
+        "@pulumi/pulumi": "latest"
+    },
+    "pulumi": {
+        "resource": true
+    }
+}
