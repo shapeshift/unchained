@@ -1,7 +1,6 @@
 import WebSocket from 'isomorphic-ws'
 import { ErrorResponse, RequestPayload, Topics, TxsTopicData } from '@shapeshiftoss/common-api'
 import { SequencedBTCParseTx } from '@shapeshiftoss/bitcoin-ingester'
-import { on } from 'events'
 
 export interface Connection {
   ws: WebSocket
