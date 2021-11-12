@@ -14,6 +14,7 @@ export type Topics = 'txs'
 export interface TxsTopicData {
   topic: 'txs'
   addresses: Array<string>
+  id: string
   blockNumber?: number
 }
 
@@ -45,7 +46,7 @@ export class ConnectionHandler {
   private readonly unchainedExchange: Exchange
 
   private isAlive: boolean
-  private queue?: Queue
+  private queues: Record<string, Queue> = {}
   private logger = new Logger({
     namespace: ['unchained', 'coinstacks', 'common', 'api'],
     level: process.env.LOG_LEVEL,
@@ -126,15 +127,20 @@ export class ConnectionHandler {
   }
 
   private async onClose(interval: NodeJS.Timeout) {
-    const msg: RegistryMessage = { action: 'unregister', client_id: this.id, registration: {} }
-    this.unchainedExchange.send(new Message(msg), 'registry')
-
-    await this.queue?.delete()
+    for await (const [subscriptionId, queue] of Object.entries(this.queues)) {
+      const msg: RegistryMessage = { action: 'unregister', client_id: `${this.id}-${subscriptionId}`, registration: {} }
+      this.unchainedExchange.send(new Message(msg), 'registry')
+      await queue.delete()
+    }
+    this.queues = {}
     clearInterval(interval)
   }
 
   private async handleSubscribeTxs(data: TxsTopicData) {
-    if (this.queue) return
+    const subscriptionId = `${this.id}-${data.id}`
+    console.log('subscriptionId', subscriptionId)
+
+    if (this.queues[subscriptionId]) return
 
     if (!data.addresses?.length) {
       this.sendError('addresses required')
@@ -143,13 +149,13 @@ export class ConnectionHandler {
 
     const txExchange = this.rabbit.declareExchange('exchange.tx.client', '', { noCreate: true })
 
-    this.queue = this.rabbit.declareQueue(`queue.tx.${this.id}`)
-    this.queue.bind(txExchange, this.id)
+    const queue = this.rabbit.declareQueue(`queue.tx.${subscriptionId}`)
+    queue.bind(txExchange, subscriptionId)
 
     try {
       await this.rabbit.completeConfiguration()
+      this.queues[subscriptionId] = queue
     } catch (err) {
-      this.queue = undefined
       this.logger.error(err, { fn: 'handleSubscribeTxs', data }, 'Failed to complete RabbitMQ configuration')
       this.sendError('failed to complete RabbitMQ configuration')
       return
@@ -161,7 +167,7 @@ export class ConnectionHandler {
 
     const msg: RegistryMessage = {
       action: 'register',
-      client_id: this.id,
+      client_id: subscriptionId,
       ingester_meta: ingesterMeta,
       registration: {
         addresses: data.addresses,
@@ -172,9 +178,13 @@ export class ConnectionHandler {
 
     const onMessage = (message: Message) => {
       const content = message.getContent()
-      this.websocket.send(JSON.stringify(content), (err) => {
+      this.websocket.send(JSON.stringify({ id: data.id, data: content }), (err) => {
         if (err) {
-          this.logger.error(err, { fn: 'onMessage', message, id: this.id, content }, 'Error sending message to client')
+          this.logger.error(
+            err,
+            { fn: 'onMessage', message, id: subscriptionId, content },
+            'Error sending message to client'
+          )
           message.nack(false, false)
           return
         }
@@ -183,6 +193,6 @@ export class ConnectionHandler {
       })
     }
 
-    this.queue.activateConsumer(onMessage)
+    queue.activateConsumer(onMessage)
   }
 }
