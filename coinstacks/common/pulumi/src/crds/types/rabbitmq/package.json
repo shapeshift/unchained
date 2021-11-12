@@ -1,6 +1,7 @@
 {
     "name": "@pulumi/rabbitmq-crd",
     "version": "3.4.0",
+    "private": "true",
     "scripts": {
         "build": "tsc"
     },
