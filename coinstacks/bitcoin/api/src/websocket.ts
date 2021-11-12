@@ -7,9 +7,15 @@ export interface Connection {
   pingTimeout?: NodeJS.Timeout
 }
 
+export interface TransactionMessage {
+  id: string
+  data: SequencedBTCParseTx
+}
+
 export class Client {
   private readonly url: string
   private readonly connections: Record<Topics, Connection | undefined>
+  private onMessageTxs: Record<string, (message: SequencedBTCParseTx) => void> = {}
 
   constructor(url: string) {
     this.url = url
@@ -37,7 +43,13 @@ export class Client {
     onMessage: (message: SequencedBTCParseTx) => void,
     onError?: (err: ErrorResponse) => void
   ): Promise<void> {
-    if (this.connections.txs) return
+    this.onMessageTxs[data.id] = onMessage
+
+    if (this.connections.txs) {
+      const payload: RequestPayload = { method: 'subscribe', data }
+      this.connections.txs.ws.send(JSON.stringify(payload))
+      return
+    }
 
     const ws = new WebSocket(this.url)
     this.connections.txs = { ws }
@@ -54,7 +66,7 @@ export class Client {
       }
 
       try {
-        const message = JSON.parse(event.data.toString()) as SequencedBTCParseTx | ErrorResponse
+        const message = JSON.parse(event.data.toString()) as TransactionMessage | ErrorResponse
 
         // narrow type to ErrorResponse if key `type` exists
         if ('type' in message) {
@@ -62,7 +74,8 @@ export class Client {
           return
         }
 
-        onMessage(message)
+        const onMessage = this.onMessageTxs[message.id]
+        onMessage && onMessage(message.data)
       } catch (err) {
         if (onError && err instanceof Error) onError({ type: 'error', message: err.message })
       }
@@ -75,12 +88,18 @@ export class Client {
   }
 
   unsubscribeTxs(): void {
+    this.onMessageTxs = {}
     this.connections.txs?.ws.send(
       JSON.stringify({ method: 'unsubscribe', topic: 'txs', data: undefined } as RequestPayload)
     )
   }
 
   close(topic: Topics): void {
+    switch (topic) {
+      case 'txs':
+        this.unsubscribeTxs()
+        break
+    }
     this.connections[topic]?.ws.close()
   }
 }
