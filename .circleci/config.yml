@@ -204,7 +204,9 @@ jobs:
             pulumi config set --path unchained:common.eks.autoscaling.minInstances 2
             pulumi config set --path unchained:common.eks.autoscaling.maxInstances 3
             pulumi config set --path unchained:common.eks.instanceTypes[0] r5.4xlarge
-            pulumi config set --path unchained:common.eks.instanceTypes[1] r5b.4xlarge
+            pulumi config set --path unchained:common.eks.instanceTypes[1] r5a.4xlarge
+            pulumi config set --path unchained:common.eks.instanceTypes[2] r5b.4xlarge
+            pulumi config set --path unchained:common.eks.instanceTypes[3] r5n.4xlarge
             pulumi config set --path unchained:common.eks.logging.enabled true
             pulumi config set --path unchained:common.eks.logging.persistentVolume true
             pulumi config set --path unchained:common.eks.logging.pvSize 50Gi
