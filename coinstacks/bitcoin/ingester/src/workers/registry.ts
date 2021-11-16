@@ -41,7 +41,7 @@ const onMessage = (worker: Worker) => async (message: Message) => {
     }
 
     if (msg.action === 'unregister') {
-      if (msg.registration.addresses) {
+      if (msg.registration.addresses?.length) {
         await registry.remove(msg)
       } else {
         await registry.delete(msg)

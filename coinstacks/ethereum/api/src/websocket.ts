@@ -12,12 +12,17 @@ export interface TransactionMessage {
   data: SequencedETHParseTx
 }
 
+export interface TxsParams {
+  data: TxsTopicData | undefined
+  onMessage: (message: SequencedETHParseTx) => void
+  onError?: (err: ErrorResponse) => void
+}
+
 export class Client {
   private readonly url: string
   private readonly connections: Record<Topics, Connection | undefined>
 
-  private onMessageTxs: Record<string, (message: SequencedETHParseTx) => void> = {}
-  private queueTxs: Record<string, TxsTopicData> = {}
+  private txs: Record<string, TxsParams> = {}
 
   constructor(url: string) {
     this.url = url
@@ -41,33 +46,45 @@ export class Client {
   }
 
   async subscribeTxs(
+    id: string,
     data: TxsTopicData,
     onMessage: (message: SequencedETHParseTx) => void,
     onError?: (err: ErrorResponse) => void
   ): Promise<void> {
-    //TODO: track most recent onError handler
-    this.onMessageTxs[data.id] = onMessage
+    // keep track of the onMessage and onError handlers associated with each id
+    this.txs[id] = { onMessage, onError, data: undefined }
 
-    if (this.connections.txs && this.connections.txs.ws.readyState !== 1) {
-      this.queueTxs[data.id] = data
-      return
-    }
-
-    if (this.connections.txs && this.connections.txs.ws.readyState === 1) {
-      const payload: RequestPayload = { method: 'subscribe', data }
-      this.connections.txs.ws.send(JSON.stringify(payload))
+    if (this.connections.txs) {
+      if (this.connections.txs.ws.readyState === 1) {
+        // subscribe if connection exists and is ready
+        this.connections.txs.ws.send(JSON.stringify({ id, method: 'subscribe', data } as RequestPayload))
+      } else {
+        // queue up subscriptions if connection exists, but is not ready yet
+        const txsData = this.txs[id].data
+        this.txs[id].data = txsData
+          ? { ...txsData, addresses: [...new Set(...txsData.addresses, ...data.addresses)] }
+          : data
+      }
       return
     }
 
     const ws = new WebSocket(this.url)
     this.connections.txs = { ws }
 
-    if (onError) {
-      ws.onerror = (event) => onError({ type: 'error', message: event.message })
+    // send connection errors to all subscription onError handlers
+    ws.onerror = (event) => {
+      Object.entries(this.txs).forEach(([id, { onError }]) => {
+        onError && onError({ id, type: 'error', message: event.message })
+      })
     }
 
+    // clear heartbeat timeout on close
     ws.onclose = () => this.connections.txs?.pingTimeout && clearTimeout(this.connections.txs.pingTimeout)
+
     ws.onmessage = (event) => {
+      // TODO: check event.type and handle non desired messages separately (noop)
+
+      // trigger heartbeat keep alive on ping event
       if (event.data === 'ping') {
         this.heartbeat('txs')
         return
@@ -76,44 +93,51 @@ export class Client {
       try {
         const message = JSON.parse(event.data.toString()) as TransactionMessage | ErrorResponse
 
-        // narrow type to ErrorResponse if key `type` exists
+        // narrow type to ErrorResponse if key `type` exists and forward to correct onError handler
         if ('type' in message) {
-          onError && onError(message)
+          const onErrorHandler = this.txs[message.id]?.onError
+          onErrorHandler && onErrorHandler(message)
           return
         }
 
-        const onMessage = this.onMessageTxs[message.id]
-        onMessage && onMessage(message.data)
+        // forward the transaction message to the correct onMessage handler
+        const onMessageHandler = this.txs[message.id]?.onMessage
+        onMessageHandler && onMessageHandler(message.data)
       } catch (err) {
-        if (onError && err instanceof Error) onError({ type: 'error', message: err.message })
+        console.log(`failed to handle onmessage event: ${JSON.stringify(event)}: ${err}`)
       }
     }
 
-    await new Promise(
-      (resolve) =>
-        (ws.onopen = () =>
-          this.onOpen('txs', () => {
-            Object.values(this.queueTxs).forEach((data) => {
-              const payload: RequestPayload = { method: 'subscribe', data }
-              ws.send(JSON.stringify(payload))
-            })
-            this.queueTxs = {}
-            resolve(undefined)
-          }))
-    )
+    // wait for the connection to open
+    await new Promise((resolve) => {
+      ws.onopen = () => {
+        // start heartbeat
+        this.onOpen('txs', resolve)
+
+        // subscribe to all queued subscriptions
+        Object.values(this.txs).forEach(({ data }) => {
+          if (!data) return
+          const payload: RequestPayload = { id, method: 'subscribe', data }
+          ws.send(JSON.stringify(payload))
+          delete this.txs[id].data
+        })
+
+        // subscribe to initial subscription
+        const payload: RequestPayload = { id, method: 'subscribe', data }
+        ws.send(JSON.stringify(payload))
+      }
+    })
   }
 
-  unsubscribeTxs(): void {
-    this.onMessageTxs = {}
-    this.connections.txs?.ws.send(
-      JSON.stringify({ method: 'unsubscribe', topic: 'txs', data: undefined } as RequestPayload)
-    )
+  unsubscribeTxs(id: string, data: TxsTopicData): void {
+    delete this.txs[id]
+    this.connections.txs?.ws.send(JSON.stringify({ id, method: 'unsubscribe', data } as RequestPayload))
   }
 
   close(topic: Topics): void {
     switch (topic) {
       case 'txs':
-        this.unsubscribeTxs()
+        Object.keys(this.txs).forEach((id) => this.unsubscribeTxs(id, <TxsTopicData>{}))
         break
     }
     this.connections[topic]?.ws.close()
