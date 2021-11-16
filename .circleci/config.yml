@@ -32,7 +32,7 @@ aliases:
     coinstack: bitcoin
     pulumi-stack: public
     pulumi-dir: coinstacks/bitcoin/pulumi
-    broker-url: amqp://guest:guest@bitcoin-rabbitmq-svc.unchained.svc.cluster.local:5672
+    broker-url: bitcoin-rabbitmq-svc.unchained.svc.cluster.local:5672
     mongo-cpu-limit: 512m
     mongo-memory-limit: 512Mi
     mongo-replicas: 3
@@ -57,7 +57,7 @@ aliases:
     coinstack: ethereum
     pulumi-stack: public
     pulumi-dir: coinstacks/ethereum/pulumi
-    broker-url: amqp://guest:guest@ethereum-rabbitmq-svc.unchained.svc.cluster.local:5672
+    broker-url: ethereum-rabbitmq-svc.unchained.svc.cluster.local:5672
     mongo-cpu-limit: 512m
     mongo-memory-limit: 512Mi
     mongo-replicas: 3
@@ -82,7 +82,7 @@ aliases:
     coinstack: ethereum
     pulumi-stack: public-ropsten
     pulumi-dir: coinstacks/ethereum/pulumi
-    broker-url: amqp://guest:guest@ethereum-ropsten-rabbitmq-svc.unchained.svc.cluster.local:5672
+    broker-url: ethereum-ropsten-rabbitmq-svc.unchained.svc.cluster.local:5672
     mongo-cpu-limit: 512m
     mongo-memory-limit: 512Mi
     mongo-replicas: 3
@@ -394,7 +394,7 @@ workflows:
           <<: *bitcoin
           environment: dev
           pulumi-stack: public-dev
-          broker-url: amqp://guest:guest@bitcoin-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
+          broker-url: bitcoin-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
           mongo-replicas: 2
           mongo-url: mongodb://bitcoin-mongodb-0.bitcoin-mongodb-headless.unchained-dev.svc.cluster.local:27017,bitcoin-mongodb-1.bitcoin-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
           indexer-replicas: 1
@@ -411,7 +411,7 @@ workflows:
           <<: *ethereum
           environment: dev
           pulumi-stack: public-dev
-          broker-url: amqp://guest:guest@ethereum-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
+          broker-url: ethereum-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
           mongo-replicas: 2
           mongo-url: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained-dev.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
           indexer-replicas: 1
@@ -429,7 +429,7 @@ workflows:
           environment: dev
           network: ropsten
           pulumi-stack: public-dev-ropsten
-          broker-url: amqp://guest:guest@ethereum-ropsten-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
+          broker-url: ethereum-ropsten-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
           mongo-replicas: 2
           mongo-url: mongodb://ethereum-ropsten-mongodb-0.ethereum-ropsten-mongodb-headless.unchained-dev.svc.cluster.local:27017,ethereum-ropsten-mongodb-1.ethereum-ropsten-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
           indexer-replicas: 1
