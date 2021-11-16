@@ -8,7 +8,7 @@ export interface Connection {
 }
 
 export interface TransactionMessage {
-  id: string
+  subscriptionId: string
   data: SequencedETHParseTx
 }
 
@@ -46,22 +46,22 @@ export class Client {
   }
 
   async subscribeTxs(
-    id: string,
+    subscriptionId: string,
     data: TxsTopicData,
     onMessage: (message: SequencedETHParseTx) => void,
     onError?: (err: ErrorResponse) => void
   ): Promise<void> {
-    // keep track of the onMessage and onError handlers associated with each id
-    this.txs[id] = { onMessage, onError, data: undefined }
+    // keep track of the onMessage and onError handlers associated with each subscriptionId
+    this.txs[subscriptionId] = { onMessage, onError, data: undefined }
 
     if (this.connections.txs) {
       if (this.connections.txs.ws.readyState === 1) {
         // subscribe if connection exists and is ready
-        this.connections.txs.ws.send(JSON.stringify({ id, method: 'subscribe', data } as RequestPayload))
+        this.connections.txs.ws.send(JSON.stringify({ subscriptionId, method: 'subscribe', data } as RequestPayload))
       } else {
         // queue up subscriptions if connection exists, but is not ready yet
-        const txsData = this.txs[id].data
-        this.txs[id].data = txsData
+        const txsData = this.txs[subscriptionId].data
+        this.txs[subscriptionId].data = txsData
           ? { ...txsData, addresses: [...new Set(...txsData.addresses, ...data.addresses)] }
           : data
       }
@@ -73,8 +73,8 @@ export class Client {
 
     // send connection errors to all subscription onError handlers
     ws.onerror = (event) => {
-      Object.entries(this.txs).forEach(([id, { onError }]) => {
-        onError && onError({ id, type: 'error', message: event.message })
+      Object.entries(this.txs).forEach(([subscriptionId, { onError }]) => {
+        onError && onError({ subscriptionId, type: 'error', message: event.message })
       })
     }
 
@@ -95,13 +95,13 @@ export class Client {
 
         // narrow type to ErrorResponse if key `type` exists and forward to correct onError handler
         if ('type' in message) {
-          const onErrorHandler = this.txs[message.id]?.onError
+          const onErrorHandler = this.txs[message.subscriptionId]?.onError
           onErrorHandler && onErrorHandler(message)
           return
         }
 
         // forward the transaction message to the correct onMessage handler
-        const onMessageHandler = this.txs[message.id]?.onMessage
+        const onMessageHandler = this.txs[message.subscriptionId]?.onMessage
         onMessageHandler && onMessageHandler(message.data)
       } catch (err) {
         console.log(`failed to handle onmessage event: ${JSON.stringify(event)}: ${err}`)
@@ -117,27 +117,27 @@ export class Client {
         // subscribe to all queued subscriptions
         Object.values(this.txs).forEach(({ data }) => {
           if (!data) return
-          const payload: RequestPayload = { id, method: 'subscribe', data }
+          const payload: RequestPayload = { subscriptionId, method: 'subscribe', data }
           ws.send(JSON.stringify(payload))
-          delete this.txs[id].data
+          delete this.txs[subscriptionId].data
         })
 
         // subscribe to initial subscription
-        const payload: RequestPayload = { id, method: 'subscribe', data }
+        const payload: RequestPayload = { subscriptionId, method: 'subscribe', data }
         ws.send(JSON.stringify(payload))
       }
     })
   }
 
-  unsubscribeTxs(id: string, data: TxsTopicData): void {
-    delete this.txs[id]
-    this.connections.txs?.ws.send(JSON.stringify({ id, method: 'unsubscribe', data } as RequestPayload))
+  unsubscribeTxs(subscriptionId: string, data: TxsTopicData): void {
+    delete this.txs[subscriptionId]
+    this.connections.txs?.ws.send(JSON.stringify({ subscriptionId, method: 'unsubscribe', data } as RequestPayload))
   }
 
   close(topic: Topics): void {
     switch (topic) {
       case 'txs':
-        Object.keys(this.txs).forEach((id) => this.unsubscribeTxs(id, <TxsTopicData>{}))
+        Object.keys(this.txs).forEach((subscriptionId) => this.unsubscribeTxs(subscriptionId, <TxsTopicData>{}))
         break
     }
     this.connections[topic]?.ws.close()
