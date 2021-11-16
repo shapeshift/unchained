@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/unchained-client",
-  "version": "3.4.0",
+  "version": "3.5.0",
   "license": "MIT",
   "main": "dist/index.js",
   "source": "src/index.ts",
@@ -15,9 +15,9 @@
     "watch": "nodemon"
   },
   "dependencies": {
-    "@shapeshiftoss/bitcoin-api": "^3.4.0",
-    "@shapeshiftoss/common-ingester": "^3.4.0",
-    "@shapeshiftoss/ethereum-api": "^3.4.0"
+    "@shapeshiftoss/bitcoin-api": "^3.5.0",
+    "@shapeshiftoss/common-ingester": "^3.5.0",
+    "@shapeshiftoss/ethereum-api": "^3.5.0"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.4.4"

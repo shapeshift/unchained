@@ -15,7 +15,9 @@ export interface TransactionMessage {
 export class Client {
   private readonly url: string
   private readonly connections: Record<Topics, Connection | undefined>
+
   private onMessageTxs: Record<string, (message: SequencedBTCParseTx) => void> = {}
+  private queueTxs: Record<string, TxsTopicData> = {}
 
   constructor(url: string) {
     this.url = url
@@ -30,7 +32,7 @@ export class Client {
     if (!connection) return
 
     connection.pingTimeout && clearTimeout(connection.pingTimeout)
-    connection.pingTimeout = setTimeout(() => connection?.ws.close(), 10000 + 1000)
+    connection.pingTimeout = setTimeout(() => connection?.ws.close(), 10000 + 5000)
   }
 
   private onOpen(topic: Topics, resolve: (value: unknown) => void): void {
@@ -43,9 +45,15 @@ export class Client {
     onMessage: (message: SequencedBTCParseTx) => void,
     onError?: (err: ErrorResponse) => void
   ): Promise<void> {
+    //TODO: track most recent onError handler
     this.onMessageTxs[data.id] = onMessage
 
-    if (this.connections.txs) {
+    if (this.connections.txs && this.connections.txs.ws.readyState !== 1) {
+      this.queueTxs[data.id] = data
+      return
+    }
+
+    if (this.connections.txs && this.connections.txs.ws.readyState === 1) {
       const payload: RequestPayload = { method: 'subscribe', data }
       this.connections.txs.ws.send(JSON.stringify(payload))
       return
@@ -81,10 +89,18 @@ export class Client {
       }
     }
 
-    await new Promise((resolve) => (ws.onopen = () => this.onOpen('txs', resolve)))
-
-    const payload: RequestPayload = { method: 'subscribe', data }
-    ws.send(JSON.stringify(payload))
+    await new Promise(
+      (resolve) =>
+        (ws.onopen = () =>
+          this.onOpen('txs', () => {
+            Object.values(this.queueTxs).forEach((data) => {
+              const payload: RequestPayload = { method: 'subscribe', data }
+              ws.send(JSON.stringify(payload))
+            })
+            this.queueTxs = {}
+            resolve(undefined)
+          }))
+    )
   }
 
   unsubscribeTxs(): void {

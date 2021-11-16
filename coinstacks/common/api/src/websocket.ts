@@ -138,7 +138,6 @@ export class ConnectionHandler {
 
   private async handleSubscribeTxs(data: TxsTopicData) {
     const subscriptionId = `${this.id}-${data.id}`
-    console.log('subscriptionId', subscriptionId)
 
     if (this.queues[subscriptionId]) return
 
