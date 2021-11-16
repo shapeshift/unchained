@@ -86,12 +86,11 @@ export const getConfig = async (): Promise<EthereumConfig> => {
   }
 
   if (config.rabbit) {
-    config.rabbit.storageClass = getStorageClassName(config.cluster)
+    config.rabbit.storageClassName = getStorageClassName(config.cluster)
 
     if (!config.rabbit.cpuLimit) missingRequiredConfig.push('rabbit.cpuLimit')
     if (!config.rabbit.memoryLimit) missingRequiredConfig.push('rabbit.memoryLimit')
     if (!config.rabbit.storageSize) missingRequiredConfig.push('rabbit.storageSize')
-    if (!config.rabbit.replicaCount) missingRequiredConfig.push('rabbit.replicaCount')
   }
 
   if (missingRequiredConfig.length) {
