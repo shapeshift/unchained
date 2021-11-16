@@ -1,9 +1,5 @@
 version: '3.6'
 
-x-env: &env
-  BROKER_URI: amqp://guest:guest@rabbitmq:5672
-  MONGO_URL: mongodb://mongo:27017
-
 services:
   api:
     labels:
@@ -13,7 +9,8 @@ services:
     image: unchained-local
     env_file: .env
     environment:
-      <<: *env
+      BROKER_URL: amqp://guest:guest@rabbitmq:5672
+      MONGO_URL: mongodb://mongo:27017
     working_dir: /app/coinstacks/bitcoin/api
     command: yarn nodemon
     volumes:
@@ -42,7 +39,8 @@ services:
     image: unchained-local
     env_file: .env
     environment:
-      <<: *env
+      BROKER_URL: amqp://guest:guest@rabbitmq:5672
+      MONGO_URL: mongodb://mongo:27017
     working_dir: /app/coinstacks/bitcoin/ingester
     command: dockerize -wait tcp://rabbitmq:5672 -timeout 5m -wait-retry-interval 10s sh -c "yarn tsc && node dist/topology.js"
     volumes:
@@ -53,7 +51,8 @@ services:
     image: unchained-local
     env_file: .env
     environment:
-      <<: *env
+      BROKER_URL: amqp://guest:guest@rabbitmq:5672
+      MONGO_URL: mongodb://mongo:27017
     working_dir: /app/coinstacks/bitcoin/ingester
     command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.coinstack -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/sockets/newBlock.ts"
     volumes:
@@ -65,7 +64,8 @@ services:
     image: unchained-local
     env_file: .env
     environment:
-      <<: *env
+      BROKER_URL: amqp://guest:guest@rabbitmq:5672
+      MONGO_URL: mongodb://mongo:27017
     working_dir: /app/coinstacks/bitcoin/ingester
     command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.coinstack -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/sockets/newTransaction.ts"
     volumes:
@@ -77,7 +77,8 @@ services:
     image: unchained-local
     env_file: .env
     environment:
-      <<: *env
+      BROKER_URL: amqp://guest:guest@rabbitmq:5672
+      MONGO_URL: mongodb://mongo:27017
     working_dir: /app/coinstacks/bitcoin/ingester
     command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.coinstack -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/workers/newBlock.ts"
     volumes:
@@ -89,7 +90,8 @@ services:
     image: unchained-local
     env_file: .env
     environment:
-      <<: *env
+      BROKER_URL: amqp://guest:guest@rabbitmq:5672
+      MONGO_URL: mongodb://mongo:27017
     working_dir: /app/coinstacks/bitcoin/ingester
     command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.coinstack -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/workers/block.ts"
     volumes:
@@ -101,7 +103,8 @@ services:
     image: unchained-local
     env_file: .env
     environment:
-      <<: *env
+      BROKER_URL: amqp://guest:guest@rabbitmq:5672
+      MONGO_URL: mongodb://mongo:27017
     working_dir: /app/coinstacks/bitcoin/ingester
     command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.coinstack -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/workers/txid.ts"
     volumes:
@@ -113,7 +116,8 @@ services:
     image: unchained-local
     env_file: .env
     environment:
-      <<: *env
+      BROKER_URL: amqp://guest:guest@rabbitmq:5672
+      MONGO_URL: mongodb://mongo:27017
     working_dir: /app/coinstacks/bitcoin/ingester
     command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.coinstack -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/workers/tx.ts"
     volumes:
@@ -125,7 +129,8 @@ services:
     image: unchained-local
     env_file: .env
     environment:
-      <<: *env
+      BROKER_URL: amqp://guest:guest@rabbitmq:5672
+      MONGO_URL: mongodb://mongo:27017
     working_dir: /app/coinstacks/bitcoin/ingester
     command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.coinstack -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/workers/address.ts"
     volumes:
@@ -137,7 +142,8 @@ services:
     image: unchained-local
     env_file: .env
     environment:
-      <<: *env
+      BROKER_URL: amqp://guest:guest@rabbitmq:5672
+      MONGO_URL: mongodb://mongo:27017
     working_dir: /app/coinstacks/bitcoin/ingester
     command: dockerize -wait tcp://mongo:27017 -wait http://guest:guest@rabbitmq:15672/api/exchanges/%2f/exchange.coinstack -timeout 5m -wait-retry-interval 10s sh -c "yarn ts-node-dev --watch ../../../packages/*/dist/tsconfig.tsbuildinfo,../../common/ingester/dist/tsconfig.tsbuildinfo --respawn --transpile-only src/workers/registry.ts"
     volumes:

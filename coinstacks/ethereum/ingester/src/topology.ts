@@ -1,11 +1,11 @@
 import { Connection } from 'amqp-ts'
 import { logger } from './logger'
 
-const BROKER_URI = process.env.BROKER_URI
+const BROKER_URL = process.env.BROKER_URL
 
-if (!BROKER_URI) throw new Error('BROKER_URI env var not set')
+if (!BROKER_URL) throw new Error('BROKER_URL env var not set')
 
-const connection = new Connection(BROKER_URI)
+const connection = new Connection(BROKER_URL)
 const deadLetterExchange = 'exchange.deadLetter'
 
 const topology: Connection.Topology = {

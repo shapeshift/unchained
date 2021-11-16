@@ -1,5 +1,5 @@
 import { hashElement } from 'folder-hash'
-import { core, Provider, yaml } from '@pulumi/kubernetes'
+import { core, Provider } from '@pulumi/kubernetes'
 import { buildAndPushImage, hasTag, getBaseHash } from '@shapeshiftoss/common-pulumi'
 import { EKSClusterLauncher } from '@shapeshiftoss/cluster-launcher'
 import { deployWatcher } from './watcher'
@@ -86,15 +86,6 @@ export = async (): Promise<Outputs> => {
   if (config.additionalEnvironments?.length) {
     config.additionalEnvironments.forEach((env) => namespaces.push(`${defaultNamespace}-${env}`))
   }
-
-  //Create RabbitMQ Cluster Operator
-  new yaml.ConfigFile(
-    'rabbitmq-cluster-operator',
-    {
-      file: `${__dirname}/src/rabbitmq.yaml`,
-    },
-    { provider }
-  )
 
   namespaces.forEach(async (namespace) => {
     new core.v1.Namespace(namespace, { metadata: { name: namespace } }, { provider })

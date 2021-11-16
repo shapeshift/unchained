@@ -5,9 +5,9 @@ import { RegistryMessage } from '@shapeshiftoss/common-ingester'
 import { IngesterMetadata } from '@shapeshiftoss/common-mongo'
 import { Logger } from '@shapeshiftoss/logger'
 
-const BROKER_URI = process.env.BROKER_URI as string
+const BROKER_URL = process.env.BROKER_URL as string
 
-if (!BROKER_URI) throw new Error('BROKER_URI env var not set')
+if (!BROKER_URL) throw new Error('BROKER_URL env var not set')
 
 export type Topics = 'txs'
 
@@ -55,7 +55,7 @@ export class ConnectionHandler {
   private constructor(websocket: WebSocket) {
     this.id = v4()
     this.isAlive = true
-    this.rabbit = new Connection(BROKER_URI)
+    this.rabbit = new Connection(BROKER_URL)
     this.unchainedExchange = this.rabbit.declareExchange('exchange.coinstack', '', { noCreate: true })
     this.routes = {
       txs: {
