@@ -93,11 +93,8 @@ export class ConnectionHandler {
   }
 
   private async onMessage(event: WebSocket.MessageEvent): Promise<void> {
-    let id = this.clientId
-
     try {
       const payload: RequestPayload = JSON.parse(event.data.toString())
-      id = payload.id
 
       switch (payload.method) {
         case 'ping': {
@@ -109,27 +106,26 @@ export class ConnectionHandler {
           const topic = payload.data?.topic
 
           if (!topic) {
-            this.sendError(`no topic specified for method: ${payload.method}`, id)
+            this.sendError(`no topic specified for method: ${payload.method}`, payload.id)
             break
           }
 
           const callback = this.routes[topic][payload.method]
           if (callback) {
-            await callback(payload.data, id)
+            await callback(payload.data, payload.id)
           } else {
-            this.sendError(`${payload.method} method not implemented for topic: ${topic}`, id)
+            this.sendError(`${payload.method} method not implemented for topic: ${topic}`, payload.id)
           }
         }
       }
     } catch (err) {
       this.logger.error(err, { fn: 'onMessage', event }, 'Error processing message')
-      this.sendError('failed to handle message', id)
     }
   }
 
   private async onClose(interval: NodeJS.Timeout) {
-    for await (const [id, queue] of Object.entries(this.queues)) {
-      const msg: RegistryMessage = { action: 'unregister', client_id: `${this.clientId}-${id}`, registration: {} }
+    for await (const [subscriptionId, queue] of Object.entries(this.queues)) {
+      const msg: RegistryMessage = { action: 'unregister', client_id: subscriptionId, registration: {} }
       this.unchainedExchange.send(new Message(msg), 'registry')
       await queue.delete()
     }
@@ -138,7 +134,9 @@ export class ConnectionHandler {
   }
 
   private async handleSubscribeTxs(data: TxsTopicData, id: string) {
-    if (this.queues[id]) return
+    const subscriptionId = `${this.clientId}-${id}`
+
+    if (this.queues[subscriptionId]) return
 
     if (!data.addresses?.length) {
       this.sendError('addresses required', id)
@@ -147,15 +145,14 @@ export class ConnectionHandler {
 
     const txExchange = this.rabbit.declareExchange('exchange.tx.client', '', { noCreate: true })
 
-    const queue = this.rabbit.declareQueue(`queue.tx.${id}`)
-    queue.bind(txExchange, id)
+    const queue = this.rabbit.declareQueue(`queue.tx.${subscriptionId}`)
+    queue.bind(txExchange, subscriptionId)
 
     try {
       await this.rabbit.completeConfiguration()
-      this.queues[id] = queue
+      this.queues[subscriptionId] = queue
     } catch (err) {
       this.logger.error(err, { fn: 'handleSubscribeTxs', data }, 'Failed to complete RabbitMQ configuration')
-      this.sendError('failed to complete RabbitMQ configuration', id)
       return
     }
 
@@ -165,7 +162,7 @@ export class ConnectionHandler {
 
     const msg: RegistryMessage = {
       action: 'register',
-      client_id: id,
+      client_id: subscriptionId,
       ingester_meta: ingesterMeta,
       registration: {
         addresses: data.addresses,
