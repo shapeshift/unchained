@@ -82,6 +82,8 @@ export class Client {
     ws.onclose = () => this.connections.txs?.pingTimeout && clearTimeout(this.connections.txs.pingTimeout)
 
     ws.onmessage = (event) => {
+      if (!event) return
+
       // TODO: check event.type and handle non desired messages separately (noop)
 
       // trigger heartbeat keep alive on ping event
