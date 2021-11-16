@@ -32,16 +32,15 @@ aliases:
     coinstack: bitcoin
     pulumi-stack: public
     pulumi-dir: coinstacks/bitcoin/pulumi
-    broker-url: bitcoin-rabbitmq.unchained.svc.cluster.local:5672
+    broker-url: bitcoin-rabbitmq-svc.unchained.svc.cluster.local:5672
     mongo-cpu-limit: 512m
     mongo-memory-limit: 512Mi
     mongo-replicas: 3
     mongo-storage-size: 100Gi
     mongo-url: mongodb://bitcoin-mongodb-0.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017,bitcoin-mongodb-1.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017,bitcoin-mongodb-2.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
     rabbit-cpu-limit: '1'
-    rabbit-memory-limit: '2Gi'
+    rabbit-memory-limit: '4Gi'
     rabbit-storage-size: '100Gi'
-    rabbit-replicas: 3
     indexer-cpu-limit: '4'
     indexer-memory-limit: 12Gi
     indexer-replicas: 2
@@ -58,16 +57,15 @@ aliases:
     coinstack: ethereum
     pulumi-stack: public
     pulumi-dir: coinstacks/ethereum/pulumi
-    broker-url: ethereum-rabbitmq.unchained.svc.cluster.local:5672
+    broker-url: ethereum-rabbitmq-svc.unchained.svc.cluster.local:5672
     mongo-cpu-limit: 512m
     mongo-memory-limit: 512Mi
     mongo-replicas: 3
     mongo-storage-size: 100Gi
     mongo-url: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-2.ethereum-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
     rabbit-cpu-limit: '1'
-    rabbit-memory-limit: '2Gi'
+    rabbit-memory-limit: '4Gi'
     rabbit-storage-size: '100Gi'
-    rabbit-replicas: 3
     indexer-cpu-limit: '4'
     indexer-memory-limit: 12Gi
     indexer-replicas: 2
@@ -84,16 +82,15 @@ aliases:
     coinstack: ethereum
     pulumi-stack: public-ropsten
     pulumi-dir: coinstacks/ethereum/pulumi
-    broker-url: ethereum-ropsten-rabbitmq.unchained.svc.cluster.local:5672
+    broker-url: ethereum-ropsten-rabbitmq-svc.unchained.svc.cluster.local:5672
     mongo-cpu-limit: 512m
     mongo-memory-limit: 512Mi
     mongo-replicas: 3
     mongo-storage-size: 100Gi
     mongo-url: mongodb://ethereum-ropsten-mongodb-0.ethereum-ropsten-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-ropsten-mongodb-1.ethereum-ropsten-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-ropsten-mongodb-2.ethereum-ropsten-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
     rabbit-cpu-limit: '1'
-    rabbit-memory-limit: '2Gi'
+    rabbit-memory-limit: '4Gi'
     rabbit-storage-size: '100Gi'
-    rabbit-replicas: 3
     indexer-cpu-limit: '4'
     indexer-memory-limit: 12Gi
     indexer-replicas: 2
@@ -238,7 +235,7 @@ jobs:
     executor: pulumi
     environment:
       DOCKER_BUILDKIT: 1
-      LOG_LEVEL: info
+      LOG_LEVEL: debug
       MIDGARD_URL: https://midgard.thorchain.info
       MONGO_DBNAME: coinstack
     parameters:
@@ -279,8 +276,6 @@ jobs:
         type: string
       rabbit-storage-size:
         type: string
-      rabbit-replicas:
-        type: integer
       indexer-cpu-limit:
         type: string
       indexer-memory-limit:
@@ -336,7 +331,6 @@ jobs:
             pulumi config set --path unchained:<< parameters.coinstack >>.rabbit.cpuLimit << parameters.rabbit-cpu-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.rabbit.memoryLimit << parameters.rabbit-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.rabbit.storageSize << parameters.rabbit-storage-size >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.rabbit.replicaCount << parameters.rabbit-replicas >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.cpuLimit << parameters.indexer-cpu-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.memoryLimit << parameters.indexer-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.replicas << parameters.indexer-replicas >>
@@ -400,8 +394,7 @@ workflows:
           <<: *bitcoin
           environment: dev
           pulumi-stack: public-dev
-          broker-url: bitcoin-rabbitmq.unchained-dev.svc.cluster.local:5672
-          rabbit-replicas: 2
+          broker-url: bitcoin-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
           mongo-replicas: 2
           mongo-url: mongodb://bitcoin-mongodb-0.bitcoin-mongodb-headless.unchained-dev.svc.cluster.local:27017,bitcoin-mongodb-1.bitcoin-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
           indexer-replicas: 1
@@ -418,8 +411,7 @@ workflows:
           <<: *ethereum
           environment: dev
           pulumi-stack: public-dev
-          broker-url: ethereum-rabbitmq.unchained-dev.svc.cluster.local:5672
-          rabbit-replicas: 2
+          broker-url: ethereum-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
           mongo-replicas: 2
           mongo-url: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained-dev.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
           indexer-replicas: 1
@@ -437,8 +429,7 @@ workflows:
           environment: dev
           network: ropsten
           pulumi-stack: public-dev-ropsten
-          broker-url: ethereum-ropsten-rabbitmq.unchained-dev.svc.cluster.local:5672
-          rabbit-replicas: 2
+          broker-url: ethereum-ropsten-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
           mongo-replicas: 2
           mongo-url: mongodb://ethereum-ropsten-mongodb-0.ethereum-ropsten-mongodb-headless.unchained-dev.svc.cluster.local:27017,ethereum-ropsten-mongodb-1.ethereum-ropsten-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
           indexer-replicas: 1
