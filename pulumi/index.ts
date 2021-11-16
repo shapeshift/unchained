@@ -87,10 +87,7 @@ export = async (): Promise<Outputs> => {
     config.additionalEnvironments.forEach((env) => namespaces.push(`${defaultNamespace}-${env}`))
   }
 
-  namespaces.forEach(async (namespace) => {
-    new core.v1.Namespace(namespace, { metadata: { name: namespace } }, { provider })
-  })
-
+  //Create RabbitMQ Cluster Operator
   new yaml.ConfigFile(
     'rabbitmq-cluster-operator',
     {
@@ -98,6 +95,10 @@ export = async (): Promise<Outputs> => {
     },
     { provider }
   )
+
+  namespaces.forEach(async (namespace) => {
+    new core.v1.Namespace(namespace, { metadata: { name: namespace } }, { provider })
+  })
 
   outputs.cluster = config.cluster
   outputs.isLocal = config.isLocal
