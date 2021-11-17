@@ -2,14 +2,14 @@ import { IndexerConfig } from '@shapeshiftoss/blockbook-pulumi'
 import { ApiConfig } from './api'
 import { IngesterConfig } from './ingester'
 import { MongoConfig } from './mongo'
-import { RabbitConfig } from './rabbitmq'
+import { RabbitConfig } from './rabbit'
 
 export * from './api'
 export * from './docker'
 export * from './ingester'
 export * from './mongo'
 export * from './hasher'
-export * from './rabbitmq'
+export * from './rabbit'
 
 export interface Dockerhub {
   username: string
