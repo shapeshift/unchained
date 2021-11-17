@@ -182,13 +182,18 @@ export class Client {
       this.connections.txs?.ws.close()
     }
 
+    // close all connections if no topic is provided
+    if (!topic) {
+      closeTxs()
+      return
+    }
+
     switch (topic) {
       case 'txs':
         closeTxs()
         break
-      // close all connections if no topic is provided
       default:
-        closeTxs()
+        console.log(`topic: ${topic} not supported`)
     }
   }
 }
