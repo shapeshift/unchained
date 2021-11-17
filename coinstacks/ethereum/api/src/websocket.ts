@@ -45,6 +45,18 @@ export class Client {
     resolve(true)
   }
 
+  /**
+   * Subscribe to transaction history and updates for newly confirmed and pending transactions.
+   *
+   * - Subsequent calls to `subscribeTxs` for the same `subscriptionId` will add additional addresses to be watched.
+   *
+   * @param subscriptionId unique id for grouping of addresses
+   * @param data details for subscribe
+   * @param data.topic specifies which topic to subscribe to
+   * @param data.addresses list of addresses to subscribe to
+   * @param onMessage handler for all transaction messages associated with `subscriptionId`
+   * @param [onError] optional handler for any error messages associated with `subscriptionId`
+   */
   async subscribeTxs(
     subscriptionId: string,
     data: TxsTopicData,
@@ -59,7 +71,7 @@ export class Client {
         // subscribe if connection exists and is ready
         this.connections.txs.ws.send(JSON.stringify({ subscriptionId, method: 'subscribe', data } as RequestPayload))
       } else {
-        // queue up subscriptions if connection exists, but is not ready yet
+        // queue up unique addresses for subscriptions if connection exists, but is not ready yet
         const txsData = this.txs[subscriptionId].data
         this.txs[subscriptionId].data = txsData
           ? { ...txsData, addresses: [...new Set(...txsData.addresses, ...data.addresses)] }
@@ -131,17 +143,52 @@ export class Client {
     })
   }
 
-  unsubscribeTxs(subscriptionId: string, data: TxsTopicData): void {
-    delete this.txs[subscriptionId]
-    this.connections.txs?.ws.send(JSON.stringify({ subscriptionId, method: 'unsubscribe', data } as RequestPayload))
+  /**
+   * Unsubscribe from transaction history and updates for newly confirmed and pending transactions.
+   *
+   * - If `subscriptionId` is provided, any provided addresses will be unsubscribed from.
+   *   If no addresses are provided, the subscription will be unsubscribed from.
+   *
+   * - If `subscriptionId` is not provided, all subscriptions will be unsubscribed from.
+   *
+   * @param [subscriptionId] unique identifier to unsubscribe from
+   * @param [data] details for unsubscribe
+   * @param data.topic specifies which topic to unsubscribe from
+   * @param data.addresses list of addresses to unsubscribe from
+   */
+  unsubscribeTxs(subscriptionId?: string, data?: TxsTopicData): void {
+    if (!subscriptionId) this.txs = {}
+    if (subscriptionId && !data?.addresses.length) delete this.txs[subscriptionId]
+
+    const payload: RequestPayload = {
+      subscriptionId: subscriptionId ?? '',
+      method: 'unsubscribe',
+      data: { topic: 'txs', addresses: data?.addresses ?? [] },
+    }
+
+    this.connections.txs?.ws.send(JSON.stringify(payload))
   }
 
-  close(topic: Topics): void {
+  /**
+   * Close and unsubscribe from any subscriptions
+   *
+   * - If no topic is provided, all supported topics will be closed and unsubscribed from
+   *
+   * @param [topic] specifies which topic to close and unsubscribe from
+   */
+  close(topic?: Topics): void {
+    const closeTxs = () => {
+      this.unsubscribeTxs()
+      this.connections.txs?.ws.close()
+    }
+
     switch (topic) {
       case 'txs':
-        Object.keys(this.txs).forEach((subscriptionId) => this.unsubscribeTxs(subscriptionId, <TxsTopicData>{}))
+        closeTxs()
         break
+      // close all connections if no topic is provided
+      default:
+        closeTxs()
     }
-    this.connections[topic]?.ws.close()
   }
 }
