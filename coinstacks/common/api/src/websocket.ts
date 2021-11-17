@@ -2,7 +2,6 @@ import WebSocket from 'ws'
 import { v4 } from 'uuid'
 import { Connection, Exchange, Message, Queue } from 'amqp-ts'
 import { RegistryMessage } from '@shapeshiftoss/common-ingester'
-import { IngesterMetadata } from '@shapeshiftoss/common-mongo'
 import { Logger } from '@shapeshiftoss/logger'
 
 const BROKER_URI = process.env.BROKER_URI as string
@@ -24,9 +23,9 @@ export interface ErrorResponse {
 
 export interface Methods {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  subscribe: (data: any, subscriptionId: string) => Promise<void>
+  subscribe: (subscriptionId: string, data: any) => Promise<void>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  unsubscribe: (data: any, subscriptionId: string) => void
+  unsubscribe: (subscriptionId: string, data: any) => void
 }
 
 export interface RequestPayload {
@@ -42,6 +41,7 @@ export class ConnectionHandler {
   private readonly websocket: WebSocket
   private readonly routes: Record<Topics, Methods>
   private readonly unchainedExchange: Exchange
+  private readonly txExchange: Exchange
 
   private isAlive: boolean
   private queues: Record<string, Queue> = {}
@@ -55,10 +55,11 @@ export class ConnectionHandler {
     this.isAlive = true
     this.rabbit = new Connection(BROKER_URI)
     this.unchainedExchange = this.rabbit.declareExchange('exchange.coinstack', '', { noCreate: true })
+    this.txExchange = this.rabbit.declareExchange('exchange.tx.client', '', { noCreate: true })
     this.routes = {
       txs: {
-        subscribe: (data: TxsTopicData, subscriptionId: string) => this.handleSubscribeTxs(data, subscriptionId),
-        unsubscribe: (data: TxsTopicData, subscriptionId: string) => this.handleUnsubscribeTxs(data, subscriptionId),
+        subscribe: (subscriptionId: string, data?: TxsTopicData) => this.handleSubscribeTxs(subscriptionId, data),
+        unsubscribe: (subscriptionId: string, data?: TxsTopicData) => this.handleUnsubscribeTxs(subscriptionId, data),
       },
     }
 
@@ -112,7 +113,7 @@ export class ConnectionHandler {
 
           const callback = this.routes[topic][payload.method]
           if (callback) {
-            await callback(payload.data, payload.subscriptionId)
+            await callback(payload.subscriptionId, payload.data)
           } else {
             this.sendError(`${payload.method} method not implemented for topic: ${topic}`, payload.subscriptionId)
           }
@@ -133,84 +134,95 @@ export class ConnectionHandler {
     clearInterval(interval)
   }
 
-  private async handleSubscribeTxs(data: TxsTopicData, subscriptionId: string) {
-    const queueId = `${this.clientId}-${subscriptionId}`
-
-    if (this.queues[queueId]) return
-
-    if (!data.addresses?.length) {
+  private async handleSubscribeTxs(subscriptionId: string, data?: TxsTopicData) {
+    if (!data?.addresses?.length) {
       this.sendError('addresses required', subscriptionId)
       return
     }
 
-    const txExchange = this.rabbit.declareExchange('exchange.tx.client', '', { noCreate: true })
+    const queueId = `${this.clientId}-${subscriptionId}`
 
-    const queue = this.rabbit.declareQueue(`queue.tx.${queueId}`)
-    queue.bind(txExchange, queueId)
+    if (!this.queues[queueId]) {
+      const queue = this.rabbit.declareQueue(`queue.tx.${queueId}`)
+      queue.bind(this.txExchange, queueId)
 
-    try {
-      await this.rabbit.completeConfiguration()
-      this.queues[queueId] = queue
-    } catch (err) {
-      this.logger.error(err, { fn: 'handleSubscribeTxs', data }, 'Failed to complete RabbitMQ configuration')
-      return
+      try {
+        await this.rabbit.completeConfiguration()
+        this.queues[queueId] = queue
+      } catch (err) {
+        this.logger.error(err, { fn: 'handleSubscribeTxs', data }, 'Failed to complete RabbitMQ configuration')
+        return
+      }
+
+      const onMessage = (message: Message) => {
+        try {
+          const content = message.getContent()
+          this.websocket.send(JSON.stringify({ subscriptionId, data: content }), (err) => {
+            if (err) {
+              this.logger.error(
+                err,
+                { fn: 'onMessage', message, subscriptionId, content },
+                'Error sending message to client'
+              )
+              message.nack(false, false)
+              return
+            }
+
+            message.ack()
+          })
+        } catch (err) {
+          this.logger.error(err, { fn: 'onMessage', message, subscriptionId }, 'Error processing message')
+          message.nack(false, false)
+        }
+      }
+
+      queue.activateConsumer(onMessage)
     }
-
-    const ingesterMeta = data.addresses.reduce<Record<string, IngesterMetadata>>((prev, address) => {
-      return { ...prev, [address]: { block: 0 } }
-    }, {})
 
     const msg: RegistryMessage = {
       action: 'register',
       client_id: queueId,
-      ingester_meta: ingesterMeta,
-      registration: {
-        addresses: data.addresses,
-      },
+      registration: { addresses: data.addresses },
     }
 
     this.unchainedExchange.send(new Message(msg), 'registry')
-
-    const onMessage = (message: Message) => {
-      try {
-        const content = message.getContent()
-        this.websocket.send(JSON.stringify({ subscriptionId, data: content }), (err) => {
-          if (err) {
-            this.logger.error(
-              err,
-              { fn: 'onMessage', message, subscriptionId, content },
-              'Error sending message to client'
-            )
-            message.nack(false, false)
-            return
-          }
-
-          message.ack()
-        })
-      } catch (err) {
-        this.logger.error(err, { fn: 'onMessage', message, subscriptionId }, 'Error processing message')
-        message.nack(false, false)
-      }
-    }
-
-    queue.activateConsumer(onMessage)
   }
 
-  private handleUnsubscribeTxs(data: TxsTopicData, subscriptionId: string) {
+  private handleUnsubscribeTxs(subscriptionId: string, data?: TxsTopicData) {
     const queueId = `${this.clientId}-${subscriptionId}`
 
+    if (subscriptionId === '' && !this.queues[queueId]) {
+      // delete and unsubscribe from all subscriptions
+      Object.keys(this.queues).forEach((queueId) => {
+        this.queues[queueId].delete()
+        delete this.queues[queueId]
+
+        const msg: RegistryMessage = {
+          action: 'unregister',
+          client_id: queueId,
+          registration: { addresses: [] },
+        }
+
+        this.unchainedExchange.send(new Message(msg), 'registry')
+      })
+    }
+
     if (!this.queues[queueId]) return
+
+    // delete queue if unsubscribing from all addresses (indicated by no addresses provided)
+    if (!data?.addresses.length) {
+      this.queues[queueId].delete()
+      delete this.queues[queueId]
+    }
 
     const msg: RegistryMessage = {
       action: 'unregister',
       client_id: queueId,
-      ingester_meta: {},
       registration: {
-        addresses: data.addresses,
+        addresses: data?.addresses,
       },
     }
 
     this.unchainedExchange.send(new Message(msg), 'registry')
-    this.queues[queueId].delete()
   }
 }
