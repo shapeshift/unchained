@@ -20,7 +20,7 @@ export class Deployment extends k8s.helm.v3.Chart {
           podAnnotations: {
             'prometheus.io/scrape': 'true',
             'prometheus.io/path': '/metrics',
-            'prometheus.io/port': '9216'
+            'prometheus.io/port': '9216',
           },
           mongodb: {
             uri: `mongodb://${args.asset}-mongodb-0.${args.asset}-mongodb-headless.unchained.svc.cluster.local:27017,${args.asset}-mongodb-1.${args.asset}-mongodb-headless.unchained.svc.cluster.local:27017,${args.asset}-mongodb-2.${args.asset}-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0`,
@@ -31,13 +31,13 @@ export class Deployment extends k8s.helm.v3.Chart {
               memory: '256Mi',
             },
             requests: {
-                cpu: '200m',
-                memory: '256Mi',
+              cpu: '200m',
+              memory: '256Mi',
             },
           },
           serviceMonitor: {
-              enabled: false
-          }
+            enabled: false,
+          },
         },
       },
       { ...opts }

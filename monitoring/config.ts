@@ -1,6 +1,6 @@
 import * as pulumi from '@pulumi/pulumi'
 
-export interface MonitoringConfig{
+export interface MonitoringConfig {
   stack: string
   environment: string
   githubOauthID: string

@@ -21,12 +21,12 @@ export class Deployment extends k8s.helm.v3.Chart {
           annotations: {
             'prometheus.io/scrape': 'true',
             'prometheus.io/path': '/metrics',
-            'prometheus.io/port': '9419'
+            'prometheus.io/port': '9419',
           },
           rabbitmq: {
             url: `http://${args.asset}-rabbitmq-svc.unchained.svc.cluster.local:15672`,
             user: 'guest',
-            password: 'guest'
+            password: 'guest',
           },
           resources: {
             limits: {
@@ -34,8 +34,8 @@ export class Deployment extends k8s.helm.v3.Chart {
               memory: '256Mi',
             },
             requests: {
-                cpu: '200m',
-                memory: '256Mi',
+              cpu: '200m',
+              memory: '256Mi',
             },
           },
         },

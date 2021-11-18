@@ -1,6 +1,6 @@
 # Unchained Monitoring
 
-Deploys a collection of software that enables us to aggregate logs, collect metrics and view the data.
+Deploys a collection of software that enables us to aggregate logs, collect metrics and view data.
 
 _This stack is experimental, use at your own risk_
 
