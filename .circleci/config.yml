@@ -348,21 +348,21 @@ jobs:
     executor: pulumi
     steps:
       - setup_remote_docker:
-        version: 20.10.2
+         version: 20.10.2
       - attach_workspace:
-        at: ~/
+         at: ~/
       - pulumi-dependencies
       - run:
-        name: pulumi up
-        working_directory: monitoring
-        command: |
-          pulumi stack select $PULUMI_ORG/prod
-          pulumi config set --path unchained:monitoring.stack $PULUMI_ORG/common/dependencies
-          pulumi config set --path unchained:monitoring.environment monitoring
-          pulumi config set --path unchained:monitoring.githubOrg $GITHUB_ORG
-          pulumi config set --path unchained:monitoring.githubOauthID $GITHUB_OAUTH_ID
-          pulumi config set --path unchained:monitoring.githubOauthSecret $GITHUB_OAUTH_SECRET
-          pulumi up -f --yes --suppress-outputs
+         name: pulumi up
+         working_directory: monitoring
+         command: |
+           pulumi stack select $PULUMI_ORG/prod
+           pulumi config set --path unchained:monitoring.stack $PULUMI_ORG/common/dependencies
+           pulumi config set --path unchained:monitoring.environment monitoring
+           pulumi config set --path unchained:monitoring.githubOrg $GITHUB_ORG
+           pulumi config set --path unchained:monitoring.githubOauthID $GITHUB_OAUTH_ID
+           pulumi config set --path unchained:monitoring.githubOauthSecret $GITHUB_OAUTH_SECRET
+           pulumi up -f --yes --suppress-outputs
 
 
   lint-and-test:
