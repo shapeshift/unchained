@@ -12,7 +12,6 @@ export interface deploymentArgs {
 export class Deployment extends pulumi.ComponentResource {
   constructor(name: string, args: deploymentArgs, opts?: pulumi.ComponentResourceOptions) {
     super('grafana', name, {}, opts)
-    //KEVIN: Same case in Loki, refactor ^^?
 
     const secretName = 'grafana-cert-secret'
 

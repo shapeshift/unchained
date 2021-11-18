@@ -9,7 +9,6 @@ export interface deploymentArgs {
 export class Deployment extends pulumi.ComponentResource {
   constructor(name: string, args: deploymentArgs, opts?: pulumi.ComponentResourceOptions) {
     super('loki', name, {}, opts)
-    //KEVIN:There's probably a better way to accomplish this^^^
 
     new k8s.helm.v3.Chart(
       `${name}-loki`,

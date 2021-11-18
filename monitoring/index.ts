@@ -11,7 +11,7 @@ type Outputs = Record<string, any>
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
-  const { kubeconfig } = await getConfig()
+  const { kubeconfig, config } = await getConfig()
 
   const name = 'unchained'
   const namespace = `${name}-monitoring`
@@ -35,11 +35,10 @@ export = async (): Promise<Outputs> => {
     {
       namespace: namespace,
       domain: 'usd.fail',
-      githubOrg: '<githubOrg>',
-      githubOauthID: '<githubOauthID>',
-      githubOauthSecret: '<githubSecret>',
+      githubOrg: config.githubOrg,
+      githubOauthID: config.githubOauthID,
+      githubOauthSecret: config.githubOauthSecret,
     },
-    //Fix these configuration values ^^^ 
     { provider }
   )
 
@@ -55,5 +54,4 @@ export = async (): Promise<Outputs> => {
   })
 
   return outputs
-  //KEVIN: What's up with these outputs?  Seems like they were catching the output from deployMongo and deployRabbit, couldn't quite figure this one out.
 }
