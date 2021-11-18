@@ -32,7 +32,7 @@ export class Deployment extends pulumi.ComponentResource {
           },
           persistence: {
             enabled: true,
-            size: '30Gi',
+            size: '50Gi',
           },
           resources: {
             limits: {
