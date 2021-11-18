@@ -154,4 +154,7 @@ const main = async () => {
   newBlockWorker.queue?.activateConsumer(onMessage(newBlockWorker, reorgWorker), { noAck: false })
 }
 
-main()
+main().catch((err) => {
+  logger.error(err)
+  process.exit(1)
+})
