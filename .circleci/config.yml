@@ -344,15 +344,15 @@ jobs:
             << parameters.pulumi-command >>
 
     deploy-monitoring:
-    description: deploy unchained monitoring stack
-    executor: pulumi
-    steps:
-      - setup_remote_docker:
+      description: deploy unchained monitoring stack
+      executor: pulumi
+      steps:
+        - setup_remote_docker:
           version: 20.10.2
-      - attach_workspace:
+        - attach_workspace:
           at: ~/
-      - pulumi-dependencies
-      - run:
+        - pulumi-dependencies
+        - run:
           name: pulumi up
           working_directory: monitoring
           command: |
