@@ -12,6 +12,7 @@ export interface LoopConfig {
   kubeconfig: string
   config: MonitoringConfig
   namespace: string
+  domain: string
 }
 export const getConfig = async (): Promise<LoopConfig> => {
   let config: MonitoringConfig
@@ -27,6 +28,7 @@ export const getConfig = async (): Promise<LoopConfig> => {
   const kubeconfig = (await stackReference.getOutputValue('kubeconfig')) as string
   const namespaces = (await stackReference.getOutputValue('namespaces')) as Array<string>
   const defaultNamespace = (await stackReference.getOutputValue('defaultNamespace')) as string
+  const domain = (await stackReference.getOutputValue('rootDomainName')) as string
 
   const namespace = config.environment ? `${defaultNamespace}-${config.environment}` : defaultNamespace
   if (!namespaces.includes(namespace)) {
@@ -47,5 +49,5 @@ export const getConfig = async (): Promise<LoopConfig> => {
     )
   }
 
-  return { kubeconfig, config, namespace }
+  return { kubeconfig, config, namespace, domain }
 }
