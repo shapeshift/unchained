@@ -11,7 +11,7 @@ type Outputs = Record<string, any>
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
-  const { kubeconfig, config } = await getConfig()
+  const { kubeconfig, config, domain } = await getConfig()
 
   const name = 'unchained'
   const namespace = `${name}-monitoring`
@@ -34,7 +34,7 @@ export = async (): Promise<Outputs> => {
     name,
     {
       namespace: namespace,
-      domain: 'usd.fail',
+      domain: domain,
       githubOrg: config.githubOrg,
       githubOauthID: config.githubOauthID,
       githubOauthSecret: config.githubOauthSecret,
