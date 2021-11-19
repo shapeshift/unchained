@@ -11,24 +11,14 @@ export interface Subscription {
 }
 
 export class Socket {
-  private connection: Connection
   private socket: WebSocket
 
   public exchange: Exchange
   public pingpong?: 'ping' | 'pong'
 
-  constructor(url: string, subscription: Subscription, exchangeName: string) {
-    const NODE_ENV = process.env.NODE_ENV
-    const BROKER_URL = process.env.BROKER_URL as string
-
-    if (NODE_ENV !== 'test') {
-      if (!BROKER_URL) throw new Error('BROKER_URL env var not set')
-    }
-
-    this.connection = new Connection(BROKER_URL)
-    this.exchange = this.connection.declareExchange(exchangeName, '', { noCreate: true })
-
-    this.socket = new WebSocket(url, { handshakeTimeout: 5000 })
+  constructor(socket: WebSocket, exchange: Exchange, subscription: Subscription) {
+    this.socket = socket
+    this.exchange = exchange
 
     this.socket.onerror = (error: WebSocket.ErrorEvent) => {
       logger.error({ error, fn: 'onError' }, 'Websocket error')
@@ -45,6 +35,24 @@ export class Socket {
       this.keepAlive()
       this.socket.send(JSON.stringify(subscription))
     }
+  }
+
+  static async init(url: string, subscription: Subscription, exchangeName: string): Promise<Socket> {
+    const NODE_ENV = process.env.NODE_ENV
+    const BROKER_URI = process.env.BROKER_URI as string
+
+    if (NODE_ENV !== 'test') {
+      if (!BROKER_URI) throw new Error('BROKER_URI env var not set')
+    }
+
+    const connection = new Connection(BROKER_URI)
+    const exchange = connection.declareExchange(exchangeName, '', { noCreate: true })
+
+    await connection.completeConfiguration()
+
+    const socket = new WebSocket(url, { handshakeTimeout: 5000 })
+
+    return new Socket(socket, exchange, subscription)
   }
 
   private keepAlive() {

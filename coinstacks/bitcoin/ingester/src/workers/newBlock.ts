@@ -14,9 +14,9 @@ if (NODE_ENV !== 'test') {
 
 const REORG_BUFFER = 6
 
-const moduleLogger = logger.child({ namespace: ['workers', 'newBlock'] })
-
 const blocks = new BlockService()
+
+const moduleLogger = logger.child({ namespace: ['workers', 'newBlock'] })
 
 const getBlock = async (hashOrHeight: string | number): Promise<BTCBlock> => {
   let hash
@@ -110,15 +110,15 @@ const onMessage = (newBlockWorker: Worker, reorgWorker: Worker) => async (messag
 
   try {
     let dbBlockLatest = await blocks.getLatest()
-    msgLogger.debug({ dbBlockLatest }, 'dbBlockLatest')
+    msgLogger.debug({ dbBlockLatest }, 'DB block')
 
     const nodeHeight = await getHeight()
-    msgLogger.debug({ nodeHeight }, 'nodeHeight')
+    msgLogger.debug({ nodeHeight }, 'Node height')
 
     let height = dbBlockLatest ? dbBlockLatest.height + 1 : nodeHeight - REORG_BUFFER
     while (height <= nodeHeight) {
       let nodeBlock = await getBlock(height)
-      msgLogger.info({ nodeBlock }, 'Get Block')
+      msgLogger.info({ hash: nodeBlock.hash, height: nodeBlock.height }, 'Node block')
 
       const result = await handleReorg(reorgWorker, dbBlockLatest, nodeBlock)
 
@@ -154,4 +154,7 @@ const main = async () => {
   newBlockWorker.queue?.activateConsumer(onMessage(newBlockWorker, reorgWorker), { noAck: false })
 }
 
-main()
+main().catch((err) => {
+  logger.error(err)
+  process.exit(1)
+})

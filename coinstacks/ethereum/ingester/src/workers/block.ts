@@ -2,13 +2,12 @@ import { Worker, Message } from '@shapeshiftoss/common-ingester'
 import { logger } from '../logger'
 import { ETHBlock } from '../types'
 
-const moduleLogger = logger.child({ namespace: ['workers', 'block'] })
+const msgLogger = logger.child({ namespace: ['workers', 'block'], fn: 'onMessage' })
 const onMessage = (worker: Worker) => (message: Message) => {
   const block: ETHBlock = message.getContent()
-  moduleLogger.debug({ block, fn: 'onMessage' }, 'Processing block')
+  msgLogger.debug({ height: Number(block.number) }, 'Block')
 
   block.transactions.forEach((txid) => worker.sendMessage(new Message(txid), 'txid'))
-
   worker.ackMessage(message)
 }
 
@@ -22,4 +21,7 @@ const main = async () => {
   worker.queue?.activateConsumer(onMessage(worker), { noAck: false })
 }
 
-main()
+main().catch((err) => {
+  logger.error(err)
+  process.exit(1)
+})

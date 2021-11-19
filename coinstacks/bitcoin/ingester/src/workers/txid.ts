@@ -16,12 +16,12 @@ const onMessage = (worker: Worker) => async (message: Message) => {
 
   try {
     const tx = await blockbook.getTransaction(txid)
-    msgLogger.debug({ txid, tx }, 'getTransaction')
+    msgLogger.trace({ blockHash: tx.blockHash, blockHeight: tx.blockHeight, txid: tx.txid }, 'Transaction')
 
     worker.sendMessage(new Message(tx), 'tx')
     worker.ackMessage(message, txid)
   } catch (err) {
-    msgLogger.error(err, 'Error processing transaction')
+    msgLogger.error(err, 'Error processing txid')
     worker.retryMessage(message, txid)
   }
 }
@@ -36,4 +36,7 @@ const main = async () => {
   worker.queue?.activateConsumer(onMessage(worker), { noAck: false })
 }
 
-main()
+main().catch((err) => {
+  logger.error(err)
+  process.exit(1)
+})

@@ -1,6 +1,6 @@
 import WebSocket from 'isomorphic-ws'
 import { ErrorResponse, RequestPayload, Topics, TxsTopicData } from '@shapeshiftoss/common-api'
-import { SequencedETHParseTx } from '@shapeshiftoss/ethereum-ingester'
+import { SequencedBTCParseTx } from '@shapeshiftoss/bitcoin-ingester'
 
 export interface Connection {
   ws: WebSocket
@@ -9,12 +9,12 @@ export interface Connection {
 
 export interface TransactionMessage {
   subscriptionId: string
-  data: SequencedETHParseTx
+  data: SequencedBTCParseTx
 }
 
 export interface TxsParams {
   data: TxsTopicData | undefined
-  onMessage: (message: SequencedETHParseTx) => void
+  onMessage: (message: SequencedBTCParseTx) => void
   onError?: (err: ErrorResponse) => void
 }
 
@@ -60,7 +60,7 @@ export class Client {
   async subscribeTxs(
     subscriptionId: string,
     data: TxsTopicData,
-    onMessage: (message: SequencedETHParseTx) => void,
+    onMessage: (message: SequencedBTCParseTx) => void,
     onError?: (err: ErrorResponse) => void
   ): Promise<void> {
     // keep track of the onMessage and onError handlers associated with each subscriptionId
@@ -142,7 +142,6 @@ export class Client {
       }
     })
   }
-
   /**
    * Unsubscribe from transaction history and updates for newly confirmed and pending transactions.
    *

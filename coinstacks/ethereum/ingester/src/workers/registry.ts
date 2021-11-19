@@ -37,7 +37,7 @@ const onMessage = (worker: Worker) => async (message: Message) => {
     }
 
     if (msg.action === 'unregister') {
-      if (msg.registration.addresses) {
+      if (msg.registration.addresses?.length) {
         await registry.remove(msg)
       } else {
         await registry.delete(msg)
@@ -61,4 +61,7 @@ const main = async () => {
   worker.queue?.activateConsumer(onMessage(worker), { noAck: false })
 }
 
-main()
+main().catch((err) => {
+  logger.error(err)
+  process.exit(1)
+})
