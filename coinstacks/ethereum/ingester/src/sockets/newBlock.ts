@@ -12,10 +12,9 @@ const subscription: Subscription = {
   method: 'subscribeNewBlock',
 }
 
-const socket = new Socket(INDEXER_WS_URL, subscription, 'exchange.coinstack')
-
 const msgLogger = logger.child({ namespace: ['sockets', 'newBlock'], fn: 'onMessage' })
-const onMessage = async (message: MessageEvent) => {
+
+const onMessage = (socket: Socket) => async (message: MessageEvent) => {
   try {
     const res: WebsocketRepsonse = JSON.parse(message.data.toString())
 
@@ -28,7 +27,7 @@ const onMessage = async (message: MessageEvent) => {
       ready()
       socket.exchange.send(new Message({ hash: '', height: -1 } as NewBlock), 'newBlock') // trigger delta sync on subscribe
     } else if ('hash' in res.data || 'height' in res.data) {
-      msgLogger.debug({ res }, 'newBlock')
+      msgLogger.debug({ height: res.data.height }, `New block`)
       socket.exchange.send(new Message(res.data), 'newBlock')
     } else {
       msgLogger.warn({ res }, 'Unhandled websocket response')
@@ -39,4 +38,13 @@ const onMessage = async (message: MessageEvent) => {
   }
 }
 
-socket.onMessage(onMessage)
+const main = async () => {
+  const socket = await Socket.init(INDEXER_WS_URL, subscription, 'exchange.coinstack')
+
+  socket.onMessage(onMessage(socket))
+}
+
+main().catch((err) => {
+  logger.error(err)
+  process.exit(1)
+})

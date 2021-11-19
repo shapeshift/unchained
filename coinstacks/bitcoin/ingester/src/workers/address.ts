@@ -2,6 +2,7 @@ import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Message, Worker, SyncTx } from '@shapeshiftoss/common-ingester'
 import { logger } from '../logger'
 import { parseTx } from '../parseTx'
+import { SequencedBTCParseTx } from '../types'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -13,20 +14,21 @@ const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 
 const msgLogger = logger.child({ namespace: ['workers', 'address'], fn: 'onMessage' })
 const onMessage = (worker: Worker) => async (message: Message) => {
-  const { address, txid, client_id }: SyncTx = message.getContent()
+  const { address, txid, client_id, sequence, total }: SyncTx = message.getContent()
   const retryKey = `${client_id}:${address}:${txid}`
 
   try {
     const tx = await blockbook.getTransaction(txid)
-    msgLogger.debug({ txid, address }, 'getTransaction')
+    msgLogger.trace({ blockHash: tx.blockHash, blockHeight: tx.blockHeight, txid: tx.txid }, 'Transaction')
 
     const pTx = await parseTx(tx, address)
-    msgLogger.debug({ address, txid, client_id }, 'Publish TX')
 
-    worker.sendMessage(new Message(pTx), client_id)
+    worker.sendMessage(new Message({ ...pTx, sequence, total } as SequencedBTCParseTx), client_id)
     worker.ackMessage(message, retryKey)
+
+    msgLogger.debug({ address, txid, client_id }, 'Transaction published')
   } catch (err) {
-    msgLogger.error(err, 'Error processing message')
+    msgLogger.error(err, 'Error processing address')
     worker.retryMessage(message, retryKey)
   }
 }
@@ -41,4 +43,7 @@ const main = async () => {
   worker.queue?.activateConsumer(onMessage(worker), { noAck: false })
 }
 
-main()
+main().catch((err) => {
+  logger.error(err)
+  process.exit(1)
+})
