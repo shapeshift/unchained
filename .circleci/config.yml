@@ -199,14 +199,17 @@ jobs:
             pulumi config set --path unchained:common.additionalEnvironments[0] dev
             pulumi config set --path unchained:common.additionalEnvironments[1] monitoring
             pulumi config set --path unchained:common.eks.allAZs true
-            pulumi config set --path unchained:common.eks.autoscaling.enabled true
-            pulumi config set --path unchained:common.eks.autoscaling.minInstances 2
-            pulumi config set --path unchained:common.eks.autoscaling.maxInstances 3
-            pulumi config set --path unchained:common.eks.instanceTypes[0] m5.4xlarge
-            pulumi config set --path unchained:common.eks.instanceTypes[1] m5a.4xlarge
-            pulumi config set --path unchained:common.eks.instanceTypes[2] m5ad.4xlarge
+            pulumi config set --path unchained:common.eks.autoscaling true
             pulumi config set --path unchained:common.eks.region $AWS_REGION
             pulumi config set --path unchained:common.eks.cidrBlock 10.0.0.0/16
+            pulumi config set --path unchained:common.eks.nodeGroups[0].name spot
+            pulumi config set --path unchained:common.eks.nodeGroups[0].type SPOT
+            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 2
+            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 5
+            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[0] r5.4xlarge
+            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r5a.4xlarge
+            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r5b.4xlarge
+            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[3] r5n.4xlarge
             pulumi config set --path unchained:common.traefik.whitelist[0] 173.245.48.0/20
             pulumi config set --path unchained:common.traefik.whitelist[1] 103.21.244.0/22
             pulumi config set --path unchained:common.traefik.whitelist[2] 103.22.200.0/22
