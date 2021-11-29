@@ -1,10 +1,11 @@
 import { Worker, Message } from '@shapeshiftoss/common-ingester'
-import { logger } from '@shapeshiftoss/logger'
+import { logger } from '../logger'
 import { BTCBlock } from '../types'
 
+const msgLogger = logger.child({ namespace: ['workers', 'block'], fn: 'onMessage' })
 const onMessage = (worker: Worker) => (message: Message) => {
   const block: BTCBlock = message.getContent()
-  logger.debug(`block: (${Number(block.height)}) ${block.hash}`)
+  msgLogger.debug({ height: block.height }, 'Block')
 
   block.tx.forEach((txid) => worker.sendMessage(new Message(txid), 'txid'))
   worker.ackMessage(message)
@@ -20,4 +21,7 @@ const main = async () => {
   worker.queue?.activateConsumer(onMessage(worker), { noAck: false })
 }
 
-main()
+main().catch((err) => {
+  logger.error(err)
+  process.exit(1)
+})

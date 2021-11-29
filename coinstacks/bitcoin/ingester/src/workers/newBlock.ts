@@ -2,7 +2,7 @@ import axios from 'axios'
 import { NewBlock } from '@shapeshiftoss/blockbook'
 import { Worker, Message, ReorgBlock, RPCResponse } from '@shapeshiftoss/common-ingester'
 import { BlockDocument, BlockService } from '@shapeshiftoss/common-mongo'
-import { logger } from '@shapeshiftoss/logger'
+import { logger } from '../logger'
 import { BTCBlock, ReorgResult } from '../types'
 
 const NODE_ENV = process.env.NODE_ENV
@@ -15,6 +15,8 @@ if (NODE_ENV !== 'test') {
 const REORG_BUFFER = 6
 
 const blocks = new BlockService()
+
+const moduleLogger = logger.child({ namespace: ['workers', 'newBlock'] })
 
 const getBlock = async (hashOrHeight: string | number): Promise<BTCBlock> => {
   let hash
@@ -96,26 +98,27 @@ export const handleReorg = async (
   const reorgBlock: ReorgBlock = { hash: dbBlock.hash, height: dbBlock.height, prevHash: dbBlock.prevHash }
   worker.sendMessage(new Message(reorgBlock), 'reorgBlock')
 
-  logger.debug(`marking block as orphaned: (${dbBlock.height}) ${dbBlock.hash}`)
+  moduleLogger.debug({ fn: 'handleReorg', dbBlock }, 'Orphaned block')
 
   // continue handling reorg to find common ancestor
   return handleReorg(worker, await blocks.getByHash(dbBlock.prevHash), await getBlock(nodeBlock.previousblockhash))
 }
 
+const msgLogger = moduleLogger.child({ fn: 'onMessage' })
 const onMessage = (newBlockWorker: Worker, reorgWorker: Worker) => async (message: Message) => {
   const newBlock: NewBlock = message.getContent()
 
   try {
     let dbBlockLatest = await blocks.getLatest()
-    logger.debug('dbBlockLatest:', dbBlockLatest?.height)
+    msgLogger.debug({ dbBlockLatest }, 'DB block')
 
     const nodeHeight = await getHeight()
-    logger.debug('nodeHeight:', nodeHeight)
+    msgLogger.debug({ nodeHeight }, 'Node height')
 
     let height = dbBlockLatest ? dbBlockLatest.height + 1 : nodeHeight - REORG_BUFFER
     while (height <= nodeHeight) {
       let nodeBlock = await getBlock(height)
-      logger.info(`getBlock: (${Number(nodeBlock.height)}) ${nodeBlock.hash}`)
+      msgLogger.info({ hash: nodeBlock.hash, height: nodeBlock.height }, 'Node block')
 
       const result = await handleReorg(reorgWorker, dbBlockLatest, nodeBlock)
 
@@ -132,7 +135,7 @@ const onMessage = (newBlockWorker: Worker, reorgWorker: Worker) => async (messag
 
     newBlockWorker.ackMessage(message, newBlock.hash)
   } catch (err) {
-    logger.error('onMessage.error:', err.isAxiosError ? err.message : err)
+    msgLogger.error(err, 'Error processing new block')
     newBlockWorker.retryMessage(message, newBlock.hash)
   }
 }
@@ -151,4 +154,7 @@ const main = async () => {
   newBlockWorker.queue?.activateConsumer(onMessage(newBlockWorker, reorgWorker), { noAck: false })
 }
 
-main()
+main().catch((err) => {
+  logger.error(err)
+  process.exit(1)
+})

@@ -9,17 +9,12 @@ executors:
       - image: pulumi/pulumi-nodejs:3.11.0
 
 aliases:
-  - &only-main
-    filters:
-      branches:
-        only:
-          - main
-
-  - &not-main
+  - &only-feature
     filters:
       branches:
         ignore:
           - main
+          - develop
 
   - &only-develop
     filters:
@@ -27,18 +22,24 @@ aliases:
         only:
           - develop
 
+  - &only-main
+    filters:
+      branches:
+        only:
+          - main
+
   - &bitcoin
     coinstack: bitcoin
     pulumi-stack: public
     pulumi-dir: coinstacks/bitcoin/pulumi
-    broker-url: amqp://guest:guest@bitcoin-rabbitmq-svc.unchained.svc.cluster.local:5672
+    broker-url: bitcoin-rabbitmq-svc.unchained.svc.cluster.local:5672
     mongo-cpu-limit: 512m
     mongo-memory-limit: 512Mi
     mongo-replicas: 3
     mongo-storage-size: 100Gi
     mongo-url: mongodb://bitcoin-mongodb-0.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017,bitcoin-mongodb-1.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017,bitcoin-mongodb-2.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
     rabbit-cpu-limit: '1'
-    rabbit-memory-limit: '2Gi'
+    rabbit-memory-limit: '4Gi'
     rabbit-storage-size: '100Gi'
     indexer-cpu-limit: '4'
     indexer-memory-limit: 12Gi
@@ -50,20 +51,20 @@ aliases:
     daemon-cpu-limit: '2'
     daemon-memory-limit: 12Gi
     daemon-storage-size: 1500Gi
-    rpc-url: http://bitcoin-indexer-svc.unchained.svc.cluster.local:8332
+    rpc-url: http://user:password@bitcoin-indexer-svc.unchained.svc.cluster.local:8332
 
   - &ethereum
     coinstack: ethereum
     pulumi-stack: public
     pulumi-dir: coinstacks/ethereum/pulumi
-    broker-url: amqp://guest:guest@ethereum-rabbitmq-svc.unchained.svc.cluster.local:5672
+    broker-url: ethereum-rabbitmq-svc.unchained.svc.cluster.local:5672
     mongo-cpu-limit: 512m
     mongo-memory-limit: 512Mi
     mongo-replicas: 3
     mongo-storage-size: 100Gi
     mongo-url: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-2.ethereum-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
     rabbit-cpu-limit: '1'
-    rabbit-memory-limit: '2Gi'
+    rabbit-memory-limit: '4Gi'
     rabbit-storage-size: '100Gi'
     indexer-cpu-limit: '4'
     indexer-memory-limit: 12Gi
@@ -81,14 +82,14 @@ aliases:
     coinstack: ethereum
     pulumi-stack: public-ropsten
     pulumi-dir: coinstacks/ethereum/pulumi
-    broker-url: amqp://guest:guest@ethereum-ropsten-rabbitmq-svc.unchained.svc.cluster.local:5672
+    broker-url: ethereum-ropsten-rabbitmq-svc.unchained.svc.cluster.local:5672
     mongo-cpu-limit: 512m
     mongo-memory-limit: 512Mi
     mongo-replicas: 3
     mongo-storage-size: 100Gi
     mongo-url: mongodb://ethereum-ropsten-mongodb-0.ethereum-ropsten-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-ropsten-mongodb-1.ethereum-ropsten-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-ropsten-mongodb-2.ethereum-ropsten-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
     rabbit-cpu-limit: '1'
-    rabbit-memory-limit: '2Gi'
+    rabbit-memory-limit: '4Gi'
     rabbit-storage-size: '100Gi'
     indexer-cpu-limit: '4'
     indexer-memory-limit: 12Gi
@@ -161,6 +162,7 @@ commands:
             helm repo add eks https://aws.github.io/eks-charts
             helm repo add grafana https://grafana.github.io/helm-charts
             helm repo add traefik https://helm.traefik.io/traefik
+            helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
       - run:
           name: install pulumi plugin resources
           command: |
@@ -195,19 +197,19 @@ jobs:
             pulumi config set --path unchained:common.cluster eks
             pulumi config set --path unchained:common.isLocal false
             pulumi config set --path unchained:common.additionalEnvironments[0] dev
+            pulumi config set --path unchained:common.additionalEnvironments[1] monitoring
             pulumi config set --path unchained:common.eks.allAZs true
-            pulumi config set --path unchained:common.eks.autoscaling.enabled true
-            pulumi config set --path unchained:common.eks.autoscaling.minInstances 2
-            pulumi config set --path unchained:common.eks.autoscaling.maxInstances 3
-            pulumi config set --path unchained:common.eks.instanceTypes[0] m5.4xlarge
-            pulumi config set --path unchained:common.eks.instanceTypes[1] m5a.4xlarge
-            pulumi config set --path unchained:common.eks.instanceTypes[2] m5ad.4xlarge
-            pulumi config set --path unchained:common.eks.logging.enabled true
-            pulumi config set --path unchained:common.eks.logging.persistentVolume true
-            pulumi config set --path unchained:common.eks.logging.pvSize 50Gi
-            pulumi config set --path unchained:common.eks.logging.retentionPeriod 336h
+            pulumi config set --path unchained:common.eks.autoscaling true
             pulumi config set --path unchained:common.eks.region $AWS_REGION
             pulumi config set --path unchained:common.eks.cidrBlock 10.0.0.0/16
+            pulumi config set --path unchained:common.eks.nodeGroups[0].name spot
+            pulumi config set --path unchained:common.eks.nodeGroups[0].type SPOT
+            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 2
+            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 5
+            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[0] r5.4xlarge
+            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r5a.4xlarge
+            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r5b.4xlarge
+            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[3] r5n.4xlarge
             pulumi config set --path unchained:common.traefik.whitelist[0] 173.245.48.0/20
             pulumi config set --path unchained:common.traefik.whitelist[1] 103.21.244.0/22
             pulumi config set --path unchained:common.traefik.whitelist[2] 103.22.200.0/22
@@ -234,7 +236,7 @@ jobs:
     executor: pulumi
     environment:
       DOCKER_BUILDKIT: 1
-      LOG_LEVEL: info
+      LOG_LEVEL: debug
       MIDGARD_URL: https://midgard.thorchain.info
       MONGO_DBNAME: coinstack
     parameters:
@@ -340,6 +342,28 @@ jobs:
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.storageSize << parameters.daemon-storage-size >>
             << parameters.pulumi-command >>
 
+  deploy-monitoring:
+    description: deploy unchained monitoring stack
+    executor: pulumi
+    steps:
+      - setup_remote_docker:
+         version: 20.10.2
+      - attach_workspace:
+         at: ~/
+      - pulumi-dependencies
+      - run:
+         name: pulumi up
+         working_directory: monitoring
+         command: |
+           pulumi stack select $PULUMI_ORG/prod
+           pulumi config set --path unchained:monitoring.stack $PULUMI_ORG/common/dependencies
+           pulumi config set --path unchained:monitoring.environment monitoring
+           pulumi config set --path unchained:monitoring.githubOrg $GITHUB_ORG
+           pulumi config set --path unchained:monitoring.githubOauthID $GITHUB_OAUTH_ID
+           pulumi config set --path unchained:monitoring.githubOauthSecret $GITHUB_OAUTH_SECRET --plaintext
+           pulumi up -f --yes --suppress-outputs
+
+
   lint-and-test:
     description: lint and test project
     executor: node
@@ -374,7 +398,7 @@ workflows:
     jobs:
       - lint-and-test:
           name: lint and test project
-          <<: *not-main
+          <<: *only-feature
   deploy-development:
     jobs:
       - lint-and-test-persist:
@@ -393,13 +417,13 @@ workflows:
           <<: *bitcoin
           environment: dev
           pulumi-stack: public-dev
-          broker-url: amqp://guest:guest@bitcoin-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
+          broker-url: bitcoin-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
           mongo-replicas: 2
           mongo-url: mongodb://bitcoin-mongodb-0.bitcoin-mongodb-headless.unchained-dev.svc.cluster.local:27017,bitcoin-mongodb-1.bitcoin-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
           indexer-replicas: 1
           indexer-url: http://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001
           indexer-ws-url: ws://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
-          rpc-url: http://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8332
+          rpc-url: http://user:password@bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8332
           requires:
             - deploy common unchained dependencies
           <<: *only-develop
@@ -410,7 +434,7 @@ workflows:
           <<: *ethereum
           environment: dev
           pulumi-stack: public-dev
-          broker-url: amqp://guest:guest@ethereum-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
+          broker-url: ethereum-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
           mongo-replicas: 2
           mongo-url: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained-dev.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
           indexer-replicas: 1
@@ -428,7 +452,7 @@ workflows:
           environment: dev
           network: ropsten
           pulumi-stack: public-dev-ropsten
-          broker-url: amqp://guest:guest@ethereum-ropsten-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
+          broker-url: ethereum-ropsten-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
           mongo-replicas: 2
           mongo-url: mongodb://ethereum-ropsten-mongodb-0.ethereum-ropsten-mongodb-headless.unchained-dev.svc.cluster.local:27017,ethereum-ropsten-mongodb-1.ethereum-ropsten-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
           indexer-replicas: 1
@@ -437,6 +461,19 @@ workflows:
           rpc-url: http://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8332
           requires:
             - deploy common unchained dependencies
+          <<: *only-develop
+
+      - approve-monitoring:
+          name: approve monitoring stack
+          type: approval
+          requires:
+            - deploy common unchained dependencies
+          <<: *only-develop
+
+      - deploy-monitoring:
+          name: deploy unchained monitoring stack
+          requires:
+            - approve monitoring stack
           <<: *only-develop
 
   deploy-main:

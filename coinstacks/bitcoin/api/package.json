@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/bitcoin-api",
-  "version": "3.0.0",
+  "version": "3.7.0",
   "license": "MIT",
   "main": "dist/bitcoin/api/src/index.js",
   "source": "src/index.ts",
@@ -14,17 +14,20 @@
     "generate": "tsoa spec-and-routes"
   },
   "dependencies": {
-    "@shapeshiftoss/blockbook": "^3.0.0",
-    "@shapeshiftoss/common-api": "^3.0.0",
-    "@shapeshiftoss/logger": "^3.0.0",
+    "@shapeshiftoss/bitcoin-ingester": "^3.7.0",
+    "@shapeshiftoss/blockbook": "^3.7.0",
+    "@shapeshiftoss/common-api": "^3.7.0",
+    "@shapeshiftoss/logger": "^1.0.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "swagger-ui-express": "^4.1.5",
-    "tsoa": "^3.4.0"
+    "tsoa": "^3.4.0",
+    "ws": "^8.2.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.9",
-    "@types/swagger-ui-express": "^4.1.2"
+    "@types/swagger-ui-express": "^4.1.2",
+    "@types/ws": "^8.2.0"
   }
 }

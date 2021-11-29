@@ -33,6 +33,11 @@ config:
       replicaCount: 1
       storageSize: '1Gi'
 
+    rabbit:
+      cpuLimit: '1'
+      memoryLimit: '2Gi'
+      storageSize: '10Gi'
+
     ## indexer - if specified an indexer service and optional node will be deployed
     ## this is very resource intensive, so you can point at public endpoints instead of running your own.
     #indexer:

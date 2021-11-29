@@ -1,6 +1,6 @@
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Message, Worker } from '@shapeshiftoss/common-ingester'
-import { logger } from '@shapeshiftoss/logger'
+import { logger } from '../logger'
 import { parseTx } from '../parseTx'
 import { ETHSyncTx, SequencedETHParseTx } from '../types'
 
@@ -12,21 +12,23 @@ if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 
+const msgLogger = logger.child({ namespace: ['workers', 'address'], fn: 'onMessage' })
 const onMessage = (worker: Worker) => async (message: Message) => {
   const { address, txid, internalTxs, client_id, sequence, total }: ETHSyncTx = message.getContent()
   const retryKey = `${client_id}:${address}:${txid}`
 
   try {
     const tx = await blockbook.getTransaction(txid)
-    logger.debug(`getTransaction: ${txid}, for address: ${address}`)
+    msgLogger.trace({ blockHash: tx.blockHash, blockHeight: tx.blockHeight, txid: tx.txid }, 'Transaction')
 
     const pTx = await parseTx(tx, address, internalTxs)
-    logger.info(`publishing tx: ${txid} for registered address: ${address} to client: ${client_id}`)
 
     worker.sendMessage(new Message({ ...pTx, sequence, total } as SequencedETHParseTx), client_id)
     worker.ackMessage(message, retryKey)
+
+    msgLogger.debug({ address, txid, client_id }, 'Transaction published')
   } catch (err) {
-    logger.error('onMessage.error:', err.isAxiosError ? err.message : err)
+    msgLogger.error(err, 'Error processing address')
     worker.retryMessage(message, retryKey)
   }
 }
@@ -41,4 +43,7 @@ const main = async () => {
   worker.queue?.activateConsumer(onMessage(worker), { noAck: false })
 }
 
-main()
+main().catch((err) => {
+  logger.error(err)
+  process.exit(1)
+})

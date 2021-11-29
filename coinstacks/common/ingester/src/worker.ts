@@ -1,5 +1,5 @@
 import { Connection, Exchange, Message, Queue } from 'amqp-ts'
-import { logger } from '@shapeshiftoss/logger'
+import { logger } from './utils/logger'
 import { ready } from './utils/probes'
 
 interface WorkerDeclaration {
@@ -11,7 +11,8 @@ interface WorkerDeclaration {
 export class Worker {
   private connection: Connection
   private retryAttempts: Record<string, number> = {}
-  private retryCount = 10
+  private maxRetries = 10
+  private logger = logger.child({ namespace: ['worker'] })
 
   public queue?: Queue
   public exchange?: Exchange
@@ -26,13 +27,13 @@ export class Worker {
 
   static async init({ queueName, exchangeName, requeueName }: WorkerDeclaration): Promise<Worker> {
     const NODE_ENV = process.env.NODE_ENV
-    const BROKER_URL = process.env.BROKER_URL as string
+    const BROKER_URI = process.env.BROKER_URI as string
 
     if (NODE_ENV !== 'test') {
-      if (!BROKER_URL) throw new Error('BROKER_URL env var not set')
+      if (!BROKER_URI) throw new Error('BROKER_URI env var not set')
     }
 
-    const connection = new Connection(BROKER_URL)
+    const connection = new Connection(BROKER_URI)
     const queue = queueName ? connection.declareQueue(queueName, { noCreate: true }) : undefined
     const requeue = requeueName ? connection.declareExchange(requeueName, '', { noCreate: true }) : undefined
     const exchange = exchangeName ? connection.declareExchange(exchangeName, '', { noCreate: true }) : undefined
@@ -55,21 +56,23 @@ export class Worker {
    * **Only 1 ack or nack should occur per message (ackMessage, retryMessage, or requeueMessage)**
    */
   async retryMessage(message: Message, identifier: string): Promise<void> {
+    const fnLogger = this.logger.child({ fn: 'retryMessage', identifier, message })
+
     try {
       const attempts = this.retryAttempts[identifier] ?? 1
 
-      if (attempts <= this.retryCount) {
+      if (attempts <= this.maxRetries) {
         await this.sleep(attempts ** 2 * 100)
-        logger.debug(`retry attmept (${attempts}) for message:`, identifier)
+        fnLogger.debug({ attempts, maxRetries: this.maxRetries }, 'Retrying')
         message.nack(false, true)
         this.retryAttempts[identifier] = attempts + 1
       } else {
-        logger.error('retry failed, rejecting message:', identifier)
+        fnLogger.error({ attempts, maxRetries: this.maxRetries }, 'Retry failed')
         message.reject()
         delete this.retryAttempts[identifier]
       }
     } catch (err) {
-      logger.error('error retrying:', err)
+      fnLogger.error(err, 'Error retrying message')
     }
   }
 
@@ -82,9 +85,11 @@ export class Worker {
    * _If no requeue exchange is declared, message will be rejected._
    */
   requeueMessage(message: Message, identifier: string, routingKey?: string): void {
+    const fnLogger = this.logger.child({ fn: 'requeueMessage', identifier, message, routingKey })
+
     try {
       if (!this.requeue) {
-        logger.error('no requeue declared, rejecting message:', identifier)
+        this.logger.error('No requeue queue declared. Rejecting message.')
         message.reject()
         delete this.retryAttempts[identifier]
         return
@@ -93,10 +98,10 @@ export class Worker {
       const msg = message.getContent()
       message.ack() // ack message to remove from queue so we can requeue to back
       delete this.retryAttempts[identifier]
-      logger.debug('requeuing message:', identifier)
+      fnLogger.debug('Requeuing message')
       this.requeue.send(new Message(msg), routingKey)
     } catch (err) {
-      logger.error('error requeuing:', err)
+      fnLogger.error(err, 'Error requeuing message')
     }
   }
 
@@ -106,7 +111,7 @@ export class Worker {
    */
   sendMessage(message: Message, routingKey?: string): void {
     if (!this.exchange) {
-      logger.warning('no exchange declared')
+      this.logger.warn({ fn: 'sendMessage' }, 'No exchange declared')
       return
     }
 
