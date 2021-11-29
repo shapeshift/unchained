@@ -14,3 +14,8 @@ export interface InternalTx {
   isError: string
   errCode: string
 }
+
+export enum Network {
+  Mainnet = 'mainnet',
+  Ropsten = 'ropsten',
+}

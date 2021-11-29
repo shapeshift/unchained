@@ -1,136 +1,138 @@
 import { ethers } from 'ethers'
 import { Tx } from '@shapeshiftoss/blockbook'
 import { Thorchain } from '@shapeshiftoss/thorchain'
-import { ParseTxUnique, Refund, Trade } from '../types'
-import { InternalTx } from './types'
+import { Dex, TxSpecific as ParseTxSpecific, TradeType, TransferType } from '../types'
+import { Network } from './types'
 import ABI from './abi/thor'
-import { aggregateSell, getSigHash } from './utils'
-
-// TODO: pass in configuration to a parser class
-const MIDGARD_URL = process.env.MIDGARD_URL as string
-const NETWORK = process.env.NETWORK as 'mainnet' | 'ropsten'
-const NODE_ENV = process.env.NODE_ENV
-const RPC_URL = process.env.RPC_URL as string
-
-if (NODE_ENV !== 'test') {
-  if (!MIDGARD_URL) throw new Error('MIDGARD_URL env var not set')
-  if (!NETWORK) throw new Error('NETWORK env var not set')
-  if (!RPC_URL) throw new Error('RPC_URL env var not set')
-}
-
-const thorchain = new Thorchain({ midgardUrl: MIDGARD_URL })
-const abiInterface = new ethers.utils.Interface(ABI)
-
-export const DEPOSIT_SIG_HASH = abiInterface.getSighash('deposit')
-export const TRANSFEROUT_SIG_HASH = abiInterface.getSighash('transferOut')
-
-// TODO: Router contract can change, use /inbound_addresses endpoint to determine current router contract
-export const ROUTER_CONTRACT = {
-  mainnet: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
-  ropsten: '0xefA28233838f46a80AaaC8c309077a9ba70D123A',
-}[NETWORK]
+import { getSigHash } from './utils'
 
 const SWAP_TYPES = ['SWAP', '=', 's']
 
-// detect address associated with transferOut internal transaction
-export const getInternalAddress = (inputData: string): string | undefined => {
-  if (getSigHash(inputData) !== TRANSFEROUT_SIG_HASH) return
-
-  const result = abiInterface.decodeFunctionData(TRANSFEROUT_SIG_HASH, inputData)
-
-  const [type] = result.memo.split(':')
-  if (type !== 'OUT' || type !== 'REFUND') return
-
-  return result.to
+export interface ParserArgs {
+  midgardUrl: string
+  network: Network
 }
 
-export const parse = async (
-  tx: Tx,
-  address: string,
-  internalTxs?: Array<InternalTx>
-): Promise<ParseTxUnique | undefined> => {
-  if (!tx.ethereumSpecific?.data) return
+export class Parser {
+  abiInterface: ethers.utils.Interface
+  thorchain: Thorchain
 
-  let result: ethers.utils.Result
-  switch (getSigHash(tx.ethereumSpecific.data)) {
-    case DEPOSIT_SIG_HASH:
-      result = abiInterface.decodeFunctionData(DEPOSIT_SIG_HASH, tx.ethereumSpecific.data)
-      break
-    case TRANSFEROUT_SIG_HASH: {
-      result = abiInterface.decodeFunctionData(TRANSFEROUT_SIG_HASH, tx.ethereumSpecific.data)
-      break
-    }
-    default:
-      return
+  readonly depositSigHash: string
+  readonly transferOutSigHash: string
+  readonly routerContract: string
+
+  constructor(args: ParserArgs) {
+    this.abiInterface = new ethers.utils.Interface(ABI)
+    this.thorchain = new Thorchain({ midgardUrl: args.midgardUrl })
+
+    this.depositSigHash = this.abiInterface.getSighash('deposit')
+    this.transferOutSigHash = this.abiInterface.getSighash('transferOut')
+
+    // TODO: Router contract can change, use /inbound_addresses endpoint to determine current router contract
+    this.routerContract = {
+      mainnet: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
+      ropsten: '0xefA28233838f46a80AaaC8c309077a9ba70D123A',
+    }[args.network]
   }
 
-  const [type, ...memo] = result.memo.split(':')
+  // detect address associated with transferOut internal transaction
+  getInternalAddress(inputData: string): string | undefined {
+    if (getSigHash(inputData) !== this.transferOutSigHash) return
 
-  // sell side
-  if (SWAP_TYPES.includes(type)) {
-    const [buyAsset] = memo
-    const { sellAmount, sellAsset } = aggregateSell(tx, address, internalTxs)
+    const result = this.abiInterface.decodeFunctionData(this.transferOutSigHash, inputData)
 
-    if (result.amount.toString() !== sellAmount) {
-      console.log(`swap amount specified differs from amount sent for tx: ${tx.txid}`)
-    }
+    const [type] = result.memo.split(':')
+    if (type !== 'OUT' || type !== 'REFUND') return
 
-    const trade: Trade = {
-      dexName: 'thor',
-      buyAmount: '',
-      buyAsset,
-      feeAsset: '',
-      feeAmount: '',
-      memo: result.memo,
-      sellAmount,
-      sellAsset,
-    }
-
-    return { trade }
+    return result.to
   }
 
-  // buy side
-  if (type === 'OUT') {
-    const { input, fee, output, liquidityFee } = await thorchain.getTxDetails(memo, 'swap')
+  async parse(tx: Tx): Promise<ParseTxSpecific | undefined> {
+    if (!tx.ethereumSpecific?.data) return
 
-    const trade: Trade = {
-      dexName: 'thor',
-      buyAmount: output.amount,
-      buyAsset: output.asset,
-      buyNetwork: output.network,
-      feeAmount: fee.amount,
-      feeAsset: fee.asset,
-      feeNetwork: fee.network,
-      memo: result.memo,
-      sellAmount: input.amount,
-      sellAsset: input.asset,
-      sellNetwork: input.network,
-      liquidityFee,
+    let result: ethers.utils.Result
+    switch (getSigHash(tx.ethereumSpecific.data)) {
+      case this.depositSigHash:
+        result = this.abiInterface.decodeFunctionData(this.depositSigHash, tx.ethereumSpecific.data)
+        break
+      case this.transferOutSigHash: {
+        result = this.abiInterface.decodeFunctionData(this.transferOutSigHash, tx.ethereumSpecific.data)
+        break
+      }
+      default:
+        return
     }
 
-    return { trade }
-  }
+    const [type, ...memo] = result.memo.split(':')
 
-  // trade refund
-  if (type === 'REFUND') {
-    const { input, fee, output } = await thorchain.getTxDetails(memo, 'refund')
+    // sell side
+    if (SWAP_TYPES.includes(type)) {
+      //const [buyAsset] = memo
 
-    const refund: Refund = {
-      dexName: 'thor',
-      feeAmount: fee.amount,
-      feeAsset: fee.asset,
-      feeNetwork: fee.network,
-      memo: result.memo,
-      refundAmount: output.amount,
-      refundAsset: output.asset,
-      refundNetwork: output.network,
-      sellAmount: input.amount,
-      sellAsset: input.asset,
-      sellNetwork: input.network,
+      return {
+        trade: {
+          dexName: Dex.Thor,
+          type: TradeType.Trade,
+          memo: result.memo,
+        },
+      }
     }
 
-    return { refund }
-  }
+    // buy side
+    if (type === 'OUT') {
+      const { input, fee, liquidityFee } = await this.thorchain.getTxDetails(memo, 'swap')
 
-  return
+      return {
+        fee: {
+          caip19: fee.asset,
+          value: fee.amount,
+        },
+        trade: {
+          dexName: Dex.Thor,
+          type: TradeType.Trade,
+          memo: result.memo,
+          liquidityFee,
+        },
+        transfers: [
+          {
+            caip19: input.asset,
+            components: [{ value: input.amount }],
+            from: '', // TODO: do we care?
+            to: '', // TODO: do we care?
+            totalValue: input.amount,
+            type: TransferType.Send,
+          },
+        ],
+      }
+    }
+
+    // trade refund
+    if (type === 'REFUND') {
+      const { input, fee } = await this.thorchain.getTxDetails(memo, 'refund')
+
+      return {
+        fee: {
+          caip19: fee.asset,
+          value: fee.amount,
+        },
+        trade: {
+          dexName: Dex.Thor,
+          type: TradeType.Refund,
+          memo: result.memo,
+        },
+        transfers: [
+          {
+            caip19: input.asset,
+            components: [{ value: input.amount }],
+            from: '',
+            to: '',
+            totalValue: input.amount,
+            type: TransferType.Send,
+          },
+        ],
+      }
+    }
+
+    return
+  }
 }

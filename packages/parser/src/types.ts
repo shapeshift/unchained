@@ -1,31 +1,11 @@
-export type AssetSymbol = string
-
-export type Dex = 'thor' | 'zrx'
-
-export interface ParseTx extends ParseTxUnique, Tx {
-  address: string
-  fee?: TxFee
-  transfers: Array<TxTransfer>
+export enum Dex {
+  Thor = 'thor',
+  Zrx = 'zrx',
 }
 
-export interface ParseTxUnique {
-  refund?: Refund
-  trade?: Trade
-  transfers?: Array<TxTransfer>
-}
-
-export interface Refund {
-  dexName: Dex
-  refundAsset: string
-  refundAmount: string
-  refundNetwork?: string
-  feeAsset: string
-  feeAmount: string
-  feeNetwork?: string
-  memo?: string
-  sellAsset: string
-  sellAmount: string
-  sellNetwork?: string
+export interface Fee {
+  caip19: string
+  value: string
 }
 
 export interface Token {
@@ -36,17 +16,25 @@ export interface Token {
 
 export interface Trade {
   dexName: Dex
-  buyAsset: string
-  buyAmount: string
-  buyNetwork?: string
-  feeAsset: string
-  feeAmount: string
-  feeNetwork?: string
+  fee?: Fee
   liquidityFee?: string
   memo?: string
-  sellAsset: string
-  sellAmount: string
-  sellNetwork?: string
+  type: TradeType
+}
+
+export enum TradeType {
+  Trade = 'trade',
+  Refund = 'refund',
+}
+
+export interface Transfer {
+  from: string
+  to: string
+  caip19: string
+  type: TransferType
+  totalValue: string
+  components: Array<{ value: string }>
+  token?: Token
 }
 
 export enum TransferType {
@@ -55,23 +43,16 @@ export enum TransferType {
 }
 
 export interface Tx {
-  txid: string
+  address: string
   blockHash?: string
   blockHeight: number
   blockTime: number
-}
-
-export interface TxFee {
-  symbol: AssetSymbol
+  caip2: string
+  fee?: Fee
+  trade?: Trade
+  transfers: Array<Transfer>
+  txid: string
   value: string
 }
 
-export interface TxTransfer {
-  from: string
-  to: string
-  symbol: AssetSymbol
-  type: TransferType
-  totalValue: string
-  components: Array<{ value: string }>
-  token?: Token
-}
+export type TxSpecific = Partial<Pick<Tx, 'fee' | 'trade' | 'transfers'>>

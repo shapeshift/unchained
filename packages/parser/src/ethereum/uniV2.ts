@@ -1,96 +1,107 @@
 import { ethers } from 'ethers'
 import { Tx } from '@shapeshiftoss/blockbook'
-import { ParseTxUnique, TransferType, TxTransfer } from '../types'
+import { TxSpecific as ParseTxSpecific, Transfer, TransferType } from '../types'
+import { Network } from './types'
 import ABI from './abi/uniV2'
 import ERC20_ABI from './abi/erc20'
 import { getSigHash } from './utils'
 
-const NETWORK = process.env.NETWORK as 'mainnet' | 'ropsten'
-const NODE_ENV = process.env.NODE_ENV
-const RPC_URL = process.env.RPC_URL as string
-
-if (NODE_ENV !== 'test') {
-  if (!NETWORK) throw new Error('NETWORK env var not set')
-  if (!RPC_URL) throw new Error('RPC_URL env var not set')
-}
-
-const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
-const abiInterface = new ethers.utils.Interface(ABI)
-
-export const ADD_LIQUIDITY_ETH_SIG_HASH = abiInterface.getSighash('addLiquidityETH')
-export const REMOVE_LIQUIDITY_ETH_SIG_HASH = abiInterface.getSighash('removeLiquidityETH')
-export const INIT_CODE_HASH = '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f' // https://github.com/Uniswap/v2-periphery/blob/dda62473e2da448bc9cb8f4514dadda4aeede5f4/contracts/libraries/UniswapV2Library.sol#L24
 export const ROUTER_CONTRACT = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
-export const FACTORY_CONTRACT = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'
-export const WETH_CONTRACT = {
-  mainnet: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-  ropsten: '0xc778417E063141139Fce010982780140Aa0cD5Ab',
-}[NETWORK]
 
-const pairFor = (tokenA: string, tokenB: string): string => {
-  const [token0, token1] = tokenA < tokenB ? [tokenA, tokenB] : [tokenB, tokenA]
-  const salt = ethers.utils.solidityKeccak256(['address', 'address'], [token0, token1])
-  return ethers.utils.getCreate2Address(FACTORY_CONTRACT, salt, INIT_CODE_HASH)
+export interface ParserArgs {
+  network: Network
+  provider: ethers.providers.JsonRpcProvider
 }
 
-export const parse = async (tx: Tx): Promise<ParseTxUnique | undefined> => {
-  if (!tx.ethereumSpecific?.data) return
-  if (tx.confirmations !== 0) return
+export class Parser {
+  abiInterface: ethers.utils.Interface
+  network: Network
+  provider: ethers.providers.JsonRpcProvider
 
-  const sendAddress = tx.vin[0].addresses?.[0] ?? ''
+  readonly addLiquidityEthSigHash: string
+  readonly removeLiquidityEthSigHash: string
+  readonly wethContract: string
 
-  switch (getSigHash(tx.ethereumSpecific.data)) {
-    case ADD_LIQUIDITY_ETH_SIG_HASH: {
-      const result = abiInterface.decodeFunctionData(ADD_LIQUIDITY_ETH_SIG_HASH, tx.ethereumSpecific.data)
+  constructor(args: ParserArgs) {
+    this.abiInterface = new ethers.utils.Interface(ABI)
+    this.network = args.network
+    this.provider = args.provider
 
-      const tokenAddress = ethers.utils.getAddress(result.token.toLowerCase())
-      const lpTokenAddress = pairFor(tokenAddress, WETH_CONTRACT)
-      const contract = new ethers.Contract(tokenAddress, ERC20_ABI, provider)
-      const decimals = await contract.decimals()
-      const name = await contract.name()
-      const symbol = await contract.symbol()
-      const value = result.amountTokenDesired.toString()
+    this.addLiquidityEthSigHash = this.abiInterface.getSighash('addLiquidityETH')
+    this.removeLiquidityEthSigHash = this.abiInterface.getSighash('removeLiquidityETH')
+    this.wethContract = {
+      mainnet: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+      ropsten: '0xc778417E063141139Fce010982780140Aa0cD5Ab',
+    }[this.network]
+  }
 
-      const transfers: Array<TxTransfer> = [
-        {
-          type: TransferType.Send,
-          from: sendAddress,
-          to: lpTokenAddress,
-          symbol,
-          totalValue: value,
-          components: [{ value }],
-          token: { contract: tokenAddress, decimals, name },
-        },
-      ]
+  async parse(tx: Tx): Promise<ParseTxSpecific | undefined> {
+    if (!tx.ethereumSpecific?.data) return
+    if (tx.confirmations !== 0) return
 
-      return { transfers }
+    const sendAddress = tx.vin[0].addresses?.[0] ?? ''
+
+    switch (getSigHash(tx.ethereumSpecific.data)) {
+      case this.addLiquidityEthSigHash: {
+        const result = this.abiInterface.decodeFunctionData(this.addLiquidityEthSigHash, tx.ethereumSpecific.data)
+
+        const tokenAddress = ethers.utils.getAddress(result.token.toLowerCase())
+        const lpTokenAddress = this.pairFor(tokenAddress, this.wethContract)
+        const contract = new ethers.Contract(tokenAddress, ERC20_ABI, this.provider)
+        const decimals = await contract.decimals()
+        const name = await contract.name()
+        const symbol = await contract.symbol()
+        const value = result.amountTokenDesired.toString()
+
+        const transfers: Array<Transfer> = [
+          {
+            type: TransferType.Send,
+            from: sendAddress,
+            to: lpTokenAddress,
+            caip19: symbol,
+            totalValue: value,
+            components: [{ value }],
+            token: { contract: tokenAddress, decimals, name },
+          },
+        ]
+
+        return { transfers }
+      }
+      case this.removeLiquidityEthSigHash: {
+        const result = this.abiInterface.decodeFunctionData(this.removeLiquidityEthSigHash, tx.ethereumSpecific.data)
+
+        const tokenAddress = ethers.utils.getAddress(result.token.toLowerCase())
+        const lpTokenAddress = this.pairFor(tokenAddress, this.wethContract)
+        const contract = new ethers.Contract(lpTokenAddress, ERC20_ABI, this.provider)
+        const decimals = await contract.decimals()
+        const name = await contract.name()
+        const symbol = await contract.symbol()
+        const value = result.liquidity.toString()
+
+        const transfers: Array<Transfer> = [
+          {
+            type: TransferType.Send,
+            from: sendAddress,
+            to: lpTokenAddress,
+            caip19: symbol,
+            totalValue: value,
+            components: [{ value }],
+            token: { contract: lpTokenAddress, decimals, name },
+          },
+        ]
+
+        return { transfers }
+      }
+      default:
+        return
     }
-    case REMOVE_LIQUIDITY_ETH_SIG_HASH: {
-      const result = abiInterface.decodeFunctionData(REMOVE_LIQUIDITY_ETH_SIG_HASH, tx.ethereumSpecific.data)
+  }
 
-      const tokenAddress = ethers.utils.getAddress(result.token.toLowerCase())
-      const lpTokenAddress = pairFor(tokenAddress, WETH_CONTRACT)
-      const contract = new ethers.Contract(lpTokenAddress, ERC20_ABI, provider)
-      const decimals = await contract.decimals()
-      const name = await contract.name()
-      const symbol = await contract.symbol()
-      const value = result.liquidity.toString()
-
-      const transfers: Array<TxTransfer> = [
-        {
-          type: TransferType.Send,
-          from: sendAddress,
-          to: lpTokenAddress,
-          symbol,
-          totalValue: value,
-          components: [{ value }],
-          token: { contract: lpTokenAddress, decimals, name },
-        },
-      ]
-
-      return { transfers }
-    }
-    default:
-      return
+  private pairFor(tokenA: string, tokenB: string): string {
+    const [token0, token1] = tokenA < tokenB ? [tokenA, tokenB] : [tokenB, tokenA]
+    const factoryContract = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'
+    const salt = ethers.utils.solidityKeccak256(['address', 'address'], [token0, token1])
+    const initCodeHash = '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f' // https://github.com/Uniswap/v2-periphery/blob/dda62473e2da448bc9cb8f4514dadda4aeede5f4/contracts/libraries/UniswapV2Library.sol#L24
+    return ethers.utils.getCreate2Address(factoryContract, salt, initCodeHash)
   }
 }
