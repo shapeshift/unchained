@@ -70,7 +70,6 @@ export class TransactionParser {
       blockHeight: tx.blockHeight,
       blockTime: tx.blockTime,
       caip2: 'ETH',
-      fee: result?.fee,
       trade: result?.trade,
       transfers: result?.transfers ?? [],
       txid: tx.txid,

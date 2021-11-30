@@ -61,7 +61,6 @@ describe('parseTx', () => {
       const address = '0xCeb660E7623E8f8312B3379Df747c35f2217b595'
       const trade: Trade = {
         dexName: Dex.Thor,
-        //buyAsset: 'THOR.RUNE',
         memo: 'SWAP:THOR.RUNE:thor19f3dsgetxzssvdmqnplfep5fe42fsrvq9u87ax:',
         type: TradeType.Trade,
       }
@@ -101,7 +100,6 @@ describe('parseTx', () => {
       const address = '0x5a8C5afbCC1A58cCbe17542957b587F46828B38E'
       const trade: Trade = {
         dexName: Dex.Thor,
-        //buyAsset: 'THOR.RUNE', // TODO: How to represent?
         memo: 'SWAP:THOR.RUNE:thor1hhjupkzy3t6ccelhz7qw8epyx4rm8a06nlm5ce:110928642111',
         type: TradeType.Trade,
       }
@@ -147,7 +145,6 @@ describe('parseTx', () => {
       const address = '0x5a8C5afbCC1A58cCbe17542957b587F46828B38E'
       const trade: Trade = {
         dexName: Dex.Thor,
-        liquidityFee: '70840351',
         memo: 'OUT:8C859BA50BC2351797F52F954971E1C6BA1F0A77610AC197BD99C4EEC6A3692A',
         type: TradeType.Trade,
       }
@@ -160,19 +157,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'ETH',
         value: tx.value,
-        fee: {
-          caip19: 'ETH',
-          value: '9600000000000000',
-        },
         transfers: [
-          {
-            type: TransferType.Send,
-            from: '',
-            to: '',
-            caip19: 'USDC',
-            totalValue: '4173773898',
-            components: [{ value: '4173773898' }],
-          },
           {
             type: TransferType.Receive,
             from: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
@@ -195,7 +180,6 @@ describe('parseTx', () => {
       const address = '0x5a8C5afbCC1A58cCbe17542957b587F46828B38E'
       const trade: Trade = {
         dexName: Dex.Thor,
-        liquidityFee: '11745645806',
         memo: 'OUT:F3AC4E90AB5951AB9FEB1715B481422B904A40B0F6753CC844E326B1213CF70E',
         type: TradeType.Trade,
       }
@@ -213,19 +197,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'ETH',
         value: tx.value,
-        fee: {
-          caip19: 'USDC',
-          value: '355025526',
-        },
         transfers: [
-          {
-            type: TransferType.Send,
-            from: '',
-            to: '',
-            caip19: 'RUNE',
-            totalValue: '510423341825',
-            components: [{ value: '510423341825' }],
-          },
           {
             type: TransferType.Receive,
             from: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
@@ -261,19 +233,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'ETH',
         value: tx.value,
-        fee: {
-          caip19: 'ETH',
-          value: '7200000000000000',
-        },
         transfers: [
-          {
-            type: TransferType.Send,
-            from: '',
-            to: '',
-            caip19: 'ETH',
-            totalValue: '13612730000000000',
-            components: [{ value: '13612730000000000' }],
-          },
           {
             type: TransferType.Receive,
             from: '0xC145990E84155416144C532E31f89B840Ca8c2cE',

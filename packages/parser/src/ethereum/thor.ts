@@ -63,12 +63,10 @@ export class Parser {
         return
     }
 
-    const [type, ...memo] = result.memo.split(':')
+    const [type] = result.memo.split(':')
 
     // sell side
     if (SWAP_TYPES.includes(type)) {
-      //const [buyAsset] = memo
-
       return {
         trade: {
           dexName: Dex.Thor,
@@ -80,56 +78,23 @@ export class Parser {
 
     // buy side
     if (type === 'OUT') {
-      const { input, fee, liquidityFee } = await this.thorchain.getTxDetails(memo, 'swap')
-
       return {
-        fee: {
-          caip19: fee.asset,
-          value: fee.amount,
-        },
         trade: {
           dexName: Dex.Thor,
           type: TradeType.Trade,
           memo: result.memo,
-          liquidityFee,
         },
-        transfers: [
-          {
-            caip19: input.asset,
-            components: [{ value: input.amount }],
-            from: '', // TODO: do we care?
-            to: '', // TODO: do we care?
-            totalValue: input.amount,
-            type: TransferType.Send,
-          },
-        ],
       }
     }
 
     // trade refund
     if (type === 'REFUND') {
-      const { input, fee } = await this.thorchain.getTxDetails(memo, 'refund')
-
       return {
-        fee: {
-          caip19: fee.asset,
-          value: fee.amount,
-        },
         trade: {
           dexName: Dex.Thor,
           type: TradeType.Refund,
           memo: result.memo,
         },
-        transfers: [
-          {
-            caip19: input.asset,
-            components: [{ value: input.amount }],
-            from: '',
-            to: '',
-            totalValue: input.amount,
-            type: TransferType.Send,
-          },
-        ],
       }
     }
 

@@ -16,8 +16,6 @@ export interface Token {
 
 export interface Trade {
   dexName: Dex
-  fee?: Fee
-  liquidityFee?: string
   memo?: string
   type: TradeType
 }
@@ -55,4 +53,4 @@ export interface Tx {
   value: string
 }
 
-export type TxSpecific = Partial<Pick<Tx, 'fee' | 'trade' | 'transfers'>>
+export type TxSpecific = Partial<Pick<Tx, 'trade' | 'transfers'>>
