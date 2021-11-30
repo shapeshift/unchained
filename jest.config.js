@@ -5,7 +5,9 @@ module.exports = {
   testEnvironment: 'node',
   testPathIgnorePatterns: ['.d.ts', '.js', '__mocks__'],
   moduleNameMapper: {
+    '^@shapeshiftoss\\/caip': '@shapeshiftoss/caip',
     '^@shapeshiftoss\\/logger': '@shapeshiftoss/logger',
+    '^@shapeshiftoss\\/types': '@shapeshiftoss/types',
     '^@shapeshiftoss\\/([^/]+)': '@shapeshiftoss/$1/src',
   },
   setupFiles: ['<rootDir>/.jest/setEnvVars.js'],
