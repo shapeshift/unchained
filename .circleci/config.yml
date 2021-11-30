@@ -42,7 +42,7 @@ aliases:
     rabbit-memory-limit: '4Gi'
     rabbit-storage-size: '100Gi'
     indexer-cpu-limit: '4'
-    indexer-memory-limit: 12Gi
+    indexer-memory-limit: 24Gi
     indexer-replicas: 2
     indexer-storage-size: 500Gi
     indexer-url: http://bitcoin-indexer-svc.unchained.svc.cluster.local:8001
