@@ -1,7 +1,7 @@
 import { ethers } from 'ethers'
 import { Tx } from '@shapeshiftoss/blockbook'
 import { Thorchain } from '@shapeshiftoss/thorchain'
-import { Dex, TxSpecific as ParseTxSpecific, TradeType, TransferType } from '../types'
+import { Dex, TxSpecific as ParseTxSpecific, TradeType } from '../types'
 import { Network } from './types'
 import ABI from './abi/thor'
 import { getSigHash } from './utils'
