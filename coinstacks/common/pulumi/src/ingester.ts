@@ -216,7 +216,7 @@ export async function deployIngester(
             resources: {
               limits: {
                 cpu: config.isLocal ? '0.5' : '1',
-                memory: config.isLocal ? '512M' : '1G',
+                memory: config.isLocal ? '512M' : '2Gi',
               },
             },
             readinessProbe: {
