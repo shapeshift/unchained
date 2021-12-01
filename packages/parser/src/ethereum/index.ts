@@ -1,6 +1,8 @@
 import { BigNumber } from 'bignumber.js'
 import { ethers } from 'ethers'
 import { Tx } from '@shapeshiftoss/blockbook'
+import { caip2, caip19 } from '@shapeshiftoss/caip'
+import { ChainTypes, ContractTypes, NetworkTypes } from '@shapeshiftoss/types'
 import { Tx as ParseTx, TxSpecific as ParseTxSpecific, Token, TransferType, Transfer } from '../types'
 import { InternalTx, Network } from './types'
 import { getSigHash } from './utils'
@@ -25,7 +27,7 @@ export class TransactionParser {
   constructor(args: TransactionParserArgs) {
     const provider = new ethers.providers.JsonRpcProvider(args.rpcUrl)
 
-    this.network = args.network ?? Network.Mainnet
+    this.network = args.network ?? NetworkTypes.MAINNET
 
     this.thor = new thor.Parser({ network: this.network, midgardUrl: args.midgardUrl })
     this.uniV2 = new uniV2.Parser({ network: this.network, provider })
@@ -69,7 +71,7 @@ export class TransactionParser {
       blockHash: tx.blockHash,
       blockHeight: tx.blockHeight,
       blockTime: tx.blockTime,
-      caip2: 'ETH',
+      caip2: caip2.toCAIP2({ chain: ChainTypes.Ethereum, network: this.network }),
       trade: result?.trade,
       transfers: result?.transfers ?? [],
       txid: tx.txid,
@@ -79,11 +81,11 @@ export class TransactionParser {
     if (address === sendAddress) {
       // send amount
       const sendValue = new BigNumber(tx.value)
-      if (!sendValue.isNaN() && sendValue.gt(0)) {
+      if (sendValue.gt(0)) {
         pTx.transfers = this.aggregateTransfer(
           pTx.transfers,
           TransferType.Send,
-          'ETH',
+          caip19.toCAIP19({ chain: ChainTypes.Ethereum, network: this.network }),
           sendAddress,
           receiveAddress,
           sendValue.toString(10)
@@ -92,19 +94,22 @@ export class TransactionParser {
 
       // network fee
       const fees = new BigNumber(tx.fees ?? 0)
-      if (!fees.isNaN() && fees.gt(0)) {
-        pTx.fee = { caip19: 'ETH', value: fees.toString(10) }
+      if (fees.gt(0)) {
+        pTx.fee = {
+          caip19: caip19.toCAIP19({ chain: ChainTypes.Ethereum, network: this.network }),
+          value: fees.toString(10),
+        }
       }
     }
 
     if (address === receiveAddress) {
       // receive amount
       const receiveValue = new BigNumber(tx.value)
-      if (!receiveValue.isNaN() && receiveValue.gt(0)) {
+      if (receiveValue.gt(0)) {
         pTx.transfers = this.aggregateTransfer(
           pTx.transfers,
           TransferType.Receive,
-          'ETH',
+          caip19.toCAIP19({ chain: ChainTypes.Ethereum, network: this.network }),
           sendAddress,
           receiveAddress,
           receiveValue.toString(10)
@@ -125,7 +130,18 @@ export class TransactionParser {
         name: transfer.name,
       }
 
-      const transferArgs = [transfer.symbol, transfer.from, transfer.to, transfer.value, token] as const
+      const transferArgs = [
+        caip19.toCAIP19({
+          chain: ChainTypes.Ethereum,
+          network: this.network,
+          contractType: ContractTypes.ERC20,
+          tokenId: transfer.token,
+        }),
+        transfer.from,
+        transfer.to,
+        transfer.value,
+        token,
+      ] as const
 
       // token send amount
       if (address === transfer.from) {
@@ -139,7 +155,12 @@ export class TransactionParser {
     })
 
     internalTxs?.forEach((internalTx) => {
-      const transferArgs = ['ETH', internalTx.from, internalTx.to, internalTx.value] as const
+      const transferArgs = [
+        caip19.toCAIP19({ chain: ChainTypes.Ethereum, network: this.network }),
+        internalTx.from,
+        internalTx.to,
+        internalTx.value,
+      ] as const
 
       // internal eth send
       if (address === internalTx.from) {
@@ -168,7 +189,7 @@ export class TransactionParser {
     const transfer = transfers?.[index]
 
     if (transfer) {
-      transfer.totalValue = new BigNumber(transfer.totalValue).plus(new BigNumber(value)).toString(10)
+      transfer.totalValue = new BigNumber(transfer.totalValue).plus(value).toString(10)
       transfer.components.push({ value: value })
       transfers[index] = transfer
     } else {

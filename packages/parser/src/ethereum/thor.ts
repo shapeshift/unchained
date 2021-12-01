@@ -30,8 +30,8 @@ export class Parser {
 
     // TODO: Router contract can change, use /inbound_addresses endpoint to determine current router contract
     this.routerContract = {
-      mainnet: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
-      ropsten: '0xefA28233838f46a80AaaC8c309077a9ba70D123A',
+      MAINNET: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
+      ETH_ROPSTEN: '0xefA28233838f46a80AaaC8c309077a9ba70D123A',
     }[args.network]
   }
 
