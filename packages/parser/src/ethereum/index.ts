@@ -81,7 +81,7 @@ export class TransactionParser {
     if (address === sendAddress) {
       // send amount
       const sendValue = new BigNumber(tx.value)
-      if (!sendValue.isNaN() && sendValue.gt(0)) {
+      if (sendValue.gt(0)) {
         pTx.transfers = this.aggregateTransfer(
           pTx.transfers,
           TransferType.Send,
@@ -94,7 +94,7 @@ export class TransactionParser {
 
       // network fee
       const fees = new BigNumber(tx.fees ?? 0)
-      if (!fees.isNaN() && fees.gt(0)) {
+      if (fees.gt(0)) {
         pTx.fee = {
           caip19: caip19.toCAIP19({ chain: ChainTypes.Ethereum, network: this.network }),
           value: fees.toString(10),
@@ -105,7 +105,7 @@ export class TransactionParser {
     if (address === receiveAddress) {
       // receive amount
       const receiveValue = new BigNumber(tx.value)
-      if (!receiveValue.isNaN() && receiveValue.gt(0)) {
+      if (receiveValue.gt(0)) {
         pTx.transfers = this.aggregateTransfer(
           pTx.transfers,
           TransferType.Receive,
@@ -189,7 +189,7 @@ export class TransactionParser {
     const transfer = transfers?.[index]
 
     if (transfer) {
-      transfer.totalValue = new BigNumber(transfer.totalValue).plus(new BigNumber(value)).toString(10)
+      transfer.totalValue = new BigNumber(transfer.totalValue).plus(value).toString(10)
       transfer.components.push({ value: value })
       transfers[index] = transfer
     } else {

@@ -789,7 +789,7 @@ describe('parseTx', () => {
       expect(expected).toEqual(actual)
     })
 
-    it.only('should be able to parse remove liquidity mempool', async () => {
+    it('should be able to parse remove liquidity mempool', async () => {
       const { txMempool } = uniRemoveLiquidity
       const address = '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C'
       const uniV2Token = {
