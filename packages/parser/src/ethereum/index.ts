@@ -185,6 +185,8 @@ export class TransactionParser {
     value: string,
     token?: Token
   ): Array<Transfer> {
+    if (!new BigNumber(value).gt(0)) return transfers
+
     const index = transfers?.findIndex((t) => t.type === type && t.caip19 === caip19 && t.from === from && t.to === to)
     const transfer = transfers?.[index]
 
