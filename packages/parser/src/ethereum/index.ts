@@ -3,13 +3,15 @@ import { ethers } from 'ethers'
 import { Tx } from '@shapeshiftoss/blockbook'
 import { caip2, caip19 } from '@shapeshiftoss/caip'
 import { ChainTypes, ContractTypes, NetworkTypes } from '@shapeshiftoss/types'
-import { Tx as ParseTx, TxSpecific as ParseTxSpecific, Token, TransferType, Transfer } from '../types'
+import { Tx as ParseTx, TxSpecific as ParseTxSpecific, Status, Token, TransferType, Transfer } from '../types'
 import { InternalTx, Network } from './types'
 import { getSigHash } from './utils'
 import * as multiSig from './multiSig'
 import * as thor from './thor'
 import * as uniV2 from './uniV2'
 import * as zrx from './zrx'
+
+export * from './types'
 
 export interface TransactionParserArgs {
   network?: Network
@@ -72,6 +74,8 @@ export class TransactionParser {
       blockHeight: tx.blockHeight,
       blockTime: tx.blockTime,
       caip2: caip2.toCAIP2({ chain: ChainTypes.Ethereum, network: this.network }),
+      confirmations: tx.confirmations,
+      status: this.getStatus(tx),
       trade: result?.trade,
       transfers: result?.transfers ?? [],
       txid: tx.txid,
@@ -175,6 +179,7 @@ export class TransactionParser {
 
     return pTx
   }
+
   // keep track of all individual tx components and add up the total value transferred by to/from address
   private aggregateTransfer(
     transfers: Array<Transfer>,
@@ -199,5 +204,15 @@ export class TransactionParser {
     }
 
     return transfers
+  }
+
+  private getStatus(tx: Tx): Status {
+    const status = tx.ethereumSpecific?.status
+
+    if (status === -1 && tx.confirmations <= 0) return Status.Pending
+    if (status === 1 && tx.confirmations > 0) return Status.Confirmed
+    if (status === 0) return Status.Failed
+
+    return Status.Unknown
   }
 }

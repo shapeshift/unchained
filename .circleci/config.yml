@@ -249,7 +249,7 @@ jobs:
         default: ''
       network:
         type: string
-        default: mainnet
+        default: MAINNET
       pulumi-stack:
         description: pulumi stack to deploy to (public)
         type: string
@@ -347,22 +347,21 @@ jobs:
     executor: pulumi
     steps:
       - setup_remote_docker:
-         version: 20.10.2
+          version: 20.10.2
       - attach_workspace:
-         at: ~/
+          at: ~/
       - pulumi-dependencies
       - run:
-         name: pulumi up
-         working_directory: monitoring
-         command: |
-           pulumi stack select $PULUMI_ORG/prod
-           pulumi config set --path unchained:monitoring.stack $PULUMI_ORG/common/dependencies
-           pulumi config set --path unchained:monitoring.environment monitoring
-           pulumi config set --path unchained:monitoring.githubOrg $GITHUB_ORG
-           pulumi config set --path unchained:monitoring.githubOauthID $GITHUB_OAUTH_ID
-           pulumi config set --path unchained:monitoring.githubOauthSecret $GITHUB_OAUTH_SECRET --plaintext
-           pulumi up -f --yes --suppress-outputs
-
+          name: pulumi up
+          working_directory: monitoring
+          command: |
+            pulumi stack select $PULUMI_ORG/prod
+            pulumi config set --path unchained:monitoring.stack $PULUMI_ORG/common/dependencies
+            pulumi config set --path unchained:monitoring.environment monitoring
+            pulumi config set --path unchained:monitoring.githubOrg $GITHUB_ORG
+            pulumi config set --path unchained:monitoring.githubOauthID $GITHUB_OAUTH_ID
+            pulumi config set --path unchained:monitoring.githubOauthSecret $GITHUB_OAUTH_SECRET --plaintext
+            pulumi up -f --yes --suppress-outputs
 
   lint-and-test:
     description: lint and test project
@@ -450,7 +449,7 @@ workflows:
           name: deploy ethereum-ropsten develop
           <<: *ethereum-ropsten
           environment: dev
-          network: ropsten
+          network: ETH_ROPSTEN
           pulumi-stack: public-dev-ropsten
           broker-url: ethereum-ropsten-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
           mongo-replicas: 2

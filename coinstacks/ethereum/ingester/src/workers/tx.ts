@@ -1,23 +1,29 @@
 import axios from 'axios'
 import { utils } from 'ethers'
 import { Blockbook, Tx } from '@shapeshiftoss/blockbook'
+import { ethereum } from '@shapeshiftoss/unchained-tx-parser'
 import { Message, Worker } from '@shapeshiftoss/common-ingester'
 import { RegistryService } from '@shapeshiftoss/common-mongo'
 import { logger } from '../logger'
 import { ETHSyncTx, EtherscanApiResponse, InternalTx, InternalTxHistory, TxHistory } from '../types'
-import { getInternalAddress } from '../parseTx'
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
+const MIDGARD_URL = process.env.MIDGARD_URL
 const MONGO_DBNAME = process.env.MONGO_DBNAME
 const MONGO_URL = process.env.MONGO_URL
+const NETWORK = process.env.NETWORK
+const RPC_URL = process.env.RPC_URL
 
 if (!ETHERSCAN_API_KEY) throw new Error('ETHERSCAN_API_KEY env var not set')
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
+if (!MIDGARD_URL) throw new Error('MIDGARD_URL env var not set')
 if (!MONGO_DBNAME) throw new Error('MONGO_DBNAME env var not set')
 if (!MONGO_URL) throw new Error('MONGO_URL env var not set')
+if (!NETWORK) throw new Error('NETWORK env var not set')
+if (!RPC_URL) throw new Error('RPC_URL env var not set')
 
 const POOL_SIZE = 100
 const PAGE_SIZE = 1000
@@ -26,6 +32,11 @@ const SYNC_TIMEOUT = 1000 * 60 * 5
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 const registry = new RegistryService(MONGO_URL, MONGO_DBNAME, POOL_SIZE)
+const parser = new ethereum.TransactionParser({
+  midgardUrl: MIDGARD_URL,
+  rpcUrl: RPC_URL,
+  network: NETWORK as ethereum.Network,
+})
 
 const moduleLogger = logger.child({ namespace: ['workers', 'tx'] })
 
@@ -56,7 +67,7 @@ const getAddresses = (tx: Tx): Array<string> => {
 
   // detect internal address for contract methods we care about (TODO: detect all internal addresses)
   if (tx.ethereumSpecific?.data) {
-    const internalAddress = getInternalAddress(tx.ethereumSpecific?.data)
+    const internalAddress = parser.getInternalAddress(tx.ethereumSpecific?.data)
     internalAddress && addresses.push(internalAddress)
   }
 
