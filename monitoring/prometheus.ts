@@ -69,12 +69,12 @@ export class Deployment extends k8s.helm.v3.Chart {
             },
             resources: {
               limits: {
-                cpu: '1',
-                memory: '2Gi',
+                cpu: '2',
+                memory: '8Gi',
               },
               requests: {
-                cpu: '1',
-                memory: '2Gi',
+                cpu: '2',
+                memory: '8Gi',
               },
             },
           },

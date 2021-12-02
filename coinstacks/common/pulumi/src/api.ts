@@ -280,7 +280,7 @@ export async function deployApi(
       },
       spec: {
         selector: { matchLabels: labels },
-        replicas: 1,
+        replicas: 2,
         template: podSpec,
       },
     },
