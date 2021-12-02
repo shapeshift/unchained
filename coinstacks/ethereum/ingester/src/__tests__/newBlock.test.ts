@@ -1,6 +1,6 @@
 import { Worker } from '@shapeshiftoss/common-ingester'
 import { handleReorg } from '../workers/newBlock'
-import { db, node } from './__mocks__/reorg'
+import { db, node } from './mockData/reorg'
 
 const sendMessageMock = jest.fn()
 jest.mock('@shapeshiftoss/common-ingester', () => ({

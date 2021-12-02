@@ -1,1 +1,1 @@
-process.env.NETWORK = 'mainnet'
+process.env.NETWORK = 'MAINNET'

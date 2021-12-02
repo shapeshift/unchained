@@ -1,6 +1,6 @@
 import { Worker } from '@shapeshiftoss/common-ingester'
 import { syncAddressIfRegistered } from '../workers/tx'
-import { blockbookTxHistory, db, tx } from './__mocks__/tx'
+import { blockbookTxHistory, db, tx } from './mockData/tx'
 
 const sendMessageMock = jest.fn()
 jest.mock('@shapeshiftoss/common-ingester', () => ({

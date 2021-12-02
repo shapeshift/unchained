@@ -1,23 +1,23 @@
-import { Dex, Tx, Trade, TradeType, TransferType } from '../../types'
+import { Dex, Status, Tx, Trade, TradeType, TransferType } from '../../types'
 import { TransactionParser } from '../index'
-import multiSigSendEth from './__mocks__/multiSigSendEth'
-import thorSwapDepositEth from './__mocks__/thorSwapDepositEth'
-import thorSwapDepositUsdc from './__mocks__/thorSwapDepositUsdc'
-import thorSwapTransferOutEth from './__mocks__/thorSwapTransferOutEth'
-import thorSwapTransferOutUsdc from './__mocks__/thorSwapTransferOutUsdc'
-import thorSwapRefundEth from './__mocks__/thorSwapRefundEth'
-import zrxTradeBondToUni from './__mocks__/zrxTradeBondToUni'
-import zrxTradeEthToMatic from './__mocks__/zrxTradeEthToMatic'
-import zrxTradeTetherToKishu from './__mocks__/zrxTradeTetherToKishu'
-import zrxTradeTribeToEth from './__mocks__/zrxTradeTribeToEth'
-import ethSelfSend from './__mocks__/ethSelfSend'
-import tokenSelfSend from './__mocks__/tokenSelfSend'
-import uniApprove from './__mocks__/uniApprove'
-import uniAddLiquidity from './__mocks__/uniAddLiquidity'
-import uniRemoveLiquidity from './__mocks__/uniRemoveLiquidity'
-import foxClaim from './__mocks__/foxClaim'
-import foxStake from './__mocks__/foxStake'
-import foxExit from './__mocks__/foxExit'
+import multiSigSendEth from './mockData/multiSigSendEth'
+import thorSwapDepositEth from './mockData/thorSwapDepositEth'
+import thorSwapDepositUsdc from './mockData/thorSwapDepositUsdc'
+import thorSwapTransferOutEth from './mockData/thorSwapTransferOutEth'
+import thorSwapTransferOutUsdc from './mockData/thorSwapTransferOutUsdc'
+import thorSwapRefundEth from './mockData/thorSwapRefundEth'
+import zrxTradeBondToUni from './mockData/zrxTradeBondToUni'
+import zrxTradeEthToMatic from './mockData/zrxTradeEthToMatic'
+import zrxTradeTetherToKishu from './mockData/zrxTradeTetherToKishu'
+import zrxTradeTribeToEth from './mockData/zrxTradeTribeToEth'
+import ethSelfSend from './mockData/ethSelfSend'
+import tokenSelfSend from './mockData/tokenSelfSend'
+import uniApprove from './mockData/uniApprove'
+import uniAddLiquidity from './mockData/uniAddLiquidity'
+import uniRemoveLiquidity from './mockData/uniRemoveLiquidity'
+import foxClaim from './mockData/foxClaim'
+import foxStake from './mockData/foxStake'
+import foxExit from './mockData/foxExit'
 
 jest.mock('@shapeshiftoss/thorchain')
 
@@ -36,7 +36,9 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        confirmations: tx.confirmations,
         value: tx.value,
+        status: Status.Confirmed,
         transfers: [
           {
             type: TransferType.Receive,
@@ -72,7 +74,9 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        confirmations: tx.confirmations,
         value: tx.value,
+        status: Status.Confirmed,
         fee: {
           caip19: 'eip155:1/slip44:60',
           value: '1700235000000000',
@@ -116,7 +120,9 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        confirmations: tx.confirmations,
         value: tx.value,
+        status: Status.Confirmed,
         fee: {
           caip19: 'eip155:1/slip44:60',
           value: '4700280000000000',
@@ -156,7 +162,9 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        confirmations: tx.confirmations,
         value: tx.value,
+        status: Status.Confirmed,
         transfers: [
           {
             type: TransferType.Receive,
@@ -196,7 +204,9 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        confirmations: tx.confirmations,
         value: tx.value,
+        status: Status.Confirmed,
         transfers: [
           {
             type: TransferType.Receive,
@@ -232,7 +242,9 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        confirmations: tx.confirmations,
         value: tx.value,
+        status: Status.Confirmed,
         transfers: [
           {
             type: TransferType.Receive,
@@ -273,7 +285,9 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        confirmations: tx.confirmations,
         value: tx.value,
+        status: Status.Confirmed,
         fee: {
           value: '8308480000000000',
           caip19: 'eip155:1/slip44:60',
@@ -325,7 +339,9 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        confirmations: tx.confirmations,
         value: tx.value,
+        status: Status.Confirmed,
         fee: {
           value: '19815285000000000',
           caip19: 'eip155:1/slip44:60',
@@ -382,7 +398,9 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        confirmations: tx.confirmations,
         value: tx.value,
+        status: Status.Confirmed,
         fee: {
           value: '78183644000000000',
           caip19: 'eip155:1/slip44:60',
@@ -440,7 +458,9 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        confirmations: tx.confirmations,
         value: tx.value,
+        status: Status.Confirmed,
         fee: {
           value: '18399681000000000',
           caip19: 'eip155:1/slip44:60',
@@ -503,7 +523,9 @@ describe('parseTx', () => {
         blockTime: txMempool.blockTime,
         address: address,
         caip2: 'eip155:1',
+        confirmations: txMempool.confirmations,
         value: txMempool.value,
+        status: Status.Pending,
         transfers: [
           {
             type: TransferType.Send,
@@ -540,7 +562,9 @@ describe('parseTx', () => {
         blockTime: tx.blockTime,
         address: address,
         caip2: 'eip155:1',
+        confirmations: tx.confirmations,
         value: tx.value,
+        status: Status.Confirmed,
         fee: {
           value: '399000000000000',
           caip19: 'eip155:1/slip44:60',
@@ -585,7 +609,9 @@ describe('parseTx', () => {
         blockTime: txMempool.blockTime,
         address: address,
         caip2: 'eip155:1',
+        confirmations: txMempool.confirmations,
         value: txMempool.value,
+        status: Status.Pending,
         transfers: [
           {
             type: TransferType.Send,
@@ -629,7 +655,9 @@ describe('parseTx', () => {
         blockTime: tx.blockTime,
         address: address,
         caip2: 'eip155:1',
+        confirmations: tx.confirmations,
         value: tx.value,
+        status: Status.Confirmed,
         fee: {
           value: '1011738000000000',
           caip19: 'eip155:1/slip44:60',
@@ -674,7 +702,9 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        confirmations: tx.confirmations,
         value: tx.value,
+        status: Status.Confirmed,
         fee: {
           value: '1447243200000000',
           caip19: 'eip155:1/slip44:60',
@@ -697,7 +727,9 @@ describe('parseTx', () => {
         blockTime: txMempool.blockTime,
         address: address,
         caip2: 'eip155:1',
+        confirmations: txMempool.confirmations,
         value: txMempool.value,
+        status: Status.Pending,
         transfers: [
           {
             type: TransferType.Send,
@@ -749,7 +781,9 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        confirmations: tx.confirmations,
         value: tx.value,
+        status: Status.Confirmed,
         fee: {
           value: '26926494400000000',
           caip19: 'eip155:1/slip44:60',
@@ -804,7 +838,9 @@ describe('parseTx', () => {
         blockTime: txMempool.blockTime,
         address: address,
         caip2: 'eip155:1',
+        confirmations: txMempool.confirmations,
         value: txMempool.value,
+        status: Status.Pending,
         transfers: [
           {
             type: TransferType.Send,
@@ -844,7 +880,9 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        confirmations: tx.confirmations,
         value: tx.value,
+        status: Status.Confirmed,
         fee: {
           value: '4082585000000000',
           caip19: 'eip155:1/slip44:60',
@@ -902,7 +940,9 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        confirmations: tx.confirmations,
         value: tx.value,
+        status: Status.Confirmed,
         fee: {
           value: '2559843000000000',
           caip19: 'eip155:1/slip44:60',
@@ -936,7 +976,9 @@ describe('parseTx', () => {
         blockTime: txMempool.blockTime,
         address: address,
         caip2: 'eip155:1',
+        confirmations: txMempool.confirmations,
         value: txMempool.value,
+        status: Status.Pending,
         transfers: [],
       }
 
@@ -961,7 +1003,9 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        confirmations: tx.confirmations,
         value: tx.value,
+        status: Status.Confirmed,
         fee: {
           value: '4650509500000000',
           caip19: 'eip155:1/slip44:60',
@@ -994,7 +1038,9 @@ describe('parseTx', () => {
         blockTime: txMempool.blockTime,
         address: address,
         caip2: 'eip155:1',
+        confirmations: txMempool.confirmations,
         value: txMempool.value,
+        status: Status.Pending,
         transfers: [],
       }
 
@@ -1024,7 +1070,9 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        confirmations: tx.confirmations,
         value: tx.value,
+        status: Status.Confirmed,
         fee: {
           value: '6136186875000000',
           caip19: 'eip155:1/slip44:60',
