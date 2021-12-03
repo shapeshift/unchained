@@ -6,11 +6,10 @@ import { Account } from '../../../common/api/src'
  */
 export interface Token {
   balance: string
-  contract: string
+  caip19: string
   decimals: number
   name: string
   symbol: string
-  type: string
 }
 
 /**

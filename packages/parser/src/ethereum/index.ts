@@ -129,7 +129,6 @@ export class TransactionParser {
       }
 
       const token: Token = {
-        contract: transfer.token,
         decimals: transfer.decimals,
         name: transfer.name,
         symbol: transfer.symbol,

@@ -68,7 +68,7 @@ export class Parser {
             }),
             totalValue: value,
             components: [{ value }],
-            token: { contract: tokenAddress, decimals, name, symbol },
+            token: { decimals, name, symbol },
           },
         ]
 
@@ -98,7 +98,7 @@ export class Parser {
             }),
             totalValue: value,
             components: [{ value }],
-            token: { contract: lpTokenAddress, decimals, name, symbol },
+            token: { decimals, name, symbol },
           },
         ]
 

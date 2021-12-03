@@ -2,6 +2,8 @@ import { ethers } from 'ethers'
 import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import { TransactionRequest } from '@ethersproject/abstract-provider'
 import { Blockbook } from '@shapeshiftoss/blockbook'
+import { caip2, caip19 } from '@shapeshiftoss/caip'
+import { ChainTypes, ContractTypes, NetworkTypes } from '@shapeshiftoss/types'
 import {
   ApiError,
   BadRequestError,
@@ -16,10 +18,12 @@ import { EthereumAPI, EthereumAccount, Token } from './models'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
+const NETWORK = process.env.NETWORK
 const RPC_URL = process.env.RPC_URL
 
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
+if (!NETWORK) throw new Error('NETWORK env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
@@ -39,16 +43,16 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
    */
   @Example<EthereumAccount>({
     balance: '284809805024198107',
+    caip2: 'eip155:1',
     nonce: 1,
     pubkey: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
     tokens: [
       {
         balance: '1337',
-        contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
+        caip19: 'eip155:1/erc20:0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
         decimals: 18,
         name: 'FOX',
         symbol: 'FOX',
-        type: 'ERC20',
       },
     ],
   })
@@ -64,11 +68,15 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
         if (token.balance && token.contract && token.decimals && token.symbol) {
           prev.push({
             balance: token.balance,
-            contract: token.contract,
+            caip19: caip19.toCAIP19({
+              chain: ChainTypes.Ethereum,
+              network: NETWORK as NetworkTypes,
+              contractType: ContractTypes.ERC20,
+              tokenId: token.contract,
+            }),
             decimals: token.decimals,
             name: token.name,
             symbol: token.symbol,
-            type: token.type,
           })
         }
 
@@ -77,6 +85,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
 
       return {
         balance: data.balance,
+        caip2: caip2.toCAIP2({ chain: ChainTypes.Ethereum, network: NETWORK as NetworkTypes }),
         nonce: Number(data.nonce ?? 0),
         pubkey: data.address,
         tokens,

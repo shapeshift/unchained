@@ -32,6 +32,7 @@ export interface InternalServerError {
  */
 export interface Account {
   balance: string
+  caip2: string
   pubkey: string
 }
 

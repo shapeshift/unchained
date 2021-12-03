@@ -1,5 +1,7 @@
 import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import { Address, Blockbook, Xpub } from '@shapeshiftoss/blockbook'
+import { caip2, caip19 } from '@shapeshiftoss/caip'
+import { ChainTypes, NetworkTypes } from '@shapeshiftoss/types'
 import {
   ApiError,
   BadRequestError,
@@ -10,14 +12,23 @@ import {
   TxHistory,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { BitcoinAPI, BitcoinAccount, BitcoinTxSpecific, BTCNetworkFee, BTCNetworkFees, Utxo } from './models'
-import { Account } from '@shapeshiftoss/common-api'
+import {
+  Address as BitcoinAddress,
+  BitcoinAPI,
+  BitcoinAccount,
+  BitcoinTxSpecific,
+  BTCNetworkFee,
+  BTCNetworkFees,
+  Utxo,
+} from './models'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
+const NETWORK = process.env.NETWORK
 
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
+if (!NETWORK) throw new Error('NETWORK env var not set')
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 
@@ -43,14 +54,22 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
    * @example pubkey "xpub6CUGRUonZSQ4TWtTMmzXdrXDtypWKiKrhko4egpiMZbpiaQL2jkwSB1icqYh2cfDfVxdx4df189oLKnC5fSwqPfgyP3hooxujYzAu3fDVmz"
    */
   @Example<BitcoinAccount>({
-    pubkey: '336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU',
     balance: '974652',
+    caip2: 'bip122:000000000019d6689c085ae165831e93',
+    pubkey: '336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU',
   })
   @Example<BitcoinAccount>({
     pubkey:
       'xpub6CUGRUonZSQ4TWtTMmzXdrXDtypWKiKrhko4egpiMZbpiaQL2jkwSB1icqYh2cfDfVxdx4df189oLKnC5fSwqPfgyP3hooxujYzAu3fDVmz',
     balance: '12688908',
-    addresses: [{ pubkey: '1EfgV2Hr5CDjXPavHDpDMjmU33BA2veHy6', balance: '10665' }],
+    caip2: 'bip122:000000000019d6689c085ae165831e93',
+    addresses: [
+      {
+        balance: '10665',
+        caip19: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
+        pubkey: '1EfgV2Hr5CDjXPavHDpDMjmU33BA2veHy6',
+      },
+    ],
     nextReceiveAddressIndex: 0,
     nextChangeAddressIndex: 0,
   })
@@ -68,8 +87,9 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
       }
 
       // list of all used addresses with additional derived addresses up to gap limit of 20, including any detected balances
-      const addresses = (data.tokens ?? []).map<Account>((token) => ({
+      const addresses = (data.tokens ?? []).map<BitcoinAddress>((token) => ({
         balance: token.balance ?? '0',
+        caip19: caip19.toCAIP19({ chain: ChainTypes.Bitcoin, network: NETWORK as NetworkTypes }),
         pubkey: token.name,
       }))
 
@@ -92,6 +112,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
       return {
         pubkey: data.address,
         balance: data.balance,
+        caip2: caip2.toCAIP2({ chain: ChainTypes.Bitcoin, network: NETWORK as NetworkTypes }),
         addresses,
         nextReceiveAddressIndex: nextAddressIndexes[0] ?? 0,
         nextChangeAddressIndex: nextAddressIndexes[1] ?? 0,
