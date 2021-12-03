@@ -52,6 +52,7 @@ export class Parser {
         const contract = new ethers.Contract(tokenAddress, ERC20_ABI, this.provider)
         const decimals = await contract.decimals()
         const name = await contract.name()
+        const symbol = await contract.symbol()
         const value = result.amountTokenDesired.toString()
 
         const transfers: Array<Transfer> = [
@@ -67,7 +68,7 @@ export class Parser {
             }),
             totalValue: value,
             components: [{ value }],
-            token: { contract: tokenAddress, decimals, name },
+            token: { contract: tokenAddress, decimals, name, symbol },
           },
         ]
 
@@ -81,6 +82,7 @@ export class Parser {
         const contract = new ethers.Contract(lpTokenAddress, ERC20_ABI, this.provider)
         const decimals = await contract.decimals()
         const name = await contract.name()
+        const symbol = await contract.symbol()
         const value = result.liquidity.toString()
 
         const transfers: Array<Transfer> = [
@@ -96,7 +98,7 @@ export class Parser {
             }),
             totalValue: value,
             components: [{ value }],
-            token: { contract: lpTokenAddress, decimals, name },
+            token: { contract: lpTokenAddress, decimals, name, symbol },
           },
         ]
 

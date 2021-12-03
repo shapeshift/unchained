@@ -2,7 +2,7 @@
   "name": "@shapeshiftoss/bitcoin-api",
   "version": "3.7.0",
   "license": "MIT",
-  "private": "true",
+  "private": true,
   "files": [
     "dist"
   ],

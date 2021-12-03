@@ -8,11 +8,10 @@ const BROKER_URI = process.env.BROKER_URI as string
 
 if (!BROKER_URI) throw new Error('BROKER_URI env var not set')
 
-export type Topics = 'txs'
-
-export interface TxsTopicData {
-  topic: 'txs'
-  addresses: Array<string>
+export interface RequestPayload {
+  subscriptionId: string
+  method: 'subscribe' | 'unsubscribe' | 'ping'
+  data?: TxsTopicData
 }
 
 export interface ErrorResponse {
@@ -21,17 +20,18 @@ export interface ErrorResponse {
   message: string
 }
 
-export interface Methods {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  subscribe: (subscriptionId: string, data: any) => Promise<void>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  unsubscribe: (subscriptionId: string, data: any) => void
+export type Topics = 'txs'
+
+export interface TxsTopicData {
+  topic: 'txs'
+  addresses: Array<string>
 }
 
-export interface RequestPayload {
-  subscriptionId: string
-  method: 'subscribe' | 'unsubscribe' | 'ping'
-  data?: TxsTopicData
+export interface Methods {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  subscribe: (subscriptionId: string, data?: any) => Promise<void>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  unsubscribe: (subscriptionId: string, data?: any) => void
 }
 
 export class ConnectionHandler {

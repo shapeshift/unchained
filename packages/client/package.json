@@ -16,13 +16,13 @@
   },
   "dependencies": {
     "@shapeshiftoss/blockbook": "^3.7.0",
-    "@shapeshiftoss/common-api": "^3.7.0",
     "@shapeshiftoss/unchained-tx-parser": "^3.0.0",
     "isomorphic-ws": "^4.0.1",
     "ws": "^8.3.0"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.4.4",
+    "@shapeshiftoss/common-api": "^3.7.0",
     "@types/ws": "^8.2.1"
   }
 }
