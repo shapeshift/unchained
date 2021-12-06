@@ -14,28 +14,36 @@ config:
     ## additionalEnvironments - is used to create additional environments inside of new namespaces
     ## by default 1 namespace is always created 'unchained'. However, if there are any additionalEnvironments it will create namepspaces per `unchained-<environment>`
     ## ie. 'unchained-dev'
+    ## only enable the monitoring environment if you plan on deploying the monitoring stack (../monitoring)
     #additionalEnvironments:
     #  - dev
+    #  - monitoring
 
     ## eks - configuration for eks cluster
     #eks:
     #  # allAzs - if true, will deploy to all AZs in specified region, otherwise deploys to 2 AZs which is the minimum required by EKS
     #  allAZs: false
     #  # autoscaling - if enabled will create a cluster autoscaler deployment (https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler)
-    #  autoscaling:
-    #    enabled: false
-    #    # min/max instances per availability zone, if using 3 AZ's this cluster would have min 3 max 9 instances 
-    #    minInstances: 1
-    #    maxInstances: 3
+    #  autoscaling: false
     #  # cidrBlock - private subnet cidrRange for the VPC
     #  cidrBlock: '10.0.0.0/16'
     #  # email - email address to be associated with the ACME account. This field is optional, but it is strongly recommended to be set. It will be used to contact you in case of issues with your account or certificates, including expiry notification emails.
     #  email:
     #  # instanceTypes - list of instance types for the kublets (https://aws.amazon.com/ec2/spot/pricing/)
-    #  instanceTypes:
-    #    - 't3.small'
-    #    - 't3.medium'
-    #    - 't3.large'
+    # # nodeGroup - list of Managed Node Groups to create for the cluster, use nodeSelectors to target workloads, node labels will be 'nodeGroup':`${nodeGroups.name}`
+    # # https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+    # #
+    # # We recommend SPOT instances because they're cheap! Ensure you use instanceTypes that are more likely to be available in your region
+    # # https://aws.amazon.com/ec2/spot/instance-advisor/
+    #  nodeGroups:
+    #   - name: 'spot'
+    #     type: 'SPOT'
+    #     desired: 1
+    #     minSize: 1
+    #     maxSize: 3
+    #     instanceTypes:
+    #       - 't3.large'
+    #       - 't3a.large'
     #  # logging - if enabled, a PLG (Promtail, Loki, Grafana) stack will be deployed
     #  logging:
     #    enabled: false
@@ -52,8 +60,6 @@ config:
     #      promtail:
     #        cpu: '100m'
     #        memory: '128Mi'
-    #  # numInstancesPerAZ - the number of desired instances to run in each AZ, if autoscaling is enabled ensure this value is within the bounds of min/max instances per AZ
-    #  numInstancesPerAZ: 1
     #  # profile - local profile to use as configured in ~/.aws/credentials file
     #  profile: 'default'
     #  # region - aws region to deploy the stack to
