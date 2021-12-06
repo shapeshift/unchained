@@ -1,0 +1,32 @@
+version: '3.6'
+
+x-env: &env
+  BROKER_URI: amqp://guest:guest@rabbitmq:5672
+  MONGO_URL: mongodb://mongo:27017
+
+services:
+  api:
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.ethereum-api.rule=Host(`api.ethereum.localhost`)'
+      - 'traefik.http.services.ethereum-api.loadbalancer.server.port=3000'
+    image: unchained-local
+    env_file: .env
+    environment:
+      <<: *env
+    working_dir: /app/coinstacks/ethereum/api
+    command: yarn nodemon
+    volumes:
+      - ../..:/app
+  mongo:
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.ethereum-mongo.rule=Host(`mongo.ethereum.localhost`)'
+      - 'traefik.http.services.ethereum-mongo.loadbalancer.server.port=27017'
+    image: mongo:4.2.8
+    logging:
+      driver: none
+    volumes:
+      - mongodb:/data/db
+volumes:
+  mongodb:
