@@ -11,6 +11,7 @@ const SWAP_TYPES = ['SWAP', '=', 's']
 export interface ParserArgs {
   midgardUrl: string
   network: Network
+  rpcUrl: string
 }
 
 export class Parser {
@@ -23,7 +24,7 @@ export class Parser {
 
   constructor(args: ParserArgs) {
     this.abiInterface = new ethers.utils.Interface(ABI)
-    this.thorchain = new Thorchain({ midgardUrl: args.midgardUrl })
+    this.thorchain = new Thorchain({ midgardUrl: args.midgardUrl, rpcUrl: args.rpcUrl })
 
     this.depositSigHash = this.abiInterface.getSighash('deposit')
     this.transferOutSigHash = this.abiInterface.getSighash('transferOut')

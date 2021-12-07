@@ -6,15 +6,6 @@ import { ActionType, Precision, Network, ThorchainArgs, TxDetails, Value } from 
 
 export * as Thornode from './generated/thornode'
 
-const NODE_ENV = process.env.NODE_ENV
-const RPC_URL = process.env.RPC_URL as string
-
-if (NODE_ENV !== 'test') {
-  if (!RPC_URL) throw new Error('RPC_URL env var not set')
-}
-
-const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
-
 const precision: Precision = {
   BCH: 8,
   BTC: 8,
@@ -33,6 +24,7 @@ const isNetworkSupported = (network: string): network is Network => {
 
 export class Thorchain {
   private midgard: DefaultApi
+  private provider?: ethers.providers.JsonRpcProvider
 
   constructor(args: ThorchainArgs) {
     const midgardConfig = new Configuration({
@@ -43,6 +35,7 @@ export class Thorchain {
     })
 
     this.midgard = new DefaultApi(midgardConfig)
+    this.provider = new ethers.providers.JsonRpcProvider(args.rpcUrl)
   }
 
   // NOTE: contract precision is static and can be saved to prevent the need to always look up on chain
@@ -57,7 +50,7 @@ export class Thorchain {
       // contract address is all uppercase resulting in 0X prefix which ethers doesn't like
       // lower case contract address and call getAddress to verify and convert to checksum format
       const address = ethers.utils.getAddress(contractAddress.toLowerCase())
-      const contract = new ethers.Contract(address, ABI, provider)
+      const contract = new ethers.Contract(address, ABI, this.provider)
       nativePrecision = await contract.decimals()
     }
 
