@@ -21,29 +21,31 @@ export class Deployment extends k8s.helm.v3.Chart {
         values: {
           // Config files
           //If alerting is true, provide OpsGenie integration configuration
-          alertmanagerFiles: args.alerting ? {
-            'alertmanager.yml': {
-              receivers: [
-                {
-                  name: 'opsgenie',
-                  opsgenie_configs: [
+          alertmanagerFiles: args.alerting
+            ? {
+                'alertmanager.yml': {
+                  receivers: [
                     {
-                      api_key: args.opsgenieApiKey,
-                      responders: [
+                      name: 'opsgenie',
+                      opsgenie_configs: [
                         {
-                          type: 'team',
-                          name: 'Unchained',
+                          api_key: args.opsgenieApiKey,
+                          responders: [
+                            {
+                              type: 'team',
+                              name: 'Unchained',
+                            },
+                          ],
                         },
                       ],
                     },
                   ],
-                }
-              ],
-              route: {
-                receiver: 'opsgenie',
-              },
-            },
-          }: {},
+                  route: {
+                    receiver: 'opsgenie',
+                  },
+                },
+              }
+            : {},
           serverFiles: {
             'alerting_rules.yml': {
               groups: [
@@ -71,7 +73,8 @@ export class Deployment extends k8s.helm.v3.Chart {
                       },
                       annotations: {
                         summary: 'Prometheus target missing (instance {{$labels.instance }}',
-                        description: 'A Prometheus target has disappeared VALUE = {{ $value }} -- LABELS = {{ $labels }}',
+                        description:
+                          'A Prometheus target has disappeared VALUE = {{ $value }} -- LABELS = {{ $labels }}',
                       },
                     },
                   ],
@@ -88,8 +91,9 @@ export class Deployment extends k8s.helm.v3.Chart {
                       },
                       annotations: {
                         summary: 'Kubernetes Node ready (instance {{ $labels.instance}})',
-                        description: '"Node {{ $labels.node }} has been unready for a long time VALUE = {{ $value }} LABELS = {{ $labels }}"'
-                      }
+                        description:
+                          '"Node {{ $labels.node }} has been unready for a long time VALUE = {{ $value }} LABELS = {{ $labels }}"',
+                      },
                     },
                     {
                       alert: 'KubernetesMemoryPressure',
@@ -100,8 +104,9 @@ export class Deployment extends k8s.helm.v3.Chart {
                       },
                       annotations: {
                         summary: 'Kubernetes memory pressure (instance {{ $labels.instance }})',
-                        description: '"{{ $labels.node }} has MemoryPressure condition\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
-                      }
+                        description:
+                          '"{{ $labels.node }} has MemoryPressure condition\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"',
+                      },
                     },
                     {
                       alert: 'KubernetesDiskPressure',
@@ -112,32 +117,37 @@ export class Deployment extends k8s.helm.v3.Chart {
                       },
                       annotations: {
                         summary: 'Kubernetes disk pressure (instance {{ $labels.instance }})',
-                        description: '"{{ $labels.node }} has DiskPressure condition\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
-                      }
+                        description:
+                          '"{{ $labels.node }} has DiskPressure condition\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"',
+                      },
                     },
                     {
                       alert: 'KubernetesOutOfCapacity',
-                      expr: 'sum by (node) ((kube_pod_status_phase{phase="Running"} == 1) + on(uid) group_left(node) (0 * kube_pod_info{pod_template_hash=""})) / sum by (node) (kube_node_status_allocatable{resource="pods"}) * 100 > 90',
+                      expr:
+                        'sum by (node) ((kube_pod_status_phase{phase="Running"} == 1) + on(uid) group_left(node) (0 * kube_pod_info{pod_template_hash=""})) / sum by (node) (kube_node_status_allocatable{resource="pods"}) * 100 > 90',
                       for: '2m',
                       labels: {
                         severity: 'warning',
                       },
                       annotations: {
                         summary: 'Kubernetes out of capacity (instance {{ $labels.instance }})',
-                        description: '"{{ $labels.node }} is out of capacity\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
-                      }
+                        description:
+                          '"{{ $labels.node }} is out of capacity\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"',
+                      },
                     },
                     {
                       alert: 'KubernetesContainerOomKiller',
-                      expr: '(kube_pod_container_status_restarts_total - kube_pod_container_status_restarts_total offset 10m >= 1) and ignoring (reason) min_over_time(kube_pod_container_status_last_terminated_reason{reason="OOMKilled"}[10m]) == 1',
+                      expr:
+                        '(kube_pod_container_status_restarts_total - kube_pod_container_status_restarts_total offset 10m >= 1) and ignoring (reason) min_over_time(kube_pod_container_status_last_terminated_reason{reason="OOMKilled"}[10m]) == 1',
                       for: '0m',
                       labels: {
                         severity: 'warning',
                       },
                       annotations: {
                         summary: 'Kubernetes container oom killer (pod {{ $labels.pod }})',
-                        description: '"Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} has been OOMKilled {{ $value }} times in the last 10 minutes.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
-                      }
+                        description:
+                          '"Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} has been OOMKilled {{ $value }} times in the last 10 minutes.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"',
+                      },
                     },
                     {
                       alert: 'KubernetesVolumeOutOfDiskSpace',
@@ -148,8 +158,9 @@ export class Deployment extends k8s.helm.v3.Chart {
                       },
                       annotations: {
                         summary: 'Kubernetes Volume out of disk space (instance {{ $labels.instance }})',
-                        description: '"Volume is almost full (< 10% left)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
-                      }
+                        description:
+                          '"Volume is almost full (< 10% left)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"',
+                      },
                     },
                     {
                       alert: 'KubernetesPersistentvolumeclaimPending',
@@ -160,8 +171,9 @@ export class Deployment extends k8s.helm.v3.Chart {
                       },
                       annotations: {
                         summary: 'Kubernetes PersistentVolumeClaim pending (instance {{ $labels.instance }})',
-                        description: '"PersistentVolumeClaim {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is pending\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
-                      }
+                        description:
+                          '"PersistentVolumeClaim {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is pending\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"',
+                      },
                     },
                     {
                       alert: 'KubernetesPersistentvolumeError',
@@ -172,8 +184,9 @@ export class Deployment extends k8s.helm.v3.Chart {
                       },
                       annotations: {
                         summary: 'Kubernetes PersistentVolume error (instance {{ $labels.instance }})',
-                        description: '"Persistent volume is in bad state\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
-                      }
+                        description:
+                          '"Persistent volume is in bad state\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"',
+                      },
                     },
                     {
                       alert: 'KubernetesStatefulsetDown',
@@ -184,8 +197,8 @@ export class Deployment extends k8s.helm.v3.Chart {
                       },
                       annotations: {
                         summary: 'Kubernetes StatefulSet down (statefulset {{ $labels.statefulset }})',
-                        description: '"A StatefulSet went down\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
-                      }
+                        description: '"A StatefulSet went down\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"',
+                      },
                     },
                     {
                       alert: 'KubernetesReplicassetMismatch',
@@ -196,20 +209,22 @@ export class Deployment extends k8s.helm.v3.Chart {
                       },
                       annotations: {
                         summary: 'Kubernetes ReplicasSet mismatch (replicaset {{ $labels.replicaset }})',
-                        description: '"Deployment Replicas mismatch\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
-                      }
+                        description: '"Deployment Replicas mismatch\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"',
+                      },
                     },
                     {
                       alert: 'KubernetesPodNotHealthy',
-                      expr: 'min_over_time(sum by (namespace, pod) (kube_pod_status_phase{phase=~"Pending|Unknown|Failed"})[15m:1m]) > 0',
+                      expr:
+                        'min_over_time(sum by (namespace, pod) (kube_pod_status_phase{phase=~"Pending|Unknown|Failed"})[15m:1m]) > 0',
                       for: '0m',
                       labels: {
                         severity: 'critical',
                       },
                       annotations: {
                         summary: 'Kubernetes Pod not healthy (pod {{ $labels.pod }})',
-                        description: '"Pod has been in a non-ready state for longer than 15 minutes.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
-                      }
+                        description:
+                          '"Pod has been in a non-ready state for longer than 15 minutes.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"',
+                      },
                     },
                     {
                       alert: 'KubernetesPodCrashLooping',
@@ -220,59 +235,68 @@ export class Deployment extends k8s.helm.v3.Chart {
                       },
                       annotations: {
                         summary: 'Kubernetes pod crash looping (pod {{ $labels.pod }})',
-                        description: '"Pod {{ $labels.pod }} is crash looping\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
-                      }
+                        description:
+                          '"Pod {{ $labels.pod }} is crash looping\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"',
+                      },
                     },
                     {
                       alert: 'KubernetesDaemonsetRolloutStuck',
-                      expr: 'kube_daemonset_status_number_ready / kube_daemonset_status_desired_number_scheduled * 100 < 100 or kube_daemonset_status_desired_number_scheduled - kube_daemonset_status_current_number_scheduled > 0',
+                      expr:
+                        'kube_daemonset_status_number_ready / kube_daemonset_status_desired_number_scheduled * 100 < 100 or kube_daemonset_status_desired_number_scheduled - kube_daemonset_status_current_number_scheduled > 0',
                       for: '10m',
                       labels: {
                         severity: 'warning',
                       },
                       annotations: {
                         summary: 'Kubernetes DaemonSet rollout stuck (daemonset {{ $labels.daemonset }})',
-                        description: '"Some Pods of DaemonSet are not scheduled or not ready\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
-                      }
+                        description:
+                          '"Some Pods of DaemonSet are not scheduled or not ready\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"',
+                      },
                     },
                     {
                       alert: 'KubernetesApiServerErrors',
-                      expr: 'sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[1m])) / sum(rate(apiserver_request_total{job="apiserver"}[1m])) * 100 > 3',
+                      expr:
+                        'sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[1m])) / sum(rate(apiserver_request_total{job="apiserver"}[1m])) * 100 > 3',
                       for: '2m',
                       labels: {
                         severity: 'critical',
                       },
                       annotations: {
                         summary: 'Kubernetes API server errors (instance {{ $labels.instance }})',
-                        description: '"Kubernetes API server is experiencing high error rate\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
-                      }
+                        description:
+                          '"Kubernetes API server is experiencing high error rate\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"',
+                      },
                     },
                     {
                       alert: 'KubernetesApiClientErrors',
-                      expr: '(sum(rate(rest_client_requests_total{code=~"(4|5).."}[1m])) by (instance, job) / sum(rate(rest_client_requests_total[1m])) by (instance, job)) * 100 > 1',
+                      expr:
+                        '(sum(rate(rest_client_requests_total{code=~"(4|5).."}[1m])) by (instance, job) / sum(rate(rest_client_requests_total[1m])) by (instance, job)) * 100 > 1',
                       for: '2m',
                       labels: {
                         severity: 'critical',
                       },
                       annotations: {
                         summary: 'Kubernetes API client errors (instance {{ $labels.instance }})',
-                        description: '"Kubernetes API client is experiencing high error rate\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
-                      }
+                        description:
+                          '"Kubernetes API client is experiencing high error rate\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"',
+                      },
                     },
                     {
                       alert: 'KubernetesApiServerLatency',
-                      expr: 'histogram_quantile(0.99, sum(rate(apiserver_request_latencies_bucket{subresource!="log",verb!~"^(?:CONNECT|WATCHLIST|WATCH|PROXY)$"} [10m])) WITHOUT (instance, resource)) / 1e+06 > 1',
+                      expr:
+                        'histogram_quantile(0.99, sum(rate(apiserver_request_latencies_bucket{subresource!="log",verb!~"^(?:CONNECT|WATCHLIST|WATCH|PROXY)$"} [10m])) WITHOUT (instance, resource)) / 1e+06 > 1',
                       for: '2m',
                       labels: {
                         severity: 'warning',
                       },
                       annotations: {
                         summary: 'Kubernetes API server latency (instance {{ $labels.instance }})',
-                        description: '"Kubernetes API server has a 99th percentile latency of {{ $value }} seconds for {{ $labels.verb }} {{ $labels.resource }}.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"'
-                      }
+                        description:
+                          '"Kubernetes API server has a 99th percentile latency of {{ $value }} seconds for {{ $labels.verb }} {{ $labels.resource }}.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"',
+                      },
                     },
-                  ]
-                }
+                  ],
+                },
               ],
             },
           },
