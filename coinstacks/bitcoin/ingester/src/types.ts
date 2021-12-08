@@ -1,6 +1,4 @@
 import { BlockDocument } from '@shapeshiftoss/common-mongo'
-import { Tx } from '@shapeshiftoss/blockbook'
-import { ParseTx, SequencedData } from '@shapeshiftoss/common-ingester'
 
 // https://developer.bitcoin.org/reference/rpc/getblock.html
 export interface BTCBlock {
@@ -24,9 +22,6 @@ export interface BTCBlock {
   previousblockhash: string
   nextblockhash: string
 }
-
-export type BTCParseTx = Tx & ParseTx
-export type SequencedBTCParseTx = BTCParseTx & SequencedData
 
 export interface ReorgResult {
   dbBlock: BlockDocument

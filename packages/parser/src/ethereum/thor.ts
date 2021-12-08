@@ -11,6 +11,7 @@ const SWAP_TYPES = ['SWAP', '=', 's']
 export interface ParserArgs {
   midgardUrl: string
   network: Network
+  rpcUrl: string
 }
 
 export class Parser {
@@ -23,15 +24,15 @@ export class Parser {
 
   constructor(args: ParserArgs) {
     this.abiInterface = new ethers.utils.Interface(ABI)
-    this.thorchain = new Thorchain({ midgardUrl: args.midgardUrl })
+    this.thorchain = new Thorchain({ midgardUrl: args.midgardUrl, rpcUrl: args.rpcUrl })
 
     this.depositSigHash = this.abiInterface.getSighash('deposit')
     this.transferOutSigHash = this.abiInterface.getSighash('transferOut')
 
     // TODO: Router contract can change, use /inbound_addresses endpoint to determine current router contract
     this.routerContract = {
-      MAINNET: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
-      ETH_ROPSTEN: '0xefA28233838f46a80AaaC8c309077a9ba70D123A',
+      mainnet: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
+      ropsten: '0xefA28233838f46a80AaaC8c309077a9ba70D123A',
     }[args.network]
   }
 
@@ -65,37 +66,12 @@ export class Parser {
 
     const [type] = result.memo.split(':')
 
-    // sell side
-    if (SWAP_TYPES.includes(type)) {
-      return {
-        trade: {
-          dexName: Dex.Thor,
-          type: TradeType.Trade,
-          memo: result.memo,
-        },
-      }
+    if (SWAP_TYPES.includes(type) || type === 'OUT') {
+      return { trade: { dexName: Dex.Thor, type: TradeType.Trade, memo: result.memo } }
     }
 
-    // buy side
-    if (type === 'OUT') {
-      return {
-        trade: {
-          dexName: Dex.Thor,
-          type: TradeType.Trade,
-          memo: result.memo,
-        },
-      }
-    }
-
-    // trade refund
     if (type === 'REFUND') {
-      return {
-        trade: {
-          dexName: Dex.Thor,
-          type: TradeType.Refund,
-          memo: result.memo,
-        },
-      }
+      return { trade: { dexName: Dex.Thor, type: TradeType.Refund, memo: result.memo } }
     }
 
     return

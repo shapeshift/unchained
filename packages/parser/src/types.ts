@@ -8,10 +8,23 @@ export interface Fee {
   value: string
 }
 
+export interface SequencedTx extends Tx {
+  sequence: number
+  total: number
+}
+
+export enum Status {
+  Confirmed = 'confirmed',
+  Pending = 'pending',
+  Failed = 'failed',
+  Unknown = 'unknown',
+}
+
 export interface Token {
   contract: string
   decimals: number
   name: string
+  symbol: string
 }
 
 export interface Trade {
@@ -46,7 +59,9 @@ export interface Tx {
   blockHeight: number
   blockTime: number
   caip2: string
+  confirmations: number
   fee?: Fee
+  status: Status
   trade?: Trade
   transfers: Array<Transfer>
   txid: string
