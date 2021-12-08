@@ -66,37 +66,12 @@ export class Parser {
 
     const [type] = result.memo.split(':')
 
-    // sell side
-    if (SWAP_TYPES.includes(type)) {
-      return {
-        trade: {
-          dexName: Dex.Thor,
-          type: TradeType.Trade,
-          memo: result.memo,
-        },
-      }
+    if (SWAP_TYPES.includes(type) || type === 'OUT') {
+      return { trade: { dexName: Dex.Thor, type: TradeType.Trade, memo: result.memo } }
     }
 
-    // buy side
-    if (type === 'OUT') {
-      return {
-        trade: {
-          dexName: Dex.Thor,
-          type: TradeType.Trade,
-          memo: result.memo,
-        },
-      }
-    }
-
-    // trade refund
     if (type === 'REFUND') {
-      return {
-        trade: {
-          dexName: Dex.Thor,
-          type: TradeType.Refund,
-          memo: result.memo,
-        },
-      }
+      return { trade: { dexName: Dex.Thor, type: TradeType.Refund, memo: result.memo } }
     }
 
     return
