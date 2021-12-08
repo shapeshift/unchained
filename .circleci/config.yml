@@ -249,7 +249,7 @@ jobs:
         default: ''
       network:
         type: string
-        default: MAINNET
+        default: mainnet
       pulumi-stack:
         description: pulumi stack to deploy to (public)
         type: string
@@ -449,7 +449,7 @@ workflows:
           name: deploy ethereum-ropsten develop
           <<: *ethereum-ropsten
           environment: dev
-          network: ETH_ROPSTEN
+          network: ropsten
           pulumi-stack: public-dev-ropsten
           broker-url: ethereum-ropsten-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
           mongo-replicas: 2

@@ -6,7 +6,7 @@ import { TxSpecific as ParseTxSpecific, Transfer, TransferType } from '../types'
 import { Network } from './types'
 import ABI from './abi/uniV2'
 import ERC20_ABI from './abi/erc20'
-import { getSigHash } from './utils'
+import { getSigHash, toNetworkType } from './utils'
 
 export const ROUTER_CONTRACT = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
 
@@ -32,8 +32,8 @@ export class Parser {
     this.addLiquidityEthSigHash = this.abiInterface.getSighash('addLiquidityETH')
     this.removeLiquidityEthSigHash = this.abiInterface.getSighash('removeLiquidityETH')
     this.wethContract = {
-      MAINNET: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-      ETH_ROPSTEN: '0xc778417E063141139Fce010982780140Aa0cD5Ab',
+      mainnet: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+      ropsten: '0xc778417E063141139Fce010982780140Aa0cD5Ab',
     }[this.network]
   }
 
@@ -62,7 +62,7 @@ export class Parser {
             to: lpTokenAddress,
             caip19: caip19.toCAIP19({
               chain: ChainTypes.Ethereum,
-              network: this.network,
+              network: toNetworkType(this.network),
               contractType: ContractTypes.ERC20,
               tokenId: tokenAddress,
             }),
@@ -92,7 +92,7 @@ export class Parser {
             to: lpTokenAddress,
             caip19: caip19.toCAIP19({
               chain: ChainTypes.Ethereum,
-              network: this.network,
+              network: toNetworkType(this.network),
               contractType: ContractTypes.ERC20,
               tokenId: lpTokenAddress,
             }),

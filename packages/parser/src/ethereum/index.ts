@@ -2,10 +2,10 @@ import { BigNumber } from 'bignumber.js'
 import { ethers } from 'ethers'
 import { Tx } from '@shapeshiftoss/blockbook'
 import { caip2, caip19 } from '@shapeshiftoss/caip'
-import { ChainTypes, ContractTypes, NetworkTypes } from '@shapeshiftoss/types'
+import { ChainTypes, ContractTypes } from '@shapeshiftoss/types'
 import { Tx as ParseTx, TxSpecific as ParseTxSpecific, Status, Token, TransferType, Transfer } from '../types'
 import { InternalTx, Network } from './types'
-import { getSigHash } from './utils'
+import { getSigHash, toNetworkType } from './utils'
 import * as multiSig from './multiSig'
 import * as thor from './thor'
 import * as uniV2 from './uniV2'
@@ -29,7 +29,7 @@ export class TransactionParser {
   constructor(args: TransactionParserArgs) {
     const provider = new ethers.providers.JsonRpcProvider(args.rpcUrl)
 
-    this.network = args.network ?? NetworkTypes.MAINNET
+    this.network = args.network ?? 'mainnet'
 
     this.thor = new thor.Parser({ network: this.network, midgardUrl: args.midgardUrl, rpcUrl: args.rpcUrl })
     this.uniV2 = new uniV2.Parser({ network: this.network, provider })
@@ -73,7 +73,7 @@ export class TransactionParser {
       blockHash: tx.blockHash,
       blockHeight: tx.blockHeight,
       blockTime: tx.blockTime,
-      caip2: caip2.toCAIP2({ chain: ChainTypes.Ethereum, network: this.network }),
+      caip2: caip2.toCAIP2({ chain: ChainTypes.Ethereum, network: toNetworkType(this.network) }),
       confirmations: tx.confirmations,
       status: this.getStatus(tx),
       trade: result?.trade,
@@ -89,7 +89,7 @@ export class TransactionParser {
         pTx.transfers = this.aggregateTransfer(
           pTx.transfers,
           TransferType.Send,
-          caip19.toCAIP19({ chain: ChainTypes.Ethereum, network: this.network }),
+          caip19.toCAIP19({ chain: ChainTypes.Ethereum, network: toNetworkType(this.network) }),
           sendAddress,
           receiveAddress,
           sendValue.toString(10)
@@ -100,7 +100,7 @@ export class TransactionParser {
       const fees = new BigNumber(tx.fees ?? 0)
       if (fees.gt(0)) {
         pTx.fee = {
-          caip19: caip19.toCAIP19({ chain: ChainTypes.Ethereum, network: this.network }),
+          caip19: caip19.toCAIP19({ chain: ChainTypes.Ethereum, network: toNetworkType(this.network) }),
           value: fees.toString(10),
         }
       }
@@ -113,7 +113,7 @@ export class TransactionParser {
         pTx.transfers = this.aggregateTransfer(
           pTx.transfers,
           TransferType.Receive,
-          caip19.toCAIP19({ chain: ChainTypes.Ethereum, network: this.network }),
+          caip19.toCAIP19({ chain: ChainTypes.Ethereum, network: toNetworkType(this.network) }),
           sendAddress,
           receiveAddress,
           receiveValue.toString(10)
@@ -138,7 +138,7 @@ export class TransactionParser {
       const transferArgs = [
         caip19.toCAIP19({
           chain: ChainTypes.Ethereum,
-          network: this.network,
+          network: toNetworkType(this.network),
           contractType: ContractTypes.ERC20,
           tokenId: transfer.token,
         }),
@@ -161,7 +161,7 @@ export class TransactionParser {
 
     internalTxs?.forEach((internalTx) => {
       const transferArgs = [
-        caip19.toCAIP19({ chain: ChainTypes.Ethereum, network: this.network }),
+        caip19.toCAIP19({ chain: ChainTypes.Ethereum, network: toNetworkType(this.network) }),
         internalTx.from,
         internalTx.to,
         internalTx.value,

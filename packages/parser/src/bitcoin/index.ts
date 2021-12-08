@@ -1,9 +1,10 @@
 import { BigNumber } from 'bignumber.js'
 import { Tx } from '@shapeshiftoss/blockbook'
 import { caip2, caip19 } from '@shapeshiftoss/caip'
-import { ChainTypes, NetworkTypes } from '@shapeshiftoss/types'
+import { ChainTypes } from '@shapeshiftoss/types'
 import { Tx as ParseTx, Status, TransferType, Transfer } from '../types'
 import { Network } from './types'
+import { toNetworkType } from './utils'
 
 export * from './types'
 
@@ -16,18 +17,18 @@ export class TransactionParser {
   network: Network
 
   constructor(args: TransactionParserArgs) {
-    this.network = args.network ?? NetworkTypes.MAINNET
+    this.network = args.network ?? 'mainnet'
   }
 
   async parse(tx: Tx, address: string): Promise<ParseTx> {
-    const caip19BTC = caip19.toCAIP19({ chain: ChainTypes.Bitcoin, network: this.network })
+    const caip19BTC = caip19.toCAIP19({ chain: ChainTypes.Bitcoin, network: toNetworkType(this.network) })
 
     const pTx: ParseTx = {
       address,
       blockHash: tx.blockHash,
       blockHeight: tx.blockHeight,
       blockTime: tx.blockTime,
-      caip2: caip2.toCAIP2({ chain: ChainTypes.Bitcoin, network: this.network }),
+      caip2: caip2.toCAIP2({ chain: ChainTypes.Bitcoin, network: toNetworkType(this.network) }),
       confirmations: tx.confirmations,
       status: tx.confirmations > 0 ? Status.Confirmed : Status.Pending,
       transfers: [],
