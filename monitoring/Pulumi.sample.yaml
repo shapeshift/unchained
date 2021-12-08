@@ -16,6 +16,10 @@ config:
     githubOrg: ''
     githubOauthID: ''
     githubOauthSecret: ''
+
+    ## - If alerting is enabled an OpsGenie API key is required to configure alertmanager integration
+    # alerting: false
+    # opsgenieApiKey: ''
     
     # ## - Visualization
     # grafana:
