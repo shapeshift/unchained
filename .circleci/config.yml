@@ -72,7 +72,7 @@ aliases:
     indexer-storage-size: 500Gi
     indexer-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-indexer-svc.unchained.svc.cluster.local:8001/websocket
-    daemon-image: ethereum/client-go:v1.10.11
+    daemon-image: ethereum/client-go:v1.10.13
     daemon-cpu-limit: '2'
     daemon-memory-limit: 24Gi
     daemon-storage-size: 1500Gi
@@ -97,7 +97,7 @@ aliases:
     indexer-storage-size: 250Gi
     indexer-url: http://ethereum-ropsten-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-ropsten-indexer-svc.unchained.svc.cluster.local:8001/websocket
-    daemon-image: ethereum/client-go:v1.10.11
+    daemon-image: ethereum/client-go:v1.10.13
     daemon-cpu-limit: '2'
     daemon-memory-limit: 24Gi
     daemon-storage-size: 500Gi
@@ -347,24 +347,23 @@ jobs:
     executor: pulumi
     steps:
       - setup_remote_docker:
-         version: 20.10.2
+          version: 20.10.2
       - attach_workspace:
-         at: ~/
+          at: ~/
       - pulumi-dependencies
       - run:
-         name: pulumi up
-         working_directory: monitoring
-         command: |
-           pulumi stack select $PULUMI_ORG/prod
-           pulumi config set --path unchained:monitoring.stack $PULUMI_ORG/common/dependencies
-           pulumi config set --path unchained:monitoring.environment monitoring
-           pulumi config set --path unchained:monitoring.githubOrg $GITHUB_ORG
-           pulumi config set --path unchained:monitoring.githubOauthID $GITHUB_OAUTH_ID
-           pulumi config set --path unchained:monitoring.githubOauthSecret $GITHUB_OAUTH_SECRET --plaintext
-           pulumi config set --path unchained:monitoring.alerting true
-           pulumi config set --path unchained:monitoring.opsgenieApiKey $OPSGENIE_API_KEY
-           pulumi up -f --yes --suppress-outputs
-
+          name: pulumi up
+          working_directory: monitoring
+          command: |
+            pulumi stack select $PULUMI_ORG/prod
+            pulumi config set --path unchained:monitoring.stack $PULUMI_ORG/common/dependencies
+            pulumi config set --path unchained:monitoring.environment monitoring
+            pulumi config set --path unchained:monitoring.githubOrg $GITHUB_ORG
+            pulumi config set --path unchained:monitoring.githubOauthID $GITHUB_OAUTH_ID
+            pulumi config set --path unchained:monitoring.githubOauthSecret $GITHUB_OAUTH_SECRET --plaintext
+            pulumi config set --path unchained:monitoring.alerting true
+            pulumi config set --path unchained:monitoring.opsgenieApiKey $OPSGENIE_API_KEY
+            pulumi up -f --yes --suppress-outputs
 
   lint-and-test:
     description: lint and test project
