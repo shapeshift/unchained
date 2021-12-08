@@ -6,6 +6,8 @@ export interface MonitoringConfig {
   githubOauthID: string
   githubOauthSecret: string
   githubOrg: string
+  alerting: boolean
+  opsgenieApiKey: string
 }
 
 export interface LoopConfig {
@@ -40,6 +42,9 @@ export const getConfig = async (): Promise<LoopConfig> => {
   const missingRequiredConfig: Array<string> = []
 
   if (!config.stack) missingRequiredConfig.push('stack')
+  if (config.alerting) {
+    if (!config.opsgenieApiKey) missingRequiredConfig.push('opsgenieApiKey')
+  }
 
   if (missingRequiredConfig.length) {
     throw new Error(
