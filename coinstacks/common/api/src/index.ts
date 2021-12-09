@@ -1,4 +1,4 @@
-import { Account, SendTxBody, TxHistory } from './models'
+import { Account, Info, SendTxBody, TxHistory } from './models'
 
 export * from './models'
 export * as middleware from './middleware'
@@ -28,6 +28,14 @@ export class ApiError extends Error {
  * or update all coinstack api implementations on any changes to the base interface.
  */
 export interface BaseAPI {
+  /**
+   * Get information about the running coinstack
+   *
+   * @returns {Promise<Info>} coinstack info
+   */
+  // @Get('info/')
+  getInfo(): Promise<Info>
+
   /**
    * Get account details by address or xpub
    *

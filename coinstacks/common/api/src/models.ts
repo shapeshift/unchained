@@ -36,6 +36,13 @@ export interface Account {
 }
 
 /**
+ * Contains info about the running coinstack
+ */
+export interface Info {
+  network: string
+}
+
+/**
  * Contains info for pagination
  */
 export interface Pagination {

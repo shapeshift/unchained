@@ -4,6 +4,7 @@ import {
   ApiError,
   BadRequestError,
   BaseAPI,
+  Info,
   InternalServerError,
   SendTxBody,
   Tx,
@@ -13,9 +14,11 @@ import {
 import { BitcoinAPI, BitcoinAccount, BitcoinTxSpecific, BTCNetworkFee, BTCNetworkFees, Utxo } from './models'
 import { Account } from '@shapeshiftoss/common-api'
 
+const NETWORK = process.env.NETWORK
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
 
+if (!NETWORK) throw new Error('NETWORK env var not set')
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 
@@ -28,6 +31,21 @@ const isXpub = (pubkey: string): boolean => {
 @Route('api/v1')
 @Tags('v1')
 export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
+  /**
+   * Get information about the running coinstack
+   *
+   * @returns {Promise<Info>} coinstack info
+   */
+  @Example<Info>({
+    network: 'mainnet',
+  })
+  @Get('info/')
+  async getInfo(): Promise<Info> {
+    return {
+      network: NETWORK as string,
+    }
+  }
+
   /**
    * Get account details by address or xpub
    *
