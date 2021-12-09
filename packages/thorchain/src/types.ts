@@ -13,6 +13,7 @@ export interface TxDetails {
 
 export interface ThorchainArgs {
   midgardUrl: string
+  rpcUrl: string
   timeout?: number
 }
 

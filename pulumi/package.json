@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/unchained-pulumi",
-  "version": "3.7.0",
+  "version": "4.1.0",
   "license": "MIT",
   "private": true,
   "scripts": {

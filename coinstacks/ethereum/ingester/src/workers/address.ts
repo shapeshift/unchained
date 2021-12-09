@@ -1,16 +1,27 @@
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Message, Worker } from '@shapeshiftoss/common-ingester'
+import { ethereum, SequencedTx } from '@shapeshiftoss/unchained-tx-parser'
 import { logger } from '../logger'
-import { parseTx } from '../parseTx'
-import { ETHSyncTx, SequencedETHParseTx } from '../types'
+import { ETHSyncTx } from '../types'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
+const MIDGARD_URL = process.env.MIDGARD_URL
+const NETWORK = process.env.NETWORK
+const RPC_URL = process.env.RPC_URL
 
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
+if (!MIDGARD_URL) throw new Error('MIDGARD_URL env var not set')
+if (!NETWORK) throw new Error('NETWORK env var not set')
+if (!RPC_URL) throw new Error('RPC_URL env var not set')
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
+const parser = new ethereum.TransactionParser({
+  midgardUrl: MIDGARD_URL,
+  rpcUrl: RPC_URL,
+  network: NETWORK as ethereum.Network,
+})
 
 const msgLogger = logger.child({ namespace: ['workers', 'address'], fn: 'onMessage' })
 const onMessage = (worker: Worker) => async (message: Message) => {
@@ -21,9 +32,9 @@ const onMessage = (worker: Worker) => async (message: Message) => {
     const tx = await blockbook.getTransaction(txid)
     msgLogger.trace({ blockHash: tx.blockHash, blockHeight: tx.blockHeight, txid: tx.txid }, 'Transaction')
 
-    const pTx = await parseTx(tx, address, internalTxs)
+    const pTx = await parser.parse(tx, address, internalTxs)
 
-    worker.sendMessage(new Message({ ...pTx, sequence, total } as SequencedETHParseTx), client_id)
+    worker.sendMessage(new Message({ ...pTx, sequence, total } as SequencedTx), client_id)
     worker.ackMessage(message, retryKey)
 
     msgLogger.debug({ address, txid, client_id }, 'Transaction published')

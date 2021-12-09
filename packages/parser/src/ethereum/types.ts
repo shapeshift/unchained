@@ -1,5 +1,3 @@
-import { NetworkTypes } from '@shapeshiftoss/types'
-
 export interface InternalTx {
   blockNumber: string
   timeStamp: string
@@ -17,4 +15,4 @@ export interface InternalTx {
   errCode: string
 }
 
-export type Network = NetworkTypes.MAINNET | NetworkTypes.ETH_ROPSTEN
+export type Network = 'mainnet' | 'ropsten'

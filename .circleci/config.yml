@@ -361,6 +361,8 @@ jobs:
             pulumi config set --path unchained:monitoring.githubOrg $GITHUB_ORG
             pulumi config set --path unchained:monitoring.githubOauthID $GITHUB_OAUTH_ID
             pulumi config set --path unchained:monitoring.githubOauthSecret $GITHUB_OAUTH_SECRET --plaintext
+            pulumi config set --path unchained:monitoring.alerting true
+            pulumi config set --path unchained:monitoring.opsgenieApiKey $OPSGENIE_API_KEY
             pulumi up -f --yes --suppress-outputs
 
   lint-and-test:
