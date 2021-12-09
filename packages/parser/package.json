@@ -14,9 +14,9 @@
   },
   "dependencies": {
     "@shapeshiftoss/blockbook": "^4.0.0",
-    "@shapeshiftoss/caip": "^1.4.2",
+    "@shapeshiftoss/caip": "^1.6.1",
     "@shapeshiftoss/thorchain": "^4.0.0",
-    "@shapeshiftoss/types": "^1.14.0",
+    "@shapeshiftoss/types": "^1.17.0",
     "bignumber.js": "^9.0.1"
   }
 }

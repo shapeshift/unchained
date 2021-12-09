@@ -2166,12 +2166,10 @@
   resolved "https://registry.yarnpkg.com/@pulumi/query/-/query-0.3.0.tgz#f496608e86a18c3dd31b6c533408e2441c29071d"
   integrity sha512-xfo+yLRM2zVjVEA4p23IjQWzyWl1ZhWOGobsBqRpIarzLvwNH/RAGaoehdxlhx4X92302DrpdIFgTICMN4P38w==
 
-"@shapeshiftoss/caip@^1.4.2":
-  version "1.4.2"
-  resolved "https://registry.yarnpkg.com/@shapeshiftoss/caip/-/caip-1.4.2.tgz#97974ddb8f630aabee43caed2d8f55f3dfdc5269"
-  integrity sha512-/nbQJkDXpjUlsH49HJHuzv3CYbpO8Lh2ghSPqA8f5vaJv2S5vZ9AQL5JnMSnEe5Nn0/4jWJ1aMVxg24oxSMbeQ==
-  dependencies:
-    "@shapeshiftoss/types" "^1.11.4"
+"@shapeshiftoss/caip@^1.6.1":
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/@shapeshiftoss/caip/-/caip-1.6.1.tgz#d9a7928543349536f4cdaf4455de0f6966eed0f4"
+  integrity sha512-T7LPjZO9YLuTfVPg2bBbqJH5mSWbcGrcmTJYd41QBRkS1XlAhI63gscENkPo2WeNunrEJFLHITiwk/ddlkme8A==
 
 "@shapeshiftoss/cluster-launcher@0.6.9":
   version "0.6.9"
@@ -2189,15 +2187,10 @@
   resolved "https://registry.yarnpkg.com/@shapeshiftoss/logger/-/logger-1.0.1.tgz#fc9d9f68a626e526bd55053dbd56b14e4b63edf1"
   integrity sha512-xxAHoUozg1WtSI6XzaPAJDFJOkMkWIAWKUCadwIMXHYjxP9FPYWoOBcwftnb5B81gZyxT6FEScIduwNq2laH+Q==
 
-"@shapeshiftoss/types@^1.11.4":
-  version "1.13.1"
-  resolved "https://registry.yarnpkg.com/@shapeshiftoss/types/-/types-1.13.1.tgz#260a17f6a9555ab78fd637049ef10b3e6c2d0fd0"
-  integrity sha512-krddcUTaJSVCI2EIXzLS61siTj5RDJUvKqu6/LYXNrDjML4uoHp5PQ4NUFrTT+p0K6tJ2oMLxV4FwSK7maZkEA==
-
-"@shapeshiftoss/types@^1.14.0":
-  version "1.14.0"
-  resolved "https://registry.yarnpkg.com/@shapeshiftoss/types/-/types-1.14.0.tgz#d138f68105b403555f2a58141a050bfe2f03eb23"
-  integrity sha512-mL9ynAEzovGZ1sTrvDr19nuIe0GOabilU0ofoSjGMstyHL130mjmyQYsx5/MdP8ldJj9irAuWHkwuGDFaRHXQw==
+"@shapeshiftoss/types@^1.17.0":
+  version "1.17.0"
+  resolved "https://registry.yarnpkg.com/@shapeshiftoss/types/-/types-1.17.0.tgz#f5dfe500b1b2da526567b0db43c766cd8f062ca7"
+  integrity sha512-w6cueEbdz0/mdLxPXmaTh8jH5hnCRP117REKPeH5MPYRA5pKWKWZVLgAIBSblhdzj8Mqi4/3hjEizt48Aq8mBA==
 
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
