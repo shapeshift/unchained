@@ -2,7 +2,8 @@
 
 1. Manually set statefulset replicas for the target coinstack to 0.
 2. Delete PVCs and PVs related to the coinstack.
-3. ```sh
+ 
+```sh
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: PersistentVolume
