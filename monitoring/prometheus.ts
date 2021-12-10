@@ -302,16 +302,14 @@ export class Deployment extends k8s.helm.v3.Chart {
                   rules: [
                     {
                       alert: 'MongodbDown',
-                      expr:
-                        'mongodb_up == 0',
+                      expr: 'mongodb_up == 0',
                       for: '5m',
                       labels: {
                         severity: 'critical',
                       },
                       annotations: {
                         summary: 'MongoDB Down (instance {{ $labels.app_kubernetes_io_instance }})',
-                        description:
-                          '"MongoDB instance is down\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"',
+                        description: '"MongoDB instance is down\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"',
                       },
                     },
                     {
@@ -344,8 +342,7 @@ export class Deployment extends k8s.helm.v3.Chart {
                     },
                     {
                       alert: 'MongodbNumberCursorsOpen',
-                      expr:
-                        'mongodb_mongod_metrics_cursor_open{state="total"} > 500',
+                      expr: 'mongodb_mongod_metrics_cursor_open{state="total"} > 500',
                       for: '2m',
                       labels: {
                         severity: 'warning',
@@ -358,8 +355,7 @@ export class Deployment extends k8s.helm.v3.Chart {
                     },
                     {
                       alert: 'MongodbCursorTimeouts',
-                      expr:
-                        'increase(mongodb_mongod_metrics_cursor_timed_out_total[1m]) > 50',
+                      expr: 'increase(mongodb_mongod_metrics_cursor_timed_out_total[1m]) > 50',
                       for: '2m',
                       labels: {
                         severity: 'warning',
@@ -372,8 +368,7 @@ export class Deployment extends k8s.helm.v3.Chart {
                     },
                     {
                       alert: 'MongodbTooManyConnections',
-                      expr:
-                        'mongodb_connections{state="current"} > 5000',
+                      expr: 'mongodb_connections{state="current"} > 5000',
                       for: '2m',
                       labels: {
                         severity: 'warning',
@@ -384,29 +379,26 @@ export class Deployment extends k8s.helm.v3.Chart {
                           '"Too many connections (> 5000)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"',
                       },
                     },
-                  ]
+                  ],
                 },
                 {
                   name: 'rabbitmq',
                   rules: [
                     {
                       alert: 'RabbitMQDown',
-                      expr:
-                        'rabbitmq_up == 0',
+                      expr: 'rabbitmq_up == 0',
                       for: '5m',
                       labels: {
                         severity: 'critical',
                       },
                       annotations: {
                         summary: 'RabbitMQ node down (instance {{ $labels.release }})',
-                        description:
-                          '"RabbitMQ node down\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"',
+                        description: '"RabbitMQ node down\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"',
                       },
                     },
                     {
                       alert: 'RabbitMQHighMemory',
-                      expr:
-                        'rabbitmq_node_mem_used / rabbitmq_node_mem_limit * 100 > 70',
+                      expr: 'rabbitmq_node_mem_used / rabbitmq_node_mem_limit * 100 > 70',
                       for: '0m',
                       labels: {
                         severity: 'critical',
@@ -419,8 +411,7 @@ export class Deployment extends k8s.helm.v3.Chart {
                     },
                     {
                       alert: 'RabbitMQTooManyConnections',
-                      expr:
-                        'rabbitmq_connectionsTotal > 1000',
+                      expr: 'rabbitmq_connectionsTotal > 1000',
                       for: '2m',
                       labels: {
                         severity: 'warning',
@@ -433,20 +424,20 @@ export class Deployment extends k8s.helm.v3.Chart {
                     },
                     {
                       alert: 'RabbitMQDeadLetterQueueFillingUp',
-                      expr:
-                        'rabbitmq_queue_messages{queue=~".*deadLetter"} > 10000',
+                      expr: 'rabbitmq_queue_messages{queue=~".*deadLetter"} > 10000',
                       for: '5m',
                       labels: {
                         severity: 'warning',
                       },
                       annotations: {
-                        summary: 'RabbitMQ dead letter queue filling up (instance {{ $labels.release }}, queue {{ $labels.queue }})',
+                        summary:
+                          'RabbitMQ dead letter queue filling up (instance {{ $labels.release }}, queue {{ $labels.queue }})',
                         description:
                           '"Dead letter queue is filling up (> 10000 messages)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"',
                       },
                     },
-                  ]
-                }
+                  ],
+                },
               ],
             },
           },
