@@ -21,8 +21,7 @@
     "test:coverage": "jest --coverage",
     "version:major": "lerna version major --force-publish --no-push",
     "version:minor": "lerna version minor --force-publish --no-push",
-    "version:patch": "lerna version patch --force-publish --no-push",
-    "prepare": "husky install"
+    "version:patch": "lerna version patch --force-publish --no-push"
   },
   "dependencies": {
     "@pulumi/kubernetes": "3.6.3",

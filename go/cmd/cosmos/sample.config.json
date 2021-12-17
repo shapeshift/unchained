@@ -1,0 +1,6 @@
+{
+        "lcdUrl": "cosmoshub-4--lcd--archive.datahub.figment.io",
+        "grpcUrl": "cosmoshub-4--grpc--archive.grpc.datahub.figment.io:443",
+        "rpcUrl": "cosmoshub-4--rpc--archive.datahub.figment.io",
+        "apiKey": ""
+}

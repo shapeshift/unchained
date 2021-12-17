@@ -1,0 +1,16 @@
+version: '3.4'
+services:
+  api:
+    image: go-unchained-local
+    build:
+      context: ../../build
+      dockerfile: Dockerfile.local
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.cosmos-api.rule=Host(`api.cosmos.localhost`)'
+      - 'traefik.http.services.cosmos-api.loadbalancer.server.port=3000'
+    command: ["-r", "(pkg|internal|cosmos)", "--", "go", "run", "cmd/cosmos/main.go"]
+    working_dir: /app
+    volumes:
+      - ../..:/app
+      - $GOPATH/pkg/mod/cache:/go/pkg/mod/cache
