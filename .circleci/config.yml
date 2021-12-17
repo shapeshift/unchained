@@ -42,7 +42,7 @@ aliases:
     rabbit-memory-limit: '4Gi'
     rabbit-storage-size: '100Gi'
     indexer-cpu-limit: '4'
-    indexer-memory-limit: 12Gi
+    indexer-memory-limit: 24Gi
     indexer-replicas: 2
     indexer-storage-size: 500Gi
     indexer-url: http://bitcoin-indexer-svc.unchained.svc.cluster.local:8001
@@ -72,7 +72,7 @@ aliases:
     indexer-storage-size: 500Gi
     indexer-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-indexer-svc.unchained.svc.cluster.local:8001/websocket
-    daemon-image: ethereum/client-go:v1.10.11
+    daemon-image: ethereum/client-go:v1.10.13
     daemon-cpu-limit: '2'
     daemon-memory-limit: 24Gi
     daemon-storage-size: 1500Gi
@@ -97,7 +97,7 @@ aliases:
     indexer-storage-size: 250Gi
     indexer-url: http://ethereum-ropsten-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-ropsten-indexer-svc.unchained.svc.cluster.local:8001/websocket
-    daemon-image: ethereum/client-go:v1.10.11
+    daemon-image: ethereum/client-go:v1.10.13
     daemon-cpu-limit: '2'
     daemon-memory-limit: 24Gi
     daemon-storage-size: 500Gi
@@ -199,14 +199,17 @@ jobs:
             pulumi config set --path unchained:common.additionalEnvironments[0] dev
             pulumi config set --path unchained:common.additionalEnvironments[1] monitoring
             pulumi config set --path unchained:common.eks.allAZs true
-            pulumi config set --path unchained:common.eks.autoscaling.enabled true
-            pulumi config set --path unchained:common.eks.autoscaling.minInstances 2
-            pulumi config set --path unchained:common.eks.autoscaling.maxInstances 3
-            pulumi config set --path unchained:common.eks.instanceTypes[0] m5.4xlarge
-            pulumi config set --path unchained:common.eks.instanceTypes[1] m5a.4xlarge
-            pulumi config set --path unchained:common.eks.instanceTypes[2] m5ad.4xlarge
+            pulumi config set --path unchained:common.eks.autoscaling true
             pulumi config set --path unchained:common.eks.region $AWS_REGION
             pulumi config set --path unchained:common.eks.cidrBlock 10.0.0.0/16
+            pulumi config set --path unchained:common.eks.nodeGroups[0].name spot
+            pulumi config set --path unchained:common.eks.nodeGroups[0].type SPOT
+            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 2
+            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 5
+            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[0] r5.4xlarge
+            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r5a.4xlarge
+            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r5b.4xlarge
+            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[3] r5n.4xlarge
             pulumi config set --path unchained:common.traefik.whitelist[0] 173.245.48.0/20
             pulumi config set --path unchained:common.traefik.whitelist[1] 103.21.244.0/22
             pulumi config set --path unchained:common.traefik.whitelist[2] 103.22.200.0/22
@@ -344,22 +347,23 @@ jobs:
     executor: pulumi
     steps:
       - setup_remote_docker:
-         version: 20.10.2
+          version: 20.10.2
       - attach_workspace:
-         at: ~/
+          at: ~/
       - pulumi-dependencies
       - run:
-         name: pulumi up
-         working_directory: monitoring
-         command: |
-           pulumi stack select $PULUMI_ORG/prod
-           pulumi config set --path unchained:monitoring.stack $PULUMI_ORG/common/dependencies
-           pulumi config set --path unchained:monitoring.environment monitoring
-           pulumi config set --path unchained:monitoring.githubOrg $GITHUB_ORG
-           pulumi config set --path unchained:monitoring.githubOauthID $GITHUB_OAUTH_ID
-           pulumi config set --path unchained:monitoring.githubOauthSecret $GITHUB_OAUTH_SECRET --plaintext
-           pulumi up -f --yes --suppress-outputs
-
+          name: pulumi up
+          working_directory: monitoring
+          command: |
+            pulumi stack select $PULUMI_ORG/prod
+            pulumi config set --path unchained:monitoring.stack $PULUMI_ORG/common/dependencies
+            pulumi config set --path unchained:monitoring.environment monitoring
+            pulumi config set --path unchained:monitoring.githubOrg $GITHUB_ORG
+            pulumi config set --path unchained:monitoring.githubOauthID $GITHUB_OAUTH_ID
+            pulumi config set --path unchained:monitoring.githubOauthSecret $GITHUB_OAUTH_SECRET --plaintext
+            pulumi config set --path unchained:monitoring.alerting true
+            pulumi config set --path unchained:monitoring.opsgenieApiKey $OPSGENIE_API_KEY
+            pulumi up -f --yes --suppress-outputs
 
   lint-and-test:
     description: lint and test project

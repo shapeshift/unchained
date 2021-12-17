@@ -2,7 +2,7 @@ import { Thorchain } from '../index'
 
 jest.mock('../index')
 
-const thorchain = new Thorchain({ midgardUrl: 'test' })
+const thorchain = new Thorchain({ midgardUrl: 'test', rpcUrl: 'test' })
 
 describe('thorchain', () => {
   describe('getTxDetails', () => {

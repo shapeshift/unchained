@@ -1,5 +1,8 @@
 # Bootstrap Node from Snapshot
 
+1. Manually set statefulset replicas for the target coinstack to 0.
+2. Delete PVCs and PVs related to the coinstack.
+ 
 ```sh
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
@@ -36,6 +39,6 @@ spec:
     requests:
       storage: 1500Gi
   storageClassName: gp2
-  name: data-daemon-ethereum-indexer-sts-<pod number>-pv
+  volumeName: data-daemon-ethereum-indexer-sts-<pod number>-pv
 EOF
 ```

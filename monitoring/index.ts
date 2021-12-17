@@ -44,10 +44,19 @@ export = async (): Promise<Outputs> => {
 
   new loki.Deployment(name, { namespace: namespace, priorityClassName: className }, { provider })
 
-  new prometheus.Deployment(name, { namespace: namespace, priorityClassName: className }, { provider })
+  new prometheus.Deployment(
+    name,
+    {
+      namespace: namespace,
+      priorityClassName: className,
+      alerting: config.alerting,
+      opsgenieApiKey: config.opsgenieApiKey,
+    },
+    { provider }
+  )
 
   //Find a better way to identify assets in the cluster, fine for now
-  const assets = ['bitcoin', 'ethereum', 'ethereum-ropsten']
+  const assets = ['bitcoin', 'ethereum']
   assets.map((asset) => {
     new mongodbExporter.Deployment(`${name}-mongo`, { namespace: namespace, asset: asset }, { provider })
     new rabbitmqExporter.Deployment(`${name}-rabbitmq`, { namespace: namespace, asset: asset }, { provider })

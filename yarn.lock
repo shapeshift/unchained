@@ -2166,10 +2166,15 @@
   resolved "https://registry.yarnpkg.com/@pulumi/query/-/query-0.3.0.tgz#f496608e86a18c3dd31b6c533408e2441c29071d"
   integrity sha512-xfo+yLRM2zVjVEA4p23IjQWzyWl1ZhWOGobsBqRpIarzLvwNH/RAGaoehdxlhx4X92302DrpdIFgTICMN4P38w==
 
-"@shapeshiftoss/cluster-launcher@0.6.7":
-  version "0.6.7"
-  resolved "https://registry.yarnpkg.com/@shapeshiftoss/cluster-launcher/-/cluster-launcher-0.6.7.tgz#d6710a1a0cb1772e3164995dd8e0f3b2b1332df2"
-  integrity sha512-lvYxtl1jbLQ1MjNZymTu6skJdtS3jXA7GGlqJpn8ToXYs0kQodPJKR26JyTH+eXxcTDJWnTb3YVB6bfD4y7JsA==
+"@shapeshiftoss/caip@^1.6.1":
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/@shapeshiftoss/caip/-/caip-1.6.1.tgz#d9a7928543349536f4cdaf4455de0f6966eed0f4"
+  integrity sha512-T7LPjZO9YLuTfVPg2bBbqJH5mSWbcGrcmTJYd41QBRkS1XlAhI63gscENkPo2WeNunrEJFLHITiwk/ddlkme8A==
+
+"@shapeshiftoss/cluster-launcher@0.6.9":
+  version "0.6.9"
+  resolved "https://registry.yarnpkg.com/@shapeshiftoss/cluster-launcher/-/cluster-launcher-0.6.9.tgz#eaa72968dc18121600cf49dcb28f5131e06b7512"
+  integrity sha512-blq7+DiPdbdluWuyJ+9HxyKuRbhBZ+lgH3rng3kRYWmiZiJkBziBot39NPgLsKVcPPwuLrEUSSziuMHuGf9JWQ==
   dependencies:
     "@pulumi/aws" "4.17.0"
     "@pulumi/awsx" "0.31.0"
@@ -2181,6 +2186,11 @@
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@shapeshiftoss/logger/-/logger-1.0.1.tgz#fc9d9f68a626e526bd55053dbd56b14e4b63edf1"
   integrity sha512-xxAHoUozg1WtSI6XzaPAJDFJOkMkWIAWKUCadwIMXHYjxP9FPYWoOBcwftnb5B81gZyxT6FEScIduwNq2laH+Q==
+
+"@shapeshiftoss/types@^1.17.0":
+  version "1.17.0"
+  resolved "https://registry.yarnpkg.com/@shapeshiftoss/types/-/types-1.17.0.tgz#f5dfe500b1b2da526567b0db43c766cd8f062ca7"
+  integrity sha512-w6cueEbdz0/mdLxPXmaTh8jH5hnCRP117REKPeH5MPYRA5pKWKWZVLgAIBSblhdzj8Mqi4/3hjEizt48Aq8mBA==
 
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
@@ -2521,10 +2531,10 @@
   resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-8.3.1.tgz#1a32969cf8f0364b3d8c8af9cc3555b7805df14f"
   integrity sha512-Y2mHTRAbqfFkpjldbkHGY8JIzRN6XqYRliG8/24FcHm2D2PwW24fl5xMRTVGdrb7iMrwCaIEbLWerGIkXuFWVg==
 
-"@types/ws@^8.2.0":
-  version "8.2.0"
-  resolved "https://registry.yarnpkg.com/@types/ws/-/ws-8.2.0.tgz#75faefbe2328f3b833cb8dc640658328990d04f3"
-  integrity sha512-cyeefcUCgJlEk+hk2h3N+MqKKsPViQgF5boi9TTHSK+PoR9KWBb/C5ccPcDyAqgsbAYHTwulch725DV84+pSpg==
+"@types/ws@^8.2.1":
+  version "8.2.1"
+  resolved "https://registry.yarnpkg.com/@types/ws/-/ws-8.2.1.tgz#7bdf6b12869726c9f3cc3c48485efea5d4505274"
+  integrity sha512-SqQ+LhVZaJi7c7sYVkjWALDigi/Wy7h7Iu72gkQp8Y8OWw/DddEVBrTSKu86pQftV2+Gm8lYM61hadPKqyaIeg==
   dependencies:
     "@types/node" "*"
 
@@ -9663,10 +9673,10 @@ ws@^7.4.6:
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.5.tgz#8b4bc4af518cfabd0473ae4f99144287b33eb881"
   integrity sha512-BAkMFcAzl8as1G/hArkxOxq3G7pjUqQ3gzYbLL0/5zNkph70e+lCoxBGnm6AW1+/aiNeV4fnKqZ8m4GZewmH2w==
 
-ws@^8.2.3:
-  version "8.2.3"
-  resolved "https://registry.yarnpkg.com/ws/-/ws-8.2.3.tgz#63a56456db1b04367d0b721a0b80cae6d8becbba"
-  integrity sha512-wBuoj1BDpC6ZQ1B7DWQBYVLphPWkm8i9Y0/3YdHjHKHiohOJ1ws+3OccDWtH+PoC9DZD5WOTrJvNbWvjS6JWaA==
+ws@^8.3.0:
+  version "8.3.0"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-8.3.0.tgz#7185e252c8973a60d57170175ff55fdbd116070d"
+  integrity sha512-Gs5EZtpqZzLvmIM59w4igITU57lrtYVFneaa434VROv4thzJyV6UjIL3D42lslWlI+D4KzLYnxSwtfuiO79sNw==
 
 xdg-basedir@^4.0.0:
   version "4.0.0"
