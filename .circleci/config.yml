@@ -15,12 +15,14 @@ aliases:
         ignore:
           - main
           - develop
+          - unchained-go
 
   - &only-develop
     filters:
       branches:
         only:
           - develop
+          - unchained-go
 
   - &only-main
     filters:
@@ -195,8 +197,10 @@ jobs:
           at: ~/
       - pulumi-dependencies
       - run:
+          command: ls
+      - run:
           name: pulumi up
-          working_directory: pulumi
+          working_directory: node/pulumi
           command: |
             pulumi stack select $PULUMI_ORG/dependencies
             pulumi config set --path unchained:common.cluster eks
@@ -321,7 +325,7 @@ jobs:
             echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
       - run:
           name: pulumi up
-          working_directory: << parameters.pulumi-dir >>
+          working_directory: node/<< parameters.pulumi-dir >>
           command: |
             pulumi stack select $PULUMI_ORG/<< parameters.pulumi-stack >>
             pulumi config set --path unchained:<< parameters.coinstack >>.stack $PULUMI_ORG/common/dependencies
@@ -358,7 +362,7 @@ jobs:
       - pulumi-dependencies
       - run:
           name: pulumi up
-          working_directory: monitoring
+          working_directory: node/monitoring
           command: |
             pulumi stack select $PULUMI_ORG/prod
             pulumi config set --path unchained:monitoring.stack $PULUMI_ORG/common/dependencies
@@ -387,7 +391,7 @@ jobs:
       - persist_to_workspace:
           root: '~'
           paths:
-            - project/node
+            - project
 
   publish:
     description: publish packages
