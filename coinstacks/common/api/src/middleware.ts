@@ -14,11 +14,14 @@ export function errorHandler(err: Error, req: Request, res: Response, next: Next
     })
   }
 
-  if (err instanceof ApiError) {
-    return res.status(err.statusCode).json(JSON.parse(err.message))
+  if (err.constructor.name === ApiError.prototype.constructor.name) {
+    const e = err as ApiError
+    console.error(e)
+    return res.status(e.statusCode).json(JSON.parse(e.message))
   }
 
   if (err instanceof SyntaxError) {
+    console.error(err)
     return res.status(400).json({
       message: err.message,
     })
@@ -26,7 +29,6 @@ export function errorHandler(err: Error, req: Request, res: Response, next: Next
 
   if (err instanceof Error) {
     console.error(err)
-
     return res.status(500).json({
       message: 'Internal Server Error',
     })
