@@ -109,21 +109,26 @@ commands:
     steps:
       - checkout
       - run:
+          working_directory: node
           name: install openjdk-11
           command: |
             curl -O https://download.java.net/java/ga/jdk11/openjdk-11_linux-x64_bin.tar.gz
             tar zxvf openjdk-11_linux-x64_bin.tar.gz
             echo 'export PATH=$PATH:$(pwd)/jdk-11/bin' >> $BASH_ENV
       - run:
+          working_directory: node
           name: yarn install
           command: yarn install --immutable
       - run:
+          working_directory: node
           name: build
           command: yarn build
       - run:
+          working_directory: node
           name: lint
           command: yarn lint
       - run:
+          working_directory: node
           name: test
           command: yarn test
   pulumi-dependencies:
@@ -382,7 +387,7 @@ jobs:
       - persist_to_workspace:
           root: '~'
           paths:
-            - project
+            - project/node
 
   publish:
     description: publish packages
