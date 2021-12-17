@@ -15,14 +15,12 @@ aliases:
         ignore:
           - main
           - develop
-          - unchained-go
 
   - &only-develop
     filters:
       branches:
         only:
           - develop
-          - unchained-go
 
   - &only-main
     filters:
