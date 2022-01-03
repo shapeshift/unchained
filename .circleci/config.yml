@@ -109,21 +109,26 @@ commands:
     steps:
       - checkout
       - run:
+          working_directory: node
           name: install openjdk-11
           command: |
             curl -O https://download.java.net/java/ga/jdk11/openjdk-11_linux-x64_bin.tar.gz
             tar zxvf openjdk-11_linux-x64_bin.tar.gz
             echo 'export PATH=$PATH:$(pwd)/jdk-11/bin' >> $BASH_ENV
       - run:
+          working_directory: node
           name: yarn install
           command: yarn install --immutable
       - run:
+          working_directory: node
           name: build
           command: yarn build
       - run:
+          working_directory: node
           name: lint
           command: yarn lint
       - run:
+          working_directory: node
           name: test
           command: yarn test
   pulumi-dependencies:
@@ -190,8 +195,10 @@ jobs:
           at: ~/
       - pulumi-dependencies
       - run:
+          command: ls
+      - run:
           name: pulumi up
-          working_directory: pulumi
+          working_directory: node/pulumi
           command: |
             pulumi stack select $PULUMI_ORG/dependencies
             pulumi config set --path unchained:common.cluster eks
@@ -316,7 +323,7 @@ jobs:
             echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
       - run:
           name: pulumi up
-          working_directory: << parameters.pulumi-dir >>
+          working_directory: node/<< parameters.pulumi-dir >>
           command: |
             pulumi stack select $PULUMI_ORG/<< parameters.pulumi-stack >>
             pulumi config set --path unchained:<< parameters.coinstack >>.stack $PULUMI_ORG/common/dependencies
@@ -353,7 +360,7 @@ jobs:
       - pulumi-dependencies
       - run:
           name: pulumi up
-          working_directory: monitoring
+          working_directory: node/monitoring
           command: |
             pulumi stack select $PULUMI_ORG/prod
             pulumi config set --path unchained:monitoring.stack $PULUMI_ORG/common/dependencies

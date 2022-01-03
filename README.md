@@ -9,13 +9,11 @@ Unchained is a multi-blockchain backend interface with three main goals:
 
 ## Table Of Contents
 
+- [Project Details](#project-details)
 - [Helpful Docs](#helpful-docs)
-- [Project Structure](#project-structure)
 - [Coin Stack Components](#coin-stack-components)
-- [Dependencies](#dependencies)
 - [Notes](#notes)
-- [Initial Setup](#initial-setup)
-- [Ports](#ports)
+- [Local Networking](#local-networking)
 - [Docker-Compose Local Dev Instructions](#docker-compose-local-dev-instructions)
   - [Prerequisites](#prerequisites)
   - [Running](#running)
@@ -23,23 +21,20 @@ Unchained is a multi-blockchain backend interface with three main goals:
   - [Docker Desktop (macOS)](docs/docker-desktop.md)
   - [Minikube (Linux)](docs/minikube.md)
 
+## Project Details
+
+- [Go](go/README.md)
+- [Node](node/README.md)
+
 ## Helpful Docs
 
 - [Pulumi](https://www.pulumi.com/docs/)
 - [Kubernetes](https://kubernetes.io/docs/home/)
 - [OpenAPI](https://github.com/OAI/OpenAPI-Specification)
-- [TSOA](https://tsoa-community.github.io/docs/)
-
-## Project Structure
-
-- `packages` - shared internal packages across coinstacks
-- `coinstacks/common` - common coinstack logic to reduce duplication
-- `coinstacks/{coin}` - coin specific logic
-- `**/pulumi` - pulumi infrastructure logic for deployment
 
 ## Coin Stack Components
 
-- **Blockchain Full Node** - coin specific daemon providing historical blockchain data (ie. bitcoind, geth, etc)
+- **Blockchain Full Node** - coin specific daemon providing historical blockchain data (ex. bitcoind, geth, etc)
 - **Indexer** - indexes transaction and balance history by address (if not provided by the node directly)
 - **[Ingester](docs/ingester.md)** - ingests blockchain data providing:
   - websocket notification of any newly confirmed or pending transactions
@@ -49,34 +44,11 @@ Unchained is a multi-blockchain backend interface with three main goals:
 
 ![Coin Stack Architecture](docs/coinstack.png)
 
-## Dependencies
-
-- [Node.js](https://nodejs.org/en/)
-  - [NVM](https://github.com/nvm-sh/nvm#installing-and-updating) \(recommended to install Node.js and npm\)
-- [Yarn](https://classic.yarnpkg.com/en/docs/install)
-- [Docker](https://docs.docker.com/get-docker/)
-
 ## Notes
 
 - The ethereum coinstack is used in all examples. If you wish to run a different coinstack, just replace `ethereum` with the coinstack name you wish to run
-- All paths are relative to the root unchained directory (ex. `unchained/{path}`)
+- All paths are relative to the root unchained project directory (ex. `unchained/[go|node]/{path}`)
 - All `pulumi` commands should be run in a `pulumi/` directory (ex. `pulumi/`, `coinstacks/ethereum/pulumi/`)
-
-## Initial Setup
-
-- Install [Node.js LTS](https://nodejs.org/en/)
-  - (Optional) use nvm to automatically install the node version specified in `.nvmrc`
-    ```sh
-    nvm use
-    ```
-- Install [Yarn](https://classic.yarnpkg.com/en/docs/install)
-  ```sh
-  npm install --global yarn
-  ```
-- Install dependencies and build:
-  ```sh
-  yarn && yarn build
-  ```
 
 ## Local Networking 
 
@@ -87,8 +59,6 @@ Traefik routes requests based on host name. which includes the coinstack name. F
 - `mongo.bitcoin.localhost`
 - `rabbit-admin.bitcoin.localhost`
 
-
-
 ## Docker-Compose Local Dev Instructions
 
 #### _Lightweight local development environment_
@@ -96,29 +66,28 @@ Traefik routes requests based on host name. which includes the coinstack name. F
 #### **Prerequisites**
 
 - Install [docker-compose](https://docs.docker.com/compose/install/)
-- Copy sample env file:
+- Copy sample env or config file:
   ```sh
   cp coinstacks/ethereum/sample.env coinstacks/ethereum/.env
   ```
-- Fill out any missing environment variables
+  ```sh
+  cp coinstacks/cosmos/sample.config.json coinstacks/cosmos/config.json
+  ```
+- Fill out any missing variables
 
 #### **Running**
 
-- To start up the reverse proxy and hot reloading for files run from the root of the project
+- Start the reverse proxy and any common service (ex. hot reloading)
   ```sh
   docker-compose up
   ```
 
-- To spin up a coinstack:
-  - API only:
-    ```sh
-    cd coinstacks/ethereum && docker-compose up api
-    ```
-  - API + Ingester (more resource intensive):
-    ```sh
-    cd coinstacks/ethereum && docker-compose up
-    ```
-- To completely tear down the coinstack (including docker volumes):
+- Start a coinstack:
+  ```sh
+  cd coinstacks/ethereum && docker-compose up
+  ```
+
+- Tear down a coinstack (including docker volumes):
   ```sh
   cd coinstacks/ethereum && docker-compose down -v
   ```

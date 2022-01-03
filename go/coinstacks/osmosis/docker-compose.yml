@@ -1,0 +1,16 @@
+version: '3.4'
+services:
+  api:
+    image: go-unchained-local
+    build:
+      context: ../../build
+      dockerfile: Dockerfile.local
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.osmosis-api.rule=Host(`api.osmosis.localhost`)'
+      - 'traefik.http.services.osmosis-api.loadbalancer.server.port=3000'
+    command: ["-r", "(pkg|internal|osmosis)", "--", "go", "run", "cmd/osmosis/main.go"]
+    working_dir: /app
+    volumes:
+      - ../..:/app
+      - $GOPATH/pkg/mod/cache:/go/pkg/mod/cache
