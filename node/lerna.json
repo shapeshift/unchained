@@ -1,0 +1,18 @@
+{
+  "version": "5.0.0",
+  "npmClient": "yarn",
+  "command": {
+    "publish": {
+      "message": "chore(release): publish %v",
+      "ignoreChanges": [
+        "**/*.md"
+      ]
+    }
+  },
+  "packages": [
+    "packages/*",
+    "coinstacks/**/*",
+    "pulumi/*"
+  ],
+  "useWorkspaces": true
+}

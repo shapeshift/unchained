@@ -1,0 +1,6 @@
+{
+        "lcdUrl": "osmosis-1--lcd--archive.datahub.figment.io",
+        "grpcUrl": "osmosis-1--grpc--archive.grpc.datahub.figment.io:443",
+        "rpcUrl": "osmosis-1--rpc--archive.datahub.figment.io",
+        "apiKey": ""
+}

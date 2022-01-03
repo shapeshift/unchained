@@ -1,0 +1,5 @@
+FROM golang:1.17.5
+
+RUN go install github.com/cespare/reflex@latest
+
+ENTRYPOINT ["reflex", "-s"]

@@ -1,0 +1,22 @@
+{
+  "name": "@shapeshiftoss/bitcoin-ingester",
+  "version": "5.0.0",
+  "license": "MIT",
+  "private": true,
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist node_modules"
+  },
+  "dependencies": {
+    "@shapeshiftoss/blockbook": "^5.0.0",
+    "@shapeshiftoss/common-ingester": "^5.0.0",
+    "@shapeshiftoss/common-mongo": "^5.0.0",
+    "@shapeshiftoss/logger": "^1.0.0",
+    "@shapeshiftoss/thorchain": "^5.0.0",
+    "@shapeshiftoss/unchained-tx-parser": "^5.0.0",
+    "axios": "^0.21.2"
+  }
+}
