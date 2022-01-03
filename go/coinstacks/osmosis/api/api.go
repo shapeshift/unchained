@@ -14,13 +14,12 @@ import (
 var logger = log.WithoutFields()
 
 type API struct {
-			httpClient: httpClient,
-			grpcClient: grpcClient,
+	handler *Handler
 }
 
 func Start(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, errChan chan<- error) {
 	a := API{
-		handler: Handler{
+		handler: &Handler{
 			httpClient: httpClient,
 			grpcClient: grpcClient,
 		},
