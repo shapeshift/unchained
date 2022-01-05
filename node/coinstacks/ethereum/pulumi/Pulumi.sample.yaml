@@ -10,9 +10,9 @@ config:
     ## for individual accounts, use your account name (pulumi whoami) for the organization component.
     stack: # run `pulumi stack ls` in `unchained/pulumi` and reference the url
 
-    ## environment - specify environment if you deployed multiples into cluster. specified as 'additionalEnvironments' in the cluster stack 
+    ## environment - specify environment if you deployed multiples into cluster. specified as 'additionalEnvironments' in the cluster stack
     ## if falsy use default environment created in cluster stack
-    #environment: 
+    #environment:
 
     ## network - chain network (ie. mainnet, testnet, etc.)
     network: mainnet
@@ -27,16 +27,16 @@ config:
 
     ## mongo - if specified a mongo database will be deployed
     mongo:
-      cpuLimit: '0.25'
-      helmChartVersion: '10.19.0'
-      memoryLimit: '256Mi'
+      cpuLimit: "0.25"
+      helmChartVersion: "10.19.0"
+      memoryLimit: "256Mi"
       replicaCount: 1
-      storageSize: '1Gi'
+      storageSize: "1Gi"
 
     rabbit:
-      cpuLimit: '1'
-      memoryLimit: '2Gi'
-      storageSize: '10Gi'
+      cpuLimit: "1"
+      memoryLimit: "2Gi"
+      storageSize: "10Gi"
 
     ## indexer - if specified an indexer service and optional node will be deployed
     ## this is very resource intensive, so you can point at public endpoints instead of running your own.
@@ -47,6 +47,6 @@ config:
     #  storageSize: '250Gi'
     #  daemon:
     #    cpuLimit: '2'
-    #    image: 'ethereum/client-go:v1.10.13'
+    #    image: 'ethereum/client-go:v1.10.15'
     #    memoryLimit: '24Gi'
     #    storageSize: '1500Gi'
