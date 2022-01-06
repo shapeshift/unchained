@@ -221,7 +221,7 @@ export async function deployIngester(
               requests: {
                 cpu: config.isLocal ? '0.5' : '1',
                 memory: config.isLocal ? '512M' : '2Gi',
-              }
+              },
             },
             readinessProbe: {
               exec: { command: ['cat', '/tmp/ready'] },
