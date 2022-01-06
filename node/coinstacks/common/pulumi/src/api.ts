@@ -246,6 +246,16 @@ export async function deployApi(
           ports: [{ containerPort: 3000, name: 'http' }],
           env: [...secretEnvs, ...rabbitCredentials],
           command: config.isLocal ? ['sh', '-c', 'yarn nodemon'] : ['node', `dist/${coinstack}/api/src/app.js`],
+          resources: {
+            limits: {
+              cpu: config.isLocal ? '500m' : '1',
+              memory: config.isLocal ? '512Mi' : '2Gi'
+            },
+            requests: {
+              cpu: config.isLocal ? '500m' : '1',
+              memory: config.isLocal ? '512Mi' : '2Gi'
+            }
+          },
           readinessProbe: {
             httpGet: { path: '/health', port: 3000 },
             initialDelaySeconds: 10,
@@ -280,7 +290,7 @@ export async function deployApi(
       },
       spec: {
         selector: { matchLabels: labels },
-        replicas: 2,
+        replicas: 4,
         template: podSpec,
       },
     },
