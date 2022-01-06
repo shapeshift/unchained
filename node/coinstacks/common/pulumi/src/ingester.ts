@@ -173,8 +173,8 @@ export async function deployIngester(
     worker({ name: 'worker-new-block', path: 'workers/newBlock', replicas: 1 }),
     worker({ name: 'worker-block', path: 'workers/block', replicas: 1 }),
     worker({ name: 'worker-txid', path: 'workers/txid', replicas: 1 }),
-    worker({ name: 'worker-tx', path: 'workers/tx', replicas: 1 }),
-    worker({ name: 'worker-address', path: 'workers/address', replicas: 1 }),
+    worker({ name: 'worker-tx', path: 'workers/tx', replicas: 5 }),
+    worker({ name: 'worker-address', path: 'workers/address', replicas: 5 }),
     worker({ name: 'worker-registry', path: 'workers/registry', replicas: 1 }),
   ]
 
@@ -218,6 +218,10 @@ export async function deployIngester(
                 cpu: config.isLocal ? '0.5' : '1',
                 memory: config.isLocal ? '512M' : '2Gi',
               },
+              requests: {
+                cpu: config.isLocal ? '0.5' : '1',
+                memory: config.isLocal ? '512M' : '2Gi',
+              }
             },
             readinessProbe: {
               exec: { command: ['cat', '/tmp/ready'] },
