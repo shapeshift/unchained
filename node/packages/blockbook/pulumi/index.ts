@@ -146,6 +146,7 @@ export async function deployIndexer(
             exec: {
               command: ['/liveness.sh'],
             },
+            timeoutSeconds: 10,
             initialDelaySeconds: 60,
             periodSeconds: 15,
             failureThreshold: 4,
