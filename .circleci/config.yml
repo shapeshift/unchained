@@ -75,7 +75,7 @@ aliases:
     daemon-image: ethereum/client-go:v1.10.15
     daemon-cpu-limit: '4'
     daemon-memory-limit: 32Gi
-    daemon-storage-size: 1500Gi
+    daemon-storage-size: 2000Gi
     rpc-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8332
 
   - &ethereum-ropsten
