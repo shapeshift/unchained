@@ -100,7 +100,11 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
         tokens,
       }
     } catch (err) {
-      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+      if (err.response) {
+        throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+      }
+
+      throw err
     }
   }
 
@@ -167,7 +171,11 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
           })) ?? [],
       }
     } catch (err) {
-      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+      if (err.response) {
+        throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+      }
+
+      throw err
     }
   }
 
@@ -258,7 +266,11 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
       const { result } = await blockbook.sendTransaction(body.hex)
       return result
     } catch (err) {
-      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+      if (err.response) {
+        throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+      }
+
+      throw err
     }
   }
 }
