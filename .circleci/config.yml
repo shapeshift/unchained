@@ -195,8 +195,6 @@ jobs:
           at: ~/
       - pulumi-dependencies
       - run:
-          command: ls
-      - run:
           name: pulumi up
           working_directory: node/pulumi
           command: |
