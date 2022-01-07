@@ -251,10 +251,6 @@ export async function deployApi(
               cpu: config.isLocal ? '500m' : '1',
               memory: config.isLocal ? '512Mi' : '2Gi',
             },
-            requests: {
-              cpu: config.isLocal ? '500m' : '1',
-              memory: config.isLocal ? '512Mi' : '2Gi',
-            },
           },
           readinessProbe: {
             httpGet: { path: '/health', port: 3000 },
