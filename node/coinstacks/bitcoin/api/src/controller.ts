@@ -115,7 +115,11 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
         nextChangeAddressIndex: nextAddressIndexes[1] ?? 0,
       }
     } catch (err) {
-      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+      if (err.response) {
+        throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+      }
+
+      throw err
     }
   }
 
@@ -188,7 +192,11 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
           })) ?? [],
       }
     } catch (err) {
-      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+      if (err.response) {
+        throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+      }
+
+      throw err
     }
   }
 
@@ -233,7 +241,11 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
       const data = await blockbook.getUtxo(pubkey)
       return data
     } catch (err) {
-      throw new ApiError(err.response, err.response.status, JSON.stringify(err.response.data))
+      if (err.response) {
+        throw new ApiError(err.response, err.response.status, JSON.stringify(err.response.data))
+      }
+
+      throw err
     }
   }
 
@@ -298,7 +310,11 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
       const data = await blockbook.getTransactionSpecific(txid)
       return data as BitcoinTxSpecific
     } catch (err) {
-      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+      if (err.response) {
+        throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+      }
+
+      throw err
     }
   }
 
@@ -323,7 +339,11 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
       const { result } = await blockbook.sendTransaction(body.hex)
       return result
     } catch (err) {
-      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+      if (err.response) {
+        throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+      }
+
+      throw err
     }
   }
 
@@ -352,7 +372,11 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
         return { ...prev, [key]: networkFee }
       }, {})
     } catch (err) {
-      throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+      if (err.response) {
+        throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+      }
+
+      throw err
     }
   }
 }
