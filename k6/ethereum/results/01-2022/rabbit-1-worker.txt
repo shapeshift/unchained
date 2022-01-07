@@ -1,0 +1,13 @@
+address: 0x742d35Cc6634C0532925a3b844Bc454e4438f44e
+txs: 13867
+txHistory fetch: 16s (blockbook)
+
+address-workers 1: 3.5 mins = 66/s
+address-workers 10: 45 sec = 308/s
+
+address: 0xA929022c9107643515F5c777cE9a910F0D1e490C
+txs: 16553
+
+address-workers 1: 1.5 min = 183/s
+address-workers 5: 45 sec = 308/s :check:
+address-workers 10: 45 sec = 308/s
