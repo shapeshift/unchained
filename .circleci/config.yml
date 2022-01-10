@@ -138,6 +138,11 @@ commands:
         type: string
     steps:
       - run:
+          name: add environment variables
+          command: |
+            echo 'export ADDITIONAL_ROOT_DOMAIN_NAME=<< parameters.organization >>_ADDITIONAL_ROOT_DOMAIN_NAME' >> $BASH_ENV
+            echo 'export PULUMI_ACCESS_TOKEN=<< parameters.organization >>_PULUMI_ACCESS_TOKEN' >> $BASH_ENV
+      - run:
           name: install tools
           command: |
             apt update
@@ -183,7 +188,7 @@ commands:
             mkdir ~/.aws
             echo [default] >> ~/.aws/credentials
             echo aws_access_key_id = $<< parameters.organization >>_AWS_ACCESS_KEY_ID >> ~/.aws/credentials
-            echo aws_secret_access_key = $<< parameters.organizaiton >>_AWS_SECRET_ACCESS_KEY >> ~/.aws/credentials
+            echo aws_secret_access_key = $<< parameters.organization >>_AWS_SECRET_ACCESS_KEY >> ~/.aws/credentials
 
 jobs:
   deploy-dependencies:
@@ -194,14 +199,14 @@ jobs:
     parameters:
       organization:
         type: string
-        default: ShapeShift
+        default: SHAPESHIFT
     steps:
       - setup_remote_docker:
           version: 20.10.2
       - attach_workspace:
           at: ~/
-      - pulumi-dependencies
-          organization: << parameters.organization >>
+      - pulumi-dependencies:
+          organization: <<parameters.organization>>
       - run:
           command: ls
       - run:
@@ -260,7 +265,7 @@ jobs:
     parameters:
       organization:
         type: string
-        default: ShapeShift
+        default: SHAPESHIFT
       coinstack:
         description: coinstack name
         type: string
@@ -325,8 +330,8 @@ jobs:
           version: 20.10.2
       - attach_workspace:
           at: ~/
-      - pulumi-dependencies
-          organization: << parameters.organization >>
+      - pulumi-dependencies:
+          organization: <<parameters.organization>>
       - run:
           name: add custom environment variables
           command: |
@@ -370,14 +375,14 @@ jobs:
     parameters:
       organization:
         type: string
-        default: ShapeShift
+        default: SHAPESHIFT
     steps:
       - setup_remote_docker:
           version: 20.10.2
       - attach_workspace:
           at: ~/
-      - pulumi-dependencies
-          organization: << parameters.organization >>
+      - pulumi-dependencies:
+          organization: <<parameters.organization>>
       - run:
           name: pulumi up
           working_directory: node/monitoring
@@ -389,7 +394,7 @@ jobs:
             pulumi config set --path unchained:monitoring.githubOauthID $GITHUB_OAUTH_ID
             pulumi config set --path unchained:monitoring.githubOauthSecret $GITHUB_OAUTH_SECRET --plaintext
             pulumi config set --path unchained:monitoring.alerting true
-            pulumi config set --path unchained:monitoring.opsgenieApiKey $<< parameters.organizations >>_OPSGENIE_API_KEY
+            pulumi config set --path unchained:monitoring.opsgenieApiKey $<< parameters.organization >>_OPSGENIE_API_KEY
             pulumi up -f --yes --suppress-outputs
 
   lint-and-test:
@@ -494,11 +499,10 @@ workflows:
           <<: *only-develop
 
   deploy-monitoring-shapeshift:
+    jobs:
       - approve-monitoring:
           name: approve monitoring stack
           type: approval
-          requires:
-            - deploy common unchained dependencies
           <<: *only-develop
 
       - deploy-monitoring:
@@ -642,11 +646,10 @@ workflows:
           <<: *only-develop
 
   deploy-monitoring-taxistake:
+    jobs:
       - approve-monitoring:
           name: approve monitoring stack
           type: approval
-          requires:
-            - deploy common unchained dependencies
           <<: *only-develop
 
       - deploy-monitoring:
