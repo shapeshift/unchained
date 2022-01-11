@@ -32,6 +32,6 @@ type Tx struct {
 }
 
 type TxHistory struct {
-	Pubkey string `json:"pubkey"`
-	Txs    []Tx   `json:"txs"`
+	api.BaseTxHistory
+	Txs []Tx `json:"txs"`
 }

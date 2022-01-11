@@ -54,23 +54,23 @@ type BaseTx struct {
 	Timestamp   *string `json:"timestamp,omitempty"`
 }
 
-//type TxHistory interface {
-//	pubkey() string
-//	txs() []Tx
-//}
+type TxHistory interface {
+	pubkey() string
+	txs() []Tx
+}
 
-type TxHistory struct {
+type BaseTxHistory struct {
 	Pubkey string `json:"pubkey"`
 	Txs    []Tx   `json:"txs"`
 }
 
-//func (b BaseTxHistory) pubkey() string {
-//	return b.Pubkey
-//}
-//
-//func (b BaseTxHistory) txs() []Tx {
-//	return b.Txs
-//}
+func (b BaseTxHistory) pubkey() string {
+	return b.Pubkey
+}
+
+func (b BaseTxHistory) txs() []Tx {
+	return b.Txs
+}
 
 // BaseAPI interface for all coinstacks to implement
 type BaseAPI interface {

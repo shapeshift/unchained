@@ -56,6 +56,10 @@ func (h *Handler) GetTxHistory(pubkey string) (api.TxHistory, error) {
 		msgs := t.CosmosTx.GetMsgs()
 
 		tx := Tx{
+			BaseTx: api.BaseTx{
+				TxID:        *t.TendermintTx.Hash,
+				BlockHeight: t.TendermintTx.Height,
+			},
 			Events: cosmos.Events(t.TendermintTx.TxResult.Log),
 			Fee: cosmos.Value{
 				Amount: fee.Amount.String(),
@@ -66,18 +70,16 @@ func (h *Handler) GetTxHistory(pubkey string) (api.TxHistory, error) {
 			Index:     int(t.TendermintTx.GetIndex()),
 			Memo:      t.SigningTx.GetMemo(),
 			Messages:  cosmos.Messages(msgs),
-			Tx: api.Tx{
-				TxID:        *t.TendermintTx.Hash,
-				BlockHeight: t.TendermintTx.Height,
-			},
 		}
 
 		txs = append(txs, tx)
 	}
 
 	txHistory := TxHistory{
-		Pubkey: pubkey,
-		Txs:    txs,
+		BaseTxHistory: api.BaseTxHistory{
+			Pubkey: pubkey,
+		},
+		Txs: txs,
 	}
 
 	return txHistory, nil

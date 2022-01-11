@@ -1,5 +1,6 @@
 IMAGE=quay.io/goswagger/swagger
 USER=$(shell id -u):$(shell id -g)
+ROOTDIR=$(shell git rev-parse --show-toplevel)/go
 
 generate:
-	- docker run --rm -it --user $(USER) -e GOPATH=$(HOME)/go:/go -e GOCACHE=/tmp -v "$(HOME):$(HOME)" -w "$(CURDIR)/api" $(IMAGE) generate spec -o swagger.json -m
+	- docker run --rm -it --user $(USER) -e GOCACHE=/tmp -v "$(ROOTDIR):$(ROOTDIR)" -w $(CURDIR) $(IMAGE) generate spec -o api/swagger.json -m
