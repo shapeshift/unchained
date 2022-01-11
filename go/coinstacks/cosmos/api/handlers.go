@@ -10,15 +10,17 @@ type Handler struct {
 	grpcClient *cosmos.GRPCClient
 }
 
-func (h *Handler) GetInfo() (*api.Info, error) {
-	info := &api.Info{
-		Network: "mainnet",
+func (h *Handler) GetInfo() (api.Info, error) {
+	info := Info{
+		BaseInfo: api.BaseInfo{
+			Network: "mainnet",
+		},
 	}
 
 	return info, nil
 }
 
-func (h *Handler) GetAccount(pubkey string) (*Account, error) {
+func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 	accRes, err := h.grpcClient.GetAccount(pubkey)
 	if err != nil {
 		return nil, err
@@ -30,7 +32,7 @@ func (h *Handler) GetAccount(pubkey string) (*Account, error) {
 	}
 
 	account := &Account{
-		Account: api.Account{
+		BaseAccount: api.BaseAccount{
 			Balance: balRes.Amount,
 			Pubkey:  accRes.Address,
 		},
@@ -42,7 +44,7 @@ func (h *Handler) GetAccount(pubkey string) (*Account, error) {
 	return account, nil
 }
 
-func (h *Handler) GetTxHistory(pubkey string) (*TxHistory, error) {
+func (h *Handler) GetTxHistory(pubkey string) (api.TxHistory, error) {
 	res, err := h.httpClient.GetTxHistory(pubkey)
 	if err != nil {
 		return nil, err
@@ -73,7 +75,7 @@ func (h *Handler) GetTxHistory(pubkey string) (*TxHistory, error) {
 		txs = append(txs, tx)
 	}
 
-	txHistory := &TxHistory{
+	txHistory := TxHistory{
 		Pubkey: pubkey,
 		Txs:    txs,
 	}

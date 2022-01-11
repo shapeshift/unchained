@@ -1,3 +1,19 @@
+/**
+Package classification Cosmos Unchained API
+
+Provides access to cosmos chain data
+
+Version: 0.0.1
+License: MIT http://opensource.org/licenses/MIT
+
+Consumes:
+- application/json
+
+Produces:
+- application/json
+
+swagger:meta
+*/
 package api
 
 import (
@@ -25,8 +41,15 @@ func Start(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, errChan
 		},
 	}
 
+	// compile check to ensure Handler implements BaseAPI
+	var _ api.BaseAPI = a.handler
+
 	router := mux.NewRouter()
 	router.Use(api.Logger)
+
+	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		handleResponse(w, http.StatusOK, map[string]string{"status": "up", "coinstack": "cosmos"})
+	}).Methods("GET")
 
 	v1 := router.PathPrefix("/api/v1").Subrouter()
 	v1.HandleFunc("/info", a.Info).Methods("GET")
@@ -42,6 +65,14 @@ func Start(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, errChan
 	}
 }
 
+/**
+swagger:route GET /api/v1/info v1 GetInfo
+
+Get information about the running coinstack
+
+responses:
+	200: Info
+*/
 func (a *API) Info(w http.ResponseWriter, r *http.Request) {
 	info, err := a.handler.GetInfo()
 	if err != nil {
