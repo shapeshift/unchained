@@ -57,6 +57,12 @@ export const getConfig = async (): Promise<BitcoinConfig> => {
     missingRequiredConfig.push(`network (${SUPPORTED_NETWORKS})`)
   }
 
+  if (config.api) {
+    if (!config.api.cpuLimit) missingRequiredConfig.push('api.cpuLimit')
+    if (!config.api.memoryLimit) missingRequiredConfig.push('api.memoryLimit')
+    if (!config.api.replicas) missingRequiredConfig.push('api.replicas')
+  }
+
   if (config.mongo) {
     config.mongo.storageClass = getStorageClassName(config.cluster)
 
@@ -84,6 +90,12 @@ export const getConfig = async (): Promise<BitcoinConfig> => {
     if (!config.indexer.daemon.memoryLimit) missingRequiredConfig.push('indexer.daemon.memoryLimit')
     if (!config.indexer.daemon.storageSize) missingRequiredConfig.push('indexer.daemon.storageSize')
   }
+
+  if (config.ingester) {
+    if (!config.ingester.cpuLimit) missingRequiredConfig.push('ingester.cpuLimit')
+    if (!config.ingester.memoryLimit) missingRequiredConfig.push('ingester.memoryLimit')
+    if (!config.ingester.replicas) missingRequiredConfig.push('ingester.replicas')
+    }
 
   if (config.rabbit) {
     config.rabbit.storageClassName = getStorageClassName(config.cluster)

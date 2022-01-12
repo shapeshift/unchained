@@ -54,6 +54,9 @@ aliases:
     api-replicas: 4
     api-cpu-limit: "1"
     api-memory-limit: "2Gi"
+    ingester-replicas: 3
+    ingester-cpu-limit: "1"
+    ingester-memory-limit: "2Gi"
     rpc-url: http://user:password@bitcoin-indexer-svc.unchained.svc.cluster.local:8332
 
   - &ethereum
@@ -82,6 +85,9 @@ aliases:
     api-replicas: 4
     api-cpu-limit: "1"
     api-memory-limit: "2Gi"
+    ingester-replicas: 3
+    ingester-cpu-limit: "1"
+    ingester-memory-limit: "2Gi"
     rpc-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8332
 
   - &ethereum-ropsten
@@ -110,6 +116,9 @@ aliases:
     api-replicas: 4
     api-cpu-limit: "1"
     api-memory-limit: "2Gi"
+    ingester-replicas: 3
+    ingester-cpu-limit: "1"
+    ingester-memory-limit: "2Gi"
     rpc-url: http://ethereum-ropsten-indexer-svc.unchained.svc.cluster.local:8332
 
 commands:
@@ -324,6 +333,12 @@ jobs:
         type: string
       api-replicas:
         type: integer
+      ingester-cpu-limit:
+        type: string
+      ingester-memory-limit:
+        type: string
+      ingester-replicas:
+        type: integer
     steps:
       - setup_remote_docker:
           version: 20.10.2
@@ -368,6 +383,9 @@ jobs:
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.cpuLimit << parameters.daemon-cpu-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.memoryLimit << parameters.daemon-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.storageSize << parameters.daemon-storage-size >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.ingester.cpuLimit << parameters.ingester-cpu-limit >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.ingester.memoryLimit << parameters.ingester-memory-limit >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.ingester.replicas << parameters.replicas >>
             << parameters.pulumi-command >>
 
   deploy-monitoring:
@@ -456,6 +474,9 @@ workflows:
           api-replicas: 2
           api-cpu-limit: "300m"
           api-memory-limit: "1Gi"
+          ingester-replicas: 2
+          ingester-cpu-limit: "500m"
+          ingester-memory-limit: "2Gi"
           requires:
             - deploy common unchained dependencies
           <<: *only-develop
@@ -476,6 +497,9 @@ workflows:
           api-replicas: 2
           api-cpu-limit: "300m"
           api-memory-limit: "1Gi"
+          ingester-replicas: 2
+          ingester-cpu-limit: "500m"
+          ingester-memory-limit: "2Gi"
           requires:
             - deploy common unchained dependencies
           <<: *only-develop
@@ -497,6 +521,9 @@ workflows:
           api-replicas: 2
           api-cpu-limit: "300m"
           api-memory-limit: "1Gi"
+          ingester-replicas: 2
+          ingester-cpu-limit: "500m"
+          ingester-memory-limit: "2Gi"
           requires:
             - deploy common unchained dependencies
           <<: *only-develop

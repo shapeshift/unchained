@@ -27,6 +27,9 @@ config:
     ## ingester - if specified all ingestion workers will be deployed
     ingester:
       enableDatadogLogs: false
+      cpuLimit: '500m'
+      memoryLimit: '1Gi'
+      replicas: '2' ## Current HA ingester workers are tx and address, all other workers will be single instance
 
     ## mongo - if specified a mongo database will be deployed
     mongo:
