@@ -33,7 +33,7 @@ func Logger(next http.Handler) http.Handler {
 
 		statusLogger := log.WithFields(log.Fields{"method": r.Method, "statusCode": sw.status, "responseTime": fmt.Sprintf("%s", time.Since(t))})
 
-		if sw.status != http.StatusOK {
+		if sw.status < http.StatusOK || sw.status >= http.StatusBadRequest {
 			statusLogger.Errorf("%s", r.RequestURI)
 			return
 		}

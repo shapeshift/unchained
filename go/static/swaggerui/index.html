@@ -3,29 +3,26 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <title>Swagger UI</title>
+    <title>ShapeShift API Docs</title>
     <link rel="stylesheet" type="text/css" href="./swagger-ui.css" />
-    <link rel="icon" type="image/png" href="./favicon-32x32.png" sizes="32x32" />
-    <link rel="icon" type="image/png" href="./favicon-16x16.png" sizes="16x16" />
+    <link rel="icon" type="image/png" href="./favi-blue.png" sizes="32x32" />
     <style>
-      html
-      {
+      html {
         box-sizing: border-box;
         overflow: -moz-scrollbars-vertical;
         overflow-y: scroll;
       }
-
+      .topbar {
+        display: none;
+      }
       *,
       *:before,
-      *:after
-      {
+      *:after { 
         box-sizing: inherit;
       }
-
-      body
-      {
+      body {
         margin:0;
-        background: #fafafa;
+        background: #fafafa; 
       }
     </style>
   </head>
@@ -39,7 +36,7 @@
     window.onload = function() {
       // Begin Swagger UI call region
       const ui = SwaggerUIBundle({
-        url: "https://petstore.swagger.io/v2/swagger.json",
+        url: "/swagger",
         dom_id: '#swagger-ui',
         deepLinking: true,
         presets: [

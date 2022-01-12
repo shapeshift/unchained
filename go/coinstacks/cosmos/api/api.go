@@ -58,8 +58,8 @@ func Start(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, errChan
 	v1Account.HandleFunc("/{pubkey}/txs", a.TxHistory).Methods("GET")
 
 	// docs redirect paths
-	//r.HandleFunc("/", docsRedirect).Methods("GET")
-	//r.HandleFunc("/docs", docsRedirect).Methods("GET")
+	r.HandleFunc("/", docsRedirect).Methods("GET")
+	r.HandleFunc("/docs", docsRedirect).Methods("GET")
 
 	http.Handle("/", r)
 
