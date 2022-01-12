@@ -17,6 +17,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"path/filepath"
 
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
@@ -42,25 +43,42 @@ func Start(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, errChan
 	// compile check to ensure Handler implements BaseAPI
 	var _ api.BaseAPI = a.handler
 
-	router := mux.NewRouter()
-	router.Use(api.Logger)
+	r := mux.NewRouter()
+	r.Use(api.Logger)
 
-	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		handleResponse(w, http.StatusOK, map[string]string{"status": "up", "coinstack": "cosmos"})
-	}).Methods("GET")
+	r.HandleFunc("/health", health).Methods("GET")
 
-	v1 := router.PathPrefix("/api/v1").Subrouter()
+	r.HandleFunc("/swagger", swagger).Methods("GET")
+	r.PathPrefix("/docs/").Handler(http.StripPrefix("/docs/", http.FileServer(http.Dir("./static/swaggerui"))))
+
+	v1 := r.PathPrefix("/api/v1").Subrouter()
 	v1.HandleFunc("/info", a.Info).Methods("GET")
 	v1Account := v1.PathPrefix("/account").Subrouter()
 	v1Account.HandleFunc("/{pubkey}", a.Account).Methods("GET")
 	v1Account.HandleFunc("/{pubkey}/txs", a.TxHistory).Methods("GET")
 
-	http.Handle("/", router)
+	// docs redirect paths
+	//r.HandleFunc("/", docsRedirect).Methods("GET")
+	//r.HandleFunc("/docs", docsRedirect).Methods("GET")
+
+	http.Handle("/", r)
 
 	logger.Info("serving application")
-	if err := http.ListenAndServe(":3000", router); err != nil {
+	if err := http.ListenAndServe(":3000", r); err != nil {
 		errChan <- errors.Wrap(err, "error serving application")
 	}
+}
+
+func health(w http.ResponseWriter, r *http.Request) {
+	handleResponse(w, http.StatusOK, map[string]string{"status": "up", "coinstack": "cosmos"})
+}
+
+func swagger(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, filepath.FromSlash("/app/coinstacks/cosmos/api/swagger.json"))
+}
+
+func docsRedirect(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/docs/", http.StatusFound)
 }
 
 // swagger:route GET /api/v1/info v1 GetInfo
