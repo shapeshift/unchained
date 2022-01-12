@@ -20,6 +20,10 @@ config:
     ## api - if specified an api service will be deployed
     api:
       enableDatadogLogs: false
+      cpuLimit: '1'
+      memoryLimit: '2Gi'
+      replicas: 4
+
 
     ## ingester - if specified all ingestion workers will be deployed
     ingester:
