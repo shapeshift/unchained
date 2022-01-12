@@ -13,3 +13,7 @@
 ## Initial Setup
 
 - Install [Golang](https://go.dev/doc/install)
+- Make coinstacks
+  ```sh
+  make
+  ```
