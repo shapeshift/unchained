@@ -19,6 +19,6 @@
     "@shapeshiftoss/unchained-tx-parser": "^5.0.0",
     "axios": "^0.21.2",
     "bignumber.js": "^9.0.1",
-    "ethers": "^5.4.0"
+    "ethers": "^5.5.3"
   }
 }
