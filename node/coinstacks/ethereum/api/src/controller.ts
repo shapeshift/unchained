@@ -51,12 +51,13 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
    *
    * @param {string} pubkey account address
    *
-   * @returns {Promise<Account>} account details
+   * @returns {Promise<EthereumAccount>} account details
    *
    * @example pubkey "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
    */
   @Example<EthereumAccount>({
     balance: '284809805024198107',
+    unconfirmedBalance: '0',
     nonce: 1,
     pubkey: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
     tokens: [
@@ -95,6 +96,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
 
       return {
         balance: data.balance,
+        unconfirmedBalance: data.unconfirmedBalance,
         nonce: Number(data.nonce ?? 0),
         pubkey: data.address,
         tokens,
