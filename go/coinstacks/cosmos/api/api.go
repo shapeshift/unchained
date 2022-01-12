@@ -1,19 +1,17 @@
-/**
-Package classification Cosmos Unchained API
-
-Provides access to cosmos chain data
-
-Version: 0.0.1
-License: MIT http://opensource.org/licenses/MIT
-
-Consumes:
-- application/json
-
-Produces:
-- application/json
-
-swagger:meta
-*/
+// Package classification Cosmos Unchained API
+//
+// Provides access to cosmos chain data
+//
+// Version: 5.0.0
+// License: MIT http://opensource.org/licenses/MIT
+//
+// Consumes:
+// - application/json
+//
+// Produces:
+// - application/json
+//
+// swagger:meta
 package api
 
 import (
@@ -65,14 +63,15 @@ func Start(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, errChan
 	}
 }
 
-/**
-swagger:route GET /api/v1/info v1 GetInfo
-
-Get information about the running coinstack
-
-responses:
-	200: Info
-*/
+// swagger:route GET /api/v1/info v1 GetInfo
+//
+// Get information about the running coinstack
+//
+// produces:
+//   - application/json
+//
+// responses:
+//   200: Info
 func (a *API) Info(w http.ResponseWriter, r *http.Request) {
 	info, err := a.handler.GetInfo()
 	if err != nil {
@@ -81,6 +80,18 @@ func (a *API) Info(w http.ResponseWriter, r *http.Request) {
 	handleResponse(w, http.StatusOK, info)
 }
 
+// swagger:route GET /api/v1/account/{pubkey} v1 GetAccount
+//
+// Get account details by address
+//
+// produces:
+//   - application/json
+//
+// responses:
+//   200: Account
+//   400: BadRequestError
+//   422: ValidationError
+//   500: InternalServerError
 func (a *API) Account(w http.ResponseWriter, r *http.Request) {
 	pubkey, ok := mux.Vars(r)["pubkey"]
 	if !ok || pubkey == "" {
@@ -122,5 +133,17 @@ func handleResponse(w http.ResponseWriter, status int, res interface{}) {
 func handleError(w http.ResponseWriter, status int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(api.Error{Message: message})
+
+	var e interface{}
+
+	switch status {
+	case http.StatusBadRequest:
+		e = api.BadRequestError{Error: message}
+	case http.StatusInternalServerError:
+		e = api.InternalServerError{Message: message}
+	default:
+		e = api.Error{Message: message}
+	}
+
+	json.NewEncoder(w).Encode(e)
 }

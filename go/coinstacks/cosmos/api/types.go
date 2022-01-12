@@ -5,18 +5,26 @@ import (
 	"github.com/shapeshift/go-unchained/pkg/cosmos"
 )
 
-//Contains info about the running coinstack
-//swagger:model Info
+// Contains info about the running coinstack
+// swagger:model Info
 type Info struct {
 	// swagger:allOf
 	api.BaseInfo
 }
 
+// Contains info about account details for an address or xpub
+// swagger:model Account
 type Account struct {
+	// swagger:allOf
 	api.BaseAccount
-	AccountNumber int            `json:"accountNumber"`
-	Sequence      int            `json:"sequence"`
-	Assets        []cosmos.Value `json:"assets"`
+	// required: true
+	// example: 420
+	AccountNumber int `json:"accountNumber"`
+	// required: true
+	// example: 69
+	Sequence int `json:"sequence"`
+	// required: true
+	Assets []cosmos.Value `json:"assets"`
 }
 
 type Tx struct {
