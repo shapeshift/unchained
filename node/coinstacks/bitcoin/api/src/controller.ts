@@ -11,8 +11,15 @@ import {
   TxHistory,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { BitcoinAPI, BitcoinAccount, BitcoinTxSpecific, BTCNetworkFee, BTCNetworkFees, Utxo } from './models'
-import { Account } from '@shapeshiftoss/common-api'
+import {
+  BitcoinAddress,
+  BitcoinAPI,
+  BitcoinAccount,
+  BitcoinTxSpecific,
+  BTCNetworkFee,
+  BTCNetworkFees,
+  Utxo,
+} from './models'
 
 const NETWORK = process.env.NETWORK
 const INDEXER_URL = process.env.INDEXER_URL
@@ -55,7 +62,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
    *
    * @param {string} pubkey account address or xpub
    *
-   * @returns {Promise<Account>} account details
+   * @returns {Promise<BitcoinAccount>} account details
    *
    * @example pubkey "336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU"
    * @example pubkey "xpub6CUGRUonZSQ4TWtTMmzXdrXDtypWKiKrhko4egpiMZbpiaQL2jkwSB1icqYh2cfDfVxdx4df189oLKnC5fSwqPfgyP3hooxujYzAu3fDVmz"
@@ -63,11 +70,13 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   @Example<BitcoinAccount>({
     pubkey: '336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU',
     balance: '974652',
+    unconfirmedBalance: '0',
   })
   @Example<BitcoinAccount>({
     pubkey:
       'xpub6CUGRUonZSQ4TWtTMmzXdrXDtypWKiKrhko4egpiMZbpiaQL2jkwSB1icqYh2cfDfVxdx4df189oLKnC5fSwqPfgyP3hooxujYzAu3fDVmz',
     balance: '12688908',
+    unconfirmedBalance: '0',
     addresses: [{ pubkey: '1EfgV2Hr5CDjXPavHDpDMjmU33BA2veHy6', balance: '10665' }],
     nextReceiveAddressIndex: 0,
     nextChangeAddressIndex: 0,
@@ -86,7 +95,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
       }
 
       // list of all used addresses with additional derived addresses up to gap limit of 20, including any detected balances
-      const addresses = (data.tokens ?? []).map<Account>((token) => ({
+      const addresses = (data.tokens ?? []).map<BitcoinAddress>((token) => ({
         balance: token.balance ?? '0',
         pubkey: token.name,
       }))
@@ -110,6 +119,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
       return {
         pubkey: data.address,
         balance: data.balance,
+        unconfirmedBalance: data.unconfirmedBalance,
         addresses,
         nextReceiveAddressIndex: nextAddressIndexes[0] ?? 0,
         nextChangeAddressIndex: nextAddressIndexes[1] ?? 0,
