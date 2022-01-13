@@ -235,24 +235,30 @@ jobs:
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r5a.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r5b.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[3] r5n.4xlarge
-            pulumi config set --path unchained:common.traefik.replicas 10
-            pulumi config set --path unchained:common.traefik.resources.cpu 500m
-            pulumi config set --path unchained:common.traefik.resources.memory 512Mi
-            pulumi config set --path unchained:common.traefik.whitelist[0] 173.245.48.0/20
-            pulumi config set --path unchained:common.traefik.whitelist[1] 103.21.244.0/22
-            pulumi config set --path unchained:common.traefik.whitelist[2] 103.22.200.0/22
-            pulumi config set --path unchained:common.traefik.whitelist[3] 103.31.4.0/22
-            pulumi config set --path unchained:common.traefik.whitelist[4] 141.101.64.0/18
-            pulumi config set --path unchained:common.traefik.whitelist[5] 108.162.192.0/18
-            pulumi config set --path unchained:common.traefik.whitelist[6] 190.93.240.0/20
-            pulumi config set --path unchained:common.traefik.whitelist[7] 188.114.96.0/20
-            pulumi config set --path unchained:common.traefik.whitelist[8] 197.234.240.0/22
-            pulumi config set --path unchained:common.traefik.whitelist[9] 198.41.128.0/17
-            pulumi config set --path unchained:common.traefik.whitelist[10] 162.158.0.0/15
-            pulumi config set --path unchained:common.traefik.whitelist[11] 104.16.0.0/13
-            pulumi config set --path unchained:common.traefik.whitelist[12] 104.24.0.0/14
-            pulumi config set --path unchained:common.traefik.whitelist[13] 172.64.0.0/13
-            pulumi config set --path unchained:common.traefik.whitelist[14] 131.0.72.0/22
+            pulumi config set --path unchained:common.eks.traefik.replicas 7
+            pulumi config set --path unchained:common.eks.traefik.resources.cpu 500m
+            pulumi config set --path unchained:common.eks.traefik.resources.memory 512Mi
+            pulumi config set --path unchained:common.eks.traefik.whitelist[0] 173.245.48.0/20
+            pulumi config set --path unchained:common.eks.traefik.whitelist[1] 103.21.244.0/22
+            pulumi config set --path unchained:common.eks.traefik.whitelist[2] 103.22.200.0/22
+            pulumi config set --path unchained:common.eks.traefik.whitelist[3] 103.31.4.0/22
+            pulumi config set --path unchained:common.eks.traefik.whitelist[4] 141.101.64.0/18
+            pulumi config set --path unchained:common.eks.traefik.whitelist[5] 108.162.192.0/18
+            pulumi config set --path unchained:common.eks.traefik.whitelist[6] 190.93.240.0/20
+            pulumi config set --path unchained:common.eks.traefik.whitelist[7] 188.114.96.0/20
+            pulumi config set --path unchained:common.eks.traefik.whitelist[8] 197.234.240.0/22
+            pulumi config set --path unchained:common.eks.traefik.whitelist[9] 198.41.128.0/17
+            pulumi config set --path unchained:common.eks.traefik.whitelist[10] 162.158.0.0/15
+            pulumi config set --path unchained:common.eks.traefik.whitelist[11] 104.16.0.0/13
+            pulumi config set --path unchained:common.eks.traefik.whitelist[12] 104.24.0.0/14
+            pulumi config set --path unchained:common.eks.traefik.whitelist[13] 172.64.0.0/13
+            pulumi config set --path unchained:common.eks.traefik.whitelist[14] 131.0.72.0/22
+            pulumi config set --path unchained:common.eks.traefik.whitelist[15] $AWS_NAT_ADDRESS_0
+            pulumi config set --path unchained:common.eks.traefik.whitelist[16] $AWS_NAT_ADDRESS_1
+            pulumi config set --path unchained:common.eks.traefik.whitelist[17] $AWS_NAT_ADDRESS_2
+            pulumi config set --path unchained:common.eks.traefik.whitelist[18] $VPN_ADDRESS_0
+            pulumi config set --path unchained:common.eks.traefik.whitelist[19] $VPN_ADDRESS_1
+            pulumi config set --path unchained:common.eks.traefik.whitelist[20] $VPN_ADDRESS_2
             pulumi config set --path unchained:common.dockerhub.username $DOCKERHUB_USERNAME
             pulumi config set --path unchained:common.dockerhub.password $DOCKERHUB_PASSWORD --plaintext
             pulumi config set --path unchained:common.dockerhub.server docker.io
