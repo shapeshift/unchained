@@ -391,7 +391,7 @@ jobs:
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.storageSize << parameters.daemon-storage-size >>
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.cpuLimit << parameters.ingester-cpu-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.memoryLimit << parameters.ingester-memory-limit >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.ingester.replicas << parameters.replicas >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.ingester.replicas << parameters.ingester-replicas >>
             << parameters.pulumi-command >>
 
   deploy-monitoring:
