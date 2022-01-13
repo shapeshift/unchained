@@ -9,6 +9,9 @@ import { Input, Resource } from '@pulumi/pulumi'
 import { buildAndPushImage, Config, hasTag, getBaseHash } from './index'
 
 export interface ApiConfig {
+  cpuLimit: string
+  memoryLimit: string
+  replicas: number
   enableDatadogLogs?: boolean
 }
 
@@ -248,8 +251,8 @@ export async function deployApi(
           command: config.isLocal ? ['sh', '-c', 'yarn nodemon'] : ['node', `dist/${coinstack}/api/src/app.js`],
           resources: {
             limits: {
-              cpu: config.isLocal ? '500m' : '1',
-              memory: config.isLocal ? '512Mi' : '2Gi',
+              cpu: config.api.cpuLimit,
+              memory: config.api.memoryLimit,
             },
           },
           readinessProbe: {
@@ -286,7 +289,7 @@ export async function deployApi(
       },
       spec: {
         selector: { matchLabels: labels },
-        replicas: 4,
+        replicas: config.api.replicas,
         template: podSpec,
       },
     },
