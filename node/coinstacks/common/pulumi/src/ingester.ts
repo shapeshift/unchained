@@ -220,7 +220,7 @@ export async function deployIngester(
             resources: {
               limits: {
                 cpu: config.ingester?.cpuLimit ?? '500m',
-                memory: config.ingester?.memoryLimit ?? '512Mi'
+                memory: config.ingester?.memoryLimit ?? '512Mi',
               },
             },
             readinessProbe: {

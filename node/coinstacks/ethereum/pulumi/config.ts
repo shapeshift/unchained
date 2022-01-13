@@ -95,7 +95,7 @@ export const getConfig = async (): Promise<EthereumConfig> => {
     if (!config.ingester.cpuLimit) missingRequiredConfig.push('ingester.cpuLimit')
     if (!config.ingester.memoryLimit) missingRequiredConfig.push('ingester.memoryLimit')
     if (!config.ingester.replicas) missingRequiredConfig.push('ingester.replicas')
-    }
+  }
 
   if (config.rabbit) {
     config.rabbit.storageClassName = getStorageClassName(config.cluster)
