@@ -9,6 +9,9 @@ import { Input, output, Resource } from '@pulumi/pulumi'
 import { buildAndPushImage, Config, hasTag, getBaseHash } from './index'
 
 export interface IngesterConfig {
+  cpuLimit: string
+  memoryLimit: string
+  replicas: number
   enableDatadogLogs?: boolean
 }
 
@@ -167,14 +170,15 @@ export async function deployIngester(
   const socket = (s: Socket): Socket => s
   const worker = (w: Worker): Worker => w
 
+  // All ingester workers are single instance except tx and address workers
   const workers: Workers = [
     socket({ name: 'socket-new-transaction', path: 'sockets/newTransaction', replicas: 1 }),
     socket({ name: 'socket-new-block', path: 'sockets/newBlock', replicas: 1 }),
     worker({ name: 'worker-new-block', path: 'workers/newBlock', replicas: 1 }),
     worker({ name: 'worker-block', path: 'workers/block', replicas: 1 }),
     worker({ name: 'worker-txid', path: 'workers/txid', replicas: 1 }),
-    worker({ name: 'worker-tx', path: 'workers/tx', replicas: 5 }),
-    worker({ name: 'worker-address', path: 'workers/address', replicas: 5 }),
+    worker({ name: 'worker-tx', path: 'workers/tx', replicas: config.ingester.replicas }),
+    worker({ name: 'worker-address', path: 'workers/address', replicas: config.ingester.replicas }),
     worker({ name: 'worker-registry', path: 'workers/registry', replicas: 1 }),
   ]
 
@@ -215,8 +219,8 @@ export async function deployIngester(
             volumeMounts: volumeMounts,
             resources: {
               limits: {
-                cpu: config.isLocal ? '0.5' : '1',
-                memory: config.isLocal ? '512M' : '2Gi',
+                cpu: config.ingester?.cpuLimit ?? '500m',
+                memory: config.ingester?.memoryLimit ?? '512Mi',
               },
             },
             readinessProbe: {
