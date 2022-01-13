@@ -20,16 +20,16 @@ config:
     ## api - if specified an api service will be deployed
     api:
       enableDatadogLogs: false
-      cpuLimit: '1'
-      memoryLimit: '2Gi'
-      replicas: 4
+      cpuLimit: '300m'
+      memoryLimit: '512Mi'
+      replicas: 1
 
 
     ## ingester - if specified all ingestion workers will be deployed
     ingester:
-      cpuLimit: '500m'
-      memoryLimit: '1Gi'
-      replicas: '2' ## Current HA ingester workers are tx and address, all other workers will be single instance
+      cpuLimit: '300m'
+      memoryLimit: '512Mi'
+      replicas: 1 ## Current HA ingester workers are tx and address, all other workers will be single instance
       enableDatadogLogs: false
 
     ## mongo - if specified a mongo database will be deployed
