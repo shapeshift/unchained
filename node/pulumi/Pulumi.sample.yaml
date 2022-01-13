@@ -65,15 +65,15 @@ config:
     #  # region - aws region to deploy the stack to
     #  region: 'us-east-1'
 
-    ## traefik - additional ingress controller configuration
-    #traefik:
-    #  replicas: 3
-    #  resources:
-    #    cpu: '300m'
-    #    memory: '256Mi'
-    #  # whitelist - list of cidrs to allow ingress into the cluster
-    #  whitelist:
-    #    - '0.0.0.0/0'
+    # # traefik - additional ingress controller configuration
+    #   traefik:
+    #     replicas: 3
+    #     resources:
+    #       cpu: '300m'
+    #       memory: '256Mi'
+    #     # whitelist - list of cidrs to allow ingress into the cluster
+    #     whitelist:
+    #       - '0.0.0.0/0'
 
     ## dockerhub - specifies a personal dockerhub account in which to push/pull images from
     ## if not specified, the public shapeshift images will be used
