@@ -21,9 +21,15 @@ type Balance struct {
 	Assets []Value
 }
 
+// Contains info about account details for an address or xpub
+// swagger:model Value
 type Value struct {
+	// required: true
+	// example: 123456789
 	Amount string
-	Denom  string
+	// required: true
+	// example: udenom
+	Denom string
 }
 
 // GetAccount details
