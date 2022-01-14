@@ -2,6 +2,8 @@ version: '3.4'
 services:
   api:
     image: go-unchained-local
+    environment:
+      - GOCACHE=/tmp
     build:
       context: ../../build
       dockerfile: Dockerfile.local
@@ -9,7 +11,7 @@ services:
       - 'traefik.enable=true'
       - 'traefik.http.routers.cosmos-api.rule=Host(`api.cosmos.localhost`)'
       - 'traefik.http.services.cosmos-api.loadbalancer.server.port=3000'
-    command: ["-r", "(pkg|internal|cosmos)", "--", "go", "run", "cmd/cosmos/main.go"]
+    command: ["-r", "(pkg|internal|cosmos)", "-R", "swagger", "--", "sh", "-c", "swagger generate spec -w coinstacks/cosmos -o coinstacks/cosmos/api/swagger.json -m && go run cmd/cosmos/main.go"]
     working_dir: /app
     volumes:
       - ../..:/app
