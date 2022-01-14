@@ -31,10 +31,16 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 		return nil, err
 	}
 
+	_, err = h.grpcClient.GetDelegations(pubkey, "uatom")
+	if err != nil {
+		return nil, err
+	}
+
 	account := &Account{
 		BaseAccount: api.BaseAccount{
-			Balance: balRes.Amount,
-			Pubkey:  accRes.Address,
+			Balance:            balRes.Amount,
+			UnconfirmedBalance: "0",
+			Pubkey:             accRes.Address,
 		},
 		AccountNumber: int(accRes.AccountNumber),
 		Sequence:      int(accRes.Sequence),

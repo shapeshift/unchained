@@ -6,6 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/gogo/protobuf/types"
 	"github.com/pkg/errors"
 )
@@ -17,8 +18,14 @@ type Account struct {
 }
 
 type Balance struct {
-	Amount string
-	Assets []Value
+	Amount      string
+	Assets      []Value
+	Delegations []Delegation
+}
+
+type Delegation struct {
+	Validator string
+	Balance   Value
 }
 
 // Contains info about account details for an address or xpub
@@ -32,7 +39,6 @@ type Value struct {
 	Denom string
 }
 
-// GetAccount details
 func (c *HTTPClient) GetAccount(address string) (*Account, error) {
 	if !isValidAddress(address) {
 		return nil, errors.New(fmt.Sprintf("invalid address: %s", address))
@@ -60,7 +66,6 @@ func (c *HTTPClient) GetAccount(address string) (*Account, error) {
 	return a, nil
 }
 
-// GetBalance details
 func (c *HTTPClient) GetBalance(address string, baseDenom string) (*Balance, error) {
 	if !isValidAddress(address) {
 		return nil, errors.New(fmt.Sprintf("invalid address: %s", address))
@@ -77,7 +82,6 @@ func (c *HTTPClient) GetBalance(address string, baseDenom string) (*Balance, err
 	return balance(res.Balances, baseDenom)
 }
 
-// GetAccount details
 func (c *GRPCClient) GetAccount(address string) (*Account, error) {
 	if !isValidAddress(address) {
 		return nil, errors.New(fmt.Sprintf("invalid address: %s", address))
@@ -102,17 +106,32 @@ func (c *GRPCClient) GetAccount(address string) (*Account, error) {
 	return a, nil
 }
 
-// GetBalance details
 func (c *GRPCClient) GetBalance(address string, baseDenom string) (*Balance, error) {
 	res, err := c.bank.AllBalances(c.ctx, &banktypes.QueryAllBalancesRequest{Address: address})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get balance")
 	}
 
+	fmt.Printf("%+v\n", res.Balances)
+
 	return balance(res.Balances, baseDenom)
 }
 
+func (c *GRPCClient) GetDelegations(address string, baseDenom string) (*Balance, error) {
+	res, err := c.staking.DelegatorDelegations(c.ctx, &stakingtypes.QueryDelegatorDelegationsRequest{DelegatorAddr: address})
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get delegations")
+	}
+
+	fmt.Printf("%+v\n", res.DelegationResponses)
+
+	return nil, nil
+
+	//return balance(res, baseDenom)
+}
+
 func balance(balances sdk.Coins, baseDenom string) (*Balance, error) {
+	balances := map[string]sdk.Amount{}
 	balance := "0"
 	assets := []Value{}
 	for _, b := range balances {

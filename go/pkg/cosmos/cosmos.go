@@ -86,9 +86,10 @@ type GRPCClient struct {
 	encoding *params.EncodingConfig
 	grpcConn *grpc.ClientConn
 
-	abci abcitypes.ABCIApplicationClient
-	auth authtypes.QueryClient
-	bank banktypes.QueryClient
+	abci    abcitypes.ABCIApplicationClient
+	auth    authtypes.QueryClient
+	bank    banktypes.QueryClient
+	staking stakingtypes.QueryClient
 }
 
 // NewGRPCClient configures and creates a GRPClient
@@ -109,6 +110,7 @@ func NewGRPCClient(conf Config) (*GRPCClient, error) {
 
 	auth := authtypes.NewQueryClient(grpcConn)
 	bank := banktypes.NewQueryClient(grpcConn)
+	staking := stakingtypes.NewQueryClient(grpcConn)
 	abci := abcitypes.NewABCIApplicationClient(grpcConn)
 
 	c := &GRPCClient{
@@ -118,6 +120,7 @@ func NewGRPCClient(conf Config) (*GRPCClient, error) {
 		abci:     abci,
 		auth:     auth,
 		bank:     bank,
+		staking:  staking,
 	}
 
 	return c, nil
