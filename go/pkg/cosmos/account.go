@@ -131,7 +131,6 @@ func (c *GRPCClient) GetDelegations(address string, baseDenom string) (*Balance,
 }
 
 func balance(balances sdk.Coins, baseDenom string) (*Balance, error) {
-	balances := map[string]sdk.Amount{}
 	balance := "0"
 	assets := []Value{}
 	for _, b := range balances {
