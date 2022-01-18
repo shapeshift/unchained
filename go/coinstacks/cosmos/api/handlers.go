@@ -31,7 +31,22 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 		return nil, err
 	}
 
-	_, err = h.grpcClient.GetDelegations(pubkey, "uatom")
+	delRes, err := h.grpcClient.GetDelegations(pubkey)
+	if err != nil {
+		return nil, err
+	}
+
+	redelRes, err := h.grpcClient.GetRedelegations(pubkey)
+	if err != nil {
+		return nil, err
+	}
+
+	unbondingsRes, err := h.grpcClient.GetUnbondings(pubkey, "uatom")
+	if err != nil {
+		return nil, err
+	}
+
+	rewardsRes, err := h.grpcClient.GetRewards(pubkey)
 	if err != nil {
 		return nil, err
 	}
@@ -45,6 +60,10 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 		AccountNumber: int(accRes.AccountNumber),
 		Sequence:      int(accRes.Sequence),
 		Assets:        balRes.Assets,
+		Delegations:   delRes,
+		Redelegations: redelRes,
+		Unbondings:    unbondingsRes,
+		Rewards:       rewardsRes.Assets,
 	}
 
 	return account, nil

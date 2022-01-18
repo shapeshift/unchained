@@ -2,10 +2,12 @@ package cosmos
 
 import (
 	"fmt"
+	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/gogo/protobuf/types"
 	"github.com/pkg/errors"
@@ -17,26 +19,91 @@ type Account struct {
 	Sequence      int
 }
 
+// Contains info about an account balance
+// swagger:model Delegation
 type Balance struct {
-	Amount      string
-	Assets      []Value
-	Delegations []Delegation
+	// required: true
+	// example: 123456789
+	Amount string `json:"amount"`
+	// required: true
+	Assets []Value `json:"assets"`
 }
 
+// Contains info about a staking delegation
+// swagger:model Delegation
 type Delegation struct {
-	Validator string
-	Balance   Value
+	// required: true
+	// example: cosmosvaloper1rpgtz9pskr5geavkjz02caqmeep7cwwpv73axj
+	Validator string `json:"validator"`
+	// required: true
+	// example: 123456.789
+	Shares string `json:"shares"`
+	// required: true
+	// example: 123456789
+	Balance Value `json:"balance"`
 }
 
-// Contains info about account details for an address or xpub
+// Contains info about a staking redelegation
+// swagger:model Redelegation
+type Redelegation struct {
+	// required: true
+	// example: cosmosvaloper1rpgtz9pskr5geavkjz02caqmeep7cwwpv73axj
+	SourceValidator string `json:"sourceValidator"`
+	// required: true
+	// example: cosmosvaloper1ma02nlc7lchu7caufyrrqt4r6v2mpsj90y9wzd
+	DestinationValidator string `json:"destinationValidator"`
+	// required: true
+	Entries []RedelegationEntry `json:"entries"`
+}
+
+// Contains info about a redelegation action
+// swagger:model RedelegationEntry
+type RedelegationEntry struct {
+	// required: true
+	// example: 1642533407592
+	CompletionTime string `json:"completionTime"`
+	// required: true
+	// example: 123456.789
+	Shares string `json:"shares"`
+}
+
+// Contains info about staking rewards
+// swagger:model Rewards
+type Rewards struct {
+	// required: true
+	Assets []Value `json:"assets"`
+}
+
+// Contains info about a staking unbonding
+// swagger:model Unbonding
+type Unbonding struct {
+	// required: true
+	// example: cosmosvaloper1rpgtz9pskr5geavkjz02caqmeep7cwwpv73axj
+	Validator string `json:"validator"`
+	// required: true
+	Entries []UnbondingEntry `json:"entries"`
+}
+
+// Contains info about an unbonding action
+// swagger:model UnbondingEntry
+type UnbondingEntry struct {
+	// required: true
+	// example: 1642533407592
+	CompletionTime string `json:"completionTime"`
+	// required: true
+	// example: 123456789
+	Balance Value `json:"balance"`
+}
+
+// Contains info about an asset value
 // swagger:model Value
 type Value struct {
 	// required: true
 	// example: 123456789
-	Amount string
+	Amount string `json:"amount"`
 	// required: true
 	// example: udenom
-	Denom string
+	Denom string `json:"denom"`
 }
 
 func (c *HTTPClient) GetAccount(address string) (*Account, error) {
@@ -112,22 +179,99 @@ func (c *GRPCClient) GetBalance(address string, baseDenom string) (*Balance, err
 		return nil, errors.Wrap(err, "failed to get balance")
 	}
 
-	fmt.Printf("%+v\n", res.Balances)
-
 	return balance(res.Balances, baseDenom)
 }
 
-func (c *GRPCClient) GetDelegations(address string, baseDenom string) (*Balance, error) {
+func (c *GRPCClient) GetDelegations(address string) ([]Delegation, error) {
 	res, err := c.staking.DelegatorDelegations(c.ctx, &stakingtypes.QueryDelegatorDelegationsRequest{DelegatorAddr: address})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get delegations")
 	}
 
-	fmt.Printf("%+v\n", res.DelegationResponses)
+	delgations := []Delegation{}
+	for _, r := range res.DelegationResponses {
+		d := Delegation{
+			Validator: r.Delegation.ValidatorAddress,
+			Shares:    r.Delegation.Shares.String(),
+			Balance: Value{
+				Amount: r.Balance.Amount.String(),
+				Denom:  r.Balance.Denom,
+			},
+		}
+		delgations = append(delgations, d)
+	}
 
-	return nil, nil
+	return delgations, nil
+}
 
-	//return balance(res, baseDenom)
+func (c *GRPCClient) GetRedelegations(address string) ([]Redelegation, error) {
+	res, err := c.staking.Redelegations(c.ctx, &stakingtypes.QueryRedelegationsRequest{DelegatorAddr: address})
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get delegations")
+	}
+
+	redelgations := []Redelegation{}
+	for _, r := range res.RedelegationResponses {
+		entries := []RedelegationEntry{}
+		for _, e := range r.Entries {
+			entry := RedelegationEntry{
+				CompletionTime: strconv.FormatInt(e.RedelegationEntry.CompletionTime.Unix(), 10),
+				Shares:         e.RedelegationEntry.SharesDst.String(),
+			}
+
+			entries = append(entries, entry)
+		}
+
+		redelegation := Redelegation{
+			SourceValidator:      r.Redelegation.ValidatorSrcAddress,
+			DestinationValidator: r.Redelegation.ValidatorDstAddress,
+			Entries:              entries,
+		}
+		redelgations = append(redelgations, redelegation)
+	}
+
+	return redelgations, nil
+}
+
+func (c *GRPCClient) GetUnbondings(address string, baseDenom string) ([]Unbonding, error) {
+	res, err := c.staking.DelegatorUnbondingDelegations(c.ctx, &stakingtypes.QueryDelegatorUnbondingDelegationsRequest{DelegatorAddr: address})
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get delegations")
+	}
+
+	unbondings := []Unbonding{}
+	for _, r := range res.UnbondingResponses {
+		entries := []UnbondingEntry{}
+		for _, e := range r.Entries {
+			entry := UnbondingEntry{
+				CompletionTime: strconv.FormatInt(e.CompletionTime.Unix(), 10),
+				Balance:        Value{Amount: e.Balance.String(), Denom: baseDenom},
+			}
+			entries = append(entries, entry)
+		}
+
+		u := Unbonding{
+			Validator: r.ValidatorAddress,
+			Entries:   entries,
+		}
+		unbondings = append(unbondings, u)
+	}
+
+	return unbondings, nil
+}
+
+func (c *GRPCClient) GetRewards(address string) (*Rewards, error) {
+	res, err := c.distribution.DelegationTotalRewards(c.ctx, &distributiontypes.QueryDelegationTotalRewardsRequest{DelegatorAddress: address})
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get delegations")
+	}
+
+	rewards := &Rewards{Assets: []Value{}}
+	for _, r := range res.Total {
+		rewards.Assets = append(rewards.Assets, Value{Amount: r.Amount.String(), Denom: r.Denom})
+	}
+
+	return rewards, nil
 }
 
 func balance(balances sdk.Coins, baseDenom string) (*Balance, error) {
