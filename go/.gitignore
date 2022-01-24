@@ -1,5 +1,6 @@
 # Project specific
 config.json
+swagger.json
 
 # Binaries for programs and plugins
 *.exe

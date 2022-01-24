@@ -38,19 +38,25 @@ aliases:
     mongo-replicas: 3
     mongo-storage-size: 100Gi
     mongo-url: mongodb://bitcoin-mongodb-0.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017,bitcoin-mongodb-1.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017,bitcoin-mongodb-2.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
-    rabbit-cpu-limit: '2'
-    rabbit-memory-limit: '8Gi'
-    rabbit-storage-size: '100Gi'
-    indexer-cpu-limit: '4'
+    rabbit-cpu-limit: "2"
+    rabbit-memory-limit: "8Gi"
+    rabbit-storage-size: "100Gi"
+    indexer-cpu-limit: "4"
     indexer-memory-limit: 24Gi
     indexer-replicas: 4
     indexer-storage-size: 500Gi
     indexer-url: http://bitcoin-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://bitcoin-indexer-svc.unchained.svc.cluster.local:8001/websocket
     daemon-image: ruimarinho/bitcoin-core:0.21.0
-    daemon-cpu-limit: '2'
+    daemon-cpu-limit: "2"
     daemon-memory-limit: 12Gi
     daemon-storage-size: 1500Gi
+    api-replicas: 4
+    api-cpu-limit: "1"
+    api-memory-limit: "2Gi"
+    ingester-replicas: 3
+    ingester-cpu-limit: "1"
+    ingester-memory-limit: "3Gi"
     rpc-url: http://user:password@bitcoin-indexer-svc.unchained.svc.cluster.local:8332
 
   - &ethereum
@@ -63,19 +69,25 @@ aliases:
     mongo-replicas: 3
     mongo-storage-size: 100Gi
     mongo-url: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-2.ethereum-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
-    rabbit-cpu-limit: '2'
-    rabbit-memory-limit: '8Gi'
-    rabbit-storage-size: '100Gi'
-    indexer-cpu-limit: '4'
+    rabbit-cpu-limit: "2"
+    rabbit-memory-limit: "8Gi"
+    rabbit-storage-size: "100Gi"
+    indexer-cpu-limit: "4"
     indexer-memory-limit: 12Gi
     indexer-replicas: 4
     indexer-storage-size: 500Gi
     indexer-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-indexer-svc.unchained.svc.cluster.local:8001/websocket
     daemon-image: ethereum/client-go:v1.10.15
-    daemon-cpu-limit: '4'
+    daemon-cpu-limit: "4"
     daemon-memory-limit: 32Gi
     daemon-storage-size: 2000Gi
+    api-replicas: 4
+    api-cpu-limit: "1"
+    api-memory-limit: "2Gi"
+    ingester-replicas: 3
+    ingester-cpu-limit: "1"
+    ingester-memory-limit: "3Gi"
     rpc-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8332
 
   - &ethereum-ropsten
@@ -88,19 +100,25 @@ aliases:
     mongo-replicas: 3
     mongo-storage-size: 100Gi
     mongo-url: mongodb://ethereum-ropsten-mongodb-0.ethereum-ropsten-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-ropsten-mongodb-1.ethereum-ropsten-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-ropsten-mongodb-2.ethereum-ropsten-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
-    rabbit-cpu-limit: '1'
-    rabbit-memory-limit: '4Gi'
-    rabbit-storage-size: '100Gi'
-    indexer-cpu-limit: '4'
+    rabbit-cpu-limit: "1"
+    rabbit-memory-limit: "4Gi"
+    rabbit-storage-size: "100Gi"
+    indexer-cpu-limit: "4"
     indexer-memory-limit: 12Gi
     indexer-replicas: 2
     indexer-storage-size: 250Gi
     indexer-url: http://ethereum-ropsten-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-ropsten-indexer-svc.unchained.svc.cluster.local:8001/websocket
     daemon-image: ethereum/client-go:v1.10.15
-    daemon-cpu-limit: '2'
+    daemon-cpu-limit: "2"
     daemon-memory-limit: 24Gi
     daemon-storage-size: 500Gi
+    api-replicas: 2
+    api-cpu-limit: "1"
+    api-memory-limit: "2Gi"
+    ingester-replicas: 2
+    ingester-cpu-limit: "1"
+    ingester-memory-limit: "3Gi"
     rpc-url: http://ethereum-ropsten-indexer-svc.unchained.svc.cluster.local:8332
 
 commands:
@@ -217,24 +235,32 @@ jobs:
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r5a.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r5b.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[3] r5n.4xlarge
-            pulumi config set --path unchained:common.traefik.replicas 10
-            pulumi config set --path unchained:common.traefik.resources.cpu 500m
-            pulumi config set --path unchained:common.traefik.resources.memory 512Mi
-            pulumi config set --path unchained:common.traefik.whitelist[0] 173.245.48.0/20
-            pulumi config set --path unchained:common.traefik.whitelist[1] 103.21.244.0/22
-            pulumi config set --path unchained:common.traefik.whitelist[2] 103.22.200.0/22
-            pulumi config set --path unchained:common.traefik.whitelist[3] 103.31.4.0/22
-            pulumi config set --path unchained:common.traefik.whitelist[4] 141.101.64.0/18
-            pulumi config set --path unchained:common.traefik.whitelist[5] 108.162.192.0/18
-            pulumi config set --path unchained:common.traefik.whitelist[6] 190.93.240.0/20
-            pulumi config set --path unchained:common.traefik.whitelist[7] 188.114.96.0/20
-            pulumi config set --path unchained:common.traefik.whitelist[8] 197.234.240.0/22
-            pulumi config set --path unchained:common.traefik.whitelist[9] 198.41.128.0/17
-            pulumi config set --path unchained:common.traefik.whitelist[10] 162.158.0.0/15
-            pulumi config set --path unchained:common.traefik.whitelist[11] 104.16.0.0/13
-            pulumi config set --path unchained:common.traefik.whitelist[12] 104.24.0.0/14
-            pulumi config set --path unchained:common.traefik.whitelist[13] 172.64.0.0/13
-            pulumi config set --path unchained:common.traefik.whitelist[14] 131.0.72.0/22
+            pulumi config set --path unchained:common.eks.traefik.replicas 7
+            pulumi config set --path unchained:common.eks.traefik.resources.cpu 500m
+            pulumi config set --path unchained:common.eks.traefik.resources.memory 512Mi
+            pulumi config set --path unchained:common.eks.traefik.whitelist[0] 173.245.48.0/20
+            pulumi config set --path unchained:common.eks.traefik.whitelist[1] 103.21.244.0/22
+            pulumi config set --path unchained:common.eks.traefik.whitelist[2] 103.22.200.0/22
+            pulumi config set --path unchained:common.eks.traefik.whitelist[3] 103.31.4.0/22
+            pulumi config set --path unchained:common.eks.traefik.whitelist[4] 141.101.64.0/18
+            pulumi config set --path unchained:common.eks.traefik.whitelist[5] 108.162.192.0/18
+            pulumi config set --path unchained:common.eks.traefik.whitelist[6] 190.93.240.0/20
+            pulumi config set --path unchained:common.eks.traefik.whitelist[7] 188.114.96.0/20
+            pulumi config set --path unchained:common.eks.traefik.whitelist[8] 197.234.240.0/22
+            pulumi config set --path unchained:common.eks.traefik.whitelist[9] 198.41.128.0/17
+            pulumi config set --path unchained:common.eks.traefik.whitelist[10] 162.158.0.0/15
+            pulumi config set --path unchained:common.eks.traefik.whitelist[11] 104.16.0.0/13
+            pulumi config set --path unchained:common.eks.traefik.whitelist[12] 104.24.0.0/14
+            pulumi config set --path unchained:common.eks.traefik.whitelist[13] 172.64.0.0/13
+            pulumi config set --path unchained:common.eks.traefik.whitelist[14] 131.0.72.0/22
+            pulumi config set --path unchained:common.eks.traefik.whitelist[15] $AWS_NAT_ADDRESS_0
+            pulumi config set --path unchained:common.eks.traefik.whitelist[16] $AWS_NAT_ADDRESS_1
+            pulumi config set --path unchained:common.eks.traefik.whitelist[17] $AWS_NAT_ADDRESS_2
+            pulumi config set --path unchained:common.eks.traefik.whitelist[18] $VPN_ADDRESS_0
+            pulumi config set --path unchained:common.eks.traefik.whitelist[19] $VPN_ADDRESS_1
+            pulumi config set --path unchained:common.eks.traefik.whitelist[20] $VPN_ADDRESS_2
+            pulumi config set --path unchained:common.eks.traefik.whitelist[21] $VPN_ADDRESS_3
+            pulumi config set --path unchained:common.eks.traefik.whitelist[22] $VPN_ADDRESS_4
             pulumi config set --path unchained:common.dockerhub.username $DOCKERHUB_USERNAME
             pulumi config set --path unchained:common.dockerhub.password $DOCKERHUB_PASSWORD --plaintext
             pulumi config set --path unchained:common.dockerhub.server docker.io
@@ -256,7 +282,7 @@ jobs:
       environment:
         description: environment to deploy into. empty string ('') is our prod
         type: string
-        default: ''
+        default: ""
       network:
         type: string
         default: mainnet
@@ -309,6 +335,18 @@ jobs:
         type: string
       daemon-storage-size:
         type: string
+      api-cpu-limit:
+        type: string
+      api-memory-limit:
+        type: string
+      api-replicas:
+        type: integer
+      ingester-cpu-limit:
+        type: string
+      ingester-memory-limit:
+        type: string
+      ingester-replicas:
+        type: integer
     steps:
       - setup_remote_docker:
           version: 20.10.2
@@ -333,6 +371,9 @@ jobs:
             [ -n "<< parameters.environment >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.environment << parameters.environment >>
             pulumi config set --path unchained:<< parameters.coinstack >>.network << parameters.network >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.enableDatadogLogs true
+            pulumi config set --path unchained:<< parameters.coinstack >>.api.cpuLimit << parameters.api-cpu-limit >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.api.memoryLimit << parameters.api-memory-limit >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.api.replicas << parameters.api-replicas >>
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.enableDatadogLogs true
             pulumi config set --path unchained:<< parameters.coinstack >>.mongo.cpuLimit << parameters.mongo-cpu-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.mongo.memoryLimit << parameters.mongo-memory-limit >>
@@ -350,6 +391,9 @@ jobs:
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.cpuLimit << parameters.daemon-cpu-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.memoryLimit << parameters.daemon-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.storageSize << parameters.daemon-storage-size >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.ingester.cpuLimit << parameters.ingester-cpu-limit >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.ingester.memoryLimit << parameters.ingester-memory-limit >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.ingester.replicas << parameters.ingester-replicas >>
             << parameters.pulumi-command >>
 
   deploy-monitoring:
@@ -390,7 +434,7 @@ jobs:
           name: Remove devDependencies
           command: yarn --production --ignore-scripts --prefer-offline --silent --frozen-lockfile
       - persist_to_workspace:
-          root: '~'
+          root: "~"
           paths:
             - project
 
@@ -435,6 +479,12 @@ workflows:
           indexer-url: http://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001
           indexer-ws-url: ws://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
           rpc-url: http://user:password@bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8332
+          api-replicas: 2
+          api-cpu-limit: "300m"
+          api-memory-limit: "1Gi"
+          ingester-replicas: 2
+          ingester-cpu-limit: "500m"
+          ingester-memory-limit: "2Gi"
           requires:
             - deploy common unchained dependencies
           <<: *only-develop
@@ -452,6 +502,12 @@ workflows:
           indexer-url: http://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8001
           indexer-ws-url: ws://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
           rpc-url: http://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8332
+          api-replicas: 2
+          api-cpu-limit: "300m"
+          api-memory-limit: "1Gi"
+          ingester-replicas: 2
+          ingester-cpu-limit: "500m"
+          ingester-memory-limit: "2Gi"
           requires:
             - deploy common unchained dependencies
           <<: *only-develop
@@ -470,6 +526,12 @@ workflows:
           indexer-url: http://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8001
           indexer-ws-url: ws://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
           rpc-url: http://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8332
+          api-replicas: 2
+          api-cpu-limit: "300m"
+          api-memory-limit: "1Gi"
+          ingester-replicas: 2
+          ingester-cpu-limit: "500m"
+          ingester-memory-limit: "2Gi"
           requires:
             - deploy common unchained dependencies
           <<: *only-develop

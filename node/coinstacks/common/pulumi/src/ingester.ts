@@ -9,6 +9,9 @@ import { Input, output, Resource } from '@pulumi/pulumi'
 import { buildAndPushImage, Config, hasTag, getBaseHash } from './index'
 
 export interface IngesterConfig {
+  cpuLimit: string
+  memoryLimit: string
+  replicas: number
   enableDatadogLogs?: boolean
 }
 
@@ -167,19 +170,22 @@ export async function deployIngester(
   const socket = (s: Socket): Socket => s
   const worker = (w: Worker): Worker => w
 
+  // All ingester workers are single instance except tx and address workers
   const workers: Workers = [
     socket({ name: 'socket-new-transaction', path: 'sockets/newTransaction', replicas: 1 }),
     socket({ name: 'socket-new-block', path: 'sockets/newBlock', replicas: 1 }),
     worker({ name: 'worker-new-block', path: 'workers/newBlock', replicas: 1 }),
     worker({ name: 'worker-block', path: 'workers/block', replicas: 1 }),
     worker({ name: 'worker-txid', path: 'workers/txid', replicas: 1 }),
-    worker({ name: 'worker-tx', path: 'workers/tx', replicas: 5 }),
-    worker({ name: 'worker-address', path: 'workers/address', replicas: 5 }),
+    worker({ name: 'worker-tx', path: 'workers/tx', replicas: config.ingester.replicas }),
+    worker({ name: 'worker-address', path: 'workers/address', replicas: config.ingester.replicas }),
     worker({ name: 'worker-registry', path: 'workers/registry', replicas: 1 }),
   ]
 
+  const { enableDatadogLogs, cpuLimit, memoryLimit } = config.ingester
+
   return workers.map((worker) => {
-    const datadogAnnotation = config.ingester?.enableDatadogLogs
+    const datadogAnnotation = enableDatadogLogs
       ? {
           [`ad.datadoghq.com/${worker.name}.logs`]: `[{"source": "${app}", "service": "${name}", "tags":["${asset}", "${worker.name}"]}]`,
         }
@@ -211,12 +217,12 @@ export async function deployIngester(
             workingDir: config.isLocal ? `/app/coinstacks/${coinstack}/ingester` : undefined,
             command: config.isLocal
               ? localCommand
-              : ['sh', '-c', `node --max-old-space-size=1024 dist/${worker.path}.js`],
+              : ['sh', '-c', `node --max-old-space-size=2048 dist/${worker.path}.js`],
             volumeMounts: volumeMounts,
             resources: {
               limits: {
-                cpu: config.isLocal ? '0.5' : '1',
-                memory: config.isLocal ? '512M' : '2Gi',
+                cpu: cpuLimit,
+                memory: memoryLimit,
               },
             },
             readinessProbe: {
