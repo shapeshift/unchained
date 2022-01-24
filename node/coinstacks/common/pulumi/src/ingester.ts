@@ -182,8 +182,10 @@ export async function deployIngester(
     worker({ name: 'worker-registry', path: 'workers/registry', replicas: 1 }),
   ]
 
+  const { enableDatadogLogs, cpuLimit, memoryLimit } = config.ingester
+
   return workers.map((worker) => {
-    const datadogAnnotation = config.ingester?.enableDatadogLogs
+    const datadogAnnotation = enableDatadogLogs
       ? {
           [`ad.datadoghq.com/${worker.name}.logs`]: `[{"source": "${app}", "service": "${name}", "tags":["${asset}", "${worker.name}"]}]`,
         }
@@ -219,8 +221,8 @@ export async function deployIngester(
             volumeMounts: volumeMounts,
             resources: {
               limits: {
-                cpu: config.ingester?.cpuLimit ?? '500m',
-                memory: config.ingester?.memoryLimit ?? '512Mi',
+                cpu: cpuLimit,
+                memory: memoryLimit,
               },
             },
             readinessProbe: {
