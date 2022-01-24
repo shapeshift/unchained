@@ -217,7 +217,7 @@ export async function deployIngester(
             workingDir: config.isLocal ? `/app/coinstacks/${coinstack}/ingester` : undefined,
             command: config.isLocal
               ? localCommand
-              : ['sh', '-c', `node --max-old-space-size=1024 dist/${worker.path}.js`],
+              : ['sh', '-c', `node --max-old-space-size=2048 dist/${worker.path}.js`],
             volumeMounts: volumeMounts,
             resources: {
               limits: {
