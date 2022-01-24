@@ -15,7 +15,7 @@ app.use(json())
 app.use(urlencoded({ extended: true }))
 app.use(cors())
 
-app.get('/health', async (_, res) => res.json({ status: 'up', asset: 'ethereum' }))
+app.get('/health', async (_, res) => res.json({ status: 'up', asset: 'ethereum', connections: wsServer.clients.size }))
 
 const options: swaggerUi.SwaggerUiOptions = {
   customCss: '.swagger-ui .topbar { display: none }',
