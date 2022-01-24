@@ -11,8 +11,10 @@ type Handler struct {
 }
 
 func (h *Handler) GetInfo() (api.Info, error) {
-	info := api.BaseInfo{
-		Network: "mainnet",
+	info := Info{
+		BaseInfo: api.BaseInfo{
+			Network: "mainnet",
+		},
 	}
 	return info, nil
 }
