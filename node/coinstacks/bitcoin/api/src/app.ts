@@ -20,7 +20,7 @@ app.use(json())
 app.use(urlencoded({ extended: true }))
 app.use(cors())
 
-app.get('/health', async (_, res) => res.json({ status: 'up', network: 'bitcoin' }))
+app.get('/health', async (_, res) => res.json({ status: 'up', network: 'bitcoin', connections: wsServer.clients.size }))
 
 const options = {
   customCss: '.swagger-ui .topbar { display: none }',
