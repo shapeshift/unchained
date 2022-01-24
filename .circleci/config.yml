@@ -56,7 +56,7 @@ aliases:
     api-memory-limit: "2Gi"
     ingester-replicas: 3
     ingester-cpu-limit: "1"
-    ingester-memory-limit: "2Gi"
+    ingester-memory-limit: "3Gi"
     rpc-url: http://user:password@bitcoin-indexer-svc.unchained.svc.cluster.local:8332
 
   - &ethereum
@@ -87,7 +87,7 @@ aliases:
     api-memory-limit: "2Gi"
     ingester-replicas: 3
     ingester-cpu-limit: "1"
-    ingester-memory-limit: "2Gi"
+    ingester-memory-limit: "3Gi"
     rpc-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8332
 
   - &ethereum-ropsten
@@ -118,7 +118,7 @@ aliases:
     api-memory-limit: "2Gi"
     ingester-replicas: 2
     ingester-cpu-limit: "1"
-    ingester-memory-limit: "2Gi"
+    ingester-memory-limit: "3Gi"
     rpc-url: http://ethereum-ropsten-indexer-svc.unchained.svc.cluster.local:8332
 
 commands:
