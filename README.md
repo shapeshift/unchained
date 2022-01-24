@@ -21,11 +21,6 @@ Unchained is a multi-blockchain backend interface with three main goals:
   - [Docker Desktop (macOS)](docs/docker-desktop.md)
   - [Minikube (Linux)](docs/minikube.md)
 
-## Project Details
-
-- [Go](go/README.md)
-- [Node](node/README.md)
-
 ## Helpful Docs
 
 - [Pulumi](https://www.pulumi.com/docs/)
@@ -60,37 +55,16 @@ Traefik routes requests based on host name. which includes the coinstack name. F
 - `rabbit-admin.bitcoin.localhost`
 
 ## Docker-Compose Local Dev Instructions
-
 #### _Lightweight local development environment_
 
 #### **Prerequisites**
 
 - Install [docker-compose](https://docs.docker.com/compose/install/)
-- Copy sample env or config file:
-  ```sh
-  cp coinstacks/ethereum/sample.env coinstacks/ethereum/.env
-  ```
-  ```sh
-  cp coinstacks/cosmos/sample.config.json coinstacks/cosmos/config.json
-  ```
-- Fill out any missing variables
 
 #### **Running**
 
-- Start the reverse proxy and any common service (ex. hot reloading)
-  ```sh
-  docker-compose up
-  ```
-
-- Start a coinstack:
-  ```sh
-  cd coinstacks/ethereum && docker-compose up
-  ```
-
-- Tear down a coinstack (including docker volumes):
-  ```sh
-  cd coinstacks/ethereum && docker-compose down -v
-  ```
+- [Go](go/README.md)
+- [Node](node/README.md)
 
 ## Kubernetes Local Dev Instructions
 
