@@ -60,7 +60,6 @@ type BaseAccount struct {
 	// example: 123456789
 	Balance string `json:"balance"`
 	// required: true
-	// example: cosmos1rcuft35qpjzpezpg6ytcrf0nmvk3l96qxdpmph
 	Pubkey string `json:"pubkey"`
 }
 
@@ -72,6 +71,17 @@ func (b BaseAccount) pubkey() string {
 	return b.Pubkey
 }
 
+// Contains info about pagination for large sets of data
+// swagger:model Pagination
+type Pagination struct {
+	// required: true
+	// example: 1
+	Page int `json:"page"`
+	// required: true
+	// example: 10
+	TotalPages int `json:"totalPages"`
+}
+
 type Tx interface {
 	txid() string
 	blockHash() *string
@@ -79,11 +89,16 @@ type Tx interface {
 	timestamp() *string
 }
 
+// Contains info about required base transaction details
+// swagger:model BaseTx
 type BaseTx struct {
-	TxID        string  `json:"txid"`
-	BlockHash   *string `json:"blockHash,omitempty"`
+	// required: true
+	TxID      string  `json:"txid"`
+	BlockHash *string `json:"blockHash,omitempty"`
+	// example: 1000000
 	BlockHeight *string `json:"blockHeight,omitempty"`
-	Timestamp   *string `json:"timestamp,omitempty"`
+	// example: 1643052655037
+	Timestamp *string `json:"timestamp,omitempty"`
 }
 
 type TxHistory interface {
@@ -92,6 +107,9 @@ type TxHistory interface {
 }
 
 type BaseTxHistory struct {
+	// swagger:allOf
+	Pagination
+	// required: true
 	Pubkey string `json:"pubkey"`
 	Txs    []Tx   `json:"txs"`
 }
@@ -106,11 +124,21 @@ func (b BaseTxHistory) txs() []Tx {
 
 // swagger:parameters GetAccount
 type PubkeyParam struct {
-	// Account address
+	// Account address or xpub
 	// in: path
 	// required: true
-	// example: cosmos1rcuft35qpjzpezpg6ytcrf0nmvk3l96qxdpmph
 	Pubkey string `json:"pubkey"`
+}
+
+// swagger:parameters GetTxHistory
+type TxHistoryParam struct {
+	// Account address or xpub
+	// in: path
+	// required: true
+	Pubkey string `json:"pubkey"`
+	// Page number
+	// in: query
+	Page int `json:"page"`
 }
 
 // BaseAPI interface for all coinstacks to implement

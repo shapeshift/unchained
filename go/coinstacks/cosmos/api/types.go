@@ -39,7 +39,11 @@ type Tx struct {
 	Events    []cosmos.Event   `json:"events"`
 }
 
+// Contains info about transaction history for an address or xpub
+// swagger:model TxHistory
 type TxHistory struct {
+	// swagger:allOf
 	api.BaseTxHistory
+	// required: true
 	Txs []Tx `json:"txs"`
 }

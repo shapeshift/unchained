@@ -126,6 +126,18 @@ func (a *API) Account(w http.ResponseWriter, r *http.Request) {
 	handleResponse(w, http.StatusOK, account)
 }
 
+// swagger:route GET /api/v1/account/{pubkey}/txs v1 GetTxHistory
+//
+// Get paginated transaction history details by address
+//
+// produces:
+//   - application/json
+//
+// responses:
+//   200: TxHistory
+//   400: BadRequestError
+//   422: ValidationError
+//   500: InternalServerError
 func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 	pubkey, ok := mux.Vars(r)["pubkey"]
 	if !ok || pubkey == "" {
