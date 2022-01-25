@@ -60,6 +60,9 @@ type BaseAccount struct {
 	// example: 123456789
 	Balance string `json:"balance"`
 	// required: true
+	// example: 0
+	UnconfirmedBalance string `json:"unconfirmedBalance"`
+	// required: true
 	// example: cosmos1rcuft35qpjzpezpg6ytcrf0nmvk3l96qxdpmph
 	Pubkey string `json:"pubkey"`
 }

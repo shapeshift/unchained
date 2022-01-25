@@ -25,6 +25,14 @@ type Account struct {
 	Sequence int `json:"sequence"`
 	// required: true
 	Assets []cosmos.Value `json:"assets"`
+	// required: true
+	Delegations []cosmos.Delegation `json:"delegations"`
+	// required: true
+	Redelegations []cosmos.Redelegation `json:"redelegations"`
+	// required: true
+	Unbondings []cosmos.Unbonding `json:"unbondings"`
+	// required: true
+	Rewards []cosmos.Value `json:"rewards"`
 }
 
 type Tx struct {

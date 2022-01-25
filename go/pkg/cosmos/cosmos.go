@@ -86,9 +86,11 @@ type GRPCClient struct {
 	encoding *params.EncodingConfig
 	grpcConn *grpc.ClientConn
 
-	abci abcitypes.ABCIApplicationClient
-	auth authtypes.QueryClient
-	bank banktypes.QueryClient
+	abci         abcitypes.ABCIApplicationClient
+	auth         authtypes.QueryClient
+	bank         banktypes.QueryClient
+	distribution distributiontypes.QueryClient
+	staking      stakingtypes.QueryClient
 }
 
 // NewGRPCClient configures and creates a GRPClient
@@ -109,15 +111,19 @@ func NewGRPCClient(conf Config) (*GRPCClient, error) {
 
 	auth := authtypes.NewQueryClient(grpcConn)
 	bank := banktypes.NewQueryClient(grpcConn)
+	distribution := distributiontypes.NewQueryClient(grpcConn)
+	staking := stakingtypes.NewQueryClient(grpcConn)
 	abci := abcitypes.NewABCIApplicationClient(grpcConn)
 
 	c := &GRPCClient{
-		ctx:      ctx,
-		grpcConn: grpcConn,
-		encoding: conf.Encoding,
-		abci:     abci,
-		auth:     auth,
-		bank:     bank,
+		ctx:          ctx,
+		grpcConn:     grpcConn,
+		encoding:     conf.Encoding,
+		abci:         abci,
+		auth:         auth,
+		bank:         bank,
+		distribution: distribution,
+		staking:      staking,
 	}
 
 	return c, nil
@@ -158,7 +164,7 @@ func NewEncoding(registerInterfaces ...func(r cryptotypes.InterfaceRegistry)) *p
 	}
 }
 
-func isValidAddress(address string) bool {
+func IsValidAddress(address string) bool {
 	if _, err := sdk.AccAddressFromBech32(address); err != nil {
 		return false
 	}

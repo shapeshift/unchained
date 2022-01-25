@@ -53,7 +53,9 @@ func Start(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, errChan
 
 	v1 := r.PathPrefix("/api/v1").Subrouter()
 	v1.HandleFunc("/info", a.Info).Methods("GET")
+
 	v1Account := v1.PathPrefix("/account").Subrouter()
+	v1Account.Use(validatePubkey)
 	v1Account.HandleFunc("/{pubkey}", a.Account).Methods("GET")
 	v1Account.HandleFunc("/{pubkey}/txs", a.TxHistory).Methods("GET")
 
