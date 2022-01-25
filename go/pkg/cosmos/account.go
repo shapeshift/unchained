@@ -19,13 +19,8 @@ type Account struct {
 	Sequence      int
 }
 
-// Contains info about an account balance
-// swagger:model Delegation
 type Balance struct {
-	// required: true
-	// example: 123456789
-	Amount string `json:"amount"`
-	// required: true
+	Amount string  `json:"amount"`
 	Assets []Value `json:"assets"`
 }
 
@@ -67,10 +62,7 @@ type RedelegationEntry struct {
 	Shares string `json:"shares"`
 }
 
-// Contains info about staking rewards
-// swagger:model Rewards
 type Rewards struct {
-	// required: true
 	Assets []Value `json:"assets"`
 }
 
@@ -276,12 +268,17 @@ func (c *HTTPClient) GetUnbondings(address string, baseDenom string) ([]Unbondin
 }
 
 func (c *HTTPClient) GetRewards(address string) (*Rewards, error) {
+	type Reward struct {
+		Amount string `json:"amount"`
+		Denom  string `json:"denom"`
+	}
+
 	var res struct {
 		UnbondingResponses []struct {
-			ValidatorAddress string  `json:"validator_address"`
-			Reward           []Value `json:"reward"`
+			ValidatorAddress string   `json:"validator_address"`
+			Reward           []Reward `json:"reward"`
 		} `json:"rewards"`
-		Total []Value `json:"total"`
+		Total []Reward `json:"total"`
 	}
 
 	_, err := c.cosmos.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/distribution/v1beta1/delegators/%s/rewards", address))
@@ -291,7 +288,7 @@ func (c *HTTPClient) GetRewards(address string) (*Rewards, error) {
 
 	rewards := &Rewards{Assets: []Value{}}
 	for _, r := range res.Total {
-		rewards.Assets = append(rewards.Assets, Value{Amount: r.Amount, Denom: r.Denom})
+		rewards.Assets = append(rewards.Assets, Value(r))
 	}
 
 	return rewards, nil
