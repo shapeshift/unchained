@@ -164,7 +164,7 @@ func NewEncoding(registerInterfaces ...func(r cryptotypes.InterfaceRegistry)) *p
 	}
 }
 
-func isValidAddress(address string) bool {
+func IsValidAddress(address string) bool {
 	if _, err := sdk.AccAddressFromBech32(address); err != nil {
 		return false
 	}

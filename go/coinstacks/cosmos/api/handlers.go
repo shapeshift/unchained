@@ -21,32 +21,32 @@ func (h *Handler) GetInfo() (api.Info, error) {
 }
 
 func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
-	accRes, err := h.grpcClient.GetAccount(pubkey)
+	accRes, err := h.httpClient.GetAccount(pubkey)
 	if err != nil {
 		return nil, err
 	}
 
-	balRes, err := h.grpcClient.GetBalance(pubkey, "uatom")
+	balRes, err := h.httpClient.GetBalance(pubkey, "uatom")
 	if err != nil {
 		return nil, err
 	}
 
-	delRes, err := h.grpcClient.GetDelegations(pubkey)
+	delRes, err := h.httpClient.GetDelegations(pubkey)
 	if err != nil {
 		return nil, err
 	}
 
-	redelRes, err := h.grpcClient.GetRedelegations(pubkey)
+	redelRes, err := h.httpClient.GetRedelegations(pubkey)
 	if err != nil {
 		return nil, err
 	}
 
-	unbondingsRes, err := h.grpcClient.GetUnbondings(pubkey, "uatom")
+	unbondingsRes, err := h.httpClient.GetUnbondings(pubkey, "uatom")
 	if err != nil {
 		return nil, err
 	}
 
-	rewardsRes, err := h.grpcClient.GetRewards(pubkey)
+	rewardsRes, err := h.httpClient.GetRewards(pubkey)
 	if err != nil {
 		return nil, err
 	}
