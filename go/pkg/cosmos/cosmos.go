@@ -10,6 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/errors"
+	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -91,6 +92,7 @@ type GRPCClient struct {
 	bank         banktypes.QueryClient
 	distribution distributiontypes.QueryClient
 	staking      stakingtypes.QueryClient
+	tx           txtypes.ServiceClient
 }
 
 // NewGRPCClient configures and creates a GRPClient
@@ -113,6 +115,7 @@ func NewGRPCClient(conf Config) (*GRPCClient, error) {
 	bank := banktypes.NewQueryClient(grpcConn)
 	distribution := distributiontypes.NewQueryClient(grpcConn)
 	staking := stakingtypes.NewQueryClient(grpcConn)
+	tx := txtypes.NewServiceClient(grpcConn)
 	abci := abcitypes.NewABCIApplicationClient(grpcConn)
 
 	c := &GRPCClient{
@@ -124,6 +127,7 @@ func NewGRPCClient(conf Config) (*GRPCClient, error) {
 		bank:         bank,
 		distribution: distribution,
 		staking:      staking,
+		tx:           tx,
 	}
 
 	return c, nil
