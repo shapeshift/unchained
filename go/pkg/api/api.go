@@ -63,7 +63,6 @@ type BaseAccount struct {
 	// example: 0
 	UnconfirmedBalance string `json:"unconfirmedBalance"`
 	// required: true
-	// example: cosmos1rcuft35qpjzpezpg6ytcrf0nmvk3l96qxdpmph
 	Pubkey string `json:"pubkey"`
 }
 
@@ -107,18 +106,35 @@ func (b BaseTxHistory) txs() []Tx {
 	return b.Txs
 }
 
+type TxBody struct {
+	// Raw transaction hex
+	// required: true
+	Hex string `json:"hex"`
+}
+
 // swagger:parameters GetAccount
 type PubkeyParam struct {
 	// Account address
 	// in: path
 	// required: true
-	// example: cosmos1rcuft35qpjzpezpg6ytcrf0nmvk3l96qxdpmph
 	Pubkey string `json:"pubkey"`
 }
+
+// swagger:parameters SendTx
+type TxParam struct {
+	// in:body
+	Body struct {
+		TxBody
+	}
+}
+
+// swagger:model TransactionHash
+type TransactionHash string
 
 // BaseAPI interface for all coinstacks to implement
 type BaseAPI interface {
 	GetInfo() (Info, error)
 	GetAccount(pubkey string) (Account, error)
 	GetTxHistory(pubkey string) (TxHistory, error)
+	SendTx(hex string) (string, error)
 }

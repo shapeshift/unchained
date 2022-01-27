@@ -109,3 +109,7 @@ func (h *Handler) GetTxHistory(pubkey string) (api.TxHistory, error) {
 
 	return txHistory, nil
 }
+
+func (h *Handler) SendTx(hex string) (string, error) {
+	return h.httpClient.BroadcastTx([]byte(hex))
+}
