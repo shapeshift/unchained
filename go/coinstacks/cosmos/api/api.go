@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"path/filepath"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
@@ -147,7 +148,17 @@ func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	txHistory, err := a.handler.GetTxHistory(pubkey)
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil {
+		page = 1
+	}
+
+	pageSize, err := strconv.Atoi(r.URL.Query().Get("pageSize"))
+	if err != nil {
+		pageSize = 25
+	}
+
+	txHistory, err := a.handler.GetTxHistory(pubkey, page, pageSize)
 	if err != nil {
 		handleError(w, http.StatusInternalServerError, err.Error())
 		return

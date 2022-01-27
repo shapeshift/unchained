@@ -3,7 +3,9 @@ package cosmos
 import (
 	"encoding/base64"
 	"fmt"
+	"math"
 	"sort"
+	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
@@ -24,7 +26,8 @@ type Tx struct {
 }
 
 type TxHistoryResponse struct {
-	Txs []Tx
+	TotalPages int
+	Txs        []Tx
 }
 
 type Message struct {
@@ -123,17 +126,27 @@ func Messages(msgs []sdk.Msg) []Message {
 	return messages
 }
 
-func (c *HTTPClient) GetTxHistory(address string) (*TxHistoryResponse, error) {
-	res, _, err := c.tendermintClient.InfoApi.TxSearch(c.ctx).Query(fmt.Sprintf("\"message.sender='%s'\"", address)).Execute()
+func (c *HTTPClient) GetTxHistory(address string, page int, pageSize int) (*TxHistoryResponse, error) {
+	res, _, err := c.tendermintClient.InfoApi.TxSearch(c.ctx).Query(fmt.Sprintf("\"message.sender='%s'\"", address)).Page(int32(page)).PerPage(int32(pageSize)).OrderBy("\"desc\"").Execute()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get send transactions")
 	}
 
+	totalSend, err := strconv.ParseFloat(res.Result.TotalCount, 64)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse totalSend: %s", res.Result.TotalCount)
+	}
+
 	resTxs := res.Result.Txs
 
-	res, _, err = c.tendermintClient.InfoApi.TxSearch(c.ctx).Query(fmt.Sprintf("\"transfer.recipient='%s'\"", address)).Execute()
+	res, _, err = c.tendermintClient.InfoApi.TxSearch(c.ctx).Query(fmt.Sprintf("\"transfer.recipient='%s'\"", address)).Page(int32(page)).PerPage(int32(pageSize)).OrderBy("\"desc\"").Execute()
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get send transactions")
+		return nil, errors.Wrap(err, "failed to get receive transactions")
+	}
+
+	totalReceive, err := strconv.ParseFloat(res.Result.TotalCount, 64)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse totalReceive: %s", res.Result.TotalCount)
 	}
 
 	resTxs = append(resTxs, res.Result.Txs...)
@@ -173,7 +186,8 @@ func (c *HTTPClient) GetTxHistory(address string) (*TxHistoryResponse, error) {
 	}
 
 	txHistory := &TxHistoryResponse{
-		Txs: txs,
+		TotalPages: int(math.Ceil((totalSend + totalReceive) / float64(pageSize))),
+		Txs:        txs,
 	}
 
 	return txHistory, nil

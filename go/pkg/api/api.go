@@ -139,14 +139,17 @@ type TxHistoryParam struct {
 	// in: path
 	// required: true
 	Pubkey string `json:"pubkey"`
-	// Page number
+	// Page number (default 1)
 	// in: query
 	Page int `json:"page"`
+	// Page size (default 25)
+	// in: query
+	PageSize int `json:"pageSize"`
 }
 
 // BaseAPI interface for all coinstacks to implement
 type BaseAPI interface {
 	GetInfo() (Info, error)
 	GetAccount(pubkey string) (Account, error)
-	GetTxHistory(pubkey string) (TxHistory, error)
+	GetTxHistory(pubkey string, page int, pageSize int) (TxHistory, error)
 }
