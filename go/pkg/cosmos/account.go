@@ -13,91 +13,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-type Account struct {
-	Address       string
-	AccountNumber int
-	Sequence      int
-}
-
-type Balance struct {
-	Amount string  `json:"amount"`
-	Assets []Value `json:"assets"`
-}
-
-// Contains info about a staking delegation
-// swagger:model Delegation
-type Delegation struct {
-	// required: true
-	// example: cosmosvaloper1rpgtz9pskr5geavkjz02caqmeep7cwwpv73axj
-	Validator string `json:"validator"`
-	// required: true
-	// example: 123456.789
-	Shares string `json:"shares"`
-	// required: true
-	// example: 123456789
-	Balance Value `json:"balance"`
-}
-
-// Contains info about a staking redelegation
-// swagger:model Redelegation
-type Redelegation struct {
-	// required: true
-	// example: cosmosvaloper1rpgtz9pskr5geavkjz02caqmeep7cwwpv73axj
-	SourceValidator string `json:"sourceValidator"`
-	// required: true
-	// example: cosmosvaloper1ma02nlc7lchu7caufyrrqt4r6v2mpsj90y9wzd
-	DestinationValidator string `json:"destinationValidator"`
-	// required: true
-	Entries []RedelegationEntry `json:"entries"`
-}
-
-// Contains info about a redelegation action
-// swagger:model RedelegationEntry
-type RedelegationEntry struct {
-	// required: true
-	// example: 1642533407592
-	CompletionTime string `json:"completionTime"`
-	// required: true
-	// example: 123456.789
-	Shares string `json:"shares"`
-}
-
-type Rewards struct {
-	Assets []Value `json:"assets"`
-}
-
-// Contains info about a staking unbonding
-// swagger:model Unbonding
-type Unbonding struct {
-	// required: true
-	// example: cosmosvaloper1rpgtz9pskr5geavkjz02caqmeep7cwwpv73axj
-	Validator string `json:"validator"`
-	// required: true
-	Entries []UnbondingEntry `json:"entries"`
-}
-
-// Contains info about an unbonding action
-// swagger:model UnbondingEntry
-type UnbondingEntry struct {
-	// required: true
-	// example: 1642533407592
-	CompletionTime string `json:"completionTime"`
-	// required: true
-	// example: 123456789
-	Balance Value `json:"balance"`
-}
-
-// Contains info about an asset value
-// swagger:model Value
-type Value struct {
-	// required: true
-	// example: 123456789
-	Amount string `json:"amount"`
-	// required: true
-	// example: udenom
-	Denom string `json:"denom"`
-}
-
 func (c *HTTPClient) GetAccount(address string) (*Account, error) {
 	var res struct {
 		Account struct {
@@ -267,7 +182,7 @@ func (c *HTTPClient) GetUnbondings(address string, baseDenom string) ([]Unbondin
 	return unbondings, nil
 }
 
-func (c *HTTPClient) GetRewards(address string) (*Rewards, error) {
+func (c *HTTPClient) GetRewards(address string) ([]Value, error) {
 	type Reward struct {
 		Amount string `json:"amount"`
 		Denom  string `json:"denom"`
@@ -286,9 +201,9 @@ func (c *HTTPClient) GetRewards(address string) (*Rewards, error) {
 		return nil, errors.Wrap(err, "failed to get unbondings")
 	}
 
-	rewards := &Rewards{Assets: []Value{}}
+	rewards := []Value{}
 	for _, r := range res.Total {
-		rewards.Assets = append(rewards.Assets, Value(r))
+		rewards = append(rewards, Value(r))
 	}
 
 	return rewards, nil
@@ -401,15 +316,15 @@ func (c *GRPCClient) GetUnbondings(address string, baseDenom string) ([]Unbondin
 	return unbondings, nil
 }
 
-func (c *GRPCClient) GetRewards(address string) (*Rewards, error) {
+func (c *GRPCClient) GetRewards(address string) ([]Value, error) {
 	res, err := c.distribution.DelegationTotalRewards(c.ctx, &distributiontypes.QueryDelegationTotalRewardsRequest{DelegatorAddress: address})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get rewards")
 	}
 
-	rewards := &Rewards{Assets: []Value{}}
+	rewards := []Value{}
 	for _, r := range res.Total {
-		rewards.Assets = append(rewards.Assets, Value{Amount: r.Amount.String(), Denom: r.Denom})
+		rewards = append(rewards, Value{Amount: r.Amount.String(), Denom: r.Denom})
 	}
 
 	return rewards, nil

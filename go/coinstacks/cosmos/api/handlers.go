@@ -63,7 +63,7 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 		Delegations:   delRes,
 		Redelegations: redelRes,
 		Unbondings:    unbondingsRes,
-		Rewards:       rewardsRes.Assets,
+		Rewards:       rewardsRes,
 	}
 
 	return account, nil
