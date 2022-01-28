@@ -86,7 +86,7 @@ export class Deployment extends pulumi.ComponentResource {
         values: {
           podAnnotations: {
             'prometheus.io/scrape': 'true',
-            'prometheus.io/port': '3101'
+            'prometheus.io/port': '3101',
           },
           config: {
             lokiAddress: `http://${name}-loki:3100/loki/api/v1/push`,
@@ -120,14 +120,14 @@ export class Deployment extends pulumi.ComponentResource {
                     selector: '{app="traefik"}|="/ping"',
                     action: 'drop',
                     drop_counter_reason: 'traefik_ping',
-                  }
+                  },
                 },
                 {
                   match: {
                     selector: '{app="traefik"}|="/metrics"',
                     action: 'drop',
                     drop_counter_reason: 'traefik_metrics',
-                  }
+                  },
                 },
                 {
                   match: {
@@ -143,9 +143,9 @@ export class Deployment extends pulumi.ComponentResource {
                             RequestHost: 'RequestHost',
                             RequestMethod: 'RequestMethod',
                             RequestPath: 'RequestPath',
-                            RequestProtocol: 'RequestProtocol'
-                          }
-                        }
+                            RequestProtocol: 'RequestProtocol',
+                          },
+                        },
                       },
                       {
                         labels: {
@@ -153,21 +153,22 @@ export class Deployment extends pulumi.ComponentResource {
                           DownstreamStatus: 'DownstreamStatus',
                           RequestHost: 'RequestHost',
                           RequestMethod: 'RequestMethod',
-                        }
+                        },
                       },
                       {
                         template: {
                           source: 'output_msg',
-                          template: '{{ .ClientHost }} - {{ .RequestMethod }} {{ .RequestPath }} {{ .RequestProtocol }} {{ .DownstreamStatus }} {{ .OriginContentSize }} {{ .Duration }}'
-                        }
+                          template:
+                            '{{ .ClientHost }} - {{ .RequestMethod }} {{ .RequestPath }} {{ .RequestProtocol }} {{ .DownstreamStatus }} {{ .OriginContentSize }} {{ .Duration }}',
+                        },
                       },
                       {
                         output: {
-                          source: 'output_msg'
-                        }
-                      }
-                    ]
-                  }
+                          source: 'output_msg',
+                        },
+                      },
+                    ],
+                  },
                 },
               ],
             },
