@@ -125,6 +125,12 @@ func (b BaseTxHistory) txs() []Tx {
 	return b.Txs
 }
 
+type TxBody struct {
+	// Raw transaction hex
+	// required: true
+	Hex string `json:"hex"`
+}
+
 // swagger:parameters GetAccount
 type PubkeyParam struct {
 	// Account address or xpub
@@ -134,11 +140,8 @@ type PubkeyParam struct {
 }
 
 // swagger:parameters GetTxHistory
-type TxHistoryParam struct {
-	// Account address or xpub
-	// in: path
-	// required: true
-	Pubkey string `json:"pubkey"`
+type PaginatedPubkeyParam struct {
+	PubkeyParam
 	// Page number (default 1)
 	// in: query
 	Page int `json:"page"`
@@ -147,9 +150,21 @@ type TxHistoryParam struct {
 	PageSize int `json:"pageSize"`
 }
 
+// swagger:parameters SendTx
+type TxParam struct {
+	// in:body
+	Body struct {
+		TxBody
+	}
+}
+
+// swagger:model TransactionHash
+type TransactionHash string
+
 // BaseAPI interface for all coinstacks to implement
 type BaseAPI interface {
 	GetInfo() (Info, error)
 	GetAccount(pubkey string) (Account, error)
 	GetTxHistory(pubkey string, page int, pageSize int) (TxHistory, error)
+	SendTx(hex string) (string, error)
 }

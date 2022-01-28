@@ -113,3 +113,7 @@ func (h *Handler) GetTxHistory(pubkey string, page int, pageSize int) (api.TxHis
 
 	return txHistory, nil
 }
+
+func (h *Handler) SendTx(hex string) (string, error) {
+	return h.httpClient.BroadcastTx([]byte(hex))
+}

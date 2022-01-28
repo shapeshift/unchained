@@ -54,6 +54,7 @@ func Start(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, errChan
 
 	v1 := r.PathPrefix("/api/v1").Subrouter()
 	v1.HandleFunc("/info", a.Info).Methods("GET")
+	v1.HandleFunc("/send", a.SendTx).Methods("POST")
 
 	v1Account := v1.PathPrefix("/account").Subrouter()
 	v1Account.Use(validatePubkey)
@@ -88,9 +89,6 @@ func docsRedirect(w http.ResponseWriter, r *http.Request) {
 //
 // Get information about the running coinstack
 //
-// produces:
-//   - application/json
-//
 // responses:
 //   200: Info
 func (a *API) Info(w http.ResponseWriter, r *http.Request) {
@@ -104,9 +102,6 @@ func (a *API) Info(w http.ResponseWriter, r *http.Request) {
 // swagger:route GET /api/v1/account/{pubkey} v1 GetAccount
 //
 // Get account details by address
-//
-// produces:
-//   - application/json
 //
 // responses:
 //   200: Account
@@ -165,6 +160,33 @@ func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 	}
 
 	handleResponse(w, http.StatusOK, txHistory)
+}
+
+// swagger:route POST /api/v1/send v1 SendTx
+//
+// Sends raw transaction to be broadcast to the node.
+//
+// responses:
+//   200: TransactionHash
+//   400: BadRequestError
+//   422: ValidationError
+//   500: InternalServerError
+func (a *API) SendTx(w http.ResponseWriter, r *http.Request) {
+	body := &api.TxBody{}
+
+	err := json.NewDecoder(r.Body).Decode(body)
+	if err != nil {
+		handleError(w, http.StatusBadRequest, "invalid post body")
+		return
+	}
+
+	txHash, err := a.handler.SendTx(body.Hex)
+	if err != nil {
+		handleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	handleResponse(w, http.StatusOK, txHash)
 }
 
 func handleResponse(w http.ResponseWriter, status int, res interface{}) {
