@@ -112,7 +112,6 @@ type PubkeyParam struct {
 	// Account address
 	// in: path
 	// required: true
-	// example: cosmos1rcuft35qpjzpezpg6ytcrf0nmvk3l96qxdpmph
 	Pubkey string `json:"pubkey"`
 }
 
