@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"path/filepath"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
@@ -123,6 +124,18 @@ func (a *API) Account(w http.ResponseWriter, r *http.Request) {
 	handleResponse(w, http.StatusOK, account)
 }
 
+// swagger:route GET /api/v1/account/{pubkey}/txs v1 GetTxHistory
+//
+// Get paginated transaction history details by address
+//
+// produces:
+//   - application/json
+//
+// responses:
+//   200: TxHistory
+//   400: BadRequestError
+//   422: ValidationError
+//   500: InternalServerError
 func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 	pubkey, ok := mux.Vars(r)["pubkey"]
 	if !ok || pubkey == "" {
@@ -130,7 +143,17 @@ func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	txHistory, err := a.handler.GetTxHistory(pubkey)
+	page, err := strconv.Atoi(r.URL.Query().Get("page"))
+	if err != nil {
+		page = 1
+	}
+
+	pageSize, err := strconv.Atoi(r.URL.Query().Get("pageSize"))
+	if err != nil {
+		pageSize = 25
+	}
+
+	txHistory, err := a.handler.GetTxHistory(pubkey, page, pageSize)
 	if err != nil {
 		handleError(w, http.StatusInternalServerError, err.Error())
 		return
