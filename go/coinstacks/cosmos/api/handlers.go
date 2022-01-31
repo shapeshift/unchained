@@ -63,14 +63,14 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 		Delegations:   delRes,
 		Redelegations: redelRes,
 		Unbondings:    unbondingsRes,
-		Rewards:       rewardsRes.Assets,
+		Rewards:       rewardsRes,
 	}
 
 	return account, nil
 }
 
-func (h *Handler) GetTxHistory(pubkey string) (api.TxHistory, error) {
-	res, err := h.httpClient.GetTxHistory(pubkey)
+func (h *Handler) GetTxHistory(pubkey string, page int, pageSize int) (api.TxHistory, error) {
+	res, err := h.httpClient.GetTxHistory(pubkey, page, pageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -102,10 +102,18 @@ func (h *Handler) GetTxHistory(pubkey string) (api.TxHistory, error) {
 
 	txHistory := TxHistory{
 		BaseTxHistory: api.BaseTxHistory{
+			Pagination: api.Pagination{
+				Page:       page,
+				TotalPages: res.TotalPages,
+			},
 			Pubkey: pubkey,
 		},
 		Txs: txs,
 	}
 
 	return txHistory, nil
+}
+
+func (h *Handler) SendTx(hex string) (string, error) {
+	return h.httpClient.BroadcastTx([]byte(hex))
 }
