@@ -66,7 +66,6 @@ func Messages(msgs []sdk.Msg) []Message {
 				Value: &v.Amount[0],
 			}
 			messages = append(messages, message)
-			break
 		case *stakingtypes.MsgDelegate:
 			message := Message{
 				From:  v.DelegatorAddress,
@@ -74,7 +73,6 @@ func Messages(msgs []sdk.Msg) []Message {
 				Value: &v.Amount,
 			}
 			messages = append(messages, message)
-			break
 		case *stakingtypes.MsgUndelegate:
 			message := Message{
 				From:  v.DelegatorAddress,
@@ -83,7 +81,6 @@ func Messages(msgs []sdk.Msg) []Message {
 				Value: &v.Amount,
 			}
 			messages = append(messages, message)
-			break
 		case *stakingtypes.MsgBeginRedelegate:
 			message := Message{
 				From:  v.DelegatorAddress,
@@ -91,7 +88,6 @@ func Messages(msgs []sdk.Msg) []Message {
 				Value: &v.Amount,
 			}
 			messages = append(messages, message)
-			break
 		case *disttypes.MsgWithdrawDelegatorReward:
 			message := Message{
 				From: v.ValidatorAddress,
@@ -99,7 +95,6 @@ func Messages(msgs []sdk.Msg) []Message {
 				Type: v.Type(),
 			}
 			messages = append(messages, message)
-			break
 		case *ibctypes.MsgTransfer:
 			message := Message{
 				From:  v.Sender,
@@ -108,21 +103,18 @@ func Messages(msgs []sdk.Msg) []Message {
 				Value: &v.Token,
 			}
 			messages = append(messages, message)
-			break
 		case *ibccoretypes.MsgUpdateClient:
 			message := Message{
 				From: v.Signer,
 				Type: v.Type(),
 			}
 			messages = append(messages, message)
-			break
 		case *ibcchanneltypes.MsgRecvPacket:
 			message := Message{
 				From: v.Signer,
 				Type: v.Type(),
 			}
 			messages = append(messages, message)
-			break
 		default:
 			logger.Warnf("unsupported message type: %s, %T", v.Type(), v)
 		}
@@ -132,10 +124,6 @@ func Messages(msgs []sdk.Msg) []Message {
 }
 
 func (c *HTTPClient) GetTxHistory(address string) (*TxHistoryResponse, error) {
-	if !isValidAddress(address) {
-		return nil, errors.New(fmt.Sprintf("invalid address: %s", address))
-	}
-
 	res, _, err := c.tendermintClient.InfoApi.TxSearch(c.ctx).Query(fmt.Sprintf("\"message.sender='%s'\"", address)).Execute()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get send transactions")
