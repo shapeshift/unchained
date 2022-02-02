@@ -21,6 +21,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/go-unchained/internal/log"
 	"github.com/shapeshift/go-unchained/pkg/api"
@@ -28,6 +29,8 @@ import (
 )
 
 var logger = log.WithoutFields()
+
+var upgrader = websocket.Upgrader{}
 
 type API struct {
 	handler *Handler
@@ -45,7 +48,11 @@ func Start(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, errChan
 	var _ api.BaseAPI = a.handler
 
 	r := mux.NewRouter()
+
+	r.Use(api.Scheme)
 	r.Use(api.Logger)
+
+	r.HandleFunc("/", a.Root).Methods("GET")
 
 	r.HandleFunc("/health", health).Methods("GET")
 
@@ -62,7 +69,6 @@ func Start(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, errChan
 	v1Account.HandleFunc("/{pubkey}/txs", a.TxHistory).Methods("GET")
 
 	// docs redirect paths
-	r.HandleFunc("/", docsRedirect).Methods("GET")
 	r.HandleFunc("/docs", docsRedirect).Methods("GET")
 
 	http.Handle("/", r)
@@ -85,9 +91,41 @@ func docsRedirect(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/docs/", http.StatusFound)
 }
 
+func (a *API) Root(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Scheme == "ws" || r.URL.Scheme == "wss" {
+		a.Websocket(w, r)
+		return
+	}
+
+	docsRedirect(w, r)
+}
+
+// swagger:route GET / Websocket Websocket
+//
+// Subscribe to pending and confirmed transactions.
+//
+// Subscribe Example:
+//
+// Unsubscribe Example:
+//
+// responses:
+func (a *API) Websocket(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		handleError(w, http.StatusInternalServerError, err.Error())
+	}
+
+	ws, err := api.NewWebsocket(conn)
+	if err != nil {
+		handleError(w, http.StatusInternalServerError, err.Error())
+	}
+
+	ws.Start()
+}
+
 // swagger:route GET /api/v1/info v1 GetInfo
 //
-// Get information about the running coinstack
+// Get information about the running coinstack.
 //
 // responses:
 //   200: Info
@@ -101,7 +139,7 @@ func (a *API) Info(w http.ResponseWriter, r *http.Request) {
 
 // swagger:route GET /api/v1/account/{pubkey} v1 GetAccount
 //
-// Get account details by address
+// Get account details.
 //
 // responses:
 //   200: Account
@@ -126,10 +164,7 @@ func (a *API) Account(w http.ResponseWriter, r *http.Request) {
 
 // swagger:route GET /api/v1/account/{pubkey}/txs v1 GetTxHistory
 //
-// Get paginated transaction history details by address
-//
-// produces:
-//   - application/json
+// Get paginated transaction history.
 //
 // responses:
 //   200: TxHistory
