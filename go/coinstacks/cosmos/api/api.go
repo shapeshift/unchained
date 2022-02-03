@@ -21,16 +21,20 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/gorilla/websocket"
+	ws "github.com/gorilla/websocket"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/go-unchained/internal/log"
 	"github.com/shapeshift/go-unchained/pkg/api"
 	"github.com/shapeshift/go-unchained/pkg/cosmos"
+	"github.com/shapeshift/go-unchained/pkg/websocket"
 )
 
 var logger = log.WithoutFields()
 
-var upgrader = websocket.Upgrader{}
+var upgrader = ws.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
 
 type API struct {
 	handler *Handler
@@ -115,7 +119,7 @@ func (a *API) Websocket(w http.ResponseWriter, r *http.Request) {
 		handleError(w, http.StatusInternalServerError, err.Error())
 	}
 
-	ws, err := api.NewWebsocket(conn)
+	ws, err := websocket.NewConnection(conn)
 	if err != nil {
 		handleError(w, http.StatusInternalServerError, err.Error())
 	}
