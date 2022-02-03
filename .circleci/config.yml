@@ -665,14 +665,6 @@ workflows:
             - approve ethereum coinstack
           <<: *only-main
 
-      ########## (POST DEPLOY) ##########
-      - publish:
-          name: publish packages
-          requires:
-            - deploy bitcoin coinstack
-            - deploy ethereum coinstack
-          <<: *only-main
-
   deploy-development-taxistake:
    jobs:
      - lint-and-test-persist:
