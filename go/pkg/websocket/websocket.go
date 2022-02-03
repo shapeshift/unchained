@@ -7,68 +7,67 @@ import (
 	"github.com/shapeshift/go-unchained/internal/log"
 )
 
-var logger = log.WithoutFields()
-
 const (
-	writeWait      = 10 * time.Second
-	pongWait       = 10 * time.Second
-	pingPeriod     = (pongWait * 9) / 10
-	maxMessageSize = 512
+	writeWait      = 15 * time.Second
+	readWait       = 15 * time.Second
+	pingPeriod     = (readWait * 9) / 10
+	maxMessageSize = 1024
 )
 
-type Connection struct {
-	conn   *websocket.Conn
-	msg    chan []byte
-	ticker *time.Ticker
+var logger = log.WithoutFields()
+
+type Client struct {
+	conn    *websocket.Conn
+	manager *Manager
+	msg     chan []byte
 }
 
-func NewConnection(conn *websocket.Conn) (*Connection, error) {
-	ws := &Connection{
-		conn: conn,
-		msg:  make(chan []byte),
+func NewClient(conn *websocket.Conn, manager *Manager) *Client {
+	c := &Client{
+		conn:    conn,
+		manager: manager,
+		msg:     make(chan []byte),
 	}
 
-	return ws, nil
+	c.manager.register <- c
+
+	return c
 }
 
-func (ws *Connection) Start() {
-	go ws.Read()
-	go ws.Write()
+func (c *Client) Start() {
+	go c.Read()
+	go c.Write()
 }
 
-func (ws *Connection) Read() {
+func (c *Client) Read() {
 	defer func() {
-		ws.conn.Close()
+		c.Shutdown()
 	}()
 
-	ws.conn.SetReadLimit(maxMessageSize)
-	ws.conn.SetReadDeadline(time.Now().Add(pongWait))
-	ws.conn.SetPongHandler(func(string) error {
-		ws.conn.SetReadDeadline(time.Now().Add(pongWait))
+	c.conn.SetReadLimit(maxMessageSize)
+	c.conn.SetReadDeadline(time.Now().Add(readWait))
+	c.conn.SetPongHandler(func(string) error {
+		c.conn.SetReadDeadline(time.Now().Add(readWait))
 		return nil
 	})
 
 	for {
-		_, msg, err := ws.conn.ReadMessage()
+		_, msg, err := c.conn.ReadMessage()
 		if err != nil {
 			return
 		}
 
-		ws.msg <- msg
+		c.msg <- msg
 	}
 }
 
-func (ws *Connection) Write() {
-	defer func() {
-		ws.conn.Close()
-		ws.ticker.Stop()
-	}()
+func (c *Client) Write() {
+	ticker := time.NewTicker(pingPeriod)
+	defer ticker.Stop()
 
-	ws.ticker = time.NewTicker(pingPeriod)
-
-	ws.conn.SetPingHandler(func(string) error {
-		ws.conn.SetWriteDeadline(time.Now().Add(writeWait))
-		if err := ws.conn.WriteMessage(websocket.PongMessage, nil); err != nil {
+	c.conn.SetPingHandler(func(string) error {
+		c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+		if err := c.conn.WriteMessage(websocket.PongMessage, nil); err != nil {
 			return err
 		}
 		return nil
@@ -76,26 +75,28 @@ func (ws *Connection) Write() {
 
 	for {
 		select {
-		case message, ok := <-ws.msg:
-			ws.conn.SetWriteDeadline(time.Now().Add(writeWait))
+		case message, ok := <-c.msg:
+			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
-				ws.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
 
-			if err := ws.conn.WriteMessage(websocket.TextMessage, message); err != nil {
+			if err := c.conn.WriteMessage(websocket.TextMessage, message); err != nil {
 				logger.Errorf("failed to write text message: %v", err)
 				return
 			}
-		case <-ws.ticker.C:
-			ws.conn.SetWriteDeadline(time.Now().Add(writeWait))
-			if err := ws.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+		case <-ticker.C:
+			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				return
 			}
 		}
 	}
 }
 
-func (ws *Connection) Shutdown() {
-	ws.conn.Close()
+func (c *Client) Shutdown() {
+	if _, ok := c.manager.clients[c]; ok {
+		c.manager.unregister <- c
+	}
 }

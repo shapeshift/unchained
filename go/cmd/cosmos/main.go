@@ -15,6 +15,7 @@ import (
 var logger = log.WithoutFields()
 
 var confPath = flag.String("config", "cmd/cosmos/config.json", "path to configuration file")
+var swaggerPath = flag.String("swagger", "/app/coinstacks/cosmos/api/swagger.json", "path to swagger spec")
 
 // Config for running application
 type Config struct {
@@ -59,13 +60,17 @@ func main() {
 	}
 	defer grpcClient.Shutdown()
 
-	go api.Start(httpClient, grpcClient, errChan)
+	api := api.New(httpClient, grpcClient, *swaggerPath)
+	defer api.Shutdown()
+
+	go api.Start(errChan)
 
 	select {
 	case err := <-errChan:
 		logger.Panic(err)
 	case <-sigChan:
 		grpcClient.Shutdown()
+		api.Shutdown()
 		os.Exit(0)
 	}
 }

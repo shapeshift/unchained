@@ -15,10 +15,12 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 	ws "github.com/gorilla/websocket"
@@ -29,6 +31,10 @@ import (
 	"github.com/shapeshift/go-unchained/pkg/websocket"
 )
 
+const (
+	gracefulShutdown = 15 * time.Second
+)
+
 var logger = log.WithoutFields()
 
 var upgrader = ws.Upgrader{
@@ -37,30 +43,48 @@ var upgrader = ws.Upgrader{
 }
 
 type API struct {
-	handler *Handler
+	handler  *Handler
+	mananger *websocket.Manager
+	server   *http.Server
 }
 
-func Start(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, errChan chan<- error) {
-	a := API{
+func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, swaggerPath string) *API {
+	m := websocket.NewManager()
+
+	r := mux.NewRouter()
+
+	s := &http.Server{
+		Addr:         ":3000",
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+		IdleTimeout:  60 * time.Second,
+		Handler:      r,
+	}
+
+	a := &API{
 		handler: &Handler{
 			httpClient: httpClient,
 			grpcClient: grpcClient,
 		},
+		mananger: m,
+		server:   s,
 	}
 
 	// compile check to ensure Handler implements BaseAPI
 	var _ api.BaseAPI = a.handler
-
-	r := mux.NewRouter()
 
 	r.Use(api.Scheme)
 	r.Use(api.Logger)
 
 	r.HandleFunc("/", a.Root).Methods("GET")
 
-	r.HandleFunc("/health", health).Methods("GET")
+	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		handleResponse(w, http.StatusOK, map[string]string{"status": "up", "coinstack": "cosmos", "connections": strconv.Itoa(a.mananger.ConnectionCount())})
+	}).Methods("GET")
 
-	r.HandleFunc("/swagger", swagger).Methods("GET")
+	r.HandleFunc("/swagger", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.FromSlash(swaggerPath))
+	}).Methods("GET")
 	r.PathPrefix("/docs/").Handler(http.StripPrefix("/docs/", http.FileServer(http.Dir("./static/swaggerui"))))
 
 	v1 := r.PathPrefix("/api/v1").Subrouter()
@@ -77,22 +101,25 @@ func Start(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, errChan
 
 	http.Handle("/", r)
 
-	logger.Info("serving application")
-	if err := http.ListenAndServe(":3000", r); err != nil {
-		errChan <- errors.Wrap(err, "error serving application")
-	}
-}
-
-func health(w http.ResponseWriter, r *http.Request) {
-	handleResponse(w, http.StatusOK, map[string]string{"status": "up", "coinstack": "cosmos"})
-}
-
-func swagger(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, filepath.FromSlash("/app/coinstacks/cosmos/api/swagger.json"))
+	return a
 }
 
 func docsRedirect(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/docs/", http.StatusFound)
+}
+
+func (a *API) Start(errChan chan<- error) {
+	logger.Info("serving application")
+	go a.mananger.Start()
+	if err := a.server.ListenAndServe(); err != nil {
+		errChan <- errors.Wrap(err, "error serving application")
+	}
+}
+
+func (a *API) Shutdown() {
+	ctx, cancel := context.WithTimeout(context.Background(), gracefulShutdown)
+	defer cancel()
+	a.server.Shutdown(ctx)
 }
 
 func (a *API) Root(w http.ResponseWriter, r *http.Request) {
@@ -119,12 +146,8 @@ func (a *API) Websocket(w http.ResponseWriter, r *http.Request) {
 		handleError(w, http.StatusInternalServerError, err.Error())
 	}
 
-	ws, err := websocket.NewConnection(conn)
-	if err != nil {
-		handleError(w, http.StatusInternalServerError, err.Error())
-	}
-
-	ws.Start()
+	c := websocket.NewClient(conn, a.mananger)
+	c.Start()
 }
 
 // swagger:route GET /api/v1/info v1 GetInfo
