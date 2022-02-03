@@ -1,32 +1,32 @@
 package websocket
 
 type Manager struct {
-	clients    map[*Client]bool
-	register   chan *Client
-	unregister chan *Client
+	connections map[*Connection]bool
+	register    chan *Connection
+	unregister  chan *Connection
 }
 
 func NewManager() *Manager {
 	return &Manager{
-		clients:    make(map[*Client]bool),
-		register:   make(chan *Client),
-		unregister: make(chan *Client),
+		connections: make(map[*Connection]bool),
+		register:    make(chan *Connection),
+		unregister:  make(chan *Connection),
 	}
 }
 
 func (m *Manager) Start() {
 	for {
 		select {
-		case client := <-m.register:
-			m.clients[client] = true
-		case client := <-m.unregister:
-			delete(m.clients, client)
-			close(client.msg)
-			client.conn.Close()
+		case c := <-m.register:
+			m.connections[c] = true
+		case c := <-m.unregister:
+			delete(m.connections, c)
+			close(c.msg)
+			c.conn.Close()
 		}
 	}
 }
 
 func (m *Manager) ConnectionCount() int {
-	return len(m.clients)
+	return len(m.connections)
 }

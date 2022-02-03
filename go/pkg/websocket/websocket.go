@@ -16,14 +16,14 @@ const (
 
 var logger = log.WithoutFields()
 
-type Client struct {
+type Connection struct {
 	conn    *websocket.Conn
 	manager *Manager
 	msg     chan []byte
 }
 
-func NewClient(conn *websocket.Conn, manager *Manager) *Client {
-	c := &Client{
+func NewConnection(conn *websocket.Conn, manager *Manager) *Connection {
+	c := &Connection{
 		conn:    conn,
 		manager: manager,
 		msg:     make(chan []byte),
@@ -34,12 +34,12 @@ func NewClient(conn *websocket.Conn, manager *Manager) *Client {
 	return c
 }
 
-func (c *Client) Start() {
+func (c *Connection) Start() {
 	go c.Read()
 	go c.Write()
 }
 
-func (c *Client) Read() {
+func (c *Connection) Read() {
 	defer func() {
 		c.Shutdown()
 	}()
@@ -61,7 +61,7 @@ func (c *Client) Read() {
 	}
 }
 
-func (c *Client) Write() {
+func (c *Connection) Write() {
 	ticker := time.NewTicker(pingPeriod)
 	defer ticker.Stop()
 
@@ -95,8 +95,8 @@ func (c *Client) Write() {
 	}
 }
 
-func (c *Client) Shutdown() {
-	if _, ok := c.manager.clients[c]; ok {
+func (c *Connection) Shutdown() {
+	if _, ok := c.manager.connections[c]; ok {
 		c.manager.unregister <- c
 	}
 }

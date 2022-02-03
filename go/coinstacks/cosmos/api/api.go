@@ -50,7 +50,6 @@ type API struct {
 
 func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, swaggerPath string) *API {
 	m := websocket.NewManager()
-
 	r := mux.NewRouter()
 
 	s := &http.Server{
@@ -146,7 +145,7 @@ func (a *API) Websocket(w http.ResponseWriter, r *http.Request) {
 		handleError(w, http.StatusInternalServerError, err.Error())
 	}
 
-	c := websocket.NewClient(conn, a.mananger)
+	c := websocket.NewConnection(conn, a.mananger)
 	c.Start()
 }
 
