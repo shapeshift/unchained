@@ -673,7 +673,7 @@ workflows:
 
      - deploy-dependencies:
          name: deploy common unchained dependencies
-         organization: TAXI_STAKE
+         organization: TAXISTAKE
          requires:
            - lint and test project (persist to workspace)
          <<: *only-develop
@@ -682,7 +682,7 @@ workflows:
      - deploy-coinstack:
          name: deploy bitcoin develop
          <<: *bitcoin
-         organization: TAXI_STAKE
+         organization: TAXISTAKE
          environment: dev
          pulumi-stack: public-dev
          broker-url: bitcoin-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
@@ -700,7 +700,7 @@ workflows:
      - deploy-coinstack:
          name: deploy ethereum develop
          <<: *ethereum
-         organization: TAXI_STAKE
+         organization: TAXISTAKE
          environment: dev
          pulumi-stack: public-dev
          broker-url: ethereum-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
@@ -718,7 +718,7 @@ workflows:
      - deploy-coinstack:
          name: deploy ethereum-ropsten develop
          <<: *ethereum-ropsten
-         organization: TAXI_STAKE
+         organization: TAXISTAKE
          environment: dev
          network: ropsten
          pulumi-stack: public-dev-ropsten
@@ -742,7 +742,7 @@ workflows:
 
      - deploy-monitoring:
          name: deploy unchained monitoring stack
-         organization: TAXI_STAKE
+         organization: TAXISTAKE
          requires:
            - approve monitoring stack
          <<: *only-develop
@@ -755,7 +755,7 @@ workflows:
 
      - deploy-dependencies:
          name: deploy common unchained dependencies
-         organization: TAXI_STAKE
+         organization: TAXISTAKE
          requires:
            - lint and test project (persist to workspace)
          <<: *only-main
@@ -763,7 +763,7 @@ workflows:
      ########## (BITCOIN) ##########
      - deploy-coinstack:
          name: preview bitcoin coinstack
-         organization: TAXI_STAKE
+         organization: TAXISTAKE
          pulumi-command: pulumi preview
          <<: *bitcoin
          requires:
@@ -779,7 +779,7 @@ workflows:
 
      - deploy-coinstack:
          name: deploy bitcoin coinstack
-         organization: TAXI_STAKE
+         organization: TAXISTAKE
          <<: *bitcoin
          requires:
            - approve bitcoin coinstack
@@ -788,7 +788,7 @@ workflows:
      ########## (ETHEREUM) ##########
      - deploy-coinstack:
          name: preview ethereum coinstack
-         organization: TAXI_STAKE
+         organization: TAXISTAKE
          pulumi-command: pulumi preview
          <<: *ethereum
          requires:
@@ -804,7 +804,7 @@ workflows:
 
      - deploy-coinstack:
          name: deploy ethereum coinstack
-         organization: TAXI_STAKE
+         organization: TAXISTAKE
          <<: *ethereum
          requires:
            - approve ethereum coinstack
