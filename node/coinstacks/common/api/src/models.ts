@@ -32,6 +32,7 @@ export interface InternalServerError {
  */
 export interface Account {
   balance: string
+  unconfirmedBalance: string
   pubkey: string
 }
 

@@ -10,40 +10,67 @@ type Handler struct {
 	grpcClient *cosmos.GRPCClient
 }
 
-func (h *Handler) GetInfo() (*api.Info, error) {
-	info := &api.Info{
-		Network: "mainnet",
+func (h *Handler) GetInfo() (api.Info, error) {
+	info := Info{
+		BaseInfo: api.BaseInfo{
+			Network: "mainnet",
+		},
 	}
 
 	return info, nil
 }
 
-func (h *Handler) GetAccount(pubkey string) (*Account, error) {
-	accRes, err := h.grpcClient.GetAccount(pubkey)
+func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
+	accRes, err := h.httpClient.GetAccount(pubkey)
 	if err != nil {
 		return nil, err
 	}
 
-	balRes, err := h.grpcClient.GetBalance(pubkey, "uatom")
+	balRes, err := h.httpClient.GetBalance(pubkey, "uatom")
+	if err != nil {
+		return nil, err
+	}
+
+	delRes, err := h.httpClient.GetDelegations(pubkey)
+	if err != nil {
+		return nil, err
+	}
+
+	redelRes, err := h.httpClient.GetRedelegations(pubkey)
+	if err != nil {
+		return nil, err
+	}
+
+	unbondingsRes, err := h.httpClient.GetUnbondings(pubkey, "uatom")
+	if err != nil {
+		return nil, err
+	}
+
+	rewardsRes, err := h.httpClient.GetRewards(pubkey)
 	if err != nil {
 		return nil, err
 	}
 
 	account := &Account{
-		Account: api.Account{
-			Balance: balRes.Amount,
-			Pubkey:  accRes.Address,
+		BaseAccount: api.BaseAccount{
+			Balance:            balRes.Amount,
+			UnconfirmedBalance: "0",
+			Pubkey:             accRes.Address,
 		},
 		AccountNumber: int(accRes.AccountNumber),
 		Sequence:      int(accRes.Sequence),
 		Assets:        balRes.Assets,
+		Delegations:   delRes,
+		Redelegations: redelRes,
+		Unbondings:    unbondingsRes,
+		Rewards:       rewardsRes,
 	}
 
 	return account, nil
 }
 
-func (h *Handler) GetTxHistory(pubkey string) (*TxHistory, error) {
-	res, err := h.httpClient.GetTxHistory(pubkey)
+func (h *Handler) GetTxHistory(pubkey string, page int, pageSize int) (api.TxHistory, error) {
+	res, err := h.httpClient.GetTxHistory(pubkey, page, pageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -54,6 +81,10 @@ func (h *Handler) GetTxHistory(pubkey string) (*TxHistory, error) {
 		msgs := t.CosmosTx.GetMsgs()
 
 		tx := Tx{
+			BaseTx: api.BaseTx{
+				TxID:        *t.TendermintTx.Hash,
+				BlockHeight: t.TendermintTx.Height,
+			},
 			Events: cosmos.Events(t.TendermintTx.TxResult.Log),
 			Fee: cosmos.Value{
 				Amount: fee.Amount.String(),
@@ -64,19 +95,25 @@ func (h *Handler) GetTxHistory(pubkey string) (*TxHistory, error) {
 			Index:     int(t.TendermintTx.GetIndex()),
 			Memo:      t.SigningTx.GetMemo(),
 			Messages:  cosmos.Messages(msgs),
-			Tx: api.Tx{
-				TxID:        *t.TendermintTx.Hash,
-				BlockHeight: t.TendermintTx.Height,
-			},
 		}
 
 		txs = append(txs, tx)
 	}
 
-	txHistory := &TxHistory{
-		Pubkey: pubkey,
-		Txs:    txs,
+	txHistory := TxHistory{
+		BaseTxHistory: api.BaseTxHistory{
+			Pagination: api.Pagination{
+				Page:       page,
+				TotalPages: res.TotalPages,
+			},
+			Pubkey: pubkey,
+		},
+		Txs: txs,
 	}
 
 	return txHistory, nil
+}
+
+func (h *Handler) SendTx(hex string) (string, error) {
+	return h.httpClient.BroadcastTx([]byte(hex))
 }

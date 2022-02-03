@@ -84,6 +84,10 @@ export class Deployment extends pulumi.ComponentResource {
         namespace: args.namespace,
         version: '3.8.2',
         values: {
+          podAnnotations: {
+            'prometheus.io/scrape': 'true',
+            'prometheus.io/port': '3101',
+          },
           config: {
             lokiAddress: `http://${name}-loki:3100/loki/api/v1/push`,
             snippets: {
@@ -106,6 +110,61 @@ export class Deployment extends pulumi.ComponentResource {
                       {
                         labels: {
                           namespace: '',
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  match: {
+                    selector: '{app="traefik"}|="/ping"',
+                    action: 'drop',
+                    drop_counter_reason: 'traefik_ping',
+                  },
+                },
+                {
+                  match: {
+                    selector: '{app="traefik"}|="/metrics"',
+                    action: 'drop',
+                    drop_counter_reason: 'traefik_metrics',
+                  },
+                },
+                {
+                  match: {
+                    selector: '{app="traefik"}|~"ClientHost"',
+                    stages: [
+                      {
+                        json: {
+                          expressions: {
+                            ClientHost: 'ClientHost',
+                            DownstreamStatus: 'DownstreamStatus',
+                            Duration: 'Duration',
+                            OriginContentSize: 'OriginContentSize',
+                            RequestHost: 'RequestHost',
+                            RequestMethod: 'RequestMethod',
+                            RequestPath: 'RequestPath',
+                            RequestProtocol: 'RequestProtocol',
+                          },
+                        },
+                      },
+                      {
+                        labels: {
+                          ClientHost: 'ClientHost',
+                          DownstreamStatus: 'DownstreamStatus',
+                          RequestHost: 'RequestHost',
+                          RequestMethod: 'RequestMethod',
+                        },
+                      },
+                      {
+                        template: {
+                          source: 'output_msg',
+                          template:
+                            '{{ .ClientHost }} - {{ .RequestMethod }} {{ .RequestPath }} {{ .RequestProtocol }} {{ .DownstreamStatus }} {{ .OriginContentSize }} {{ .Duration }}',
+                        },
+                      },
+                      {
+                        output: {
+                          source: 'output_msg',
                         },
                       },
                     ],

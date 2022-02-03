@@ -56,6 +56,11 @@ export interface Utxo {
   coinbase?: boolean
 }
 
+export interface BitcoinAddress {
+  balance: string
+  pubkey: string
+}
+
 /**
  * Contains additional bitcoin specific account info
  */
@@ -63,7 +68,7 @@ export interface BitcoinAccount extends Account {
   /**
    * List of associated addresses for an xpub
    */
-  addresses?: Array<Account>
+  addresses?: Array<BitcoinAddress>
 
   /**
    * The next unused receive address index for an xpub (change index 0)

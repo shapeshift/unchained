@@ -10,6 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/errors"
+	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -86,9 +87,12 @@ type GRPCClient struct {
 	encoding *params.EncodingConfig
 	grpcConn *grpc.ClientConn
 
-	abci abcitypes.ABCIApplicationClient
-	auth authtypes.QueryClient
-	bank banktypes.QueryClient
+	abci         abcitypes.ABCIApplicationClient
+	auth         authtypes.QueryClient
+	bank         banktypes.QueryClient
+	distribution distributiontypes.QueryClient
+	staking      stakingtypes.QueryClient
+	tx           txtypes.ServiceClient
 }
 
 // NewGRPCClient configures and creates a GRPClient
@@ -109,15 +113,21 @@ func NewGRPCClient(conf Config) (*GRPCClient, error) {
 
 	auth := authtypes.NewQueryClient(grpcConn)
 	bank := banktypes.NewQueryClient(grpcConn)
+	distribution := distributiontypes.NewQueryClient(grpcConn)
+	staking := stakingtypes.NewQueryClient(grpcConn)
+	tx := txtypes.NewServiceClient(grpcConn)
 	abci := abcitypes.NewABCIApplicationClient(grpcConn)
 
 	c := &GRPCClient{
-		ctx:      ctx,
-		grpcConn: grpcConn,
-		encoding: conf.Encoding,
-		abci:     abci,
-		auth:     auth,
-		bank:     bank,
+		ctx:          ctx,
+		grpcConn:     grpcConn,
+		encoding:     conf.Encoding,
+		abci:         abci,
+		auth:         auth,
+		bank:         bank,
+		distribution: distribution,
+		staking:      staking,
+		tx:           tx,
 	}
 
 	return c, nil
@@ -158,7 +168,7 @@ func NewEncoding(registerInterfaces ...func(r cryptotypes.InterfaceRegistry)) *p
 	}
 }
 
-func isValidAddress(address string) bool {
+func IsValidAddress(address string) bool {
 	if _, err := sdk.AccAddressFromBech32(address); err != nil {
 		return false
 	}
