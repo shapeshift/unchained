@@ -133,8 +133,8 @@ func NewGRPCClient(conf Config) (*GRPCClient, error) {
 	return c, nil
 }
 
-// Shutdown any GRPCClient connections
-func (c *GRPCClient) Shutdown() {
+// Close any GRPCClient connections
+func (c *GRPCClient) Close() {
 	c.grpcConn.Close()
 }
 

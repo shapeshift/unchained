@@ -22,6 +22,7 @@ func (m *Manager) Start() {
 		case c := <-m.unregister:
 			delete(m.connections, c)
 			close(c.msg)
+			c.ticker.Stop()
 			c.conn.Close()
 		}
 	}

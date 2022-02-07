@@ -2,6 +2,8 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -10,6 +12,8 @@ import (
 	"github.com/shapeshift/go-unchained/internal/config"
 	"github.com/shapeshift/go-unchained/internal/log"
 	"github.com/shapeshift/go-unchained/pkg/cosmos"
+	"github.com/shapeshift/go-unchained/pkg/tendermint"
+	"github.com/shapeshift/go-unchained/pkg/websocket"
 )
 
 var logger = log.WithoutFields()
@@ -34,7 +38,7 @@ func main() {
 
 	conf := &Config{}
 	if err := config.Load(*confPath, conf); err != nil {
-		logger.Panic(err)
+		logger.Panicf("%+v", err)
 	}
 
 	encoding := cosmos.NewEncoding()
@@ -51,25 +55,42 @@ func main() {
 
 	httpClient, err := cosmos.NewHTTPClient(cfg)
 	if err != nil {
-		logger.Panic(err)
+		logger.Panicf("%+v", err)
 	}
 
 	grpcClient, err := cosmos.NewGRPCClient(cfg)
 	if err != nil {
+		logger.Panicf("%+v", err)
+	}
+
+	url := fmt.Sprintf("wss://%s/websocket", cfg.RPCURL)
+	header := http.Header{}
+	header.Add("Authorization", cfg.APIKey)
+
+	wsClient, err := websocket.NewClient(url, header, nil)
+	if err != nil {
 		logger.Panic(err)
 	}
-	defer grpcClient.Shutdown()
 
-	api := api.New(httpClient, grpcClient, *swaggerPath)
+	wsClient2, err := tendermint.NewWebsocketClient(cfg)
+	if err != nil {
+		logger.Panic(err)
+	}
+
+	err = wsClient2.Start()
+	if err != nil {
+		logger.Panic(err)
+	}
+
+	api := api.New(httpClient, grpcClient, wsClient, *swaggerPath)
 	defer api.Shutdown()
 
-	go api.Start(errChan)
+	go api.Serve(errChan)
 
 	select {
 	case err := <-errChan:
-		logger.Panic(err)
+		logger.Panicf("%+v", err)
 	case <-sigChan:
-		grpcClient.Shutdown()
 		api.Shutdown()
 		os.Exit(0)
 	}
