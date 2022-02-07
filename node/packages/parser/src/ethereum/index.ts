@@ -13,7 +13,7 @@ import * as zrx from './zrx'
 
 export * from './types'
 
-export interface EthereumTransactionParserArgs {
+export interface TransactionParserArgs {
   network?: Network
   midgardUrl: string
   rpcUrl: string
@@ -26,7 +26,7 @@ export class TransactionParser {
   private uniV2: uniV2.Parser
   private zrx: zrx.Parser
 
-  constructor(args: EthereumTransactionParserArgs) {
+  constructor(args: TransactionParserArgs) {
     const provider = new ethers.providers.JsonRpcProvider(args.rpcUrl)
 
     this.network = args.network ?? 'mainnet'
