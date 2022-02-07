@@ -272,6 +272,11 @@ jobs:
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r5a.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r5b.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[3] r5n.4xlarge
+            pulumi config set --path unchained:common.eks.traefik.autoscaling.enabled true
+            pulumi config set --path unchained:common.eks.traefik.autoscaling.cpuThreshold 30
+            pulumi config set --path unchained:common.eks.traefik.autoscaling.maxReplicas 10
+            pulumi config set --path unchained:common.eks.traefik.replicas 3
+            pulumi config set --path unchained:common.eks.traefik.resources.cpu 300m
             pulumi config set --path unchained:common.eks.traefik.replicas 7
             pulumi config set --path unchained:common.eks.traefik.resources.cpu 500m
             pulumi config set --path unchained:common.eks.traefik.resources.memory 512Mi
