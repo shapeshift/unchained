@@ -137,6 +137,9 @@ func (a *API) Root(w http.ResponseWriter, r *http.Request) {
 // Subscribe Example:
 //
 // Unsubscribe Example:
+//
+// responses:
+//   200:
 func (a *API) Websocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
