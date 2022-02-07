@@ -8,7 +8,7 @@ import { toNetworkType } from './utils'
 
 export * from './types'
 
-export interface TransactionParserArgs {
+export interface BitcoinTransactionParserArgs {
   network?: Network
   rpcUrl: string
 }
@@ -16,7 +16,7 @@ export interface TransactionParserArgs {
 export class TransactionParser {
   network: Network
 
-  constructor(args: TransactionParserArgs) {
+  constructor(args: BitcoinTransactionParserArgs) {
     this.network = args.network ?? 'mainnet'
   }
 
