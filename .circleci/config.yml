@@ -277,8 +277,6 @@ jobs:
             pulumi config set --path unchained:common.eks.traefik.autoscaling.maxReplicas 10
             pulumi config set --path unchained:common.eks.traefik.replicas 3
             pulumi config set --path unchained:common.eks.traefik.resources.cpu 300m
-            pulumi config set --path unchained:common.eks.traefik.replicas 7
-            pulumi config set --path unchained:common.eks.traefik.resources.cpu 500m
             pulumi config set --path unchained:common.eks.traefik.resources.memory 512Mi
             pulumi config set --path unchained:common.eks.traefik.whitelist[0] 173.245.48.0/20
             pulumi config set --path unchained:common.eks.traefik.whitelist[1] 103.21.244.0/22
