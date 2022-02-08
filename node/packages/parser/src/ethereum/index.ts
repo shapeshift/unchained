@@ -1,9 +1,9 @@
 import { BigNumber } from 'bignumber.js'
 import { ethers } from 'ethers'
 import { Tx } from '@shapeshiftoss/blockbook'
-import { caip2, caip19 } from '@shapeshiftoss/caip'
+import { caip19, caip2 } from '@shapeshiftoss/caip'
 import { ChainTypes, ContractTypes } from '@shapeshiftoss/types'
-import { Tx as ParseTx, TxSpecific as ParseTxSpecific, Status, Token, TransferType, Transfer } from '../types'
+import { Status, Token, Transfer, TransferType, Tx as ParseTx } from '../types'
 import { InternalTx, Network } from './types'
 import { getSigHash, toNetworkType } from './utils'
 import * as multiSig from './multiSig'
@@ -19,12 +19,15 @@ export interface TransactionParserArgs {
   rpcUrl: string
 }
 
+export type Parser = thor.Parser | uniV2.Parser | zrx.Parser
+
 export class TransactionParser {
   network: Network
 
-  private thor: thor.Parser
-  private uniV2: uniV2.Parser
-  private zrx: zrx.Parser
+  private readonly thor: thor.Parser
+  private readonly uniV2: uniV2.Parser
+  private readonly zrx: zrx.Parser
+  private readonly parsers: Array<Parser>
 
   constructor(args: TransactionParserArgs) {
     const provider = new ethers.providers.JsonRpcProvider(args.rpcUrl)
@@ -34,6 +37,8 @@ export class TransactionParser {
     this.thor = new thor.Parser({ network: this.network, midgardUrl: args.midgardUrl, rpcUrl: args.rpcUrl })
     this.uniV2 = new uniV2.Parser({ network: this.network, provider })
     this.zrx = new zrx.Parser()
+
+    this.parsers = [this.zrx, this.thor, this.uniV2]
   }
 
   // return any addresses that can be detected
@@ -52,21 +57,8 @@ export class TransactionParser {
     const sendAddress = tx.vin[0].addresses?.[0] ?? ''
     const receiveAddress = tx.vout[0].addresses?.[0] ?? ''
 
-    let result: ParseTxSpecific | undefined
-    switch (receiveAddress) {
-      case zrx.PROXY_CONTRACT: {
-        result = this.zrx.parse(tx)
-        break
-      }
-      case this.thor.routerContract: {
-        result = await this.thor.parse(tx)
-        break
-      }
-      case uniV2.ROUTER_CONTRACT: {
-        result = await this.uniV2.parse(tx)
-        break
-      }
-    }
+    const parserResults = await Promise.all(this.parsers.map(async (parser) => await parser.parse(tx)))
+    const result = parserResults.find((result) => result)
 
     const pTx: ParseTx = {
       address,
