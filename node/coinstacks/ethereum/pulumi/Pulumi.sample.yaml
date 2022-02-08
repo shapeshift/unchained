@@ -30,11 +30,17 @@ config:
 
 
     ## ingester - if specified all ingestion workers will be deployed
+    ## All ingesters use 1 replica with the exception of tx and address workers, which are configured for high availability
+    ## If autoscaling is enabled, horizontal pod autoscalers will be deployed alongside high availability worker deployments
     ingester:
+      enableDatadogLogs: false
+      autoscaling:
+        enabled: false
+        cpuThreshold: 30
+        maxReplicas: 2
       cpuLimit: '300m'
       memoryLimit: '512Mi'
-      replicas: 1 ## Current HA ingester workers are tx and address, all other workers will be single instance
-      enableDatadogLogs: false
+      replicas: 1
 
     ## mongo - if specified a mongo database will be deployed
     mongo:

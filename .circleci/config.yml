@@ -54,8 +54,11 @@ aliases:
     api-cpu-limit: "500m"
     api-cpu-threshold: 30
     api-memory-limit: "2Gi"
-    ingester-replicas: 3
-    ingester-cpu-limit: "1"
+    ingester-autoscaling: true
+    ingester-replicas: 2
+    ingester-max-replicas: 4
+    ingester-cpu-threshold: 20
+    ingester-cpu-limit: "500m"
     ingester-memory-limit: "3Gi"
     rpc-url: http://user:password@bitcoin-indexer-svc.unchained.svc.cluster.local:8332
 
@@ -88,8 +91,11 @@ aliases:
     api-cpu-limit: "500m"
     api-cpu-threshold: 30
     api-memory-limit: "2Gi"
-    ingester-replicas: 3
-    ingester-cpu-limit: "1"
+    ingester-autoscaling: true
+    ingester-replicas: 2
+    ingester-max-replicas: 4
+    ingester-cpu-threshold: 20
+    ingester-cpu-limit: "500m"
     ingester-memory-limit: "3Gi"
     rpc-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8332
 
@@ -122,8 +128,11 @@ aliases:
     api-cpu-threshold: 30
     api-cpu-limit: "500m"
     api-memory-limit: "2Gi"
+    ingester-autoscaling: true
     ingester-replicas: 2
-    ingester-cpu-limit: "1"
+    ingester-max-replicas: 4
+    ingester-cpu-threshold: 20
+    ingester-cpu-limit: "500m"
     ingester-memory-limit: "3Gi"
     rpc-url: http://ethereum-ropsten-indexer-svc.unchained.svc.cluster.local:8332
 
@@ -396,11 +405,17 @@ jobs:
         type: string
       api-replicas:
         type: integer
+      ingester-autoscaling:
+        type: boolean
       ingester-cpu-limit:
         type: string
+      ingester-cpu-threshold:
+        type: integer
       ingester-memory-limit:
         type: string
       ingester-replicas:
+        type: integer
+      ingester-max-replicas:
         type: integer
     steps:
       - setup_remote_docker:
@@ -449,6 +464,9 @@ jobs:
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.cpuLimit << parameters.daemon-cpu-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.memoryLimit << parameters.daemon-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.storageSize << parameters.daemon-storage-size >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.ingester.autoscaling.enabled << parameters.ingester-autoscaling >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.ingester.autoscaling.cpuThreshold << parameters.ingester-cpu-threshold >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.ingester.autoscaling.maxReplicas << parameters.ingester-max-replicas >>
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.cpuLimit << parameters.ingester-cpu-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.memoryLimit << parameters.ingester-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.replicas << parameters.ingester-replicas >>
@@ -540,8 +558,11 @@ workflows:
           api-cpu-limit: "300m"
           api-cpu-threshold: 30
           api-memory-limit: "1Gi"
-          ingester-replicas: 2
+          ingester-autoscaling: true
+          ingester-replicas: 1
+          ingester-max-replcas: 2
           ingester-cpu-limit: "500m"
+          ingester-cpu-threshold: 20
           ingester-memory-limit: "2Gi"
           requires:
             - deploy common unchained dependencies
@@ -566,8 +587,11 @@ workflows:
           api-cpu-limit: "300m"
           api-cpu-threshold: 30
           api-memory-limit: "1Gi"
-          ingester-replicas: 2
+          ingester-autoscaling: true
+          ingester-replicas: 1
+          ingester-max-replcas: 2
           ingester-cpu-limit: "500m"
+          ingester-cpu-threshold: 20
           ingester-memory-limit: "2Gi"
           requires:
             - deploy common unchained dependencies
@@ -593,8 +617,11 @@ workflows:
           api-cpu-limit: "300m"
           api-cpu-threshold: 30
           api-memory-limit: "1Gi"
-          ingester-replicas: 2
+          ingester-autoscaling: true
+          ingester-replicas: 1
+          ingester-max-replcas: 2
           ingester-cpu-limit: "500m"
+          ingester-cpu-threshold: 20
           ingester-memory-limit: "2Gi"
           requires:
             - deploy common unchained dependencies
