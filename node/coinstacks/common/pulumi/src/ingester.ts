@@ -176,7 +176,7 @@ export async function deployIngester(
   // We have hard-coded high availability workers here, need to break this into configuration
   const workers: Workers = [
     socket({ name: 'socket-new-transaction', path: 'sockets/newTransaction', replicas: 1, autoscaling: false }),
-    socket({ name: 'socket-new-block', path: 'sockets/newBlock', replicas: 1, autoscaling: false  }),
+    socket({ name: 'socket-new-block', path: 'sockets/newBlock', replicas: 1, autoscaling: false }),
     worker({ name: 'worker-new-block', path: 'workers/newBlock', replicas: 1, autoscaling: false }),
     worker({ name: 'worker-block', path: 'workers/block', replicas: 1, autoscaling: false }),
     worker({ name: 'worker-txid', path: 'workers/txid', replicas: 1, autoscaling: false }),
@@ -185,7 +185,7 @@ export async function deployIngester(
     worker({ name: 'worker-registry', path: 'workers/registry', replicas: 1, autoscaling: false }),
   ]
 
-  const { enableDatadogLogs, cpuLimit, memoryLimit, autoscaling  } = config.ingester
+  const { enableDatadogLogs, cpuLimit, memoryLimit, autoscaling } = config.ingester
 
   return workers.map((worker) => {
     const datadogAnnotation = enableDatadogLogs
@@ -261,10 +261,10 @@ export async function deployIngester(
             scaleTargetRef: {
               apiVersion: 'apps/v1',
               kind: 'Deployment',
-              name: `${name}-${worker.name}`
+              name: `${name}-${worker.name}`,
             },
-            targetCPUUtilizationPercentage: autoscaling.cpuThreshold
-          }
+            targetCPUUtilizationPercentage: autoscaling.cpuThreshold,
+          },
         },
         { provider, dependsOn: deployDependencies }
       )
