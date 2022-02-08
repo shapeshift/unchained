@@ -40,7 +40,7 @@ aliases:
     rabbit-storage-size: "100Gi"
     indexer-cpu-limit: "4"
     indexer-memory-limit: 24Gi
-    indexer-replicas: 4
+    indexer-replicas: 3
     indexer-storage-size: 500Gi
     indexer-url: http://bitcoin-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://bitcoin-indexer-svc.unchained.svc.cluster.local:8001/websocket
@@ -48,8 +48,11 @@ aliases:
     daemon-cpu-limit: "2"
     daemon-memory-limit: 12Gi
     daemon-storage-size: 1500Gi
-    api-replicas: 4
-    api-cpu-limit: "1"
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 6
+    api-cpu-limit: "500m"
+    api-cpu-threshold: 30
     api-memory-limit: "2Gi"
     ingester-replicas: 3
     ingester-cpu-limit: "1"
@@ -71,7 +74,7 @@ aliases:
     rabbit-storage-size: "100Gi"
     indexer-cpu-limit: "4"
     indexer-memory-limit: 12Gi
-    indexer-replicas: 4
+    indexer-replicas: 3
     indexer-storage-size: 500Gi
     indexer-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-indexer-svc.unchained.svc.cluster.local:8001/websocket
@@ -79,8 +82,11 @@ aliases:
     daemon-cpu-limit: "4"
     daemon-memory-limit: 32Gi
     daemon-storage-size: 2000Gi
-    api-replicas: 4
-    api-cpu-limit: "1"
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 6
+    api-cpu-limit: "500m"
+    api-cpu-threshold: 30
     api-memory-limit: "2Gi"
     ingester-replicas: 3
     ingester-cpu-limit: "1"
@@ -110,8 +116,11 @@ aliases:
     daemon-cpu-limit: "2"
     daemon-memory-limit: 24Gi
     daemon-storage-size: 500Gi
+    api-autoscaling: true
     api-replicas: 2
-    api-cpu-limit: "1"
+    api-max-replicas: 4
+    api-cpu-threshold: 30
+    api-cpu-limit: "500m"
     api-memory-limit: "2Gi"
     ingester-replicas: 2
     ingester-cpu-limit: "1"
@@ -272,8 +281,11 @@ jobs:
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r5a.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r5b.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[3] r5n.4xlarge
-            pulumi config set --path unchained:common.eks.traefik.replicas 7
-            pulumi config set --path unchained:common.eks.traefik.resources.cpu 500m
+            pulumi config set --path unchained:common.eks.traefik.autoscaling.enabled true
+            pulumi config set --path unchained:common.eks.traefik.autoscaling.cpuThreshold 30
+            pulumi config set --path unchained:common.eks.traefik.autoscaling.maxReplicas 10
+            pulumi config set --path unchained:common.eks.traefik.replicas 3
+            pulumi config set --path unchained:common.eks.traefik.resources.cpu 300m
             pulumi config set --path unchained:common.eks.traefik.resources.memory 512Mi
             pulumi config set --path unchained:common.eks.traefik.whitelist[0] 173.245.48.0/20
             pulumi config set --path unchained:common.eks.traefik.whitelist[1] 103.21.244.0/22
@@ -372,6 +384,12 @@ jobs:
         type: string
       daemon-storage-size:
         type: string
+      api-autoscaling:
+        type: boolean
+      api-cpu-threshold:
+        type: integer
+      api-max-replicas:
+        type: integer
       api-cpu-limit:
         type: string
       api-memory-limit:
@@ -408,6 +426,9 @@ jobs:
             [ -n "<< parameters.environment >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.environment << parameters.environment >>
             pulumi config set --path unchained:<< parameters.coinstack >>.network << parameters.network >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.enableDatadogLogs true
+            pulumi config set --path unchained:<< parameters.coinstack >>.api.autoscaling.enabled << parameters.api-autoscaling >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.api.autoscaling.cpuThreshold << parameters.api-cpu-threshold >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.api.autoscaling.maxReplicas << parameters.api-max-replicas >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.cpuLimit << parameters.api-cpu-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.memoryLimit << parameters.api-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.replicas << parameters.api-replicas >>
@@ -513,8 +534,11 @@ workflows:
           indexer-url: http://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001
           indexer-ws-url: ws://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
           rpc-url: http://user:password@bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8332
+          api-autoscaling: true
           api-replicas: 2
+          api-max-replicas: 3
           api-cpu-limit: "300m"
+          api-cpu-threshold: 30
           api-memory-limit: "1Gi"
           ingester-replicas: 2
           ingester-cpu-limit: "500m"
@@ -536,8 +560,11 @@ workflows:
           indexer-url: http://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8001
           indexer-ws-url: ws://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
           rpc-url: http://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8332
+          api-autoscaling: true
           api-replicas: 2
+          api-max-replicas: 3
           api-cpu-limit: "300m"
+          api-cpu-threshold: 30
           api-memory-limit: "1Gi"
           ingester-replicas: 2
           ingester-cpu-limit: "500m"
@@ -560,8 +587,11 @@ workflows:
           indexer-url: http://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8001
           indexer-ws-url: ws://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
           rpc-url: http://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8332
+          api-autoscaling: true
           api-replicas: 2
+          api-max-replicas: 3
           api-cpu-limit: "300m"
+          api-cpu-threshold: 30
           api-memory-limit: "1Gi"
           ingester-replicas: 2
           ingester-cpu-limit: "500m"

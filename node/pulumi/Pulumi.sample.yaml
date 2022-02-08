@@ -67,6 +67,11 @@ config:
 
     # # traefik - additional ingress controller configuration
     #   traefik:
+    #     # autoscaling - if enabled, a horizontal pod autoscaler will be deployed
+    #     autoscaling:
+    #       enabled: false
+    #       cpuThreshold: 30
+    #       maxReplicas: 5
     #     replicas: 3
     #     resources:
     #       cpu: '300m'
