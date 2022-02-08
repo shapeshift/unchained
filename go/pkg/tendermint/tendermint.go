@@ -3,75 +3,54 @@ package tendermint
 import (
 	"context"
 	"fmt"
-	"net/http"
-	"time"
+	"net"
+	"strconv"
 
 	"github.com/pkg/errors"
 	"github.com/shapeshift/go-unchained/internal/log"
 	"github.com/shapeshift/go-unchained/pkg/cosmos"
-	tendermint "github.com/tendermint/tendermint/rpc/client/http"
+	"github.com/tendermint/tendermint/libs/json"
 	coretypes "github.com/tendermint/tendermint/rpc/core/types"
+	tendermint "github.com/tendermint/tendermint/rpc/jsonrpc/client"
+	"github.com/tendermint/tendermint/types"
 )
 
 var logger = log.WithoutFields()
 
 type WebsocketClient struct {
-	txs      *tendermint.HTTP
-	txsRes   <-chan coretypes.ResultEvent
-	block    *tendermint.HTTP
-	blockRes <-chan coretypes.ResultEvent
+	txs      *tendermint.WSClient
 	registry map[string]chan<- []byte
 }
 
 func NewWebsocketClient(cfg cosmos.Config) (*WebsocketClient, error) {
-	client := &http.Client{
-		Timeout: 5 * time.Second,
-	}
-
 	path := fmt.Sprintf("/apikey/%s/websocket", cfg.APIKey)
 	url := fmt.Sprintf("wss://%s", cfg.RPCURL)
 
-	blockClient, err := tendermint.NewWithClient(url, path, client)
+	txsClient, err := tendermint.NewWS(url, path)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create websocket client")
 	}
 
-	txsClient, err := tendermint.NewWithClient(url, path, client)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to create websocket client")
-	}
+	// use default dialer
+	txsClient.Dialer = net.Dial
 
 	ws := &WebsocketClient{
-		txs:   txsClient,
-		block: blockClient,
+		txs:      txsClient,
+		registry: make(map[string]chan<- []byte),
 	}
 
 	return ws, nil
 }
-
 func (ws *WebsocketClient) Start() error {
-	err := ws.block.OnStart()
+	err := ws.txs.Start()
 	if err != nil {
-		return errors.Wrap(err, "failed to start the block client")
+		return errors.Wrap(err, "failed to start websocket")
 	}
 
-	err = ws.txs.OnStart()
+	err = ws.txs.Subscribe(context.Background(), types.EventQueryTx.String())
 	if err != nil {
-		return errors.Wrap(err, "failed to start the txs client")
+		return errors.Wrap(err, "failed to subscribe")
 	}
-
-	blockRes, err := ws.block.Subscribe(context.Background(), "", "tm.event = 'NewBlock'")
-	if err != nil {
-		return errors.Wrap(err, "failed to subscribe to NewBlock event")
-	}
-	ws.blockRes = blockRes
-
-	txsRes, err := ws.txs.Subscribe(context.Background(), "", "tm.event = 'Tx'")
-	if err != nil {
-		return errors.Wrap(err, "failed to subscribe to Tx event")
-	}
-
-	ws.txsRes = txsRes
 
 	go ws.listen()
 
@@ -91,19 +70,30 @@ func (ws *WebsocketClient) Unsubscribe(addrs []string) {
 }
 
 func (ws *WebsocketClient) Stop() {
-	ws.txs.OnStop()
-	ws.block.OnStop()
+	if err := ws.txs.Stop(); err != nil {
+		logger.Errorf("failed to stop txs client: %v", err)
+	}
 }
 
 func (ws *WebsocketClient) listen() {
-	for {
-		select {
-		case r := <-ws.blockRes:
-			fmt.Printf("%+v\n", r)
-		case r := <-ws.txsRes:
-			fmt.Printf("%+v\n", r)
-		default:
-			fmt.Println("here")
+	for r := range ws.txs.ResponsesCh {
+		if r.Error != nil {
+			logger.Error(r.Error.Error())
+			continue
+		}
+
+		result := &coretypes.ResultEvent{}
+		if err := json.Unmarshal(r.Result, result); err != nil {
+			logger.Errorf("failed to unmarshal message: %v", err)
+			continue
+		}
+
+		if result.Data != nil {
+			go ws.handleTx(result.Data.(types.EventDataTx))
 		}
 	}
+}
+
+func (ws *WebsocketClient) handleTx(tx types.EventDataTx) {
+	ws.registry["test"] <- []byte(strconv.Itoa(int(tx.Height)))
 }

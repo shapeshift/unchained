@@ -28,6 +28,7 @@ import (
 	"github.com/shapeshift/go-unchained/internal/log"
 	"github.com/shapeshift/go-unchained/pkg/api"
 	"github.com/shapeshift/go-unchained/pkg/cosmos"
+	"github.com/shapeshift/go-unchained/pkg/tendermint"
 	"github.com/shapeshift/go-unchained/pkg/websocket"
 )
 
@@ -45,11 +46,11 @@ var upgrader = ws.Upgrader{
 type API struct {
 	handler  *Handler
 	mananger *websocket.Manager
-	wsClient *websocket.Client
+	wsClient *tendermint.WebsocketClient
 	server   *http.Server
 }
 
-func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient *websocket.Client, swaggerPath string) *API {
+func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient *tendermint.WebsocketClient, swaggerPath string) *API {
 	r := mux.NewRouter()
 
 	s := &http.Server{
@@ -123,7 +124,7 @@ func (a *API) Shutdown() {
 	defer cancel()
 
 	a.handler.grpcClient.Close()
-	//a.wsClient.Stop()
+	a.wsClient.Stop()
 	a.server.Shutdown(ctx)
 }
 
