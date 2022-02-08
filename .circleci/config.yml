@@ -560,7 +560,7 @@ workflows:
           api-memory-limit: "1Gi"
           ingester-autoscaling: true
           ingester-replicas: 1
-          ingester-max-replcas: 2
+          ingester-max-replicas: 2
           ingester-cpu-limit: "500m"
           ingester-cpu-threshold: 20
           ingester-memory-limit: "2Gi"
@@ -589,7 +589,7 @@ workflows:
           api-memory-limit: "1Gi"
           ingester-autoscaling: true
           ingester-replicas: 1
-          ingester-max-replcas: 2
+          ingester-max-replicas: 2
           ingester-cpu-limit: "500m"
           ingester-cpu-threshold: 20
           ingester-memory-limit: "2Gi"
@@ -619,7 +619,7 @@ workflows:
           api-memory-limit: "1Gi"
           ingester-autoscaling: true
           ingester-replicas: 1
-          ingester-max-replcas: 2
+          ingester-max-replicas: 2
           ingester-cpu-limit: "500m"
           ingester-cpu-threshold: 20
           ingester-memory-limit: "2Gi"
