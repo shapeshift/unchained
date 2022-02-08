@@ -10,6 +10,7 @@ import * as multiSig from './multiSig'
 import * as thor from './thor'
 import * as uniV2 from './uniV2'
 import * as zrx from './zrx'
+import { findAsyncSequential } from './helpers'
 
 export * from './types'
 
@@ -57,9 +58,9 @@ export class TransactionParser {
     const sendAddress = tx.vin[0].addresses?.[0] ?? ''
     const receiveAddress = tx.vout[0].addresses?.[0] ?? ''
 
-    const parserResults = await Promise.all(this.parsers.map(async (parser) => await parser.parse(tx)))
-    // We expect only one result - though if there are more than one we'll take the first we find.
-    const result = parserResults.find((result) => result)
+    // We expect only one Parser to return a result. If multiple do, we take the first and early exit.
+    const parser = await findAsyncSequential(this.parsers, async (parser) => !!(await parser.parse(tx)))
+    const result = await parser?.parse(tx)
 
     const pTx: ParseTx = {
       address,

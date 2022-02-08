@@ -4,7 +4,7 @@ import { Dex, TxSpecific as ParseTxSpecific, TradeType } from '../types'
 import { Network } from './types'
 import ABI from './abi/thor'
 import { getSigHash } from './utils'
-import { isEthereumSpecific, txMatchesContract } from './helpers'
+import { txInteractsWithContract } from './helpers'
 import { Tx } from '@shapeshiftoss/blockbook'
 
 const SWAP_TYPES = ['SWAP', '=', 's']
@@ -49,15 +49,15 @@ export class Parser {
     return result.to
   }
 
-  isSupportedTransaction(tx: Tx) {
-    return txMatchesContract(tx, this.routerContract)
+  isParsable(tx: Tx): boolean {
+    return txInteractsWithContract(tx, this.routerContract)
   }
 
   async parse(tx: Tx): Promise<ParseTxSpecific | undefined> {
-    if (!this.isSupportedTransaction(tx)) return
-    if (!(isEthereumSpecific(tx.ethereumSpecific) && tx.ethereumSpecific.data)) return
+    if (!this.isParsable(tx)) return
+    if (!tx.ethereumSpecific?.data) return
 
-    const result: ethers.utils.Result | undefined = (() => {
+    const result = (() => {
       switch (getSigHash(tx.ethereumSpecific.data)) {
         case this.depositSigHash:
           return this.abiInterface.decodeFunctionData(this.depositSigHash, tx.ethereumSpecific.data)

@@ -7,7 +7,7 @@ import { Network } from './types'
 import ABI from './abi/uniV2'
 import ERC20_ABI from './abi/erc20'
 import { getSigHash, toNetworkType } from './utils'
-import { isEthereumSpecific, txMatchesContract } from './helpers'
+import { txInteractsWithContract } from './helpers'
 
 export const ROUTER_CONTRACT = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
 
@@ -38,15 +38,16 @@ export class Parser {
     }[this.network]
   }
 
-  isSupportedTransaction(tx: Tx) {
-    const isUniV2Contract = txMatchesContract(tx, ROUTER_CONTRACT)
-    const hasNoConfirmations = tx.confirmations === 0
-    return hasNoConfirmations && isUniV2Contract
+  isParsable(tx: Tx): boolean {
+    if (!txInteractsWithContract(tx, ROUTER_CONTRACT)) return false
+    if (!(tx.confirmations === 0)) return false
+
+    return true
   }
 
   async parse(tx: Tx): Promise<ParseTxSpecific | undefined> {
-    if (!this.isSupportedTransaction(tx)) return
-    if (!(isEthereumSpecific(tx.ethereumSpecific) && tx.ethereumSpecific.data)) return
+    if (!this.isParsable(tx)) return
+    if (!tx.ethereumSpecific?.data) return
 
     const sendAddress = tx.vin[0].addresses?.[0] ?? ''
 
