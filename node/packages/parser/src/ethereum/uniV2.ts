@@ -40,8 +40,8 @@ export class Parser {
 
   isSupportedTransaction(tx: Tx) {
     const isUniV2Contract = txMatchesContract(tx, ROUTER_CONTRACT)
-    const hasConfirmations = tx.confirmations === 0
-    return hasConfirmations && isUniV2Contract
+    const hasNoConfirmations = tx.confirmations === 0
+    return hasNoConfirmations && isUniV2Contract
   }
 
   async parse(tx: Tx): Promise<ParseTxSpecific | undefined> {

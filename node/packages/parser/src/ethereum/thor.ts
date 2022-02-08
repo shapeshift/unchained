@@ -82,7 +82,7 @@ export class Parser {
       return { trade: { dexName: Dex.Thor, type: TradeType.Refund, memo: result.memo } }
     }
 
-    // We encountered a case we thought we'd support, but didn't - exit
+    // We encountered a case we thought we'd support, but don't - exit
     return
   }
 }

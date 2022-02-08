@@ -12,7 +12,6 @@ export class Parser {
   }
 
   parse(tx: Tx): Partial<ParseTx> | undefined {
-    // Early exit if parser doesn't support transaction
     if (!this.isSupportedTransaction(tx)) return
 
     return {

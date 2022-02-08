@@ -58,6 +58,7 @@ export class TransactionParser {
     const receiveAddress = tx.vout[0].addresses?.[0] ?? ''
 
     const parserResults = await Promise.all(this.parsers.map(async (parser) => await parser.parse(tx)))
+    // We expect only one result - though if there are more than one we'll take the first we find.
     const result = parserResults.find((result) => result)
 
     const pTx: ParseTx = {
