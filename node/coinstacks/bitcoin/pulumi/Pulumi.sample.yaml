@@ -20,6 +20,10 @@ config:
     ## api - if specified an api service will be deployed
     api:
       enableDatadogLogs: false
+      autoscaling:
+        enabled: false
+        cpuThreshold: 30
+        maxReplicas: 2
       cpuLimit: '300m'
       memoryLimit: '512Mi'
       replicas: 1
