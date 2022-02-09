@@ -141,10 +141,6 @@ func (a *API) Root(w http.ResponseWriter, r *http.Request) {
 //
 // Subscribe to pending and confirmed transactions.
 //
-// Subscribe Example:
-//
-// Unsubscribe Example:
-//
 // responses:
 //   200:
 func (a *API) Websocket(w http.ResponseWriter, r *http.Request) {

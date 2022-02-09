@@ -1,5 +1,6 @@
 package websocket
 
+// Manager manages registering, unregistering, and signaling cleanup of client connections
 type Manager struct {
 	connections map[*Connection]bool
 	register    chan *Connection
@@ -21,9 +22,7 @@ func (m *Manager) Start() {
 			m.connections[c] = true
 		case c := <-m.unregister:
 			delete(m.connections, c)
-			close(c.msg)
-			c.ticker.Stop()
-			c.conn.Close()
+			close(c.doneChan)
 		}
 	}
 }

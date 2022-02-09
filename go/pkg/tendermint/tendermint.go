@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/shapeshift/go-unchained/internal/log"
 	"github.com/shapeshift/go-unchained/pkg/cosmos"
+	"github.com/shapeshift/go-unchained/pkg/websocket"
 	"github.com/tendermint/tendermint/libs/json"
 	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 	tendermint "github.com/tendermint/tendermint/rpc/jsonrpc/client"
@@ -18,8 +19,8 @@ import (
 var logger = log.WithoutFields()
 
 type WebsocketClient struct {
-	txs      *tendermint.WSClient
-	registry map[string]chan<- []byte
+	*websocket.Registry
+	txs *tendermint.WSClient
 }
 
 func NewWebsocketClient(cfg cosmos.Config) (*WebsocketClient, error) {
@@ -35,8 +36,8 @@ func NewWebsocketClient(cfg cosmos.Config) (*WebsocketClient, error) {
 	txsClient.Dialer = net.Dial
 
 	ws := &WebsocketClient{
+		Registry: websocket.NewRegistry(),
 		txs:      txsClient,
-		registry: make(map[string]chan<- []byte),
 	}
 
 	return ws, nil
@@ -55,18 +56,6 @@ func (ws *WebsocketClient) Start() error {
 	go ws.listen()
 
 	return nil
-}
-
-func (ws *WebsocketClient) Subscribe(addrs []string, msg chan<- []byte) {
-	for _, a := range addrs {
-		ws.registry[a] = msg
-	}
-}
-
-func (ws *WebsocketClient) Unsubscribe(addrs []string) {
-	for _, a := range addrs {
-		delete(ws.registry, a)
-	}
 }
 
 func (ws *WebsocketClient) Stop() {
@@ -95,5 +84,5 @@ func (ws *WebsocketClient) listen() {
 }
 
 func (ws *WebsocketClient) handleTx(tx types.EventDataTx) {
-	ws.registry["test"] <- []byte(strconv.Itoa(int(tx.Height)))
+	ws.Publish([]string{"test"}, []byte(strconv.Itoa(int(tx.Height))))
 }

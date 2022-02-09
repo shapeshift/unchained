@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/shapeshift/go-unchained/internal/log"
 )
@@ -18,22 +19,38 @@ const (
 
 var logger = log.WithoutFields()
 
-// Connection represents a single websocket connection on the unchained api server
-type Connection struct {
-	conn    *websocket.Conn
-	handler Handler
-	manager *Manager
-	msg     chan []byte
-	ticker  *time.Ticker
+type RequestPayload struct {
+	SubscriptionID string   `json:"subscriptionId"`
+	Method         string   `json:"method"`
+	Data           []string `json:"data"`
 }
 
-// NewConnection defines the connection struct and registers the connection with the manager
-func NewConnection(conn *websocket.Conn, handler Handler, manager *Manager) *Connection {
+type ErrorResponse struct {
+	SubscriptionID string `json:"subscriptionId"`
+	Type           string `json:"type"`
+	Message        string `json:"message"`
+}
+
+// Connection represents a single websocket connection on the unchained api server
+type Connection struct {
+	clientID string
+	conn     *websocket.Conn
+	doneChan chan interface{}
+	handler  Registrar
+	manager  *Manager
+	msgChan  chan []byte
+	ticker   *time.Ticker
+}
+
+// NewConnection defines the connection and registers it with the manager
+func NewConnection(conn *websocket.Conn, handler Registrar, manager *Manager) *Connection {
 	c := &Connection{
-		conn:    conn,
-		handler: handler,
-		manager: manager,
-		msg:     make(chan []byte),
+		clientID: uuid.NewString(),
+		conn:     conn,
+		doneChan: make(chan interface{}),
+		handler:  handler,
+		manager:  manager,
+		msgChan:  make(chan []byte),
 	}
 
 	c.manager.register <- c
@@ -79,14 +96,24 @@ func (c *Connection) Start() {
 
 	go c.read()
 	go c.write()
+	go c.cleanup()
 }
 
-// Stop the websocket connection by unregistering with the manager.
+// Stop the websocket connection by unregistering with the manager and unsubscribing the client.
 func (c *Connection) Stop() {
+	c.handler.Unsubscribe(c.clientID, nil, c.msgChan)
+
 	// ensure connection has not already been unregistered before unregistering.
 	if _, ok := c.manager.connections[c]; ok {
 		c.manager.unregister <- c
 	}
+}
+
+func (c *Connection) cleanup() {
+	<-c.doneChan
+	c.ticker.Stop()
+	c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+	c.conn.Close()
 }
 
 func (c *Connection) read() {
@@ -106,9 +133,9 @@ func (c *Connection) read() {
 
 		switch r.Method {
 		case "subscribe":
-			c.handler.Subscribe(r.Data, c.msg)
+			c.handler.Subscribe(c.clientID, r.Data, c.msgChan)
 		case "unsubscribe":
-			c.handler.Unsubscribe(r.Data)
+			c.handler.Unsubscribe(c.clientID, r.Data, c.msgChan)
 		default:
 			c.writeError(fmt.Sprintf("%s method not implemented", r.Method), r.SubscriptionID)
 		}
@@ -116,17 +143,9 @@ func (c *Connection) read() {
 }
 
 func (c *Connection) write() {
-	for {
-		select {
-		case msg, ok := <-c.msg:
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
-			if !ok {
-				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
-				return
-			}
-
-			c.conn.WriteMessage(websocket.TextMessage, msg)
-		}
+	for msg := range c.msgChan {
+		c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+		c.conn.WriteMessage(websocket.TextMessage, msg)
 	}
 }
 
