@@ -38,15 +38,9 @@ export class Parser {
     }[this.network]
   }
 
-  isParsable(tx: Tx): boolean {
-    if (!txInteractsWithContract(tx, ROUTER_CONTRACT)) return false
-    if (!(tx.confirmations === 0)) return false
-
-    return true
-  }
-
   async parse(tx: Tx): Promise<ParseTxSpecific | undefined> {
-    if (!this.isParsable(tx)) return
+    if (!txInteractsWithContract(tx, ROUTER_CONTRACT)) return
+    if (!(tx.confirmations === 0)) return
     if (!tx.ethereumSpecific?.data) return
 
     const sendAddress = tx.vin[0].addresses?.[0] ?? ''

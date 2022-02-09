@@ -49,12 +49,8 @@ export class Parser {
     return result.to
   }
 
-  isParsable(tx: Tx): boolean {
-    return txInteractsWithContract(tx, this.routerContract)
-  }
-
   async parse(tx: Tx): Promise<ParseTxSpecific | undefined> {
-    if (!this.isParsable(tx)) return
+    if (!txInteractsWithContract(tx, this.routerContract)) return
     if (!tx.ethereumSpecific?.data) return
 
     const result = (() => {
