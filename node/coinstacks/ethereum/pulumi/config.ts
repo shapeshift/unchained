@@ -95,6 +95,9 @@ export const getConfig = async (): Promise<EthereumConfig> => {
   }
 
   if (config.ingester) {
+    if (!config.ingester.autoscaling.enabled) missingRequiredConfig.push('ingester.autoscaling.enabled')
+    if (!config.ingester.autoscaling.maxReplicas) missingRequiredConfig.push('ingester.autoscaling.maxReplicas')
+    if (!config.ingester.autoscaling.cpuThreshold) missingRequiredConfig.push('ingester.autoscaling.cpuThreshold')
     if (!config.ingester.cpuLimit) missingRequiredConfig.push('ingester.cpuLimit')
     if (!config.ingester.memoryLimit) missingRequiredConfig.push('ingester.memoryLimit')
     if (!config.ingester.replicas) missingRequiredConfig.push('ingester.replicas')
