@@ -12,6 +12,7 @@ export interface ApiConfig {
   cpuLimit: string
   memoryLimit: string
   replicas: number
+  autoscaling: { enabled: boolean; maxReplicas: number; cpuThreshold: number }
   enableDatadogLogs?: boolean
 }
 
@@ -279,6 +280,28 @@ export async function deployApi(
         volumes: [{ name: 'app', hostPath: { path: join(__dirname, '../../../../') } }],
       }),
     },
+  }
+
+  if (config.api.autoscaling.enabled) {
+    new k8s.autoscaling.v1.HorizontalPodAutoscaler(
+      name,
+      {
+        metadata: {
+          namespace: namespace,
+        },
+        spec: {
+          minReplicas: config.api.replicas,
+          maxReplicas: config.api.autoscaling.maxReplicas,
+          scaleTargetRef: {
+            apiVersion: 'apps/v1',
+            kind: 'Deployment',
+            name: name,
+          },
+          targetCPUUtilizationPercentage: config.api.autoscaling.cpuThreshold,
+        },
+      },
+      { provider }
+    )
   }
 
   return new k8s.apps.v1.Deployment(
