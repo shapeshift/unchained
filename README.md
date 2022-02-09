@@ -21,11 +21,6 @@ Unchained is a multi-blockchain backend interface with three main goals:
   - [Docker Desktop (macOS)](docs/docker-desktop.md)
   - [Minikube (Linux)](docs/minikube.md)
 
-## Project Details
-
-- [Go](go/README.md)
-- [Node](node/README.md)
-
 ## Helpful Docs
 
 - [Pulumi](https://www.pulumi.com/docs/)
@@ -34,15 +29,25 @@ Unchained is a multi-blockchain backend interface with three main goals:
 
 ## Coin Stack Components
 
-- **Blockchain Full Node** - coin specific daemon providing historical blockchain data (ex. bitcoind, geth, etc)
-- **Indexer** - indexes transaction and balance history by address (if not provided by the node directly)
-- **[Ingester](docs/ingester.md)** - ingests blockchain data providing:
+- **Node** - coin specific node daemon providing historical blockchain data (ex. bitcoind, geth, etc)
+- **Indexer** - optional service that indexes transaction and balance history by address, or any other applicable information, if not provided by the node directly
+- **[Ingester (TO BE REMOVED)](docs/ingester.md)** - ingests blockchain data providing:
   - websocket notification of any newly confirmed or pending transactions
   - stream of historical transaction history
   - additional parsing logic not provided by the indexer or node
-- **Common API** - a [REST API](https://api.ethereum.shapeshift.com/docs/) that provides necessary data to a client in a common format across all blockchains
+- **[API](https://api.ethereum.shapeshift.com/docs/)** - provides a base set of functionality via REST and WebSocket that can be extended with coin specific logic
 
-![Coin Stack Architecture](docs/coinstack.png)
+## Architecture Diagrams
+
+**<p align="center">With Ingester (TO BE REMOVED)</p>**
+
+---
+
+![](docs/coinstack.png)
+
+No Indexer | With Indexer
+:---------:|:------------:
+![](docs/coinstackWithIndexer.drawio.svg) | ![](docs/coinstackNoIndexer.drawio.svg)
 
 ## Notes
 
@@ -59,38 +64,57 @@ Traefik routes requests based on host name. which includes the coinstack name. F
 - `mongo.bitcoin.localhost`
 - `rabbit-admin.bitcoin.localhost`
 
+## Setup
+
+- Each language subdirectory has setup requirements before running a coinstack locally
+  - [Go](go/README.md#initialsetup) - `unchained/go`
+  - [Node](node/README.md) - `unchained/node`
+
 ## Docker-Compose Local Dev Instructions
 
-#### _Lightweight local development environment_
+### _Lightweight local development environment_
+
+---
 
 #### **Prerequisites**
 
 - Install [docker-compose](https://docs.docker.com/compose/install/)
-- Copy sample env or config file:
-  ```sh
-  cp coinstacks/ethereum/sample.env coinstacks/ethereum/.env
-  ```
-  ```sh
-  cp coinstacks/cosmos/sample.config.json coinstacks/cosmos/config.json
-  ```
-- Fill out any missing variables
 
 #### **Running**
 
+- Commands should be run from the language subdirectory (ex. `unchained/go`, `unchained/node`)
+
 - Start the reverse proxy and any common service (ex. hot reloading)
+
   ```sh
-  docker-compose up
+  docker-compose up -d
   ```
 
+  _Note: `-d` runs the containers in daemon (background) mode. If you want to see logs, `-d` can be omitted._
+
 - Start a coinstack:
+
   ```sh
   cd coinstacks/ethereum && docker-compose up
   ```
+  - If only developing on the API:
+
+    ```sh
+    cd coinstacks/ethereum && docker-compose up api
+    ```
+
+- Visit http://api.ethereum.localhost/docs to view the OpenAPI documentation for the API
 
 - Tear down a coinstack (including docker volumes):
+
   ```sh
   cd coinstacks/ethereum && docker-compose down -v
   ```
+
+#### **Common Issues**
+
+- If you are running [Docker Desktop](https://docs.docker.com/desktop/) and see any `SIGKILL` errors, increase your resource limits in the Resources Tab
+
 
 ## Kubernetes Local Dev Instructions
 

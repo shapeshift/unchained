@@ -21,31 +21,56 @@ func (h *Handler) GetInfo() (api.Info, error) {
 }
 
 func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
-	accRes, err := h.grpcClient.GetAccount(pubkey)
+	accRes, err := h.httpClient.GetAccount(pubkey)
 	if err != nil {
 		return nil, err
 	}
 
-	balRes, err := h.grpcClient.GetBalance(pubkey, "uatom")
+	balRes, err := h.httpClient.GetBalance(pubkey, "uatom")
+	if err != nil {
+		return nil, err
+	}
+
+	delRes, err := h.httpClient.GetDelegations(pubkey)
+	if err != nil {
+		return nil, err
+	}
+
+	redelRes, err := h.httpClient.GetRedelegations(pubkey)
+	if err != nil {
+		return nil, err
+	}
+
+	unbondingsRes, err := h.httpClient.GetUnbondings(pubkey, "uatom")
+	if err != nil {
+		return nil, err
+	}
+
+	rewardsRes, err := h.httpClient.GetRewards(pubkey)
 	if err != nil {
 		return nil, err
 	}
 
 	account := &Account{
 		BaseAccount: api.BaseAccount{
-			Balance: balRes.Amount,
-			Pubkey:  accRes.Address,
+			Balance:            balRes.Amount,
+			UnconfirmedBalance: "0",
+			Pubkey:             accRes.Address,
 		},
 		AccountNumber: int(accRes.AccountNumber),
 		Sequence:      int(accRes.Sequence),
 		Assets:        balRes.Assets,
+		Delegations:   delRes,
+		Redelegations: redelRes,
+		Unbondings:    unbondingsRes,
+		Rewards:       rewardsRes,
 	}
 
 	return account, nil
 }
 
-func (h *Handler) GetTxHistory(pubkey string) (api.TxHistory, error) {
-	res, err := h.httpClient.GetTxHistory(pubkey)
+func (h *Handler) GetTxHistory(pubkey string, page int, pageSize int) (api.TxHistory, error) {
+	res, err := h.httpClient.GetTxHistory(pubkey, page, pageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -77,10 +102,18 @@ func (h *Handler) GetTxHistory(pubkey string) (api.TxHistory, error) {
 
 	txHistory := TxHistory{
 		BaseTxHistory: api.BaseTxHistory{
+			Pagination: api.Pagination{
+				Page:       page,
+				TotalPages: res.TotalPages,
+			},
 			Pubkey: pubkey,
 		},
 		Txs: txs,
 	}
 
 	return txHistory, nil
+}
+
+func (h *Handler) SendTx(hex string) (string, error) {
+	return h.httpClient.BroadcastTx([]byte(hex))
 }

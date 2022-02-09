@@ -9,6 +9,7 @@ import { Input, output, Resource } from '@pulumi/pulumi'
 import { buildAndPushImage, Config, hasTag, getBaseHash } from './index'
 
 export interface IngesterConfig {
+  autoscaling: { enabled: boolean; cpuThreshold: number; maxReplicas: number }
   cpuLimit: string
   memoryLimit: string
   replicas: number
@@ -157,12 +158,14 @@ export async function deployIngester(
     name: string
     path: string
     replicas: 0 | 1
+    autoscaling: boolean
   }
 
   type Worker = {
     name: string
     path: string
     replicas: number
+    autoscaling: boolean
   }
 
   type Workers = Array<Socket | Worker>
@@ -170,19 +173,19 @@ export async function deployIngester(
   const socket = (s: Socket): Socket => s
   const worker = (w: Worker): Worker => w
 
-  // All ingester workers are single instance except tx and address workers
+  // We have hard-coded high availability workers here, need to break this into configuration
   const workers: Workers = [
-    socket({ name: 'socket-new-transaction', path: 'sockets/newTransaction', replicas: 1 }),
-    socket({ name: 'socket-new-block', path: 'sockets/newBlock', replicas: 1 }),
-    worker({ name: 'worker-new-block', path: 'workers/newBlock', replicas: 1 }),
-    worker({ name: 'worker-block', path: 'workers/block', replicas: 1 }),
-    worker({ name: 'worker-txid', path: 'workers/txid', replicas: 1 }),
-    worker({ name: 'worker-tx', path: 'workers/tx', replicas: config.ingester.replicas }),
-    worker({ name: 'worker-address', path: 'workers/address', replicas: config.ingester.replicas }),
-    worker({ name: 'worker-registry', path: 'workers/registry', replicas: 1 }),
+    socket({ name: 'socket-new-transaction', path: 'sockets/newTransaction', replicas: 1, autoscaling: false }),
+    socket({ name: 'socket-new-block', path: 'sockets/newBlock', replicas: 1, autoscaling: false }),
+    worker({ name: 'worker-new-block', path: 'workers/newBlock', replicas: 1, autoscaling: false }),
+    worker({ name: 'worker-block', path: 'workers/block', replicas: 1, autoscaling: false }),
+    worker({ name: 'worker-txid', path: 'workers/txid', replicas: 1, autoscaling: false }),
+    worker({ name: 'worker-tx', path: 'workers/tx', replicas: config.ingester.replicas, autoscaling: true }),
+    worker({ name: 'worker-address', path: 'workers/address', replicas: config.ingester.replicas, autoscaling: true }),
+    worker({ name: 'worker-registry', path: 'workers/registry', replicas: 1, autoscaling: false }),
   ]
 
-  const { enableDatadogLogs, cpuLimit, memoryLimit } = config.ingester
+  const { enableDatadogLogs, cpuLimit, memoryLimit, autoscaling } = config.ingester
 
   return workers.map((worker) => {
     const datadogAnnotation = enableDatadogLogs
@@ -243,6 +246,28 @@ export async function deployIngester(
         ],
         volumes: volumes,
       },
+    }
+
+    if (worker.autoscaling && autoscaling.enabled) {
+      new k8s.autoscaling.v1.HorizontalPodAutoscaler(
+        `${name}-${worker.name}`,
+        {
+          metadata: {
+            namespace: namespace,
+          },
+          spec: {
+            minReplicas: worker.replicas,
+            maxReplicas: autoscaling.maxReplicas,
+            scaleTargetRef: {
+              apiVersion: 'apps/v1',
+              kind: 'Deployment',
+              name: `${name}-${worker.name}`,
+            },
+            targetCPUUtilizationPercentage: autoscaling.cpuThreshold,
+          },
+        },
+        { provider, dependsOn: deployDependencies }
+      )
     }
 
     return new k8s.apps.v1.Deployment(

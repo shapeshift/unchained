@@ -1,5 +1,5 @@
 COINSTACKS := $(wildcard coinstacks/*)
-MAKEFLAGS += -j$(words $(COINSTACKS)) --no-print-directory
+MAKEFLAGS += --no-print-directory
 
 .PHONY: all build clean $(COINSTACKS)
 

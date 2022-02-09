@@ -5,7 +5,6 @@ go 1.17
 require (
 	github.com/cosmos/cosmos-sdk v0.42.5
 	github.com/go-resty/resty/v2 v2.7.0
-	github.com/gogo/protobuf v1.3.3
 	github.com/gorilla/mux v1.8.0
 	github.com/osmosis-labs/osmosis v1.0.4
 	github.com/pkg/errors v0.9.1
@@ -52,6 +51,7 @@ require (
 	github.com/go-kit/kit v0.10.0 // indirect
 	github.com/go-logfmt/logfmt v0.5.0 // indirect
 	github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2 // indirect
+	github.com/gogo/protobuf v1.3.3 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.3 // indirect
 	github.com/google/btree v1.0.0 // indirect
