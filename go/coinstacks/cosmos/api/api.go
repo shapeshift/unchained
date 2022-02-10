@@ -28,7 +28,6 @@ import (
 	"github.com/shapeshift/go-unchained/internal/log"
 	"github.com/shapeshift/go-unchained/pkg/api"
 	"github.com/shapeshift/go-unchained/pkg/cosmos"
-	"github.com/shapeshift/go-unchained/pkg/tendermint"
 	"github.com/shapeshift/go-unchained/pkg/websocket"
 )
 
@@ -46,11 +45,10 @@ var upgrader = ws.Upgrader{
 type API struct {
 	handler  *Handler
 	mananger *websocket.Manager
-	wsClient *tendermint.WebsocketClient
 	server   *http.Server
 }
 
-func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient *tendermint.WebsocketClient, swaggerPath string) *API {
+func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient *cosmos.WSClient, swaggerPath string) *API {
 	r := mux.NewRouter()
 
 	s := &http.Server{
@@ -65,10 +63,10 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient 
 		handler: &Handler{
 			httpClient: httpClient,
 			grpcClient: grpcClient,
+			wsClient:   wsClient,
 		},
 		mananger: websocket.NewManager(),
 		server:   s,
-		wsClient: wsClient,
 	}
 
 	// compile check to ensure Handler implements BaseAPI
@@ -112,6 +110,10 @@ func docsRedirect(w http.ResponseWriter, r *http.Request) {
 func (a *API) Serve(errChan chan<- error) {
 	logger.Info("serving application")
 
+	if err := a.handler.StartWebsocket(); err != nil {
+		errChan <- errors.Wrap(err, "error serving application")
+	}
+
 	go a.mananger.Start()
 
 	if err := a.server.ListenAndServe(); err != nil {
@@ -124,7 +126,7 @@ func (a *API) Shutdown() {
 	defer cancel()
 
 	a.handler.grpcClient.Close()
-	a.wsClient.Stop()
+	a.handler.wsClient.Stop()
 	a.server.Shutdown(ctx)
 }
 
@@ -150,7 +152,7 @@ func (a *API) Websocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := websocket.NewConnection(conn, a.wsClient, a.mananger)
+	c := websocket.NewConnection(conn, a.handler.wsClient, a.mananger)
 	c.Start()
 }
 

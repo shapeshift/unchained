@@ -1,13 +1,69 @@
 package api
 
 import (
+	"crypto/sha256"
+	"encoding/json"
+	"fmt"
+	"strconv"
+
+	"github.com/pkg/errors"
 	"github.com/shapeshift/go-unchained/pkg/api"
 	"github.com/shapeshift/go-unchained/pkg/cosmos"
+	"github.com/tendermint/tendermint/types"
 )
 
 type Handler struct {
 	httpClient *cosmos.HTTPClient
 	grpcClient *cosmos.GRPCClient
+	wsClient   *cosmos.WSClient
+}
+
+func (h *Handler) StartWebsocket() error {
+	h.wsClient.TxHandler(func(tx types.EventDataTx) ([]byte, error) {
+		blockHeight := strconv.Itoa(int(tx.Height))
+		txid := fmt.Sprintf("%X", sha256.Sum256(tx.Tx))
+
+		baseTx := api.BaseTx{
+			TxID:        txid,
+			BlockHeight: &blockHeight,
+		}
+
+		_, signingTx, err := cosmos.DecodeTx(h.wsClient.EncodingConfig(), tx.Tx)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to decode tx: %v", tx.Tx)
+		}
+
+		fee := signingTx.GetFee()[0]
+		//msgs := cosmosTx.GetMsgs()
+
+		t := Tx{
+			BaseTx: baseTx,
+			//Events: cosmos.Events(tx.Result.Log),
+			Fee: cosmos.Value{
+				Amount: fee.Amount.String(),
+				Denom:  fee.Denom,
+			},
+			GasWanted: strconv.Itoa(int(tx.Result.GasWanted)),
+			GasUsed:   strconv.Itoa(int(tx.Result.GasUsed)),
+			Index:     int(tx.Index),
+			Memo:      signingTx.GetMemo(),
+			//Messages:  cosmos.Messages(msgs),
+		}
+
+		msg, err := json.Marshal(t)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to marshal tx: %v", t)
+		}
+
+		return msg, nil
+	})
+
+	err := h.wsClient.Start()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
 }
 
 func (h *Handler) GetInfo() (api.Info, error) {

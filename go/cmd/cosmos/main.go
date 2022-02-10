@@ -10,7 +10,6 @@ import (
 	"github.com/shapeshift/go-unchained/internal/config"
 	"github.com/shapeshift/go-unchained/internal/log"
 	"github.com/shapeshift/go-unchained/pkg/cosmos"
-	"github.com/shapeshift/go-unchained/pkg/tendermint"
 )
 
 var logger = log.WithoutFields()
@@ -60,12 +59,7 @@ func main() {
 		logger.Panicf("%+v", err)
 	}
 
-	wsClient, err := tendermint.NewWebsocketClient(cfg)
-	if err != nil {
-		logger.Panicf("%+v", err)
-	}
-
-	err = wsClient.Start()
+	wsClient, err := cosmos.NewWebsocketClient(cfg)
 	if err != nil {
 		logger.Panicf("%+v", err)
 	}
