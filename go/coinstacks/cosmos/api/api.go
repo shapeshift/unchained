@@ -43,9 +43,9 @@ var upgrader = ws.Upgrader{
 }
 
 type API struct {
-	handler  *Handler
-	mananger *websocket.Manager
-	server   *http.Server
+	handler *Handler
+	manager *websocket.Manager
+	server  *http.Server
 }
 
 func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient *cosmos.WSClient, swaggerPath string) *API {
@@ -65,8 +65,8 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient 
 			grpcClient: grpcClient,
 			wsClient:   wsClient,
 		},
-		mananger: websocket.NewManager(),
-		server:   s,
+		manager: websocket.NewManager(),
+		server:  s,
 	}
 
 	// compile check to ensure Handler implements BaseAPI
@@ -78,7 +78,7 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient 
 	r.HandleFunc("/", a.Root).Methods("GET")
 
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		handleResponse(w, http.StatusOK, map[string]string{"status": "up", "coinstack": "cosmos", "connections": strconv.Itoa(a.mananger.ConnectionCount())})
+		handleResponse(w, http.StatusOK, map[string]string{"status": "up", "coinstack": "cosmos", "connections": strconv.Itoa(a.manager.ConnectionCount())})
 	}).Methods("GET")
 
 	r.HandleFunc("/swagger", func(w http.ResponseWriter, r *http.Request) {
@@ -114,7 +114,7 @@ func (a *API) Serve(errChan chan<- error) {
 		errChan <- errors.Wrap(err, "error serving application")
 	}
 
-	go a.mananger.Start()
+	go a.manager.Start()
 
 	if err := a.server.ListenAndServe(); err != nil {
 		errChan <- errors.Wrap(err, "error serving application")
@@ -152,7 +152,7 @@ func (a *API) Websocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := websocket.NewConnection(conn, a.handler.wsClient, a.mananger)
+	c := websocket.NewConnection(conn, a.handler.wsClient, a.manager)
 	c.Start()
 }
 
