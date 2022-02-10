@@ -2,7 +2,7 @@ import { ethers } from 'ethers'
 import { Tx } from '@shapeshiftoss/blockbook'
 import { caip19 } from '@shapeshiftoss/caip'
 import { ChainTypes, ContractTypes } from '@shapeshiftoss/types'
-import { TxSpecific as ParseTxSpecific, Transfer, TransferType } from '../types'
+import { Transfer, TransferType, TxSpecific as ParseTxSpecific, UniV2Tx } from '../types'
 import { Network } from './types'
 import ABI from './abi/uniV2'
 import ERC20_ABI from './abi/erc20'
@@ -38,7 +38,7 @@ export class Parser {
     }[this.network]
   }
 
-  async parse(tx: Tx): Promise<ParseTxSpecific | undefined> {
+  async parse(tx: Tx): Promise<ParseTxSpecific<UniV2Tx> | undefined> {
     if (!txInteractsWithContract(tx, ROUTER_CONTRACT)) return
     if (!(tx.confirmations === 0)) return
     if (!tx.ethereumSpecific?.data) return

@@ -8,7 +8,7 @@ export interface Fee {
   value: string
 }
 
-export interface SequencedTx extends Tx {
+export interface SequencedTx extends TxBase {
   sequence: number
   total: number
 }
@@ -53,7 +53,12 @@ export enum TransferType {
   Receive = 'receive',
 }
 
-export interface Tx {
+export interface TxMetaData {
+  buyTx: Transfer | undefined
+  sellTx: Transfer | undefined
+}
+
+export interface TxBase {
   address: string
   blockHash?: string
   blockHeight: number
@@ -66,6 +71,23 @@ export interface Tx {
   transfers: Array<Transfer>
   txid: string
   value: string
+  data?: TxMetaData
 }
 
-export type TxSpecific = Partial<Pick<Tx, 'trade' | 'transfers'>>
+export interface UniV2Tx extends TxBase {
+  data?: TxMetaData // TODO = Type and extend any specific properties
+}
+
+export interface ZrxTx extends TxBase {
+  data?: TxMetaData // TODO = Type and extend any specific properties
+}
+
+export interface ThorTx extends TxBase {
+  data?: TxMetaData // TODO = Type and extend any specific properties
+}
+
+// TODO - Add ZrxTx, ThorTx, YearnTx etc
+
+export type Tx = UniV2Tx | ZrxTx | ThorTx
+
+export type TxSpecific<T extends Tx> = Partial<Pick<T, 'trade' | 'transfers' | 'data'>>

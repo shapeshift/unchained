@@ -3,7 +3,7 @@ import { ethers } from 'ethers'
 import { Tx } from '@shapeshiftoss/blockbook'
 import { caip19, caip2 } from '@shapeshiftoss/caip'
 import { ChainTypes, ContractTypes } from '@shapeshiftoss/types'
-import { Status, Token, Transfer, TransferType, Tx as ParseTx } from '../types'
+import { Status, Token, Transfer, TransferType, Tx as ParseTx, TxMetaData, TxSpecific } from '../types'
 import { InternalTx, Network } from './types'
 import { getSigHash, toNetworkType } from './utils'
 import * as multiSig from './multiSig'
@@ -11,6 +11,7 @@ import * as thor from './thor'
 import * as uniV2 from './uniV2'
 import * as zrx from './zrx'
 import { findAsyncSequential } from '../helpers'
+import { getBuyTx, getSellTx } from './helpers'
 
 export * from './types'
 
@@ -59,7 +60,10 @@ export class TransactionParser {
     const receiveAddress = tx.vout[0].addresses?.[0] ?? ''
 
     // We expect only one Parser to return a result. If multiple do, we take the first and early exit.
-    const result = await findAsyncSequential(this.parsers, async (parser) => await parser.parse(tx))
+    const contractParserResult: TxSpecific<ParseTx> | undefined = await findAsyncSequential(
+      this.parsers,
+      async (parser) => await parser.parse(tx)
+    )
 
     const pTx: ParseTx = {
       address,
@@ -69,8 +73,8 @@ export class TransactionParser {
       caip2: caip2.toCAIP2({ chain: ChainTypes.Ethereum, network: toNetworkType(this.network) }),
       confirmations: tx.confirmations,
       status: this.getStatus(tx),
-      trade: result?.trade,
-      transfers: result?.transfers ?? [],
+      trade: contractParserResult?.trade,
+      transfers: contractParserResult?.transfers ?? [],
       txid: tx.txid,
       value: tx.value,
     }
@@ -170,6 +174,19 @@ export class TransactionParser {
         pTx.transfers = this.aggregateTransfer(pTx.transfers, TransferType.Receive, ...transferArgs)
       }
     })
+
+    const metaData: TxMetaData = (() => {
+      const buyTx = getBuyTx(pTx)
+      const sellTx = getSellTx(pTx)
+      return {
+        buyTx: buyTx ? { ...buyTx } : undefined,
+        sellTx: sellTx ? { ...sellTx } : undefined,
+      }
+    })()
+
+    if (metaData) {
+      pTx.data = metaData
+    }
 
     return pTx
   }

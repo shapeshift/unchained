@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import { Thorchain } from '@shapeshiftoss/thorchain'
-import { Dex, TxSpecific as ParseTxSpecific, TradeType } from '../types'
+import { Dex, ThorTx, TradeType, TxSpecific as ParseTxSpecific } from '../types'
 import { Network } from './types'
 import ABI from './abi/thor'
 import { getSigHash } from './utils'
@@ -49,7 +49,7 @@ export class Parser {
     return result.to
   }
 
-  async parse(tx: Tx): Promise<ParseTxSpecific | undefined> {
+  async parse(tx: Tx): Promise<ParseTxSpecific<ThorTx> | undefined> {
     if (!txInteractsWithContract(tx, this.routerContract)) return
     if (!tx.ethereumSpecific?.data) return
 
