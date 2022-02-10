@@ -14,11 +14,13 @@ import (
 	"github.com/tendermint/tendermint/types"
 )
 
+type TxHandlerFunc = func(tx types.EventDataTx) ([]byte, []string, error)
+
 type WSClient struct {
 	*websocket.Registry
 	txs       *tendermint.WSClient
 	encoding  *params.EncodingConfig
-	txHandler func(tx types.EventDataTx) ([]byte, error)
+	txHandler TxHandlerFunc
 }
 
 func NewWebsocketClient(conf Config) (*WSClient, error) {
@@ -69,7 +71,7 @@ func (ws *WSClient) Stop() {
 	}
 }
 
-func (ws *WSClient) TxHandler(fn func(tx types.EventDataTx) ([]byte, error)) {
+func (ws *WSClient) TxHandler(fn TxHandlerFunc) {
 	ws.txHandler = fn
 }
 
@@ -104,13 +106,11 @@ func (ws *WSClient) listenTxs() {
 }
 
 func (ws *WSClient) handleTx(tx types.EventDataTx) {
-	// TODO: detect addresses and handle if registered
-
-	msg, err := ws.txHandler(tx)
+	msg, addrs, err := ws.txHandler(tx)
 	if err != nil {
 		logger.Errorf("failed to handle tx: %v", err)
 		return
 	}
 
-	ws.Publish([]string{"test"}, msg)
+	ws.Publish(addrs, msg)
 }

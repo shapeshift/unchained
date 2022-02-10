@@ -139,8 +139,14 @@ func (c *GRPCClient) BroadcastTx(txBytes []byte) (string, error) {
 func Events(log string) []Event {
 	logs, err := sdk.ParseABCILogs(log)
 	if err != nil {
-		logger.Error("failed to parse logs: %s", err)
-		return nil
+		// transaction error logs are not in json format and will fail to parse
+		// return error event with the log message
+		event := Event{
+			Type:       "error",
+			Attributes: []Attribute{{Key: "message", Value: log}},
+		}
+
+		return []Event{event}
 	}
 
 	events := []Event{}
@@ -180,74 +186,62 @@ func Messages(msgs []sdk.Msg) []Message {
 		switch v := msg.(type) {
 		case *banktypes.MsgSend:
 			message := Message{
-				From:  v.FromAddress,
-				To:    v.ToAddress,
-				Type:  v.Type(),
-				Value: coinToValue(&v.Amount[0]),
+				Addresses: []string{v.FromAddress, v.ToAddress},
+				From:      v.FromAddress,
+				To:        v.ToAddress,
+				Type:      v.Type(),
+				Value:     coinToValue(&v.Amount[0]),
 			}
 			messages = append(messages, message)
 		case *stakingtypes.MsgDelegate:
 			message := Message{
-				From:  v.DelegatorAddress,
-				Type:  v.Type(),
-				Value: coinToValue(&v.Amount),
+				Addresses: []string{v.DelegatorAddress, v.ValidatorAddress},
+				From:      v.DelegatorAddress,
+				To:        v.ValidatorAddress,
+				Type:      v.Type(),
+				Value:     coinToValue(&v.Amount),
 			}
 			messages = append(messages, message)
 		case *stakingtypes.MsgUndelegate:
 			message := Message{
-				From:  v.DelegatorAddress,
-				To:    v.ValidatorAddress,
-				Type:  v.Type(),
-				Value: coinToValue(&v.Amount),
+				Addresses: []string{v.DelegatorAddress, v.ValidatorAddress},
+				From:      v.ValidatorAddress,
+				To:        v.DelegatorAddress,
+				Type:      v.Type(),
+				Value:     coinToValue(&v.Amount),
 			}
 			messages = append(messages, message)
 		case *stakingtypes.MsgBeginRedelegate:
 			message := Message{
-				From:  v.DelegatorAddress,
-				Type:  v.Type(),
-				Value: coinToValue(&v.Amount),
+				Addresses: []string{v.DelegatorAddress, v.ValidatorSrcAddress, v.ValidatorDstAddress},
+				From:      v.ValidatorSrcAddress,
+				To:        v.ValidatorDstAddress,
+				Type:      v.Type(),
+				Value:     coinToValue(&v.Amount),
 			}
 			messages = append(messages, message)
 		case *disttypes.MsgWithdrawDelegatorReward:
 			message := Message{
-				From: v.ValidatorAddress,
-				To:   v.DelegatorAddress,
-				Type: v.Type(),
-			}
-			messages = append(messages, message)
-		case *liquiditytypes.MsgSwapWithinBatch:
-			message := Message{
-				From:  v.SwapRequesterAddress,
-				Type:  v.Type(),
-				Value: coinToValue(&v.OfferCoin),
+				Addresses: []string{v.DelegatorAddress, v.ValidatorAddress},
+				From:      v.ValidatorAddress,
+				To:        v.DelegatorAddress,
+				Type:      v.Type(),
 			}
 			messages = append(messages, message)
 		case *ibctransfertypes.MsgTransfer:
 			message := Message{
-				From:  v.Sender,
-				To:    v.Receiver,
-				Type:  v.Type(),
-				Value: coinToValue(&v.Token),
+				Addresses: []string{v.Sender, v.Receiver},
+				From:      v.Sender,
+				To:        v.Receiver,
+				Type:      v.Type(),
+				Value:     coinToValue(&v.Token),
 			}
 			messages = append(messages, message)
-		case *ibcclienttypes.MsgUpdateClient:
-			message := Message{
-				From: v.Signer,
-				Type: "UpdateClient",
-			}
-			messages = append(messages, message)
-		case *ibcchanneltypes.MsgAcknowledgement:
-			message := Message{
-				From: v.Signer,
-				Type: "Acknowledgement",
-			}
-			messages = append(messages, message)
-		case *ibcchanneltypes.MsgRecvPacket:
-			message := Message{
-				From: v.Signer,
-				Type: "RecvPacket",
-			}
-			messages = append(messages, message)
+		case *liquiditytypes.MsgSwapWithinBatch,
+			*ibcclienttypes.MsgUpdateClient,
+			*ibcchanneltypes.MsgAcknowledgement,
+			*ibcchanneltypes.MsgRecvPacket:
+			// known but not currently handled
 		default:
 			logger.Warnf("unsupported message type: %T", v)
 		}
