@@ -14,12 +14,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
-	ibctypes "github.com/cosmos/cosmos-sdk/x/ibc/applications/transfer/types"
-	ibccoretypes "github.com/cosmos/cosmos-sdk/x/ibc/core/02-client/types"
-	ibcchanneltypes "github.com/cosmos/cosmos-sdk/x/ibc/core/04-channel/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
+	ibcclienttypes "github.com/cosmos/ibc-go/v3/modules/core/02-client/types"
+	ibcchanneltypes "github.com/cosmos/ibc-go/v3/modules/core/04-channel/types"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/go-unchained/pkg/tendermint/client"
+	liquiditytypes "github.com/tendermint/liquidity/x/liquidity/types"
 )
 
 func (c *HTTPClient) GetTxHistory(address string, page int, pageSize int) (*TxHistory, error) {
@@ -214,7 +215,14 @@ func Messages(msgs []sdk.Msg) []Message {
 				Type: v.Type(),
 			}
 			messages = append(messages, message)
-		case *ibctypes.MsgTransfer:
+		case *liquiditytypes.MsgSwapWithinBatch:
+			message := Message{
+				From:  v.SwapRequesterAddress,
+				Type:  v.Type(),
+				Value: coinToValue(&v.OfferCoin),
+			}
+			messages = append(messages, message)
+		case *ibctransfertypes.MsgTransfer:
 			message := Message{
 				From:  v.Sender,
 				To:    v.Receiver,
@@ -222,20 +230,26 @@ func Messages(msgs []sdk.Msg) []Message {
 				Value: coinToValue(&v.Token),
 			}
 			messages = append(messages, message)
-		case *ibccoretypes.MsgUpdateClient:
+		case *ibcclienttypes.MsgUpdateClient:
 			message := Message{
 				From: v.Signer,
-				Type: v.Type(),
+				Type: "UpdateClient",
+			}
+			messages = append(messages, message)
+		case *ibcchanneltypes.MsgAcknowledgement:
+			message := Message{
+				From: v.Signer,
+				Type: "Acknowledgement",
 			}
 			messages = append(messages, message)
 		case *ibcchanneltypes.MsgRecvPacket:
 			message := Message{
 				From: v.Signer,
-				Type: v.Type(),
+				Type: "RecvPacket",
 			}
 			messages = append(messages, message)
 		default:
-			logger.Warnf("unsupported message type: %s, %T", v.Type(), v)
+			logger.Warnf("unsupported message type: %T", v)
 		}
 	}
 

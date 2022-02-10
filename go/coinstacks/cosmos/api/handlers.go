@@ -28,17 +28,26 @@ func (h *Handler) StartWebsocket() error {
 			BlockHeight: &blockHeight,
 		}
 
-		_, signingTx, err := cosmos.DecodeTx(h.wsClient.EncodingConfig(), tx.Tx)
+		cosmosTx, signingTx, err := cosmos.DecodeTx(h.wsClient.EncodingConfig(), tx.Tx)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to decode tx: %v", tx.Tx)
 		}
 
+		var events []cosmos.Event
+		if tx.Result.Code == 0 {
+			events = cosmos.Events(tx.Result.Log)
+		} else {
+			attribute := cosmos.Attribute{Key: "message", Value: tx.Result.Log}
+			event := cosmos.Event{Type: "error", Attributes: []cosmos.Attribute{attribute}}
+			events = []cosmos.Event{event}
+		}
+
 		fee := signingTx.GetFee()[0]
-		//msgs := cosmosTx.GetMsgs()
+		msgs := cosmosTx.GetMsgs()
 
 		t := Tx{
 			BaseTx: baseTx,
-			//Events: cosmos.Events(tx.Result.Log),
+			Events: events,
 			Fee: cosmos.Value{
 				Amount: fee.Amount.String(),
 				Denom:  fee.Denom,
@@ -47,7 +56,7 @@ func (h *Handler) StartWebsocket() error {
 			GasUsed:   strconv.Itoa(int(tx.Result.GasUsed)),
 			Index:     int(tx.Index),
 			Memo:      signingTx.GetMemo(),
-			//Messages:  cosmos.Messages(msgs),
+			Messages:  cosmos.Messages(msgs),
 		}
 
 		msg, err := json.Marshal(t)
