@@ -43,8 +43,8 @@ body:
       value: |
         ## Bounty Hunters
         ###### Information for bounty hunters (please don't edit)
-          - [Join our Discord](https://discord.gg/shapeshift)
-          - Include an expected timeline for you to complete work in the work plan when you apply for this bounty!
-          - Please refer to [this link](https://shapeshiftdao.gitbook.io/getting-started/how-to-contribute/bounties#resources-for-new-contributors-and-bounty-hunters) for some basic info
+          - Join the [ShapeShift Discord](https://discord.gg/shapeshift)
+          - Check out the [Contribution Guidelines](https://shapeshiftdao.gitbook.io/getting-started/how-to-contribute/bounties#resources-for-new-contributors-and-bounty-hunters)
+          - Include an expected completion timeline in the work plan when you apply for this bounty on [Gitcoin](https://gitcoin.co/shapeshift/bounties)!
     validations:
       required: true
