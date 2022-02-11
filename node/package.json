@@ -15,6 +15,7 @@
     "clean": "lerna run clean --scope @shapeshiftoss/* && rm -rf coverage dist node_modules",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
+    "show-linked-packages": "find node_modules node_modules/@* -maxdepth 1 -type l -print",
     "lint": "eslint '*/**/*.{js,ts}' && yarn lint:ts",
     "lint:ts": "tsc --noEmit",
     "test": "jest",
