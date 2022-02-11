@@ -38,8 +38,13 @@ body:
       options:
         - label: As the sponsor of this bounty I will review the PR
           required: true
+  - type: textarea
+    id: bounty-hunters-header
+    attributes:
+      label: Bounty Hunters
+      description: Information for bounty hunters (please don't edit)
   - type: markdown
-    id: bounty-hunters
+    id: bounty-hunters-body
     attributes:
       value: |
         - [Join our Discord](https://discord.gg/shapeshift)
