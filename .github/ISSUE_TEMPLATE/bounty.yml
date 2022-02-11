@@ -1,0 +1,52 @@
+name: Bounty
+description: Create a bounty
+labels: ["bounty"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bounty
+  - type: textarea
+    id: overview
+    attributes:
+      label: Overview
+      description: General background needed for bounty hunter to complete task
+      placeholder: General background needed for bounty hunter to complete task
+    validations:
+      required: true
+  - type: textarea
+    id: reference
+    attributes:
+      label: Reference
+      description: An explanation as to where the bounty hunter should look or code that is affected
+      placeholder: An explanation as to where the bounty hunter should look or code that is affected
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: The criteria that needs to be completed in order for the bounty to be considered complete
+      placeholder: The criteria that needs to be completed in order for the bounty to be considered complete
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots-or-mockups
+    attributes:
+      label: Screenshots/Mockups
+      description: Screenshots related to UI changes for simple changes, links to clickable mockups for larger features
+      placeholder: Screenshots related to UI changes for simple changes, links to clickable mockups for larger features
+    validations:
+      required: false
+  - type: textarea
+    id: bounty-hunters
+    attributes:
+      label: Bounty Hunters
+      description: Information for bounty hunters to join ShapeShift discord and other general information (this can be left as it is)
+      placeholder: Information for bounty hunters to join ShapeShift discord and other general information
+      value: |
+        - Join our discord [here](https://discord.gg/shapeshift). Once you join you can see more about this issue [here](https://discord.com/channels/554694662431178782/873244924026449940/925799058537336853)
+        - Include an expected timeline for you to complete work in the work plan when you apply for this bounty!
+        - Please refer to [this link](https://shapeshiftdao.gitbook.io/getting-started/how-to-contribute/bounties#resources-for-new-contributors-and-bounty-hunters) for some basic info
+    validations:
+      required: false
