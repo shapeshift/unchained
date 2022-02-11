@@ -38,7 +38,7 @@ body:
       options:
         - label: As the sponsor of this bounty I will review the PR
           required: true
-  - type: textarea
+  - type: markdown
     id: bounty-hunters
     attributes:
       label: Bounty Hunters
