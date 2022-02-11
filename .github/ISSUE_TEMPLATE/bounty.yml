@@ -38,10 +38,6 @@ body:
         - label: As the sponsor of this bounty I will review the PR
           required: true
   - type: markdown
-    id: spacer
-    attributes:
-      value: " "
-  - type: markdown
     id: bounty-hunters
     attributes:
       value: |
