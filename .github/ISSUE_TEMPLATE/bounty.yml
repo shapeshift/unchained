@@ -10,7 +10,7 @@ body:
     id: overview
     attributes:
       label: Overview
-      description: General background needed for bounty hunter to complete task
+      description: A brief overview of the bounty and any relevant background information
       placeholder: We need to be able to support the new foo chain.
     validations:
       required: true
@@ -18,7 +18,7 @@ body:
     id: reference
     attributes:
       label: Reference
-      description: An explanation as to where the bounty hunter should look or code that is affected
+      description: Any technical or project references to provide additional context about the bounty
       placeholder: Look at how we implement the bar chain.
     validations:
       required: true
@@ -26,7 +26,7 @@ body:
     id: acceptance-criteria
     attributes:
       label: Acceptance Criteria
-      description: The criteria that needs to be completed in order for the bounty to be considered complete
+      description: The requirements that must be satisfied for the bounty to be completed
       placeholder: We now support the foo chain.
     validations:
       required: true
