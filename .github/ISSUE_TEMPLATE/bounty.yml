@@ -42,7 +42,6 @@ body:
     id: bounty-hunters
     attributes:
       value: |
-        <br>
         ## Bounty Hunters
         ###### Information for bounty hunters (please don't edit)
           - [Join our Discord](https://discord.gg/shapeshift)
