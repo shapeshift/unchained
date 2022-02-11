@@ -4,8 +4,7 @@ labels: ["needs bounty"]
 body:
   - type: markdown
     attributes:
-      value: |
-        Thank you for taking the time to fill out this bounty!
+      value: Thank you for taking the time to fill out this bounty!
   - type: textarea
     id: overview
     attributes:
