@@ -36,13 +36,13 @@ body:
       options:
         - label: As the sponsor of this bounty I will review the PR
           required: true
-  - type: markdown
+  - type: checkboxes
     id: bounty-hunters
     attributes:
-      value: |
-        ## Bounty Hunters
-          - Join the [ShapeShift Discord](https://discord.gg/shapeshift)
-          - Check out the [Contribution Guidelines](https://shapeshiftdao.gitbook.io/getting-started/how-to-contribute/bounties#resources-for-new-contributors-and-bounty-hunters)
-          - Include an expected completion timeline in the work plan when you apply for this bounty on [Gitcoin](https://gitcoin.co/shapeshift/bounties)!
+      label: Bounty Hunters
+      options:
+          - label: Join the [ShapeShift Discord](https://discord.gg/shapeshift)
+          - label: Check out the [Contribution Guidelines](https://shapeshiftdao.gitbook.io/getting-started/how-to-contribute/bounties#resources-for-new-contributors-and-bounty-hunters)
+          - label: Include an expected completion timeline in the work plan when you apply for this bounty on [Gitcoin](https://gitcoin.co/shapeshift/bounties)!
     validations:
-      required: true
+      required: false
