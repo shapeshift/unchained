@@ -3,8 +3,6 @@ package cosmos
 
 import (
 	"context"
-	"encoding/base64"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	cryptotypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
@@ -180,8 +178,8 @@ func IsValidAddress(address string) bool {
 
 func IsValidRawTx(txbyte string) bool {
 	encoding := NewEncoding()
-	base64decode , err := base64.StdEncoding.DecodeString(txbyte)
-	decodedTx, err := encoding.TxConfig.TxJSONDecoder()((base64decode))
+	//base64decode , err := base64.StdEncoding.DecodeString(txbyte)
+	decodedTx, err := encoding.TxConfig.TxJSONDecoder()([]byte((txbyte)))
 	if err != nil {
 		return false
 	}
