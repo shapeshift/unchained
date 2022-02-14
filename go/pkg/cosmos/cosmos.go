@@ -21,6 +21,7 @@ import (
 	ibcchanneltypes "github.com/cosmos/cosmos-sdk/x/ibc/core/04-channel/types"
 	ibctenderminttypes "github.com/cosmos/cosmos-sdk/x/ibc/light-clients/07-tendermint/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+
 	"github.com/go-resty/resty/v2"
 	"github.com/shapeshift/go-unchained/internal/log"
 	tendermintclient "github.com/shapeshift/go-unchained/pkg/tendermint/client"
@@ -173,5 +174,18 @@ func IsValidAddress(address string) bool {
 		return false
 	}
 
+	return true
+}
+
+func IsValidRawTx(txbyte string) bool {
+	encoding := NewEncoding()
+	decodedTx, err := encoding.TxConfig.TxJSONDecoder()([]byte(txbyte))
+	if err != nil {
+		return false
+	}
+	validateTxerr := decodedTx.ValidateBasic()
+	if validateTxerr != nil {
+		return false
+	}
 	return true
 }

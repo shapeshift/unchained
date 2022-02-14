@@ -22,5 +22,23 @@ func validatePubkey(next http.Handler) http.Handler {
 		}
 
 		next.ServeHTTP(w, r)
+
+	})
+}
+
+func validateRawTx(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		rawTx, ok := mux.Vars(r)["rawtransactionhex"]
+		if !ok || rawTx == "" {
+			handleError(w, http.StatusBadRequest, "raw transaction hash required")
+			return
+		}
+
+		if !cosmos.IsValidRawTx(rawTx) {
+			handleError(w, http.StatusBadRequest, fmt.Sprintf("invalid transaction: %s", rawTx))
+			return
+		}
+
+		next.ServeHTTP(w, r)
 	})
 }

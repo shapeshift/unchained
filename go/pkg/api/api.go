@@ -1,4 +1,4 @@
-// Package api provides a common base set of api types and functionality for all coinstacks to use,
+// provides a common base set of api types and functionality for all coinstacks to use,
 // along with useful middlewares for an http server.
 package api
 
@@ -161,10 +161,13 @@ type TxParam struct {
 // swagger:model TransactionHash
 type TransactionHash string
 
+type Gas string
+
 // BaseAPI interface for all coinstacks to implement
 type BaseAPI interface {
 	GetInfo() (Info, error)
 	GetAccount(pubkey string) (Account, error)
 	GetTxHistory(pubkey string, page int, pageSize int) (TxHistory, error)
 	SendTx(hex string) (string, error)
+	GetGasEstimation(hex string) (Gas, error)
 }

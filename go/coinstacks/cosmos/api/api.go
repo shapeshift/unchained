@@ -1,4 +1,4 @@
-// Package classification Cosmos Unchained API
+// Package api Package classification Cosmos Unchained API
 //
 // Provides access to cosmos chain data
 //
@@ -60,6 +60,10 @@ func Start(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, errChan
 	v1Account.Use(validatePubkey)
 	v1Account.HandleFunc("/{pubkey}", a.Account).Methods("GET")
 	v1Account.HandleFunc("/{pubkey}/txs", a.TxHistory).Methods("GET")
+
+	v1gas := v1.PathPrefix("/gas").Subrouter()
+	v1gas.Use(validateRawTx)
+	v1gas.HandleFunc("/estimate", a.GasEstimation).Methods("GET")
 
 	// docs redirect paths
 	r.HandleFunc("/", docsRedirect).Methods("GET")
@@ -187,6 +191,31 @@ func (a *API) SendTx(w http.ResponseWriter, r *http.Request) {
 	}
 
 	handleResponse(w, http.StatusOK, txHash)
+}
+
+// swagger:route GET /api/v1/gas/estimation v1 GasEstimation
+//
+// Get
+//
+// responses:
+//   200: GasAmount
+//   400: BadRequestError
+//   422: ValidationError
+//   500: InternalServerError
+func (a *API) GasEstimation(w http.ResponseWriter, r *http.Request) {
+	body := &api.TxBody{}
+	err := json.NewDecoder(r.Body).Decode(body)
+	if err != nil {
+		handleError(w, http.StatusBadRequest, "invalid query parameter")
+		return
+	}
+	gasUsed, err := a.handler.GetGasEstimation(body.Hex)
+	if err != nil {
+		handleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	handleResponse(w, http.StatusOK, gasUsed)
+
 }
 
 func handleResponse(w http.ResponseWriter, status int, res interface{}) {
