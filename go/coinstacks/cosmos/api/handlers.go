@@ -69,9 +69,10 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 	return account, nil
 }
 
-func (h *Handler) GetTxHistory(pubkey string, page int, pageSize int) (api.TxHistory, error) {
-	res, err := h.httpClient.GetTxHistory(pubkey, page, pageSize)
+func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize uint) (api.TxHistory, error) {
+	res, err := h.httpClient.GetTxHistory(pubkey, cursor, pageSize)
 	if err != nil {
+		logger.Errorf("error getting tx history for %s (%s): %s", pubkey, cursor, err)
 		return nil, err
 	}
 
@@ -103,8 +104,7 @@ func (h *Handler) GetTxHistory(pubkey string, page int, pageSize int) (api.TxHis
 	txHistory := TxHistory{
 		BaseTxHistory: api.BaseTxHistory{
 			Pagination: api.Pagination{
-				Page:       page,
-				TotalPages: res.TotalPages,
+				Cursor: res.Cursor,
 			},
 			Pubkey: pubkey,
 		},

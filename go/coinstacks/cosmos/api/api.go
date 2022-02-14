@@ -17,6 +17,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -32,7 +33,8 @@ import (
 )
 
 const (
-	gracefulShutdown = 15 * time.Second
+	gracefulShutdown     = 15 * time.Second
+	txHistoryMaxPageSize = 100
 )
 
 var logger = log.WithoutFields()
@@ -199,23 +201,34 @@ func (a *API) Account(w http.ResponseWriter, r *http.Request) {
 //   422: ValidationError
 //   500: InternalServerError
 func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
+	var err error
 	pubkey, ok := mux.Vars(r)["pubkey"]
 	if !ok || pubkey == "" {
 		handleError(w, http.StatusBadRequest, "pubkey required")
 		return
 	}
 
-	page, err := strconv.Atoi(r.URL.Query().Get("page"))
-	if err != nil {
-		page = 1
+	cursor := r.URL.Query().Get("cursor")
+
+	pageSize := uint64(10)
+	ps := r.URL.Query().Get("pageSize")
+	if ps != "" {
+		pageSize, err = strconv.ParseUint(ps, 10, 32)
+		if err != nil {
+			handleError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		if pageSize > txHistoryMaxPageSize {
+			handleError(w, http.StatusBadRequest, fmt.Sprintf("page size max is %d", txHistoryMaxPageSize))
+			return
+		}
+		if pageSize == 0 {
+			handleError(w, http.StatusBadRequest, "page size cannot be 0")
+			return
+		}
 	}
 
-	pageSize, err := strconv.Atoi(r.URL.Query().Get("pageSize"))
-	if err != nil {
-		pageSize = 25
-	}
-
-	txHistory, err := a.handler.GetTxHistory(pubkey, page, pageSize)
+	txHistory, err := a.handler.GetTxHistory(pubkey, cursor, uint(pageSize))
 	if err != nil {
 		handleError(w, http.StatusInternalServerError, err.Error())
 		return

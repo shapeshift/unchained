@@ -96,7 +96,8 @@ type Tx struct {
 }
 
 type TxHistory struct {
-	TotalPages int
+	TotalPages int // Deprecated
+	Cursor     string
 	Txs        []Tx
 }
 

@@ -41,6 +41,7 @@ type Config struct {
 	GRPCURL          string
 	LCDURL           string
 	RPCURL           string
+	Scheme           string
 }
 
 // HTTPClient allows communicating over http
@@ -61,6 +62,9 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 
 	tConf := tendermintclient.NewConfiguration()
 	tConf.Scheme = "https"
+	if conf.Scheme != "" {
+		tConf.Scheme = conf.Scheme
+	}
 	tConf.Servers = []tendermintclient.ServerConfiguration{{URL: conf.RPCURL}}
 	tConf.AddDefaultHeader("Authorization", conf.APIKey)
 	tClient := tendermintclient.NewAPIClient(tConf)

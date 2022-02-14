@@ -77,12 +77,9 @@ func (b BaseAccount) pubkey() string {
 // Contains info about pagination for large sets of data
 // swagger:model Pagination
 type Pagination struct {
-	// required: true
-	// example: 1
-	Page int `json:"page"`
-	// required: true
-	// example: 10
-	TotalPages int `json:"totalPages"`
+	// required: false
+	// example: d2l0aGRyYXdfZGVsZWdhdG9yX3Jld2FyZA==
+	Cursor string `json:"cursor"`
 }
 
 type Tx interface {
@@ -165,6 +162,6 @@ type TransactionHash string
 type BaseAPI interface {
 	GetInfo() (Info, error)
 	GetAccount(pubkey string) (Account, error)
-	GetTxHistory(pubkey string, page int, pageSize int) (TxHistory, error)
+	GetTxHistory(pubkey string, cursor string, pageSize uint) (TxHistory, error)
 	SendTx(hex string) (string, error)
 }

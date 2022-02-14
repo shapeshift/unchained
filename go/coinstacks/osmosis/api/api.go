@@ -73,7 +73,8 @@ func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	txHistory, err := a.handler.GetTxHistory(pubkey)
+	cursor := r.URL.Query().Get("cursor")
+	txHistory, err := a.handler.GetTxHistory(pubkey, cursor)
 	if err != nil {
 		handleError(w, http.StatusInternalServerError, err.Error())
 		return

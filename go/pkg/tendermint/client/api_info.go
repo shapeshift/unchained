@@ -2286,7 +2286,7 @@ func (a *InfoApiService) TxSearchExecute(r ApiTxSearchRequest) (TxSearchResponse
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
+	if err != nil || localVarHTTPResponse == nil || localVarHTTPResponse.StatusCode < 200 || localVarHTTPResponse.StatusCode  > 399 {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 

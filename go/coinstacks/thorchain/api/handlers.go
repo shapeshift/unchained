@@ -45,7 +45,7 @@ func (h *Handler) GetAccount(pubkey string) (*Account, error) {
 }
 
 func (h *Handler) GetTxHistory(pubkey string) (api.TxHistory, error) {
-	res, err := h.httpClient.GetTxHistory(pubkey)
+	res, err := h.httpClient.GetTxHistory(pubkey, "", 10)
 	if err != nil {
 		return nil, err
 	}

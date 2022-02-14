@@ -23,6 +23,7 @@ type Config struct {
 	GRPCURL string `mapstructure:"grpcUrl"`
 	LCDURL  string `mapstructure:"lcdUrl"`
 	RPCURL  string `mapstructure:"rpcUrl"`
+	Scheme  string `mapstructure:"scheme"`
 }
 
 func main() {
@@ -47,6 +48,7 @@ func main() {
 		GRPCURL:          conf.GRPCURL,
 		LCDURL:           conf.LCDURL,
 		RPCURL:           conf.RPCURL,
+		Scheme:           conf.Scheme,
 	}
 
 	httpClient, err := cosmos.NewHTTPClient(cfg)
