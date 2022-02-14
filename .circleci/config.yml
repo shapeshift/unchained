@@ -35,14 +35,14 @@ aliases:
     mongo-cpu-limit: 512m
     mongo-memory-limit: 512Mi
     mongo-replicas: 3
-    mongo-storage-size: 100Gi
+    mongo-storage-size: 10Gi
     mongo-url: mongodb://bitcoin-mongodb-0.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017,bitcoin-mongodb-1.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017,bitcoin-mongodb-2.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
     rabbit-cpu-limit: "2"
     rabbit-memory-limit: "8Gi"
-    rabbit-storage-size: "100Gi"
+    rabbit-storage-size: "10Gi"
     indexer-cpu-limit: "4"
     indexer-memory-limit: 24Gi
-    indexer-replicas: 4
+    indexer-replicas: 3
     indexer-storage-size: 500Gi
     indexer-url: http://bitcoin-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://bitcoin-indexer-svc.unchained.svc.cluster.local:8001/websocket
@@ -50,11 +50,17 @@ aliases:
     daemon-cpu-limit: "2"
     daemon-memory-limit: 12Gi
     daemon-storage-size: 1500Gi
-    api-replicas: 4
-    api-cpu-limit: "1"
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 6
+    api-cpu-limit: "500m"
+    api-cpu-threshold: 30
     api-memory-limit: "2Gi"
-    ingester-replicas: 3
-    ingester-cpu-limit: "1"
+    ingester-autoscaling: true
+    ingester-replicas: 2
+    ingester-max-replicas: 4
+    ingester-cpu-threshold: 20
+    ingester-cpu-limit: "500m"
     ingester-memory-limit: "3Gi"
     rpc-url: http://user:password@bitcoin-indexer-svc.unchained.svc.cluster.local:8332
 
@@ -66,14 +72,14 @@ aliases:
     mongo-cpu-limit: 512m
     mongo-memory-limit: 512Mi
     mongo-replicas: 3
-    mongo-storage-size: 100Gi
+    mongo-storage-size: 10Gi
     mongo-url: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-2.ethereum-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
     rabbit-cpu-limit: "2"
     rabbit-memory-limit: "8Gi"
-    rabbit-storage-size: "100Gi"
+    rabbit-storage-size: "10Gi"
     indexer-cpu-limit: "4"
     indexer-memory-limit: 12Gi
-    indexer-replicas: 4
+    indexer-replicas: 3
     indexer-storage-size: 500Gi
     indexer-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-indexer-svc.unchained.svc.cluster.local:8001/websocket
@@ -81,11 +87,17 @@ aliases:
     daemon-cpu-limit: "4"
     daemon-memory-limit: 32Gi
     daemon-storage-size: 2000Gi
-    api-replicas: 4
-    api-cpu-limit: "1"
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 6
+    api-cpu-limit: "500m"
+    api-cpu-threshold: 30
     api-memory-limit: "2Gi"
-    ingester-replicas: 3
-    ingester-cpu-limit: "1"
+    ingester-autoscaling: true
+    ingester-replicas: 2
+    ingester-max-replicas: 4
+    ingester-cpu-threshold: 20
+    ingester-cpu-limit: "500m"
     ingester-memory-limit: "3Gi"
     rpc-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8332
 
@@ -97,11 +109,11 @@ aliases:
     mongo-cpu-limit: 512m
     mongo-memory-limit: 512Mi
     mongo-replicas: 3
-    mongo-storage-size: 100Gi
+    mongo-storage-size: 10Gi
     mongo-url: mongodb://ethereum-ropsten-mongodb-0.ethereum-ropsten-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-ropsten-mongodb-1.ethereum-ropsten-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-ropsten-mongodb-2.ethereum-ropsten-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
     rabbit-cpu-limit: "1"
     rabbit-memory-limit: "4Gi"
-    rabbit-storage-size: "100Gi"
+    rabbit-storage-size: "10Gi"
     indexer-cpu-limit: "4"
     indexer-memory-limit: 12Gi
     indexer-replicas: 2
@@ -112,11 +124,17 @@ aliases:
     daemon-cpu-limit: "2"
     daemon-memory-limit: 24Gi
     daemon-storage-size: 500Gi
+    api-autoscaling: true
     api-replicas: 2
-    api-cpu-limit: "1"
+    api-max-replicas: 4
+    api-cpu-threshold: 30
+    api-cpu-limit: "500m"
     api-memory-limit: "2Gi"
+    ingester-autoscaling: true
     ingester-replicas: 2
-    ingester-cpu-limit: "1"
+    ingester-max-replicas: 4
+    ingester-cpu-threshold: 20
+    ingester-cpu-limit: "500m"
     ingester-memory-limit: "3Gi"
     rpc-url: http://ethereum-ropsten-indexer-svc.unchained.svc.cluster.local:8332
 
@@ -285,8 +303,11 @@ jobs:
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r5a.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r5b.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[3] r5n.4xlarge
-            pulumi config set --path unchained:common.eks.traefik.replicas 7
-            pulumi config set --path unchained:common.eks.traefik.resources.cpu 500m
+            pulumi config set --path unchained:common.eks.traefik.autoscaling.enabled true
+            pulumi config set --path unchained:common.eks.traefik.autoscaling.cpuThreshold 30
+            pulumi config set --path unchained:common.eks.traefik.autoscaling.maxReplicas 10
+            pulumi config set --path unchained:common.eks.traefik.replicas 3
+            pulumi config set --path unchained:common.eks.traefik.resources.cpu 300m
             pulumi config set --path unchained:common.eks.traefik.resources.memory 512Mi
             pulumi config set --path unchained:common.eks.traefik.whitelist[0] 173.245.48.0/20
             pulumi config set --path unchained:common.eks.traefik.whitelist[1] 103.21.244.0/22
@@ -388,17 +409,29 @@ jobs:
         type: string
       daemon-storage-size:
         type: string
+      api-autoscaling:
+        type: boolean
+      api-cpu-threshold:
+        type: integer
+      api-max-replicas:
+        type: integer
       api-cpu-limit:
         type: string
       api-memory-limit:
         type: string
       api-replicas:
         type: integer
+      ingester-autoscaling:
+        type: boolean
       ingester-cpu-limit:
         type: string
+      ingester-cpu-threshold:
+        type: integer
       ingester-memory-limit:
         type: string
       ingester-replicas:
+        type: integer
+      ingester-max-replicas:
         type: integer
     steps:
       - setup_remote_docker:
@@ -425,6 +458,9 @@ jobs:
             [ -n "<< parameters.environment >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.environment << parameters.environment >>
             pulumi config set --path unchained:<< parameters.coinstack >>.network << parameters.network >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.enableDatadogLogs true
+            pulumi config set --path unchained:<< parameters.coinstack >>.api.autoscaling.enabled << parameters.api-autoscaling >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.api.autoscaling.cpuThreshold << parameters.api-cpu-threshold >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.api.autoscaling.maxReplicas << parameters.api-max-replicas >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.cpuLimit << parameters.api-cpu-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.memoryLimit << parameters.api-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.replicas << parameters.api-replicas >>
@@ -445,6 +481,9 @@ jobs:
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.cpuLimit << parameters.daemon-cpu-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.memoryLimit << parameters.daemon-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.storageSize << parameters.daemon-storage-size >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.ingester.autoscaling.enabled << parameters.ingester-autoscaling >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.ingester.autoscaling.cpuThreshold << parameters.ingester-cpu-threshold >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.ingester.autoscaling.maxReplicas << parameters.ingester-max-replicas >>
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.cpuLimit << parameters.ingester-cpu-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.memoryLimit << parameters.ingester-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.replicas << parameters.ingester-replicas >>
@@ -537,11 +576,17 @@ workflows:
           indexer-url: http://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001
           indexer-ws-url: ws://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
           rpc-url: http://user:password@bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8332
+          api-autoscaling: true
           api-replicas: 2
+          api-max-replicas: 3
           api-cpu-limit: "300m"
+          api-cpu-threshold: 30
           api-memory-limit: "1Gi"
-          ingester-replicas: 2
+          ingester-autoscaling: true
+          ingester-replicas: 1
+          ingester-max-replicas: 2
           ingester-cpu-limit: "500m"
+          ingester-cpu-threshold: 20
           ingester-memory-limit: "2Gi"
           requires:
             - deploy common unchained dependencies
@@ -560,11 +605,17 @@ workflows:
           indexer-url: http://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8001
           indexer-ws-url: ws://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
           rpc-url: http://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8332
+          api-autoscaling: true
           api-replicas: 2
+          api-max-replicas: 3
           api-cpu-limit: "300m"
+          api-cpu-threshold: 30
           api-memory-limit: "1Gi"
-          ingester-replicas: 2
+          ingester-autoscaling: true
+          ingester-replicas: 1
+          ingester-max-replicas: 2
           ingester-cpu-limit: "500m"
+          ingester-cpu-threshold: 20
           ingester-memory-limit: "2Gi"
           requires:
             - deploy common unchained dependencies
@@ -584,11 +635,17 @@ workflows:
           indexer-url: http://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8001
           indexer-ws-url: ws://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
           rpc-url: http://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8332
+          api-autoscaling: true
           api-replicas: 2
+          api-max-replicas: 3
           api-cpu-limit: "300m"
+          api-cpu-threshold: 30
           api-memory-limit: "1Gi"
-          ingester-replicas: 2
+          ingester-autoscaling: true
+          ingester-replicas: 1
+          ingester-max-replicas: 2
           ingester-cpu-limit: "500m"
+          ingester-cpu-threshold: 20
           ingester-memory-limit: "2Gi"
           requires:
             - deploy common unchained dependencies
