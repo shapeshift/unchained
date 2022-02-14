@@ -61,9 +61,9 @@ func Start(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, errChan
 	v1Account.HandleFunc("/{pubkey}", a.Account).Methods("GET")
 	v1Account.HandleFunc("/{pubkey}/txs", a.TxHistory).Methods("GET")
 
-	v1gas := v1.PathPrefix("/gas").Subrouter()
+	v1gas := v1.PathPrefix("/gas/estimate").Subrouter()
 	v1gas.Use(validateRawTx)
-	v1gas.HandleFunc("/estimate", a.GasEstimation).Methods("GET")
+	v1gas.HandleFunc("/{txbytes}", a.GasEstimation).Methods("GET")
 
 	// docs redirect paths
 	r.HandleFunc("/", docsRedirect).Methods("GET")
@@ -203,13 +203,13 @@ func (a *API) SendTx(w http.ResponseWriter, r *http.Request) {
 //   422: ValidationError
 //   500: InternalServerError
 func (a *API) GasEstimation(w http.ResponseWriter, r *http.Request) {
-	body := &api.TxBody{}
-	err := json.NewDecoder(r.Body).Decode(body)
-	if err != nil {
-		handleError(w, http.StatusBadRequest, "invalid query parameter")
+	rawTx, ok := mux.Vars(r)["txbytes"]
+	if !ok || rawTx == "" {
+		handleError(w, http.StatusBadRequest, "raw transaction hash required")
 		return
 	}
-	gasUsed, err := a.handler.GetGasEstimation(body.Hex)
+
+	gasUsed, err := a.handler.GetGasEstimation(rawTx)
 	if err != nil {
 		handleError(w, http.StatusInternalServerError, err.Error())
 		return
