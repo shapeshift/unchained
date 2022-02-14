@@ -1,4 +1,4 @@
-// provides a common base set of api types and functionality for all coinstacks to use,
+// Package api provides a common base set of api types and functionality for all coinstacks to use,
 // along with useful middlewares for an http server.
 package api
 

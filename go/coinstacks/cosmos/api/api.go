@@ -1,4 +1,4 @@
-// Package api Package classification Cosmos Unchained API
+// Package classification Cosmos Unchained API
 //
 // Provides access to cosmos chain data
 //

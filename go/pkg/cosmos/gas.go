@@ -4,7 +4,7 @@ import (
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	"github.com/pkg/errors"
-	types1 "github.com/tendermint/tendermint/abci/types"
+	abcitypes "github.com/tendermint/tendermint/abci/types"
 	"strconv"
 )
 
@@ -17,7 +17,7 @@ func (c *HTTPClient) GetGasEstimation(txBytes []byte) (string, error) {
 		Result struct {
 			Data   string         `json:"data"`
 			Log    string         `json:"log"`
-			Events []types1.Event `json:"events"`
+			Events []abcitypes.Event `json:"events"`
 		} `json:"result"`
 	}
 	hexToUnmarshal, err := c.encoding.TxConfig.TxDecoder()(txBytes)
