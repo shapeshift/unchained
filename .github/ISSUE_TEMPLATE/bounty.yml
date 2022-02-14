@@ -46,4 +46,4 @@ body:
           - Include an expected completion timeline in the work plan when you apply for this bounty on [Gitcoin](https://gitcoin.co/shapeshift/bounties)!
       render: markdown
     validations:
-      required: true
+      required: false
