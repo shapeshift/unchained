@@ -66,7 +66,7 @@ func (c *Connection) Start() {
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(readWait))
 
-	// handle ping from client heartbeat.
+	// handle ping message from client heartbeat.
 	// if there is an error responding to client, connection will be closed.
 	c.conn.SetPingHandler(func(string) error {
 		c.conn.SetWriteDeadline(time.Now().Add(writeWait))
@@ -76,15 +76,15 @@ func (c *Connection) Start() {
 		return nil
 	})
 
-	// handle ping from server heartbeat and reset read deadline.
-	// if no ping is receive before read deadline expires, connection will be closed.
+	// handle pong response from client and reset read deadline.
+	// if no pong is receive before read deadline expires, connection will be closed.
 	c.conn.SetPongHandler(func(string) error {
 		c.conn.SetReadDeadline(time.Now().Add(readWait))
 		return nil
 	})
 
-	// send ping message to verify health of client and server.
-	// if there is an error responding to either, connection will be closed.
+	// send ping message to verify health of client.
+	// if there is an error responding to client, connection will be closed.
 	go func() {
 		for range c.ticker.C {
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))

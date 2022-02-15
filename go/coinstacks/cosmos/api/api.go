@@ -111,7 +111,7 @@ func (a *API) Serve(errChan chan<- error) {
 	logger.Info("serving application")
 
 	if err := a.handler.StartWebsocket(); err != nil {
-		errChan <- errors.Wrap(err, "error serving application")
+		errChan <- errors.Wrap(err, "error starting websocket")
 	}
 
 	go a.manager.Start()

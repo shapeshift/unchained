@@ -27,18 +27,12 @@ func NewWebsocketClient(conf Config) (*WSClient, error) {
 	path := fmt.Sprintf("/apikey/%s/websocket", conf.APIKey)
 	url := fmt.Sprintf("wss://%s", conf.RPCURL)
 
-	blockClient, err := tendermint.NewWS(url, path)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to create websocket client")
-	}
-
 	txsClient, err := tendermint.NewWS(url, path)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create websocket client")
 	}
 
 	// use default dialer
-	blockClient.Dialer = net.Dial
 	txsClient.Dialer = net.Dial
 
 	ws := &WSClient{
@@ -49,6 +43,7 @@ func NewWebsocketClient(conf Config) (*WSClient, error) {
 
 	return ws, nil
 }
+
 func (ws *WSClient) Start() error {
 	err := ws.txs.Start()
 	if err != nil {
@@ -97,10 +92,8 @@ func (ws *WSClient) listenTxs() {
 			case types.EventDataTx:
 				go ws.handleTx(result.Data.(types.EventDataTx))
 			default:
-				fmt.Printf("%T", result.Data)
-
+				fmt.Printf("unsupported result type: %T", result.Data)
 			}
-
 		}
 	}
 }
