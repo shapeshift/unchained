@@ -4,15 +4,9 @@
   "command": {
     "publish": {
       "message": "chore(release): publish %v",
-      "ignoreChanges": [
-        "**/*.md"
-      ]
+      "ignoreChanges": ["**/*.md"]
     }
   },
-  "packages": [
-    "packages/*",
-    "coinstacks/**/*",
-    "pulumi/*"
-  ],
+  "packages": ["packages/*", "coinstacks/**/*", "pulumi/*"],
   "useWorkspaces": true
 }
