@@ -97,9 +97,8 @@ type Tx struct {
 }
 
 type TxHistory struct {
-	TotalPages int // Deprecated
-	Cursor     string
-	Txs        []Tx
+	Cursor string
+	Txs    []Tx
 }
 
 // Contains info about a staking unbonding
