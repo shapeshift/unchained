@@ -43,13 +43,12 @@ var upgrader = ws.Upgrader{
 }
 
 type API struct {
-	handler  *Handler
-	mananger *websocket.Manager
-	server   *http.Server
+	handler *Handler
+	manager *websocket.Manager
+	server  *http.Server
 }
 
-func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, swaggerPath string) *API {
-	m := websocket.NewManager()
+func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient *cosmos.WSClient, swaggerPath string) *API {
 	r := mux.NewRouter()
 
 	s := &http.Server{
@@ -64,9 +63,10 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, swaggerPa
 		handler: &Handler{
 			httpClient: httpClient,
 			grpcClient: grpcClient,
+			wsClient:   wsClient,
 		},
-		mananger: m,
-		server:   s,
+		manager: websocket.NewManager(),
+		server:  s,
 	}
 
 	// compile check to ensure Handler implements BaseAPI
@@ -78,7 +78,7 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, swaggerPa
 	r.HandleFunc("/", a.Root).Methods("GET")
 
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		handleResponse(w, http.StatusOK, map[string]string{"status": "up", "coinstack": "cosmos", "connections": strconv.Itoa(a.mananger.ConnectionCount())})
+		handleResponse(w, http.StatusOK, map[string]string{"status": "up", "coinstack": "cosmos", "connections": strconv.Itoa(a.manager.ConnectionCount())})
 	}).Methods("GET")
 
 	r.HandleFunc("/swagger", func(w http.ResponseWriter, r *http.Request) {
@@ -107,9 +107,15 @@ func docsRedirect(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/docs/", http.StatusFound)
 }
 
-func (a *API) Start(errChan chan<- error) {
+func (a *API) Serve(errChan chan<- error) {
 	logger.Info("serving application")
-	go a.mananger.Start()
+
+	if err := a.handler.StartWebsocket(); err != nil {
+		errChan <- errors.Wrap(err, "error starting websocket")
+	}
+
+	go a.manager.Start()
+
 	if err := a.server.ListenAndServe(); err != nil {
 		errChan <- errors.Wrap(err, "error serving application")
 	}
@@ -118,6 +124,9 @@ func (a *API) Start(errChan chan<- error) {
 func (a *API) Shutdown() {
 	ctx, cancel := context.WithTimeout(context.Background(), gracefulShutdown)
 	defer cancel()
+
+	a.handler.grpcClient.Close()
+	a.handler.wsClient.Stop()
 	a.server.Shutdown(ctx)
 }
 
@@ -134,19 +143,16 @@ func (a *API) Root(w http.ResponseWriter, r *http.Request) {
 //
 // Subscribe to pending and confirmed transactions.
 //
-// Subscribe Example:
-//
-// Unsubscribe Example:
-//
 // responses:
 //   200:
 func (a *API) Websocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		handleError(w, http.StatusInternalServerError, err.Error())
+		return
 	}
 
-	c := websocket.NewConnection(conn, a.mananger)
+	c := websocket.NewConnection(conn, a.handler.wsClient, a.manager)
 	c.Start()
 }
 
@@ -160,7 +166,9 @@ func (a *API) Info(w http.ResponseWriter, r *http.Request) {
 	info, err := a.handler.GetInfo()
 	if err != nil {
 		handleError(w, http.StatusInternalServerError, err.Error())
+		return
 	}
+
 	handleResponse(w, http.StatusOK, info)
 }
 

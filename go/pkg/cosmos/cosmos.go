@@ -6,24 +6,23 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	cryptotypes "github.com/cosmos/cosmos-sdk/codec/types"
-	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	"github.com/cosmos/cosmos-sdk/simapp/params"
+	stdtypes "github.com/cosmos/cosmos-sdk/std"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/errors"
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
-	ibctransfertypes "github.com/cosmos/cosmos-sdk/x/ibc/applications/transfer/types"
-	ibcclienttypes "github.com/cosmos/cosmos-sdk/x/ibc/core/02-client/types"
-	ibcchanneltypes "github.com/cosmos/cosmos-sdk/x/ibc/core/04-channel/types"
-	ibctenderminttypes "github.com/cosmos/cosmos-sdk/x/ibc/light-clients/07-tendermint/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
+	ibccoretypes "github.com/cosmos/ibc-go/v3/modules/core/types"
 	"github.com/go-resty/resty/v2"
+	"github.com/pkg/errors"
 	"github.com/shapeshift/go-unchained/internal/log"
 	tendermintclient "github.com/shapeshift/go-unchained/pkg/tendermint/client"
+	liquiditytypes "github.com/tendermint/liquidity/x/liquidity/types"
 	abcitypes "github.com/tendermint/tendermint/abci/types"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -133,8 +132,8 @@ func NewGRPCClient(conf Config) (*GRPCClient, error) {
 	return c, nil
 }
 
-// Shutdown any GRPCClient connections
-func (c *GRPCClient) Shutdown() {
+// Close any GRPCClient connections
+func (c *GRPCClient) Close() {
 	c.grpcConn.Close()
 }
 
@@ -144,14 +143,13 @@ func NewEncoding(registerInterfaces ...func(r cryptotypes.InterfaceRegistry)) *p
 
 	// register base protobuf types
 	banktypes.RegisterInterfaces(registry)
-	cryptocodec.RegisterInterfaces(registry)
 	distributiontypes.RegisterInterfaces(registry)
 	govtypes.RegisterInterfaces(registry)
-	stakingtypes.RegisterInterfaces(registry)
-	ibcchanneltypes.RegisterInterfaces(registry)
-	ibcclienttypes.RegisterInterfaces(registry)
-	ibctenderminttypes.RegisterInterfaces(registry)
+	ibccoretypes.RegisterInterfaces(registry)
 	ibctransfertypes.RegisterInterfaces(registry)
+	liquiditytypes.RegisterInterfaces(registry)
+	stakingtypes.RegisterInterfaces(registry)
+	stdtypes.RegisterInterfaces(registry)
 
 	// register custom protobuf types
 	for _, r := range registerInterfaces {
