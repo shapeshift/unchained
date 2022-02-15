@@ -58,6 +58,9 @@ export const getConfig = async (): Promise<BitcoinConfig> => {
   }
 
   if (config.api) {
+    if (!config.api.autoscaling.enabled) missingRequiredConfig.push('api.autoscaling.enabled')
+    if (!config.api.autoscaling.maxReplicas) missingRequiredConfig.push('api.autoscaling.maxReplicas')
+    if (!config.api.autoscaling.cpuThreshold) missingRequiredConfig.push('api.autoscaling.cpuThreshold')
     if (!config.api.cpuLimit) missingRequiredConfig.push('api.cpuLimit')
     if (!config.api.memoryLimit) missingRequiredConfig.push('api.memoryLimit')
     if (!config.api.replicas) missingRequiredConfig.push('api.replicas')
@@ -92,6 +95,9 @@ export const getConfig = async (): Promise<BitcoinConfig> => {
   }
 
   if (config.ingester) {
+    if (!config.ingester.autoscaling.enabled) missingRequiredConfig.push('ingester.autoscaling.enabled')
+    if (!config.ingester.autoscaling.maxReplicas) missingRequiredConfig.push('ingester.autoscaling.maxReplicas')
+    if (!config.ingester.autoscaling.cpuThreshold) missingRequiredConfig.push('ingester.autoscaling.cpuThreshold')
     if (!config.ingester.cpuLimit) missingRequiredConfig.push('ingester.cpuLimit')
     if (!config.ingester.memoryLimit) missingRequiredConfig.push('ingester.memoryLimit')
     if (!config.ingester.replicas) missingRequiredConfig.push('ingester.replicas')

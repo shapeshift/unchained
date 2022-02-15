@@ -1,10 +1,11 @@
 import { ethers } from 'ethers'
-import { Tx } from '@shapeshiftoss/blockbook'
 import { Thorchain } from '@shapeshiftoss/thorchain'
 import { Dex, TxSpecific as ParseTxSpecific, TradeType } from '../types'
 import { Network } from './types'
 import ABI from './abi/thor'
 import { getSigHash } from './utils'
+import { txInteractsWithContract } from './helpers'
+import { Tx } from '@shapeshiftoss/blockbook'
 
 const SWAP_TYPES = ['SWAP', '=', 's']
 
@@ -49,20 +50,23 @@ export class Parser {
   }
 
   async parse(tx: Tx): Promise<ParseTxSpecific | undefined> {
+    if (!txInteractsWithContract(tx, this.routerContract)) return
     if (!tx.ethereumSpecific?.data) return
 
-    let result: ethers.utils.Result
-    switch (getSigHash(tx.ethereumSpecific.data)) {
-      case this.depositSigHash:
-        result = this.abiInterface.decodeFunctionData(this.depositSigHash, tx.ethereumSpecific.data)
-        break
-      case this.transferOutSigHash: {
-        result = this.abiInterface.decodeFunctionData(this.transferOutSigHash, tx.ethereumSpecific.data)
-        break
+    const result = (() => {
+      switch (getSigHash(tx.ethereumSpecific.data)) {
+        case this.depositSigHash:
+          return this.abiInterface.decodeFunctionData(this.depositSigHash, tx.ethereumSpecific.data)
+        case this.transferOutSigHash: {
+          return this.abiInterface.decodeFunctionData(this.transferOutSigHash, tx.ethereumSpecific.data)
+        }
+        default:
+          return undefined
       }
-      default:
-        return
-    }
+    })()
+
+    // We didn't recognise the sigHash - exit
+    if (!result) return
 
     const [type] = result.memo.split(':')
 
@@ -74,6 +78,7 @@ export class Parser {
       return { trade: { dexName: Dex.Thor, type: TradeType.Refund, memo: result.memo } }
     }
 
+    // We encountered a case we thought we'd support, but don't - exit
     return
   }
 }
