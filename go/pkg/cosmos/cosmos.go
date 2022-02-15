@@ -3,6 +3,7 @@ package cosmos
 
 import (
 	"context"
+	"encoding/base64"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cryptotypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
@@ -11,6 +12,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/errors"
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
+	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
@@ -20,7 +22,6 @@ import (
 	ibcchanneltypes "github.com/cosmos/cosmos-sdk/x/ibc/core/04-channel/types"
 	ibctenderminttypes "github.com/cosmos/cosmos-sdk/x/ibc/light-clients/07-tendermint/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-
 	"github.com/go-resty/resty/v2"
 	"github.com/shapeshift/go-unchained/internal/log"
 	tendermintclient "github.com/shapeshift/go-unchained/pkg/tendermint/client"
@@ -177,9 +178,12 @@ func IsValidAddress(address string) bool {
 }
 
 func IsValidRawTx(txbyte string) bool {
-	encoding := NewEncoding()
-	//base64decode , err := base64.StdEncoding.DecodeString(txbyte)
-	decodedTx, err := encoding.TxConfig.TxJSONDecoder()([]byte((txbyte)))
+	base64decode, err := base64.StdEncoding.DecodeString(txbyte)
+	if err != nil {
+		return false
+	}
+	marshaler := codec.NewProtoCodec(cryptotypes.NewInterfaceRegistry())
+	decodedTx, err := authtx.DefaultTxDecoder(marshaler)(base64decode)
 	if err != nil {
 		return false
 	}
