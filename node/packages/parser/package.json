@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/unchained-tx-parser",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "license": "MIT",
   "main": "dist/index.js",
   "source": "src/index.ts",
@@ -13,9 +13,9 @@
     "clean": "rm -rf dist node_modules"
   },
   "dependencies": {
-    "@shapeshiftoss/blockbook": "^5.1.0",
+    "@shapeshiftoss/blockbook": "^5.1.1",
     "@shapeshiftoss/caip": "^1.6.1",
-    "@shapeshiftoss/thorchain": "^5.1.0",
+    "@shapeshiftoss/thorchain": "^5.1.1",
     "@shapeshiftoss/types": "^1.17.0",
     "bignumber.js": "^9.0.1"
   }

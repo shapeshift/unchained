@@ -2172,10 +2172,10 @@
   resolved "https://registry.yarnpkg.com/@shapeshiftoss/caip/-/caip-1.6.1.tgz#d9a7928543349536f4cdaf4455de0f6966eed0f4"
   integrity sha512-T7LPjZO9YLuTfVPg2bBbqJH5mSWbcGrcmTJYd41QBRkS1XlAhI63gscENkPo2WeNunrEJFLHITiwk/ddlkme8A==
 
-"@shapeshiftoss/cluster-launcher@0.7.1":
-  version "0.7.1"
-  resolved "https://registry.yarnpkg.com/@shapeshiftoss/cluster-launcher/-/cluster-launcher-0.7.1.tgz#75cdd21fb70e10adbbed716236f388deb09739ca"
-  integrity sha512-EfYUzz5hh++/zngkH1WFwYs8ZRMWh46LnDgZ6S3cXlud9xS6W0xFnt3NSFjx6cn+c7hkXV0xmV8Yuup5JFxoVg==
+"@shapeshiftoss/cluster-launcher@0.7.2":
+  version "0.7.2"
+  resolved "https://registry.yarnpkg.com/@shapeshiftoss/cluster-launcher/-/cluster-launcher-0.7.2.tgz#7ae468ce127b0e4bb4218fdff78135a3a061511f"
+  integrity sha512-P0ol5MUbl7yau1wzzikLrd0kyxVxpNH5Hy7Z1JwzvdUM+bllKRrH9rAiojosRigmlsM9IZHxKubJjSdKXOxLhQ==
   dependencies:
     "@pulumi/aws" "4.17.0"
     "@pulumi/awsx" "0.31.0"

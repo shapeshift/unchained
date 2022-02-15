@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/gaia",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "license": "MIT",
   "main": "dist/index.js",
   "source": "src/index.ts",
