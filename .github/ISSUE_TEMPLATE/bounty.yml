@@ -1,0 +1,48 @@
+name: Bounty
+description: Create a bounty
+labels: ["needs bounty"]
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for taking the time to fill out this bounty!
+  - type: textarea
+    id: overview
+    attributes:
+      label: Overview
+      description: A brief overview of the bounty and any relevant background information
+      placeholder: We need to be able to support the new foo chain.
+    validations:
+      required: true
+  - type: textarea
+    id: reference
+    attributes:
+      label: Reference
+      description: Any technical or project references to provide additional context about the bounty
+      placeholder: Look at how we implement the bar chain.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: The requirements that must be satisfied for the bounty to be completed
+      placeholder: We now support the foo chain.
+    validations:
+      required: true
+  - type: checkboxes
+    id: ownership
+    attributes:
+      label: Ownership
+      options:
+        - label: As the sponsor of this bounty I will review the PR
+          required: true
+  - type: checkboxes
+    id: bounty-hunters
+    attributes:
+      label: Bounty Hunters
+      options:
+          - label: Join the [ShapeShift Discord](https://discord.gg/shapeshift)
+          - label: Check out the [Contribution Guidelines](https://shapeshiftdao.gitbook.io/getting-started/how-to-contribute/bounties#resources-for-new-contributors-and-bounty-hunters)
+          - label: Include an expected completion timeline in the work plan when you apply for this bounty on [Gitcoin](https://gitcoin.co/shapeshift/bounties)!
+    validations:
+      required: false
