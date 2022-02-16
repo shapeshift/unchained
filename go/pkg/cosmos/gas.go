@@ -24,18 +24,9 @@ func (c *HTTPClient) GetGasEstimation(txBytes []byte) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	reqData, err := c.encoding.TxConfig.WrapTxBuilder(hexToUnmarshal)
-	if err != nil {
-		return "", err
-	}
-	protoProvider, ok := reqData.(authtx.ProtoTxProvider)
-	if !ok {
-		return "", err
-	}
-	protoTx := protoProvider.GetProtoTx()
-
-	_, err = c.tendermintClient.R().SetBody(&txtypes.SimulateRequest{Tx: protoTx}).SetResult(&res).Post("/cosmos/tx/v1beta1/simulate")
-
+	jsonreq, err := authtx.DefaultJSONTxEncoder(CodecRegister())(hexToUnmarshal)
+	response, err := c.cosmos.R().SetBody(jsonreq).SetResult(&res).Post("/cosmos/tx/v1beta1/simulate")
+	logger.Info(string(response.Body()))
 	if err != nil {
 		return "", errors.Wrap(err, res.Result.Log)
 	}
