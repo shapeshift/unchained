@@ -175,17 +175,9 @@ export class TransactionParser {
       }
     })
 
-    const metaData: TxMetadata = (() => {
-      const buyTx = getBuyTx(pTx)
-      const sellTx = getSellTx(pTx)
-      return {
-        buyTx,
-        sellTx,
-      }
-    })()
-
-    if (metaData) {
-      pTx.data = metaData
+    pTx.data = {
+      buyTx: getBuyTx(pTx),
+      sellTx: getSellTx(pTx),
     }
 
     return pTx
