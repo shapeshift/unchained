@@ -1,4 +1,4 @@
-import { Dex, Status, Trade, TradeType, TransferType, Tx, TxMetaData } from '../../types'
+import { Dex, Status, Trade, TradeType, TransferType, Tx, TxMetadata } from '../../types'
 import { TransactionParser } from '../index'
 import multiSigSendEth from './mockData/multiSigSendEth'
 import thorSwapDepositEth from './mockData/thorSwapDepositEth'
@@ -23,7 +23,7 @@ jest.mock('@shapeshiftoss/thorchain')
 
 const txParser = new TransactionParser({ midgardUrl: '', rpcUrl: '' })
 
-const emptyMetaData: TxMetaData = {
+const emptyMetaData: TxMetadata = {
   buyTx: undefined,
   sellTx: undefined,
 }

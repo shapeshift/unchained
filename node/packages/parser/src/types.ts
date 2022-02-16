@@ -53,7 +53,7 @@ export enum TransferType {
   Receive = 'receive',
 }
 
-export interface TxMetaData {
+export interface TxMetadata {
   buyTx: Transfer | undefined
   sellTx: Transfer | undefined
 }
@@ -71,22 +71,20 @@ export interface TxBase {
   transfers: Array<Transfer>
   txid: string
   value: string
-  data?: TxMetaData
+  data?: TxMetadata
 }
 
 export interface UniV2Tx extends TxBase {
-  data?: TxMetaData // TODO = Type and extend any specific properties
+  data?: TxMetadata // TODO = Type and extend any specific properties
 }
 
 export interface ZrxTx extends TxBase {
-  data?: TxMetaData // TODO = Type and extend any specific properties
+  data?: TxMetadata // TODO = Type and extend any specific properties
 }
 
 export interface ThorTx extends TxBase {
-  data?: TxMetaData // TODO = Type and extend any specific properties
+  data?: TxMetadata // TODO = Type and extend any specific properties
 }
-
-// TODO - Add ZrxTx, ThorTx, YearnTx etc
 
 export type Tx = UniV2Tx | ZrxTx | ThorTx
 

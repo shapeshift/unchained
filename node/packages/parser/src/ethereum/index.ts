@@ -3,7 +3,7 @@ import { ethers } from 'ethers'
 import { Tx } from '@shapeshiftoss/blockbook'
 import { caip19, caip2 } from '@shapeshiftoss/caip'
 import { ChainTypes, ContractTypes } from '@shapeshiftoss/types'
-import { Status, Token, Transfer, TransferType, Tx as ParseTx, TxMetaData, TxSpecific } from '../types'
+import { Status, Token, Transfer, TransferType, Tx as ParseTx, TxMetadata, TxSpecific } from '../types'
 import { InternalTx, Network } from './types'
 import { getSigHash, toNetworkType } from './utils'
 import * as multiSig from './multiSig'
@@ -175,7 +175,7 @@ export class TransactionParser {
       }
     })
 
-    const metaData: TxMetaData = (() => {
+    const metaData: TxMetadata = (() => {
       const buyTx = getBuyTx(pTx)
       const sellTx = getSellTx(pTx)
       return {
