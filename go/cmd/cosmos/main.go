@@ -34,7 +34,7 @@ func main() {
 
 	conf := &Config{}
 	if err := config.Load(*confPath, conf); err != nil {
-		logger.Panicf("%+v", err)
+		logger.Panicf("failed to load config: %+v", err)
 	}
 
 	encoding := cosmos.NewEncoding()
@@ -51,17 +51,17 @@ func main() {
 
 	httpClient, err := cosmos.NewHTTPClient(cfg)
 	if err != nil {
-		logger.Panicf("%+v", err)
+		logger.Panicf("failed to create new http client: %+v", err)
 	}
 
 	grpcClient, err := cosmos.NewGRPCClient(cfg)
 	if err != nil {
-		logger.Panicf("%+v", err)
+		logger.Panicf("failed to create new grpc client: %+v", err)
 	}
 
 	wsClient, err := cosmos.NewWebsocketClient(cfg)
 	if err != nil {
-		logger.Panicf("%+v", err)
+		logger.Panicf("failed to create new websocket client: %+v", err)
 	}
 
 	api := api.New(httpClient, grpcClient, wsClient, *swaggerPath)

@@ -17,7 +17,9 @@ import (
 var logger = log.WithoutFields()
 
 var confPath = flag.String("config", "cmd/osmosis/config.json", "path to configuration file")
+var swaggerPath = flag.String("swagger", "/app/coinstacks/cosmos/api/swagger.json", "path to swagger spec")
 
+// Config for running application
 type Config struct {
 	APIKey  string `mapstructure:"apiKey"`
 	GRPCURL string `mapstructure:"grpcUrl"`
@@ -34,7 +36,7 @@ func main() {
 
 	conf := &Config{}
 	if err := config.Load(*confPath, conf); err != nil {
-		logger.Panic(err)
+		logger.Panicf("failed to load config: %+v", err)
 	}
 
 	encoding := cosmos.NewEncoding(
@@ -54,22 +56,29 @@ func main() {
 
 	httpClient, err := cosmos.NewHTTPClient(cfg)
 	if err != nil {
-		logger.Panic(err)
+		logger.Panicf("failed to create new http client: %+v", err)
 	}
 
 	grpcClient, err := cosmos.NewGRPCClient(cfg)
 	if err != nil {
-		logger.Panic(err)
+		logger.Panicf("failed to create new grpc client: %+v", err)
 	}
-	defer grpcClient.Shutdown()
 
-	go api.Start(httpClient, grpcClient, errChan)
+	wsClient, err := cosmos.NewWebsocketClient(cfg)
+	if err != nil {
+		logger.Panicf("failed to create new websocket client: %+v", err)
+	}
+
+	api := api.New(httpClient, grpcClient, wsClient, *swaggerPath)
+	defer api.Shutdown()
+
+	go api.Serve(errChan)
 
 	select {
 	case err := <-errChan:
-		logger.Panic(err)
+		logger.Panicf("%+v", err)
 	case <-sigChan:
-		grpcClient.Shutdown()
+		api.Shutdown()
 		os.Exit(0)
 	}
 }
