@@ -54,8 +54,8 @@ export enum TransferType {
 }
 
 export interface TxMetadata {
-  buyTx: Transfer | undefined
-  sellTx: Transfer | undefined
+  buyTx?: Transfer
+  sellTx?: Transfer
 }
 
 export interface TxBase {

@@ -179,8 +179,8 @@ export class TransactionParser {
       const buyTx = getBuyTx(pTx)
       const sellTx = getSellTx(pTx)
       return {
-        buyTx: buyTx ? { ...buyTx } : undefined,
-        sellTx: sellTx ? { ...sellTx } : undefined,
+        buyTx,
+        sellTx,
       }
     })()
 
