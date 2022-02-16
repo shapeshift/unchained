@@ -27,16 +27,13 @@ func (h *Handler) StartWebsocket() error {
 
 		// TODO: blockHash and timestamp
 		blockHeight := strconv.Itoa(int(tx.Height))
-		txid := fmt.Sprintf("%X", sha256.Sum256(tx.Tx))
 		fee := signingTx.GetFee()[0]
 
-		baseTx := api.BaseTx{
-			TxID:        txid,
-			BlockHeight: &blockHeight,
-		}
-
 		t := Tx{
-			BaseTx: baseTx,
+			BaseTx: api.BaseTx{
+				TxID:        fmt.Sprintf("%X", sha256.Sum256(tx.Tx)),
+				BlockHeight: &blockHeight,
+			},
 			Events: cosmos.Events(tx.Result.Log),
 			Fee: cosmos.Value{
 				Amount: fee.Amount.String(),

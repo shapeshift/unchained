@@ -13,15 +13,16 @@ import (
 	thortypes "gitlab.com/thorchain/thornode/x/thorchain/types"
 )
 
-var logger = log.WithoutFields()
+var (
+	logger = log.WithoutFields()
 
-var confPath = flag.String("config", "cmd/thorchain/config.json", "path to configuration file")
+	confPath    = flag.String("config", "cmd/thorchain/config.json", "path to configuration file")
+	swaggerPath = flag.String("swagger", "/app/coinstacks/thorchain/api/swagger.json", "path to swagger spec")
+)
 
 type Config struct {
-	APIKey  string `mapstructure:"apiKey"`
-	GRPCURL string `mapstructure:"grpcUrl"`
-	LCDURL  string `mapstructure:"lcdUrl"`
-	RPCURL  string `mapstructure:"rpcUrl"`
+	LCDURL string `mapstructure:"lcdUrl"`
+	RPCURL string `mapstructure:"rpcUrl"`
 }
 
 func main() {
@@ -33,39 +34,39 @@ func main() {
 
 	conf := &Config{}
 	if err := config.Load(*confPath, conf); err != nil {
-		logger.Panic(err)
+		logger.Panicf("failed to load config: %+v", err)
 	}
 
 	encoding := cosmos.NewEncoding(thortypes.RegisterInterfaces)
 
 	cfg := cosmos.Config{
-		APIKey:           conf.APIKey,
 		Bech32AddrPrefix: "thor",
 		Bech32PkPrefix:   "thorpub",
 		Encoding:         encoding,
-		GRPCURL:          conf.GRPCURL,
 		LCDURL:           conf.LCDURL,
 		RPCURL:           conf.RPCURL,
 	}
 
 	httpClient, err := cosmos.NewHTTPClient(cfg)
 	if err != nil {
-		logger.Panic(err)
+		logger.Panicf("failed to create new http client: %+v", err)
 	}
 
-	grpcClient, err := cosmos.NewGRPCClient(cfg)
+	wsClient, err := cosmos.NewWebsocketClient(cfg)
 	if err != nil {
-		logger.Panic(err)
+		logger.Panicf("failed to create new websocket client: %+v", err)
 	}
-	defer grpcClient.Shutdown()
 
-	go api.Start(httpClient, grpcClient, errChan)
+	api := api.New(httpClient, wsClient, *swaggerPath)
+	defer api.Shutdown()
+
+	go api.Serve(errChan)
 
 	select {
 	case err := <-errChan:
-		logger.Panic(err)
+		logger.Panicf("%+v", err)
 	case <-sigChan:
-		grpcClient.Shutdown()
+		api.Shutdown()
 		os.Exit(0)
 	}
 }

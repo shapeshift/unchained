@@ -40,10 +40,7 @@ func main() {
 		logger.Panicf("failed to load config: %+v", err)
 	}
 
-	encoding := cosmos.NewEncoding(
-		gammtypes.RegisterInterfaces,
-		lockuptypes.RegisterInterfaces,
-	)
+	encoding := cosmos.NewEncoding(gammtypes.RegisterInterfaces, lockuptypes.RegisterInterfaces)
 
 	cfg := cosmos.Config{
 		APIKey:           conf.APIKey,
