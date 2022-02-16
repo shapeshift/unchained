@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/go-unchained/coinstacks/osmosis"
 	"github.com/shapeshift/go-unchained/pkg/api"
@@ -15,7 +16,6 @@ import (
 
 type Handler struct {
 	httpClient *cosmos.HTTPClient
-	grpcClient *cosmos.GRPCClient
 	wsClient   *cosmos.WSClient
 }
 
@@ -26,28 +26,31 @@ func (h *Handler) StartWebsocket() error {
 			return nil, nil, errors.Wrapf(err, "failed to decode tx: %v", tx.Tx)
 		}
 
-		// TODO: blockHash and timestamp
 		blockHeight := strconv.Itoa(int(tx.Height))
-		txid := fmt.Sprintf("%X", sha256.Sum256(tx.Tx))
-		fee := signingTx.GetFee()[0]
 
-		baseTx := api.BaseTx{
-			TxID:        txid,
-			BlockHeight: &blockHeight,
+		fees := signingTx.GetFee()
+		if len(fees) == 0 {
+			fees = []sdk.Coin{{Denom: "uosmo", Amount: sdk.NewInt(0)}}
+		} else if len(fees) > 1 {
+			logger.Warnf("multiple fees seen: %+v", fees)
 		}
 
 		t := Tx{
-			BaseTx: baseTx,
+			// TODO: blockHash and timestamp
+			BaseTx: api.BaseTx{
+				TxID:        fmt.Sprintf("%X", sha256.Sum256(tx.Tx)),
+				BlockHeight: &blockHeight,
+			},
 			Events: cosmos.Events(tx.Result.Log),
 			Fee: cosmos.Value{
-				Amount: fee.Amount.String(),
-				Denom:  fee.Denom,
+				Amount: fees[0].Amount.String(),
+				Denom:  fees[0].Denom,
 			},
 			GasWanted: strconv.Itoa(int(tx.Result.GasWanted)),
 			GasUsed:   strconv.Itoa(int(tx.Result.GasUsed)),
 			Index:     int(tx.Index),
 			Memo:      signingTx.GetMemo(),
-			Messages:  cosmos.Messages(cosmosTx.GetMsgs()),
+			Messages:  osmosis.Messages(cosmosTx.GetMsgs()),
 		}
 
 		msg, err := json.Marshal(t)
@@ -105,8 +108,9 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 
 	account := &Account{
 		BaseAccount: api.BaseAccount{
-			Balance: balRes.Amount,
-			Pubkey:  accRes.Address,
+			Balance:            balRes.Amount,
+			UnconfirmedBalance: "0",
+			Pubkey:             accRes.Address,
 		},
 		AccountNumber: int(accRes.AccountNumber),
 		Sequence:      int(accRes.Sequence),

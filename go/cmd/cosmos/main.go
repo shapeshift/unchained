@@ -12,10 +12,12 @@ import (
 	"github.com/shapeshift/go-unchained/pkg/cosmos"
 )
 
-var logger = log.WithoutFields()
+var (
+	logger = log.WithoutFields()
 
-var confPath = flag.String("config", "cmd/cosmos/config.json", "path to configuration file")
-var swaggerPath = flag.String("swagger", "/app/coinstacks/cosmos/api/swagger.json", "path to swagger spec")
+	confPath    = flag.String("config", "cmd/cosmos/config.json", "path to configuration file")
+	swaggerPath = flag.String("swagger", "/app/coinstacks/cosmos/api/swagger.json", "path to swagger spec")
+)
 
 // Config for running application
 type Config struct {

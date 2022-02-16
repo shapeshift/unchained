@@ -2,8 +2,8 @@ package osmosis
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	gammtypes "github.com/osmosis-labs/osmosis/x/gamm/types"
-	lockuptypes "github.com/osmosis-labs/osmosis/x/lockup/types"
+	gammtypes "github.com/osmosis-labs/osmosis/v6/x/gamm/types"
+	lockuptypes "github.com/osmosis-labs/osmosis/v6/x/lockup/types"
 	"github.com/shapeshift/go-unchained/pkg/cosmos"
 )
 
@@ -29,7 +29,6 @@ func Messages(msgs []sdk.Msg) []cosmos.Message {
 				Value:     coinToValue(&v.Coins[0]),
 			}
 			messages = append(messages, message)
-			break
 		case *gammtypes.MsgJoinPool:
 			message := cosmos.Message{
 				Addresses: []string{v.Sender},
@@ -38,7 +37,6 @@ func Messages(msgs []sdk.Msg) []cosmos.Message {
 				Value:     coinToValue(&v.TokenInMaxs[0]),
 			}
 			messages = append(messages, message)
-			break
 		case *gammtypes.MsgSwapExactAmountIn:
 			message := cosmos.Message{
 				Addresses: []string{v.Sender},
@@ -47,7 +45,6 @@ func Messages(msgs []sdk.Msg) []cosmos.Message {
 				Value:     coinToValue(&v.TokenIn),
 			}
 			messages = append(messages, message)
-			break
 		default:
 			unhandledMsgs = append(unhandledMsgs, msg)
 		}

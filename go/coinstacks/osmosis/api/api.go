@@ -17,6 +17,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -32,15 +33,17 @@ import (
 )
 
 const (
-	gracefulShutdown = 15 * time.Second
+	PORT              = 3000
+	GRACEFUL_SHUTDOWN = 15 * time.Second
+	WRITE_TIMEOUT     = 15 * time.Second
+	READ_TIMEOUT      = 15 * time.Second
+	IDLE_TIMEOUT      = 60 * time.Second
 )
 
-var logger = log.WithoutFields()
-
-var upgrader = ws.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
+var (
+	logger   = log.WithoutFields()
+	upgrader = ws.Upgrader{ReadBufferSize: 1024, WriteBufferSize: 1024}
+)
 
 type API struct {
 	handler *Handler
@@ -48,25 +51,22 @@ type API struct {
 	server  *http.Server
 }
 
-func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient *cosmos.WSClient, swaggerPath string) *API {
+func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, swaggerPath string) *API {
 	r := mux.NewRouter()
-
-	s := &http.Server{
-		Addr:         ":3000",
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
-		IdleTimeout:  60 * time.Second,
-		Handler:      r,
-	}
 
 	a := &API{
 		handler: &Handler{
 			httpClient: httpClient,
-			grpcClient: grpcClient,
 			wsClient:   wsClient,
 		},
 		manager: websocket.NewManager(),
-		server:  s,
+		server: &http.Server{
+			Addr:         fmt.Sprintf(":%d", PORT),
+			WriteTimeout: WRITE_TIMEOUT,
+			ReadTimeout:  READ_TIMEOUT,
+			IdleTimeout:  IDLE_TIMEOUT,
+			Handler:      r,
+		},
 	}
 
 	// compile check to ensure Handler implements BaseAPI
@@ -84,6 +84,7 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient 
 	r.HandleFunc("/swagger", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.FromSlash(swaggerPath))
 	}).Methods("GET")
+
 	r.PathPrefix("/docs/").Handler(http.StripPrefix("/docs/", http.FileServer(http.Dir("./static/swaggerui"))))
 
 	v1 := r.PathPrefix("/api/v1").Subrouter()
@@ -122,10 +123,9 @@ func (a *API) Serve(errChan chan<- error) {
 }
 
 func (a *API) Shutdown() {
-	ctx, cancel := context.WithTimeout(context.Background(), gracefulShutdown)
+	ctx, cancel := context.WithTimeout(context.Background(), GRACEFUL_SHUTDOWN)
 	defer cancel()
 
-	a.handler.grpcClient.Close()
 	a.handler.wsClient.Stop()
 	a.server.Shutdown(ctx)
 }
