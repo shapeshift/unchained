@@ -8,7 +8,7 @@ export interface Fee {
   value: string
 }
 
-export type SequencedTx = Tx & {
+export type SequencedTx = (StandardTx | Tx) & {
   sequence: number
   total: number
 }
@@ -58,7 +58,7 @@ export interface TxMetadata {
   sellTx?: Transfer
 }
 
-export interface TxBase {
+export interface StandardTx {
   address: string
   blockHash?: string
   blockHeight: number
@@ -74,15 +74,15 @@ export interface TxBase {
   data?: TxMetadata
 }
 
-export interface UniV2Tx extends TxBase {
+export interface UniV2Tx extends StandardTx {
   data?: TxMetadata // TODO = Type and extend any specific properties
 }
 
-export interface ZrxTx extends TxBase {
+export interface ZrxTx extends StandardTx {
   data?: TxMetadata // TODO = Type and extend any specific properties
 }
 
-export interface ThorTx extends TxBase {
+export interface ThorTx extends StandardTx {
   data?: TxMetadata // TODO = Type and extend any specific properties
 }
 
