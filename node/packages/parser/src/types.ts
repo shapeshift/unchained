@@ -8,7 +8,7 @@ export interface Fee {
   value: string
 }
 
-export interface SequencedTx extends TxBase {
+export type SequencedTx = Tx & {
   sequence: number
   total: number
 }

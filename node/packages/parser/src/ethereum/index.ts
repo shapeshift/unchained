@@ -60,7 +60,7 @@ export class TransactionParser {
     const receiveAddress = tx.vout[0].addresses?.[0] ?? ''
 
     // We expect only one Parser to return a result. If multiple do, we take the first and early exit.
-    const contractParserResult: TxSpecific<ParseTx> | undefined = await findAsyncSequential(
+    const contractParserResult = await findAsyncSequential<Parser, TxSpecific<ParseTx>>(
       this.parsers,
       async (parser) => await parser.parse(tx)
     )
