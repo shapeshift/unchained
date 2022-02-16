@@ -15,12 +15,12 @@ func (c *HTTPClient) GetGasEstimation(txBytes []byte) (string, error) {
 			GasUsed   string `json:"gas_used"`
 		} `json:"gas_info"`
 		Result struct {
-			Data   string         `json:"data"`
-			Log    string         `json:"log"`
+			Data   string            `json:"data"`
+			Log    string            `json:"log"`
 			Events []abcitypes.Event `json:"events"`
 		} `json:"result"`
 	}
-	hexToUnmarshal, err := c.encoding.TxConfig.TxDecoder()(txBytes)
+	hexToUnmarshal, err := DecodeData(txBytes)
 	if err != nil {
 		return "", err
 	}
@@ -34,18 +34,19 @@ func (c *HTTPClient) GetGasEstimation(txBytes []byte) (string, error) {
 	}
 	protoTx := protoProvider.GetProtoTx()
 
-	_, err = c.cosmos.R().SetBody(&txtypes.SimulateRequest{Tx: protoTx}).SetResult(&res).Post("/cosmos/tx/v1beta1/simulate")
+	_, err = c.tendermintClient.R().SetBody(&txtypes.SimulateRequest{Tx: protoTx}).SetResult(&res).Post("/cosmos/tx/v1beta1/simulate")
+
 	if err != nil {
 		return "", errors.Wrap(err, res.Result.Log)
 	}
-	if res.GasInfo.GasWanted == "" {
-		return "", errors.New("gas_wanted is empty")
+	if res.GasInfo.GasUsed == "" {
+		return "", errors.New("gas_used is empty")
 	}
 	return res.GasInfo.GasUsed, nil
 }
 
 func (c *GRPCClient) GetGasEstimation(txBytes []byte) (string, error) {
-	hexToUnmarshal, err := c.encoding.TxConfig.TxDecoder()(txBytes)
+	hexToUnmarshal, err := DecodeData(txBytes)
 	if err != nil {
 		return "", err
 	}

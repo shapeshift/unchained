@@ -1,7 +1,9 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/shapeshift/go-unchained/pkg/api"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -28,13 +30,20 @@ func validatePubkey(next http.Handler) http.Handler {
 
 func validateRawTx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		rawTx, ok := mux.Vars(r)["txbytes"]
-		if !ok || rawTx == "" {
+
+		rawTx := api.TxBody{}
+		err := json.NewDecoder(r.Body).Decode(&rawTx)
+
+		if err != nil {
+			handleError(w, http.StatusBadRequest, "invalid post body")
+			return
+		}
+		if rawTx.Hex == "" {
 			handleError(w, http.StatusBadRequest, "raw transaction hash required")
 			return
 		}
 
-		if !cosmos.IsValidRawTx(rawTx) {
+		if !cosmos.IsValidRawTx(rawTx.Hex) {
 			handleError(w, http.StatusBadRequest, fmt.Sprintf("invalid transaction: %s", rawTx))
 			return
 		}

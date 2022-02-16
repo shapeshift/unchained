@@ -12,7 +12,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/errors"
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
-	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
@@ -178,18 +177,45 @@ func IsValidAddress(address string) bool {
 }
 
 func IsValidRawTx(txbyte string) bool {
-	base64decode, err := base64.StdEncoding.DecodeString(txbyte)
+	if len(txbyte) == 0 {
+		return false
+	}
+	checkValidity, err := DecodeData([]byte(txbyte))
 	if err != nil {
 		return false
 	}
-	marshaler := codec.NewProtoCodec(cryptotypes.NewInterfaceRegistry())
-	decodedTx, err := authtx.DefaultTxDecoder(marshaler)(base64decode)
+	err = checkValidity.ValidateBasic()
 	if err != nil {
-		return false
-	}
-	validateTxerr := decodedTx.ValidateBasic()
-	if validateTxerr != nil {
 		return false
 	}
 	return true
+}
+
+func CodecRegister() *codec.ProtoCodec {
+	registry := cryptotypes.NewInterfaceRegistry()
+
+	// register base protobuf types
+	banktypes.RegisterInterfaces(registry)
+	cryptocodec.RegisterInterfaces(registry)
+	distributiontypes.RegisterInterfaces(registry)
+	govtypes.RegisterInterfaces(registry)
+	stakingtypes.RegisterInterfaces(registry)
+	ibcchanneltypes.RegisterInterfaces(registry)
+	ibcclienttypes.RegisterInterfaces(registry)
+	ibctenderminttypes.RegisterInterfaces(registry)
+	ibctransfertypes.RegisterInterfaces(registry)
+	return codec.NewProtoCodec(registry)
+}
+
+func DecodeData(byte []byte) (sdk.Tx, error) {
+	base64decode, err := base64.StdEncoding.DecodeString(string(byte))
+	if err != nil {
+		return nil, errors.Wrap(err, "Can not base64 decode ")
+	}
+
+	decodedByte, err := tx.DefaultTxDecoder(CodecRegister())(base64decode)
+	if err != nil {
+		return nil, errors.Wrap(err, "Can not byte to Tx decode ")
+	}
+	return decodedByte, nil
 }
