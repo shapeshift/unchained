@@ -45,7 +45,7 @@ describe('parseTx', () => {
       const { tx, internalTxs } = multiSigSendEth
       const address = '0x76DA1578aC163CA7ca4143B7dEAa428e85Db3042'
 
-      const parsedStandardTx = {
+      const standardTransfer = {
         caip19: 'eip155:1/slip44:60',
         components: [{ value: '1201235000000000000' }],
         from: '0x79fE68B3e4Bc2B91a4C8dfFb5317C7B8813d8Ae7',
@@ -66,7 +66,7 @@ describe('parseTx', () => {
         data: emptyMetaData,
         value: tx.value,
         status: Status.Confirmed,
-        transfers: [parsedStandardTx],
+        transfers: [standardTransfer],
       }
 
       const actual = await txParser.parse(tx, address, internalTxs)
@@ -84,7 +84,7 @@ describe('parseTx', () => {
         memo: 'SWAP:THOR.RUNE:thor19f3dsgetxzssvdmqnplfep5fe42fsrvq9u87ax:',
         type: TradeType.Trade,
       }
-      const parsedSellTx = {
+      const sellTransfer = {
         caip19: 'eip155:1/slip44:60',
         components: [{ value: '295040000000000000' }],
         from: '0xCeb660E7623E8f8312B3379Df747c35f2217b595',
@@ -101,14 +101,14 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: { sellTx: parsedSellTx },
+        data: { sellTx: sellTransfer },
         value: tx.value,
         status: Status.Confirmed,
         fee: {
           caip19: 'eip155:1/slip44:60',
           value: '1700235000000000',
         },
-        transfers: [parsedSellTx],
+        transfers: [sellTransfer],
         trade,
       }
 
@@ -125,7 +125,7 @@ describe('parseTx', () => {
         memo: 'SWAP:THOR.RUNE:thor1hhjupkzy3t6ccelhz7qw8epyx4rm8a06nlm5ce:110928642111',
         type: TradeType.Trade,
       }
-      const parsedSellTx = {
+      const sellTransfer = {
         caip19: 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
         components: [{ value: '16598881497' }],
         from: '0x5a8C5afbCC1A58cCbe17542957b587F46828B38E',
@@ -145,7 +145,7 @@ describe('parseTx', () => {
         confirmations: tx.confirmations,
         data: {
           buyTx: undefined,
-          sellTx: parsedSellTx,
+          sellTx: sellTransfer,
         },
         value: tx.value,
         status: Status.Confirmed,
@@ -153,7 +153,7 @@ describe('parseTx', () => {
           caip19: 'eip155:1/slip44:60',
           value: '4700280000000000',
         },
-        transfers: [parsedSellTx],
+        transfers: [sellTransfer],
         trade,
       }
 
@@ -170,7 +170,7 @@ describe('parseTx', () => {
         memo: 'OUT:8C859BA50BC2351797F52F954971E1C6BA1F0A77610AC197BD99C4EEC6A3692A',
         type: TradeType.Trade,
       }
-      const parsedBuyTx = {
+      const buyTransfer = {
         caip19: 'eip155:1/slip44:60',
         components: [{ value: '1579727090000000000' }],
         from: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
@@ -188,10 +188,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: { buyTx: parsedBuyTx },
+        data: { buyTx: buyTransfer },
         value: tx.value,
         status: Status.Confirmed,
-        transfers: [parsedBuyTx],
+        transfers: [buyTransfer],
         trade,
       }
 
@@ -208,7 +208,7 @@ describe('parseTx', () => {
         memo: 'OUT:F3AC4E90AB5951AB9FEB1715B481422B904A40B0F6753CC844E326B1213CF70E',
         type: TradeType.Trade,
       }
-      const parsedBuyTx = {
+      const buyTransfer = {
         caip19: 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
         components: [{ value: '47596471640' }],
         from: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
@@ -226,10 +226,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: { buyTx: parsedBuyTx },
+        data: { buyTx: buyTransfer },
         value: tx.value,
         status: Status.Confirmed,
-        transfers: [parsedBuyTx],
+        transfers: [buyTransfer],
         trade,
       }
 
@@ -246,7 +246,7 @@ describe('parseTx', () => {
         memo: 'REFUND:851B4997CF8F9FBA806B3780E0C178CCB173AE78E3FD5056F7375B059B22BD3A',
         type: TradeType.Refund,
       }
-      const parsedBuyTx = {
+      const buyTransfer = {
         caip19: 'eip155:1/slip44:60',
         components: [{ value: '6412730000000000' }],
         from: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
@@ -264,10 +264,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: { buyTx: parsedBuyTx },
+        data: { buyTx: buyTransfer },
         value: tx.value,
         status: Status.Confirmed,
-        transfers: [parsedBuyTx],
+        transfers: [buyTransfer],
         trade,
       }
 
@@ -285,7 +285,7 @@ describe('parseTx', () => {
         dexName: Dex.Zrx,
         type: TradeType.Trade,
       }
-      const parsedBuyTx = {
+      const buyTransfer = {
         caip19: 'eip155:1/slip44:60',
         components: [
           {
@@ -299,7 +299,7 @@ describe('parseTx', () => {
         type: TransferType.Receive,
       }
 
-      const parsedSellTx = {
+      const sellTransfer = {
         caip19: 'eip155:1/erc20:0xc7283b66eb1eb5fb86327f08e1b5816b0720212b',
         components: [
           {
@@ -322,8 +322,8 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
-          buyTx: parsedBuyTx,
-          sellTx: parsedSellTx,
+          buyTx: buyTransfer,
+          sellTx: sellTransfer,
         },
         value: tx.value,
         status: Status.Confirmed,
@@ -331,7 +331,7 @@ describe('parseTx', () => {
           value: '8308480000000000',
           caip19: 'eip155:1/slip44:60',
         },
-        transfers: [parsedSellTx, parsedBuyTx],
+        transfers: [sellTransfer, buyTransfer],
         trade,
       }
 
@@ -348,7 +348,7 @@ describe('parseTx', () => {
         type: TradeType.Trade,
       }
 
-      const parsedBuyTx = {
+      const buyTransfer = {
         caip19: 'eip155:1/erc20:0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0',
         components: [
           {
@@ -362,7 +362,7 @@ describe('parseTx', () => {
         type: TransferType.Receive,
       }
 
-      const parsedSellTx = {
+      const sellTransfer = {
         caip19: 'eip155:1/slip44:60',
         components: [
           {
@@ -385,8 +385,8 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
-          buyTx: parsedBuyTx,
-          sellTx: parsedSellTx,
+          buyTx: buyTransfer,
+          sellTx: sellTransfer,
         },
         value: tx.value,
         status: Status.Confirmed,
@@ -394,7 +394,7 @@ describe('parseTx', () => {
           value: '19815285000000000',
           caip19: 'eip155:1/slip44:60',
         },
-        transfers: [parsedSellTx, parsedBuyTx],
+        transfers: [sellTransfer, buyTransfer],
         trade,
       }
 
@@ -411,7 +411,7 @@ describe('parseTx', () => {
         type: TradeType.Trade,
       }
 
-      const parsedBuyTx = {
+      const buyTransfer = {
         type: TransferType.Receive,
         from: '0xF82d8Ec196Fb0D56c6B82a8B1870F09502A49F88',
         to: '0xb8b19c048296E086DaF69F54d48dE2Da444dB047',
@@ -421,7 +421,7 @@ describe('parseTx', () => {
         token: kishuToken,
       }
 
-      const parsedSellTx = {
+      const sellTransfer = {
         type: TransferType.Send,
         from: '0xb8b19c048296E086DaF69F54d48dE2Da444dB047',
         to: '0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852',
@@ -440,8 +440,8 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
-          buyTx: parsedBuyTx,
-          sellTx: parsedSellTx,
+          buyTx: buyTransfer,
+          sellTx: sellTransfer,
         },
         value: tx.value,
         status: Status.Confirmed,
@@ -449,7 +449,7 @@ describe('parseTx', () => {
           value: '78183644000000000',
           caip19: 'eip155:1/slip44:60',
         },
-        transfers: [parsedSellTx, parsedBuyTx],
+        transfers: [sellTransfer, buyTransfer],
         trade,
       }
 
@@ -466,7 +466,7 @@ describe('parseTx', () => {
         type: TradeType.Trade,
       }
 
-      const parsedBuyTx1 = {
+      const buyTransfer1 = {
         type: TransferType.Receive,
         from: '0xEBFb684dD2b01E698ca6c14F10e4f289934a54D6',
         to: address,
@@ -476,7 +476,7 @@ describe('parseTx', () => {
         token: uniToken,
       }
 
-      const parsedBuyTx2 = {
+      const buyTransfer2 = {
         type: TransferType.Receive,
         from: '0xd3d2E2692501A5c9Ca623199D38826e513033a17',
         to: address,
@@ -486,7 +486,7 @@ describe('parseTx', () => {
         token: uniToken,
       }
 
-      const parsedSellTx1 = {
+      const sellTransfer1 = {
         type: TransferType.Send,
         from: address,
         to: '0x6591c4BcD6D7A1eb4E537DA8B78676C1576Ba244',
@@ -496,7 +496,7 @@ describe('parseTx', () => {
         token: bondToken,
       }
 
-      const parsedSellTx2 = {
+      const sellTransfer2 = {
         type: TransferType.Send,
         from: address,
         to: '0xB17B1342579e4bcE6B6e9A426092EA57d33843D9',
@@ -515,8 +515,8 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
-          buyTx: parsedBuyTx1, // TODO - work out how we handle multiple buy txs
-          sellTx: parsedSellTx1, // TODO - work out how we handle multiple sell txs
+          buyTx: buyTransfer1, // TODO - work out how we handle multiple buy txs
+          sellTx: sellTransfer1, // TODO - work out how we handle multiple sell txs
         },
         value: tx.value,
         status: Status.Confirmed,
@@ -524,7 +524,7 @@ describe('parseTx', () => {
           value: '18399681000000000',
           caip19: 'eip155:1/slip44:60',
         },
-        transfers: [parsedSellTx1, parsedBuyTx1, parsedSellTx2, parsedBuyTx2],
+        transfers: [sellTransfer1, buyTransfer1, sellTransfer2, buyTransfer2],
         trade,
       }
 
