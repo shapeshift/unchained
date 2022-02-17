@@ -28,6 +28,20 @@ const emptyMetaData: TxMetadata = {
   sellTx: undefined,
 }
 
+const uniV2Token = {
+  contract: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
+  decimals: 18,
+  name: 'Uniswap V2',
+  symbol: 'UNI-V2',
+}
+
+const foxToken = {
+  contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
+  decimals: 18,
+  name: 'FOX',
+  symbol: 'FOX',
+}
+
 describe('parseTx', () => {
   describe('multiSig', () => {
     it('should be able to parse eth multi sig send', async () => {
@@ -1018,18 +1032,6 @@ describe('parseTx', () => {
     it('should be able to parse add liquidity', async () => {
       const { tx } = uniAddLiquidity
       const address = '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C'
-      const foxToken = {
-        contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
-        decimals: 18,
-        name: 'FOX',
-        symbol: 'FOX',
-      }
-      const uniV2Token = {
-        contract: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
-        decimals: 18,
-        name: 'Uniswap V2',
-        symbol: 'UNI-V2',
-      }
 
       const expected: Tx = {
         txid: tx.txid,
@@ -1084,12 +1086,6 @@ describe('parseTx', () => {
     it('should be able to parse remove liquidity mempool', async () => {
       const { txMempool } = uniRemoveLiquidity
       const address = '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C'
-      const uniV2Token = {
-        contract: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
-        decimals: 18,
-        name: 'Uniswap V2',
-        symbol: 'UNI-V2',
-      }
 
       const expected: Tx = {
         txid: txMempool.txid,
@@ -1122,18 +1118,6 @@ describe('parseTx', () => {
     it('should be able to parse remove liquidity', async () => {
       const { tx, internalTxs } = uniRemoveLiquidity
       const address = '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C'
-      const foxToken = {
-        contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
-        decimals: 18,
-        name: 'FOX',
-        symbol: 'FOX',
-      }
-      const uniV2Token = {
-        contract: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
-        decimals: 18,
-        name: 'Uniswap V2',
-        symbol: 'UNI-V2',
-      }
 
       const expected: Tx = {
         txid: tx.txid,
@@ -1190,12 +1174,6 @@ describe('parseTx', () => {
     it('should be able to parse claim', async () => {
       const { tx } = foxClaim
       const address = '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C'
-      const foxToken = {
-        contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
-        decimals: 18,
-        name: 'FOX',
-        symbol: 'FOX',
-      }
 
       const expected: Tx = {
         txid: tx.txid,
@@ -1256,12 +1234,6 @@ describe('parseTx', () => {
     it('should be able to parse stake', async () => {
       const { tx } = foxStake
       const address = '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C'
-      const uniV2Token = {
-        contract: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
-        decimals: 18,
-        name: 'Uniswap V2',
-        symbol: 'UNI-V2',
-      }
 
       const expected: Tx = {
         txid: tx.txid,
@@ -1321,18 +1293,6 @@ describe('parseTx', () => {
     it('should be able to parse exit', async () => {
       const { tx } = foxExit
       const address = '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C'
-      const foxToken = {
-        contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
-        decimals: 18,
-        name: 'FOX',
-        symbol: 'FOX',
-      }
-      const uniV2Token = {
-        contract: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
-        decimals: 18,
-        name: 'Uniswap V2',
-        symbol: 'UNI-V2',
-      }
 
       const expected: Tx = {
         txid: tx.txid,
