@@ -3,7 +3,7 @@ import { ethers } from 'ethers'
 import { Tx } from '@shapeshiftoss/blockbook'
 import { caip19, caip2 } from '@shapeshiftoss/caip'
 import { ChainTypes, ContractTypes } from '@shapeshiftoss/types'
-import { Status, Token, Transfer, TransferType, Tx as ParseTx } from '../types'
+import { Status, Token, Transfer, TransferType, Tx as ParseTx, TxSpecific } from '../types'
 import { InternalTx, Network } from './types'
 import { getSigHash, toNetworkType } from './utils'
 import * as multiSig from './multiSig'
@@ -11,6 +11,7 @@ import * as thor from './thor'
 import * as uniV2 from './uniV2'
 import * as zrx from './zrx'
 import { findAsyncSequential } from '../helpers'
+import { getBuyTx, getSellTx } from './helpers'
 
 export * from './types'
 
@@ -55,13 +56,13 @@ export class TransactionParser {
   }
 
   async parse(tx: Tx, address: string, internalTxs?: Array<InternalTx>): Promise<ParseTx> {
-    const sendAddress = tx.vin[0].addresses?.[0] ?? ''
-    const receiveAddress = tx.vout[0].addresses?.[0] ?? ''
-
     // We expect only one Parser to return a result. If multiple do, we take the first and early exit.
-    const result = await findAsyncSequential(this.parsers, async (parser) => await parser.parse(tx))
+    const contractParserResult = await findAsyncSequential<Parser, TxSpecific<ParseTx>>(
+      this.parsers,
+      async (parser) => await parser.parse(tx)
+    )
 
-    const pTx: ParseTx = {
+    const parsedTx: ParseTx = {
       address,
       blockHash: tx.blockHash,
       blockHeight: tx.blockHeight,
@@ -69,18 +70,70 @@ export class TransactionParser {
       caip2: caip2.toCAIP2({ chain: ChainTypes.Ethereum, network: toNetworkType(this.network) }),
       confirmations: tx.confirmations,
       status: this.getStatus(tx),
-      trade: result?.trade,
-      transfers: result?.transfers ?? [],
+      trade: contractParserResult?.trade,
+      transfers: contractParserResult?.transfers ?? [],
       txid: tx.txid,
       value: tx.value,
     }
+
+    const parsedTxWithTransfers = this.getParsedTxWithTransfers(tx, parsedTx, address, internalTxs)
+
+    // Add metadata and return
+    return {
+      ...parsedTxWithTransfers,
+      data: {
+        buyTx: getBuyTx(parsedTxWithTransfers),
+        sellTx: getSellTx(parsedTxWithTransfers),
+      },
+    }
+  }
+
+  // keep track of all individual tx components and add up the total value transferred by to/from address
+  private aggregateTransfer(
+    transfers: Array<Transfer>,
+    type: TransferType,
+    caip19: string,
+    from: string,
+    to: string,
+    value: string,
+    token?: Token
+  ): Array<Transfer> {
+    if (!new BigNumber(value).gt(0)) return transfers
+
+    const index = transfers?.findIndex((t) => t.type === type && t.caip19 === caip19 && t.from === from && t.to === to)
+    const transfer = transfers?.[index]
+
+    if (transfer) {
+      transfer.totalValue = new BigNumber(transfer.totalValue).plus(value).toString(10)
+      transfer.components.push({ value: value })
+      transfers[index] = transfer
+    } else {
+      transfers = [...transfers, { type, caip19, from, to, totalValue: value, components: [{ value: value }], token }]
+    }
+
+    return transfers
+  }
+
+  private getStatus(tx: Tx): Status {
+    const status = tx.ethereumSpecific?.status
+
+    if (status === -1 && tx.confirmations <= 0) return Status.Pending
+    if (status === 1 && tx.confirmations > 0) return Status.Confirmed
+    if (status === 0) return Status.Failed
+
+    return Status.Unknown
+  }
+
+  private getParsedTxWithTransfers(tx: Tx, parsedTx: ParseTx, address: string, internalTxs?: Array<InternalTx>) {
+    const sendAddress = tx.vin[0].addresses?.[0] ?? ''
+    const receiveAddress = tx.vout[0].addresses?.[0] ?? ''
 
     if (address === sendAddress) {
       // send amount
       const sendValue = new BigNumber(tx.value)
       if (sendValue.gt(0)) {
-        pTx.transfers = this.aggregateTransfer(
-          pTx.transfers,
+        parsedTx.transfers = this.aggregateTransfer(
+          parsedTx.transfers,
           TransferType.Send,
           caip19.toCAIP19({ chain: ChainTypes.Ethereum, network: toNetworkType(this.network) }),
           sendAddress,
@@ -92,7 +145,7 @@ export class TransactionParser {
       // network fee
       const fees = new BigNumber(tx.fees ?? 0)
       if (fees.gt(0)) {
-        pTx.fee = {
+        parsedTx.fee = {
           caip19: caip19.toCAIP19({ chain: ChainTypes.Ethereum, network: toNetworkType(this.network) }),
           value: fees.toString(10),
         }
@@ -103,8 +156,8 @@ export class TransactionParser {
       // receive amount
       const receiveValue = new BigNumber(tx.value)
       if (receiveValue.gt(0)) {
-        pTx.transfers = this.aggregateTransfer(
-          pTx.transfers,
+        parsedTx.transfers = this.aggregateTransfer(
+          parsedTx.transfers,
           TransferType.Receive,
           caip19.toCAIP19({ chain: ChainTypes.Ethereum, network: toNetworkType(this.network) }),
           sendAddress,
@@ -143,12 +196,12 @@ export class TransactionParser {
 
       // token send amount
       if (address === transfer.from) {
-        pTx.transfers = this.aggregateTransfer(pTx.transfers, TransferType.Send, ...transferArgs)
+        parsedTx.transfers = this.aggregateTransfer(parsedTx.transfers, TransferType.Send, ...transferArgs)
       }
 
       // token receive amount
       if (address === transfer.to) {
-        pTx.transfers = this.aggregateTransfer(pTx.transfers, TransferType.Receive, ...transferArgs)
+        parsedTx.transfers = this.aggregateTransfer(parsedTx.transfers, TransferType.Receive, ...transferArgs)
       }
     })
 
@@ -162,51 +215,15 @@ export class TransactionParser {
 
       // internal eth send
       if (address === internalTx.from) {
-        pTx.transfers = this.aggregateTransfer(pTx.transfers, TransferType.Send, ...transferArgs)
+        parsedTx.transfers = this.aggregateTransfer(parsedTx.transfers, TransferType.Send, ...transferArgs)
       }
 
       // internal eth receive
       if (address === internalTx.to) {
-        pTx.transfers = this.aggregateTransfer(pTx.transfers, TransferType.Receive, ...transferArgs)
+        parsedTx.transfers = this.aggregateTransfer(parsedTx.transfers, TransferType.Receive, ...transferArgs)
       }
     })
 
-    return pTx
-  }
-
-  // keep track of all individual tx components and add up the total value transferred by to/from address
-  private aggregateTransfer(
-    transfers: Array<Transfer>,
-    type: TransferType,
-    caip19: string,
-    from: string,
-    to: string,
-    value: string,
-    token?: Token
-  ): Array<Transfer> {
-    if (!new BigNumber(value).gt(0)) return transfers
-
-    const index = transfers?.findIndex((t) => t.type === type && t.caip19 === caip19 && t.from === from && t.to === to)
-    const transfer = transfers?.[index]
-
-    if (transfer) {
-      transfer.totalValue = new BigNumber(transfer.totalValue).plus(value).toString(10)
-      transfer.components.push({ value: value })
-      transfers[index] = transfer
-    } else {
-      transfers = [...transfers, { type, caip19, from, to, totalValue: value, components: [{ value: value }], token }]
-    }
-
-    return transfers
-  }
-
-  private getStatus(tx: Tx): Status {
-    const status = tx.ethereumSpecific?.status
-
-    if (status === -1 && tx.confirmations <= 0) return Status.Pending
-    if (status === 1 && tx.confirmations > 0) return Status.Confirmed
-    if (status === 0) return Status.Failed
-
-    return Status.Unknown
+    return parsedTx
   }
 }
