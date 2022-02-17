@@ -42,6 +42,13 @@ const foxToken = {
   symbol: 'FOX',
 }
 
+const usdcToken = {
+  contract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+  decimals: 6,
+  name: 'USD Coin',
+  symbol: 'USDC',
+}
+
 describe('parseTx', () => {
   describe('multiSig', () => {
     it('should be able to parse eth multi sig send', async () => {
@@ -142,12 +149,6 @@ describe('parseTx', () => {
         dexName: Dex.Thor,
         memo: 'SWAP:THOR.RUNE:thor1hhjupkzy3t6ccelhz7qw8epyx4rm8a06nlm5ce:110928642111',
         type: TradeType.Trade,
-      }
-      const usdcToken = {
-        contract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-        decimals: 6,
-        name: 'USD Coin',
-        symbol: 'USDC',
       }
 
       const expected: Tx = {
@@ -264,12 +265,6 @@ describe('parseTx', () => {
         dexName: Dex.Thor,
         memo: 'OUT:F3AC4E90AB5951AB9FEB1715B481422B904A40B0F6753CC844E326B1213CF70E',
         type: TradeType.Trade,
-      }
-      const usdcToken = {
-        contract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-        decimals: 6,
-        name: 'USD Coin',
-        symbol: 'USDC',
       }
 
       const expected: Tx = {
@@ -859,12 +854,6 @@ describe('parseTx', () => {
     it('should be able to parse token mempool', async () => {
       const { txMempool } = tokenSelfSend
       const address = '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C'
-      const usdcToken = {
-        contract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-        decimals: 6,
-        name: 'USD Coin',
-        symbol: 'USDC',
-      }
 
       const expected: Tx = {
         txid: txMempool.txid,
@@ -906,12 +895,6 @@ describe('parseTx', () => {
     it('should be able to parse token', async () => {
       const { tx } = tokenSelfSend
       const address = '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C'
-      const usdcToken = {
-        contract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-        decimals: 6,
-        name: 'USD Coin',
-        symbol: 'USDC',
-      }
 
       const expected: Tx = {
         txid: tx.txid,
