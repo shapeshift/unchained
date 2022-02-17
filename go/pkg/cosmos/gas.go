@@ -1,39 +1,42 @@
 package cosmos
 
 import (
+	"encoding/json"
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	"github.com/pkg/errors"
-	abcitypes "github.com/tendermint/tendermint/abci/types"
+	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"strconv"
 )
 
 func (c *HTTPClient) GetGasEstimation(txBytes []byte) (string, error) {
-	var res struct {
-		GasInfo struct {
-			GasWanted string `json:"gas_wanted"`
-			GasUsed   string `json:"gas_used"`
-		} `json:"gas_info"`
-		Result struct {
-			Data   string            `json:"data"`
-			Log    string            `json:"log"`
-			Events []abcitypes.Event `json:"events"`
-		} `json:"result"`
-	}
-	hexToUnmarshal, err := DecodeData(txBytes)
+	var res txtypes.SimulateResponse
+
+	decodeTx, err := DecodeData(txBytes)
 	if err != nil {
 		return "", err
 	}
-	jsonreq, err := authtx.DefaultJSONTxEncoder(CodecRegister())(hexToUnmarshal)
-	response, err := c.cosmos.R().SetBody(jsonreq).SetResult(&res).Post("/cosmos/tx/v1beta1/simulate")
-	logger.Info(string(response.Body()))
+	wrappedTxBuilder, err := c.encoding.TxConfig.WrapTxBuilder(decodeTx)
 	if err != nil {
-		return "", errors.Wrap(err, res.Result.Log)
+		return "", err
 	}
-	if res.GasInfo.GasUsed == "" {
+	reqData := wrappedTxBuilder.(authtx.ProtoTxProvider).GetProtoTx()
+	reqRawBody := txtypes.SimulateRequest{Tx: reqData}
+	jsonBody, err := c.encoding.Marshaler.MarshalJSON(&reqRawBody)
+	if err != nil {
+		return "", err
+	}
+	ret, err := c.cosmos.R().SetBody(jsonBody).SetResult(&res).Post("/cosmos/tx/v1beta1/simulate")
+
+	if err != nil || ret.IsError() {
+		var status = spb.Status{}
+		json.Unmarshal(ret.Body(), &status)
+		return status.GetMessage(), errors.Wrap(err, string(ret.Body()))
+	}
+	if res.GasInfo.GasUsed == 0 {
 		return "", errors.New("gas_used is empty")
 	}
-	return res.GasInfo.GasUsed, nil
+	return strconv.FormatUint(res.GasInfo.GasUsed, 10), nil
 }
 
 func (c *GRPCClient) GetGasEstimation(txBytes []byte) (string, error) {
