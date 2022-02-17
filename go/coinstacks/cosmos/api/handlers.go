@@ -119,6 +119,7 @@ func (h *Handler) SendTx(hex string) (string, error) {
 }
 
 func (h *Handler) GetGasEstimation(hex string) (api.Gas, error) {
+
 	res, err := h.httpClient.GetGasEstimation([]byte(hex))
 	if err != nil {
 		return "", err

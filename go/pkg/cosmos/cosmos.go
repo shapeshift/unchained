@@ -176,21 +176,6 @@ func IsValidAddress(address string) bool {
 	return true
 }
 
-func IsValidRawTx(txbyte string) bool {
-	if len(txbyte) == 0 {
-		return false
-	}
-	checkValidity, err := DecodeData([]byte(txbyte))
-	if err != nil {
-		return false
-	}
-	err = checkValidity.ValidateBasic()
-	if err != nil {
-		return false
-	}
-	return true
-}
-
 func CodecRegister() *codec.ProtoCodec {
 	registry := cryptotypes.NewInterfaceRegistry()
 
