@@ -1,4 +1,4 @@
-module github.com/shapeshift/go-unchained
+module github.com/shapeshift/unchained
 
 go 1.17
 

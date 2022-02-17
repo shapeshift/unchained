@@ -17,7 +17,7 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	"github.com/pkg/errors"
-	"github.com/shapeshift/go-unchained/pkg/tendermint/client"
+	"github.com/shapeshift/unchained/pkg/tendermint/client"
 )
 
 func (c *HTTPClient) GetTxHistory(address string, page int, pageSize int) (*TxHistory, error) {

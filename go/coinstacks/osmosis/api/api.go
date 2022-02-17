@@ -26,10 +26,10 @@ import (
 	"github.com/gorilla/mux"
 	ws "github.com/gorilla/websocket"
 	"github.com/pkg/errors"
-	"github.com/shapeshift/go-unchained/internal/log"
-	"github.com/shapeshift/go-unchained/pkg/api"
-	"github.com/shapeshift/go-unchained/pkg/cosmos"
-	"github.com/shapeshift/go-unchained/pkg/websocket"
+	"github.com/shapeshift/unchained/internal/log"
+	"github.com/shapeshift/unchained/pkg/api"
+	"github.com/shapeshift/unchained/pkg/cosmos"
+	"github.com/shapeshift/unchained/pkg/websocket"
 )
 
 const (

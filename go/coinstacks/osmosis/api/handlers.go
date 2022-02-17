@@ -8,9 +8,9 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
-	"github.com/shapeshift/go-unchained/coinstacks/osmosis"
-	"github.com/shapeshift/go-unchained/pkg/api"
-	"github.com/shapeshift/go-unchained/pkg/cosmos"
+	"github.com/shapeshift/unchained/coinstacks/osmosis"
+	"github.com/shapeshift/unchained/pkg/api"
+	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/tendermint/tendermint/types"
 )
 

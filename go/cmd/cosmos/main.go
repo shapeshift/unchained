@@ -6,10 +6,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/shapeshift/go-unchained/coinstacks/cosmos/api"
-	"github.com/shapeshift/go-unchained/internal/config"
-	"github.com/shapeshift/go-unchained/internal/log"
-	"github.com/shapeshift/go-unchained/pkg/cosmos"
+	"github.com/shapeshift/unchained/coinstacks/cosmos/api"
+	"github.com/shapeshift/unchained/internal/config"
+	"github.com/shapeshift/unchained/internal/log"
+	"github.com/shapeshift/unchained/pkg/cosmos"
 )
 
 var (

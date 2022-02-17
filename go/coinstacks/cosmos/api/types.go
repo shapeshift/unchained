@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/shapeshift/go-unchained/pkg/api"
-	"github.com/shapeshift/go-unchained/pkg/cosmos"
+	"github.com/shapeshift/unchained/pkg/api"
+	"github.com/shapeshift/unchained/pkg/cosmos"
 )
 
 // Contains info about the running coinstack
