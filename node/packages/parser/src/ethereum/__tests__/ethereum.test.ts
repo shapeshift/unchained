@@ -18,6 +18,17 @@ import uniRemoveLiquidity from './mockData/uniRemoveLiquidity'
 import foxClaim from './mockData/foxClaim'
 import foxStake from './mockData/foxStake'
 import foxExit from './mockData/foxExit'
+import {
+  bondToken,
+  foxToken,
+  kishuToken,
+  maticToken,
+  tribeToken,
+  uniToken,
+  uniV2Token,
+  usdcToken,
+  usdtToken,
+} from './mockData/tokens'
 
 jest.mock('@shapeshiftoss/thorchain')
 
@@ -28,32 +39,21 @@ const emptyMetaData: TxMetadata = {
   sellTx: undefined,
 }
 
-const uniV2Token = {
-  contract: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
-  decimals: 18,
-  name: 'Uniswap V2',
-  symbol: 'UNI-V2',
-}
-
-const foxToken = {
-  contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
-  decimals: 18,
-  name: 'FOX',
-  symbol: 'FOX',
-}
-
-const usdcToken = {
-  contract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-  decimals: 6,
-  name: 'USD Coin',
-  symbol: 'USDC',
-}
-
 describe('parseTx', () => {
   describe('multiSig', () => {
     it('should be able to parse eth multi sig send', async () => {
       const { tx, internalTxs } = multiSigSendEth
       const address = '0x76DA1578aC163CA7ca4143B7dEAa428e85Db3042'
+
+      const parsedStandardTx = {
+        caip19: 'eip155:1/slip44:60',
+        components: [{ value: '1201235000000000000' }],
+        from: '0x79fE68B3e4Bc2B91a4C8dfFb5317C7B8813d8Ae7',
+        to: '0x76DA1578aC163CA7ca4143B7dEAa428e85Db3042',
+        token: undefined,
+        totalValue: '1201235000000000000',
+        type: TransferType.Receive,
+      }
 
       const expected: Tx = {
         txid: tx.txid,
@@ -66,16 +66,7 @@ describe('parseTx', () => {
         data: emptyMetaData,
         value: tx.value,
         status: Status.Confirmed,
-        transfers: [
-          {
-            type: TransferType.Receive,
-            from: '0x79fE68B3e4Bc2B91a4C8dfFb5317C7B8813d8Ae7',
-            to: '0x76DA1578aC163CA7ca4143B7dEAa428e85Db3042',
-            caip19: 'eip155:1/slip44:60',
-            totalValue: '1201235000000000000',
-            components: [{ value: '1201235000000000000' }],
-          },
-        ],
+        transfers: [parsedStandardTx],
       }
 
       const actual = await txParser.parse(tx, address, internalTxs)
@@ -93,6 +84,14 @@ describe('parseTx', () => {
         memo: 'SWAP:THOR.RUNE:thor19f3dsgetxzssvdmqnplfep5fe42fsrvq9u87ax:',
         type: TradeType.Trade,
       }
+      const parsedSellTx = {
+        caip19: 'eip155:1/slip44:60',
+        components: [{ value: '295040000000000000' }],
+        from: '0xCeb660E7623E8f8312B3379Df747c35f2217b595',
+        to: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
+        totalValue: '295040000000000000',
+        type: TransferType.Send,
+      }
 
       const expected: Tx = {
         txid: tx.txid,
@@ -102,38 +101,14 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: {
-          buyTx: undefined,
-          sellTx: {
-            caip19: 'eip155:1/slip44:60',
-            components: [
-              {
-                value: '295040000000000000',
-              },
-            ],
-            from: '0xCeb660E7623E8f8312B3379Df747c35f2217b595',
-            to: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
-            token: undefined,
-            totalValue: '295040000000000000',
-            type: TransferType.Send,
-          },
-        },
+        data: { sellTx: parsedSellTx },
         value: tx.value,
         status: Status.Confirmed,
         fee: {
           caip19: 'eip155:1/slip44:60',
           value: '1700235000000000',
         },
-        transfers: [
-          {
-            type: TransferType.Send,
-            from: '0xCeb660E7623E8f8312B3379Df747c35f2217b595',
-            to: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
-            caip19: 'eip155:1/slip44:60',
-            totalValue: '295040000000000000',
-            components: [{ value: '295040000000000000' }],
-          },
-        ],
+        transfers: [parsedSellTx],
         trade,
       }
 
@@ -150,6 +125,15 @@ describe('parseTx', () => {
         memo: 'SWAP:THOR.RUNE:thor1hhjupkzy3t6ccelhz7qw8epyx4rm8a06nlm5ce:110928642111',
         type: TradeType.Trade,
       }
+      const parsedSellTx = {
+        caip19: 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+        components: [{ value: '16598881497' }],
+        from: '0x5a8C5afbCC1A58cCbe17542957b587F46828B38E',
+        to: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
+        token: usdcToken,
+        totalValue: '16598881497',
+        type: TransferType.Send,
+      }
 
       const expected: Tx = {
         txid: tx.txid,
@@ -161,24 +145,7 @@ describe('parseTx', () => {
         confirmations: tx.confirmations,
         data: {
           buyTx: undefined,
-          sellTx: {
-            caip19: 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-            components: [
-              {
-                value: '16598881497',
-              },
-            ],
-            from: '0x5a8C5afbCC1A58cCbe17542957b587F46828B38E',
-            to: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
-            token: {
-              contract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-              decimals: 6,
-              name: 'USD Coin',
-              symbol: 'USDC',
-            },
-            totalValue: '16598881497',
-            type: TransferType.Send,
-          },
+          sellTx: parsedSellTx,
         },
         value: tx.value,
         status: Status.Confirmed,
@@ -186,17 +153,7 @@ describe('parseTx', () => {
           caip19: 'eip155:1/slip44:60',
           value: '4700280000000000',
         },
-        transfers: [
-          {
-            type: TransferType.Send,
-            from: '0x5a8C5afbCC1A58cCbe17542957b587F46828B38E',
-            to: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
-            caip19: 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-            totalValue: '16598881497',
-            components: [{ value: '16598881497' }],
-            token: usdcToken,
-          },
-        ],
+        transfers: [parsedSellTx],
         trade,
       }
 
@@ -213,6 +170,15 @@ describe('parseTx', () => {
         memo: 'OUT:8C859BA50BC2351797F52F954971E1C6BA1F0A77610AC197BD99C4EEC6A3692A',
         type: TradeType.Trade,
       }
+      const parsedBuyTx = {
+        caip19: 'eip155:1/slip44:60',
+        components: [{ value: '1579727090000000000' }],
+        from: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
+        to: '0x5a8C5afbCC1A58cCbe17542957b587F46828B38E',
+        token: undefined,
+        totalValue: '1579727090000000000',
+        type: TransferType.Receive,
+      }
 
       const expected: Tx = {
         txid: tx.txid,
@@ -222,34 +188,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: {
-          buyTx: {
-            caip19: 'eip155:1/slip44:60',
-            components: [
-              {
-                value: '1579727090000000000',
-              },
-            ],
-            from: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
-            to: '0x5a8C5afbCC1A58cCbe17542957b587F46828B38E',
-            token: undefined,
-            totalValue: '1579727090000000000',
-            type: TransferType.Receive,
-          },
-          sellTx: undefined,
-        },
+        data: { buyTx: parsedBuyTx },
         value: tx.value,
         status: Status.Confirmed,
-        transfers: [
-          {
-            type: TransferType.Receive,
-            from: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
-            to: '0x5a8C5afbCC1A58cCbe17542957b587F46828B38E',
-            caip19: 'eip155:1/slip44:60',
-            totalValue: '1579727090000000000',
-            components: [{ value: '1579727090000000000' }],
-          },
-        ],
+        transfers: [parsedBuyTx],
         trade,
       }
 
@@ -266,6 +208,15 @@ describe('parseTx', () => {
         memo: 'OUT:F3AC4E90AB5951AB9FEB1715B481422B904A40B0F6753CC844E326B1213CF70E',
         type: TradeType.Trade,
       }
+      const parsedBuyTx = {
+        caip19: 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+        components: [{ value: '47596471640' }],
+        from: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
+        to: '0x5a8C5afbCC1A58cCbe17542957b587F46828B38E',
+        token: usdcToken,
+        totalValue: '47596471640',
+        type: TransferType.Receive,
+      }
 
       const expected: Tx = {
         txid: tx.txid,
@@ -275,40 +226,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: {
-          buyTx: {
-            caip19: 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-            components: [
-              {
-                value: '47596471640',
-              },
-            ],
-            from: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
-            to: '0x5a8C5afbCC1A58cCbe17542957b587F46828B38E',
-            token: {
-              contract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-              decimals: 6,
-              name: 'USD Coin',
-              symbol: 'USDC',
-            },
-            totalValue: '47596471640',
-            type: TransferType.Receive,
-          },
-          sellTx: undefined,
-        },
+        data: { buyTx: parsedBuyTx },
         value: tx.value,
         status: Status.Confirmed,
-        transfers: [
-          {
-            type: TransferType.Receive,
-            from: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
-            to: '0x5a8C5afbCC1A58cCbe17542957b587F46828B38E',
-            caip19: 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-            totalValue: '47596471640',
-            components: [{ value: '47596471640' }],
-            token: usdcToken,
-          },
-        ],
+        transfers: [parsedBuyTx],
         trade,
       }
 
@@ -325,6 +246,15 @@ describe('parseTx', () => {
         memo: 'REFUND:851B4997CF8F9FBA806B3780E0C178CCB173AE78E3FD5056F7375B059B22BD3A',
         type: TradeType.Refund,
       }
+      const parsedBuyTx = {
+        caip19: 'eip155:1/slip44:60',
+        components: [{ value: '6412730000000000' }],
+        from: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
+        to: '0xfc0Cc6E85dFf3D75e3985e0CB83B090cfD498dd1',
+        token: undefined,
+        totalValue: '6412730000000000',
+        type: TransferType.Receive,
+      }
 
       const expected: Tx = {
         txid: tx.txid,
@@ -334,34 +264,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: {
-          buyTx: {
-            caip19: 'eip155:1/slip44:60',
-            components: [
-              {
-                value: '6412730000000000',
-              },
-            ],
-            from: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
-            to: '0xfc0Cc6E85dFf3D75e3985e0CB83B090cfD498dd1',
-            token: undefined,
-            totalValue: '6412730000000000',
-            type: TransferType.Receive,
-          },
-          sellTx: undefined,
-        },
+        data: { buyTx: parsedBuyTx },
         value: tx.value,
         status: Status.Confirmed,
-        transfers: [
-          {
-            type: TransferType.Receive,
-            from: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
-            to: '0xfc0Cc6E85dFf3D75e3985e0CB83B090cfD498dd1',
-            caip19: 'eip155:1/slip44:60',
-            totalValue: '6412730000000000',
-            components: [{ value: '6412730000000000' }],
-          },
-        ],
+        transfers: [parsedBuyTx],
         trade,
       }
 
@@ -379,11 +285,32 @@ describe('parseTx', () => {
         dexName: Dex.Zrx,
         type: TradeType.Trade,
       }
-      const tribeToken = {
-        contract: '0xc7283b66Eb1EB5FB86327f08e1B5816b0720212B',
-        decimals: 18,
-        name: 'Tribe',
-        symbol: 'TRIBE',
+      const parsedBuyTx = {
+        caip19: 'eip155:1/slip44:60',
+        components: [
+          {
+            value: '541566754246167133',
+          },
+        ],
+        from: '0xDef1C0ded9bec7F1a1670819833240f027b25EfF',
+        to: '0x5bb96c35a68Cba037D0F261C67477416db137F03',
+        token: undefined,
+        totalValue: '541566754246167133',
+        type: TransferType.Receive,
+      }
+
+      const parsedSellTx = {
+        caip19: 'eip155:1/erc20:0xc7283b66eb1eb5fb86327f08e1b5816b0720212b',
+        components: [
+          {
+            value: '1000000000000000000000',
+          },
+        ],
+        from: '0x5bb96c35a68Cba037D0F261C67477416db137F03',
+        to: '0x7ce01885a13c652241aE02Ea7369Ee8D466802EB',
+        token: tribeToken,
+        totalValue: '1000000000000000000000',
+        type: TransferType.Send,
       }
 
       const expected: Tx = {
@@ -395,37 +322,8 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
-          buyTx: {
-            caip19: 'eip155:1/slip44:60',
-            components: [
-              {
-                value: '541566754246167133',
-              },
-            ],
-            from: '0xDef1C0ded9bec7F1a1670819833240f027b25EfF',
-            to: '0x5bb96c35a68Cba037D0F261C67477416db137F03',
-            token: undefined,
-            totalValue: '541566754246167133',
-            type: TransferType.Receive,
-          },
-          sellTx: {
-            caip19: 'eip155:1/erc20:0xc7283b66eb1eb5fb86327f08e1b5816b0720212b',
-            components: [
-              {
-                value: '1000000000000000000000',
-              },
-            ],
-            from: '0x5bb96c35a68Cba037D0F261C67477416db137F03',
-            to: '0x7ce01885a13c652241aE02Ea7369Ee8D466802EB',
-            token: {
-              contract: '0xc7283b66Eb1EB5FB86327f08e1B5816b0720212B',
-              decimals: 18,
-              name: 'Tribe',
-              symbol: 'TRIBE',
-            },
-            totalValue: '1000000000000000000000',
-            type: TransferType.Send,
-          },
+          buyTx: parsedBuyTx,
+          sellTx: parsedSellTx,
         },
         value: tx.value,
         status: Status.Confirmed,
@@ -433,25 +331,7 @@ describe('parseTx', () => {
           value: '8308480000000000',
           caip19: 'eip155:1/slip44:60',
         },
-        transfers: [
-          {
-            type: TransferType.Send,
-            from: '0x5bb96c35a68Cba037D0F261C67477416db137F03',
-            to: '0x7ce01885a13c652241aE02Ea7369Ee8D466802EB',
-            caip19: 'eip155:1/erc20:0xc7283b66eb1eb5fb86327f08e1b5816b0720212b',
-            totalValue: '1000000000000000000000',
-            components: [{ value: '1000000000000000000000' }],
-            token: tribeToken,
-          },
-          {
-            type: TransferType.Receive,
-            from: '0xDef1C0ded9bec7F1a1670819833240f027b25EfF',
-            to: '0x5bb96c35a68Cba037D0F261C67477416db137F03',
-            caip19: 'eip155:1/slip44:60',
-            totalValue: '541566754246167133',
-            components: [{ value: '541566754246167133' }],
-          },
-        ],
+        transfers: [parsedSellTx, parsedBuyTx],
         trade,
       }
 
@@ -467,11 +347,33 @@ describe('parseTx', () => {
         dexName: Dex.Zrx,
         type: TradeType.Trade,
       }
-      const maticToken = {
-        contract: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0',
-        decimals: 18,
-        name: 'Matic Token',
-        symbol: 'MATIC',
+
+      const parsedBuyTx = {
+        caip19: 'eip155:1/erc20:0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0',
+        components: [
+          {
+            value: '50000000000000000000000',
+          },
+        ],
+        from: '0x22F9dCF4647084d6C31b2765F6910cd85C178C18',
+        to: '0x564BcA365D62BCC22dB53d032F8dbD35439C9206',
+        token: maticToken,
+        totalValue: '50000000000000000000000',
+        type: TransferType.Receive,
+      }
+
+      const parsedSellTx = {
+        caip19: 'eip155:1/slip44:60',
+        components: [
+          {
+            value: '10000000000000000000',
+          },
+        ],
+        from: '0x564BcA365D62BCC22dB53d032F8dbD35439C9206',
+        to: '0xDef1C0ded9bec7F1a1670819833240f027b25EfF',
+        token: undefined,
+        totalValue: '10000000000000000000',
+        type: TransferType.Send,
       }
 
       const expected: Tx = {
@@ -483,37 +385,8 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
-          buyTx: {
-            caip19: 'eip155:1/erc20:0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0',
-            components: [
-              {
-                value: '50000000000000000000000',
-              },
-            ],
-            from: '0x22F9dCF4647084d6C31b2765F6910cd85C178C18',
-            to: '0x564BcA365D62BCC22dB53d032F8dbD35439C9206',
-            token: {
-              contract: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0',
-              decimals: 18,
-              name: 'Matic Token',
-              symbol: 'MATIC',
-            },
-            totalValue: '50000000000000000000000',
-            type: TransferType.Receive,
-          },
-          sellTx: {
-            caip19: 'eip155:1/slip44:60',
-            components: [
-              {
-                value: '10000000000000000000',
-              },
-            ],
-            from: '0x564BcA365D62BCC22dB53d032F8dbD35439C9206',
-            to: '0xDef1C0ded9bec7F1a1670819833240f027b25EfF',
-            token: undefined,
-            totalValue: '10000000000000000000',
-            type: TransferType.Send,
-          },
+          buyTx: parsedBuyTx,
+          sellTx: parsedSellTx,
         },
         value: tx.value,
         status: Status.Confirmed,
@@ -521,25 +394,7 @@ describe('parseTx', () => {
           value: '19815285000000000',
           caip19: 'eip155:1/slip44:60',
         },
-        transfers: [
-          {
-            type: TransferType.Send,
-            from: '0x564BcA365D62BCC22dB53d032F8dbD35439C9206',
-            to: '0xDef1C0ded9bec7F1a1670819833240f027b25EfF',
-            caip19: 'eip155:1/slip44:60',
-            totalValue: '10000000000000000000',
-            components: [{ value: '10000000000000000000' }],
-          },
-          {
-            type: TransferType.Receive,
-            from: '0x22F9dCF4647084d6C31b2765F6910cd85C178C18',
-            to: '0x564BcA365D62BCC22dB53d032F8dbD35439C9206',
-            caip19: 'eip155:1/erc20:0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0',
-            totalValue: '50000000000000000000000',
-            components: [{ value: '50000000000000000000000' }],
-            token: maticToken,
-          },
-        ],
+        transfers: [parsedSellTx, parsedBuyTx],
         trade,
       }
 
@@ -555,17 +410,25 @@ describe('parseTx', () => {
         dexName: Dex.Zrx,
         type: TradeType.Trade,
       }
-      const usdtToken = {
-        contract: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-        decimals: 6,
-        name: 'Tether USD',
-        symbol: 'USDT',
+
+      const parsedBuyTx = {
+        type: TransferType.Receive,
+        from: '0xF82d8Ec196Fb0D56c6B82a8B1870F09502A49F88',
+        to: '0xb8b19c048296E086DaF69F54d48dE2Da444dB047',
+        caip19: 'eip155:1/erc20:0xa2b4c0af19cc16a6cfacce81f192b024d625817d',
+        totalValue: '9248567698016204727450',
+        components: [{ value: '9248567698016204727450' }],
+        token: kishuToken,
       }
-      const kishuToken = {
-        contract: '0xA2b4C0Af19cC16a6CfAcCe81F192B024d625817D',
-        decimals: 9,
-        name: 'Kishu Inu',
-        symbol: 'KISHU',
+
+      const parsedSellTx = {
+        type: TransferType.Send,
+        from: '0xb8b19c048296E086DaF69F54d48dE2Da444dB047',
+        to: '0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852',
+        caip19: 'eip155:1/erc20:0xdac17f958d2ee523a2206206994597c13d831ec7',
+        totalValue: '45000000000',
+        components: [{ value: '45000000000' }],
+        token: usdtToken,
       }
 
       const expected: Tx = {
@@ -577,42 +440,8 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
-          buyTx: {
-            caip19: 'eip155:1/erc20:0xa2b4c0af19cc16a6cfacce81f192b024d625817d',
-            components: [
-              {
-                value: '9248567698016204727450',
-              },
-            ],
-            from: '0xF82d8Ec196Fb0D56c6B82a8B1870F09502A49F88',
-            to: '0xb8b19c048296E086DaF69F54d48dE2Da444dB047',
-            token: {
-              contract: '0xA2b4C0Af19cC16a6CfAcCe81F192B024d625817D',
-              decimals: 9,
-              name: 'Kishu Inu',
-              symbol: 'KISHU',
-            },
-            totalValue: '9248567698016204727450',
-            type: TransferType.Receive,
-          },
-          sellTx: {
-            caip19: 'eip155:1/erc20:0xdac17f958d2ee523a2206206994597c13d831ec7',
-            components: [
-              {
-                value: '45000000000',
-              },
-            ],
-            from: '0xb8b19c048296E086DaF69F54d48dE2Da444dB047',
-            to: '0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852',
-            token: {
-              contract: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-              decimals: 6,
-              name: 'Tether USD',
-              symbol: 'USDT',
-            },
-            totalValue: '45000000000',
-            type: TransferType.Send,
-          },
+          buyTx: parsedBuyTx,
+          sellTx: parsedSellTx,
         },
         value: tx.value,
         status: Status.Confirmed,
@@ -620,26 +449,7 @@ describe('parseTx', () => {
           value: '78183644000000000',
           caip19: 'eip155:1/slip44:60',
         },
-        transfers: [
-          {
-            type: TransferType.Send,
-            from: '0xb8b19c048296E086DaF69F54d48dE2Da444dB047',
-            to: '0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852',
-            caip19: 'eip155:1/erc20:0xdac17f958d2ee523a2206206994597c13d831ec7',
-            totalValue: '45000000000',
-            components: [{ value: '45000000000' }],
-            token: usdtToken,
-          },
-          {
-            type: TransferType.Receive,
-            from: '0xF82d8Ec196Fb0D56c6B82a8B1870F09502A49F88',
-            to: '0xb8b19c048296E086DaF69F54d48dE2Da444dB047',
-            caip19: 'eip155:1/erc20:0xa2b4c0af19cc16a6cfacce81f192b024d625817d',
-            totalValue: '9248567698016204727450',
-            components: [{ value: '9248567698016204727450' }],
-            token: kishuToken,
-          },
-        ],
+        transfers: [parsedSellTx, parsedBuyTx],
         trade,
       }
 
@@ -655,17 +465,45 @@ describe('parseTx', () => {
         dexName: Dex.Zrx,
         type: TradeType.Trade,
       }
-      const uniToken = {
-        contract: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
-        decimals: 18,
-        name: 'Uniswap',
-        symbol: 'UNI',
+
+      const parsedBuyTx1 = {
+        type: TransferType.Receive,
+        from: '0xEBFb684dD2b01E698ca6c14F10e4f289934a54D6',
+        to: address,
+        caip19: 'eip155:1/erc20:0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
+        totalValue: '56639587020747520629',
+        components: [{ value: '56639587020747520629' }],
+        token: uniToken,
       }
-      const bondToken = {
-        contract: '0x0391D2021f89DC339F60Fff84546EA23E337750f',
-        decimals: 18,
-        name: 'BarnBridge Governance Token',
-        symbol: 'BOND',
+
+      const parsedBuyTx2 = {
+        type: TransferType.Receive,
+        from: '0xd3d2E2692501A5c9Ca623199D38826e513033a17',
+        to: address,
+        caip19: 'eip155:1/erc20:0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
+        totalValue: '47448670568188553620',
+        components: [{ value: '47448670568188553620' }],
+        token: uniToken,
+      }
+
+      const parsedSellTx1 = {
+        type: TransferType.Send,
+        from: address,
+        to: '0x6591c4BcD6D7A1eb4E537DA8B78676C1576Ba244',
+        caip19: 'eip155:1/erc20:0x0391d2021f89dc339f60fff84546ea23e337750f',
+        totalValue: '53910224825217010944',
+        components: [{ value: '53910224825217010944' }],
+        token: bondToken,
+      }
+
+      const parsedSellTx2 = {
+        type: TransferType.Send,
+        from: address,
+        to: '0xB17B1342579e4bcE6B6e9A426092EA57d33843D9',
+        caip19: 'eip155:1/erc20:0x0391d2021f89dc339f60fff84546ea23e337750f',
+        totalValue: '46089775174782989056',
+        components: [{ value: '46089775174782989056' }],
+        token: bondToken,
       }
 
       const expected: Tx = {
@@ -677,42 +515,8 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
-          buyTx: {
-            caip19: 'eip155:1/erc20:0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
-            components: [
-              {
-                value: '56639587020747520629',
-              },
-            ],
-            from: '0xEBFb684dD2b01E698ca6c14F10e4f289934a54D6',
-            to: '0x986bB494db49E6f1CDC1be098e3157f8DDC5a821',
-            token: {
-              contract: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
-              decimals: 18,
-              name: 'Uniswap',
-              symbol: 'UNI',
-            },
-            totalValue: '56639587020747520629',
-            type: TransferType.Receive,
-          },
-          sellTx: {
-            caip19: 'eip155:1/erc20:0x0391d2021f89dc339f60fff84546ea23e337750f',
-            components: [
-              {
-                value: '53910224825217010944',
-              },
-            ],
-            from: '0x986bB494db49E6f1CDC1be098e3157f8DDC5a821',
-            to: '0x6591c4BcD6D7A1eb4E537DA8B78676C1576Ba244',
-            token: {
-              contract: '0x0391D2021f89DC339F60Fff84546EA23E337750f',
-              decimals: 18,
-              name: 'BarnBridge Governance Token',
-              symbol: 'BOND',
-            },
-            totalValue: '53910224825217010944',
-            type: TransferType.Send,
-          },
+          buyTx: parsedBuyTx1, // TODO - work out how we handle multiple buy txs
+          sellTx: parsedSellTx1, // TODO - work out how we handle multiple sell txs
         },
         value: tx.value,
         status: Status.Confirmed,
@@ -720,44 +524,7 @@ describe('parseTx', () => {
           value: '18399681000000000',
           caip19: 'eip155:1/slip44:60',
         },
-        transfers: [
-          {
-            type: TransferType.Send,
-            from: address,
-            to: '0x6591c4BcD6D7A1eb4E537DA8B78676C1576Ba244',
-            caip19: 'eip155:1/erc20:0x0391d2021f89dc339f60fff84546ea23e337750f',
-            totalValue: '53910224825217010944',
-            components: [{ value: '53910224825217010944' }],
-            token: bondToken,
-          },
-          {
-            type: TransferType.Receive,
-            from: '0xEBFb684dD2b01E698ca6c14F10e4f289934a54D6',
-            to: address,
-            caip19: 'eip155:1/erc20:0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
-            totalValue: '56639587020747520629',
-            components: [{ value: '56639587020747520629' }],
-            token: uniToken,
-          },
-          {
-            type: TransferType.Send,
-            from: address,
-            to: '0xB17B1342579e4bcE6B6e9A426092EA57d33843D9',
-            caip19: 'eip155:1/erc20:0x0391d2021f89dc339f60fff84546ea23e337750f',
-            totalValue: '46089775174782989056',
-            components: [{ value: '46089775174782989056' }],
-            token: bondToken,
-          },
-          {
-            type: TransferType.Receive,
-            from: '0xd3d2E2692501A5c9Ca623199D38826e513033a17',
-            to: address,
-            caip19: 'eip155:1/erc20:0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
-            totalValue: '47448670568188553620',
-            components: [{ value: '47448670568188553620' }],
-            token: uniToken,
-          },
-        ],
+        transfers: [parsedSellTx1, parsedBuyTx1, parsedSellTx2, parsedBuyTx2],
         trade,
       }
 
