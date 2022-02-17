@@ -711,7 +711,7 @@ workflows:
       - deploy-coinstack:
           name: deploy bitcoin develop (taxistake)
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: destroy -f --yes
           requires:
             - deploy dependencies (taxistake)
           <<: *bitcoin
@@ -721,7 +721,7 @@ workflows:
       - deploy-coinstack:
           name: deploy ethereum develop (taxistake)
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: destroy -f --yes
           requires:
             - deploy dependencies (taxistake)
           <<: *ethereum
@@ -731,7 +731,7 @@ workflows:
       - deploy-coinstack:
           name: deploy ethereum-ropsten develop (taxistake)
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: destroy -f --yes
           requires:
             - deploy dependencies (taxistake)
           <<: *ethereum-ropsten
