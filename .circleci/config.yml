@@ -12,14 +12,12 @@ aliases:
         ignore:
           - main
           - develop
-          - taxi-stake
 
   - &only-develop
     filters:
       branches:
         only:
           - develop
-          - taxi-stake
 
   - &only-main
     filters:
@@ -64,6 +62,29 @@ aliases:
     ingester-memory-limit: "3Gi"
     rpc-url: http://user:password@bitcoin-indexer-svc.unchained.svc.cluster.local:8332
 
+  - &bitcoin-dev
+    environment: dev
+    pulumi-stack: public-dev
+    broker-url: bitcoin-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
+    mongo-replicas: 2
+    mongo-url: mongodb://bitcoin-mongodb-0.bitcoin-mongodb-headless.unchained-dev.svc.cluster.local:27017,bitcoin-mongodb-1.bitcoin-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
+    indexer-replicas: 1
+    indexer-url: http://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
+    rpc-url: http://user:password@bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8332
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 3
+    api-cpu-limit: "300m"
+    api-cpu-threshold: 30
+    api-memory-limit: "1Gi"
+    ingester-autoscaling: true
+    ingester-replicas: 1
+    ingester-max-replicas: 2
+    ingester-cpu-limit: "500m"
+    ingester-cpu-threshold: 20
+    ingester-memory-limit: "2Gi"
+
   - &ethereum
     coinstack: ethereum
     pulumi-stack: public
@@ -101,6 +122,29 @@ aliases:
     ingester-memory-limit: "3Gi"
     rpc-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8332
 
+  - &ethereum-dev
+    environment: dev
+    pulumi-stack: public-dev
+    broker-url: ethereum-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
+    mongo-replicas: 2
+    mongo-url: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained-dev.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
+    indexer-replicas: 1
+    indexer-url: http://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
+    rpc-url: http://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8332
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 3
+    api-cpu-limit: "300m"
+    api-cpu-threshold: 30
+    api-memory-limit: "1Gi"
+    ingester-autoscaling: true
+    ingester-replicas: 1
+    ingester-max-replicas: 2
+    ingester-cpu-limit: "500m"
+    ingester-cpu-threshold: 20
+    ingester-memory-limit: "2Gi"
+
   - &ethereum-ropsten
     coinstack: ethereum
     pulumi-stack: public-ropsten
@@ -137,6 +181,30 @@ aliases:
     ingester-cpu-limit: "500m"
     ingester-memory-limit: "3Gi"
     rpc-url: http://ethereum-ropsten-indexer-svc.unchained.svc.cluster.local:8332
+
+  - &ethereum-ropsten-dev
+    environment: dev
+    network: ropsten
+    pulumi-stack: public-dev-ropsten
+    broker-url: ethereum-ropsten-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
+    mongo-replicas: 2
+    mongo-url: mongodb://ethereum-ropsten-mongodb-0.ethereum-ropsten-mongodb-headless.unchained-dev.svc.cluster.local:27017,ethereum-ropsten-mongodb-1.ethereum-ropsten-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
+    indexer-replicas: 1
+    indexer-url: http://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
+    rpc-url: http://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8332
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 3
+    api-cpu-limit: "300m"
+    api-cpu-threshold: 30
+    api-memory-limit: "1Gi"
+    ingester-autoscaling: true
+    ingester-replicas: 1
+    ingester-max-replicas: 2
+    ingester-cpu-limit: "500m"
+    ingester-cpu-threshold: 20
+    ingester-memory-limit: "2Gi"
 
 commands:
   setup-runtime:
@@ -277,6 +345,9 @@ jobs:
       organization:
         type: string
         default: SHAPESHIFT
+      pulumi-command:
+        type: string
+        default: preview
     steps:
       - setup_remote_docker:
           version: 20.10.2
@@ -285,7 +356,7 @@ jobs:
       - pulumi-dependencies:
           organization: <<parameters.organization>>
       - run:
-          name: pulumi up
+          name: pulumi
           working_directory: node/pulumi
           command: |
             pulumi stack select $<< parameters.organization >>_PULUMI_ORG/dependencies
@@ -338,7 +409,7 @@ jobs:
             pulumi config set --path unchained:common.dockerhub.password $DOCKERHUB_PASSWORD --plaintext
             pulumi config set --path unchained:common.dockerhub.server docker.io
             pulumi config set --path unchained:common.rootDomainName $<< parameters.organization >>_ROOT_DOMAIN_NAME
-            pulumi up -f --yes --suppress-outputs
+            pulumi <<parameters.pulumi-command>> --suppress-outputs
 
   deploy-coinstack:
     description: deploy a specific coinstack
@@ -370,7 +441,7 @@ jobs:
         type: string
       pulumi-command:
         type: string
-        default: pulumi up -f --yes --suppress-outputs
+        default: preview
       broker-url:
         type: string
       mongo-cpu-limit:
@@ -452,7 +523,7 @@ jobs:
             echo 'export NETWORK=<< parameters.network >>' >> $BASH_ENV
             echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
       - run:
-          name: pulumi up
+          name: pulumi
           working_directory: node/<< parameters.pulumi-dir >>
           command: |
             pulumi stack select $<< parameters.organization >>_PULUMI_ORG/<< parameters.pulumi-stack >>
@@ -489,7 +560,7 @@ jobs:
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.cpuLimit << parameters.ingester-cpu-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.memoryLimit << parameters.ingester-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.replicas << parameters.ingester-replicas >>
-            << parameters.pulumi-command >>
+            pulumi << parameters.pulumi-command >> --suppress-outputs
 
   deploy-monitoring:
     description: deploy unchained monitoring stack
@@ -498,6 +569,9 @@ jobs:
       organization:
         type: string
         default: SHAPESHIFT
+      pulumi-command:
+        type: string
+        default: preview
     steps:
       - setup_remote_docker:
           version: 20.10.2
@@ -506,7 +580,7 @@ jobs:
       - pulumi-dependencies:
           organization: <<parameters.organization>>
       - run:
-          name: pulumi up
+          name: pulumi
           working_directory: node/monitoring
           command: |
             pulumi stack select $<< parameters.organization >>_PULUMI_ORG/prod
@@ -517,7 +591,7 @@ jobs:
             pulumi config set --path unchained:monitoring.githubOauthSecret $GITHUB_OAUTH_SECRET --plaintext
             pulumi config set --path unchained:monitoring.alerting true
             pulumi config set --path unchained:monitoring.opsgenieApiKey $<< parameters.organization >>_OPSGENIE_API_KEY
-            pulumi up -f --yes --suppress-outputs
+            pulumi <<parameters.pulumi-command>> --suppress-outputs
 
   lint-and-test:
     description: lint and test project
@@ -553,318 +627,296 @@ workflows:
           name: lint and test project
           <<: *only-feature
 
-  deploy-development-shapeshift:
+  deploy-development:
     jobs:
       - lint-and-test-persist:
           name: lint and test project (persist to workspace)
           <<: *only-develop
 
+      ########## (SHAPESHIFT) ##########
       - deploy-dependencies:
-          name: deploy common unchained dependencies
+          name: preview dependencies (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: preview
           requires:
             - lint and test project (persist to workspace)
           <<: *only-develop
 
-      ########## (BITCOIN DEV) ##########
-      - deploy-coinstack:
-          name: deploy bitcoin develop
-          <<: *bitcoin
-          environment: dev
-          pulumi-stack: public-dev
-          broker-url: bitcoin-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
-          mongo-replicas: 2
-          mongo-url: mongodb://bitcoin-mongodb-0.bitcoin-mongodb-headless.unchained-dev.svc.cluster.local:27017,bitcoin-mongodb-1.bitcoin-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
-          indexer-replicas: 1
-          indexer-url: http://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001
-          indexer-ws-url: ws://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
-          rpc-url: http://user:password@bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8332
-          api-autoscaling: true
-          api-replicas: 2
-          api-max-replicas: 3
-          api-cpu-limit: "300m"
-          api-cpu-threshold: 30
-          api-memory-limit: "1Gi"
-          ingester-autoscaling: true
-          ingester-replicas: 1
-          ingester-max-replicas: 2
-          ingester-cpu-limit: "500m"
-          ingester-cpu-threshold: 20
-          ingester-memory-limit: "2Gi"
-          requires:
-            - deploy common unchained dependencies
-          <<: *only-develop
-
-      ########## (ETHEREUM DEV) ##########
-      - deploy-coinstack:
-          name: deploy ethereum develop
-          <<: *ethereum
-          environment: dev
-          pulumi-stack: public-dev
-          broker-url: ethereum-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
-          mongo-replicas: 2
-          mongo-url: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained-dev.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
-          indexer-replicas: 1
-          indexer-url: http://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8001
-          indexer-ws-url: ws://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
-          rpc-url: http://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8332
-          api-autoscaling: true
-          api-replicas: 2
-          api-max-replicas: 3
-          api-cpu-limit: "300m"
-          api-cpu-threshold: 30
-          api-memory-limit: "1Gi"
-          ingester-autoscaling: true
-          ingester-replicas: 1
-          ingester-max-replicas: 2
-          ingester-cpu-limit: "500m"
-          ingester-cpu-threshold: 20
-          ingester-memory-limit: "2Gi"
-          requires:
-            - deploy common unchained dependencies
-          <<: *only-develop
-
-      ########## (ETHEREUM-ROPSTEN DEV) ##########
-      - deploy-coinstack:
-          name: deploy ethereum-ropsten develop
-          <<: *ethereum-ropsten
-          environment: dev
-          network: ropsten
-          pulumi-stack: public-dev-ropsten
-          broker-url: ethereum-ropsten-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
-          mongo-replicas: 2
-          mongo-url: mongodb://ethereum-ropsten-mongodb-0.ethereum-ropsten-mongodb-headless.unchained-dev.svc.cluster.local:27017,ethereum-ropsten-mongodb-1.ethereum-ropsten-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
-          indexer-replicas: 1
-          indexer-url: http://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8001
-          indexer-ws-url: ws://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
-          rpc-url: http://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8332
-          api-autoscaling: true
-          api-replicas: 2
-          api-max-replicas: 3
-          api-cpu-limit: "300m"
-          api-cpu-threshold: 30
-          api-memory-limit: "1Gi"
-          ingester-autoscaling: true
-          ingester-replicas: 1
-          ingester-max-replicas: 2
-          ingester-cpu-limit: "500m"
-          ingester-cpu-threshold: 20
-          ingester-memory-limit: "2Gi"
-          requires:
-            - deploy common unchained dependencies
-          <<: *only-develop
-
-  deploy-monitoring-shapeshift:
-    jobs:
-      - approve-monitoring:
-          name: approve monitoring stack
+      - approve-shapeshift:
+          name: approve shapeshift
           type: approval
+          requires:
+            - preview dependencies (shapeshift)
+          <<: *only-develop
+
+      - deploy-dependencies:
+          name: deploy dependencies (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: up -f --yes
+          requires:
+            - approve shapeshift
+          <<: *only-develop
+
+      - deploy-coinstack:
+          name: deploy bitcoin develop (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: up -f --yes
+          requires:
+            - deploy dependencies (shapeshift)
+          <<: *bitcoin
+          <<: *bitcoin-dev
+          <<: *only-develop
+
+      - deploy-coinstack:
+          name: deploy ethereum develop (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: up -f --yes
+          requires:
+            - deploy dependencies (shapeshift)
+          <<: *ethereum
+          <<: *ethereum-dev
+          <<: *only-develop
+
+      - deploy-coinstack:
+          name: deploy ethereum-ropsten develop (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: up -f --yes
+          requires:
+            - deploy dependencies (shapeshift)
+          <<: *ethereum-ropsten
+          <<: *ethereum-ropsten-dev
+          <<: *only-develop
+
+      ########## (TAXISTAKE) ##########
+      - deploy-dependencies:
+          name: preview dependencies (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - lint and test project (persist to workspace)
+          <<: *only-develop
+
+      - approve-taxistake:
+          name: approve taxistake
+          type: approval
+          requires:
+            - preview dependencies (taxistake)
+          <<: *only-develop
+
+      - deploy-dependencies:
+          name: deploy dependencies (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve taxistake
+          <<: *only-develop
+
+      - deploy-coinstack:
+          name: deploy bitcoin develop (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - deploy dependencies (taxistake)
+          <<: *bitcoin
+          <<: *bitcoin-dev
+          <<: *only-develop
+
+      - deploy-coinstack:
+          name: deploy ethereum develop (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - deploy dependencies (taxistake)
+          <<: *ethereum
+          <<: *ethereum-dev
+          <<: *only-develop
+
+      - deploy-coinstack:
+          name: deploy ethereum-ropsten develop (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - deploy dependencies (taxistake)
+          <<: *ethereum-ropsten
+          <<: *ethereum-ropsten-dev
+          <<: *only-develop
+
+  deploy-monitoring:
+    jobs:
+      - lint-and-test-persist:
+          name: lint and test project (persist to workplace)
+          <<: *only-develop
+
+      ########## (SHAPESHIFT) ##########
+      - deploy-monitoring:
+          name: preview monitoring (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: preview
+          requires:
+            - lint and test project (persist to workplace)
+          <<: *only-develop
+
+      - approve-monitoring:
+          name: approve shapeshift
+          type: approval
+          requires:
+            - preview monitoring (shapeshift)
           <<: *only-develop
 
       - deploy-monitoring:
-          name: deploy unchained monitoring stack
+          name: deploy monitoring (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: up -f --yes
           requires:
-            - approve monitoring stack
+            - approve shapeshift
           <<: *only-develop
 
-  deploy-main-shapeshift:
+      ########## (TAXISTAKE) ##########
+      - deploy-monitoring:
+          name: preview monitoring (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - lint and test project (persist to workplace)
+          <<: *only-develop
+
+      - approve-monitoring:
+          name: approve taxistake
+          type: approval
+          requires:
+            - preview monitoring (taxistake)
+          <<: *only-develop
+
+      - deploy-monitoring:
+          name: deploy monitoring (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve taxistake
+          <<: *only-develop
+
+  deploy-main:
     jobs:
       - lint-and-test-persist:
           name: lint and test project (persist to workspace)
           <<: *only-main
 
+      ########## (SHAPESHIFT) ##########
       - deploy-dependencies:
-          name: deploy common unchained dependencies
+          name: validate dependencies (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: preview --expect-no-changes
           requires:
             - lint and test project (persist to workspace)
           <<: *only-main
 
-      ########## (BITCOIN) ##########
+      ####### BITCOIN
       - deploy-coinstack:
-          name: preview bitcoin coinstack
-          pulumi-command: pulumi preview
-          <<: *bitcoin
+          name: preview bitcoin (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: preview
           requires:
-            - deploy common unchained dependencies
+            - validate dependencies (shapeshift)
+          <<: *bitcoin
           <<: *only-main
 
       - approve-coinstack:
-          name: approve bitcoin coinstack
+          name: approve bitcoin coinstack (shapeshift)
           type: approval
           requires:
-            - preview bitcoin coinstack
+            - preview bitcoin (shapeshift)
           <<: *only-main
 
       - deploy-coinstack:
-          name: deploy bitcoin coinstack
-          <<: *bitcoin
+          name: deploy bitcoin (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: up -f --yes
           requires:
-            - approve bitcoin coinstack
+            - approve bitcoin coinstack (shapeshift)
           <<: *only-main
 
-      ########## (ETHEREUM) ##########
+      ####### ETHEREUM
       - deploy-coinstack:
-          name: preview ethereum coinstack
-          pulumi-command: pulumi preview
+          name: preview ethereum (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: preview
+          requires:
+            - validate dependencies (shapeshift)
           <<: *ethereum
-          requires:
-            - deploy common unchained dependencies
           <<: *only-main
 
       - approve-coinstack:
-          name: approve ethereum coinstack
+          name: approve ethereum coinstack (shapeshift)
           type: approval
           requires:
-            - preview ethereum coinstack
+            - preview ethereum (shapeshift)
           <<: *only-main
 
       - deploy-coinstack:
-          name: deploy ethereum coinstack
-          <<: *ethereum
+          name: deploy ethereum (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: up -f --yes
           requires:
-            - approve ethereum coinstack
+            - approve ethereum coinstack (shapeshift)
+          <<: *ethereum
           <<: *only-main
 
-  deploy-development-taxistake:
-   jobs:
-     - lint-and-test-persist:
-         name: lint and test project (persist to workspace)
-         <<: *only-develop
+      ########## (TAXISTAKE) ##########
+      - deploy-dependencies:
+          name: validate dependencies (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: preview --expect-no-changes
+          requires:
+            - lint and test project (persist to workspace)
+          <<: *only-main
 
-     - deploy-dependencies:
-         name: deploy common unchained dependencies
-         organization: TAXISTAKE
-         requires:
-           - lint and test project (persist to workspace)
-         <<: *only-develop
+      ####### BITCOIN
+      - deploy-coinstack:
+          name: preview bitcoin (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies (taxistake)
+          <<: *bitcoin
+          <<: *only-main
 
-     ########## (BITCOIN DEV) ##########
-     - deploy-coinstack:
-         name: deploy bitcoin develop
-         <<: *bitcoin
-         organization: TAXISTAKE
-         environment: dev
-         pulumi-stack: public-dev
-         broker-url: bitcoin-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
-         mongo-replicas: 2
-         mongo-url: mongodb://bitcoin-mongodb-0.bitcoin-mongodb-headless.unchained-dev.svc.cluster.local:27017,bitcoin-mongodb-1.bitcoin-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
-         indexer-replicas: 1
-         indexer-url: http://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001
-         indexer-ws-url: ws://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
-         rpc-url: http://user:password@bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8332
-         requires:
-           - deploy common unchained dependencies
-         <<: *only-develop
+      - approve-coinstack:
+          name: approve bitcoin coinstack (taxistake)
+          type: approval
+          requires:
+            - preview bitcoin (taxistake)
+          <<: *only-main
 
-     ########## (ETHEREUM DEV) ##########
-     - deploy-coinstack:
-         name: deploy ethereum develop
-         <<: *ethereum
-         organization: TAXISTAKE
-         environment: dev
-         pulumi-stack: public-dev
-         broker-url: ethereum-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
-         mongo-replicas: 2
-         mongo-url: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained-dev.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
-         indexer-replicas: 1
-         indexer-url: http://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8001
-         indexer-ws-url: ws://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
-         rpc-url: http://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8332
-         requires:
-           - deploy common unchained dependencies
-         <<: *only-develop
+      - deploy-coinstack:
+          name: deploy bitcoin (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve bitcoin coinstack (taxistake)
+          <<: *only-main
 
-     ########## (ETHEREUM-ROPSTEN DEV) ##########
-     - deploy-coinstack:
-         name: deploy ethereum-ropsten develop
-         <<: *ethereum-ropsten
-         organization: TAXISTAKE
-         environment: dev
-         network: ropsten
-         pulumi-stack: public-dev-ropsten
-         broker-url: ethereum-ropsten-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
-         mongo-replicas: 2
-         mongo-url: mongodb://ethereum-ropsten-mongodb-0.ethereum-ropsten-mongodb-headless.unchained-dev.svc.cluster.local:27017,ethereum-ropsten-mongodb-1.ethereum-ropsten-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
-         indexer-replicas: 1
-         indexer-url: http://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8001
-         indexer-ws-url: ws://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
-         rpc-url: http://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8332
-         requires:
-           - deploy common unchained dependencies
-         <<: *only-develop
+      ####### ETHEREUM
+      - deploy-coinstack:
+          name: preview ethereum (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies (taxistake)
+          <<: *ethereum
+          <<: *only-main
 
-  deploy-monitoring-taxistake:
-   jobs:
-     - approve-monitoring:
-         name: approve monitoring stack
-         type: approval
-         <<: *only-develop
+      - approve-coinstack:
+          name: approve ethereum coinstack (taxistake)
+          type: approval
+          requires:
+            - preview ethereum (taxistake)
+          <<: *only-main
 
-     - deploy-monitoring:
-         name: deploy unchained monitoring stack
-         organization: TAXISTAKE
-         requires:
-           - approve monitoring stack
-         <<: *only-develop
-
-  deploy-main-taxistake:
-   jobs:
-     - lint-and-test-persist:
-         name: lint and test project (persist to workspace)
-         <<: *only-main
-
-     - deploy-dependencies:
-         name: deploy common unchained dependencies
-         organization: TAXISTAKE
-         requires:
-           - lint and test project (persist to workspace)
-         <<: *only-main
-
-     ########## (BITCOIN) ##########
-     - deploy-coinstack:
-         name: preview bitcoin coinstack
-         organization: TAXISTAKE
-         pulumi-command: pulumi preview
-         <<: *bitcoin
-         requires:
-           - deploy common unchained dependencies
-         <<: *only-main
-
-     - approve-coinstack:
-         name: approve bitcoin coinstack
-         type: approval
-         requires:
-           - preview bitcoin coinstack
-         <<: *only-main
-
-     - deploy-coinstack:
-         name: deploy bitcoin coinstack
-         organization: TAXISTAKE
-         <<: *bitcoin
-         requires:
-           - approve bitcoin coinstack
-         <<: *only-main
-
-     ########## (ETHEREUM) ##########
-     - deploy-coinstack:
-         name: preview ethereum coinstack
-         organization: TAXISTAKE
-         pulumi-command: pulumi preview
-         <<: *ethereum
-         requires:
-           - deploy common unchained dependencies
-         <<: *only-main
-
-     - approve-coinstack:
-         name: approve ethereum coinstack
-         type: approval
-         requires:
-           - preview ethereum coinstack
-         <<: *only-main
-
-     - deploy-coinstack:
-         name: deploy ethereum coinstack
-         organization: TAXISTAKE
-         <<: *ethereum
-         requires:
-           - approve ethereum coinstack
-         <<: *only-main
+      - deploy-coinstack:
+          name: deploy ethereum (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve ethereum coinstack (taxistake)
+          <<: *ethereum
+          <<: *only-main
