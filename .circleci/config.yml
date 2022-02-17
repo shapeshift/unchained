@@ -18,6 +18,7 @@ aliases:
       branches:
         only:
           - develop
+          - taxi-stake
 
   - &only-main
     filters:
@@ -343,7 +344,6 @@ jobs:
     parameters:
       organization:
         type: string
-        default: SHAPESHIFT
       pulumi-command:
         type: string
         default: preview
@@ -421,7 +421,6 @@ jobs:
     parameters:
       organization:
         type: string
-        default: SHAPESHIFT
       coinstack:
         description: coinstack name
         type: string
@@ -567,7 +566,6 @@ jobs:
     parameters:
       organization:
         type: string
-        default: SHAPESHIFT
       pulumi-command:
         type: string
         default: preview
