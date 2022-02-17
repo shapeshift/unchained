@@ -657,27 +657,30 @@ workflows:
       - deploy-coinstack:
           name: deploy bitcoin develop (shapeshift)
           organization: SHAPESHIFT
-          pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies (shapeshift)
+          <<: *bitcoin
           <<: *bitcoin-dev
           <<: *only-develop
 
       - deploy-coinstack:
           name: deploy ethereum develop (shapeshift)
           organization: SHAPESHIFT
-          pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies (shapeshift)
+          <<: *ethereum
           <<: *ethereum-dev
           <<: *only-develop
 
       - deploy-coinstack:
           name: deploy ethereum-ropsten develop (shapeshift)
           organization: SHAPESHIFT
-          pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies (shapeshift)
+          <<: *ethereum-ropsten
           <<: *ethereum-ropsten-dev
           <<: *only-develop
 
