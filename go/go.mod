@@ -8,13 +8,13 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/osmosis-labs/osmosis v1.0.4
 	github.com/pkg/errors v0.9.1
-	github.com/sirupsen/logrus v1.6.0
-	github.com/spf13/viper v1.7.1
-	github.com/tendermint/tendermint v0.34.10
-	gitlab.com/thorchain/thornode v0.77.1
-	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
-	google.golang.org/grpc v1.40.0
-
+	github.com/sirupsen/logrus v1.8.1
+    github.com/spf13/viper v1.10.1
+    github.com/tendermint/liquidity v1.4.5
+    github.com/tendermint/tendermint v0.34.14
+    gitlab.com/thorchain/thornode v0.80.0
+    golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
+    google.golang.org/grpc v1.44.0
 )
 
 require (
