@@ -833,6 +833,7 @@ workflows:
           pulumi-command: up -f --yes
           requires:
             - approve bitcoin coinstack (shapeshift)
+          <<: *bitcoin
           <<: *only-main
 
       ####### ETHEREUM
@@ -893,6 +894,7 @@ workflows:
           pulumi-command: up -f --yes
           requires:
             - approve bitcoin coinstack (taxistake)
+          <<: *bitcoin
           <<: *only-main
 
       ####### ETHEREUM
