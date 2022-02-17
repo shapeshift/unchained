@@ -3,7 +3,7 @@ version: 2.1
 executors:
   pulumi:
     docker:
-      - image: pulumi/pulumi-nodejs:3.11.0
+      - image: pulumi/pulumi-nodejs:3.24.1
 
 aliases:
   - &only-feature
@@ -64,7 +64,6 @@ aliases:
     rpc-url: http://user:password@bitcoin-indexer-svc.unchained.svc.cluster.local:8332
 
   - &bitcoin-dev
-    <<: *bitcoin
     environment: dev
     pulumi-stack: public-dev
     broker-url: bitcoin-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
@@ -125,7 +124,6 @@ aliases:
     rpc-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8332
 
   - &ethereum-dev
-    <<: *ethereum
     environment: dev
     pulumi-stack: public-dev
     broker-url: ethereum-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
@@ -186,7 +184,6 @@ aliases:
     rpc-url: http://ethereum-ropsten-indexer-svc.unchained.svc.cluster.local:8332
 
   - &ethereum-ropsten-dev
-    <<: *ethereum-ropsten
     environment: dev
     network: ropsten
     pulumi-stack: public-dev-ropsten
@@ -714,6 +711,7 @@ workflows:
           pulumi-command: preview
           requires:
             - deploy dependencies (taxistake)
+          <<: *bitcoin
           <<: *bitcoin-dev
           <<: *only-develop
 
@@ -723,6 +721,7 @@ workflows:
           pulumi-command: preview
           requires:
             - deploy dependencies (taxistake)
+          <<: *ethereum
           <<: *ethereum-dev
           <<: *only-develop
 
@@ -732,6 +731,7 @@ workflows:
           pulumi-command: preview
           requires:
             - deploy dependencies (taxistake)
+          <<: *ethereum-ropsten
           <<: *ethereum-ropsten-dev
           <<: *only-develop
 
