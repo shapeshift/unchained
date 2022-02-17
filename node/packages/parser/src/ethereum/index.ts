@@ -62,7 +62,7 @@ export class TransactionParser {
       async (parser) => await parser.parse(tx)
     )
 
-    const pTx: ParseTx = {
+    const parsedTx: ParseTx = {
       address,
       blockHash: tx.blockHash,
       blockHeight: tx.blockHeight,
@@ -76,14 +76,14 @@ export class TransactionParser {
       value: tx.value,
     }
 
-    const pTxWithTransfers = this.getParsedTxWithTransfers(tx, pTx, address, internalTxs)
+    const parsedTxWithTransfers = this.getParsedTxWithTransfers(tx, parsedTx, address, internalTxs)
 
     // Add metadata and return
     return {
-      ...pTxWithTransfers,
+      ...parsedTxWithTransfers,
       data: {
-        buyTx: getBuyTx(pTxWithTransfers),
-        sellTx: getSellTx(pTxWithTransfers),
+        buyTx: getBuyTx(parsedTxWithTransfers),
+        sellTx: getSellTx(parsedTxWithTransfers),
       },
     }
   }
@@ -124,7 +124,7 @@ export class TransactionParser {
     return Status.Unknown
   }
 
-  private getParsedTxWithTransfers(tx: Tx, pTx: ParseTx, address: string, internalTxs?: Array<InternalTx>) {
+  private getParsedTxWithTransfers(tx: Tx, parsedTx: ParseTx, address: string, internalTxs?: Array<InternalTx>) {
     const sendAddress = tx.vin[0].addresses?.[0] ?? ''
     const receiveAddress = tx.vout[0].addresses?.[0] ?? ''
 
@@ -132,8 +132,8 @@ export class TransactionParser {
       // send amount
       const sendValue = new BigNumber(tx.value)
       if (sendValue.gt(0)) {
-        pTx.transfers = this.aggregateTransfer(
-          pTx.transfers,
+        parsedTx.transfers = this.aggregateTransfer(
+          parsedTx.transfers,
           TransferType.Send,
           caip19.toCAIP19({ chain: ChainTypes.Ethereum, network: toNetworkType(this.network) }),
           sendAddress,
@@ -145,7 +145,7 @@ export class TransactionParser {
       // network fee
       const fees = new BigNumber(tx.fees ?? 0)
       if (fees.gt(0)) {
-        pTx.fee = {
+        parsedTx.fee = {
           caip19: caip19.toCAIP19({ chain: ChainTypes.Ethereum, network: toNetworkType(this.network) }),
           value: fees.toString(10),
         }
@@ -156,8 +156,8 @@ export class TransactionParser {
       // receive amount
       const receiveValue = new BigNumber(tx.value)
       if (receiveValue.gt(0)) {
-        pTx.transfers = this.aggregateTransfer(
-          pTx.transfers,
+        parsedTx.transfers = this.aggregateTransfer(
+          parsedTx.transfers,
           TransferType.Receive,
           caip19.toCAIP19({ chain: ChainTypes.Ethereum, network: toNetworkType(this.network) }),
           sendAddress,
@@ -196,12 +196,12 @@ export class TransactionParser {
 
       // token send amount
       if (address === transfer.from) {
-        pTx.transfers = this.aggregateTransfer(pTx.transfers, TransferType.Send, ...transferArgs)
+        parsedTx.transfers = this.aggregateTransfer(parsedTx.transfers, TransferType.Send, ...transferArgs)
       }
 
       // token receive amount
       if (address === transfer.to) {
-        pTx.transfers = this.aggregateTransfer(pTx.transfers, TransferType.Receive, ...transferArgs)
+        parsedTx.transfers = this.aggregateTransfer(parsedTx.transfers, TransferType.Receive, ...transferArgs)
       }
     })
 
@@ -215,15 +215,15 @@ export class TransactionParser {
 
       // internal eth send
       if (address === internalTx.from) {
-        pTx.transfers = this.aggregateTransfer(pTx.transfers, TransferType.Send, ...transferArgs)
+        parsedTx.transfers = this.aggregateTransfer(parsedTx.transfers, TransferType.Send, ...transferArgs)
       }
 
       // internal eth receive
       if (address === internalTx.to) {
-        pTx.transfers = this.aggregateTransfer(pTx.transfers, TransferType.Receive, ...transferArgs)
+        parsedTx.transfers = this.aggregateTransfer(parsedTx.transfers, TransferType.Receive, ...transferArgs)
       }
     })
 
-    return pTx
+    return parsedTx
   }
 }
