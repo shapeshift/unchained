@@ -587,9 +587,9 @@ jobs:
             pulumi stack select $<< parameters.organization >>_PULUMI_ORG/prod
             pulumi config set --path unchained:monitoring.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies
             pulumi config set --path unchained:monitoring.environment monitoring
-            pulumi config set --path unchained:monitoring.githubOrg $GITHUB_ORG
-            pulumi config set --path unchained:monitoring.githubOauthID $GITHUB_OAUTH_ID
-            pulumi config set --path unchained:monitoring.githubOauthSecret $GITHUB_OAUTH_SECRET --plaintext
+            pulumi config set --path unchained:monitoring.githubOrg $<< parameters.organization>>_GITHUB_ORG
+            pulumi config set --path unchained:monitoring.githubOauthID $<< parameters.organization>>_GITHUB_OAUTH_ID
+            pulumi config set --path unchained:monitoring.githubOauthSecret $<< parameters.organization>>_GITHUB_OAUTH_SECRET --plaintext
             pulumi config set --path unchained:monitoring.alerting true
             pulumi config set --path unchained:monitoring.opsgenieApiKey $<< parameters.organization >>_OPSGENIE_API_KEY
             pulumi <<parameters.pulumi-command>> --suppress-outputs
@@ -661,7 +661,7 @@ workflows:
       - deploy-coinstack:
           name: deploy bitcoin develop (shapeshift)
           organization: SHAPESHIFT
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies (shapeshift)
           <<: *bitcoin-dev
@@ -670,7 +670,7 @@ workflows:
       - deploy-coinstack:
           name: deploy ethereum develop (shapeshift)
           organization: SHAPESHIFT
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies (shapeshift)
           <<: *ethereum-dev
@@ -679,7 +679,7 @@ workflows:
       - deploy-coinstack:
           name: deploy ethereum-ropsten develop (shapeshift)
           organization: SHAPESHIFT
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies (shapeshift)
           <<: *ethereum-ropsten-dev
