@@ -54,9 +54,9 @@ type Event struct {
 // Contains info about a transaction message
 // swagger:model Message
 type Message struct {
-	Addresses []string
-	From      string `json:"from,omitempty"`
-	To        string `json:"to,omitempty"`
+	Addresses []string `json:"-"`
+	From      string   `json:"from,omitempty"`
+	To        string   `json:"to,omitempty"`
 	// required: true
 	// example: /cosmos.bank.v1beta1.MsgSend
 	Type  string `json:"type"`

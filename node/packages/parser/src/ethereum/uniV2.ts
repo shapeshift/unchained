@@ -6,8 +6,7 @@ import { Transfer, TransferType, TxSpecific as ParseTxSpecific, UniV2Tx } from '
 import { Network } from './types'
 import ABI from './abi/uniV2'
 import ERC20_ABI from './abi/erc20'
-import { getSigHash, toNetworkType } from './utils'
-import { txInteractsWithContract } from './helpers'
+import { getSigHash, toNetworkType, txInteractsWithContract } from './utils'
 
 export const ROUTER_CONTRACT = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
 

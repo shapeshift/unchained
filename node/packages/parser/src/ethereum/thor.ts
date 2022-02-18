@@ -3,8 +3,7 @@ import { Thorchain } from '@shapeshiftoss/thorchain'
 import { Dex, ThorTx, TradeType, TxSpecific as ParseTxSpecific } from '../types'
 import { Network } from './types'
 import ABI from './abi/thor'
-import { getSigHash } from './utils'
-import { txInteractsWithContract } from './helpers'
+import { getSigHash, txInteractsWithContract } from './utils'
 import { Tx } from '@shapeshiftoss/blockbook'
 
 const SWAP_TYPES = ['SWAP', '=', 's']
