@@ -12,14 +12,12 @@ aliases:
         ignore:
           - main
           - develop
-          - taxi-stake
 
   - &only-develop
     filters:
       branches:
         only:
           - develop
-          - taxi-stake
 
   - &only-main
     filters:
