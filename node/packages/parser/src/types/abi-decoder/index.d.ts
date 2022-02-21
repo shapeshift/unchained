@@ -60,9 +60,9 @@ declare module 'abi-decoder' {
   }
 
   export declare function getABIs(): ABI.Item[]
-  export declare function addABI(items: ABI.Item[])
-  export declare function removeABI(items: ABI.Item[])
-  export declare function getMethodIDs()
+  export declare function addABI(items: ABI.Item[]): void
+  export declare function removeABI(items: ABI.Item[]): void
+  export declare function getMethodIDs(): Map<string, ABI.Item>
   export declare function decodeMethod(data: string): DecodedMethod | undefined
   export declare function decodeLogs(logs: LogItem[]): Array<DecodedLogs | undefined>
 }

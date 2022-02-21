@@ -6,6 +6,8 @@ import { addABI, decodeMethod } from 'abi-decoder'
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
 
+const contract = '0x6a1e73f12018d8e5f966ce794aa2921941feb17e'
+
 export class Parser {
   blockbook: Blockbook
 
@@ -17,7 +19,9 @@ export class Parser {
   }
 
   async parse(tx: Tx): Promise<ParseTxSpecific<YearnTx> | undefined> {
-    // FIXME - only run if it's a Yearn tx!
+    const interactedWith = tx.vout && tx.vout[0].addresses && tx.vout[0].addresses[0]
+    if (interactedWith === contract) return
+
     const transaction = await this.blockbook.getTransaction(tx.txid)
     const data = transaction.ethereumSpecific?.data
     addABI(shapeShiftRouter)
