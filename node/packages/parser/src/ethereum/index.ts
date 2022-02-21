@@ -1,6 +1,6 @@
 import { BigNumber } from 'bignumber.js'
 import { ethers } from 'ethers'
-import { Blockbook, Tx } from '@shapeshiftoss/blockbook'
+import { Tx } from '@shapeshiftoss/blockbook'
 import { caip19, caip2 } from '@shapeshiftoss/caip'
 import { ChainTypes, ContractTypes } from '@shapeshiftoss/types'
 import { Status, Token, Transfer, TransferType, Tx as ParseTx, TxSpecific } from '../types'
@@ -15,9 +15,6 @@ import { findAsyncSequential } from '../helpers'
 import { getBuyTx, getSellTx } from './helpers'
 
 export * from './types'
-
-const INDEXER_URL = process.env.INDEXER_URL
-const INDEXER_WS_URL = process.env.INDEXER_WS_URL
 
 export interface TransactionParserArgs {
   network?: Network
@@ -39,11 +36,6 @@ export class TransactionParser {
   private readonly parsers: Array<GenericParser>
 
   constructor(args: TransactionParserArgs) {
-    if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
-    if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
-
-    const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
-
     const provider = new ethers.providers.JsonRpcProvider(args.rpcUrl)
 
     this.network = args.network ?? 'mainnet'
@@ -51,7 +43,7 @@ export class TransactionParser {
     this.thor = new thor.Parser({ network: this.network, midgardUrl: args.midgardUrl, rpcUrl: args.rpcUrl })
     this.uniV2 = new uniV2.Parser({ network: this.network, provider })
     this.zrx = new zrx.Parser()
-    this.yearn = new yearn.Parser({ blockbook })
+    this.yearn = new yearn.Parser()
 
     this.parsers = [this.zrx, this.thor, this.uniV2, this.yearn]
   }

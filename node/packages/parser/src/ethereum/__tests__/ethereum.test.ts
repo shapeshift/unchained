@@ -19,6 +19,7 @@ import foxClaim from './mockData/foxClaim'
 import foxStake from './mockData/foxStake'
 import foxExit from './mockData/foxExit'
 import yearnDeposit from './mockData/yearnDeposit'
+import yearnApproval from './mockData/yearnApproval'
 import {
   bondToken,
   foxToken,
@@ -34,11 +35,6 @@ import {
 } from './mockData/tokens'
 
 jest.mock('@shapeshiftoss/thorchain')
-jest.mock('@shapeshiftoss/blockbook', () => ({
-  Blockbook: jest.fn().mockImplementation(() => ({
-    getTransaction: () => yearnDeposit.tx,
-  })),
-}))
 
 const txParser = new TransactionParser({ midgardUrl: '', rpcUrl: '' })
 
@@ -1096,7 +1092,35 @@ describe('parseTx', () => {
   })
 
   describe('yearn', () => {
-    it('should be able to parse deposit', async () => {
+    it('should parse approval', async () => {
+      const { tx } = yearnApproval
+      const address = '0x1399D13F3A0aaf08f7C5028D81447a311e4760c4'
+
+      const expected: Tx = {
+        txid: tx.txid,
+        blockHeight: tx.blockHeight,
+        blockTime: tx.blockTime,
+        blockHash: tx.blockHash,
+        address: address,
+        caip2: 'eip155:1',
+        confirmations: tx.confirmations,
+        data: {
+          type: 'approve',
+        },
+        value: tx.value,
+        status: Status.Confirmed,
+        fee: {
+          value: '4519526097650998',
+          caip19: 'eip155:1/slip44:60',
+        },
+        transfers: [],
+      }
+
+      const actual = await txParser.parse(tx, address)
+      expect(expected).toEqual(actual)
+    })
+
+    it('should parse deposit', async () => {
       const { tx } = yearnDeposit
       const address = '0x1399D13F3A0aaf08f7C5028D81447a311e4760c4'
 
