@@ -40,7 +40,7 @@ export class TransactionParser {
     }
 
     // messages make best attempt to track where value is transferring to for a variety of tx types
-    // logs provide more specific information if needed as mor complex tx types are added
+    // logs provide more specific information if needed as more complex tx types are added
     tx.messages.forEach((msg) => {
       if (msg.from === address) {
         // send amount
