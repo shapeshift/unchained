@@ -1,3 +1,5 @@
+// abi-decoder has no TS support
+// They are simple and somewhat static, so we define the types ourselves
 declare module 'abi-decoder' {
   export namespace ABI {
     export type Type = 'function' | 'constructor' | 'event' | 'fallback' | 'receive'

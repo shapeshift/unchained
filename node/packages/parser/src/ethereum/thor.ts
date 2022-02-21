@@ -38,6 +38,18 @@ export class Parser implements GenericParser {
     }[args.network]
   }
 
+  // detect address associated with transferOut internal transaction
+  getInternalAddress(inputData: string): string | undefined {
+    if (getSigHash(inputData) !== this.transferOutSigHash) return
+
+    const result = this.abiInterface.decodeFunctionData(this.transferOutSigHash, inputData)
+
+    const [type] = result.memo.split(':')
+    if (type !== 'OUT' || type !== 'REFUND') return
+
+    return result.to
+  }
+
   async parse(tx: Tx): Promise<ParseTxSpecific<ThorTx> | undefined> {
     if (!txInteractsWithContract(tx, this.routerContract)) return
     if (!tx.ethereumSpecific?.data) return
@@ -69,17 +81,5 @@ export class Parser implements GenericParser {
 
     // We encountered a case we thought we'd support, but don't - exit
     return
-  }
-
-  // detect address associated with transferOut internal transaction
-  getInternalAddress(inputData: string): string | undefined {
-    if (getSigHash(inputData) !== this.transferOutSigHash) return
-
-    const result = this.abiInterface.decodeFunctionData(this.transferOutSigHash, inputData)
-
-    const [type] = result.memo.split(':')
-    if (type !== 'OUT' || type !== 'REFUND') return
-
-    return result.to
   }
 }
