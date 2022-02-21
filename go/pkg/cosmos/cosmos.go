@@ -5,7 +5,7 @@ import (
 	"context"
 
 	"github.com/cosmos/cosmos-sdk/codec"
-	cryptotypes "github.com/cosmos/cosmos-sdk/codec/types"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/simapp/params"
 	stdtypes "github.com/cosmos/cosmos-sdk/std"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -20,8 +20,8 @@ import (
 	ibccoretypes "github.com/cosmos/ibc-go/v3/modules/core/types"
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
-	"github.com/shapeshift/go-unchained/internal/log"
-	tendermintclient "github.com/shapeshift/go-unchained/pkg/tendermint/client"
+	"github.com/shapeshift/unchained/internal/log"
+	tendermintclient "github.com/shapeshift/unchained/pkg/tendermint/client"
 	liquiditytypes "github.com/tendermint/liquidity/x/liquidity/types"
 	abcitypes "github.com/tendermint/tendermint/abci/types"
 	"google.golang.org/grpc"
@@ -138,8 +138,8 @@ func (c *GRPCClient) Close() {
 }
 
 // NewEncoding registers all base protobuf types by default as well as any custom types passed in
-func NewEncoding(registerInterfaces ...func(r cryptotypes.InterfaceRegistry)) *params.EncodingConfig {
-	registry := cryptotypes.NewInterfaceRegistry()
+func NewEncoding(registerInterfaces ...func(r codectypes.InterfaceRegistry)) *params.EncodingConfig {
+	registry := codectypes.NewInterfaceRegistry()
 
 	// register base protobuf types
 	banktypes.RegisterInterfaces(registry)
