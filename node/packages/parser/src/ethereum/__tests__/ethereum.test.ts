@@ -18,10 +18,13 @@ import uniRemoveLiquidity from './mockData/uniRemoveLiquidity'
 import foxClaim from './mockData/foxClaim'
 import foxStake from './mockData/foxStake'
 import foxExit from './mockData/foxExit'
+import yearnDeposit from './mockData/yearnDeposit'
 import {
   bondToken,
   foxToken,
   kishuToken,
+  linkToken,
+  linkYearnVault,
   maticToken,
   tribeToken,
   uniToken,
@@ -31,6 +34,11 @@ import {
 } from './mockData/tokens'
 
 jest.mock('@shapeshiftoss/thorchain')
+jest.mock('@shapeshiftoss/blockbook', () => ({
+  Blockbook: jest.fn().mockImplementation(() => ({
+    getTransaction: () => yearnDeposit.tx,
+  })),
+}))
 
 const txParser = new TransactionParser({ midgardUrl: '', rpcUrl: '' })
 
@@ -1083,6 +1091,55 @@ describe('parseTx', () => {
 
       const actual = await txParser.parse(tx, address)
 
+      expect(expected).toEqual(actual)
+    })
+  })
+
+  describe('yearn', () => {
+    it('should be able to parse deposit', async () => {
+      const { tx } = yearnDeposit
+      const address = '0x1399D13F3A0aaf08f7C5028D81447a311e4760c4'
+
+      const expected: Tx = {
+        txid: tx.txid,
+        blockHeight: tx.blockHeight,
+        blockTime: tx.blockTime,
+        blockHash: tx.blockHash,
+        address: address,
+        caip2: 'eip155:1',
+        confirmations: tx.confirmations,
+        data: {
+          type: 'deposit',
+        },
+        value: tx.value,
+        status: Status.Confirmed,
+        fee: {
+          value: '18139009291874667',
+          caip19: 'eip155:1/slip44:60',
+        },
+        transfers: [
+          {
+            type: TransferType.Send,
+            from: address,
+            to: '0x6a1e73f12018D8e5f966ce794aa2921941feB17E',
+            caip19: 'eip155:1/erc20:0x514910771af9ca656af840dff83e8264ecf986ca',
+            totalValue: '999961394864662132',
+            components: [{ value: '999961394864662132' }],
+            token: linkToken,
+          },
+          {
+            type: TransferType.Receive,
+            from: '0x0000000000000000000000000000000000000000',
+            to: address,
+            caip19: 'eip155:1/erc20:0x671a912c10bba0cfa74cfc2d6fba9ba1ed9530b2',
+            totalValue: '987002304279657611',
+            components: [{ value: '987002304279657611' }],
+            token: linkYearnVault,
+          },
+        ],
+      }
+
+      const actual = await txParser.parse(tx, address)
       expect(expected).toEqual(actual)
     })
   })

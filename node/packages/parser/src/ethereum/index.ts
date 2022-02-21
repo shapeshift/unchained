@@ -10,6 +10,7 @@ import * as multiSig from './multiSig'
 import * as thor from './thor'
 import * as uniV2 from './uniV2'
 import * as zrx from './zrx'
+import * as yearn from './yearn'
 import { findAsyncSequential } from '../helpers'
 import { getBuyTx, getSellTx } from './helpers'
 
@@ -21,7 +22,7 @@ export interface TransactionParserArgs {
   rpcUrl: string
 }
 
-export type Parser = thor.Parser | uniV2.Parser | zrx.Parser
+export type Parser = thor.Parser | uniV2.Parser | zrx.Parser | yearn.Parser
 
 export class TransactionParser {
   network: Network
@@ -29,6 +30,7 @@ export class TransactionParser {
   private readonly thor: thor.Parser
   private readonly uniV2: uniV2.Parser
   private readonly zrx: zrx.Parser
+  private readonly yearn: yearn.Parser
   private readonly parsers: Array<Parser>
 
   constructor(args: TransactionParserArgs) {
@@ -39,8 +41,9 @@ export class TransactionParser {
     this.thor = new thor.Parser({ network: this.network, midgardUrl: args.midgardUrl, rpcUrl: args.rpcUrl })
     this.uniV2 = new uniV2.Parser({ network: this.network, provider })
     this.zrx = new zrx.Parser()
+    this.yearn = new yearn.Parser()
 
-    this.parsers = [this.zrx, this.thor, this.uniV2]
+    this.parsers = [this.zrx, this.thor, this.uniV2, this.yearn]
   }
 
   // return any addresses that can be detected
@@ -69,11 +72,12 @@ export class TransactionParser {
       blockTime: tx.blockTime,
       caip2: caip2.toCAIP2({ chain: ChainTypes.Ethereum, network: toNetworkType(this.network) }),
       confirmations: tx.confirmations,
-      status: this.getStatus(tx),
+      status: TransactionParser.getStatus(tx),
       trade: contractParserResult?.trade,
       transfers: contractParserResult?.transfers ?? [],
       txid: tx.txid,
       value: tx.value,
+      data: contractParserResult?.data,
     }
 
     const parsedTxWithTransfers = this.getParsedTxWithTransfers(tx, parsedTx, address, internalTxs)
@@ -81,7 +85,10 @@ export class TransactionParser {
     // Add metadata and return
     return {
       ...parsedTxWithTransfers,
+      // TODO - Should shared logic actually live here?
+      // TODO - What to do with duplicate data
       data: {
+        ...parsedTxWithTransfers.data,
         buyTx: getBuyTx(parsedTxWithTransfers),
         sellTx: getSellTx(parsedTxWithTransfers),
       },
@@ -114,7 +121,7 @@ export class TransactionParser {
     return transfers
   }
 
-  private getStatus(tx: Tx): Status {
+  private static getStatus(tx: Tx): Status {
     const status = tx.ethereumSpecific?.status
 
     if (status === -1 && tx.confirmations <= 0) return Status.Pending

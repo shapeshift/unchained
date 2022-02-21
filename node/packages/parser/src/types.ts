@@ -56,6 +56,7 @@ export enum TransferType {
 export interface TxMetadata {
   buyTx?: Transfer
   sellTx?: Transfer
+  type?: string
 }
 
 export interface StandardTx {
@@ -86,6 +87,10 @@ export interface ThorTx extends StandardTx {
   data?: TxMetadata // TODO = Type and extend any specific properties
 }
 
-export type Tx = UniV2Tx | ZrxTx | ThorTx
+export interface YearnTx extends StandardTx {
+  data?: TxMetadata // TODO = Type and extend any specific properties
+}
+
+export type Tx = UniV2Tx | ZrxTx | ThorTx | YearnTx
 
 export type TxSpecific<T extends Tx> = Partial<Pick<T, 'trade' | 'transfers' | 'data'>>
