@@ -2,7 +2,8 @@ import { BigNumber } from 'bignumber.js'
 import { Tx } from '@shapeshiftoss/blockbook'
 import { caip2, caip19 } from '@shapeshiftoss/caip'
 import { ChainTypes } from '@shapeshiftoss/types'
-import { Tx as ParseTx, Status, TransferType, Transfer } from '../types'
+import { Tx as ParseTx, Status, TransferType } from '../types'
+import { aggregateTransfer } from '../utils'
 import { Network } from './types'
 import { toNetworkType } from './utils'
 
@@ -21,7 +22,7 @@ export class TransactionParser {
   }
 
   async parse(tx: Tx, address: string): Promise<ParseTx> {
-    const caip19BTC = caip19.toCAIP19({ chain: ChainTypes.Bitcoin, network: toNetworkType(this.network) })
+    const caip19Bitcoin = caip19.toCAIP19({ chain: ChainTypes.Bitcoin, network: toNetworkType(this.network) })
 
     const parsedTx: ParseTx = {
       address,
@@ -41,10 +42,10 @@ export class TransactionParser {
         // send amount
         const sendValue = new BigNumber(vin.value ?? 0)
         if (sendValue.gt(0)) {
-          parsedTx.transfers = this.aggregateTransfer(
+          parsedTx.transfers = aggregateTransfer(
             parsedTx.transfers,
             TransferType.Send,
-            caip19BTC,
+            caip19Bitcoin,
             vin.addresses?.[0] ?? '',
             tx.vout[0].addresses?.[0] ?? '',
             sendValue.toString(10)
@@ -54,7 +55,7 @@ export class TransactionParser {
         // network fee
         const fees = new BigNumber(tx.fees ?? 0)
         if (fees.gt(0)) {
-          parsedTx.fee = { caip19: caip19BTC, value: fees.toString(10) }
+          parsedTx.fee = { caip19: caip19Bitcoin, value: fees.toString(10) }
         }
       }
     })
@@ -64,10 +65,10 @@ export class TransactionParser {
         // receive amount
         const receiveValue = new BigNumber(vout.value ?? 0)
         if (receiveValue.gt(0)) {
-          parsedTx.transfers = this.aggregateTransfer(
+          parsedTx.transfers = aggregateTransfer(
             parsedTx.transfers,
             TransferType.Receive,
-            caip19BTC,
+            caip19Bitcoin,
             tx.vin[0].addresses?.[0] ?? '',
             vout.addresses?.[0] ?? '',
             receiveValue.toString(10)
@@ -77,30 +78,5 @@ export class TransactionParser {
     })
 
     return parsedTx
-  }
-
-  // keep track of all individual tx components and add up the total value transferred
-  private aggregateTransfer(
-    transfers: Array<Transfer>,
-    type: TransferType,
-    caip19: string,
-    from: string,
-    to: string,
-    value: string
-  ): Array<Transfer> {
-    if (!new BigNumber(value).gt(0)) return transfers
-
-    const index = transfers?.findIndex((t) => t.type === type && t.caip19 === caip19 && t.from === from && t.to === to)
-    const transfer = transfers?.[index]
-
-    if (transfer) {
-      transfer.totalValue = new BigNumber(transfer.totalValue).plus(value).toString(10)
-      transfer.components.push({ value: value })
-      transfers[index] = transfer
-    } else {
-      transfers = [...transfers, { type, caip19, from, to, totalValue: value, components: [{ value: value }] }]
-    }
-
-    return transfers
   }
 }

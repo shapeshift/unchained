@@ -1,6 +1,6 @@
 import { Tx } from '@shapeshiftoss/blockbook'
 import { Dex, TradeType, TxSpecific, ZrxTx } from '../types'
-import { txInteractsWithContract } from './helpers'
+import { txInteractsWithContract } from './utils'
 
 export const PROXY_CONTRACT = '0xDef1C0ded9bec7F1a1670819833240f027b25EfF'
 
