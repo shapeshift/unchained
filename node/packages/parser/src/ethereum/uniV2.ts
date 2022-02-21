@@ -8,6 +8,7 @@ import ABI from './abi/uniV2'
 import ERC20_ABI from './abi/erc20'
 import { getSigHash, itemsToFragments, toNetworkType } from './utils'
 import { txInteractsWithContract } from './helpers'
+import { GenericParser } from './index'
 
 export const ROUTER_CONTRACT = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
 
@@ -16,7 +17,7 @@ export interface ParserArgs {
   provider: ethers.providers.JsonRpcProvider
 }
 
-export class Parser {
+export class Parser implements GenericParser {
   abiInterface: ethers.utils.Interface
   network: Network
   provider: ethers.providers.JsonRpcProvider

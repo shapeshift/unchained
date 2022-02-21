@@ -6,6 +6,7 @@ import ABI from './abi/thor'
 import { getSigHash, itemsToFragments } from './utils'
 import { txInteractsWithContract } from './helpers'
 import { Tx } from '@shapeshiftoss/blockbook'
+import { GenericParser } from './index'
 
 const SWAP_TYPES = ['SWAP', '=', 's']
 
@@ -15,7 +16,7 @@ export interface ParserArgs {
   rpcUrl: string
 }
 
-export class Parser {
+export class Parser implements GenericParser {
   abiInterface: ethers.utils.Interface
   thorchain: Thorchain
 
@@ -35,18 +36,6 @@ export class Parser {
       mainnet: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
       ropsten: '0xefA28233838f46a80AaaC8c309077a9ba70D123A',
     }[args.network]
-  }
-
-  // detect address associated with transferOut internal transaction
-  getInternalAddress(inputData: string): string | undefined {
-    if (getSigHash(inputData) !== this.transferOutSigHash) return
-
-    const result = this.abiInterface.decodeFunctionData(this.transferOutSigHash, inputData)
-
-    const [type] = result.memo.split(':')
-    if (type !== 'OUT' || type !== 'REFUND') return
-
-    return result.to
   }
 
   async parse(tx: Tx): Promise<ParseTxSpecific<ThorTx> | undefined> {
@@ -80,5 +69,17 @@ export class Parser {
 
     // We encountered a case we thought we'd support, but don't - exit
     return
+  }
+
+  // detect address associated with transferOut internal transaction
+  getInternalAddress(inputData: string): string | undefined {
+    if (getSigHash(inputData) !== this.transferOutSigHash) return
+
+    const result = this.abiInterface.decodeFunctionData(this.transferOutSigHash, inputData)
+
+    const [type] = result.memo.split(':')
+    if (type !== 'OUT' || type !== 'REFUND') return
+
+    return result.to
   }
 }

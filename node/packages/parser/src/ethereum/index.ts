@@ -1,6 +1,6 @@
 import { BigNumber } from 'bignumber.js'
 import { ethers } from 'ethers'
-import { Tx } from '@shapeshiftoss/blockbook'
+import { Blockbook, Tx } from '@shapeshiftoss/blockbook'
 import { caip19, caip2 } from '@shapeshiftoss/caip'
 import { ChainTypes, ContractTypes } from '@shapeshiftoss/types'
 import { Status, Token, Transfer, TransferType, Tx as ParseTx, TxSpecific } from '../types'
@@ -16,13 +16,18 @@ import { getBuyTx, getSellTx } from './helpers'
 
 export * from './types'
 
+const INDEXER_URL = process.env.INDEXER_URL
+const INDEXER_WS_URL = process.env.INDEXER_WS_URL
+
 export interface TransactionParserArgs {
   network?: Network
   midgardUrl: string
   rpcUrl: string
 }
 
-export type Parser = thor.Parser | uniV2.Parser | zrx.Parser | yearn.Parser
+export interface GenericParser {
+  parse: (tx: Tx) => Promise<Partial<TxSpecific<ParseTx>> | undefined>
+}
 
 export class TransactionParser {
   network: Network
@@ -31,9 +36,14 @@ export class TransactionParser {
   private readonly uniV2: uniV2.Parser
   private readonly zrx: zrx.Parser
   private readonly yearn: yearn.Parser
-  private readonly parsers: Array<Parser>
+  private readonly parsers: Array<GenericParser>
 
   constructor(args: TransactionParserArgs) {
+    if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
+    if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
+
+    const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
+
     const provider = new ethers.providers.JsonRpcProvider(args.rpcUrl)
 
     this.network = args.network ?? 'mainnet'
@@ -41,7 +51,7 @@ export class TransactionParser {
     this.thor = new thor.Parser({ network: this.network, midgardUrl: args.midgardUrl, rpcUrl: args.rpcUrl })
     this.uniV2 = new uniV2.Parser({ network: this.network, provider })
     this.zrx = new zrx.Parser()
-    this.yearn = new yearn.Parser()
+    this.yearn = new yearn.Parser({ blockbook })
 
     this.parsers = [this.zrx, this.thor, this.uniV2, this.yearn]
   }
@@ -60,7 +70,7 @@ export class TransactionParser {
 
   async parse(tx: Tx, address: string, internalTxs?: Array<InternalTx>): Promise<ParseTx> {
     // We expect only one Parser to return a result. If multiple do, we take the first and early exit.
-    const contractParserResult = await findAsyncSequential<Parser, TxSpecific<ParseTx>>(
+    const contractParserResult = await findAsyncSequential<GenericParser, TxSpecific<ParseTx>>(
       this.parsers,
       async (parser) => await parser.parse(tx)
     )
