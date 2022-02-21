@@ -1,4 +1,6 @@
-export default [
+import { ABI } from 'abi-decoder-ts/cjs/types'
+
+const shapeShirtRouter: ABI.Item[] = [
   {
     inputs: [
       {
@@ -489,3 +491,5 @@ export default [
     type: 'function',
   },
 ]
+
+export default shapeShirtRouter
