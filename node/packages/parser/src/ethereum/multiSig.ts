@@ -1,8 +1,9 @@
 import { ethers } from 'ethers'
 import ABI from './abi/multiSig'
-import { getSigHash } from './utils'
+import { getSigHash, itemsToFragments } from './utils'
 
-const abiInterface = new ethers.utils.Interface(ABI)
+const fragments = itemsToFragments(ABI)
+const abiInterface = new ethers.utils.Interface(fragments)
 
 export const SENDMULTISIG_SIG_HASH = abiInterface.getSighash('sendMultiSig')
 

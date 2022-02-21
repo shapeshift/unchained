@@ -17,6 +17,7 @@ export class Parser {
   }
 
   async parse(tx: Tx): Promise<ParseTxSpecific<YearnTx> | undefined> {
+    // FIXME - only run if it's a Yearn tx!
     const transaction = await this.blockbook.getTransaction(tx.txid)
     const data = transaction.ethereumSpecific?.data
     addABI(shapeShiftRouter)

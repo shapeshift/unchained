@@ -1,5 +1,7 @@
 import { NetworkTypes } from '@shapeshiftoss/types'
 import { Network } from './types'
+import { ABI } from 'abi-decoder'
+import { JsonFragment } from '@ethersproject/abi/src.ts/fragments'
 
 export const getSigHash = (inputData: string | undefined): string | undefined => {
   if (!inputData) return
@@ -17,3 +19,6 @@ export const toNetworkType = (network: Network): NetworkTypes => {
       throw new Error('unsupported network')
   }
 }
+
+const itemToFragment = (item: ABI.Item): JsonFragment => ({ ...item, gas: item.gas?.toString() } as JsonFragment)
+export const itemsToFragments = (items: ABI.Item[]): JsonFragment[] => items.map(itemToFragment)

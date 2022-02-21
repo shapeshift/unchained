@@ -6,7 +6,7 @@ import { Transfer, TransferType, TxSpecific as ParseTxSpecific, UniV2Tx } from '
 import { Network } from './types'
 import ABI from './abi/uniV2'
 import ERC20_ABI from './abi/erc20'
-import { getSigHash, toNetworkType } from './utils'
+import { getSigHash, itemsToFragments, toNetworkType } from './utils'
 import { txInteractsWithContract } from './helpers'
 
 export const ROUTER_CONTRACT = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
@@ -26,7 +26,7 @@ export class Parser {
   readonly wethContract: string
 
   constructor(args: ParserArgs) {
-    this.abiInterface = new ethers.utils.Interface(ABI)
+    this.abiInterface = new ethers.utils.Interface(itemsToFragments(ABI))
     this.network = args.network
     this.provider = args.provider
 
@@ -51,7 +51,7 @@ export class Parser {
 
         const tokenAddress = ethers.utils.getAddress(result.token.toLowerCase())
         const lpTokenAddress = Parser.pairFor(tokenAddress, this.wethContract)
-        const contract = new ethers.Contract(tokenAddress, ERC20_ABI, this.provider)
+        const contract = new ethers.Contract(tokenAddress, itemsToFragments(ERC20_ABI), this.provider)
         const decimals = await contract.decimals()
         const name = await contract.name()
         const symbol = await contract.symbol()
@@ -81,7 +81,7 @@ export class Parser {
 
         const tokenAddress = ethers.utils.getAddress(result.token.toLowerCase())
         const lpTokenAddress = Parser.pairFor(tokenAddress, this.wethContract)
-        const contract = new ethers.Contract(lpTokenAddress, ERC20_ABI, this.provider)
+        const contract = new ethers.Contract(lpTokenAddress, itemsToFragments(ERC20_ABI), this.provider)
         const decimals = await contract.decimals()
         const name = await contract.name()
         const symbol = await contract.symbol()

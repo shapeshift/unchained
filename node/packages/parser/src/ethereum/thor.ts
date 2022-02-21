@@ -3,7 +3,7 @@ import { Thorchain } from '@shapeshiftoss/thorchain'
 import { Dex, ThorTx, TradeType, TxSpecific as ParseTxSpecific } from '../types'
 import { Network } from './types'
 import ABI from './abi/thor'
-import { getSigHash } from './utils'
+import { getSigHash, itemsToFragments } from './utils'
 import { txInteractsWithContract } from './helpers'
 import { Tx } from '@shapeshiftoss/blockbook'
 
@@ -24,7 +24,7 @@ export class Parser {
   readonly routerContract: string
 
   constructor(args: ParserArgs) {
-    this.abiInterface = new ethers.utils.Interface(ABI)
+    this.abiInterface = new ethers.utils.Interface(itemsToFragments(ABI))
     this.thorchain = new Thorchain({ midgardUrl: args.midgardUrl, rpcUrl: args.rpcUrl })
 
     this.depositSigHash = this.abiInterface.getSighash('deposit')
