@@ -1,4 +1,6 @@
-export default [
+import { ABI } from 'abi-decoder-ts/cjs/types'
+
+const erc20: Array<ABI.Item> = [
   {
     inputs: [
       {
@@ -286,3 +288,5 @@ export default [
     type: 'function',
   },
 ]
+
+export default erc20

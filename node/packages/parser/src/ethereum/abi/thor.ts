@@ -1,4 +1,6 @@
-export default [
+import { ABI } from 'abi-decoder-ts/cjs/types'
+
+const thor: Array<ABI.Item> = [
   { inputs: [], stateMutability: 'nonpayable', type: 'constructor' },
   {
     anonymous: false,
@@ -149,3 +151,5 @@ export default [
     type: 'function',
   },
 ]
+
+export default thor

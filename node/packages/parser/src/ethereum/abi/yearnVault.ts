@@ -1,4 +1,6 @@
-export default [
+import { ABI } from 'abi-decoder-ts/cjs/types'
+
+const yearnVault: Array<ABI.Item> = [
   {
     name: 'Transfer',
     inputs: [
@@ -642,3 +644,5 @@ export default [
     gas: 3191,
   },
 ]
+
+export default yearnVault

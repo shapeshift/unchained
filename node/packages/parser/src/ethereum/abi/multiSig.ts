@@ -1,4 +1,8 @@
-export default [
+import { ABI } from 'abi-decoder-ts/cjs/types'
+
+// Type check fails as `receive` is missing from abi-decoder-ts
+// PR to submitted to maintainer to rectify: https://github.com/sambacha/abi-decoder/pull/10
+const multiSig: Array<ABI.Item> = [
   {
     anonymous: false,
     inputs: [
@@ -363,3 +367,5 @@ export default [
     type: 'receive',
   },
 ]
+
+export default multiSig

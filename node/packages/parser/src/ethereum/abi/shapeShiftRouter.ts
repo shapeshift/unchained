@@ -1,6 +1,6 @@
 import { ABI } from 'abi-decoder-ts/cjs/types'
 
-const shapeShirtRouter: ABI.Item[] = [
+const shapeShiftRouter: Array<ABI.Item> = [
   {
     inputs: [
       {
@@ -492,4 +492,4 @@ const shapeShirtRouter: ABI.Item[] = [
   },
 ]
 
-export default shapeShirtRouter
+export default shapeShiftRouter

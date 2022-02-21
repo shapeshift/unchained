@@ -1,4 +1,8 @@
-export default [
+import { ABI } from 'abi-decoder-ts/cjs/types'
+
+// Type check fails as `receive` is missing from abi-decoder-ts
+// PR to submitted to maintainer to rectify: https://github.com/sambacha/abi-decoder/pull/10
+const uniV2: Array<ABI.Item> = [
   {
     inputs: [
       { internalType: 'address', name: '_factory', type: 'address' },
@@ -338,3 +342,5 @@ export default [
   },
   { stateMutability: 'payable', type: 'receive' },
 ]
+
+export default uniV2
