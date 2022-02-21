@@ -3,7 +3,7 @@ package cosmos
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
-	"github.com/shapeshift/go-unchained/pkg/tendermint/client"
+	"github.com/shapeshift/unchained/pkg/tendermint/client"
 )
 
 type Account struct {
