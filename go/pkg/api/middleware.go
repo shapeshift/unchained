@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/shapeshift/go-unchained/internal/log"
+	"github.com/shapeshift/unchained/internal/log"
 )
 
 type statusWriter struct {
