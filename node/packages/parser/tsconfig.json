@@ -2,7 +2,8 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
-    "incremental": true
+    "incremental": true,
+    "typeRoots": [ "./types", "./node_modules/@types"],
   },
   "include": ["src"],
   "exclude": ["node_modules", "**/__tests__", "**/__mocks__"]

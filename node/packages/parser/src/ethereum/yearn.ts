@@ -1,7 +1,7 @@
 import { Tx, Blockbook } from '@shapeshiftoss/blockbook'
 import { YearnTx, TxSpecific as ParseTxSpecific } from '../types'
 import shapeShiftRouter from './abi/shapeShiftRouter'
-import { addABI, decodeMethod } from 'abi-decoder-ts'
+import { addABI, decodeMethod } from 'abi-decoder'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL

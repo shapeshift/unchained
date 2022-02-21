@@ -1,4 +1,4 @@
-import { ABI } from 'abi-decoder-ts/cjs/types'
+import { ABI } from 'abi-decoder'
 
 const yearnVault: Array<ABI.Item> = [
   {
