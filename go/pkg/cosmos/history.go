@@ -214,9 +214,13 @@ func (h *History) fetch() (*TxHistory, error) {
 	}
 
 	h.cursor.LastBlockHeight = lastBlockHeight
+
 	cursor, err := h.cursor.encode()
 	if err != nil {
+		// TODO: handle error
 	}
+
+	// TODO: nil cursor if done
 
 	txHistory := &TxHistory{
 		Txs:    txs,
