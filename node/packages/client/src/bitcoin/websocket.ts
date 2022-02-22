@@ -156,6 +156,7 @@ export class Client {
    * @param data.addresses list of addresses to unsubscribe from
    */
   unsubscribeTxs(subscriptionId?: string, data?: TxsTopicData): void {
+    if (this.connections.txs?.ws.readyState !== WebSocket.OPEN) return
     if (!subscriptionId) this.txs = {}
     if (subscriptionId && !data?.addresses.length) delete this.txs[subscriptionId]
 

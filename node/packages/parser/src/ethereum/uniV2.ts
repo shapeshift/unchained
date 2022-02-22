@@ -2,11 +2,11 @@ import { ethers } from 'ethers'
 import { Tx } from '@shapeshiftoss/blockbook'
 import { caip19 } from '@shapeshiftoss/caip'
 import { ChainTypes, ContractTypes } from '@shapeshiftoss/types'
-import { TxSpecific as ParseTxSpecific, Transfer, TransferType } from '../types'
+import { Transfer, TransferType, TxSpecific as ParseTxSpecific, UniV2Tx } from '../types'
 import { Network } from './types'
 import ABI from './abi/uniV2'
 import ERC20_ABI from './abi/erc20'
-import { getSigHash, toNetworkType } from './utils'
+import { getSigHash, toNetworkType, txInteractsWithContract } from './utils'
 
 export const ROUTER_CONTRACT = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
 
@@ -37,9 +37,10 @@ export class Parser {
     }[this.network]
   }
 
-  async parse(tx: Tx): Promise<ParseTxSpecific | undefined> {
+  async parse(tx: Tx): Promise<ParseTxSpecific<UniV2Tx> | undefined> {
+    if (!txInteractsWithContract(tx, ROUTER_CONTRACT)) return
+    if (!(tx.confirmations === 0)) return
     if (!tx.ethereumSpecific?.data) return
-    if (tx.confirmations !== 0) return
 
     const sendAddress = tx.vin[0].addresses?.[0] ?? ''
 
@@ -48,7 +49,7 @@ export class Parser {
         const result = this.abiInterface.decodeFunctionData(this.addLiquidityEthSigHash, tx.ethereumSpecific.data)
 
         const tokenAddress = ethers.utils.getAddress(result.token.toLowerCase())
-        const lpTokenAddress = this.pairFor(tokenAddress, this.wethContract)
+        const lpTokenAddress = Parser.pairFor(tokenAddress, this.wethContract)
         const contract = new ethers.Contract(tokenAddress, ERC20_ABI, this.provider)
         const decimals = await contract.decimals()
         const name = await contract.name()
@@ -78,7 +79,7 @@ export class Parser {
         const result = this.abiInterface.decodeFunctionData(this.removeLiquidityEthSigHash, tx.ethereumSpecific.data)
 
         const tokenAddress = ethers.utils.getAddress(result.token.toLowerCase())
-        const lpTokenAddress = this.pairFor(tokenAddress, this.wethContract)
+        const lpTokenAddress = Parser.pairFor(tokenAddress, this.wethContract)
         const contract = new ethers.Contract(lpTokenAddress, ERC20_ABI, this.provider)
         const decimals = await contract.decimals()
         const name = await contract.name()
@@ -109,7 +110,7 @@ export class Parser {
     }
   }
 
-  private pairFor(tokenA: string, tokenB: string): string {
+  private static pairFor(tokenA: string, tokenB: string): string {
     const [token0, token1] = tokenA < tokenB ? [tokenA, tokenB] : [tokenB, tokenA]
     const factoryContract = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'
     const salt = ethers.utils.solidityKeccak256(['address', 'address'], [token0, token1])

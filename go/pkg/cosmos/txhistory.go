@@ -10,16 +10,8 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/simapp/params"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth/signing"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
-	ibctypes "github.com/cosmos/cosmos-sdk/x/ibc/applications/transfer/types"
-	ibccoretypes "github.com/cosmos/cosmos-sdk/x/ibc/core/02-client/types"
-	ibcchanneltypes "github.com/cosmos/cosmos-sdk/x/ibc/core/04-channel/types"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/pkg/errors"
-	"github.com/shapeshift/go-unchained/pkg/tendermint/client"
+	"github.com/shapeshift/unchained/pkg/tendermint/client"
 )
 
 // cursor stores state client side between paginated requests
@@ -54,113 +46,6 @@ const (
 )
 
 const tendermintPageSize = 100
-
-func Events(log string) []Event {
-	logs, err := sdk.ParseABCILogs(log)
-	if err != nil {
-		logger.Error("failed to parse logs: %s", err)
-		return nil
-	}
-
-	events := []Event{}
-	for _, l := range logs {
-		for _, e := range l.GetEvents() {
-			attributes := []Attribute{}
-			for _, a := range e.Attributes {
-				attribute := Attribute{
-					Key:   a.Key,
-					Value: a.Value,
-				}
-				attributes = append(attributes, attribute)
-			}
-
-			event := Event{
-				Type:       e.Type,
-				Attributes: attributes,
-			}
-			events = append(events, event)
-		}
-	}
-
-	return events
-}
-
-func Messages(msgs []sdk.Msg) []Message {
-	messages := []Message{}
-
-	coinToValue := func(c *sdk.Coin) Value {
-		return Value{
-			Amount: c.Amount.String(),
-			Denom:  c.Denom,
-		}
-	}
-
-	for _, msg := range msgs {
-		switch v := msg.(type) {
-		case *banktypes.MsgSend:
-			message := Message{
-				From:  v.FromAddress,
-				To:    v.ToAddress,
-				Type:  v.Type(),
-				Value: coinToValue(&v.Amount[0]),
-			}
-			messages = append(messages, message)
-		case *stakingtypes.MsgDelegate:
-			message := Message{
-				From:  v.DelegatorAddress,
-				Type:  v.Type(),
-				Value: coinToValue(&v.Amount),
-			}
-			messages = append(messages, message)
-		case *stakingtypes.MsgUndelegate:
-			message := Message{
-				From:  v.DelegatorAddress,
-				To:    v.ValidatorAddress,
-				Type:  v.Type(),
-				Value: coinToValue(&v.Amount),
-			}
-			messages = append(messages, message)
-		case *stakingtypes.MsgBeginRedelegate:
-			message := Message{
-				From:  v.DelegatorAddress,
-				Type:  v.Type(),
-				Value: coinToValue(&v.Amount),
-			}
-			messages = append(messages, message)
-		case *disttypes.MsgWithdrawDelegatorReward:
-			message := Message{
-				From: v.ValidatorAddress,
-				To:   v.DelegatorAddress,
-				Type: v.Type(),
-			}
-			messages = append(messages, message)
-		case *ibctypes.MsgTransfer:
-			message := Message{
-				From:  v.Sender,
-				To:    v.Receiver,
-				Type:  v.Type(),
-				Value: coinToValue(&v.Token),
-			}
-			messages = append(messages, message)
-		case *ibccoretypes.MsgUpdateClient:
-			message := Message{
-				From: v.Signer,
-				Type: v.Type(),
-			}
-			messages = append(messages, message)
-		case *ibcchanneltypes.MsgRecvPacket:
-			message := Message{
-				From: v.Signer,
-				Type: v.Type(),
-			}
-			messages = append(messages, message)
-		default:
-			logger.Warnf("unsupported message type: %s, %T", v.Type(), v)
-		}
-	}
-
-	return messages
-}
 
 // make a request for a page of tx history from the tendermint RPC endpoint
 func (s *txHistoryState) tendermintHistoryRequest(txType HistTxType) (*client.TxSearchResponse, error) {
@@ -442,7 +327,7 @@ func (s *txHistoryState) readTxHistory() (*TxHistory, error) {
 		}
 
 		// decode tx to its components
-		cosmosTx, signingTx, err := decodeTx(*next.Tx, s.encodingConfig)
+		cosmosTx, signingTx, err := DecodeTx(*s.encodingConfig, *next.Tx)
 		if err != nil {
 			logger.Errorf("failed to decode tx: %s: %s", *next.Hash, err.Error())
 			continue
@@ -558,23 +443,4 @@ func (c *HTTPClient) GetTxHistory(address string, pageCursor string, pageSize ui
 	}
 
 	return txHistory, nil
-}
-
-func decodeTx(rawTx string, encodingConfig *params.EncodingConfig) (sdk.Tx, signing.Tx, error) {
-	protoTx, err := base64.StdEncoding.DecodeString(rawTx)
-	if err != nil {
-		return nil, nil, errors.Wrapf(err, "error decoding transaction from base64")
-	}
-
-	sdkTx, err := encodingConfig.TxConfig.TxDecoder()(protoTx)
-	if err != nil {
-		return nil, nil, errors.Wrapf(err, "error decoding transaction from protobuf")
-	}
-
-	builder, err := encodingConfig.TxConfig.WrapTxBuilder(sdkTx)
-	if err != nil {
-		return nil, nil, errors.Wrapf(err, "error making transaction builder")
-	}
-
-	return sdkTx, builder.GetTx(), nil
 }
