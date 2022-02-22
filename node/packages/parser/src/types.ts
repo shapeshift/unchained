@@ -91,6 +91,6 @@ export interface YearnTx extends StandardTx {
   data?: TxMetadata // TODO = Type and extend any specific properties
 }
 
-export type Tx = UniV2Tx | ZrxTx | ThorTx | YearnTx
+export type Tx = StandardTx | UniV2Tx | ZrxTx | ThorTx
 
 export type TxSpecific<T extends Tx> = Partial<Pick<T, 'trade' | 'transfers' | 'data'>>

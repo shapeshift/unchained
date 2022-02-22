@@ -14,9 +14,9 @@
   },
   "dependencies": {
     "@shapeshiftoss/blockbook": "^5.1.1",
-    "@shapeshiftoss/caip": "^1.6.1",
+    "@shapeshiftoss/caip": "^1.11.1",
     "@shapeshiftoss/thorchain": "^5.1.1",
-    "@shapeshiftoss/types": "^1.17.0",
+    "@shapeshiftoss/types": "^1.23.0",
     "abi-decoder": "^2.4.0",
     "bignumber.js": "^9.0.1"
   }
