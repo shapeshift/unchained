@@ -1,13 +1,81 @@
 package api
 
 import (
-	"github.com/shapeshift/go-unchained/pkg/api"
-	"github.com/shapeshift/go-unchained/pkg/cosmos"
+	"crypto/sha256"
+	"encoding/json"
+	"fmt"
+	"strconv"
+
+	"github.com/pkg/errors"
+	"github.com/shapeshift/unchained/pkg/api"
+	"github.com/shapeshift/unchained/pkg/cosmos"
+	"github.com/tendermint/tendermint/types"
 )
 
 type Handler struct {
 	httpClient *cosmos.HTTPClient
 	grpcClient *cosmos.GRPCClient
+	wsClient   *cosmos.WSClient
+}
+
+func (h *Handler) StartWebsocket() error {
+	h.wsClient.TxHandler(func(tx types.EventDataTx) ([]byte, []string, error) {
+		cosmosTx, signingTx, err := cosmos.DecodeTx(h.wsClient.EncodingConfig(), tx.Tx)
+		if err != nil {
+			return nil, nil, errors.Wrapf(err, "failed to decode tx: %v", tx.Tx)
+		}
+
+		// TODO: blockHash and timestamp
+		blockHeight := strconv.Itoa(int(tx.Height))
+		fee := signingTx.GetFee()[0]
+
+		t := Tx{
+			BaseTx: api.BaseTx{
+				TxID:        fmt.Sprintf("%X", sha256.Sum256(tx.Tx)),
+				BlockHeight: &blockHeight,
+			},
+			Events: cosmos.Events(tx.Result.Log),
+			Fee: cosmos.Value{
+				Amount: fee.Amount.String(),
+				Denom:  fee.Denom,
+			},
+			GasWanted: strconv.Itoa(int(tx.Result.GasWanted)),
+			GasUsed:   strconv.Itoa(int(tx.Result.GasUsed)),
+			Index:     int(tx.Index),
+			Memo:      signingTx.GetMemo(),
+			Messages:  cosmos.Messages(cosmosTx.GetMsgs()),
+		}
+
+		msg, err := json.Marshal(t)
+		if err != nil {
+			return nil, nil, errors.Wrapf(err, "failed to marshal tx: %v", t)
+		}
+
+		seen := make(map[string]bool)
+		addrs := []string{}
+		for _, m := range t.Messages {
+			if m.Addresses == nil {
+				continue
+			}
+
+			// unique set of addresses
+			for _, addr := range m.Addresses {
+				if _, ok := seen[addr]; !ok {
+					addrs = append(addrs, m.Addresses...)
+					seen[addr] = true
+				}
+			}
+		}
+
+		return msg, addrs, nil
+	})
+
+	err := h.wsClient.Start()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
 }
 
 func (h *Handler) GetInfo() (api.Info, error) {

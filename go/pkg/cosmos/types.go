@@ -3,7 +3,7 @@ package cosmos
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
-	"github.com/shapeshift/go-unchained/pkg/tendermint/client"
+	"github.com/shapeshift/unchained/pkg/tendermint/client"
 )
 
 type Account struct {
@@ -54,8 +54,9 @@ type Event struct {
 // Contains info about a transaction message
 // swagger:model Message
 type Message struct {
-	From string `json:"from,omitempty"`
-	To   string `json:"to,omitempty"`
+	Addresses []string `json:"-"`
+	From      string   `json:"from,omitempty"`
+	To        string   `json:"to,omitempty"`
 	// required: true
 	// example: /cosmos.bank.v1beta1.MsgSend
 	Type  string `json:"type"`
