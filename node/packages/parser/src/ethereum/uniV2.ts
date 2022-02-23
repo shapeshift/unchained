@@ -8,8 +8,7 @@ import ABI from './abi/uniV2'
 import ERC20_ABI from './abi/erc20'
 import { getSigHash, toNetworkType, txInteractsWithContract } from './utils'
 import { GenericParser } from './index'
-
-export const ROUTER_CONTRACT = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
+import { YEARN_V2_ROUTER_CONTRACT } from './constants'
 
 export interface ParserArgs {
   network: Network
@@ -39,7 +38,7 @@ export class Parser implements GenericParser {
   }
 
   async parse(tx: Tx): Promise<TxSpecific<UniV2Tx> | undefined> {
-    if (!txInteractsWithContract(tx, ROUTER_CONTRACT)) return
+    if (!txInteractsWithContract(tx, YEARN_V2_ROUTER_CONTRACT)) return
     if (!(tx.confirmations === 0)) return
     if (!tx.ethereumSpecific?.data) return
 

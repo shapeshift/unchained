@@ -1,3 +1,5 @@
+import { SHAPE_SHIFT_ROUTER_CONTRACT } from '../../constants'
+
 const yearnDeposit = {
   txid: '0xcb6f3702249a22e10e5330ad43b3eed548966cf09c3f5bb423d7835511c991fb',
   vin: [
@@ -11,7 +13,7 @@ const yearnDeposit = {
     {
       value: '0',
       n: 0,
-      addresses: ['0x6a1e73f12018D8e5f966ce794aa2921941feB17E'],
+      addresses: [SHAPE_SHIFT_ROUTER_CONTRACT],
       isAddress: true,
     },
   ],
@@ -25,7 +27,7 @@ const yearnDeposit = {
     {
       type: 'ERC20',
       from: '0x1399D13F3A0aaf08f7C5028D81447a311e4760c4',
-      to: '0x6a1e73f12018D8e5f966ce794aa2921941feB17E',
+      to: SHAPE_SHIFT_ROUTER_CONTRACT,
       token: '0x514910771AF9Ca656af840dff83E8264EcF986CA',
       name: 'ChainLink Token',
       symbol: 'LINK',
@@ -44,7 +46,7 @@ const yearnDeposit = {
     },
     {
       type: 'ERC20',
-      from: '0x6a1e73f12018D8e5f966ce794aa2921941feB17E',
+      from: SHAPE_SHIFT_ROUTER_CONTRACT,
       to: '0x671a912C10bba0CFA74Cfc2d6Fba9BA1ed9530B2',
       token: '0x514910771AF9Ca656af840dff83E8264EcF986CA',
       name: 'ChainLink Token',

@@ -6,6 +6,7 @@ import ABI from './abi/thor'
 import { getSigHash, txInteractsWithContract } from './utils'
 import { Tx } from '@shapeshiftoss/blockbook'
 import { GenericParser } from './index'
+import { THOR_ROUTER_CONTRACT_MAINNET, THOR_ROUTER_CONTRACT_ROPSTEN } from './constants'
 
 const SWAP_TYPES = ['SWAP', '=', 's']
 
@@ -32,8 +33,8 @@ export class Parser implements GenericParser {
 
     // TODO: Router contract can change, use /inbound_addresses endpoint to determine current router contract
     this.routerContract = {
-      mainnet: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
-      ropsten: '0xefA28233838f46a80AaaC8c309077a9ba70D123A',
+      mainnet: THOR_ROUTER_CONTRACT_MAINNET,
+      ropsten: THOR_ROUTER_CONTRACT_ROPSTEN,
     }[args.network]
   }
 

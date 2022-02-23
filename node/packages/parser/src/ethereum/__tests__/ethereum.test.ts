@@ -33,6 +33,7 @@ import {
   usdcToken,
   usdtToken,
 } from './mockData/tokens'
+import { SHAPE_SHIFT_ROUTER_CONTRACT } from '../constants'
 
 jest.mock('@shapeshiftoss/thorchain')
 
@@ -1145,7 +1146,7 @@ describe('parseTx', () => {
           {
             type: TransferType.Send,
             from: address,
-            to: '0x6a1e73f12018D8e5f966ce794aa2921941feB17E',
+            to: SHAPE_SHIFT_ROUTER_CONTRACT,
             caip19: 'eip155:1/erc20:0x514910771af9ca656af840dff83e8264ecf986ca',
             totalValue: '999961394864662132',
             components: [{ value: '999961394864662132' }],

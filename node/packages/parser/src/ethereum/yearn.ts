@@ -4,8 +4,7 @@ import shapeShiftRouter from './abi/shapeShiftRouter'
 import yearnVault from './abi/yearnVault'
 import { GenericParser } from './index'
 import { ethers } from 'ethers'
-
-const SHAPE_SHIFT_ROUTER_CONTRACT = '0x6a1e73f12018D8e5f966ce794aa2921941feB17E'
+import { SHAPE_SHIFT_ROUTER_CONTRACT } from './constants'
 
 export class Parser implements GenericParser {
   supportsTransaction(tx: Tx) {
