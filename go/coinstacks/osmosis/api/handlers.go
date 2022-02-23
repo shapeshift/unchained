@@ -27,17 +27,19 @@ func (h *Handler) StartWebsocket() error {
 		}
 
 		blockHeight := strconv.Itoa(int(tx.Height))
+		txid := fmt.Sprintf("%X", sha256.Sum256(tx.Tx))
 
 		fees := signingTx.GetFee()
 		if len(fees) == 0 {
+			logger.Warnf("txid: %s - no fees detected", txid)
 			fees = []sdk.Coin{{Denom: "uosmo", Amount: sdk.NewInt(0)}}
 		} else if len(fees) > 1 {
-			logger.Warnf("multiple fees seen: %+v", fees)
+			logger.Warnf("txid: %s - multiple fees detected (defaulting to index 0): %+v", txid, fees)
 		}
 
 		t := Tx{
-			// TODO: blockHash and timestamp
 			BaseTx: api.BaseTx{
+				// TODO: blockHash and timestamp
 				TxID:        fmt.Sprintf("%X", sha256.Sum256(tx.Tx)),
 				BlockHeight: &blockHeight,
 			},
