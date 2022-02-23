@@ -2,8 +2,7 @@ import { ethers } from 'ethers'
 import ABI from './abi/multiSig'
 import { getSigHash } from './utils'
 
-const fragments = ABI
-const abiInterface = new ethers.utils.Interface(fragments)
+const abiInterface = new ethers.utils.Interface(ABI)
 
 export const SENDMULTISIG_SIG_HASH = abiInterface.getSighash('sendMultiSig')
 
