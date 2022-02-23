@@ -68,5 +68,5 @@ const yearnDeposit = {
 
 export default {
   tx: yearnDeposit,
-  txMempool: { ...yearnDeposit, blockHeight: -1, confirmations: 0 },
+  txMempool: { ...yearnDeposit, blockHeight: -1, confirmations: 0, fee: 0, ethereumSpecific: undefined },
 }

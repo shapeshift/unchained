@@ -78,5 +78,5 @@ const yearnWithdrawal = {
 
 export default {
   tx: yearnWithdrawal,
-  txMempool: { ...yearnWithdrawal, blockHeight: -1, confirmations: 0 },
+  txMempool: { ...yearnWithdrawal, blockHeight: -1, confirmations: 0, fee: 0, ethereumSpecific: undefined },
 }

@@ -43,7 +43,7 @@ export class Parser implements GenericParser {
 
     return {
       data: {
-        type: decoded?.name,
+        method: decoded?.name,
       },
     }
   }

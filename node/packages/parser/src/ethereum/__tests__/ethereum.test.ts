@@ -1107,7 +1107,7 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
-          type: 'approve',
+          method: 'approve',
         },
         value: tx.value,
         status: Status.Confirmed,
@@ -1135,7 +1135,7 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
-          type: 'deposit',
+          method: 'deposit',
         },
         value: tx.value,
         status: Status.Confirmed,
@@ -1182,7 +1182,7 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
-          type: 'withdraw',
+          method: 'withdraw',
         },
         value: tx.value,
         status: Status.Confirmed,

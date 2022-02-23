@@ -34,5 +34,5 @@ const yearnApproval = {
 
 export default {
   tx: yearnApproval,
-  txMempool: { ...yearnApproval, blockHeight: -1, confirmations: 0 },
+  txMempool: { ...yearnApproval, blockHeight: -1, confirmations: 0, fee: 0, ethereumSpecific: undefined },
 }

@@ -56,7 +56,7 @@ export enum TransferType {
 export interface TxMetadata {
   buyTx?: Transfer
   sellTx?: Transfer
-  type?: string
+  method?: string
 }
 
 export interface StandardTx {
