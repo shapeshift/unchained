@@ -1,0 +1,6 @@
+config:
+  unchained:cosmos:
+    stack: kaladinlight/common/minikube
+    network: mainnet
+    api:
+      enableDatadogLogs: false

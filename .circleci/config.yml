@@ -209,6 +209,28 @@ aliases:
     ingester-cpu-threshold: 20
     ingester-memory-limit: "2Gi"
 
+  - &cosmos
+    coinstack: cosmos
+    pulumi-stack: public
+    pulumi-dir: coinstacks/cosmos/pulumi
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 6
+    api-cpu-limit: "500m"
+    api-cpu-threshold: 30
+    api-memory-limit: "2Gi"
+
+  - &cosmos-dev
+    <<: *cosmos
+    environment: dev
+    pulumi-stack: public-dev
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 3
+    api-cpu-limit: "300m"
+    api-cpu-threshold: 30
+    api-memory-limit: "1Gi"
+
 commands:
   setup-runtime:
     description: setup runtime environment
@@ -228,6 +250,7 @@ commands:
             curl -sSL "https://golang.org/dl/go1.17.6.linux-amd64.tar.gz" | sudo tar -xz -C /usr/local/
             mkdir -p /home/circleci/go/bin
             curl -sSL "https://github.com/gotestyourself/gotestsum/releases/download/v1.7.0/gotestsum_1.7.0_linux_amd64.tar.gz" | sudo tar -xz -C /usr/local/bin gotestsum
+            curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sudo sh -s -- -b /usr/local/bin v1.43.0
       - run:
           name: node
           command: |
@@ -251,7 +274,7 @@ commands:
             rm openjdk.tar.gz
       - run:
           name: goswagger
-          command: docker pull quay.io/goswagger/swagger
+          command: docker pull quay.io/goswagger/swagger:v0.29.0
 
   unchained-precheck:
     description: checkout project, install dependencies, build, lint and test
@@ -412,8 +435,8 @@ jobs:
             pulumi config set --path unchained:common.rootDomainName $<< parameters.organization >>_ROOT_DOMAIN_NAME
             pulumi <<parameters.pulumi-command>> --suppress-outputs
 
-  deploy-coinstack:
-    description: deploy a specific coinstack
+  deploy-coinstack-node:
+    description: deploy a specific node coinstack
     executor: pulumi
     environment:
       DOCKER_BUILDKIT: 1
@@ -562,6 +585,68 @@ jobs:
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.replicas << parameters.ingester-replicas >>
             pulumi << parameters.pulumi-command >> --suppress-outputs
 
+  deploy-coinstack-go:
+    description: deploy a specific go coinstack
+    executor: pulumi
+    environment:
+      DOCKER_BUILDKIT: 1
+    parameters:
+      organization:
+        type: string
+      coinstack:
+        description: coinstack name
+        type: string
+      environment:
+        description: environment to deploy into. empty string ('') is our prod
+        type: string
+        default: ""
+      network:
+        type: string
+        default: mainnet
+      pulumi-stack:
+        description: pulumi stack to deploy to (public)
+        type: string
+      pulumi-dir:
+        description: path to pulumi directory
+        type: string
+      pulumi-command:
+        type: string
+        default: preview
+      api-autoscaling:
+        type: boolean
+      api-cpu-threshold:
+        type: integer
+      api-max-replicas:
+        type: integer
+      api-cpu-limit:
+        type: string
+      api-memory-limit:
+        type: string
+      api-replicas:
+        type: integer
+    steps:
+      - setup_remote_docker:
+          version: 20.10.2
+      - attach_workspace:
+          at: ~/
+      - pulumi-dependencies:
+          organization: <<parameters.organization>>
+      - run:
+          name: pulumi
+          working_directory: go/<< parameters.pulumi-dir >>
+          command: |
+            pulumi stack select $<< parameters.organization >>_PULUMI_ORG/<< parameters.pulumi-stack >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies
+            [ -n "<< parameters.environment >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.environment << parameters.environment >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.network << parameters.network >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.api.autoscaling.enabled << parameters.api-autoscaling >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.api.autoscaling.cpuThreshold << parameters.api-cpu-threshold >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.api.autoscaling.maxReplicas << parameters.api-max-replicas >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.api.cpuLimit << parameters.api-cpu-limit >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.api.memoryLimit << parameters.api-memory-limit >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.api.replicas << parameters.api-replicas >>
+            pulumi << parameters.pulumi-command >> --suppress-outputs
+
   deploy-monitoring:
     description: deploy unchained monitoring stack
     executor: pulumi
@@ -656,7 +741,7 @@ workflows:
             - approve shapeshift
           <<: *only-develop
 
-      - deploy-coinstack:
+      - deploy-coinstack-node:
           name: deploy bitcoin develop (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
@@ -665,7 +750,7 @@ workflows:
           <<: *bitcoin-dev
           <<: *only-develop
 
-      - deploy-coinstack:
+      - deploy-coinstack-node:
           name: deploy ethereum develop (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
@@ -674,13 +759,22 @@ workflows:
           <<: *ethereum-dev
           <<: *only-develop
 
-      - deploy-coinstack:
+      - deploy-coinstack-node:
           name: deploy ethereum-ropsten develop (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
           requires:
             - deploy dependencies (shapeshift)
           <<: *ethereum-ropsten-dev
+          <<: *only-develop
+
+      - deploy-coinstack-go:
+          name: deploy cosmos develop (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: up -f --yes
+          requires:
+            - deploy dependencies (shapeshift)
+          <<: *cosmos-dev
           <<: *only-develop
 
       ########## (TAXISTAKE) ##########
@@ -707,7 +801,7 @@ workflows:
             - approve taxistake
           <<: *only-develop
 
-      - deploy-coinstack:
+      - deploy-coinstack-node:
           name: deploy bitcoin develop (taxistake)
           organization: TAXISTAKE
           pulumi-command: up -f --yes
@@ -716,7 +810,7 @@ workflows:
           <<: *bitcoin-dev
           <<: *only-develop
 
-      - deploy-coinstack:
+      - deploy-coinstack-node:
           name: deploy ethereum develop (taxistake)
           organization: TAXISTAKE
           pulumi-command: up -f --yes
@@ -725,7 +819,7 @@ workflows:
           <<: *ethereum-dev
           <<: *only-develop
 
-      - deploy-coinstack:
+      - deploy-coinstack-node:
           name: deploy ethereum-ropsten develop (taxistake)
           organization: TAXISTAKE
           pulumi-command: up -f --yes
@@ -804,7 +898,7 @@ workflows:
           <<: *only-main
 
       ####### BITCOIN
-      - deploy-coinstack:
+      - deploy-coinstack-node:
           name: preview bitcoin (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: preview
@@ -820,7 +914,7 @@ workflows:
             - preview bitcoin (shapeshift)
           <<: *only-main
 
-      - deploy-coinstack:
+      - deploy-coinstack-node:
           name: deploy bitcoin (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
@@ -830,7 +924,7 @@ workflows:
           <<: *only-main
 
       ####### ETHEREUM
-      - deploy-coinstack:
+      - deploy-coinstack-node:
           name: preview ethereum (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: preview
@@ -846,7 +940,7 @@ workflows:
             - preview ethereum (shapeshift)
           <<: *only-main
 
-      - deploy-coinstack:
+      - deploy-coinstack-node:
           name: deploy ethereum (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
@@ -865,7 +959,7 @@ workflows:
           <<: *only-main
 
       ####### BITCOIN
-      - deploy-coinstack:
+      - deploy-coinstack-node:
           name: preview bitcoin (taxistake)
           organization: TAXISTAKE
           pulumi-command: preview
@@ -881,7 +975,7 @@ workflows:
             - preview bitcoin (taxistake)
           <<: *only-main
 
-      - deploy-coinstack:
+      - deploy-coinstack-node:
           name: deploy bitcoin (taxistake)
           organization: TAXISTAKE
           pulumi-command: up -f --yes
@@ -891,7 +985,7 @@ workflows:
           <<: *only-main
 
       ####### ETHEREUM
-      - deploy-coinstack:
+      - deploy-coinstack-node:
           name: preview ethereum (taxistake)
           organization: TAXISTAKE
           pulumi-command: preview
@@ -907,7 +1001,7 @@ workflows:
             - preview ethereum (taxistake)
           <<: *only-main
 
-      - deploy-coinstack:
+      - deploy-coinstack-node:
           name: deploy ethereum (taxistake)
           organization: TAXISTAKE
           pulumi-command: up -f --yes

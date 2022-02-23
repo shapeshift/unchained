@@ -1,0 +1,21 @@
+{
+  "name": "@shapeshiftoss/common-pulumi",
+  "license": "MIT",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "clean": "rm -rf node_modules"
+  },
+  "dependencies": {
+    "@pulumi/kubernetes": "^3.16.0",
+    "@pulumi/pulumi": "^3.24.1",
+    "@types/folder-hash": "^4.0.0",
+    "@types/object-hash": "^2.2.1",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.0.0",
+    "folder-hash": "^4.0.0",
+    "fs": "^0.0.1-security",
+    "object-hash": "^2.2.0",
+    "path": "^0.12.7"
+  }
+}

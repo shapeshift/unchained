@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
@@ -41,7 +40,7 @@ func Logger(next http.Handler) http.Handler {
 			next.ServeHTTP(sw, r)
 		}
 
-		statusLogger := log.WithFields(log.Fields{"method": r.Method, "statusCode": sw.status, "responseTime": fmt.Sprintf("%s", time.Since(t))})
+		statusLogger := log.WithFields(log.Fields{"method": r.Method, "statusCode": sw.status, "responseTime": time.Since(t).String()})
 
 		if sw.status < http.StatusOK || sw.status >= http.StatusBadRequest {
 			statusLogger.Errorf("%s", r.RequestURI)
