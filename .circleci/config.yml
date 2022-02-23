@@ -416,9 +416,9 @@ jobs:
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r5b.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[3] r5n.4xlarge
             pulumi config set --path unchained:common.eks.traefik.autoscaling.enabled true
-            pulumi config set --path unchained:common.eks.traefik.autoscaling.cpuThreshold 30
-            pulumi config set --path unchained:common.eks.traefik.autoscaling.maxReplicas 10
-            pulumi config set --path unchained:common.eks.traefik.replicas 3
+            pulumi config set --path unchained:common.eks.traefik.autoscaling.cpuThreshold 20
+            pulumi config set --path unchained:common.eks.traefik.autoscaling.maxReplicas 15
+            pulumi config set --path unchained:common.eks.traefik.replicas 5
             pulumi config set --path unchained:common.eks.traefik.resources.cpu 300m
             pulumi config set --path unchained:common.eks.traefik.resources.memory 512Mi
             pulumi config set --path unchained:common.eks.traefik.whitelist[0] 173.245.48.0/20
@@ -850,8 +850,15 @@ workflows:
 
   deploy-monitoring:
     jobs:
+      - approve-monitoring-workflow:
+          name: approve monitoring workflow
+          type: approval
+          <<: *only-develop
+
       - lint-and-test-persist:
           name: lint and test project (persist to workplace)
+          requires:
+            - approve monitoring workflow
           <<: *only-develop
 
       ########## (SHAPESHIFT) ##########
