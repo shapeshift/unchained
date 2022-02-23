@@ -1,4 +1,4 @@
-import { Dex, Status, Trade, TradeType, TransferType, Tx, TxMetadata } from '../../types'
+import { Dex, Status, Trade, TradeType, TransferType, Tx } from '../../types'
 import { TransactionParser } from '../index'
 import multiSigSendEth from './mockData/multiSigSendEth'
 import thorSwapDepositEth from './mockData/thorSwapDepositEth'
@@ -40,11 +40,6 @@ jest.mock('@shapeshiftoss/thorchain')
 
 const txParser = new TransactionParser({ midgardUrl: '', rpcUrl: '' })
 
-const emptyMetaData: TxMetadata = {
-  buyTx: undefined,
-  sellTx: undefined,
-}
-
 describe('parseTx', () => {
   describe('multiSig', () => {
     it('should be able to parse eth multi sig send', async () => {
@@ -69,7 +64,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         transfers: [standardTransfer],
@@ -107,7 +102,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: { sellTx: sellTransfer },
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -149,10 +144,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: {
-          buyTx: undefined,
-          sellTx: sellTransfer,
-        },
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -194,7 +186,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: { buyTx: buyTransfer },
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         transfers: [buyTransfer],
@@ -232,7 +224,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: { buyTx: buyTransfer },
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         transfers: [buyTransfer],
@@ -270,7 +262,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: { buyTx: buyTransfer },
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         transfers: [buyTransfer],
@@ -327,10 +319,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: {
-          buyTx: buyTransfer,
-          sellTx: sellTransfer,
-        },
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -390,10 +379,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: {
-          buyTx: buyTransfer,
-          sellTx: sellTransfer,
-        },
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -445,10 +431,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: {
-          buyTx: buyTransfer,
-          sellTx: sellTransfer,
-        },
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -520,10 +503,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: {
-          buyTx: buyTransfer1, // TODO - work out how we handle multiple buy txs
-          sellTx: sellTransfer1, // TODO - work out how we handle multiple sell txs
-        },
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -552,7 +532,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: txMempool.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: txMempool.value,
         status: Status.Pending,
         transfers: [
@@ -592,7 +572,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -635,7 +615,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: txMempool.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: txMempool.value,
         status: Status.Pending,
         transfers: [
@@ -677,7 +657,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -725,7 +705,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -751,7 +731,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: txMempool.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: txMempool.value,
         status: Status.Pending,
         transfers: [
@@ -797,7 +777,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -850,7 +830,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: txMempool.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: txMempool.value,
         status: Status.Pending,
         transfers: [
@@ -883,7 +863,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -939,7 +919,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -976,7 +956,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: txMempool.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: txMempool.value,
         status: Status.Pending,
         transfers: [],
@@ -999,7 +979,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -1035,7 +1015,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: txMempool.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: txMempool.value,
         status: Status.Pending,
         transfers: [],
@@ -1058,7 +1038,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         fee: {

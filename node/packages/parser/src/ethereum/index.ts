@@ -6,7 +6,7 @@ import { ChainTypes, ContractTypes } from '@shapeshiftoss/types'
 import { Status, Token, TransferType, Tx as ParseTx, TxSpecific } from '../types'
 import { aggregateTransfer, findAsyncSequential } from '../utils'
 import { InternalTx, Network } from './types'
-import { getBuyTx, getSellTx, getSigHash, toNetworkType } from './utils'
+import { getSigHash, toNetworkType } from './utils'
 import * as multiSig from './multiSig'
 import * as thor from './thor'
 import * as uniV2 from './uniV2'
@@ -81,19 +81,7 @@ export class TransactionParser {
       data: contractParserResult?.data,
     }
 
-    const parsedTxWithTransfers = this.getParsedTxWithTransfers(tx, parsedTx, address, internalTxs)
-
-    // Add metadata and return
-    return {
-      ...parsedTxWithTransfers,
-      // TODO - Should shared logic actually live here?
-      // TODO - What to do with duplicate data
-      data: {
-        ...parsedTxWithTransfers.data,
-        buyTx: getBuyTx(parsedTxWithTransfers),
-        sellTx: getSellTx(parsedTxWithTransfers),
-      },
-    }
+    return this.getParsedTxWithTransfers(tx, parsedTx, address, internalTxs)
   }
 
   private static getStatus(tx: Tx): Status {

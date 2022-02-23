@@ -54,8 +54,6 @@ export enum TransferType {
 }
 
 export interface TxMetadata {
-  buyTx?: Transfer
-  sellTx?: Transfer
   method?: string
 }
 
