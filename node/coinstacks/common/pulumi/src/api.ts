@@ -282,7 +282,7 @@ export async function deployApi(
     },
   }
 
-  const apiDeployment =  new k8s.apps.v1.Deployment(
+  const apiDeployment = new k8s.apps.v1.Deployment(
     name,
     {
       metadata: {
@@ -295,30 +295,29 @@ export async function deployApi(
       },
     },
     { provider, dependsOn: deployDependencies }
-    )
+  )
 
-    if (config.api.autoscaling.enabled) {
-      new k8s.autoscaling.v1.HorizontalPodAutoscaler(
-        name,
-        {
-          metadata: {
-            namespace: namespace,
-          },
-          spec: {
-            minReplicas: config.api.replicas,
-            maxReplicas: config.api.autoscaling.maxReplicas,
-            scaleTargetRef: {
-              apiVersion: apiDeployment.apiVersion,
-              kind: apiDeployment.kind,
-              name: apiDeployment.metadata.name
-            },
-            targetCPUUtilizationPercentage: config.api.autoscaling.cpuThreshold,
-          },
+  if (config.api.autoscaling.enabled) {
+    new k8s.autoscaling.v1.HorizontalPodAutoscaler(
+      name,
+      {
+        metadata: {
+          namespace: namespace,
         },
-        { provider }
-      )
-    }
+        spec: {
+          minReplicas: config.api.replicas,
+          maxReplicas: config.api.autoscaling.maxReplicas,
+          scaleTargetRef: {
+            apiVersion: apiDeployment.apiVersion,
+            kind: apiDeployment.kind,
+            name: apiDeployment.metadata.name,
+          },
+          targetCPUUtilizationPercentage: config.api.autoscaling.cpuThreshold,
+        },
+      },
+      { provider }
+    )
+  }
 
   return apiDeployment
-
 }
