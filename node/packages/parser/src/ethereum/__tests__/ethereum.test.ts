@@ -20,6 +20,7 @@ import foxStake from './mockData/foxStake'
 import foxExit from './mockData/foxExit'
 import yearnDeposit from './mockData/yearnDeposit'
 import yearnApproval from './mockData/yearnApproval'
+import yearnWithdrawal from './mockData/yearnWithdrawal'
 import {
   bondToken,
   foxToken,
@@ -1160,6 +1161,53 @@ describe('parseTx', () => {
             totalValue: '987002304279657611',
             components: [{ value: '987002304279657611' }],
             token: linkYearnVault,
+          },
+        ],
+      }
+
+      const actual = await txParser.parse(tx, address)
+      expect(expected).toEqual(actual)
+    })
+
+    it('should parse withdrawal', async () => {
+      const { tx } = yearnWithdrawal
+      const address = '0x1399D13F3A0aaf08f7C5028D81447a311e4760c4'
+
+      const expected: Tx = {
+        txid: tx.txid,
+        blockHeight: tx.blockHeight,
+        blockTime: tx.blockTime,
+        blockHash: tx.blockHash,
+        address: address,
+        caip2: 'eip155:1',
+        confirmations: tx.confirmations,
+        data: {
+          type: 'withdraw',
+        },
+        value: tx.value,
+        status: Status.Confirmed,
+        fee: {
+          value: '19460274119661600',
+          caip19: 'eip155:1/slip44:60',
+        },
+        transfers: [
+          {
+            type: TransferType.Send,
+            from: address,
+            to: '0x0000000000000000000000000000000000000000',
+            caip19: 'eip155:1/erc20:0x671a912c10bba0cfa74cfc2d6fba9ba1ed9530b2',
+            totalValue: '493501152139828806',
+            components: [{ value: '493501152139828806' }],
+            token: linkYearnVault,
+          },
+          {
+            type: TransferType.Receive,
+            from: '0x671a912C10bba0CFA74Cfc2d6Fba9BA1ed9530B2',
+            to: address,
+            caip19: 'eip155:1/erc20:0x514910771af9ca656af840dff83e8264ecf986ca',
+            totalValue: '500482168225493862',
+            components: [{ value: '500482168225493862' }],
+            token: linkToken,
           },
         ],
       }
