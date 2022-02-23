@@ -23,16 +23,16 @@ export = async (): Promise<Outputs> => {
     provider = new k8s.Provider('kube-provider', { kubeconfig })
   }
 
-  if (existsSync('../.env')) {
-    getEnv({ path: join(__dirname, '../.env') })
+  if (existsSync('../../cmd/cosmos/.env')) {
+    getEnv({ path: join(__dirname, '../../cmd/cosmos/.env') })
   } else if (config.isLocal) {
     throw new Error(
-      'you must run `cp sample.env .env` from the cosmos coinstack directory and fill out any empty values.'
+      'you must run `cp sample.env .env` from the cmd/cosmos directory and fill out any empty values.'
     )
   }
 
   const missingKeys: Array<string> = []
-  const stringData = Object.keys(parse(readFileSync('../sample.env'))).reduce((prev, key) => {
+  const stringData = Object.keys(parse(readFileSync('../../cmd/cosmos/sample.env'))).reduce((prev, key) => {
     const value = process.env[key]
 
     if (!value) {

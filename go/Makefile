@@ -13,3 +13,6 @@ build:
 clean:
 	go clean ./...
 	find . -type f -name 'swagger.json' -exec rm -f {} +
+
+test:
+	go test ./...
