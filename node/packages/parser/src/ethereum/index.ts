@@ -22,7 +22,7 @@ export interface TransactionParserArgs {
 }
 
 export interface GenericParser {
-  parse: (tx: Tx) => Promise<Partial<TxSpecific<ParseTx>> | undefined>
+  parse: (tx: Tx) => Promise<TxSpecific<ParseTx> | undefined>
 }
 
 export class TransactionParser {
@@ -96,7 +96,7 @@ export class TransactionParser {
     }
   }
 
-  private getStatus(tx: Tx): Status {
+  private static getStatus(tx: Tx): Status {
     const status = tx.ethereumSpecific?.status
 
     if (status === -1 && tx.confirmations <= 0) return Status.Pending

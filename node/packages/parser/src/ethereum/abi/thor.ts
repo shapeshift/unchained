@@ -1,6 +1,6 @@
-import { ABI } from 'abi-decoder'
+import { JsonFragment } from '@ethersproject/abi/lib/fragments'
 
-const thor: Array<ABI.Item> = [
+const thor: Array<JsonFragment> = [
   { inputs: [], stateMutability: 'nonpayable', type: 'constructor' },
   {
     anonymous: false,

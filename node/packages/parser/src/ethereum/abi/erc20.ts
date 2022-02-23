@@ -1,6 +1,6 @@
-import { ABI } from 'abi-decoder'
+import { JsonFragment } from '@ethersproject/abi/lib/fragments'
 
-const erc20: Array<ABI.Item> = [
+const erc20: Array<JsonFragment> = [
   {
     inputs: [
       {

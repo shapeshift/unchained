@@ -2,11 +2,11 @@ import { ethers } from 'ethers'
 import { Tx } from '@shapeshiftoss/blockbook'
 import { caip19 } from '@shapeshiftoss/caip'
 import { ChainTypes, ContractTypes } from '@shapeshiftoss/types'
-import { Transfer, TransferType, TxSpecific as ParseTxSpecific, UniV2Tx } from '../types'
+import { Transfer, TransferType, TxSpecific, UniV2Tx } from '../types'
 import { Network } from './types'
 import ABI from './abi/uniV2'
 import ERC20_ABI from './abi/erc20'
-import { getSigHash, toNetworkType, txInteractsWithContract, itemsToFragments } from './utils'
+import { getSigHash, toNetworkType, txInteractsWithContract } from './utils'
 import { GenericParser } from './index'
 
 export const ROUTER_CONTRACT = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D'
@@ -26,7 +26,7 @@ export class Parser implements GenericParser {
   readonly wethContract: string
 
   constructor(args: ParserArgs) {
-    this.abiInterface = new ethers.utils.Interface(itemsToFragments(ABI))
+    this.abiInterface = new ethers.utils.Interface(ABI)
     this.network = args.network
     this.provider = args.provider
 
@@ -38,7 +38,7 @@ export class Parser implements GenericParser {
     }[this.network]
   }
 
-  async parse(tx: Tx): Promise<ParseTxSpecific<UniV2Tx> | undefined> {
+  async parse(tx: Tx): Promise<TxSpecific<UniV2Tx> | undefined> {
     if (!txInteractsWithContract(tx, ROUTER_CONTRACT)) return
     if (!(tx.confirmations === 0)) return
     if (!tx.ethereumSpecific?.data) return
@@ -51,7 +51,7 @@ export class Parser implements GenericParser {
 
         const tokenAddress = ethers.utils.getAddress(result.token.toLowerCase())
         const lpTokenAddress = Parser.pairFor(tokenAddress, this.wethContract)
-        const contract = new ethers.Contract(tokenAddress, itemsToFragments(ERC20_ABI), this.provider)
+        const contract = new ethers.Contract(tokenAddress, ERC20_ABI, this.provider)
         const decimals = await contract.decimals()
         const name = await contract.name()
         const symbol = await contract.symbol()
@@ -81,7 +81,7 @@ export class Parser implements GenericParser {
 
         const tokenAddress = ethers.utils.getAddress(result.token.toLowerCase())
         const lpTokenAddress = Parser.pairFor(tokenAddress, this.wethContract)
-        const contract = new ethers.Contract(lpTokenAddress, itemsToFragments(ERC20_ABI), this.provider)
+        const contract = new ethers.Contract(lpTokenAddress, ERC20_ABI, this.provider)
         const decimals = await contract.decimals()
         const name = await contract.name()
         const symbol = await contract.symbol()

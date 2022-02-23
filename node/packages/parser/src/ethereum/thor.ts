@@ -1,9 +1,9 @@
 import { ethers } from 'ethers'
 import { Thorchain } from '@shapeshiftoss/thorchain'
-import { Dex, ThorTx, TradeType, TxSpecific as ParseTxSpecific } from '../types'
+import { Dex, ThorTx, TradeType, TxSpecific } from '../types'
 import { Network } from './types'
 import ABI from './abi/thor'
-import { getSigHash, itemsToFragments, txInteractsWithContract } from './utils'
+import { getSigHash, txInteractsWithContract } from './utils'
 import { Tx } from '@shapeshiftoss/blockbook'
 import { GenericParser } from './index'
 
@@ -24,7 +24,7 @@ export class Parser implements GenericParser {
   readonly routerContract: string
 
   constructor(args: ParserArgs) {
-    this.abiInterface = new ethers.utils.Interface(itemsToFragments(ABI))
+    this.abiInterface = new ethers.utils.Interface(ABI)
     this.thorchain = new Thorchain({ midgardUrl: args.midgardUrl, rpcUrl: args.rpcUrl })
 
     this.depositSigHash = this.abiInterface.getSighash('deposit')
@@ -49,7 +49,7 @@ export class Parser implements GenericParser {
     return result.to
   }
 
-  async parse(tx: Tx): Promise<ParseTxSpecific<ThorTx> | undefined> {
+  async parse(tx: Tx): Promise<TxSpecific<ThorTx> | undefined> {
     if (!txInteractsWithContract(tx, this.routerContract)) return
     if (!tx.ethereumSpecific?.data) return
 

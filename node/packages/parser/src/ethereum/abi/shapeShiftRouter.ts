@@ -1,6 +1,6 @@
-import { ABI } from 'abi-decoder'
+import { JsonFragment } from '@ethersproject/abi/lib/fragments'
 
-const shapeShiftRouter: Array<ABI.Item> = [
+const shapeShiftRouter: Array<JsonFragment> = [
   {
     inputs: [
       {

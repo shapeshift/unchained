@@ -1,6 +1,6 @@
-import { ABI } from 'abi-decoder'
+import { JsonFragment } from '@ethersproject/abi/lib/fragments'
 
-const uniV2: Array<ABI.Item> = [
+const uniV2: Array<JsonFragment> = [
   {
     inputs: [
       { internalType: 'address', name: '_factory', type: 'address' },

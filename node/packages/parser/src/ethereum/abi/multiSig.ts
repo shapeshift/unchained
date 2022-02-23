@@ -1,6 +1,6 @@
-import { ABI } from 'abi-decoder'
+import { JsonFragment } from '@ethersproject/abi/lib/fragments'
 
-const multiSig: Array<ABI.Item> = [
+const multiSig: Array<JsonFragment> = [
   {
     anonymous: false,
     inputs: [
