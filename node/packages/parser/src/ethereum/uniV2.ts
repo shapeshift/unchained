@@ -4,7 +4,7 @@ import { caip19 } from '@shapeshiftoss/caip'
 import { ChainTypes, ContractTypes } from '@shapeshiftoss/types'
 import { Transfer, TransferType, TxSpecific, UniV2Tx } from '../types'
 import { Network } from './types'
-import ABI from './abi/uniV2'
+import UNIV2_ABI from './abi/uniV2'
 import ERC20_ABI from './abi/erc20'
 import { getSigHash, toNetworkType, txInteractsWithContract } from './utils'
 import { GenericParser } from './index'
@@ -25,7 +25,7 @@ export class Parser implements GenericParser {
   readonly wethContract: string
 
   constructor(args: ParserArgs) {
-    this.abiInterface = new ethers.utils.Interface(ABI)
+    this.abiInterface = new ethers.utils.Interface(UNIV2_ABI)
     this.network = args.network
     this.provider = args.provider
 

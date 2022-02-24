@@ -6,8 +6,7 @@ import { ChainTypes, ContractTypes } from '@shapeshiftoss/types'
 import { Status, Token, TransferType, Tx as ParseTx, TxSpecific } from '../types'
 import { aggregateTransfer, findAsyncSequential } from '../utils'
 import { InternalTx, Network } from './types'
-import { getSigHash, toNetworkType } from './utils'
-import * as multiSig from './multiSig'
+import { getInternalMultisigAddress, getSigHash, SENDMULTISIG_SIG_HASH, toNetworkType } from './utils'
 import * as thor from './thor'
 import * as uniV2 from './uniV2'
 import * as zrx from './zrx'
@@ -52,8 +51,8 @@ export class TransactionParser {
     switch (getSigHash(inputData)) {
       case this.thor.transferOutSigHash:
         return this.thor.getInternalAddress(inputData)
-      case multiSig.SENDMULTISIG_SIG_HASH:
-        return multiSig.getInternalAddress(inputData)
+      case SENDMULTISIG_SIG_HASH:
+        return getInternalMultisigAddress(inputData)
       default:
         return
     }
