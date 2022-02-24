@@ -47,7 +47,9 @@ func Logger(next http.Handler) http.Handler {
 			return
 		}
 
-		statusLogger.Infof("%s from %s", r.RequestURI, r.RemoteAddr)
+		if !strings.Contains(r.RequestURI, "/health") {
+			statusLogger.Infof("%s from %s", r.RequestURI, r.RemoteAddr)
+		}
 	})
 }
 

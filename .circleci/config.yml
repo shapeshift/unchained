@@ -873,15 +873,6 @@ workflows:
           <<: *ethereum-ropsten-dev
           <<: *only-develop
 
-      - deploy-coinstack-go:
-          name: deploy cosmos develop (shapeshift)
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - deploy dependencies (taxistake)
-          <<: *cosmos-dev
-          <<: *only-develop
-
   deploy-monitoring:
     jobs:
       - approve-monitoring-workflow:
