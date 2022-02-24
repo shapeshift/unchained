@@ -57,11 +57,12 @@ export class Parser implements GenericParser {
 
   private async getTransfers(tx: Tx): Promise<Transfer[] | undefined> {
     const data = tx.ethereumSpecific?.data
+    if (!data) return
     const sendAddress = tx.vin[0].addresses?.[0] ?? ''
     return await (async () => {
       switch (getSigHash(data)) {
         case this.addLiquidityEthSigHash: {
-          const result = this.abiInterface.decodeFunctionData(this.addLiquidityEthSigHash, tx.ethereumSpecific.data)
+          const result = this.abiInterface.decodeFunctionData(this.addLiquidityEthSigHash, data)
 
           const tokenAddress = ethers.utils.getAddress(result.token.toLowerCase())
           const lpTokenAddress = Parser.pairFor(tokenAddress, this.wethContract)
@@ -91,7 +92,7 @@ export class Parser implements GenericParser {
           return transfers
         }
         case this.removeLiquidityEthSigHash: {
-          const result = this.abiInterface.decodeFunctionData(this.removeLiquidityEthSigHash, tx.ethereumSpecific.data)
+          const result = this.abiInterface.decodeFunctionData(this.removeLiquidityEthSigHash, data)
 
           const tokenAddress = ethers.utils.getAddress(result.token.toLowerCase())
           const lpTokenAddress = Parser.pairFor(tokenAddress, this.wethContract)
