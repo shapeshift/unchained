@@ -54,13 +54,13 @@ export class Parser implements GenericParser {
     if (!txInteractsWithContract(tx, this.routerContract)) return
     if (!txData) return
 
+    const decoded = this.abiInterface.parseTransaction({ data: txData })
+
     const result = (() => {
       switch (getSigHash(txData)) {
         case this.depositSigHash:
-          return this.abiInterface.decodeFunctionData(this.depositSigHash, txData)
-        case this.transferOutSigHash: {
-          return this.abiInterface.decodeFunctionData(this.transferOutSigHash, txData)
-        }
+        case this.transferOutSigHash:
+          return decoded.args
         default:
           return undefined
       }
@@ -68,8 +68,6 @@ export class Parser implements GenericParser {
 
     // We didn't recognise the sigHash - exit
     if (!result) return
-
-    const decoded = this.abiInterface.parseTransaction({ data: txData })
 
     const data = {
       method: decoded.name,
