@@ -55,6 +55,7 @@ export enum TransferType {
 
 export interface TxMetadata {
   method?: string
+  parser?: string
 }
 
 export interface StandardTx {

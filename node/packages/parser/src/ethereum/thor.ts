@@ -2,7 +2,7 @@ import { ethers } from 'ethers'
 import { Thorchain } from '@shapeshiftoss/thorchain'
 import { Dex, ThorTx, TradeType, TxSpecific } from '../types'
 import { Network } from './types'
-import ABI from './abi/thor'
+import THOR_ABI from './abi/thor'
 import { getSigHash, txInteractsWithContract } from './utils'
 import { Tx } from '@shapeshiftoss/blockbook'
 import { GenericParser } from './index'
@@ -25,7 +25,7 @@ export class Parser implements GenericParser {
   readonly routerContract: string
 
   constructor(args: ParserArgs) {
-    this.abiInterface = new ethers.utils.Interface(ABI)
+    this.abiInterface = new ethers.utils.Interface(THOR_ABI)
     this.thorchain = new Thorchain({ midgardUrl: args.midgardUrl, rpcUrl: args.rpcUrl })
 
     this.depositSigHash = this.abiInterface.getSighash('deposit')
@@ -51,15 +51,16 @@ export class Parser implements GenericParser {
   }
 
   async parse(tx: Tx): Promise<TxSpecific<ThorTx> | undefined> {
+    const txData = tx.ethereumSpecific?.data
     if (!txInteractsWithContract(tx, this.routerContract)) return
-    if (!tx.ethereumSpecific?.data) return
+    if (!txData) return
 
     const result = (() => {
-      switch (getSigHash(tx.ethereumSpecific.data)) {
+      switch (getSigHash(txData)) {
         case this.depositSigHash:
-          return this.abiInterface.decodeFunctionData(this.depositSigHash, tx.ethereumSpecific.data)
+          return this.abiInterface.decodeFunctionData(this.depositSigHash, txData)
         case this.transferOutSigHash: {
-          return this.abiInterface.decodeFunctionData(this.transferOutSigHash, tx.ethereumSpecific.data)
+          return this.abiInterface.decodeFunctionData(this.transferOutSigHash, txData)
         }
         default:
           return undefined
@@ -69,14 +70,21 @@ export class Parser implements GenericParser {
     // We didn't recognise the sigHash - exit
     if (!result) return
 
+    const decoded = this.abiInterface.parseTransaction({ data: txData })
+
+    const data = {
+      method: decoded.name,
+      parser: 'thor',
+    }
+
     const [type] = result.memo.split(':')
 
     if (SWAP_TYPES.includes(type) || type === 'OUT') {
-      return { trade: { dexName: Dex.Thor, type: TradeType.Trade, memo: result.memo } }
+      return { trade: { dexName: Dex.Thor, type: TradeType.Trade, memo: result.memo }, data }
     }
 
     if (type === 'REFUND') {
-      return { trade: { dexName: Dex.Thor, type: TradeType.Refund, memo: result.memo } }
+      return { trade: { dexName: Dex.Thor, type: TradeType.Refund, memo: result.memo }, data }
     }
 
     // We encountered a case we thought we'd support, but don't - exit

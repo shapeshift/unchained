@@ -9,11 +9,19 @@ export class Parser implements GenericParser {
     if (!txInteractsWithContract(tx, ZRX_PROXY_CONTRACT)) return
     if (!(tx.tokenTransfers && tx.tokenTransfers.length)) return
 
+    const trade = {
+      dexName: Dex.Zrx,
+      type: TradeType.Trade,
+    }
+
+    const data = {
+      method: undefined, // TODO - add zrx ABI and decode
+      parser: 'zrx',
+    }
+
     return {
-      trade: {
-        dexName: Dex.Zrx,
-        type: TradeType.Trade,
-      },
+      trade,
+      data,
     }
   }
 }

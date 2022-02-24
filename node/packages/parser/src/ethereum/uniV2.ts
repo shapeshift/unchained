@@ -43,8 +43,15 @@ export class Parser implements GenericParser {
     if (!(tx.confirmations === 0)) return
 
     const transfers = await this.getTransfers(tx)
+    const decoded = this.abiInterface.parseTransaction({ data: tx.ethereumSpecific.data })
 
-    return { transfers }
+    return {
+      transfers,
+      data: {
+        parser: 'uniV2',
+        method: decoded.name,
+      },
+    }
   }
 
   private static pairFor(tokenA: string, tokenB: string): string {

@@ -102,7 +102,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: undefined,
+        data: {
+          method: 'deposit',
+          parser: 'thor',
+        },
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -144,7 +147,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: undefined,
+        data: {
+          method: 'deposit',
+          parser: 'thor',
+        },
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -186,7 +192,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: undefined,
+        data: {
+          method: 'transferOut',
+          parser: 'thor',
+        },
         value: tx.value,
         status: Status.Confirmed,
         transfers: [buyTransfer],
@@ -224,7 +233,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: undefined,
+        data: {
+          method: 'transferOut',
+          parser: 'thor',
+        },
         value: tx.value,
         status: Status.Confirmed,
         transfers: [buyTransfer],
@@ -262,7 +274,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: undefined,
+        data: {
+          method: 'transferOut',
+          parser: 'thor',
+        },
         value: tx.value,
         status: Status.Confirmed,
         transfers: [buyTransfer],
@@ -292,7 +307,7 @@ describe('parseTx', () => {
         ],
         from: '0xDef1C0ded9bec7F1a1670819833240f027b25EfF',
         to: '0x5bb96c35a68Cba037D0F261C67477416db137F03',
-        token: undefined,
+        data: undefined,
         totalValue: '541566754246167133',
         type: TransferType.Receive,
       }
@@ -319,7 +334,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: undefined,
+        data: {
+          method: undefined,
+          parser: 'zrx',
+        },
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -379,7 +397,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: undefined,
+        data: {
+          method: undefined,
+          parser: 'zrx',
+        },
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -431,7 +452,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: undefined,
+        data: {
+          method: undefined,
+          parser: 'zrx',
+        },
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -503,7 +527,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: undefined,
+        data: {
+          method: undefined,
+          parser: 'zrx',
+        },
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -731,7 +758,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: txMempool.confirmations,
-        data: undefined,
+        data: {
+          method: 'addLiquidityETH',
+          parser: 'uniV2',
+        },
         value: txMempool.value,
         status: Status.Pending,
         transfers: [
@@ -830,7 +860,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: txMempool.confirmations,
-        data: undefined,
+        data: {
+          method: 'removeLiquidityETH',
+          parser: 'uniV2',
+        },
         value: txMempool.value,
         status: Status.Pending,
         transfers: [
@@ -1088,6 +1121,7 @@ describe('parseTx', () => {
         confirmations: tx.confirmations,
         data: {
           method: 'approve',
+          parser: 'yearn',
         },
         value: tx.value,
         status: Status.Confirmed,
@@ -1116,6 +1150,7 @@ describe('parseTx', () => {
         confirmations: tx.confirmations,
         data: {
           method: 'deposit',
+          parser: 'yearn',
         },
         value: tx.value,
         status: Status.Confirmed,
@@ -1163,6 +1198,7 @@ describe('parseTx', () => {
         confirmations: tx.confirmations,
         data: {
           method: 'withdraw',
+          parser: 'yearn',
         },
         value: tx.value,
         status: Status.Confirmed,

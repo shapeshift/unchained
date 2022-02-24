@@ -34,6 +34,7 @@ export class Parser implements GenericParser {
     return {
       data: {
         method: decoded?.name,
+        parser: 'yearn',
       },
     }
   }
