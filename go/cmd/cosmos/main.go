@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -45,8 +44,6 @@ func main() {
 			logger.Panicf("failed to load config: %+v", err)
 		}
 	}
-
-	fmt.Printf("%+v\n", conf)
 
 	encoding := cosmos.NewEncoding()
 
