@@ -2,12 +2,11 @@ import { ethers } from 'ethers'
 import { Tx } from '@shapeshiftoss/blockbook'
 import { caip19 } from '@shapeshiftoss/caip'
 import { ChainTypes, ContractTypes } from '@shapeshiftoss/types'
-import { Transfer, TransferType, TxSpecific, UniV2Tx } from '../types'
+import { GenericParser, Transfer, TransferType, TxSpecific, UniV2Tx } from '../types'
 import { Network } from './types'
 import UNIV2_ABI from './abi/uniV2'
 import ERC20_ABI from './abi/erc20'
 import { getSigHash, toNetworkType, txInteractsWithContract } from './utils'
-import { GenericParser } from './index'
 import { YEARN_V2_ROUTER_CONTRACT } from './constants'
 
 export interface ParserArgs {

@@ -1,11 +1,10 @@
 import { ethers } from 'ethers'
 import { Thorchain } from '@shapeshiftoss/thorchain'
-import { Dex, ThorTx, TradeType, TxSpecific } from '../types'
+import { Dex, GenericParser, ThorTx, TradeType, TxSpecific } from '../types'
 import { Network } from './types'
 import THOR_ABI from './abi/thor'
 import { getSigHash, txInteractsWithContract } from './utils'
 import { Tx } from '@shapeshiftoss/blockbook'
-import { GenericParser } from './index'
 import { THOR_ROUTER_CONTRACT_MAINNET, THOR_ROUTER_CONTRACT_ROPSTEN } from './constants'
 
 const SWAP_TYPES = ['SWAP', '=', 's']
