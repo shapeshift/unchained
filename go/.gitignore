@@ -12,6 +12,12 @@ Pulumi.*.yaml
 *.so
 *.dylib
 
+# dotenv environment variables file
+.env.*
+.env
+.env.test
+.env.secrets
+
 # Test binary, built with `go test -c`
 *.test
 
