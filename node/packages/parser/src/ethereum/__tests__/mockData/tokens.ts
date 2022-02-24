@@ -59,3 +59,17 @@ export const bondToken = {
   name: 'BarnBridge Governance Token',
   symbol: 'BOND',
 }
+
+export const linkToken = {
+  contract: '0x514910771AF9Ca656af840dff83E8264EcF986CA',
+  decimals: 18,
+  name: 'ChainLink Token',
+  symbol: 'LINK',
+}
+
+export const linkYearnVault = {
+  contract: '0x671a912C10bba0CFA74Cfc2d6Fba9BA1ed9530B2',
+  decimals: 18,
+  name: 'LINK yVault',
+  symbol: 'yvLINK',
+}

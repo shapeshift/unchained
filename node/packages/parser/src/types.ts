@@ -1,3 +1,5 @@
+import { Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
+
 export enum Dex {
   Thor = 'thor',
   Zrx = 'zrx',
@@ -54,8 +56,8 @@ export enum TransferType {
 }
 
 export interface TxMetadata {
-  buyTx?: Transfer
-  sellTx?: Transfer
+  method?: string
+  parser?: string
 }
 
 export interface StandardTx {
@@ -86,6 +88,14 @@ export interface ThorTx extends StandardTx {
   data?: TxMetadata // TODO = Type and extend any specific properties
 }
 
-export type Tx = UniV2Tx | ZrxTx | ThorTx
+export interface YearnTx extends StandardTx {
+  data?: TxMetadata // TODO = Type and extend any specific properties
+}
+
+export type Tx = StandardTx | UniV2Tx | ZrxTx | ThorTx
 
 export type TxSpecific<T extends Tx> = Partial<Pick<T, 'trade' | 'transfers' | 'data'>>
+
+export interface GenericParser {
+  parse: (tx: BlockbookTx) => Promise<TxSpecific<Tx> | undefined>
+}

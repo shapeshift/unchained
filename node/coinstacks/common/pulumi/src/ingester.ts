@@ -248,29 +248,7 @@ export async function deployIngester(
       },
     }
 
-    if (worker.autoscaling && autoscaling.enabled) {
-      new k8s.autoscaling.v1.HorizontalPodAutoscaler(
-        `${name}-${worker.name}`,
-        {
-          metadata: {
-            namespace: namespace,
-          },
-          spec: {
-            minReplicas: worker.replicas,
-            maxReplicas: autoscaling.maxReplicas,
-            scaleTargetRef: {
-              apiVersion: 'apps/v1',
-              kind: 'Deployment',
-              name: `${name}-${worker.name}`,
-            },
-            targetCPUUtilizationPercentage: autoscaling.cpuThreshold,
-          },
-        },
-        { provider, dependsOn: deployDependencies }
-      )
-    }
-
-    return new k8s.apps.v1.Deployment(
+    const ingesterDeployment = new k8s.apps.v1.Deployment(
       `${name}-${worker.name}`,
       {
         metadata: {
@@ -288,5 +266,29 @@ export async function deployIngester(
         dependsOn: output(deployDependencies).apply((dependencies) => [...dependencies, topology]),
       }
     )
+
+    if (worker.autoscaling && autoscaling.enabled) {
+      new k8s.autoscaling.v1.HorizontalPodAutoscaler(
+        `${name}-${worker.name}`,
+        {
+          metadata: {
+            namespace: namespace,
+          },
+          spec: {
+            minReplicas: worker.replicas,
+            maxReplicas: autoscaling.maxReplicas,
+            scaleTargetRef: {
+              apiVersion: ingesterDeployment.apiVersion,
+              kind: ingesterDeployment.kind,
+              name: ingesterDeployment.metadata.name,
+            },
+            targetCPUUtilizationPercentage: autoscaling.cpuThreshold,
+          },
+        },
+        { provider, dependsOn: deployDependencies }
+      )
+    }
+
+    return ingesterDeployment
   })
 }

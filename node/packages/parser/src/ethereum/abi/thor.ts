@@ -1,4 +1,6 @@
-export default [
+import { JsonFragment } from '@ethersproject/abi/lib/fragments'
+
+const thor: Array<JsonFragment> = [
   { inputs: [], stateMutability: 'nonpayable', type: 'constructor' },
   {
     anonymous: false,
@@ -149,3 +151,5 @@ export default [
     type: 'function',
   },
 ]
+
+export default thor
