@@ -12,14 +12,14 @@ aliases:
         ignore:
           - main
           - develop
-          - deploy-golang
+          - deploy-cosmos
 
   - &only-develop
     filters:
       branches:
         only:
           - develop
-          - deploy-golang
+          - deploy-cosmos
 
   - &only-main
     filters:
