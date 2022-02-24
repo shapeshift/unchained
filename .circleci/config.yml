@@ -12,12 +12,14 @@ aliases:
         ignore:
           - main
           - develop
+          - deploy-golang
 
   - &only-develop
     filters:
       branches:
         only:
           - develop
+          - deploy-golang
 
   - &only-main
     filters:
@@ -213,6 +215,9 @@ aliases:
     coinstack: cosmos
     pulumi-stack: public
     pulumi-dir: coinstacks/cosmos/pulumi
+    lcd-url: cosmoshub-4--lcd--archive.datahub.figment.io
+    grpc-url: cosmoshub-4--grpc--archive.grpc.datahub.figment.io:443
+    rpc-url: cosmoshub-4--rpc--archive.datahub.figment.io
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -307,6 +312,10 @@ commands:
           working_directory: go
           name: make
           command: make
+      - run:
+          working_directory: go/pulumi
+          name: install common pulumi dependencies
+          command: yarn install --immutable
       #- run:
       #    working_directory: go
       #    name: lint
@@ -416,9 +425,9 @@ jobs:
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r5b.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[3] r5n.4xlarge
             pulumi config set --path unchained:common.eks.traefik.autoscaling.enabled true
-            pulumi config set --path unchained:common.eks.traefik.autoscaling.cpuThreshold 30
-            pulumi config set --path unchained:common.eks.traefik.autoscaling.maxReplicas 10
-            pulumi config set --path unchained:common.eks.traefik.replicas 3
+            pulumi config set --path unchained:common.eks.traefik.autoscaling.cpuThreshold 20
+            pulumi config set --path unchained:common.eks.traefik.autoscaling.maxReplicas 15
+            pulumi config set --path unchained:common.eks.traefik.replicas 5
             pulumi config set --path unchained:common.eks.traefik.resources.cpu 300m
             pulumi config set --path unchained:common.eks.traefik.resources.memory 512Mi
             pulumi config set --path unchained:common.eks.traefik.whitelist[0] 173.245.48.0/20
@@ -444,6 +453,9 @@ jobs:
             pulumi config set --path unchained:common.eks.traefik.whitelist[20] $VPN_ADDRESS_2
             pulumi config set --path unchained:common.eks.traefik.whitelist[21] $VPN_ADDRESS_3
             pulumi config set --path unchained:common.eks.traefik.whitelist[22] $VPN_ADDRESS_4
+            pulumi config set --path unchained:common.eks.traefik.whitelist[23] $AWS_TAXISTAKE_NAT_ADDRESS_0
+            pulumi config set --path unchained:common.eks.traefik.whitelist[24] $AWS_TAXISTAKE_NAT_ADDRESS_1
+            pulumi config set --path unchained:common.eks.traefik.whitelist[25] $AWS_TAXISTAKE_NAT_ADDRESS_2
             pulumi config set --path unchained:common.dockerhub.username $DOCKERHUB_USERNAME
             pulumi config set --path unchained:common.dockerhub.password $DOCKERHUB_PASSWORD --plaintext
             pulumi config set --path unchained:common.dockerhub.server docker.io
@@ -627,6 +639,12 @@ jobs:
       pulumi-command:
         type: string
         default: preview
+      lcd-url:
+        type: string
+      grpc-url:
+        type: string
+      rpc-url:
+        type: string
       api-autoscaling:
         type: boolean
       api-cpu-threshold:
@@ -647,9 +665,17 @@ jobs:
       - pulumi-dependencies:
           organization: <<parameters.organization>>
       - run:
+          name: add custom environment variables
+          command: |
+            echo 'export LCD_URL=<< parameters.lcd-url >>' >> $BASH_ENV
+            echo 'export GRPC_URL=<< parameters.grpc-url >>' >> $BASH_ENV
+            echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
+            echo 'export API_KEY=$<< parameters.organization >>_DATAHUB_API_KEY' >> $BASH_ENV
+      - run:
           name: pulumi
           working_directory: go/<< parameters.pulumi-dir >>
           command: |
+            yarn install --immutable
             pulumi stack select $<< parameters.organization >>_PULUMI_ORG/<< parameters.pulumi-stack >>
             pulumi config set --path unchained:<< parameters.coinstack >>.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies
             [ -n "<< parameters.environment >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.environment << parameters.environment >>
@@ -700,8 +726,8 @@ jobs:
     steps:
       - checkout
       - setup-runtime
-      - unchained-precheck-node
       - unchained-precheck-go
+      - unchained-precheck-node
 
   lint-and-test-persist:
     description: lint and test project (persist to workspace)
@@ -711,9 +737,8 @@ jobs:
     steps:
       - checkout
       - setup-runtime
-      - unchained-precheck
-      - unchained-precheck-node
       - unchained-precheck-go
+      - unchained-precheck-node
       - run:
           name: Remove devDependencies
           command: yarn --production --ignore-scripts --prefer-offline --silent --frozen-lockfile
@@ -850,8 +875,15 @@ workflows:
 
   deploy-monitoring:
     jobs:
+      - approve-monitoring-workflow:
+          name: approve monitoring workflow
+          type: approval
+          <<: *only-develop
+
       - lint-and-test-persist:
           name: lint and test project (persist to workplace)
+          requires:
+            - approve monitoring workflow
           <<: *only-develop
 
       ########## (SHAPESHIFT) ##########

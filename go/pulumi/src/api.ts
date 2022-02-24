@@ -109,7 +109,8 @@ export async function deployApi(
       if (!(await hasTag(image, tag))) {
         await buildAndPushImage({
           image,
-          context: `../../../build`,
+          context: `../../../../go`,
+          dockerFile: `../../../build/Dockerfile`,
           auth: {
             password: config.dockerhub.password,
             username: config.dockerhub.username,
@@ -256,7 +257,8 @@ export async function deployApi(
           image: imageName,
           ports: [{ containerPort: 3000, name: 'http' }],
           env: [...secretEnvs],
-          command: config.isLocal ? ['sh', '-c', `go run cmd/${coinstack}/main.go`] : ['-swagger', 'swagger.json'],
+          command: config.isLocal ? ['sh', '-c', `go run cmd/${coinstack}/main.go`] : undefined,
+          args: !config.isLocal ? ['-swagger', 'swagger.json'] : undefined,
           resources: {
             limits: {
               cpu: config.api.cpuLimit,

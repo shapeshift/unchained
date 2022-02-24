@@ -10,7 +10,6 @@ import (
 	"github.com/shapeshift/unchained/internal/config"
 	"github.com/shapeshift/unchained/internal/log"
 	"github.com/shapeshift/unchained/pkg/cosmos"
-	thortypes "gitlab.com/thorchain/thornode/x/thorchain/types"
 )
 
 var (
@@ -43,7 +42,7 @@ func main() {
 		}
 	}
 
-	encoding := cosmos.NewEncoding(thortypes.RegisterInterfaces)
+	encoding := cosmos.NewEncoding()
 
 	cfg := cosmos.Config{
 		Bech32AddrPrefix: "thor",

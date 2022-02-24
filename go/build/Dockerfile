@@ -19,7 +19,6 @@ FROM alpine
 ARG COINSTACK
 
 COPY --from=builder /app/static static
-COPY --from=builder /app/cmd/${COINSTACK}/config.json config.json
 COPY --from=builder /app/coinstacks/${COINSTACK}/api/swagger.json swagger.json
 COPY --from=builder /go/bin/app /go/bin/app
 

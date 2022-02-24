@@ -30,7 +30,7 @@ func LoadFromEnv(config interface{}, keys ...string) error {
 	for _, key := range keys {
 		val, ok := os.LookupEnv(key)
 		if !ok {
-			return errors.Errorf("%s environment variable not set")
+			return errors.Errorf("%s environment variable not set", key)
 		}
 
 		envVars[key] = val
