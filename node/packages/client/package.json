@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/unchained-client",
-  "version": "5.1.1",
+  "version": "5.2.0",
   "license": "MIT",
   "main": "dist/index.js",
   "source": "src/index.ts",
@@ -15,14 +15,14 @@
     "watch": "nodemon"
   },
   "dependencies": {
-    "@shapeshiftoss/blockbook": "^5.1.1",
-    "@shapeshiftoss/unchained-tx-parser": "^5.1.1",
+    "@shapeshiftoss/blockbook": "^5.2.0",
+    "@shapeshiftoss/unchained-tx-parser": "^5.2.0",
     "isomorphic-ws": "^4.0.1",
     "ws": "^8.3.0"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.4.4",
-    "@shapeshiftoss/common-api": "^5.1.1",
+    "@shapeshiftoss/common-api": "^5.2.0",
     "@types/ws": "^8.2.1"
   }
 }
