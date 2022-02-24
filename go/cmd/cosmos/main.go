@@ -15,16 +15,16 @@ import (
 var (
 	logger = log.WithoutFields()
 
-	confPath    = flag.String("config", "cmd/cosmos/config.json", "path to configuration file")
-	swaggerPath = flag.String("swagger", "/app/coinstacks/cosmos/api/swagger.json", "path to swagger spec")
+	envPath     = flag.String("env", "", "path to env file (default: use os env)")
+	swaggerPath = flag.String("swagger", "coinstacks/cosmos/api/swagger.json", "path to swagger spec")
 )
 
 // Config for running application
 type Config struct {
-	APIKey  string `mapstructure:"apiKey"`
-	GRPCURL string `mapstructure:"grpcUrl"`
-	LCDURL  string `mapstructure:"lcdUrl"`
-	RPCURL  string `mapstructure:"rpcUrl"`
+	APIKey  string `mapstructure:"API_KEY"`
+	GRPCURL string `mapstructure:"GRPC_URL"`
+	LCDURL  string `mapstructure:"LCD_URL"`
+	RPCURL  string `mapstructure:"RPC_URL"`
 }
 
 func main() {
@@ -35,8 +35,14 @@ func main() {
 	signal.Notify(sigChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
 	conf := &Config{}
-	if err := config.Load(*confPath, conf); err != nil {
-		logger.Panicf("failed to load config: %+v", err)
+	if *envPath == "" {
+		if err := config.LoadFromEnv(conf, "API_KEY", "GRPC_URL", "LCD_URL", "RPC_URL"); err != nil {
+			logger.Panicf("failed to load config from env: %+v", err)
+		}
+	} else {
+		if err := config.Load(*envPath, conf); err != nil {
+			logger.Panicf("failed to load config: %+v", err)
+		}
 	}
 
 	encoding := cosmos.NewEncoding()
