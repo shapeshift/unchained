@@ -1,4 +1,4 @@
-IMAGE=quay.io/goswagger/swagger
+IMAGE=quay.io/goswagger/swagger:v0.29.0
 USER=$(shell id -u):$(shell id -g)
 ROOTDIR=$(shell git rev-parse --show-toplevel)/go
 

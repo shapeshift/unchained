@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
@@ -24,22 +25,27 @@ func (h *Handler) StartWebsocket() error {
 			return nil, nil, errors.Wrapf(err, "failed to decode tx: %v", tx.Tx)
 		}
 
-		// TODO: blockHash and timestamp
 		blockHeight := strconv.Itoa(int(tx.Height))
 		txid := fmt.Sprintf("%X", sha256.Sum256(tx.Tx))
-		fee := signingTx.GetFee()[0]
 
-		baseTx := api.BaseTx{
-			TxID:        txid,
-			BlockHeight: &blockHeight,
+		fees := signingTx.GetFee()
+		if len(fees) == 0 {
+			logger.Warnf("txid: %s, no fees detected", txid)
+			fees = []sdk.Coin{{Denom: "rune", Amount: sdk.NewInt(0)}}
+		} else if len(fees) > 1 {
+			logger.Warnf("txid: %s - multiple fees detected (defaulting to index 0): %+v", txid, fees)
 		}
 
 		t := Tx{
-			BaseTx: baseTx,
+			BaseTx: api.BaseTx{
+				// TODO: blockHash and timestamp
+				TxID:        txid,
+				BlockHeight: &blockHeight,
+			},
 			Events: cosmos.Events(tx.Result.Log),
 			Fee: cosmos.Value{
-				Amount: fee.Amount.String(),
-				Denom:  fee.Denom,
+				Amount: fees[0].Amount.String(),
+				Denom:  fees[0].Denom,
 			},
 			GasWanted: strconv.Itoa(int(tx.Result.GasWanted)),
 			GasUsed:   strconv.Itoa(int(tx.Result.GasUsed)),

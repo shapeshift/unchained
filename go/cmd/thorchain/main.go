@@ -10,14 +10,13 @@ import (
 	"github.com/shapeshift/unchained/internal/config"
 	"github.com/shapeshift/unchained/internal/log"
 	"github.com/shapeshift/unchained/pkg/cosmos"
-	thortypes "gitlab.com/thorchain/thornode/x/thorchain/types"
 )
 
 var (
 	logger = log.WithoutFields()
 
-	confPath    = flag.String("config", "cmd/thorchain/config.json", "path to configuration file")
-	swaggerPath = flag.String("swagger", "/app/coinstacks/thorchain/api/swagger.json", "path to swagger spec")
+	envPath     = flag.String("env", "", "path to env file (default: use os env)")
+	swaggerPath = flag.String("swagger", "coinstacks/thorchain/api/swagger.json", "path to swagger spec")
 )
 
 type Config struct {
@@ -33,11 +32,17 @@ func main() {
 	signal.Notify(sigChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
 	conf := &Config{}
-	if err := config.Load(*confPath, conf); err != nil {
-		logger.Panicf("failed to load config: %+v", err)
+	if *envPath == "" {
+		if err := config.LoadFromEnv(conf, "LCD_URL", "RPC_URL"); err != nil {
+			logger.Panicf("failed to load config from env: %+v", err)
+		}
+	} else {
+		if err := config.Load(*envPath, conf); err != nil {
+			logger.Panicf("failed to load config: %+v", err)
+		}
 	}
 
-	encoding := cosmos.NewEncoding(thortypes.RegisterInterfaces)
+	encoding := cosmos.NewEncoding()
 
 	cfg := cosmos.Config{
 		Bech32AddrPrefix: "thor",
