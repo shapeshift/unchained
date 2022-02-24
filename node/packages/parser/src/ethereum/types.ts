@@ -16,3 +16,12 @@ export interface InternalTx {
 }
 
 export type Network = 'mainnet' | 'ropsten'
+
+export interface yearnTokenVault {
+  address: string
+  symbol: string
+  name: string
+  display_name: string
+  icon: string
+  decimals: string
+}

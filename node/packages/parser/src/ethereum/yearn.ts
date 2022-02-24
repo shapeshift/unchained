@@ -4,10 +4,12 @@ import shapeShiftRouter from './abi/shapeShiftRouter'
 import yearnVault from './abi/yearnVault'
 import { GenericParser } from './index'
 import { ethers } from 'ethers'
-import { SHAPE_SHIFT_ROUTER_CONTRACT, YEARN_LINK_TOKEN_VAULT } from './constants'
-import { getSigHash } from './utils'
+import { SHAPE_SHIFT_ROUTER_CONTRACT } from './constants'
+import { getSigHash, getYearnTokenVaultAddresses } from './utils'
 
 export class Parser implements GenericParser {
+  yearnTokenVaultAddresses: Array<string> | undefined
+
   async parse(tx: Tx): Promise<TxSpecific<YearnTx> | undefined> {
     const shapeShiftInterface = new ethers.utils.Interface(shapeShiftRouter)
     const yearnInterface = new ethers.utils.Interface(yearnVault)
@@ -17,8 +19,10 @@ export class Parser implements GenericParser {
 
     const txSigHash = getSigHash(data)
     const approvalSigHash = yearnInterface.getSighash('approve')
-    const depositSigHash = '0x20e8c565' // We hardcode this as there are 2 'deposit' functions in shapeShiftRouter
-    const withdrawSigHash = '0x00f714ce' // We hardcode this as there are multiple 'withdraw' functions in shapeShiftRouter
+    // TODO - work out how to use shapeShiftInterface.getSighash('deposit(address,address,uint256,uint256)')
+    const depositSigHash = '0x20e8c565'
+    // TODO - work out how to use yearnInterface.getSighash('withdraw(...)')
+    const withdrawSigHash = '0x00f714ce'
 
     const abiInterface = (() => {
       switch (txSigHash) {
@@ -37,8 +41,16 @@ export class Parser implements GenericParser {
     const spender = decoded?.args._spender
     const receiveAddress = tx.vout?.[0].addresses?.[0]
 
-    // FIXME - for withdraw, it only detects yvLINK withdrawal - find a way to make this generic for all Yearn vaults
-    if (!([receiveAddress, spender].includes(SHAPE_SHIFT_ROUTER_CONTRACT) || receiveAddress === YEARN_LINK_TOKEN_VAULT))
+    if (!this.yearnTokenVaultAddresses) {
+      this.yearnTokenVaultAddresses = await getYearnTokenVaultAddresses()
+    }
+
+    if (
+      !(
+        [receiveAddress, spender].includes(SHAPE_SHIFT_ROUTER_CONTRACT) ||
+        (receiveAddress ? this.yearnTokenVaultAddresses?.includes(receiveAddress) : false)
+      )
+    )
       return
 
     return {
