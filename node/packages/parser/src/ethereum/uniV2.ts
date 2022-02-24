@@ -38,76 +38,13 @@ export class Parser implements GenericParser {
   }
 
   async parse(tx: Tx): Promise<TxSpecific<UniV2Tx> | undefined> {
+    if (!tx.ethereumSpecific?.data) return
     if (!txInteractsWithContract(tx, YEARN_V2_ROUTER_CONTRACT)) return
     if (!(tx.confirmations === 0)) return
-    if (!tx.ethereumSpecific?.data) return
 
-    const sendAddress = tx.vin[0].addresses?.[0] ?? ''
+    const transfers = await this.getTransfers(tx)
 
-    switch (getSigHash(tx.ethereumSpecific.data)) {
-      case this.addLiquidityEthSigHash: {
-        const result = this.abiInterface.decodeFunctionData(this.addLiquidityEthSigHash, tx.ethereumSpecific.data)
-
-        const tokenAddress = ethers.utils.getAddress(result.token.toLowerCase())
-        const lpTokenAddress = Parser.pairFor(tokenAddress, this.wethContract)
-        const contract = new ethers.Contract(tokenAddress, ERC20_ABI, this.provider)
-        const decimals = await contract.decimals()
-        const name = await contract.name()
-        const symbol = await contract.symbol()
-        const value = result.amountTokenDesired.toString()
-
-        const transfers: Array<Transfer> = [
-          {
-            type: TransferType.Send,
-            from: sendAddress,
-            to: lpTokenAddress,
-            caip19: caip19.toCAIP19({
-              chain: ChainTypes.Ethereum,
-              network: toNetworkType(this.network),
-              contractType: ContractTypes.ERC20,
-              tokenId: tokenAddress,
-            }),
-            totalValue: value,
-            components: [{ value }],
-            token: { contract: tokenAddress, decimals, name, symbol },
-          },
-        ]
-
-        return { transfers }
-      }
-      case this.removeLiquidityEthSigHash: {
-        const result = this.abiInterface.decodeFunctionData(this.removeLiquidityEthSigHash, tx.ethereumSpecific.data)
-
-        const tokenAddress = ethers.utils.getAddress(result.token.toLowerCase())
-        const lpTokenAddress = Parser.pairFor(tokenAddress, this.wethContract)
-        const contract = new ethers.Contract(lpTokenAddress, ERC20_ABI, this.provider)
-        const decimals = await contract.decimals()
-        const name = await contract.name()
-        const symbol = await contract.symbol()
-        const value = result.liquidity.toString()
-
-        const transfers: Array<Transfer> = [
-          {
-            type: TransferType.Send,
-            from: sendAddress,
-            to: lpTokenAddress,
-            caip19: caip19.toCAIP19({
-              chain: ChainTypes.Ethereum,
-              network: toNetworkType(this.network),
-              contractType: ContractTypes.ERC20,
-              tokenId: lpTokenAddress,
-            }),
-            totalValue: value,
-            components: [{ value }],
-            token: { contract: lpTokenAddress, decimals, name, symbol },
-          },
-        ]
-
-        return { transfers }
-      }
-      default:
-        return
-    }
+    return { transfers }
   }
 
   private static pairFor(tokenA: string, tokenB: string): string {
@@ -116,5 +53,76 @@ export class Parser implements GenericParser {
     const salt = ethers.utils.solidityKeccak256(['address', 'address'], [token0, token1])
     const initCodeHash = '0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f' // https://github.com/Uniswap/v2-periphery/blob/dda62473e2da448bc9cb8f4514dadda4aeede5f4/contracts/libraries/UniswapV2Library.sol#L24
     return ethers.utils.getCreate2Address(factoryContract, salt, initCodeHash)
+  }
+
+  private async getTransfers(tx: Tx): Promise<Transfer[] | undefined> {
+    const data = tx.ethereumSpecific?.data
+    const sendAddress = tx.vin[0].addresses?.[0] ?? ''
+    return await (async () => {
+      switch (getSigHash(data)) {
+        case this.addLiquidityEthSigHash: {
+          const result = this.abiInterface.decodeFunctionData(this.addLiquidityEthSigHash, tx.ethereumSpecific.data)
+
+          const tokenAddress = ethers.utils.getAddress(result.token.toLowerCase())
+          const lpTokenAddress = Parser.pairFor(tokenAddress, this.wethContract)
+          const contract = new ethers.Contract(tokenAddress, ERC20_ABI, this.provider)
+          const decimals = await contract.decimals()
+          const name = await contract.name()
+          const symbol = await contract.symbol()
+          const value = result.amountTokenDesired.toString()
+
+          const transfers: Array<Transfer> = [
+            {
+              type: TransferType.Send,
+              from: sendAddress,
+              to: lpTokenAddress,
+              caip19: caip19.toCAIP19({
+                chain: ChainTypes.Ethereum,
+                network: toNetworkType(this.network),
+                contractType: ContractTypes.ERC20,
+                tokenId: tokenAddress,
+              }),
+              totalValue: value,
+              components: [{ value }],
+              token: { contract: tokenAddress, decimals, name, symbol },
+            },
+          ]
+
+          return transfers
+        }
+        case this.removeLiquidityEthSigHash: {
+          const result = this.abiInterface.decodeFunctionData(this.removeLiquidityEthSigHash, tx.ethereumSpecific.data)
+
+          const tokenAddress = ethers.utils.getAddress(result.token.toLowerCase())
+          const lpTokenAddress = Parser.pairFor(tokenAddress, this.wethContract)
+          const contract = new ethers.Contract(lpTokenAddress, ERC20_ABI, this.provider)
+          const decimals = await contract.decimals()
+          const name = await contract.name()
+          const symbol = await contract.symbol()
+          const value = result.liquidity.toString()
+
+          const transfers: Array<Transfer> = [
+            {
+              type: TransferType.Send,
+              from: sendAddress,
+              to: lpTokenAddress,
+              caip19: caip19.toCAIP19({
+                chain: ChainTypes.Ethereum,
+                network: toNetworkType(this.network),
+                contractType: ContractTypes.ERC20,
+                tokenId: lpTokenAddress,
+              }),
+              totalValue: value,
+              components: [{ value }],
+              token: { contract: lpTokenAddress, decimals, name, symbol },
+            },
+          ]
+
+          return transfers
+        }
+        default:
+          return
+      }
+    })()
   }
 }
