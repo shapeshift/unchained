@@ -3,7 +3,7 @@ import { ethers } from 'ethers'
 import { Tx } from '@shapeshiftoss/blockbook'
 import { caip19, caip2 } from '@shapeshiftoss/caip'
 import { ChainTypes, ContractTypes } from '@shapeshiftoss/types'
-import { Status, Token, TransferType, Tx as ParseTx, TxSpecific } from '../types'
+import { GenericParser, Status, Token, TransferType, Tx as ParseTx, TxSpecific } from '../types'
 import { aggregateTransfer, findAsyncSequential } from '../utils'
 import { InternalTx, Network } from './types'
 import { getInternalMultisigAddress, getSigHash, SENDMULTISIG_SIG_HASH, toNetworkType } from './utils'
@@ -18,10 +18,6 @@ export interface TransactionParserArgs {
   network?: Network
   midgardUrl: string
   rpcUrl: string
-}
-
-export interface GenericParser {
-  parse: (tx: Tx) => Promise<TxSpecific<ParseTx> | undefined>
 }
 
 export class TransactionParser {

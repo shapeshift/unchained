@@ -307,7 +307,7 @@ describe('parseTx', () => {
         ],
         from: '0xDef1C0ded9bec7F1a1670819833240f027b25EfF',
         to: '0x5bb96c35a68Cba037D0F261C67477416db137F03',
-        data: undefined,
+        token: undefined,
         totalValue: '541566754246167133',
         type: TransferType.Receive,
       }
