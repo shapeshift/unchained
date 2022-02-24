@@ -162,6 +162,6 @@ type TransactionHash string
 type BaseAPI interface {
 	GetInfo() (Info, error)
 	GetAccount(pubkey string) (Account, error)
-	GetTxHistory(pubkey string, cursor string, pageSize uint) (TxHistory, error)
+	GetTxHistory(pubkey string, cursor string, pageSize int) (TxHistory, error)
 	SendTx(hex string) (string, error)
 }

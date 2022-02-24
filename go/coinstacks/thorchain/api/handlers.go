@@ -121,9 +121,10 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 	return account, nil
 }
 
-func (h *Handler) GetTxHistory(pubkey string) (api.TxHistory, error) {
-	res, err := h.httpClient.GetTxHistory(pubkey, "", 10)
+func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
+	res, err := h.httpClient.GetTxHistory(pubkey, cursor, pageSize)
 	if err != nil {
+		logger.Errorf("error getting tx history for pubkey %s and cursor %s: %s", pubkey, cursor, err)
 		return nil, err
 	}
 

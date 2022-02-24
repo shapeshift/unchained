@@ -33,12 +33,12 @@ import (
 )
 
 const (
-	txHistoryMaxPageSize = 100
-	PORT                 = 3000
-	GRACEFUL_SHUTDOWN    = 15 * time.Second
-	WRITE_TIMEOUT        = 15 * time.Second
-	READ_TIMEOUT         = 15 * time.Second
-	IDLE_TIMEOUT         = 60 * time.Second
+	PORT                     = 3000
+	GRACEFUL_SHUTDOWN        = 15 * time.Second
+	WRITE_TIMEOUT            = 15 * time.Second
+	READ_TIMEOUT             = 15 * time.Second
+	IDLE_TIMEOUT             = 60 * time.Second
+	MAX_PAGE_SIZE_TX_HISTORY = 100
 )
 
 var (
@@ -218,23 +218,23 @@ func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 
 	cursor := r.URL.Query().Get("cursor")
 
-	pageSize, err := strconv.ParseUint(r.URL.Query().Get("pageSize"), 10, 32)
+	pageSize, err := strconv.Atoi(r.URL.Query().Get("pageSize"))
 	if err != nil {
-		handleError(w, http.StatusBadRequest, err.Error())
+		api.HandleError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	if pageSize > txHistoryMaxPageSize {
-		handleError(w, http.StatusBadRequest, fmt.Sprintf("page size max is %d", txHistoryMaxPageSize))
+	if pageSize > MAX_PAGE_SIZE_TX_HISTORY {
+		api.HandleError(w, http.StatusBadRequest, fmt.Sprintf("page size max is %d", MAX_PAGE_SIZE_TX_HISTORY))
 		return
 	}
 
 	if pageSize == 0 {
-		handleError(w, http.StatusBadRequest, "page size cannot be 0")
+		api.HandleError(w, http.StatusBadRequest, "page size cannot be 0")
 		return
 	}
 
-	txHistory, err := a.handler.GetTxHistory(pubkey, cursor, uint(pageSize))
+	txHistory, err := a.handler.GetTxHistory(pubkey, cursor, pageSize)
 	if err != nil {
 		api.HandleError(w, http.StatusInternalServerError, err.Error())
 		return
