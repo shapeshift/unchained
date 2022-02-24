@@ -7,26 +7,38 @@ import { SHAPE_SHIFT_ROUTER_CONTRACT } from './constants'
 import { getSigHash, getYearnTokenVaultAddresses } from './utils'
 
 export class Parser implements GenericParser {
-  yearnTokenVaultAddresses: Array<string> | undefined
+  yearnTokenVaultAddresses: string[] | undefined
+  shapeShiftInterface = new ethers.utils.Interface(shapeShiftRouter)
+  yearnInterface = new ethers.utils.Interface(yearnVault)
+
+  approvalSigHash = this.yearnInterface.getSighash('approve')
+  // TODO - work out how to use shapeShiftInterface.getSighash('deposit(address,address,uint256,uint256)')
+  depositSigHash = '0x20e8c565'
+  withdrawSigHash = '0x00f714ce'
 
   async parse(tx: Tx): Promise<TxSpecific<YearnTx> | undefined> {
     const data = tx.ethereumSpecific?.data
     if (!data) return
 
-    const abiInterface = this.getAbiInterface(data)
+    const txSigHash = getSigHash(data)
+    const abiInterface = this.getAbiInterface(txSigHash)
     if (!abiInterface) return
 
     const decoded = abiInterface.parseTransaction({ data })
-    const spender = decoded?.args._spender
     const receiveAddress = tx.vout?.[0].addresses?.[0]
 
     if (!this.yearnTokenVaultAddresses) {
       this.yearnTokenVaultAddresses = await getYearnTokenVaultAddresses()
     }
 
-    const usedShapeShiftRouterContract = [receiveAddress, spender].includes(SHAPE_SHIFT_ROUTER_CONTRACT)
-    const sentToYearnVault = receiveAddress ? this.yearnTokenVaultAddresses?.includes(receiveAddress) : false
-    if (!(usedShapeShiftRouterContract || sentToYearnVault)) return
+    if (txSigHash === this.approvalSigHash && decoded?.args._spender !== SHAPE_SHIFT_ROUTER_CONTRACT) return
+    if (txSigHash === this.depositSigHash && receiveAddress !== SHAPE_SHIFT_ROUTER_CONTRACT) return
+    if (
+      txSigHash === this.withdrawSigHash &&
+      receiveAddress &&
+      !this.yearnTokenVaultAddresses?.includes(receiveAddress)
+    )
+      return
 
     return {
       data: {
@@ -36,24 +48,14 @@ export class Parser implements GenericParser {
     }
   }
 
-  getAbiInterface(data: string): ethers.utils.Interface | undefined {
-    const shapeShiftInterface = new ethers.utils.Interface(shapeShiftRouter)
-    const yearnInterface = new ethers.utils.Interface(yearnVault)
-
-    const txSigHash = getSigHash(data)
-    const approvalSigHash = yearnInterface.getSighash('approve')
-    // TODO - work out how to use shapeShiftInterface.getSighash('deposit(address,address,uint256,uint256)')
-    const depositSigHash = '0x20e8c565'
-    // TODO - work out how to use yearnInterface.getSighash('withdraw(...)')
-    const withdrawSigHash = '0x00f714ce'
-
+  getAbiInterface(txSigHash: string | undefined): ethers.utils.Interface | undefined {
     return (() => {
       switch (txSigHash) {
-        case approvalSigHash:
-        case withdrawSigHash:
-          return yearnInterface
-        case depositSigHash:
-          return shapeShiftInterface
+        case this.approvalSigHash:
+        case this.withdrawSigHash:
+          return this.yearnInterface
+        case this.depositSigHash:
+          return this.shapeShiftInterface
         default:
           return undefined
       }
