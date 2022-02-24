@@ -2,6 +2,8 @@
 config.json
 swagger.json
 node_modules
+Pulumi.*.yaml
+!Pulumi.sample.yaml
 
 # Binaries for programs and plugins
 *.exe

@@ -9,7 +9,7 @@ COPY ./static /app/static
 COPY ./internal /app/internal
 COPY ./cmd/${COINSTACK} /app/cmd/${COINSTACK}
 COPY ./pkg /app/pkg
-COPY ./coinstacks/${COINSTACK} /app/coinstacks/${COINSTACK}
+COPY ./coinstacks/${COINSTACK}/api /app/coinstacks/${COINSTACK}/api
 
 WORKDIR /app/cmd/${COINSTACK}
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o /go/bin/app

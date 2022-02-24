@@ -19,7 +19,6 @@ config:
 
     ## api - if specified an api service will be deployed
     api:
-      enableDatadogLogs: false
       autoscaling:
         enabled: false
         cpuThreshold: 30

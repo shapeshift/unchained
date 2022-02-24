@@ -45,12 +45,15 @@ export const getConfig = async (): Promise<Config> => {
   }
 
   if (config.api) {
-    if (!config.api.autoscaling.enabled) missingRequiredConfig.push('api.autoscaling.enabled')
-    if (!config.api.autoscaling.maxReplicas) missingRequiredConfig.push('api.autoscaling.maxReplicas')
-    if (!config.api.autoscaling.cpuThreshold) missingRequiredConfig.push('api.autoscaling.cpuThreshold')
-    if (!config.api.cpuLimit) missingRequiredConfig.push('api.cpuLimit')
-    if (!config.api.memoryLimit) missingRequiredConfig.push('api.memoryLimit')
-    if (!config.api.replicas) missingRequiredConfig.push('api.replicas')
+    if (config.api.autoscaling) {
+      if (config.api.autoscaling.enabled === undefined) missingRequiredConfig.push('api.autoscaling.enabled')
+      if (config.api.autoscaling.maxReplicas === undefined) missingRequiredConfig.push('api.autoscaling.maxReplicas')
+      if (config.api.autoscaling.cpuThreshold === undefined) missingRequiredConfig.push('api.autoscaling.cpuThreshold')
+    }
+
+    if (config.api.cpuLimit === undefined) missingRequiredConfig.push('api.cpuLimit')
+    if (config.api.memoryLimit === undefined) missingRequiredConfig.push('api.memoryLimit')
+    if (config.api.replicas === undefined) missingRequiredConfig.push('api.replicas')
   }
 
   if (missingRequiredConfig.length) {

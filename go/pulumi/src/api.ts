@@ -6,47 +6,73 @@ import { readFileSync } from 'fs'
 import { join } from 'path'
 import * as k8s from '@pulumi/kubernetes'
 import { Input, Resource } from '@pulumi/pulumi'
-import { buildAndPushImage, Config, hasTag, getBaseHash } from './index'
+import { buildAndPushImage, Config, hasTag } from './index'
+
+export interface Autoscaling {
+  enabled: boolean,
+  maxReplicas: number,
+  cpuThreshold: number
+}
 
 export interface ApiConfig {
   cpuLimit: string
   memoryLimit: string
   replicas: number
-  autoscaling: { enabled: boolean; maxReplicas: number; cpuThreshold: number }
-  enableDatadogLogs?: boolean
+  autoscaling?: Autoscaling
 }
 
 // creates a hash of the content included in the final build image
 const getHash = async (coinstack: string, buildArgs: Record<string, string>): Promise<string> => {
   const hash = createHash('sha1')
 
-  // hash root level unchained files
+  // hash go module files
   const { hash: unchainedHash } = await hashElement('../../../', {
     folders: { exclude: ['.*', '*'] },
-    files: { include: ['package.json', 'lerna.json'] },
+    files: { include: ['go.mod', 'go.sum'] },
   })
   hash.update(unchainedHash)
 
-  // hash contents of packages
-  const { hash: packagesHash } = await hashElement('../../../packages', {
-    folders: { include: ['**'], exclude: ['.*', 'dist', 'node_modules', 'pulumi'] },
-    files: { include: ['*.ts', '*.json', 'Dockerfile'] },
+  // hash build files
+  const { hash: buildHash } = await hashElement('../../../build', {
+    folders: { include: ['**'], exclude: ['.*'] },
+    files: { include: ['Dockerfile'] },
   })
-  hash.update(packagesHash)
+  hash.update(buildHash)
 
-  // hash contents of common-api
-  const { hash: commonApiHash } = await hashElement('../../common/api', {
-    folders: { include: ['**'], exclude: ['.*', 'dist', 'node_modules', 'pulumi'] },
-    files: { include: ['*.ts', '*.json', 'Dockerfile'] },
+  // hash contents of static
+  const { hash: staticHash } = await hashElement('../../../static', {
+    folders: { include: ['**'], exclude: ['.*'] },
+    files: { include: ['*'] },
   })
-  hash.update(commonApiHash)
+  hash.update(staticHash)
 
-  // hash contents of coinstack-api
-  const { hash: apiHash } = await hashElement(`../../${coinstack}/api`, {
-    folders: { include: ['**'], exclude: ['.*', 'dist', 'node_modules', 'pulumi'] },
-    files: { include: ['*.ts', '*.json', 'Dockerfile'] },
+  // hash contents of internal
+  const { hash: internalHash } = await hashElement('../../../internal', {
+    folders: { include: ['**'], exclude: ['.*'] },
+    files: { include: ['*.go'] },
   })
-  hash.update(apiHash)
+  hash.update(internalHash)
+
+  // hash contents of cmd
+  const { hash: cmdHash } = await hashElement(`../../../cmd/${coinstack}`, {
+    folders: { include: ['**'], exclude: ['.*'] },
+    files: { include: ['*.go', 'sample.env'] },
+  })
+  hash.update(cmdHash)
+
+  // hash contents of pkg
+  const { hash: pkgHash } = await hashElement('../../../pkg', {
+    folders: { include: ['**'], exclude: ['.*'] },
+    files: { include: ['*.go'] },
+  })
+  hash.update(pkgHash)
+
+  // hash contents of coinstack api
+  const { hash: coinstackHash } = await hashElement(`../../${coinstack}/api`, {
+    folders: { include: ['**'], exclude: ['.*'] },
+    files: { include: ['*.go', '*.json'] },
+  })
+  hash.update(coinstackHash)
 
   hash.update(objectHash(buildArgs))
 
@@ -68,14 +94,10 @@ export async function deployApi(
   const [coinstack] = asset.split('-')
   const name = `${asset}-${tier}`
 
-  let imageName = 'mhart/alpine-node:14.17.3' // local dev image
+  let imageName = 'golang:1.17.6-alpine' // local dev image
   if (!config.isLocal) {
     const repositoryName = `${app}-${coinstack}-${tier}`
-    const baseImageName = `${config.dockerhub?.username ?? 'shapeshiftdao'}/unchained-base:${await getBaseHash()}`
-    const buildArgs = {
-      BUILDKIT_INLINE_CACHE: '1',
-      BASE_IMAGE: baseImageName, // associated base image for dockerhub user expected to exist
-    }
+    const buildArgs = { BUILDKIT_INLINE_CACHE: '1', COINSTACK: coinstack }
     const tag = await getHash(coinstack, buildArgs)
 
     imageName = `shapeshiftdao/${repositoryName}:${tag}` // default public image
@@ -87,7 +109,7 @@ export async function deployApi(
       if (!(await hasTag(image, tag))) {
         await buildAndPushImage({
           image,
-          context: `../../${coinstack}/api`,
+          context: `../../../build`,
           auth: {
             password: config.dockerhub.password,
             username: config.dockerhub.username,
@@ -96,7 +118,7 @@ export async function deployApi(
           buildArgs,
           env: { DOCKER_BUILDKIT: '1' },
           tags: [tag],
-          cacheFroms: [`${image}:${tag}`, `${image}:latest`, baseImageName],
+          cacheFroms: [`${image}:${tag}`, `${image}:latest`],
         })
       }
     }
@@ -217,28 +239,13 @@ export async function deployApi(
     )
   }
 
-  const secretEnvs = Object.keys(parse(readFileSync('../sample.env'))).map<k8s.types.input.core.v1.EnvVar>((key) => ({
+  const secretEnvs = Object.keys(parse(readFileSync(`../../../cmd/${coinstack}/sample.env`))).map<k8s.types.input.core.v1.EnvVar>((key) => ({
     name: key,
     valueFrom: { secretKeyRef: { name: asset, key: key } },
   }))
 
-  // Fetch user credentials in secret generated by rabbitmq cluster operator, build URI
-  const rabbitCredentials: k8s.types.input.core.v1.EnvVar[] = [
-    {
-      name: 'BROKER_URI',
-      value: 'amqp://guest:guest@$(BROKER_URL)',
-    },
-  ]
-
-  const datadogAnnotation = config.api.enableDatadogLogs
-    ? {
-        [`ad.datadoghq.com/${tier}.logs`]: `[{"source": "${app}", "service": "${name}"}]`,
-      }
-    : {}
-
   const podSpec: k8s.types.input.core.v1.PodTemplateSpec = {
     metadata: {
-      annotations: { ...datadogAnnotation },
       namespace: namespace,
       labels: labels,
     },
@@ -248,8 +255,8 @@ export async function deployApi(
           name: tier,
           image: imageName,
           ports: [{ containerPort: 3000, name: 'http' }],
-          env: [...secretEnvs, ...rabbitCredentials],
-          command: config.isLocal ? ['sh', '-c', 'yarn nodemon'] : ['node', `dist/${coinstack}/api/src/app.js`],
+          env: [...secretEnvs],
+          command: config.isLocal ? ['sh', '-c', `go run cmd/${coinstack}/main.go`] : ['-swagger', 'swagger.json'],
           resources: {
             limits: {
               cpu: config.api.cpuLimit,
@@ -272,17 +279,17 @@ export async function deployApi(
           },
           ...(config.isLocal && {
             volumeMounts: [{ name: 'app', mountPath: '/app' }],
-            workingDir: `/app/coinstacks/${coinstack}/api`,
+            workingDir: `/app`,
           }),
         },
       ],
       ...(config.isLocal && {
-        volumes: [{ name: 'app', hostPath: { path: join(__dirname, '../../../../') } }],
+        volumes: [{ name: 'app', hostPath: { path: join(__dirname, '../../../go') } }],
       }),
     },
   }
 
-  if (config.api.autoscaling.enabled) {
+  if (config.api.autoscaling?.enabled) {
     new k8s.autoscaling.v1.HorizontalPodAutoscaler(
       name,
       {
