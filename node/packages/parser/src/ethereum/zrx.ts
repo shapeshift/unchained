@@ -1,19 +1,26 @@
 import { Tx } from '@shapeshiftoss/blockbook'
-import { Dex, TradeType, TxSpecific, ZrxTx } from '../types'
+import { Dex, GenericParser, TradeType, TxSpecific, ZrxTx } from '../types'
 import { txInteractsWithContract } from './utils'
+import { ZRX_PROXY_CONTRACT } from './constants'
 
-export const PROXY_CONTRACT = '0xDef1C0ded9bec7F1a1670819833240f027b25EfF'
-
-export class Parser {
-  parse(tx: Tx): Partial<TxSpecific<ZrxTx>> | undefined {
-    if (!txInteractsWithContract(tx, PROXY_CONTRACT)) return
+export class Parser implements GenericParser {
+  async parse(tx: Tx): Promise<TxSpecific<ZrxTx> | undefined> {
+    if (!txInteractsWithContract(tx, ZRX_PROXY_CONTRACT)) return
     if (!(tx.tokenTransfers && tx.tokenTransfers.length)) return
 
+    const trade = {
+      dexName: Dex.Zrx,
+      type: TradeType.Trade,
+    }
+
+    const data = {
+      method: undefined, // TODO - add zrx ABI and decode
+      parser: 'zrx',
+    }
+
     return {
-      trade: {
-        dexName: Dex.Zrx,
-        type: TradeType.Trade,
-      },
+      trade,
+      data,
     }
   }
 }

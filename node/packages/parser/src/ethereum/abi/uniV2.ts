@@ -1,4 +1,6 @@
-export default [
+import { JsonFragment } from '@ethersproject/abi/lib/fragments'
+
+const uniV2: Array<JsonFragment> = [
   {
     inputs: [
       { internalType: 'address', name: '_factory', type: 'address' },
@@ -338,3 +340,5 @@ export default [
   },
   { stateMutability: 'payable', type: 'receive' },
 ]
+
+export default uniV2
