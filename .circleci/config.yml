@@ -406,6 +406,9 @@ jobs:
             pulumi config set --path unchained:common.eks.traefik.whitelist[20] $VPN_ADDRESS_2
             pulumi config set --path unchained:common.eks.traefik.whitelist[21] $VPN_ADDRESS_3
             pulumi config set --path unchained:common.eks.traefik.whitelist[22] $VPN_ADDRESS_4
+            pulumi config set --path unchained:common.eks.traefik.whitelist[23] $AWS_TAXISTAKE_NAT_ADDRESS_0
+            pulumi config set --path unchained:common.eks.traefik.whitelist[24] $AWS_TAXISTAKE_NAT_ADDRESS_1
+            pulumi config set --path unchained:common.eks.traefik.whitelist[25] $AWS_TAXISTAKE_NAT_ADDRESS_2
             pulumi config set --path unchained:common.dockerhub.username $DOCKERHUB_USERNAME
             pulumi config set --path unchained:common.dockerhub.password $DOCKERHUB_PASSWORD --plaintext
             pulumi config set --path unchained:common.dockerhub.server docker.io
