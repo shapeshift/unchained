@@ -1,4 +1,4 @@
-import { Dex, Status, Trade, TradeType, TransferType, Tx, TxMetadata } from '../../types'
+import { Dex, Status, Trade, TradeType, TransferType, Tx } from '../../types'
 import { TransactionParser } from '../index'
 import multiSigSendEth from './mockData/multiSigSendEth'
 import thorSwapDepositEth from './mockData/thorSwapDepositEth'
@@ -18,10 +18,15 @@ import uniRemoveLiquidity from './mockData/uniRemoveLiquidity'
 import foxClaim from './mockData/foxClaim'
 import foxStake from './mockData/foxStake'
 import foxExit from './mockData/foxExit'
+import yearnDeposit from './mockData/yearnDeposit'
+import yearnApproval from './mockData/yearnApproval'
+import yearnWithdrawal from './mockData/yearnWithdrawal'
 import {
   bondToken,
   foxToken,
   kishuToken,
+  linkToken,
+  linkYearnVault,
   maticToken,
   tribeToken,
   uniToken,
@@ -29,15 +34,11 @@ import {
   usdcToken,
   usdtToken,
 } from './mockData/tokens'
+import { SHAPE_SHIFT_ROUTER_CONTRACT } from '../constants'
 
 jest.mock('@shapeshiftoss/thorchain')
 
 const txParser = new TransactionParser({ midgardUrl: '', rpcUrl: '' })
-
-const emptyMetaData: TxMetadata = {
-  buyTx: undefined,
-  sellTx: undefined,
-}
 
 describe('parseTx', () => {
   describe('multiSig', () => {
@@ -63,7 +64,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         transfers: [standardTransfer],
@@ -101,7 +102,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: { sellTx: sellTransfer },
+        data: {
+          method: 'deposit',
+          parser: 'thor',
+        },
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -144,8 +148,8 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
-          buyTx: undefined,
-          sellTx: sellTransfer,
+          method: 'deposit',
+          parser: 'thor',
         },
         value: tx.value,
         status: Status.Confirmed,
@@ -188,7 +192,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: { buyTx: buyTransfer },
+        data: {
+          method: 'transferOut',
+          parser: 'thor',
+        },
         value: tx.value,
         status: Status.Confirmed,
         transfers: [buyTransfer],
@@ -226,7 +233,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: { buyTx: buyTransfer },
+        data: {
+          method: 'transferOut',
+          parser: 'thor',
+        },
         value: tx.value,
         status: Status.Confirmed,
         transfers: [buyTransfer],
@@ -264,7 +274,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: { buyTx: buyTransfer },
+        data: {
+          method: 'transferOut',
+          parser: 'thor',
+        },
         value: tx.value,
         status: Status.Confirmed,
         transfers: [buyTransfer],
@@ -322,8 +335,8 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
-          buyTx: buyTransfer,
-          sellTx: sellTransfer,
+          method: undefined,
+          parser: 'zrx',
         },
         value: tx.value,
         status: Status.Confirmed,
@@ -385,8 +398,8 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
-          buyTx: buyTransfer,
-          sellTx: sellTransfer,
+          method: undefined,
+          parser: 'zrx',
         },
         value: tx.value,
         status: Status.Confirmed,
@@ -440,8 +453,8 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
-          buyTx: buyTransfer,
-          sellTx: sellTransfer,
+          method: undefined,
+          parser: 'zrx',
         },
         value: tx.value,
         status: Status.Confirmed,
@@ -515,8 +528,8 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
-          buyTx: buyTransfer1, // TODO - work out how we handle multiple buy txs
-          sellTx: sellTransfer1, // TODO - work out how we handle multiple sell txs
+          method: undefined,
+          parser: 'zrx',
         },
         value: tx.value,
         status: Status.Confirmed,
@@ -546,7 +559,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: txMempool.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: txMempool.value,
         status: Status.Pending,
         transfers: [
@@ -586,7 +599,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -629,7 +642,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: txMempool.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: txMempool.value,
         status: Status.Pending,
         transfers: [
@@ -671,7 +684,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -719,7 +732,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -745,7 +758,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: txMempool.confirmations,
-        data: emptyMetaData,
+        data: {
+          method: 'addLiquidityETH',
+          parser: 'uniV2',
+        },
         value: txMempool.value,
         status: Status.Pending,
         transfers: [
@@ -791,7 +807,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -844,7 +860,10 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: txMempool.confirmations,
-        data: emptyMetaData,
+        data: {
+          method: 'removeLiquidityETH',
+          parser: 'uniV2',
+        },
         value: txMempool.value,
         status: Status.Pending,
         transfers: [
@@ -877,7 +896,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -933,7 +952,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -970,7 +989,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: txMempool.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: txMempool.value,
         status: Status.Pending,
         transfers: [],
@@ -993,7 +1012,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -1029,7 +1048,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: txMempool.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: txMempool.value,
         status: Status.Pending,
         transfers: [],
@@ -1052,7 +1071,7 @@ describe('parseTx', () => {
         address: address,
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
-        data: emptyMetaData,
+        data: undefined,
         value: tx.value,
         status: Status.Confirmed,
         fee: {
@@ -1083,6 +1102,133 @@ describe('parseTx', () => {
 
       const actual = await txParser.parse(tx, address)
 
+      expect(expected).toEqual(actual)
+    })
+  })
+
+  describe('yearn', () => {
+    it('should parse approval', async () => {
+      const { tx } = yearnApproval
+      const address = '0x1399D13F3A0aaf08f7C5028D81447a311e4760c4'
+
+      const expected: Tx = {
+        txid: tx.txid,
+        blockHeight: tx.blockHeight,
+        blockTime: tx.blockTime,
+        blockHash: tx.blockHash,
+        address: address,
+        caip2: 'eip155:1',
+        confirmations: tx.confirmations,
+        data: {
+          method: 'approve',
+          parser: 'yearn',
+        },
+        value: tx.value,
+        status: Status.Confirmed,
+        fee: {
+          value: '4519526097650998',
+          caip19: 'eip155:1/slip44:60',
+        },
+        transfers: [],
+      }
+
+      const actual = await txParser.parse(tx, address)
+      expect(expected).toEqual(actual)
+    })
+
+    it('should parse deposit', async () => {
+      const { tx } = yearnDeposit
+      const address = '0x1399D13F3A0aaf08f7C5028D81447a311e4760c4'
+
+      const expected: Tx = {
+        txid: tx.txid,
+        blockHeight: tx.blockHeight,
+        blockTime: tx.blockTime,
+        blockHash: tx.blockHash,
+        address: address,
+        caip2: 'eip155:1',
+        confirmations: tx.confirmations,
+        data: {
+          method: 'deposit',
+          parser: 'yearn',
+        },
+        value: tx.value,
+        status: Status.Confirmed,
+        fee: {
+          value: '18139009291874667',
+          caip19: 'eip155:1/slip44:60',
+        },
+        transfers: [
+          {
+            type: TransferType.Send,
+            from: address,
+            to: SHAPE_SHIFT_ROUTER_CONTRACT,
+            caip19: 'eip155:1/erc20:0x514910771af9ca656af840dff83e8264ecf986ca',
+            totalValue: '999961394864662132',
+            components: [{ value: '999961394864662132' }],
+            token: linkToken,
+          },
+          {
+            type: TransferType.Receive,
+            from: '0x0000000000000000000000000000000000000000',
+            to: address,
+            caip19: 'eip155:1/erc20:0x671a912c10bba0cfa74cfc2d6fba9ba1ed9530b2',
+            totalValue: '987002304279657611',
+            components: [{ value: '987002304279657611' }],
+            token: linkYearnVault,
+          },
+        ],
+      }
+
+      const actual = await txParser.parse(tx, address)
+      expect(expected).toEqual(actual)
+    })
+
+    it('should parse withdrawal', async () => {
+      const { tx } = yearnWithdrawal
+      const address = '0x1399D13F3A0aaf08f7C5028D81447a311e4760c4'
+
+      const expected: Tx = {
+        txid: tx.txid,
+        blockHeight: tx.blockHeight,
+        blockTime: tx.blockTime,
+        blockHash: tx.blockHash,
+        address: address,
+        caip2: 'eip155:1',
+        confirmations: tx.confirmations,
+        data: {
+          method: 'withdraw',
+          parser: 'yearn',
+        },
+        value: tx.value,
+        status: Status.Confirmed,
+        fee: {
+          value: '19460274119661600',
+          caip19: 'eip155:1/slip44:60',
+        },
+        transfers: [
+          {
+            type: TransferType.Send,
+            from: address,
+            to: '0x0000000000000000000000000000000000000000',
+            caip19: 'eip155:1/erc20:0x671a912c10bba0cfa74cfc2d6fba9ba1ed9530b2',
+            totalValue: '493501152139828806',
+            components: [{ value: '493501152139828806' }],
+            token: linkYearnVault,
+          },
+          {
+            type: TransferType.Receive,
+            from: '0x671a912C10bba0CFA74Cfc2d6Fba9BA1ed9530B2',
+            to: address,
+            caip19: 'eip155:1/erc20:0x514910771af9ca656af840dff83e8264ecf986ca',
+            totalValue: '500482168225493862',
+            components: [{ value: '500482168225493862' }],
+            token: linkToken,
+          },
+        ],
+      }
+
+      const actual = await txParser.parse(tx, address)
       expect(expected).toEqual(actual)
     })
   })

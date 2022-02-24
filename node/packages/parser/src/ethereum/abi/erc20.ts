@@ -1,4 +1,6 @@
-export default [
+import { JsonFragment } from '@ethersproject/abi/lib/fragments'
+
+const erc20: Array<JsonFragment> = [
   {
     inputs: [
       {
@@ -286,3 +288,5 @@ export default [
     type: 'function',
   },
 ]
+
+export default erc20

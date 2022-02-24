@@ -1,7 +1,9 @@
 import { NetworkTypes } from '@shapeshiftoss/types'
 import { Tx } from '@shapeshiftoss/blockbook'
-import { TransferType, Tx as ParseTx } from '../types'
-import { Network } from './types'
+import { Network, YearnTokenVault } from './types'
+import axios from 'axios'
+import { ethers } from 'ethers'
+import MULTISIG_ABI from './abi/multiSig'
 
 export const toNetworkType = (network: Network): NetworkTypes => {
   switch (network) {
@@ -25,11 +27,20 @@ export const txInteractsWithContract = (tx: Tx, contract: string) => {
   return receiveAddress === contract
 }
 
-export const getStandardTx = (tx: ParseTx | undefined) => (tx?.transfers?.length === 1 ? tx.transfers[0] : undefined)
+export const getYearnTokenVaultAddresses = async (): Promise<Array<string> | undefined> => {
+  const yearnTokenVaultResponse = await axios.get<YearnTokenVault[]>('https://api.yearn.finance/v1/chains/1/vaults/all')
+  return yearnTokenVaultResponse.status === 200 ? yearnTokenVaultResponse.data.map((vault) => vault.address) : undefined
+}
 
-export const getBuyTx = (tx: ParseTx | undefined) =>
-  tx?.trade ? tx.transfers?.find((t) => t.type === TransferType.Receive) : undefined
+export const SENDMULTISIG_SIG_HASH = ((): string => {
+  const abiInterface = new ethers.utils.Interface(MULTISIG_ABI)
+  return abiInterface.getSighash('sendMultiSig')
+})()
 
-export const getSellTx = (tx: ParseTx | undefined) => {
-  return tx?.trade ? tx.transfers?.find((t) => t.type === TransferType.Send) : undefined
+// detect address associated with sendMultiSig internal transaction
+export const getInternalMultisigAddress = (inputData: string): string | undefined => {
+  const abiInterface = new ethers.utils.Interface(MULTISIG_ABI)
+  if (getSigHash(inputData) !== SENDMULTISIG_SIG_HASH) return
+  const result = abiInterface.decodeFunctionData(SENDMULTISIG_SIG_HASH, inputData)
+  return result.toAddress
 }
