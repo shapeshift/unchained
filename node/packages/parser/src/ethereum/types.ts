@@ -17,7 +17,7 @@ export interface InternalTx {
 
 export type Network = 'mainnet' | 'ropsten'
 
-export interface yearnTokenVault {
+export interface YearnTokenVault {
   address: string
   symbol: string
   name: string

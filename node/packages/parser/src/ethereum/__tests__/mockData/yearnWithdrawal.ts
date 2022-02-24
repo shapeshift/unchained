@@ -1,4 +1,4 @@
-import { YEARN_LINK_TOKEN_VAULT } from '../../constants'
+const YEARN_LINK_TOKEN_VAULT = '0x671a912C10bba0CFA74Cfc2d6Fba9BA1ed9530B2'
 
 const yearnWithdrawal = {
   txid: '0xf76726fa317df7e7785254f5f9f59d68fd303aeba108e8f883c938250afcfd46',

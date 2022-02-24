@@ -65,71 +65,65 @@ export class Parser implements GenericParser {
     const data = tx.ethereumSpecific?.data
     if (!data) return
     const sendAddress = tx.vin[0].addresses?.[0] ?? ''
-    return await (async () => {
-      switch (getSigHash(data)) {
-        case this.addLiquidityEthSigHash: {
-          const result = this.abiInterface.decodeFunctionData(this.addLiquidityEthSigHash, data)
+    switch (getSigHash(data)) {
+      case this.addLiquidityEthSigHash: {
+        const result = this.abiInterface.decodeFunctionData(this.addLiquidityEthSigHash, data)
 
-          const tokenAddress = ethers.utils.getAddress(result.token.toLowerCase())
-          const lpTokenAddress = Parser.pairFor(tokenAddress, this.wethContract)
-          const contract = new ethers.Contract(tokenAddress, ERC20_ABI, this.provider)
-          const decimals = await contract.decimals()
-          const name = await contract.name()
-          const symbol = await contract.symbol()
-          const value = result.amountTokenDesired.toString()
+        const tokenAddress = ethers.utils.getAddress(result.token.toLowerCase())
+        const lpTokenAddress = Parser.pairFor(tokenAddress, this.wethContract)
+        const contract = new ethers.Contract(tokenAddress, ERC20_ABI, this.provider)
+        const decimals = await contract.decimals()
+        const name = await contract.name()
+        const symbol = await contract.symbol()
+        const value = result.amountTokenDesired.toString()
 
-          const transfers: Array<Transfer> = [
-            {
-              type: TransferType.Send,
-              from: sendAddress,
-              to: lpTokenAddress,
-              caip19: caip19.toCAIP19({
-                chain: ChainTypes.Ethereum,
-                network: toNetworkType(this.network),
-                contractType: ContractTypes.ERC20,
-                tokenId: tokenAddress,
-              }),
-              totalValue: value,
-              components: [{ value }],
-              token: { contract: tokenAddress, decimals, name, symbol },
-            },
-          ]
-
-          return transfers
-        }
-        case this.removeLiquidityEthSigHash: {
-          const result = this.abiInterface.decodeFunctionData(this.removeLiquidityEthSigHash, data)
-
-          const tokenAddress = ethers.utils.getAddress(result.token.toLowerCase())
-          const lpTokenAddress = Parser.pairFor(tokenAddress, this.wethContract)
-          const contract = new ethers.Contract(lpTokenAddress, ERC20_ABI, this.provider)
-          const decimals = await contract.decimals()
-          const name = await contract.name()
-          const symbol = await contract.symbol()
-          const value = result.liquidity.toString()
-
-          const transfers: Array<Transfer> = [
-            {
-              type: TransferType.Send,
-              from: sendAddress,
-              to: lpTokenAddress,
-              caip19: caip19.toCAIP19({
-                chain: ChainTypes.Ethereum,
-                network: toNetworkType(this.network),
-                contractType: ContractTypes.ERC20,
-                tokenId: lpTokenAddress,
-              }),
-              totalValue: value,
-              components: [{ value }],
-              token: { contract: lpTokenAddress, decimals, name, symbol },
-            },
-          ]
-
-          return transfers
-        }
-        default:
-          return
+        return [
+          {
+            type: TransferType.Send,
+            from: sendAddress,
+            to: lpTokenAddress,
+            caip19: caip19.toCAIP19({
+              chain: ChainTypes.Ethereum,
+              network: toNetworkType(this.network),
+              contractType: ContractTypes.ERC20,
+              tokenId: tokenAddress,
+            }),
+            totalValue: value,
+            components: [{ value }],
+            token: { contract: tokenAddress, decimals, name, symbol },
+          },
+        ]
       }
-    })()
+      case this.removeLiquidityEthSigHash: {
+        const result = this.abiInterface.decodeFunctionData(this.removeLiquidityEthSigHash, data)
+
+        const tokenAddress = ethers.utils.getAddress(result.token.toLowerCase())
+        const lpTokenAddress = Parser.pairFor(tokenAddress, this.wethContract)
+        const contract = new ethers.Contract(lpTokenAddress, ERC20_ABI, this.provider)
+        const decimals = await contract.decimals()
+        const name = await contract.name()
+        const symbol = await contract.symbol()
+        const value = result.liquidity.toString()
+
+        return [
+          {
+            type: TransferType.Send,
+            from: sendAddress,
+            to: lpTokenAddress,
+            caip19: caip19.toCAIP19({
+              chain: ChainTypes.Ethereum,
+              network: toNetworkType(this.network),
+              contractType: ContractTypes.ERC20,
+              tokenId: lpTokenAddress,
+            }),
+            totalValue: value,
+            components: [{ value }],
+            token: { contract: lpTokenAddress, decimals, name, symbol },
+          },
+        ]
+      }
+      default:
+        return
+    }
   }
 }

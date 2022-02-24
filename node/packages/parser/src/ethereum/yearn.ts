@@ -14,7 +14,9 @@ export class Parser implements GenericParser {
     if (!data) return
 
     const abiInterface = this.getAbiInterface(data)
-    const decoded = abiInterface?.parseTransaction({ data })
+    if (!abiInterface) return
+
+    const decoded = abiInterface.parseTransaction({ data })
     const spender = decoded?.args._spender
     const receiveAddress = tx.vout?.[0].addresses?.[0]
 
@@ -22,13 +24,9 @@ export class Parser implements GenericParser {
       this.yearnTokenVaultAddresses = await getYearnTokenVaultAddresses()
     }
 
-    if (
-      !(
-        [receiveAddress, spender].includes(SHAPE_SHIFT_ROUTER_CONTRACT) ||
-        (receiveAddress ? this.yearnTokenVaultAddresses?.includes(receiveAddress) : false)
-      )
-    )
-      return
+    const usedShapeShiftRouterContract = [receiveAddress, spender].includes(SHAPE_SHIFT_ROUTER_CONTRACT)
+    const sentToYearnVault = receiveAddress ? this.yearnTokenVaultAddresses?.includes(receiveAddress) : false
+    if (!(usedShapeShiftRouterContract || sentToYearnVault)) return
 
     return {
       data: {
@@ -52,11 +50,10 @@ export class Parser implements GenericParser {
     return (() => {
       switch (txSigHash) {
         case approvalSigHash:
+        case withdrawSigHash:
           return yearnInterface
         case depositSigHash:
           return shapeShiftInterface
-        case withdrawSigHash:
-          return yearnInterface
         default:
           return undefined
       }
