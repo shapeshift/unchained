@@ -1,6 +1,4 @@
 {
         "lcdUrl": "rpc.thorchain.info/",
-        "grpcUrl": "",
-        "rpcUrl": "rpc.thorchain.info/",
-        "apiKey": ""
+        "rpcUrl": "rpc.thorchain.info/"
 }

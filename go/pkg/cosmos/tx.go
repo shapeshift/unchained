@@ -9,14 +9,11 @@ import (
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
-	ibcclienttypes "github.com/cosmos/ibc-go/v3/modules/core/02-client/types"
-	ibcchanneltypes "github.com/cosmos/ibc-go/v3/modules/core/04-channel/types"
 	"github.com/pkg/errors"
-	"github.com/shapeshift/go-unchained/pkg/tendermint/client"
-	liquiditytypes "github.com/tendermint/liquidity/x/liquidity/types"
+	"github.com/shapeshift/unchained/pkg/tendermint/client"
 )
 
 func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (*TxHistory, error) {
@@ -170,7 +167,7 @@ func Messages(msgs []sdk.Msg) []Message {
 				Value:     coinToValue(&v.Amount),
 			}
 			messages = append(messages, message)
-		case *disttypes.MsgWithdrawDelegatorReward:
+		case *distributiontypes.MsgWithdrawDelegatorReward:
 			message := Message{
 				Addresses: []string{v.DelegatorAddress, v.ValidatorAddress},
 				From:      v.ValidatorAddress,
@@ -187,13 +184,6 @@ func Messages(msgs []sdk.Msg) []Message {
 				Value:     coinToValue(&v.Token),
 			}
 			messages = append(messages, message)
-		case *liquiditytypes.MsgSwapWithinBatch,
-			*ibcclienttypes.MsgUpdateClient,
-			*ibcchanneltypes.MsgAcknowledgement,
-			*ibcchanneltypes.MsgRecvPacket:
-			// known but not currently handled
-		default:
-			logger.Warnf("unsupported message type: %T", v)
 		}
 	}
 

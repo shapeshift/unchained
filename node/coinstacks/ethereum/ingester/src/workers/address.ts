@@ -32,9 +32,9 @@ const onMessage = (worker: Worker) => async (message: Message) => {
     const tx = await blockbook.getTransaction(txid)
     msgLogger.trace({ blockHash: tx.blockHash, blockHeight: tx.blockHeight, txid: tx.txid }, 'Transaction')
 
-    const pTx = await parser.parse(tx, address, internalTxs)
+    const parsedTx = await parser.parse(tx, address, internalTxs)
 
-    worker.sendMessage(new Message({ ...pTx, sequence, total } as SequencedTx), client_id)
+    worker.sendMessage(new Message({ ...parsedTx, sequence, total } as SequencedTx), client_id)
     worker.ackMessage(message, retryKey)
 
     msgLogger.debug({ address, txid, client_id }, 'Transaction published')

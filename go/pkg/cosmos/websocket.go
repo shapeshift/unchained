@@ -7,7 +7,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/pkg/errors"
-	"github.com/shapeshift/go-unchained/pkg/websocket"
+	"github.com/shapeshift/unchained/pkg/websocket"
 	"github.com/tendermint/tendermint/libs/json"
 	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 	tendermint "github.com/tendermint/tendermint/rpc/jsonrpc/client"

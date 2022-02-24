@@ -6,16 +6,18 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/shapeshift/go-unchained/coinstacks/cosmos/api"
-	"github.com/shapeshift/go-unchained/internal/config"
-	"github.com/shapeshift/go-unchained/internal/log"
-	"github.com/shapeshift/go-unchained/pkg/cosmos"
+	"github.com/shapeshift/unchained/coinstacks/cosmos/api"
+	"github.com/shapeshift/unchained/internal/config"
+	"github.com/shapeshift/unchained/internal/log"
+	"github.com/shapeshift/unchained/pkg/cosmos"
 )
 
-var logger = log.WithoutFields()
+var (
+	logger = log.WithoutFields()
 
-var confPath = flag.String("config", "cmd/cosmos/config.json", "path to configuration file")
-var swaggerPath = flag.String("swagger", "/app/coinstacks/cosmos/api/swagger.json", "path to swagger spec")
+	confPath    = flag.String("config", "cmd/cosmos/config.json", "path to configuration file")
+	swaggerPath = flag.String("swagger", "/app/coinstacks/cosmos/api/swagger.json", "path to swagger spec")
+)
 
 // Config for running application
 type Config struct {
@@ -35,7 +37,7 @@ func main() {
 
 	conf := &Config{}
 	if err := config.Load(*confPath, conf); err != nil {
-		logger.Panicf("%+v", err)
+		logger.Panicf("failed to load config: %+v", err)
 	}
 
 	encoding := cosmos.NewEncoding()
@@ -53,17 +55,17 @@ func main() {
 
 	httpClient, err := cosmos.NewHTTPClient(cfg)
 	if err != nil {
-		logger.Panicf("%+v", err)
+		logger.Panicf("failed to create new http client: %+v", err)
 	}
 
 	grpcClient, err := cosmos.NewGRPCClient(cfg)
 	if err != nil {
-		logger.Panicf("%+v", err)
+		logger.Panicf("failed to create new grpc client: %+v", err)
 	}
 
 	wsClient, err := cosmos.NewWebsocketClient(cfg)
 	if err != nil {
-		logger.Panicf("%+v", err)
+		logger.Panicf("failed to create new websocket client: %+v", err)
 	}
 
 	api := api.New(httpClient, grpcClient, wsClient, *swaggerPath)

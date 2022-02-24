@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/shapeshift/go-unchained/pkg/api"
-	"github.com/shapeshift/go-unchained/pkg/cosmos"
+	"github.com/shapeshift/unchained/pkg/api"
+	"github.com/shapeshift/unchained/pkg/cosmos"
 )
 
 // Contains info about the running coinstack
@@ -35,16 +35,31 @@ type Account struct {
 	Rewards []cosmos.Value `json:"rewards"`
 }
 
+// Contains info about a transaction
+// swagger:model Tx
 type Tx struct {
+	// swagger:allOf
 	api.BaseTx
-	Fee       cosmos.Value     `json:"fee"`
-	GasUsed   string           `json:"gasUsed"`
-	GasWanted string           `json:"gasWanted"`
-	Index     int              `json:"index"`
-	Memo      string           `json:"memo,omitempty"`
-	Value     string           `json:"value"`
-	Messages  []cosmos.Message `json:"messages"`
-	Events    []cosmos.Event   `json:"events"`
+	// required: true
+	Fee cosmos.Value `json:"fee"`
+	// required: true
+	// example: 888
+	GasUsed string `json:"gasUsed"`
+	// required: true
+	// example: 999
+	GasWanted string `json:"gasWanted"`
+	// required: true
+	// example: 1
+	Index int `json:"index"`
+	// required: true
+	Memo string `json:"memo,omitempty"`
+	// required: true
+	// 123456789
+	Value string `json:"value"`
+	// swagger:allOf
+	Messages []cosmos.Message `json:"messages"`
+	// swagger:allOf
+	Events []cosmos.Event `json:"events"`
 }
 
 // Contains info about transaction history for an address or xpub
