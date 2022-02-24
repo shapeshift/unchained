@@ -18,6 +18,7 @@ type Cursor struct {
 	TotalReceives   int    `json:"totalReceives"`
 }
 
+// encode Cursor struct as a base64 string
 func (c *Cursor) encode() (string, error) {
 	bytes, err := json.Marshal(c)
 	if err != nil {
@@ -27,6 +28,7 @@ func (c *Cursor) encode() (string, error) {
 	return base64.StdEncoding.EncodeToString(bytes), nil
 }
 
+// decode base64 string and unmarshal value into Cursor struct
 func (c *Cursor) decode(b64 string) error {
 	str, err := base64.StdEncoding.DecodeString(b64)
 	if err != nil {
