@@ -10,7 +10,7 @@ export interface Fee {
   value: string
 }
 
-export type SequencedTx = (StandardTx | Tx) & {
+export type SequencedTx = Tx & {
   sequence: number
   total: number
 }
@@ -57,7 +57,7 @@ export enum TransferType {
 
 export interface TxMetadata {
   method?: string
-  parser?: string
+  parser: string
 }
 
 export interface StandardTx {
