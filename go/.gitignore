@@ -1,6 +1,9 @@
 # Project specific
 config.json
 swagger.json
+node_modules
+Pulumi.*.yaml
+!Pulumi.sample.yaml
 
 # Binaries for programs and plugins
 *.exe
@@ -8,6 +11,12 @@ swagger.json
 *.dll
 *.so
 *.dylib
+
+# dotenv environment variables file
+.env.*
+.env
+.env.test
+.env.secrets
 
 # Test binary, built with `go test -c`
 *.test

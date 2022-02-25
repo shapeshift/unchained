@@ -1,10 +1,11 @@
 import { ethers } from 'ethers'
 import { Thorchain } from '@shapeshiftoss/thorchain'
-import { Dex, ThorTx, TradeType, TxSpecific as ParseTxSpecific } from '../types'
+import { Dex, GenericParser, ThorTx, TradeType, TxSpecific } from '../types'
 import { Network } from './types'
-import ABI from './abi/thor'
+import THOR_ABI from './abi/thor'
 import { getSigHash, txInteractsWithContract } from './utils'
 import { Tx } from '@shapeshiftoss/blockbook'
+import { THOR_ROUTER_CONTRACT_MAINNET, THOR_ROUTER_CONTRACT_ROPSTEN } from './constants'
 
 const SWAP_TYPES = ['SWAP', '=', 's']
 
@@ -14,7 +15,7 @@ export interface ParserArgs {
   rpcUrl: string
 }
 
-export class Parser {
+export class Parser implements GenericParser {
   abiInterface: ethers.utils.Interface
   thorchain: Thorchain
 
@@ -23,7 +24,7 @@ export class Parser {
   readonly routerContract: string
 
   constructor(args: ParserArgs) {
-    this.abiInterface = new ethers.utils.Interface(ABI)
+    this.abiInterface = new ethers.utils.Interface(THOR_ABI)
     this.thorchain = new Thorchain({ midgardUrl: args.midgardUrl, rpcUrl: args.rpcUrl })
 
     this.depositSigHash = this.abiInterface.getSighash('deposit')
@@ -31,8 +32,8 @@ export class Parser {
 
     // TODO: Router contract can change, use /inbound_addresses endpoint to determine current router contract
     this.routerContract = {
-      mainnet: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
-      ropsten: '0xefA28233838f46a80AaaC8c309077a9ba70D123A',
+      mainnet: THOR_ROUTER_CONTRACT_MAINNET,
+      ropsten: THOR_ROUTER_CONTRACT_ROPSTEN,
     }[args.network]
   }
 
@@ -48,17 +49,18 @@ export class Parser {
     return result.to
   }
 
-  async parse(tx: Tx): Promise<ParseTxSpecific<ThorTx> | undefined> {
+  async parse(tx: Tx): Promise<TxSpecific<ThorTx> | undefined> {
+    const txData = tx.ethereumSpecific?.data
     if (!txInteractsWithContract(tx, this.routerContract)) return
-    if (!tx.ethereumSpecific?.data) return
+    if (!txData) return
+
+    const decoded = this.abiInterface.parseTransaction({ data: txData })
 
     const result = (() => {
-      switch (getSigHash(tx.ethereumSpecific.data)) {
+      switch (getSigHash(txData)) {
         case this.depositSigHash:
-          return this.abiInterface.decodeFunctionData(this.depositSigHash, tx.ethereumSpecific.data)
-        case this.transferOutSigHash: {
-          return this.abiInterface.decodeFunctionData(this.transferOutSigHash, tx.ethereumSpecific.data)
-        }
+        case this.transferOutSigHash:
+          return decoded.args
         default:
           return undefined
       }
@@ -67,14 +69,19 @@ export class Parser {
     // We didn't recognise the sigHash - exit
     if (!result) return
 
+    const data = {
+      method: decoded.name,
+      parser: 'thor',
+    }
+
     const [type] = result.memo.split(':')
 
     if (SWAP_TYPES.includes(type) || type === 'OUT') {
-      return { trade: { dexName: Dex.Thor, type: TradeType.Trade, memo: result.memo } }
+      return { trade: { dexName: Dex.Thor, type: TradeType.Trade, memo: result.memo }, data }
     }
 
     if (type === 'REFUND') {
-      return { trade: { dexName: Dex.Thor, type: TradeType.Refund, memo: result.memo } }
+      return { trade: { dexName: Dex.Thor, type: TradeType.Refund, memo: result.memo }, data }
     }
 
     // We encountered a case we thought we'd support, but don't - exit

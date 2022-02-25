@@ -1,4 +1,6 @@
-export default [
+import { JsonFragment } from '@ethersproject/abi/lib/fragments'
+
+const multiSig: Array<JsonFragment> = [
   {
     anonymous: false,
     inputs: [
@@ -363,3 +365,5 @@ export default [
     type: 'receive',
   },
 ]
+
+export default multiSig
