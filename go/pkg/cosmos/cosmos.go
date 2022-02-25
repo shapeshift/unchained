@@ -3,6 +3,7 @@ package cosmos
 
 import (
 	"context"
+	"net/url"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -40,7 +41,7 @@ type Config struct {
 	GRPCURL          string
 	LCDURL           string
 	RPCURL           string
-	Scheme           string
+	WSURL            string
 }
 
 // HTTPClient allows communicating over http
@@ -55,26 +56,31 @@ type HTTPClient struct {
 
 // NewHTTPClient configures and creates an HTTPClient
 func NewHTTPClient(conf Config) (*HTTPClient, error) {
-	ctx := context.Background()
-
 	sdk.GetConfig().SetBech32PrefixForAccount(conf.Bech32AddrPrefix, conf.Bech32PkPrefix)
 
-	tConf := tendermintclient.NewConfiguration()
-	tConf.Scheme = "https"
-	if conf.Scheme != "" {
-		tConf.Scheme = conf.Scheme
+	lcdURL, err := url.Parse(conf.LCDURL)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse LCDURL: %s", conf.LCDURL)
 	}
-	tConf.Servers = []tendermintclient.ServerConfiguration{{URL: conf.RPCURL}}
+
+	rpcURL, err := url.Parse(conf.RPCURL)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse RPCURL: %s", conf.RPCURL)
+	}
+
+	tConf := tendermintclient.NewConfiguration()
+	tConf.Scheme = rpcURL.Scheme
+	tConf.Servers = []tendermintclient.ServerConfiguration{{URL: rpcURL.Host}}
 	tConf.AddDefaultHeader("Authorization", conf.APIKey)
 	tClient := tendermintclient.NewAPIClient(tConf)
 
 	// untyped resty http clients
 	headers := map[string]string{"Accept": "application/json", "Authorization": conf.APIKey}
-	cosmos := resty.New().SetScheme("https").SetBaseURL(conf.LCDURL).SetHeaders(headers)
-	tendermint := resty.New().SetScheme("https").SetBaseURL(conf.RPCURL).SetHeaders(headers)
+	cosmos := resty.New().SetScheme(lcdURL.Scheme).SetBaseURL(lcdURL.Host).SetHeaders(headers)
+	tendermint := resty.New().SetScheme(rpcURL.Scheme).SetBaseURL(rpcURL.Host).SetHeaders(headers)
 
 	c := &HTTPClient{
-		ctx:              ctx,
+		ctx:              context.Background(),
 		encoding:         conf.Encoding,
 		cosmos:           cosmos,
 		tendermint:       tendermint,
@@ -102,16 +108,21 @@ type GRPCClient struct {
 func NewGRPCClient(conf Config) (*GRPCClient, error) {
 	sdk.GetConfig().SetBech32PrefixForAccount(conf.Bech32AddrPrefix, conf.Bech32PkPrefix)
 
+	grpcURL, err := url.Parse(conf.GRPCURL)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse GRPCURL: %s", conf.GRPCURL)
+	}
+
 	md := metadata.Pairs("Authorization", conf.APIKey)
 	ctx := metadata.NewOutgoingContext(context.Background(), md)
 
 	grpcConn, err := grpc.DialContext(
 		context.Background(),
-		conf.GRPCURL,
+		grpcURL.String(),
 		grpc.WithTransportCredentials(credentials.NewTLS(nil)), // The Cosmos SDK doesn't support any transport security mechanism.
 	)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unable to connect to: %s", conf.GRPCURL)
+		return nil, errors.Wrapf(err, "unable to connect to: %s", grpcURL)
 	}
 
 	auth := authtypes.NewQueryClient(grpcConn)

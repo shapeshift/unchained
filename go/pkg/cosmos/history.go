@@ -7,7 +7,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/pkg/errors"
-	"github.com/shapeshift/go-unchained/pkg/tendermint/client"
+	"github.com/shapeshift/unchained/pkg/tendermint/client"
 )
 
 const PAGE_SIZE = 100
@@ -79,14 +79,14 @@ func (h *History) doRequest(txType TxType) (*client.TxSearchResponse, error) {
 		}
 	}
 
-	return &res, nil
+	return nil, nil
 }
 
 func (h *History) filterByCursor(txs []client.TxSearchResponseResultTxs, lastTxID string) ([]client.TxSearchResponseResultTxs, error) {
 	foundLastTx := false
 
 	filtered := []client.TxSearchResponseResultTxs{}
-	for i, tx := range txs {
+	for _, tx := range txs {
 		if tx.Height == nil {
 			logger.Errorf("no height for tx: %s", *tx.Hash)
 			break
@@ -108,9 +108,9 @@ func (h *History) filterByCursor(txs []client.TxSearchResponseResultTxs, lastTxI
 			if *tx.Hash == lastTxID {
 				foundLastTx = true
 				// found as last tx in results, need to fetch next page
-				if i == len(res.Result.Txs)-1 {
-					refetch = true
-				}
+				//if i == len(res.Result.Txs)-1 {
+				//	refetch = true
+				//}
 				continue
 			}
 			if !foundLastTx {

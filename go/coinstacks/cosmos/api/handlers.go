@@ -98,7 +98,7 @@ func (h *Handler) GetInfo() (api.Info, error) {
 }
 
 func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
-	accRes, err := h.httpClient.GetAccount(pubkey)
+	accRes, err := h.grpcClient.GetAccount(pubkey)
 	if err != nil {
 		return nil, err
 	}
