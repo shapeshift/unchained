@@ -52,7 +52,7 @@ func (o *BlockID) GetHash() string {
 // GetHashOk returns a tuple with the Hash field value
 // and a boolean to check if the value has been set.
 func (o *BlockID) GetHashOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Hash, true
@@ -76,7 +76,7 @@ func (o *BlockID) GetParts() BlockIDParts {
 // GetPartsOk returns a tuple with the Parts field value
 // and a boolean to check if the value has been set.
 func (o *BlockID) GetPartsOk() (*BlockIDParts, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Parts, true

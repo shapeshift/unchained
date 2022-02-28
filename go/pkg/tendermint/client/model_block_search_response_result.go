@@ -51,11 +51,11 @@ func (o *BlockSearchResponseResult) GetBlocks() []BlockComplete {
 
 // GetBlocksOk returns a tuple with the Blocks field value
 // and a boolean to check if the value has been set.
-func (o *BlockSearchResponseResult) GetBlocksOk() (*[]BlockComplete, bool) {
-	if o == nil  {
+func (o *BlockSearchResponseResult) GetBlocksOk() ([]BlockComplete, bool) {
+	if o == nil {
 		return nil, false
 	}
-	return &o.Blocks, true
+	return o.Blocks, true
 }
 
 // SetBlocks sets field value
@@ -76,7 +76,7 @@ func (o *BlockSearchResponseResult) GetTotalCount() int32 {
 // GetTotalCountOk returns a tuple with the TotalCount field value
 // and a boolean to check if the value has been set.
 func (o *BlockSearchResponseResult) GetTotalCountOk() (*int32, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.TotalCount, true

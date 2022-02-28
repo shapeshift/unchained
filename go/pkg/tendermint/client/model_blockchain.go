@@ -52,7 +52,7 @@ func (o *Blockchain) GetLastHeight() string {
 // GetLastHeightOk returns a tuple with the LastHeight field value
 // and a boolean to check if the value has been set.
 func (o *Blockchain) GetLastHeightOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.LastHeight, true
@@ -75,11 +75,11 @@ func (o *Blockchain) GetBlockMetas() []BlockMeta {
 
 // GetBlockMetasOk returns a tuple with the BlockMetas field value
 // and a boolean to check if the value has been set.
-func (o *Blockchain) GetBlockMetasOk() (*[]BlockMeta, bool) {
-	if o == nil  {
+func (o *Blockchain) GetBlockMetasOk() ([]BlockMeta, bool) {
+	if o == nil {
 		return nil, false
 	}
-	return &o.BlockMetas, true
+	return o.BlockMetas, true
 }
 
 // SetBlockMetas sets field value

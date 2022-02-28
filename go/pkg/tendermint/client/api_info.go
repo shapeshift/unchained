@@ -12,22 +12,18 @@ package client
 
 import (
 	"bytes"
-	_context "context"
-	_ioutil "io/ioutil"
-	_nethttp "net/http"
-	_neturl "net/url"
+	"context"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 )
 
-// Linger please
-var (
-	_ _context.Context
-)
 
 // InfoApiService InfoApi service
 type InfoApiService service
 
 type ApiBlockRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *InfoApiService
 	height *int32
 }
@@ -38,7 +34,7 @@ func (r ApiBlockRequest) Height(height int32) ApiBlockRequest {
 	return r
 }
 
-func (r ApiBlockRequest) Execute() (BlockResponse, *_nethttp.Response, error) {
+func (r ApiBlockRequest) Execute() (*BlockResponse, *http.Response, error) {
 	return r.ApiService.BlockExecute(r)
 }
 
@@ -48,10 +44,10 @@ Block Get block at a specified height
 Get Block.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiBlockRequest
 */
-func (a *InfoApiService) Block(ctx _context.Context) ApiBlockRequest {
+func (a *InfoApiService) Block(ctx context.Context) ApiBlockRequest {
 	return ApiBlockRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -60,24 +56,24 @@ func (a *InfoApiService) Block(ctx _context.Context) ApiBlockRequest {
 
 // Execute executes the request
 //  @return BlockResponse
-func (a *InfoApiService) BlockExecute(r ApiBlockRequest) (BlockResponse, *_nethttp.Response, error) {
+func (a *InfoApiService) BlockExecute(r ApiBlockRequest) (*BlockResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  BlockResponse
+		localVarReturnValue  *BlockResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoApiService.Block")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/block"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 
 	if r.height != nil {
 		localVarQueryParams.Add("height", parameterToString(*r.height, ""))
@@ -109,15 +105,15 @@ func (a *InfoApiService) BlockExecute(r ApiBlockRequest) (BlockResponse, *_netht
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -135,7 +131,7 @@ func (a *InfoApiService) BlockExecute(r ApiBlockRequest) (BlockResponse, *_netht
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -146,7 +142,7 @@ func (a *InfoApiService) BlockExecute(r ApiBlockRequest) (BlockResponse, *_netht
 }
 
 type ApiBlockByHashRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *InfoApiService
 	hash *string
 }
@@ -157,7 +153,7 @@ func (r ApiBlockByHashRequest) Hash(hash string) ApiBlockByHashRequest {
 	return r
 }
 
-func (r ApiBlockByHashRequest) Execute() (BlockResponse, *_nethttp.Response, error) {
+func (r ApiBlockByHashRequest) Execute() (*BlockResponse, *http.Response, error) {
 	return r.ApiService.BlockByHashExecute(r)
 }
 
@@ -167,10 +163,10 @@ BlockByHash Get block by hash
 Get Block By Hash.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiBlockByHashRequest
 */
-func (a *InfoApiService) BlockByHash(ctx _context.Context) ApiBlockByHashRequest {
+func (a *InfoApiService) BlockByHash(ctx context.Context) ApiBlockByHashRequest {
 	return ApiBlockByHashRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -179,24 +175,24 @@ func (a *InfoApiService) BlockByHash(ctx _context.Context) ApiBlockByHashRequest
 
 // Execute executes the request
 //  @return BlockResponse
-func (a *InfoApiService) BlockByHashExecute(r ApiBlockByHashRequest) (BlockResponse, *_nethttp.Response, error) {
+func (a *InfoApiService) BlockByHashExecute(r ApiBlockByHashRequest) (*BlockResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  BlockResponse
+		localVarReturnValue  *BlockResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoApiService.BlockByHash")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/block_by_hash"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if r.hash == nil {
 		return localVarReturnValue, nil, reportError("hash is required and must be specified")
 	}
@@ -229,15 +225,15 @@ func (a *InfoApiService) BlockByHashExecute(r ApiBlockByHashRequest) (BlockRespo
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -255,7 +251,7 @@ func (a *InfoApiService) BlockByHashExecute(r ApiBlockByHashRequest) (BlockRespo
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -266,7 +262,7 @@ func (a *InfoApiService) BlockByHashExecute(r ApiBlockByHashRequest) (BlockRespo
 }
 
 type ApiBlockResultsRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *InfoApiService
 	height *int32
 }
@@ -277,7 +273,7 @@ func (r ApiBlockResultsRequest) Height(height int32) ApiBlockResultsRequest {
 	return r
 }
 
-func (r ApiBlockResultsRequest) Execute() (BlockSearchResponse, *_nethttp.Response, error) {
+func (r ApiBlockResultsRequest) Execute() (*BlockSearchResponse, *http.Response, error) {
 	return r.ApiService.BlockResultsExecute(r)
 }
 
@@ -287,10 +283,10 @@ BlockResults Get block results at a specified height
 Get block_results.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiBlockResultsRequest
 */
-func (a *InfoApiService) BlockResults(ctx _context.Context) ApiBlockResultsRequest {
+func (a *InfoApiService) BlockResults(ctx context.Context) ApiBlockResultsRequest {
 	return ApiBlockResultsRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -299,24 +295,24 @@ func (a *InfoApiService) BlockResults(ctx _context.Context) ApiBlockResultsReque
 
 // Execute executes the request
 //  @return BlockSearchResponse
-func (a *InfoApiService) BlockResultsExecute(r ApiBlockResultsRequest) (BlockSearchResponse, *_nethttp.Response, error) {
+func (a *InfoApiService) BlockResultsExecute(r ApiBlockResultsRequest) (*BlockSearchResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  BlockSearchResponse
+		localVarReturnValue  *BlockSearchResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoApiService.BlockResults")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/block_results"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 
 	if r.height != nil {
 		localVarQueryParams.Add("height", parameterToString(*r.height, ""))
@@ -348,15 +344,15 @@ func (a *InfoApiService) BlockResultsExecute(r ApiBlockResultsRequest) (BlockSea
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -374,7 +370,7 @@ func (a *InfoApiService) BlockResultsExecute(r ApiBlockResultsRequest) (BlockSea
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -385,7 +381,7 @@ func (a *InfoApiService) BlockResultsExecute(r ApiBlockResultsRequest) (BlockSea
 }
 
 type ApiBlockSearchRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *InfoApiService
 	query *string
 	page *int32
@@ -398,23 +394,26 @@ func (r ApiBlockSearchRequest) Query(query string) ApiBlockSearchRequest {
 	r.query = &query
 	return r
 }
+
 // Page number (1-based)
 func (r ApiBlockSearchRequest) Page(page int32) ApiBlockSearchRequest {
 	r.page = &page
 	return r
 }
+
 // Number of entries per page (max: 100)
 func (r ApiBlockSearchRequest) PerPage(perPage int32) ApiBlockSearchRequest {
 	r.perPage = &perPage
 	return r
 }
+
 // Order in which blocks are sorted (\&quot;asc\&quot; or \&quot;desc\&quot;), by height. If empty, default sorting will be still applied.
 func (r ApiBlockSearchRequest) OrderBy(orderBy string) ApiBlockSearchRequest {
 	r.orderBy = &orderBy
 	return r
 }
 
-func (r ApiBlockSearchRequest) Execute() (BlockResultsResponse, *_nethttp.Response, error) {
+func (r ApiBlockSearchRequest) Execute() (*BlockResultsResponse, *http.Response, error) {
 	return r.ApiService.BlockSearchExecute(r)
 }
 
@@ -426,10 +425,10 @@ Search for blocks by BeginBlock and EndBlock events.
 See /subscribe for the query syntax.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiBlockSearchRequest
 */
-func (a *InfoApiService) BlockSearch(ctx _context.Context) ApiBlockSearchRequest {
+func (a *InfoApiService) BlockSearch(ctx context.Context) ApiBlockSearchRequest {
 	return ApiBlockSearchRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -438,24 +437,24 @@ func (a *InfoApiService) BlockSearch(ctx _context.Context) ApiBlockSearchRequest
 
 // Execute executes the request
 //  @return BlockResultsResponse
-func (a *InfoApiService) BlockSearchExecute(r ApiBlockSearchRequest) (BlockResultsResponse, *_nethttp.Response, error) {
+func (a *InfoApiService) BlockSearchExecute(r ApiBlockSearchRequest) (*BlockResultsResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  BlockResultsResponse
+		localVarReturnValue  *BlockResultsResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoApiService.BlockSearch")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/block_search"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if r.query == nil {
 		return localVarReturnValue, nil, reportError("query is required and must be specified")
 	}
@@ -497,15 +496,15 @@ func (a *InfoApiService) BlockSearchExecute(r ApiBlockSearchRequest) (BlockResul
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -523,7 +522,7 @@ func (a *InfoApiService) BlockSearchExecute(r ApiBlockSearchRequest) (BlockResul
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -534,7 +533,7 @@ func (a *InfoApiService) BlockSearchExecute(r ApiBlockSearchRequest) (BlockResul
 }
 
 type ApiBlockchainRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *InfoApiService
 	minHeight *int32
 	maxHeight *int32
@@ -545,13 +544,14 @@ func (r ApiBlockchainRequest) MinHeight(minHeight int32) ApiBlockchainRequest {
 	r.minHeight = &minHeight
 	return r
 }
+
 // Maximum block height to return
 func (r ApiBlockchainRequest) MaxHeight(maxHeight int32) ApiBlockchainRequest {
 	r.maxHeight = &maxHeight
 	return r
 }
 
-func (r ApiBlockchainRequest) Execute() (BlockchainResponse, *_nethttp.Response, error) {
+func (r ApiBlockchainRequest) Execute() (*BlockchainResponse, *http.Response, error) {
 	return r.ApiService.BlockchainExecute(r)
 }
 
@@ -568,10 +568,10 @@ At most 20 items will be returned. Block headers are returned in
 descending order (highest first).
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiBlockchainRequest
 */
-func (a *InfoApiService) Blockchain(ctx _context.Context) ApiBlockchainRequest {
+func (a *InfoApiService) Blockchain(ctx context.Context) ApiBlockchainRequest {
 	return ApiBlockchainRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -580,24 +580,24 @@ func (a *InfoApiService) Blockchain(ctx _context.Context) ApiBlockchainRequest {
 
 // Execute executes the request
 //  @return BlockchainResponse
-func (a *InfoApiService) BlockchainExecute(r ApiBlockchainRequest) (BlockchainResponse, *_nethttp.Response, error) {
+func (a *InfoApiService) BlockchainExecute(r ApiBlockchainRequest) (*BlockchainResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  BlockchainResponse
+		localVarReturnValue  *BlockchainResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoApiService.Blockchain")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/blockchain"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 
 	if r.minHeight != nil {
 		localVarQueryParams.Add("minHeight", parameterToString(*r.minHeight, ""))
@@ -632,15 +632,15 @@ func (a *InfoApiService) BlockchainExecute(r ApiBlockchainRequest) (BlockchainRe
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -658,7 +658,7 @@ func (a *InfoApiService) BlockchainExecute(r ApiBlockchainRequest) (BlockchainRe
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -669,7 +669,7 @@ func (a *InfoApiService) BlockchainExecute(r ApiBlockchainRequest) (BlockchainRe
 }
 
 type ApiCommitRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *InfoApiService
 	height *int32
 }
@@ -680,7 +680,7 @@ func (r ApiCommitRequest) Height(height int32) ApiCommitRequest {
 	return r
 }
 
-func (r ApiCommitRequest) Execute() (CommitResponse, *_nethttp.Response, error) {
+func (r ApiCommitRequest) Execute() (*CommitResponse, *http.Response, error) {
 	return r.ApiService.CommitExecute(r)
 }
 
@@ -690,10 +690,10 @@ Commit Get commit results at a specified height
 Get Commit.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiCommitRequest
 */
-func (a *InfoApiService) Commit(ctx _context.Context) ApiCommitRequest {
+func (a *InfoApiService) Commit(ctx context.Context) ApiCommitRequest {
 	return ApiCommitRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -702,24 +702,24 @@ func (a *InfoApiService) Commit(ctx _context.Context) ApiCommitRequest {
 
 // Execute executes the request
 //  @return CommitResponse
-func (a *InfoApiService) CommitExecute(r ApiCommitRequest) (CommitResponse, *_nethttp.Response, error) {
+func (a *InfoApiService) CommitExecute(r ApiCommitRequest) (*CommitResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  CommitResponse
+		localVarReturnValue  *CommitResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoApiService.Commit")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/commit"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 
 	if r.height != nil {
 		localVarQueryParams.Add("height", parameterToString(*r.height, ""))
@@ -751,15 +751,15 @@ func (a *InfoApiService) CommitExecute(r ApiCommitRequest) (CommitResponse, *_ne
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -777,7 +777,7 @@ func (a *InfoApiService) CommitExecute(r ApiCommitRequest) (CommitResponse, *_ne
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -788,7 +788,7 @@ func (a *InfoApiService) CommitExecute(r ApiCommitRequest) (CommitResponse, *_ne
 }
 
 type ApiConsensusParamsRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *InfoApiService
 	height *int32
 }
@@ -799,7 +799,7 @@ func (r ApiConsensusParamsRequest) Height(height int32) ApiConsensusParamsReques
 	return r
 }
 
-func (r ApiConsensusParamsRequest) Execute() (ConsensusParamsResponse, *_nethttp.Response, error) {
+func (r ApiConsensusParamsRequest) Execute() (*ConsensusParamsResponse, *http.Response, error) {
 	return r.ApiService.ConsensusParamsExecute(r)
 }
 
@@ -809,10 +809,10 @@ ConsensusParams Get consensus parameters
 Get consensus parameters.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiConsensusParamsRequest
 */
-func (a *InfoApiService) ConsensusParams(ctx _context.Context) ApiConsensusParamsRequest {
+func (a *InfoApiService) ConsensusParams(ctx context.Context) ApiConsensusParamsRequest {
 	return ApiConsensusParamsRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -821,24 +821,24 @@ func (a *InfoApiService) ConsensusParams(ctx _context.Context) ApiConsensusParam
 
 // Execute executes the request
 //  @return ConsensusParamsResponse
-func (a *InfoApiService) ConsensusParamsExecute(r ApiConsensusParamsRequest) (ConsensusParamsResponse, *_nethttp.Response, error) {
+func (a *InfoApiService) ConsensusParamsExecute(r ApiConsensusParamsRequest) (*ConsensusParamsResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  ConsensusParamsResponse
+		localVarReturnValue  *ConsensusParamsResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoApiService.ConsensusParams")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/consensus_params"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 
 	if r.height != nil {
 		localVarQueryParams.Add("height", parameterToString(*r.height, ""))
@@ -870,15 +870,15 @@ func (a *InfoApiService) ConsensusParamsExecute(r ApiConsensusParamsRequest) (Co
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -896,7 +896,7 @@ func (a *InfoApiService) ConsensusParamsExecute(r ApiConsensusParamsRequest) (Co
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -907,12 +907,11 @@ func (a *InfoApiService) ConsensusParamsExecute(r ApiConsensusParamsRequest) (Co
 }
 
 type ApiConsensusStateRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *InfoApiService
 }
 
-
-func (r ApiConsensusStateRequest) Execute() (ConsensusStateResponse, *_nethttp.Response, error) {
+func (r ApiConsensusStateRequest) Execute() (*ConsensusStateResponse, *http.Response, error) {
 	return r.ApiService.ConsensusStateExecute(r)
 }
 
@@ -924,10 +923,10 @@ Get consensus state.
 Not safe to call from inside the ABCI application during a block execution.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiConsensusStateRequest
 */
-func (a *InfoApiService) ConsensusState(ctx _context.Context) ApiConsensusStateRequest {
+func (a *InfoApiService) ConsensusState(ctx context.Context) ApiConsensusStateRequest {
 	return ApiConsensusStateRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -936,24 +935,24 @@ func (a *InfoApiService) ConsensusState(ctx _context.Context) ApiConsensusStateR
 
 // Execute executes the request
 //  @return ConsensusStateResponse
-func (a *InfoApiService) ConsensusStateExecute(r ApiConsensusStateRequest) (ConsensusStateResponse, *_nethttp.Response, error) {
+func (a *InfoApiService) ConsensusStateExecute(r ApiConsensusStateRequest) (*ConsensusStateResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  ConsensusStateResponse
+		localVarReturnValue  *ConsensusStateResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoApiService.ConsensusState")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/consensus_state"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -982,15 +981,15 @@ func (a *InfoApiService) ConsensusStateExecute(r ApiConsensusStateRequest) (Cons
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -1008,7 +1007,7 @@ func (a *InfoApiService) ConsensusStateExecute(r ApiConsensusStateRequest) (Cons
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -1019,12 +1018,11 @@ func (a *InfoApiService) ConsensusStateExecute(r ApiConsensusStateRequest) (Cons
 }
 
 type ApiDumpConsensusStateRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *InfoApiService
 }
 
-
-func (r ApiDumpConsensusStateRequest) Execute() (DumpConsensusResponse, *_nethttp.Response, error) {
+func (r ApiDumpConsensusStateRequest) Execute() (*DumpConsensusResponse, *http.Response, error) {
 	return r.ApiService.DumpConsensusStateExecute(r)
 }
 
@@ -1036,10 +1034,10 @@ Get consensus state.
 Not safe to call from inside the ABCI application during a block execution.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiDumpConsensusStateRequest
 */
-func (a *InfoApiService) DumpConsensusState(ctx _context.Context) ApiDumpConsensusStateRequest {
+func (a *InfoApiService) DumpConsensusState(ctx context.Context) ApiDumpConsensusStateRequest {
 	return ApiDumpConsensusStateRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -1048,24 +1046,24 @@ func (a *InfoApiService) DumpConsensusState(ctx _context.Context) ApiDumpConsens
 
 // Execute executes the request
 //  @return DumpConsensusResponse
-func (a *InfoApiService) DumpConsensusStateExecute(r ApiDumpConsensusStateRequest) (DumpConsensusResponse, *_nethttp.Response, error) {
+func (a *InfoApiService) DumpConsensusStateExecute(r ApiDumpConsensusStateRequest) (*DumpConsensusResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  DumpConsensusResponse
+		localVarReturnValue  *DumpConsensusResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoApiService.DumpConsensusState")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/dump_consensus_state"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -1094,15 +1092,15 @@ func (a *InfoApiService) DumpConsensusStateExecute(r ApiDumpConsensusStateReques
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -1120,7 +1118,7 @@ func (a *InfoApiService) DumpConsensusStateExecute(r ApiDumpConsensusStateReques
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -1131,12 +1129,11 @@ func (a *InfoApiService) DumpConsensusStateExecute(r ApiDumpConsensusStateReques
 }
 
 type ApiGenesisRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *InfoApiService
 }
 
-
-func (r ApiGenesisRequest) Execute() (GenesisResponse, *_nethttp.Response, error) {
+func (r ApiGenesisRequest) Execute() (*GenesisResponse, *http.Response, error) {
 	return r.ApiService.GenesisExecute(r)
 }
 
@@ -1146,10 +1143,10 @@ Genesis Get Genesis
 Get the genesis document.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiGenesisRequest
 */
-func (a *InfoApiService) Genesis(ctx _context.Context) ApiGenesisRequest {
+func (a *InfoApiService) Genesis(ctx context.Context) ApiGenesisRequest {
 	return ApiGenesisRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -1158,24 +1155,24 @@ func (a *InfoApiService) Genesis(ctx _context.Context) ApiGenesisRequest {
 
 // Execute executes the request
 //  @return GenesisResponse
-func (a *InfoApiService) GenesisExecute(r ApiGenesisRequest) (GenesisResponse, *_nethttp.Response, error) {
+func (a *InfoApiService) GenesisExecute(r ApiGenesisRequest) (*GenesisResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  GenesisResponse
+		localVarReturnValue  *GenesisResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoApiService.Genesis")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/genesis"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -1204,15 +1201,15 @@ func (a *InfoApiService) GenesisExecute(r ApiGenesisRequest) (GenesisResponse, *
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -1230,7 +1227,7 @@ func (a *InfoApiService) GenesisExecute(r ApiGenesisRequest) (GenesisResponse, *
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -1241,7 +1238,7 @@ func (a *InfoApiService) GenesisExecute(r ApiGenesisRequest) (GenesisResponse, *
 }
 
 type ApiGenesisChunkedRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *InfoApiService
 	chunkID *int32
 }
@@ -1252,7 +1249,7 @@ func (r ApiGenesisChunkedRequest) ChunkID(chunkID int32) ApiGenesisChunkedReques
 	return r
 }
 
-func (r ApiGenesisChunkedRequest) Execute() (GenesisChunkedResponse, *_nethttp.Response, error) {
+func (r ApiGenesisChunkedRequest) Execute() (*GenesisChunkedResponse, *http.Response, error) {
 	return r.ApiService.GenesisChunkedExecute(r)
 }
 
@@ -1263,10 +1260,10 @@ Get genesis document in a paginated/chunked format to make it
 easier to iterate through larger genesis structures.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiGenesisChunkedRequest
 */
-func (a *InfoApiService) GenesisChunked(ctx _context.Context) ApiGenesisChunkedRequest {
+func (a *InfoApiService) GenesisChunked(ctx context.Context) ApiGenesisChunkedRequest {
 	return ApiGenesisChunkedRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -1275,24 +1272,24 @@ func (a *InfoApiService) GenesisChunked(ctx _context.Context) ApiGenesisChunkedR
 
 // Execute executes the request
 //  @return GenesisChunkedResponse
-func (a *InfoApiService) GenesisChunkedExecute(r ApiGenesisChunkedRequest) (GenesisChunkedResponse, *_nethttp.Response, error) {
+func (a *InfoApiService) GenesisChunkedExecute(r ApiGenesisChunkedRequest) (*GenesisChunkedResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  GenesisChunkedResponse
+		localVarReturnValue  *GenesisChunkedResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoApiService.GenesisChunked")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/genesis_chunked"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 
 	if r.chunkID != nil {
 		localVarQueryParams.Add("chunkID", parameterToString(*r.chunkID, ""))
@@ -1324,15 +1321,15 @@ func (a *InfoApiService) GenesisChunkedExecute(r ApiGenesisChunkedRequest) (Gene
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -1350,7 +1347,7 @@ func (a *InfoApiService) GenesisChunkedExecute(r ApiGenesisChunkedRequest) (Gene
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -1361,7 +1358,7 @@ func (a *InfoApiService) GenesisChunkedExecute(r ApiGenesisChunkedRequest) (Gene
 }
 
 type ApiHeaderRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *InfoApiService
 	height *int32
 }
@@ -1372,7 +1369,7 @@ func (r ApiHeaderRequest) Height(height int32) ApiHeaderRequest {
 	return r
 }
 
-func (r ApiHeaderRequest) Execute() (HeaderResponse, *_nethttp.Response, error) {
+func (r ApiHeaderRequest) Execute() (*HeaderResponse, *http.Response, error) {
 	return r.ApiService.HeaderExecute(r)
 }
 
@@ -1382,10 +1379,10 @@ Header Get the header at a specified height
 Retrieve the block header corresponding to a specified height.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiHeaderRequest
 */
-func (a *InfoApiService) Header(ctx _context.Context) ApiHeaderRequest {
+func (a *InfoApiService) Header(ctx context.Context) ApiHeaderRequest {
 	return ApiHeaderRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -1394,24 +1391,24 @@ func (a *InfoApiService) Header(ctx _context.Context) ApiHeaderRequest {
 
 // Execute executes the request
 //  @return HeaderResponse
-func (a *InfoApiService) HeaderExecute(r ApiHeaderRequest) (HeaderResponse, *_nethttp.Response, error) {
+func (a *InfoApiService) HeaderExecute(r ApiHeaderRequest) (*HeaderResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  HeaderResponse
+		localVarReturnValue  *HeaderResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoApiService.Header")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/header"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 
 	if r.height != nil {
 		localVarQueryParams.Add("height", parameterToString(*r.height, ""))
@@ -1443,15 +1440,15 @@ func (a *InfoApiService) HeaderExecute(r ApiHeaderRequest) (HeaderResponse, *_ne
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -1469,7 +1466,7 @@ func (a *InfoApiService) HeaderExecute(r ApiHeaderRequest) (HeaderResponse, *_ne
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -1480,7 +1477,7 @@ func (a *InfoApiService) HeaderExecute(r ApiHeaderRequest) (HeaderResponse, *_ne
 }
 
 type ApiHeaderByHashRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *InfoApiService
 	hash *string
 }
@@ -1491,7 +1488,7 @@ func (r ApiHeaderByHashRequest) Hash(hash string) ApiHeaderByHashRequest {
 	return r
 }
 
-func (r ApiHeaderByHashRequest) Execute() (HeaderResponse, *_nethttp.Response, error) {
+func (r ApiHeaderByHashRequest) Execute() (*HeaderResponse, *http.Response, error) {
 	return r.ApiService.HeaderByHashExecute(r)
 }
 
@@ -1501,10 +1498,10 @@ HeaderByHash Get header by hash
 Retrieve the block header corresponding to a block hash.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiHeaderByHashRequest
 */
-func (a *InfoApiService) HeaderByHash(ctx _context.Context) ApiHeaderByHashRequest {
+func (a *InfoApiService) HeaderByHash(ctx context.Context) ApiHeaderByHashRequest {
 	return ApiHeaderByHashRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -1513,24 +1510,24 @@ func (a *InfoApiService) HeaderByHash(ctx _context.Context) ApiHeaderByHashReque
 
 // Execute executes the request
 //  @return HeaderResponse
-func (a *InfoApiService) HeaderByHashExecute(r ApiHeaderByHashRequest) (HeaderResponse, *_nethttp.Response, error) {
+func (a *InfoApiService) HeaderByHashExecute(r ApiHeaderByHashRequest) (*HeaderResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  HeaderResponse
+		localVarReturnValue  *HeaderResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoApiService.HeaderByHash")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/header_by_hash"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if r.hash == nil {
 		return localVarReturnValue, nil, reportError("hash is required and must be specified")
 	}
@@ -1563,15 +1560,15 @@ func (a *InfoApiService) HeaderByHashExecute(r ApiHeaderByHashRequest) (HeaderRe
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -1589,7 +1586,7 @@ func (a *InfoApiService) HeaderByHashExecute(r ApiHeaderByHashRequest) (HeaderRe
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -1600,12 +1597,11 @@ func (a *InfoApiService) HeaderByHashExecute(r ApiHeaderByHashRequest) (HeaderRe
 }
 
 type ApiHealthRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *InfoApiService
 }
 
-
-func (r ApiHealthRequest) Execute() (EmptyResponse, *_nethttp.Response, error) {
+func (r ApiHealthRequest) Execute() (*EmptyResponse, *http.Response, error) {
 	return r.ApiService.HealthExecute(r)
 }
 
@@ -1615,10 +1611,10 @@ Health Node heartbeat
 Get node health. Returns empty result (200 OK) on success, no response - in case of an error.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiHealthRequest
 */
-func (a *InfoApiService) Health(ctx _context.Context) ApiHealthRequest {
+func (a *InfoApiService) Health(ctx context.Context) ApiHealthRequest {
 	return ApiHealthRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -1627,24 +1623,24 @@ func (a *InfoApiService) Health(ctx _context.Context) ApiHealthRequest {
 
 // Execute executes the request
 //  @return EmptyResponse
-func (a *InfoApiService) HealthExecute(r ApiHealthRequest) (EmptyResponse, *_nethttp.Response, error) {
+func (a *InfoApiService) HealthExecute(r ApiHealthRequest) (*EmptyResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  EmptyResponse
+		localVarReturnValue  *EmptyResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoApiService.Health")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/health"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -1673,15 +1669,15 @@ func (a *InfoApiService) HealthExecute(r ApiHealthRequest) (EmptyResponse, *_net
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -1699,7 +1695,7 @@ func (a *InfoApiService) HealthExecute(r ApiHealthRequest) (EmptyResponse, *_net
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -1710,12 +1706,11 @@ func (a *InfoApiService) HealthExecute(r ApiHealthRequest) (EmptyResponse, *_net
 }
 
 type ApiNetInfoRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *InfoApiService
 }
 
-
-func (r ApiNetInfoRequest) Execute() (NetInfoResponse, *_nethttp.Response, error) {
+func (r ApiNetInfoRequest) Execute() (*NetInfoResponse, *http.Response, error) {
 	return r.ApiService.NetInfoExecute(r)
 }
 
@@ -1725,10 +1720,10 @@ NetInfo Network information
 Get network info.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiNetInfoRequest
 */
-func (a *InfoApiService) NetInfo(ctx _context.Context) ApiNetInfoRequest {
+func (a *InfoApiService) NetInfo(ctx context.Context) ApiNetInfoRequest {
 	return ApiNetInfoRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -1737,24 +1732,24 @@ func (a *InfoApiService) NetInfo(ctx _context.Context) ApiNetInfoRequest {
 
 // Execute executes the request
 //  @return NetInfoResponse
-func (a *InfoApiService) NetInfoExecute(r ApiNetInfoRequest) (NetInfoResponse, *_nethttp.Response, error) {
+func (a *InfoApiService) NetInfoExecute(r ApiNetInfoRequest) (*NetInfoResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  NetInfoResponse
+		localVarReturnValue  *NetInfoResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoApiService.NetInfo")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/net_info"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -1783,15 +1778,15 @@ func (a *InfoApiService) NetInfoExecute(r ApiNetInfoRequest) (NetInfoResponse, *
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -1809,7 +1804,7 @@ func (a *InfoApiService) NetInfoExecute(r ApiNetInfoRequest) (NetInfoResponse, *
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -1820,12 +1815,11 @@ func (a *InfoApiService) NetInfoExecute(r ApiNetInfoRequest) (NetInfoResponse, *
 }
 
 type ApiNumUnconfirmedTxsRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *InfoApiService
 }
 
-
-func (r ApiNumUnconfirmedTxsRequest) Execute() (NumUnconfirmedTransactionsResponse, *_nethttp.Response, error) {
+func (r ApiNumUnconfirmedTxsRequest) Execute() (*NumUnconfirmedTransactionsResponse, *http.Response, error) {
 	return r.ApiService.NumUnconfirmedTxsExecute(r)
 }
 
@@ -1835,10 +1829,10 @@ NumUnconfirmedTxs Get data about unconfirmed transactions
 Get data about unconfirmed transactions
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiNumUnconfirmedTxsRequest
 */
-func (a *InfoApiService) NumUnconfirmedTxs(ctx _context.Context) ApiNumUnconfirmedTxsRequest {
+func (a *InfoApiService) NumUnconfirmedTxs(ctx context.Context) ApiNumUnconfirmedTxsRequest {
 	return ApiNumUnconfirmedTxsRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -1847,24 +1841,24 @@ func (a *InfoApiService) NumUnconfirmedTxs(ctx _context.Context) ApiNumUnconfirm
 
 // Execute executes the request
 //  @return NumUnconfirmedTransactionsResponse
-func (a *InfoApiService) NumUnconfirmedTxsExecute(r ApiNumUnconfirmedTxsRequest) (NumUnconfirmedTransactionsResponse, *_nethttp.Response, error) {
+func (a *InfoApiService) NumUnconfirmedTxsExecute(r ApiNumUnconfirmedTxsRequest) (*NumUnconfirmedTransactionsResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  NumUnconfirmedTransactionsResponse
+		localVarReturnValue  *NumUnconfirmedTransactionsResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoApiService.NumUnconfirmedTxs")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/num_unconfirmed_txs"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -1893,15 +1887,15 @@ func (a *InfoApiService) NumUnconfirmedTxsExecute(r ApiNumUnconfirmedTxsRequest)
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -1919,7 +1913,7 @@ func (a *InfoApiService) NumUnconfirmedTxsExecute(r ApiNumUnconfirmedTxsRequest)
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -1930,12 +1924,11 @@ func (a *InfoApiService) NumUnconfirmedTxsExecute(r ApiNumUnconfirmedTxsRequest)
 }
 
 type ApiStatusRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *InfoApiService
 }
 
-
-func (r ApiStatusRequest) Execute() (StatusResponse, *_nethttp.Response, error) {
+func (r ApiStatusRequest) Execute() (*StatusResponse, *http.Response, error) {
 	return r.ApiService.StatusExecute(r)
 }
 
@@ -1945,10 +1938,10 @@ Status Node Status
 Get Tendermint status including node info, pubkey, latest block hash, app hash, block height, current max peer height, and time.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiStatusRequest
 */
-func (a *InfoApiService) Status(ctx _context.Context) ApiStatusRequest {
+func (a *InfoApiService) Status(ctx context.Context) ApiStatusRequest {
 	return ApiStatusRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -1957,24 +1950,24 @@ func (a *InfoApiService) Status(ctx _context.Context) ApiStatusRequest {
 
 // Execute executes the request
 //  @return StatusResponse
-func (a *InfoApiService) StatusExecute(r ApiStatusRequest) (StatusResponse, *_nethttp.Response, error) {
+func (a *InfoApiService) StatusExecute(r ApiStatusRequest) (*StatusResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  StatusResponse
+		localVarReturnValue  *StatusResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoApiService.Status")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/status"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -2003,15 +1996,15 @@ func (a *InfoApiService) StatusExecute(r ApiStatusRequest) (StatusResponse, *_ne
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -2029,7 +2022,7 @@ func (a *InfoApiService) StatusExecute(r ApiStatusRequest) (StatusResponse, *_ne
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -2040,7 +2033,7 @@ func (a *InfoApiService) StatusExecute(r ApiStatusRequest) (StatusResponse, *_ne
 }
 
 type ApiTxRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *InfoApiService
 	hash *string
 	prove *bool
@@ -2051,13 +2044,14 @@ func (r ApiTxRequest) Hash(hash string) ApiTxRequest {
 	r.hash = &hash
 	return r
 }
+
 // Include proofs of the transactions inclusion in the block
 func (r ApiTxRequest) Prove(prove bool) ApiTxRequest {
 	r.prove = &prove
 	return r
 }
 
-func (r ApiTxRequest) Execute() (TxResponse, *_nethttp.Response, error) {
+func (r ApiTxRequest) Execute() (*TxResponse, *http.Response, error) {
 	return r.ApiService.TxExecute(r)
 }
 
@@ -2067,10 +2061,10 @@ Tx Get transactions by hash
 Get a transaction
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiTxRequest
 */
-func (a *InfoApiService) Tx(ctx _context.Context) ApiTxRequest {
+func (a *InfoApiService) Tx(ctx context.Context) ApiTxRequest {
 	return ApiTxRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -2079,24 +2073,24 @@ func (a *InfoApiService) Tx(ctx _context.Context) ApiTxRequest {
 
 // Execute executes the request
 //  @return TxResponse
-func (a *InfoApiService) TxExecute(r ApiTxRequest) (TxResponse, *_nethttp.Response, error) {
+func (a *InfoApiService) TxExecute(r ApiTxRequest) (*TxResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  TxResponse
+		localVarReturnValue  *TxResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoApiService.Tx")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/tx"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if r.hash == nil {
 		return localVarReturnValue, nil, reportError("hash is required and must be specified")
 	}
@@ -2132,15 +2126,15 @@ func (a *InfoApiService) TxExecute(r ApiTxRequest) (TxResponse, *_nethttp.Respon
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -2158,7 +2152,7 @@ func (a *InfoApiService) TxExecute(r ApiTxRequest) (TxResponse, *_nethttp.Respon
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -2169,7 +2163,7 @@ func (a *InfoApiService) TxExecute(r ApiTxRequest) (TxResponse, *_nethttp.Respon
 }
 
 type ApiTxSearchRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *InfoApiService
 	query *string
 	prove *bool
@@ -2183,28 +2177,32 @@ func (r ApiTxSearchRequest) Query(query string) ApiTxSearchRequest {
 	r.query = &query
 	return r
 }
+
 // Include proofs of the transactions inclusion in the block
 func (r ApiTxSearchRequest) Prove(prove bool) ApiTxSearchRequest {
 	r.prove = &prove
 	return r
 }
+
 // Page number (1-based)
 func (r ApiTxSearchRequest) Page(page int32) ApiTxSearchRequest {
 	r.page = &page
 	return r
 }
+
 // Number of entries per page (max: 100)
 func (r ApiTxSearchRequest) PerPage(perPage int32) ApiTxSearchRequest {
 	r.perPage = &perPage
 	return r
 }
+
 // Order in which transactions are sorted (\&quot;asc\&quot; or \&quot;desc\&quot;), by height &amp; index. If empty, default sorting will be still applied.
 func (r ApiTxSearchRequest) OrderBy(orderBy string) ApiTxSearchRequest {
 	r.orderBy = &orderBy
 	return r
 }
 
-func (r ApiTxSearchRequest) Execute() (TxSearchResponse, *_nethttp.Response, error) {
+func (r ApiTxSearchRequest) Execute() (*TxSearchResponse, *http.Response, error) {
 	return r.ApiService.TxSearchExecute(r)
 }
 
@@ -2216,10 +2214,10 @@ Search for transactions w/ their results.
 See /subscribe for the query syntax.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiTxSearchRequest
 */
-func (a *InfoApiService) TxSearch(ctx _context.Context) ApiTxSearchRequest {
+func (a *InfoApiService) TxSearch(ctx context.Context) ApiTxSearchRequest {
 	return ApiTxSearchRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -2228,24 +2226,24 @@ func (a *InfoApiService) TxSearch(ctx _context.Context) ApiTxSearchRequest {
 
 // Execute executes the request
 //  @return TxSearchResponse
-func (a *InfoApiService) TxSearchExecute(r ApiTxSearchRequest) (TxSearchResponse, *_nethttp.Response, error) {
+func (a *InfoApiService) TxSearchExecute(r ApiTxSearchRequest) (*TxSearchResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  TxSearchResponse
+		localVarReturnValue  *TxSearchResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoApiService.TxSearch")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/tx_search"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if r.query == nil {
 		return localVarReturnValue, nil, reportError("query is required and must be specified")
 	}
@@ -2286,19 +2284,19 @@ func (a *InfoApiService) TxSearchExecute(r ApiTxSearchRequest) (TxSearchResponse
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil || localVarHTTPResponse.StatusCode < 200 || localVarHTTPResponse.StatusCode  > 399 {
+	if err != nil || localVarHTTPResponse == nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -2316,7 +2314,7 @@ func (a *InfoApiService) TxSearchExecute(r ApiTxSearchRequest) (TxSearchResponse
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -2327,7 +2325,7 @@ func (a *InfoApiService) TxSearchExecute(r ApiTxSearchRequest) (TxSearchResponse
 }
 
 type ApiUnconfirmedTxsRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *InfoApiService
 	limit *int32
 }
@@ -2338,7 +2336,7 @@ func (r ApiUnconfirmedTxsRequest) Limit(limit int32) ApiUnconfirmedTxsRequest {
 	return r
 }
 
-func (r ApiUnconfirmedTxsRequest) Execute() (UnconfirmedTransactionsResponse, *_nethttp.Response, error) {
+func (r ApiUnconfirmedTxsRequest) Execute() (*UnconfirmedTransactionsResponse, *http.Response, error) {
 	return r.ApiService.UnconfirmedTxsExecute(r)
 }
 
@@ -2348,10 +2346,10 @@ UnconfirmedTxs Get the list of unconfirmed transactions
 Get list of unconfirmed transactions
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiUnconfirmedTxsRequest
 */
-func (a *InfoApiService) UnconfirmedTxs(ctx _context.Context) ApiUnconfirmedTxsRequest {
+func (a *InfoApiService) UnconfirmedTxs(ctx context.Context) ApiUnconfirmedTxsRequest {
 	return ApiUnconfirmedTxsRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -2360,24 +2358,24 @@ func (a *InfoApiService) UnconfirmedTxs(ctx _context.Context) ApiUnconfirmedTxsR
 
 // Execute executes the request
 //  @return UnconfirmedTransactionsResponse
-func (a *InfoApiService) UnconfirmedTxsExecute(r ApiUnconfirmedTxsRequest) (UnconfirmedTransactionsResponse, *_nethttp.Response, error) {
+func (a *InfoApiService) UnconfirmedTxsExecute(r ApiUnconfirmedTxsRequest) (*UnconfirmedTransactionsResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  UnconfirmedTransactionsResponse
+		localVarReturnValue  *UnconfirmedTransactionsResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoApiService.UnconfirmedTxs")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/unconfirmed_txs"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 
 	if r.limit != nil {
 		localVarQueryParams.Add("limit", parameterToString(*r.limit, ""))
@@ -2409,15 +2407,15 @@ func (a *InfoApiService) UnconfirmedTxsExecute(r ApiUnconfirmedTxsRequest) (Unco
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -2435,7 +2433,7 @@ func (a *InfoApiService) UnconfirmedTxsExecute(r ApiUnconfirmedTxsRequest) (Unco
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -2446,7 +2444,7 @@ func (a *InfoApiService) UnconfirmedTxsExecute(r ApiUnconfirmedTxsRequest) (Unco
 }
 
 type ApiValidatorsRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *InfoApiService
 	height *int32
 	page *int32
@@ -2458,18 +2456,20 @@ func (r ApiValidatorsRequest) Height(height int32) ApiValidatorsRequest {
 	r.height = &height
 	return r
 }
+
 // Page number (1-based)
 func (r ApiValidatorsRequest) Page(page int32) ApiValidatorsRequest {
 	r.page = &page
 	return r
 }
+
 // Number of entries per page (max: 100)
 func (r ApiValidatorsRequest) PerPage(perPage int32) ApiValidatorsRequest {
 	r.perPage = &perPage
 	return r
 }
 
-func (r ApiValidatorsRequest) Execute() (ValidatorsResponse, *_nethttp.Response, error) {
+func (r ApiValidatorsRequest) Execute() (*ValidatorsResponse, *http.Response, error) {
 	return r.ApiService.ValidatorsExecute(r)
 }
 
@@ -2479,10 +2479,10 @@ Validators Get validator set at a specified height
 Get Validators. Validators are sorted first by voting power (descending), then by address (ascending).
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiValidatorsRequest
 */
-func (a *InfoApiService) Validators(ctx _context.Context) ApiValidatorsRequest {
+func (a *InfoApiService) Validators(ctx context.Context) ApiValidatorsRequest {
 	return ApiValidatorsRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -2491,24 +2491,24 @@ func (a *InfoApiService) Validators(ctx _context.Context) ApiValidatorsRequest {
 
 // Execute executes the request
 //  @return ValidatorsResponse
-func (a *InfoApiService) ValidatorsExecute(r ApiValidatorsRequest) (ValidatorsResponse, *_nethttp.Response, error) {
+func (a *InfoApiService) ValidatorsExecute(r ApiValidatorsRequest) (*ValidatorsResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  ValidatorsResponse
+		localVarReturnValue  *ValidatorsResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoApiService.Validators")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/validators"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 
 	if r.height != nil {
 		localVarQueryParams.Add("height", parameterToString(*r.height, ""))
@@ -2546,15 +2546,15 @@ func (a *InfoApiService) ValidatorsExecute(r ApiValidatorsRequest) (ValidatorsRe
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -2572,7 +2572,7 @@ func (a *InfoApiService) ValidatorsExecute(r ApiValidatorsRequest) (ValidatorsRe
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}

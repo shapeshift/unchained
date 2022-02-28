@@ -56,7 +56,7 @@ func (o *TxSearchResponseResultTxResult) GetLog() string {
 // GetLogOk returns a tuple with the Log field value
 // and a boolean to check if the value has been set.
 func (o *TxSearchResponseResultTxResult) GetLogOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Log, true
@@ -80,7 +80,7 @@ func (o *TxSearchResponseResultTxResult) GetGasWanted() string {
 // GetGasWantedOk returns a tuple with the GasWanted field value
 // and a boolean to check if the value has been set.
 func (o *TxSearchResponseResultTxResult) GetGasWantedOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.GasWanted, true
@@ -104,7 +104,7 @@ func (o *TxSearchResponseResultTxResult) GetGasUsed() string {
 // GetGasUsedOk returns a tuple with the GasUsed field value
 // and a boolean to check if the value has been set.
 func (o *TxSearchResponseResultTxResult) GetGasUsedOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.GasUsed, true
@@ -128,7 +128,7 @@ func (o *TxSearchResponseResultTxResult) GetTags() Event {
 // GetTagsOk returns a tuple with the Tags field value
 // and a boolean to check if the value has been set.
 func (o *TxSearchResponseResultTxResult) GetTagsOk() (*Event, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Tags, true

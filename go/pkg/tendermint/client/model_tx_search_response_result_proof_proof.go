@@ -56,7 +56,7 @@ func (o *TxSearchResponseResultProofProof) GetTotal() string {
 // GetTotalOk returns a tuple with the Total field value
 // and a boolean to check if the value has been set.
 func (o *TxSearchResponseResultProofProof) GetTotalOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Total, true
@@ -80,7 +80,7 @@ func (o *TxSearchResponseResultProofProof) GetIndex() string {
 // GetIndexOk returns a tuple with the Index field value
 // and a boolean to check if the value has been set.
 func (o *TxSearchResponseResultProofProof) GetIndexOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Index, true
@@ -104,7 +104,7 @@ func (o *TxSearchResponseResultProofProof) GetLeafHash() string {
 // GetLeafHashOk returns a tuple with the LeafHash field value
 // and a boolean to check if the value has been set.
 func (o *TxSearchResponseResultProofProof) GetLeafHashOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.LeafHash, true
@@ -127,11 +127,11 @@ func (o *TxSearchResponseResultProofProof) GetAunts() []string {
 
 // GetAuntsOk returns a tuple with the Aunts field value
 // and a boolean to check if the value has been set.
-func (o *TxSearchResponseResultProofProof) GetAuntsOk() (*[]string, bool) {
-	if o == nil  {
+func (o *TxSearchResponseResultProofProof) GetAuntsOk() ([]string, bool) {
+	if o == nil {
 		return nil, false
 	}
-	return &o.Aunts, true
+	return o.Aunts, true
 }
 
 // SetAunts sets field value

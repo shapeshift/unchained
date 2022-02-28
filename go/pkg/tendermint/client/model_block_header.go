@@ -76,7 +76,7 @@ func (o *BlockHeader) GetVersion() BlockHeaderVersion {
 // GetVersionOk returns a tuple with the Version field value
 // and a boolean to check if the value has been set.
 func (o *BlockHeader) GetVersionOk() (*BlockHeaderVersion, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Version, true
@@ -100,7 +100,7 @@ func (o *BlockHeader) GetChainId() string {
 // GetChainIdOk returns a tuple with the ChainId field value
 // and a boolean to check if the value has been set.
 func (o *BlockHeader) GetChainIdOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.ChainId, true
@@ -124,7 +124,7 @@ func (o *BlockHeader) GetHeight() string {
 // GetHeightOk returns a tuple with the Height field value
 // and a boolean to check if the value has been set.
 func (o *BlockHeader) GetHeightOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Height, true
@@ -148,7 +148,7 @@ func (o *BlockHeader) GetTime() string {
 // GetTimeOk returns a tuple with the Time field value
 // and a boolean to check if the value has been set.
 func (o *BlockHeader) GetTimeOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Time, true
@@ -172,7 +172,7 @@ func (o *BlockHeader) GetLastBlockId() BlockID {
 // GetLastBlockIdOk returns a tuple with the LastBlockId field value
 // and a boolean to check if the value has been set.
 func (o *BlockHeader) GetLastBlockIdOk() (*BlockID, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.LastBlockId, true
@@ -196,7 +196,7 @@ func (o *BlockHeader) GetLastCommitHash() string {
 // GetLastCommitHashOk returns a tuple with the LastCommitHash field value
 // and a boolean to check if the value has been set.
 func (o *BlockHeader) GetLastCommitHashOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.LastCommitHash, true
@@ -220,7 +220,7 @@ func (o *BlockHeader) GetDataHash() string {
 // GetDataHashOk returns a tuple with the DataHash field value
 // and a boolean to check if the value has been set.
 func (o *BlockHeader) GetDataHashOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.DataHash, true
@@ -244,7 +244,7 @@ func (o *BlockHeader) GetValidatorsHash() string {
 // GetValidatorsHashOk returns a tuple with the ValidatorsHash field value
 // and a boolean to check if the value has been set.
 func (o *BlockHeader) GetValidatorsHashOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.ValidatorsHash, true
@@ -268,7 +268,7 @@ func (o *BlockHeader) GetNextValidatorsHash() string {
 // GetNextValidatorsHashOk returns a tuple with the NextValidatorsHash field value
 // and a boolean to check if the value has been set.
 func (o *BlockHeader) GetNextValidatorsHashOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.NextValidatorsHash, true
@@ -292,7 +292,7 @@ func (o *BlockHeader) GetConsensusHash() string {
 // GetConsensusHashOk returns a tuple with the ConsensusHash field value
 // and a boolean to check if the value has been set.
 func (o *BlockHeader) GetConsensusHashOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.ConsensusHash, true
@@ -316,7 +316,7 @@ func (o *BlockHeader) GetAppHash() string {
 // GetAppHashOk returns a tuple with the AppHash field value
 // and a boolean to check if the value has been set.
 func (o *BlockHeader) GetAppHashOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.AppHash, true
@@ -340,7 +340,7 @@ func (o *BlockHeader) GetLastResultsHash() string {
 // GetLastResultsHashOk returns a tuple with the LastResultsHash field value
 // and a boolean to check if the value has been set.
 func (o *BlockHeader) GetLastResultsHashOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.LastResultsHash, true
@@ -364,7 +364,7 @@ func (o *BlockHeader) GetEvidenceHash() string {
 // GetEvidenceHashOk returns a tuple with the EvidenceHash field value
 // and a boolean to check if the value has been set.
 func (o *BlockHeader) GetEvidenceHashOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.EvidenceHash, true
@@ -388,7 +388,7 @@ func (o *BlockHeader) GetProposerAddress() string {
 // GetProposerAddressOk returns a tuple with the ProposerAddress field value
 // and a boolean to check if the value has been set.
 func (o *BlockHeader) GetProposerAddressOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.ProposerAddress, true

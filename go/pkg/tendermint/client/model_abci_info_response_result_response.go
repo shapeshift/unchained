@@ -54,7 +54,7 @@ func (o *ABCIInfoResponseResultResponse) GetData() string {
 // GetDataOk returns a tuple with the Data field value
 // and a boolean to check if the value has been set.
 func (o *ABCIInfoResponseResultResponse) GetDataOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Data, true
@@ -78,7 +78,7 @@ func (o *ABCIInfoResponseResultResponse) GetVersion() string {
 // GetVersionOk returns a tuple with the Version field value
 // and a boolean to check if the value has been set.
 func (o *ABCIInfoResponseResultResponse) GetVersionOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Version, true
@@ -102,7 +102,7 @@ func (o *ABCIInfoResponseResultResponse) GetAppVersion() string {
 // GetAppVersionOk returns a tuple with the AppVersion field value
 // and a boolean to check if the value has been set.
 func (o *ABCIInfoResponseResultResponse) GetAppVersionOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.AppVersion, true

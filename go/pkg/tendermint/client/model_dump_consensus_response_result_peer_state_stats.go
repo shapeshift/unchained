@@ -52,7 +52,7 @@ func (o *DumpConsensusResponseResultPeerStateStats) GetVotes() string {
 // GetVotesOk returns a tuple with the Votes field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultPeerStateStats) GetVotesOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Votes, true
@@ -76,7 +76,7 @@ func (o *DumpConsensusResponseResultPeerStateStats) GetBlockParts() string {
 // GetBlockPartsOk returns a tuple with the BlockParts field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultPeerStateStats) GetBlockPartsOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.BlockParts, true

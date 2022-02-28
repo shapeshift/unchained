@@ -52,7 +52,7 @@ func (o *DumpConsensusResponseResultPeerStateRoundStateProposalBlockPartsHeader)
 // GetTotalOk returns a tuple with the Total field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultPeerStateRoundStateProposalBlockPartsHeader) GetTotalOk() (*int32, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Total, true
@@ -76,7 +76,7 @@ func (o *DumpConsensusResponseResultPeerStateRoundStateProposalBlockPartsHeader)
 // GetHashOk returns a tuple with the Hash field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultPeerStateRoundStateProposalBlockPartsHeader) GetHashOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Hash, true
