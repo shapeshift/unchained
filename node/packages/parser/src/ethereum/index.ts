@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js'
 import { ethers } from 'ethers'
 import { Tx } from '@shapeshiftoss/blockbook'
-import { caip19, caip2 } from '@shapeshiftoss/caip'
+import { caip19, caip2, AssetNamespace, AssetReference } from '@shapeshiftoss/caip'
 import { ChainTypes, ContractTypes } from '@shapeshiftoss/types'
 import { GenericParser, Status, Token, TransferType, Tx as ParseTx, TxSpecific } from '../types'
 import { aggregateTransfer, findAsyncSequential } from '../utils'
@@ -90,7 +90,12 @@ export class TransactionParser {
   }
 
   private getParsedTxWithTransfers(tx: Tx, parsedTx: ParseTx, address: string, internalTxs?: Array<InternalTx>) {
-    const caip19Ethereum = caip19.toCAIP19({ chain: ChainTypes.Ethereum, network: toNetworkType(this.network) })
+    const caip19Ethereum = caip19.toCAIP19({
+      chain: ChainTypes.Ethereum,
+      network: toNetworkType(this.network),
+      assetNamespace: AssetNamespace.Slip44,
+      AssetReference: AssetReference.Ethereum,
+    })
     const sendAddress = tx.vin[0].addresses?.[0] ?? ''
     const receiveAddress = tx.vout[0].addresses?.[0] ?? ''
 
@@ -148,8 +153,8 @@ export class TransactionParser {
         caip19.toCAIP19({
           chain: ChainTypes.Ethereum,
           network: toNetworkType(this.network),
-          contractType: ContractTypes.ERC20,
-          tokenId: transfer.token,
+          assetNamespace: AssetNamespace.ERC20,
+          assetReference: transfer.token,
         }),
         transfer.from,
         transfer.to,
@@ -170,7 +175,12 @@ export class TransactionParser {
 
     internalTxs?.forEach((internalTx) => {
       const transferArgs = [
-        caip19.toCAIP19({ chain: ChainTypes.Ethereum, network: toNetworkType(this.network) }),
+        caip19.toCAIP19({
+          chain: ChainTypes.Ethereum,
+          network: toNetworkType(this.network),
+          assetNamespace: AssetNamespace.Slip44,
+          assetReference: AssetReference.Ethereum,
+        }),
         internalTx.from,
         internalTx.to,
         internalTx.value,
