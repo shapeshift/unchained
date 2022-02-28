@@ -1,3 +1,5 @@
+import { mempoolMock } from './mempoolMock'
+
 const foxExit = {
   txid: '0x1c676dd29be457b091e1ecb6578b6614d3f084df610876dfd196e6125fc3f6d6',
   vin: [
@@ -51,32 +53,23 @@ const foxExit = {
     gasPrice: '56875000000',
     data: '0xe9fad8ee',
   },
+  coinSpecificData: {
+    tx: {
+      nonce: '0x61',
+      gasPrice: '0xd3e03a0c0',
+      gas: '0x2c1cc',
+      to: '0xDd80E21669A664Bce83E3AD9a0d74f8Dad5D9E72',
+      value: '0x0',
+      input: '0xe9fad8ee',
+      hash: '0x1c676dd29be457b091e1ecb6578b6614d3f084df610876dfd196e6125fc3f6d6',
+      blockNumber: '',
+      from: '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C',
+      transactionIndex: '',
+    },
+  },
 }
 
 export default {
   tx: foxExit,
-  txMempool: {
-    ...foxExit,
-    blockHeight: -1,
-    confirmations: 0,
-    fees: '0',
-    blockHash: undefined,
-    rbf: true,
-    ethereumSpecific: { ...foxExit.ethereumSpecific, status: -1 },
-    coinSpecificData: {
-      tx: {
-        nonce: '0x61',
-        gasPrice: '0xd3e03a0c0',
-        gas: '0x2c1cc',
-        to: '0xDd80E21669A664Bce83E3AD9a0d74f8Dad5D9E72',
-        value: '0x0',
-        input: '0xe9fad8ee',
-        hash: '0x1c676dd29be457b091e1ecb6578b6614d3f084df610876dfd196e6125fc3f6d6',
-        blockNumber: '',
-        from: '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C',
-        transactionIndex: '',
-      },
-    },
-    tokenTransfers: undefined,
-  },
+  txMempool: mempoolMock(foxExit),
 }

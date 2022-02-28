@@ -1,3 +1,5 @@
+import { mempoolMock } from './mempoolMock'
+
 const ethSelfSend = {
   txid: '0x854dff9231cadb562129cff006150dfc6dd1508ea2a39c9b51292d234c47a992',
   vin: [
@@ -33,12 +35,5 @@ const ethSelfSend = {
 
 export default {
   tx: ethSelfSend,
-  txMempool: {
-    ...ethSelfSend,
-    blockHeight: -1,
-    confirmations: 0,
-    fees: '0',
-    ethereumSpecific: { ...ethSelfSend.ethereumSpecific, status: -1 },
-    blockHash: undefined,
-  },
+  txMempool: mempoolMock(ethSelfSend),
 }

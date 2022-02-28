@@ -1,3 +1,5 @@
+import { mempoolMock } from './mempoolMock'
+
 export const tokenOnly = {
   txid: '0x29077583093eedabf886708cc84857ec681a280b8cb07431569f33a538e904ef',
   vin: [
@@ -46,5 +48,5 @@ export const tokenOnly = {
 
 export default {
   tx: tokenOnly,
-  txMempool: { ...tokenOnly, blockHeight: -1, confirmations: 0, fee: 0, ethereumSpecific: undefined },
+  txMempool: mempoolMock(tokenOnly),
 }

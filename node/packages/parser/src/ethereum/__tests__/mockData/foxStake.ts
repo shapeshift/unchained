@@ -1,3 +1,5 @@
+import { mempoolMock } from './mempoolMock'
+
 const foxStake = {
   txid: '0x253585eae87ebbb6b81c0fa6c6fe3894fb8afb2fb8c7073f7c4b28915aebd2a7',
   vin: [
@@ -41,32 +43,23 @@ const foxStake = {
     gasPrice: '45500000000',
     data: '0xa694fc3a0000000000000000000000000000000000000000000000000161c0b44c0353ce',
   },
+  coinSpecificData: {
+    tx: {
+      nonce: '0x65',
+      gasPrice: '0xa9802e700',
+      gas: '0x1f67c',
+      to: '0xDd80E21669A664Bce83E3AD9a0d74f8Dad5D9E72',
+      value: '0x0',
+      input: '0xa694fc3a0000000000000000000000000000000000000000000000000161c0b44c0353ce',
+      hash: '0x253585eae87ebbb6b81c0fa6c6fe3894fb8afb2fb8c7073f7c4b28915aebd2a7',
+      blockNumber: '',
+      from: '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C',
+      transactionIndex: '',
+    },
+  },
 }
 
 export default {
   tx: foxStake,
-  txMempool: {
-    ...foxStake,
-    blockHeight: -1,
-    confirmations: 0,
-    fees: '0',
-    blockHash: undefined,
-    rbf: true,
-    ethereumSpecific: { ...foxStake.ethereumSpecific, status: -1 },
-    coinSpecificData: {
-      tx: {
-        nonce: '0x65',
-        gasPrice: '0xa9802e700',
-        gas: '0x1f67c',
-        to: '0xDd80E21669A664Bce83E3AD9a0d74f8Dad5D9E72',
-        value: '0x0',
-        input: '0xa694fc3a0000000000000000000000000000000000000000000000000161c0b44c0353ce',
-        hash: '0x253585eae87ebbb6b81c0fa6c6fe3894fb8afb2fb8c7073f7c4b28915aebd2a7',
-        blockNumber: '',
-        from: '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C',
-        transactionIndex: '',
-      },
-    },
-    tokenTransfers: undefined,
-  },
+  txMempool: mempoolMock(foxStake),
 }

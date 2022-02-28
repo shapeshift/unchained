@@ -1,4 +1,5 @@
 import { SHAPE_SHIFT_ROUTER_CONTRACT } from '../../constants'
+import { mempoolMock } from './mempoolMock'
 
 const yearnDeposit = {
   txid: '0xcb6f3702249a22e10e5330ad43b3eed548966cf09c3f5bb423d7835511c991fb',
@@ -68,5 +69,5 @@ const yearnDeposit = {
 
 export default {
   tx: yearnDeposit,
-  txMempool: { ...yearnDeposit, blockHeight: -1, confirmations: 0, fee: 0, ethereumSpecific: undefined },
+  txMempool: mempoolMock(yearnDeposit),
 }
