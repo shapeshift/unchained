@@ -49,8 +49,8 @@ export default {
   txMempool: {
     ...tokenSelfSend,
     blockHeight: -1,
+    fees: '0',
     confirmations: 0,
-    fees: 0,
     ethereumSpecific: { ...tokenSelfSend.ethereumSpecific, status: -1 },
     blockHash: undefined,
   },

@@ -37,7 +37,7 @@ export default {
     ...ethSelfSend,
     blockHeight: -1,
     confirmations: 0,
-    fees: 0,
+    fees: '0',
     ethereumSpecific: { ...ethSelfSend.ethereumSpecific, status: -1 },
     blockHash: undefined,
   },

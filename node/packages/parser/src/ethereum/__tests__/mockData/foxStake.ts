@@ -49,7 +49,7 @@ export default {
     ...foxStake,
     blockHeight: -1,
     confirmations: 0,
-    fees: 0,
+    fees: '0',
     blockHash: undefined,
     rbf: true,
     ethereumSpecific: { ...foxStake.ethereumSpecific, status: -1 },

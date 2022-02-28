@@ -59,7 +59,7 @@ export default {
     ...foxExit,
     blockHeight: -1,
     confirmations: 0,
-    fees: 0,
+    fees: '0',
     blockHash: undefined,
     rbf: true,
     ethereumSpecific: { ...foxExit.ethereumSpecific, status: -1 },
