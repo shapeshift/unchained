@@ -23,6 +23,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	ws "github.com/gorilla/websocket"
 	"github.com/pkg/errors"
@@ -73,6 +74,7 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient 
 	// compile check to ensure Handler implements BaseAPI
 	var _ api.BaseAPI = a.handler
 
+	r.Use(handlers.CORS())
 	r.Use(api.Scheme)
 	r.Use(api.Logger)
 
