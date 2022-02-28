@@ -261,7 +261,7 @@ func (a *API) SendTx(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	txHash, err := a.handler.SendTx(body.Hex)
+	txHash, err := a.handler.SendTx(body.RawTx)
 	if err != nil {
 		api.HandleError(w, http.StatusInternalServerError, err.Error())
 		return
