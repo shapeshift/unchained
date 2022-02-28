@@ -19,6 +19,17 @@ const (
 	Receive
 )
 
+func (t TxType) String() string {
+	switch t {
+	case Send:
+		return "send"
+	case Receive:
+		return "receive"
+	default:
+		return fmt.Sprintf("unknown (%d)", t)
+	}
+}
+
 // History stores state to complete the request
 type History struct {
 	ctx               context.Context
@@ -34,7 +45,8 @@ type History struct {
 }
 
 func (h *History) String() string {
-	return fmt.Sprintf(`address: %s, pageSize: %d, sendTxs: %d, hasMoreSendTxs: %t, receiveTxs: %d, hasMoreReceiveTxs: %t`, h.address, h.pageSize, len(h.sendTxs), h.hasMoreSendTxs, len(h.receiveTxs), h.hasMoreReceiveTxs)
+	return fmt.Sprintf(`{address: %s, pageSize: %d, sendTxs: %d, hasMoreSendTxs: %t, receiveTxs: %d, hasMoreReceiveTxs: %t} %+v`,
+		h.address, h.pageSize, len(h.sendTxs), h.hasMoreSendTxs, len(h.receiveTxs), h.hasMoreReceiveTxs, h.cursor)
 }
 
 func (h *History) doRequest(txType TxType) (*client.TxSearchResponse, error) {
@@ -69,12 +81,22 @@ func (h *History) doRequest(txType TxType) (*client.TxSearchResponse, error) {
 			}
 
 			// no cursor provided by client, return response
-			if h.cursor.LastSendTxID == "" {
+			if h.cursor.LastSendTxIndex == nil {
 				return res, nil
 			}
 
-			h.filterByCursor(res.Result.Txs, h.cursor.LastSendTxID)
-			h.cursor.SendPage++
+			res.Result.Txs, err = h.filterByCursor(res.Result.Txs, h.cursor.LastSendTxIndex)
+			if err != nil {
+				return nil, errors.Wrapf(err, "failed to filter transactions by cursor")
+			}
+
+			// fetch the next page if no transactions exist after filtering
+			if len(res.Result.Txs) == 0 {
+				h.cursor.SendPage++
+				continue
+			}
+
+			return res, nil
 		case Receive:
 			res, httpRes, err := req.Query(fmt.Sprintf(`"transfer.recipient='%s'"`, h.address)).Page(int32(h.cursor.ReceivePage)).Execute()
 			if err != nil {
@@ -102,52 +124,45 @@ func (h *History) doRequest(txType TxType) (*client.TxSearchResponse, error) {
 			}
 
 			// no cursor provided by client, return response
-			if h.cursor.LastReceiveTxID == "" {
+			if h.cursor.LastReceiveTxIndex == nil {
 				return res, nil
 			}
 
-			h.filterByCursor(res.Result.Txs, h.cursor.LastReceiveTxID)
-			h.cursor.ReceivePage++
+			res.Result.Txs, err = h.filterByCursor(res.Result.Txs, h.cursor.LastReceiveTxIndex)
+			if err != nil {
+				return nil, errors.Wrapf(err, "failed to filter transactions by cursor")
+			}
+
+			// fetch the next page if no transactions exist after filtering
+			if len(res.Result.Txs) == 0 {
+				h.cursor.ReceivePage++
+				continue
+			}
+
+			return res, nil
 		default:
-			return nil, fmt.Errorf("invalid histTxType %d", txType)
+			return nil, errors.Errorf("invalid TxType: %s", txType)
 		}
 	}
 }
 
-func (h *History) filterByCursor(txs []client.TxSearchResponseResultTxs, lastTxID string) ([]client.TxSearchResponseResultTxs, error) {
-	foundLastTx := false
-
+// filterByCursor will filter out any transactions that we have already returned to the client based on the state of the cursor
+func (h *History) filterByCursor(txs []client.TxSearchResponseResultTxs, lastTxIndex *int32) ([]client.TxSearchResponseResultTxs, error) {
 	filtered := []client.TxSearchResponseResultTxs{}
 	for _, tx := range txs {
-		if tx.Height == nil {
-			logger.Errorf("no height for tx: %s", *tx.Hash)
-			break
-		}
-
 		txHeight, err := strconv.Atoi(*tx.Height)
 		if err != nil {
-			logger.Errorf("error parsing tx height %s: %s", *tx.Height, err)
-			break
+			return nil, errors.Wrapf(err, "failed to convert tx height %s", *tx.Height)
 		}
 
-		// skip if height newer than last height from cursor
+		// do not include transaction if height is more recent than the last tx returned
 		if txHeight > h.cursor.LastBlockHeight {
 			continue
 		}
 
-		// if equal to last height from cursor, skip until we find matching last tx
-		if txHeight == h.cursor.LastBlockHeight {
-			if *tx.Hash == lastTxID {
-				foundLastTx = true
-				// found as last tx in results, need to fetch next page
-				//if i == len(res.Result.Txs)-1 {
-				//	refetch = true
-				//}
-				continue
-			}
-			if !foundLastTx {
-				continue
-			}
+		// do not include transaction if same height but tx index is more recent than the last tx returned
+		if txHeight == h.cursor.LastBlockHeight && *tx.Index <= *lastTxIndex {
+			continue
 		}
 
 		filtered = append(filtered, tx)
@@ -209,16 +224,16 @@ func (h *History) fetch() (*TxHistory, error) {
 			return nil, errors.Wrap(err, "failed to get most recent receive tx height")
 		}
 
-		// find the next most recent transaction defaulting to send if equal and remove from the txs set
+		// find the next most recent transaction and remove from the txs set
 		var next client.TxSearchResponseResultTxs
 		if sendHeight >= receiveHeight {
 			next = h.sendTxs[0]
 			h.sendTxs = h.sendTxs[1:]
-			h.cursor.LastSendTxID = *next.Hash
+			h.cursor.LastSendTxIndex = next.Index
 		} else {
 			next = h.receiveTxs[0]
 			h.receiveTxs = h.receiveTxs[1:]
-			h.cursor.LastReceiveTxID = *next.Hash
+			h.cursor.LastReceiveTxIndex = next.Index
 		}
 
 		cosmosTx, signingTx, err := DecodeTx(*h.encoding, *next.Tx)
@@ -263,7 +278,6 @@ func (h *History) fetch() (*TxHistory, error) {
 func (h *History) fetchMore(txType TxType) error {
 	switch txType {
 	case Send:
-		// fetch the next page
 		h.cursor.SendPage++
 		res, err := h.doRequest(txType)
 		if err != nil {
@@ -273,7 +287,6 @@ func (h *History) fetchMore(txType TxType) error {
 		h.sendTxs = res.Result.Txs
 		h.removeDuplicateTxs()
 	case Receive:
-		// fetch the next page
 		h.cursor.ReceivePage++
 		res, err := h.doRequest(txType)
 		if err != nil {
@@ -283,7 +296,7 @@ func (h *History) fetchMore(txType TxType) error {
 		h.receiveTxs = res.Result.Txs
 		h.removeDuplicateTxs()
 	default:
-		return errors.Errorf("invalid TxType: %d", txType)
+		return errors.Errorf("invalid TxType: %s", txType)
 	}
 
 	return nil
