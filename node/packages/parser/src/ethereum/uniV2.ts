@@ -1,7 +1,7 @@
 import { ethers } from 'ethers'
 import { Tx } from '@shapeshiftoss/blockbook'
 import { caip19, AssetNamespace, AssetReference } from '@shapeshiftoss/caip'
-import { ChainTypes, ContractTypes } from '@shapeshiftoss/types'
+import { ChainTypes } from '@shapeshiftoss/types'
 import { GenericParser, Transfer, TransferType, TxSpecific, UniV2Tx } from '../types'
 import { Network } from './types'
 import UNIV2_ABI from './abi/uniV2'
