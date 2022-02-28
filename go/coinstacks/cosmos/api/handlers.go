@@ -98,7 +98,7 @@ func (h *Handler) GetInfo() (api.Info, error) {
 }
 
 func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
-	accRes, err := h.grpcClient.GetAccount(pubkey)
+	accRes, err := h.httpClient.GetAccount(pubkey)
 	if err != nil {
 		return nil, err
 	}
@@ -190,6 +190,6 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 	return txHistory, nil
 }
 
-func (h *Handler) SendTx(hex string) (string, error) {
-	return h.httpClient.BroadcastTx([]byte(hex))
+func (h *Handler) SendTx(rawTx string) (string, error) {
+	return h.httpClient.BroadcastTx([]byte(rawTx))
 }
