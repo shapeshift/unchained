@@ -37,7 +37,7 @@ export class TransactionParser {
     this.thor = new thor.Parser({ network: this.network, midgardUrl: args.midgardUrl, rpcUrl: args.rpcUrl })
     this.uniV2 = new uniV2.Parser({ network: this.network, provider })
     this.zrx = new zrx.Parser()
-    this.yearn = new yearn.Parser()
+    this.yearn = new yearn.Parser({ provider })
 
     this.parsers = [this.zrx, this.thor, this.uniV2, this.yearn]
   }

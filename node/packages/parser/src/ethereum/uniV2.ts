@@ -15,7 +15,7 @@ export interface ParserArgs {
 }
 
 export class Parser implements GenericParser {
-  abiInterface: ethers.utils.Interface
+  abiInterface = new ethers.utils.Interface(UNIV2_ABI)
   network: Network
   provider: ethers.providers.JsonRpcProvider
 
@@ -24,7 +24,6 @@ export class Parser implements GenericParser {
   readonly wethContract: string
 
   constructor(args: ParserArgs) {
-    this.abiInterface = new ethers.utils.Interface(UNIV2_ABI)
     this.network = args.network
     this.provider = args.provider
 
