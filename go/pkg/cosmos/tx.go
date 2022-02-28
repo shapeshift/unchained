@@ -20,7 +20,7 @@ func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (
 	history := History{
 		ctx:               c.ctx,
 		address:           address,
-		cursor:            Cursor{LastBlockHeight: -1},
+		cursor:            Cursor{SendPage: 1, ReceivePage: 1},
 		sendTxs:           []client.TxSearchResponseResultTxs{},
 		hasMoreSendTxs:    true,
 		receiveTxs:        []client.TxSearchResponseResultTxs{},
