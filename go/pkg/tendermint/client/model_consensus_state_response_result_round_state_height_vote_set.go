@@ -17,9 +17,9 @@ import (
 // ConsensusStateResponseResultRoundStateHeightVoteSet struct for ConsensusStateResponseResultRoundStateHeightVoteSet
 type ConsensusStateResponseResultRoundStateHeightVoteSet struct {
 	Round *int32 `json:"round,omitempty"`
-	Prevotes *[]string `json:"prevotes,omitempty"`
+	Prevotes []string `json:"prevotes,omitempty"`
 	PrevotesBitArray *string `json:"prevotes_bit_array,omitempty"`
-	Precommits *[]string `json:"precommits,omitempty"`
+	Precommits []string `json:"precommits,omitempty"`
 	PrecommitsBitArray *string `json:"precommits_bit_array,omitempty"`
 }
 
@@ -78,12 +78,12 @@ func (o *ConsensusStateResponseResultRoundStateHeightVoteSet) GetPrevotes() []st
 		var ret []string
 		return ret
 	}
-	return *o.Prevotes
+	return o.Prevotes
 }
 
 // GetPrevotesOk returns a tuple with the Prevotes field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ConsensusStateResponseResultRoundStateHeightVoteSet) GetPrevotesOk() (*[]string, bool) {
+func (o *ConsensusStateResponseResultRoundStateHeightVoteSet) GetPrevotesOk() ([]string, bool) {
 	if o == nil || o.Prevotes == nil {
 		return nil, false
 	}
@@ -101,7 +101,7 @@ func (o *ConsensusStateResponseResultRoundStateHeightVoteSet) HasPrevotes() bool
 
 // SetPrevotes gets a reference to the given []string and assigns it to the Prevotes field.
 func (o *ConsensusStateResponseResultRoundStateHeightVoteSet) SetPrevotes(v []string) {
-	o.Prevotes = &v
+	o.Prevotes = v
 }
 
 // GetPrevotesBitArray returns the PrevotesBitArray field value if set, zero value otherwise.
@@ -142,12 +142,12 @@ func (o *ConsensusStateResponseResultRoundStateHeightVoteSet) GetPrecommits() []
 		var ret []string
 		return ret
 	}
-	return *o.Precommits
+	return o.Precommits
 }
 
 // GetPrecommitsOk returns a tuple with the Precommits field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ConsensusStateResponseResultRoundStateHeightVoteSet) GetPrecommitsOk() (*[]string, bool) {
+func (o *ConsensusStateResponseResultRoundStateHeightVoteSet) GetPrecommitsOk() ([]string, bool) {
 	if o == nil || o.Precommits == nil {
 		return nil, false
 	}
@@ -165,7 +165,7 @@ func (o *ConsensusStateResponseResultRoundStateHeightVoteSet) HasPrecommits() bo
 
 // SetPrecommits gets a reference to the given []string and assigns it to the Precommits field.
 func (o *ConsensusStateResponseResultRoundStateHeightVoteSet) SetPrecommits(v []string) {
-	o.Precommits = &v
+	o.Precommits = v
 }
 
 // GetPrecommitsBitArray returns the PrecommitsBitArray field value if set, zero value otherwise.

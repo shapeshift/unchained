@@ -54,7 +54,7 @@ func (o *ConsensusParamsBlock) GetMaxBytes() string {
 // GetMaxBytesOk returns a tuple with the MaxBytes field value
 // and a boolean to check if the value has been set.
 func (o *ConsensusParamsBlock) GetMaxBytesOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.MaxBytes, true
@@ -78,7 +78,7 @@ func (o *ConsensusParamsBlock) GetMaxGas() string {
 // GetMaxGasOk returns a tuple with the MaxGas field value
 // and a boolean to check if the value has been set.
 func (o *ConsensusParamsBlock) GetMaxGasOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.MaxGas, true
@@ -102,7 +102,7 @@ func (o *ConsensusParamsBlock) GetTimeIotaMs() string {
 // GetTimeIotaMsOk returns a tuple with the TimeIotaMs field value
 // and a boolean to check if the value has been set.
 func (o *ConsensusParamsBlock) GetTimeIotaMsOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.TimeIotaMs, true

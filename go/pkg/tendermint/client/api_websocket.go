@@ -12,22 +12,18 @@ package client
 
 import (
 	"bytes"
-	_context "context"
-	_ioutil "io/ioutil"
-	_nethttp "net/http"
-	_neturl "net/url"
+	"context"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 )
 
-// Linger please
-var (
-	_ _context.Context
-)
 
 // WebsocketApiService WebsocketApi service
 type WebsocketApiService service
 
 type ApiSubscribeRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *WebsocketApiService
 	query *string
 }
@@ -38,7 +34,7 @@ func (r ApiSubscribeRequest) Query(query string) ApiSubscribeRequest {
 	return r
 }
 
-func (r ApiSubscribeRequest) Execute() (EmptyResponse, *_nethttp.Response, error) {
+func (r ApiSubscribeRequest) Execute() (*EmptyResponse, *http.Response, error) {
 	return r.ApiService.SubscribeExecute(r)
 }
 
@@ -141,10 +137,14 @@ https://godoc.org/github.com/tendermint/tendermint/libs/pubsub/query.
 import rpchttp "github.com/tendermint/rpc/client/http"
 import "github.com/tendermint/tendermint/types"
 
-client := rpchttp.New("tcp://0.0.0.0:26657")
-err := client.Start()
+client, err := rpchttp.New("tcp://0.0.0.0:26657", "/websocket")
 if err != nil {
-  handle error
+  // handle error
+}
+
+err = client.Start()
+if err != nil {
+  // handle error
 }
 defer client.Stop()
 ctx, cancel := context.WithTimeout(context.Background(), 1 * time.Second)
@@ -152,7 +152,7 @@ defer cancel()
 query := "tm.event = 'Tx' AND tx.height = 3"
 txs, err := client.Subscribe(ctx, "test-client", query)
 if err != nil {
-  handle error
+  // handle error
 }
 
 go func() {
@@ -166,10 +166,10 @@ NOTE: if you're not reading events fast enough, Tendermint might
 terminate the subscription.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiSubscribeRequest
 */
-func (a *WebsocketApiService) Subscribe(ctx _context.Context) ApiSubscribeRequest {
+func (a *WebsocketApiService) Subscribe(ctx context.Context) ApiSubscribeRequest {
 	return ApiSubscribeRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -178,24 +178,24 @@ func (a *WebsocketApiService) Subscribe(ctx _context.Context) ApiSubscribeReques
 
 // Execute executes the request
 //  @return EmptyResponse
-func (a *WebsocketApiService) SubscribeExecute(r ApiSubscribeRequest) (EmptyResponse, *_nethttp.Response, error) {
+func (a *WebsocketApiService) SubscribeExecute(r ApiSubscribeRequest) (*EmptyResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  EmptyResponse
+		localVarReturnValue  *EmptyResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WebsocketApiService.Subscribe")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/subscribe"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if r.query == nil {
 		return localVarReturnValue, nil, reportError("query is required and must be specified")
 	}
@@ -228,15 +228,15 @@ func (a *WebsocketApiService) SubscribeExecute(r ApiSubscribeRequest) (EmptyResp
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -254,7 +254,7 @@ func (a *WebsocketApiService) SubscribeExecute(r ApiSubscribeRequest) (EmptyResp
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -265,7 +265,7 @@ func (a *WebsocketApiService) SubscribeExecute(r ApiSubscribeRequest) (EmptyResp
 }
 
 type ApiUnsubscribeRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *WebsocketApiService
 	query *string
 }
@@ -276,7 +276,7 @@ func (r ApiUnsubscribeRequest) Query(query string) ApiUnsubscribeRequest {
 	return r
 }
 
-func (r ApiUnsubscribeRequest) Execute() (EmptyResponse, *_nethttp.Response, error) {
+func (r ApiUnsubscribeRequest) Execute() (*EmptyResponse, *http.Response, error) {
 	return r.ApiService.UnsubscribeExecute(r)
 }
 
@@ -284,24 +284,28 @@ func (r ApiUnsubscribeRequest) Execute() (EmptyResponse, *_nethttp.Response, err
 Unsubscribe Unsubscribe from event on Websocket
 
 ```go
-client := rpchttp.New("tcp://0.0.0.0:26657")
+client, err := rpchttp.New("tcp://0.0.0.0:26657", "/websocket")
+if err != nil {
+  // handle error
+}
+
 err := client.Start()
 if err != nil {
-   handle error
+  // handle error
 }
 defer client.Stop()
 query := "tm.event = 'Tx' AND tx.height = 3"
 err = client.Unsubscribe(context.Background(), "test-client", query)
 if err != nil {
-   handle error
+  // handle error
 }
 ```
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiUnsubscribeRequest
 */
-func (a *WebsocketApiService) Unsubscribe(ctx _context.Context) ApiUnsubscribeRequest {
+func (a *WebsocketApiService) Unsubscribe(ctx context.Context) ApiUnsubscribeRequest {
 	return ApiUnsubscribeRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -310,24 +314,24 @@ func (a *WebsocketApiService) Unsubscribe(ctx _context.Context) ApiUnsubscribeRe
 
 // Execute executes the request
 //  @return EmptyResponse
-func (a *WebsocketApiService) UnsubscribeExecute(r ApiUnsubscribeRequest) (EmptyResponse, *_nethttp.Response, error) {
+func (a *WebsocketApiService) UnsubscribeExecute(r ApiUnsubscribeRequest) (*EmptyResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  EmptyResponse
+		localVarReturnValue  *EmptyResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WebsocketApiService.Unsubscribe")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/unsubscribe"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if r.query == nil {
 		return localVarReturnValue, nil, reportError("query is required and must be specified")
 	}
@@ -360,15 +364,15 @@ func (a *WebsocketApiService) UnsubscribeExecute(r ApiUnsubscribeRequest) (Empty
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -386,7 +390,7 @@ func (a *WebsocketApiService) UnsubscribeExecute(r ApiUnsubscribeRequest) (Empty
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -397,12 +401,11 @@ func (a *WebsocketApiService) UnsubscribeExecute(r ApiUnsubscribeRequest) (Empty
 }
 
 type ApiUnsubscribeAllRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *WebsocketApiService
 }
 
-
-func (r ApiUnsubscribeAllRequest) Execute() (EmptyResponse, *_nethttp.Response, error) {
+func (r ApiUnsubscribeAllRequest) Execute() (*EmptyResponse, *http.Response, error) {
 	return r.ApiService.UnsubscribeAllExecute(r)
 }
 
@@ -412,10 +415,10 @@ UnsubscribeAll Unsubscribe from all events via WebSocket
 Unsubscribe from all events via WebSocket
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiUnsubscribeAllRequest
 */
-func (a *WebsocketApiService) UnsubscribeAll(ctx _context.Context) ApiUnsubscribeAllRequest {
+func (a *WebsocketApiService) UnsubscribeAll(ctx context.Context) ApiUnsubscribeAllRequest {
 	return ApiUnsubscribeAllRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -424,24 +427,24 @@ func (a *WebsocketApiService) UnsubscribeAll(ctx _context.Context) ApiUnsubscrib
 
 // Execute executes the request
 //  @return EmptyResponse
-func (a *WebsocketApiService) UnsubscribeAllExecute(r ApiUnsubscribeAllRequest) (EmptyResponse, *_nethttp.Response, error) {
+func (a *WebsocketApiService) UnsubscribeAllExecute(r ApiUnsubscribeAllRequest) (*EmptyResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  EmptyResponse
+		localVarReturnValue  *EmptyResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WebsocketApiService.UnsubscribeAll")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/unsubscribe_all"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -470,15 +473,15 @@ func (a *WebsocketApiService) UnsubscribeAllExecute(r ApiUnsubscribeAllRequest) 
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -496,7 +499,7 @@ func (a *WebsocketApiService) UnsubscribeAllExecute(r ApiUnsubscribeAllRequest) 
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}

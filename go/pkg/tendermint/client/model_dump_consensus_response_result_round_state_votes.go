@@ -74,7 +74,7 @@ func (o *DumpConsensusResponseResultRoundStateVotes) SetRound(v string) {
 
 // GetPrevotes returns the Prevotes field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *DumpConsensusResponseResultRoundStateVotes) GetPrevotes() []string {
-	if o == nil  {
+	if o == nil {
 		var ret []string
 		return ret
 	}
@@ -84,11 +84,11 @@ func (o *DumpConsensusResponseResultRoundStateVotes) GetPrevotes() []string {
 // GetPrevotesOk returns a tuple with the Prevotes field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *DumpConsensusResponseResultRoundStateVotes) GetPrevotesOk() (*[]string, bool) {
+func (o *DumpConsensusResponseResultRoundStateVotes) GetPrevotesOk() ([]string, bool) {
 	if o == nil || o.Prevotes == nil {
 		return nil, false
 	}
-	return &o.Prevotes, true
+	return o.Prevotes, true
 }
 
 // HasPrevotes returns a boolean if a field has been set.
@@ -139,7 +139,7 @@ func (o *DumpConsensusResponseResultRoundStateVotes) SetPrevotesBitArray(v strin
 
 // GetPrecommits returns the Precommits field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *DumpConsensusResponseResultRoundStateVotes) GetPrecommits() []string {
-	if o == nil  {
+	if o == nil {
 		var ret []string
 		return ret
 	}
@@ -149,11 +149,11 @@ func (o *DumpConsensusResponseResultRoundStateVotes) GetPrecommits() []string {
 // GetPrecommitsOk returns a tuple with the Precommits field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *DumpConsensusResponseResultRoundStateVotes) GetPrecommitsOk() (*[]string, bool) {
+func (o *DumpConsensusResponseResultRoundStateVotes) GetPrecommitsOk() ([]string, bool) {
 	if o == nil || o.Precommits == nil {
 		return nil, false
 	}
-	return &o.Precommits, true
+	return o.Precommits, true
 }
 
 // HasPrecommits returns a boolean if a field has been set.

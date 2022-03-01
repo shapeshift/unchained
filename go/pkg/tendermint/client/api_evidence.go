@@ -12,22 +12,18 @@ package client
 
 import (
 	"bytes"
-	_context "context"
-	_ioutil "io/ioutil"
-	_nethttp "net/http"
-	_neturl "net/url"
+	"context"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 )
 
-// Linger please
-var (
-	_ _context.Context
-)
 
 // EvidenceApiService EvidenceApi service
 type EvidenceApiService service
 
 type ApiBroadcastEvidenceRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *EvidenceApiService
 	evidence *string
 }
@@ -38,7 +34,7 @@ func (r ApiBroadcastEvidenceRequest) Evidence(evidence string) ApiBroadcastEvide
 	return r
 }
 
-func (r ApiBroadcastEvidenceRequest) Execute() (BroadcastEvidenceResponse, *_nethttp.Response, error) {
+func (r ApiBroadcastEvidenceRequest) Execute() (*BroadcastEvidenceResponse, *http.Response, error) {
 	return r.ApiService.BroadcastEvidenceExecute(r)
 }
 
@@ -48,10 +44,10 @@ BroadcastEvidence Broadcast evidence of the misbehavior.
 Broadcast evidence of the misbehavior.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiBroadcastEvidenceRequest
 */
-func (a *EvidenceApiService) BroadcastEvidence(ctx _context.Context) ApiBroadcastEvidenceRequest {
+func (a *EvidenceApiService) BroadcastEvidence(ctx context.Context) ApiBroadcastEvidenceRequest {
 	return ApiBroadcastEvidenceRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -60,24 +56,24 @@ func (a *EvidenceApiService) BroadcastEvidence(ctx _context.Context) ApiBroadcas
 
 // Execute executes the request
 //  @return BroadcastEvidenceResponse
-func (a *EvidenceApiService) BroadcastEvidenceExecute(r ApiBroadcastEvidenceRequest) (BroadcastEvidenceResponse, *_nethttp.Response, error) {
+func (a *EvidenceApiService) BroadcastEvidenceExecute(r ApiBroadcastEvidenceRequest) (*BroadcastEvidenceResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  BroadcastEvidenceResponse
+		localVarReturnValue  *BroadcastEvidenceResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "EvidenceApiService.BroadcastEvidence")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/broadcast_evidence"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if r.evidence == nil {
 		return localVarReturnValue, nil, reportError("evidence is required and must be specified")
 	}
@@ -110,15 +106,15 @@ func (a *EvidenceApiService) BroadcastEvidenceExecute(r ApiBroadcastEvidenceRequ
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -136,7 +132,7 @@ func (a *EvidenceApiService) BroadcastEvidenceExecute(r ApiBroadcastEvidenceRequ
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}

@@ -1,7 +1,7 @@
 /*
 Tendermint RPC
 
-Tendermint supports the following RPC protocols:  * URI over HTTP * JSONRPC over HTTP * JSONRPC over websockets  ## Configuration  RPC can be configured by tuning parameters under `[rpc]` table in the `$TMHOME/config/config.toml` file or by using the `--rpc.X` command-line flags.  Default rpc listen address is `tcp://0.0.0.0:26657`. To set another address, set the `laddr` config parameter to desired value. CORS (Cross-Origin Resource Sharing) can be enabled by setting `cors_allowed_origins`, `cors_allowed_methods`, `cors_allowed_headers` config parameters.  ## Arguments  Arguments which expect strings or byte arrays may be passed as quoted strings, like `\"abc\"` or as `0x`-prefixed strings, like `0x616263`.  ## URI/HTTP  A REST like interface.      curl localhost:26657/block?height=5  ## JSONRPC/HTTP  JSONRPC requests can be POST'd to the root RPC endpoint via HTTP.      curl --header \"Content-Type: application/json\" --request POST --data '{\"method\": \"block\", \"params\": [\"5\"], \"id\": 1}' localhost:26657  ## JSONRPC/websockets  JSONRPC requests can be also made via websocket. The websocket endpoint is at `/websocket`, e.g. `localhost:26657/websocket`. Asynchronous RPC functions like event `subscribe` and `unsubscribe` are only available via websockets.  Example using https://github.com/hashrocket/ws:      ws ws://localhost:26657/websocket     > { \"jsonrpc\": \"2.0\", \"method\": \"subscribe\", \"params\": [\"tm.event='NewBlock'\"], \"id\": 1 } 
+Tendermint supports the following RPC protocols:  * URI over HTTP * JSONRPC over HTTP * JSONRPC over websockets  ## Configuration  RPC can be configured by tuning parameters under `[rpc]` table in the `$TMHOME/config/config.toml` file or by using the `--rpc.X` command-line flags.  Default rpc listen address is `tcp://0.0.0.0:26657`. To set another address, set the `laddr` config parameter to desired value. CORS (Cross-Origin Resource Sharing) can be enabled by setting `cors_allowed_origins`, `cors_allowed_methods`, `cors_allowed_headers` config parameters.  ## Arguments  Arguments which expect strings or byte arrays may be passed as quoted strings, like `\"abc\"` or as `0x`-prefixed strings, like `0x616263`.  ## URI/HTTP  A REST like interface.      curl localhost:26657/block?height=5  ## JSONRPC/HTTP  JSONRPC requests can be POST'd to the root RPC endpoint via HTTP.      curl --header \"Content-Type: application/json\" --request POST --data '{\"method\": \"block\", \"params\": [\"5\"], \"id\": 1}' localhost:26657  ## JSONRPC/websockets  JSONRPC requests can be also made via websocket. The websocket endpoint is at `/websocket`, e.g. `localhost:26657/websocket`. Asynchronous RPC functions like event `subscribe` and `unsubscribe` are only available via websockets.  Example using https://github.com/hashrocket/ws:      ws ws://localhost:26657/websocket     > { \"jsonrpc\": \"2.0\", \"method\": \"subscribe\", \"params\": [\"tm.event='NewBlock'\"], \"id\": 1 }
 
 API version: Master
 */
@@ -18,7 +18,7 @@ import (
 type ErrorResponse struct {
 	Id *int32 `json:"id,omitempty"`
 	Jsonrpc *string `json:"jsonrpc,omitempty"`
-	Error *string `json:"error,omitempty"`
+	Error *json.RawMessage `json:"error,omitempty"`
 }
 
 // NewErrorResponse instantiates a new ErrorResponse object
@@ -108,7 +108,10 @@ func (o *ErrorResponse) GetError() string {
 		var ret string
 		return ret
 	}
-	return *o.Error
+
+	bytes, _ := o.Error.MarshalJSON()
+
+	return string(bytes)
 }
 
 // GetErrorOk returns a tuple with the Error field value if set, nil otherwise
@@ -117,7 +120,15 @@ func (o *ErrorResponse) GetErrorOk() (*string, bool) {
 	if o == nil || o.Error == nil {
 		return nil, false
 	}
-	return o.Error, true
+
+	bytes, err := o.Error.MarshalJSON()
+	if err != nil {
+		return nil, false
+	}
+
+	e := string(bytes)
+
+	return &e, true
 }
 
 // HasError returns a boolean if a field has been set.
@@ -131,7 +142,8 @@ func (o *ErrorResponse) HasError() bool {
 
 // SetError gets a reference to the given string and assigns it to the Error field.
 func (o *ErrorResponse) SetError(v string) {
-	o.Error = &v
+	e := json.RawMessage(v)
+	o.Error = &e
 }
 
 func (o ErrorResponse) MarshalJSON() ([]byte, error) {
@@ -183,5 +195,3 @@ func (v *NullableErrorResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

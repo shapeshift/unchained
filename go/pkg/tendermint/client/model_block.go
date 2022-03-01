@@ -17,8 +17,8 @@ import (
 // Block struct for Block
 type Block struct {
 	Header *BlockHeader `json:"header,omitempty"`
-	Data *[]string `json:"data,omitempty"`
-	Evidence *[]Evidence `json:"evidence,omitempty"`
+	Data []string `json:"data,omitempty"`
+	Evidence []Evidence `json:"evidence,omitempty"`
 	LastCommit *BlockLastCommit `json:"last_commit,omitempty"`
 }
 
@@ -77,12 +77,12 @@ func (o *Block) GetData() []string {
 		var ret []string
 		return ret
 	}
-	return *o.Data
+	return o.Data
 }
 
 // GetDataOk returns a tuple with the Data field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Block) GetDataOk() (*[]string, bool) {
+func (o *Block) GetDataOk() ([]string, bool) {
 	if o == nil || o.Data == nil {
 		return nil, false
 	}
@@ -100,7 +100,7 @@ func (o *Block) HasData() bool {
 
 // SetData gets a reference to the given []string and assigns it to the Data field.
 func (o *Block) SetData(v []string) {
-	o.Data = &v
+	o.Data = v
 }
 
 // GetEvidence returns the Evidence field value if set, zero value otherwise.
@@ -109,12 +109,12 @@ func (o *Block) GetEvidence() []Evidence {
 		var ret []Evidence
 		return ret
 	}
-	return *o.Evidence
+	return o.Evidence
 }
 
 // GetEvidenceOk returns a tuple with the Evidence field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Block) GetEvidenceOk() (*[]Evidence, bool) {
+func (o *Block) GetEvidenceOk() ([]Evidence, bool) {
 	if o == nil || o.Evidence == nil {
 		return nil, false
 	}
@@ -132,7 +132,7 @@ func (o *Block) HasEvidence() bool {
 
 // SetEvidence gets a reference to the given []Evidence and assigns it to the Evidence field.
 func (o *Block) SetEvidence(v []Evidence) {
-	o.Evidence = &v
+	o.Evidence = v
 }
 
 // GetLastCommit returns the LastCommit field value if set, zero value otherwise.

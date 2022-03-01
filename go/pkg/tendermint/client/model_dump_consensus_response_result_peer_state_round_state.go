@@ -76,7 +76,7 @@ func (o *DumpConsensusResponseResultPeerStateRoundState) GetHeight() string {
 // GetHeightOk returns a tuple with the Height field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultPeerStateRoundState) GetHeightOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Height, true
@@ -100,7 +100,7 @@ func (o *DumpConsensusResponseResultPeerStateRoundState) GetRound() string {
 // GetRoundOk returns a tuple with the Round field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultPeerStateRoundState) GetRoundOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Round, true
@@ -124,7 +124,7 @@ func (o *DumpConsensusResponseResultPeerStateRoundState) GetStep() int32 {
 // GetStepOk returns a tuple with the Step field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultPeerStateRoundState) GetStepOk() (*int32, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Step, true
@@ -148,7 +148,7 @@ func (o *DumpConsensusResponseResultPeerStateRoundState) GetStartTime() string {
 // GetStartTimeOk returns a tuple with the StartTime field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultPeerStateRoundState) GetStartTimeOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.StartTime, true
@@ -172,7 +172,7 @@ func (o *DumpConsensusResponseResultPeerStateRoundState) GetProposal() bool {
 // GetProposalOk returns a tuple with the Proposal field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultPeerStateRoundState) GetProposalOk() (*bool, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Proposal, true
@@ -196,7 +196,7 @@ func (o *DumpConsensusResponseResultPeerStateRoundState) GetProposalBlockPartsHe
 // GetProposalBlockPartsHeaderOk returns a tuple with the ProposalBlockPartsHeader field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultPeerStateRoundState) GetProposalBlockPartsHeaderOk() (*DumpConsensusResponseResultPeerStateRoundStateProposalBlockPartsHeader, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.ProposalBlockPartsHeader, true
@@ -222,7 +222,7 @@ func (o *DumpConsensusResponseResultPeerStateRoundState) GetProposalPolRound() i
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *DumpConsensusResponseResultPeerStateRoundState) GetProposalPolRoundOk() (*int32, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return o.ProposalPolRound.Get(), o.ProposalPolRound.IsSet()
@@ -248,7 +248,7 @@ func (o *DumpConsensusResponseResultPeerStateRoundState) GetProposalPol() string
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *DumpConsensusResponseResultPeerStateRoundState) GetProposalPolOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return o.ProposalPol.Get(), o.ProposalPol.IsSet()
@@ -274,7 +274,7 @@ func (o *DumpConsensusResponseResultPeerStateRoundState) GetPrevotes() string {
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *DumpConsensusResponseResultPeerStateRoundState) GetPrevotesOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return o.Prevotes.Get(), o.Prevotes.IsSet()
@@ -300,7 +300,7 @@ func (o *DumpConsensusResponseResultPeerStateRoundState) GetPrecommits() string 
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *DumpConsensusResponseResultPeerStateRoundState) GetPrecommitsOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return o.Precommits.Get(), o.Precommits.IsSet()
@@ -326,7 +326,7 @@ func (o *DumpConsensusResponseResultPeerStateRoundState) GetLastCommitRound() in
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *DumpConsensusResponseResultPeerStateRoundState) GetLastCommitRoundOk() (*int32, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return o.LastCommitRound.Get(), o.LastCommitRound.IsSet()
@@ -352,7 +352,7 @@ func (o *DumpConsensusResponseResultPeerStateRoundState) GetLastCommit() string 
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *DumpConsensusResponseResultPeerStateRoundState) GetLastCommitOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return o.LastCommit.Get(), o.LastCommit.IsSet()
@@ -378,7 +378,7 @@ func (o *DumpConsensusResponseResultPeerStateRoundState) GetCatchupCommitRound()
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *DumpConsensusResponseResultPeerStateRoundState) GetCatchupCommitRoundOk() (*int32, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return o.CatchupCommitRound.Get(), o.CatchupCommitRound.IsSet()
@@ -404,7 +404,7 @@ func (o *DumpConsensusResponseResultPeerStateRoundState) GetCatchupCommit() stri
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *DumpConsensusResponseResultPeerStateRoundState) GetCatchupCommitOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return o.CatchupCommit.Get(), o.CatchupCommit.IsSet()

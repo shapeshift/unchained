@@ -3,9 +3,6 @@ package cosmos
 import (
 	"encoding/base64"
 	"fmt"
-	"math"
-	"sort"
-	"strconv"
 
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/simapp/params"
@@ -17,78 +14,38 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	"github.com/pkg/errors"
-	"github.com/shapeshift/unchained/pkg/tendermint/client"
 )
 
-func (c *HTTPClient) GetTxHistory(address string, page int, pageSize int) (*TxHistory, error) {
-	res, _, err := c.tendermintClient.InfoApi.TxSearch(c.ctx).Query(fmt.Sprintf("\"message.sender='%s'\"", address)).Page(int32(page)).PerPage(int32(pageSize)).OrderBy("\"desc\"").Execute()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get send transactions")
+func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (*TxHistory, error) {
+	history := &History{
+		ctx:              c.ctx,
+		cursor:           &Cursor{SendPage: 1, ReceivePage: 1},
+		pageSize:         pageSize,
+		tendermintClient: c.tendermintClient,
+		encoding:         c.encoding,
 	}
 
-	totalSend, err := strconv.ParseFloat(res.Result.TotalCount, 64)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse totalSend: %s", res.Result.TotalCount)
-	}
-
-	resTxs := res.Result.Txs
-
-	res, _, err = c.tendermintClient.InfoApi.TxSearch(c.ctx).Query(fmt.Sprintf("\"transfer.recipient='%s'\"", address)).Page(int32(page)).PerPage(int32(pageSize)).OrderBy("\"desc\"").Execute()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get receive transactions")
-	}
-
-	totalReceive, err := strconv.ParseFloat(res.Result.TotalCount, 64)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse totalReceive: %s", res.Result.TotalCount)
-	}
-
-	resTxs = append(resTxs, res.Result.Txs...)
-
-	// filter out duplicate transactions
-	seen := make(map[string]bool)
-	uniqueTxs := []client.TxSearchResponseResultTxs{}
-	for _, t := range resTxs {
-		if _, ok := seen[*t.Hash]; !ok {
-			uniqueTxs = append(uniqueTxs, t)
-			seen[*t.Hash] = true
+	if cursor != "" {
+		if err := history.cursor.decode(cursor); err != nil {
+			return nil, errors.Wrapf(err, "failed to decode cursor: %s", cursor)
 		}
 	}
 
-	// sort descending by block height
-	sort.Slice(uniqueTxs, func(i, j int) bool {
-		if *uniqueTxs[i].Height == *uniqueTxs[j].Height {
-			return *uniqueTxs[i].Index > *uniqueTxs[j].Index
-		}
-		return *uniqueTxs[i].Height > *uniqueTxs[j].Height
-	})
-
-	txs := []Tx{}
-	for _, t := range uniqueTxs {
-		cosmosTx, signingTx, err := DecodeTx(*c.encoding, *t.Tx)
-		if err != nil {
-			logger.Errorf("failed to decode tx: %s: %s", *t.Hash, err.Error())
-			continue
-		}
-
-		tx := Tx{
-			TendermintTx: t,
-			CosmosTx:     cosmosTx,
-			SigningTx:    signingTx,
-		}
-		txs = append(txs, tx)
+	history.send = &TxState{
+		hasMore: true,
+		page:    history.cursor.SendPage,
+		query:   fmt.Sprintf(`"message.sender='%s'"`, address),
 	}
 
-	var totalPages int
-	if totalSend >= totalReceive {
-		totalPages = int(math.Ceil(totalSend / float64(pageSize)))
-	} else {
-		totalPages = int(math.Ceil(totalReceive / float64(pageSize)))
+	history.receive = &TxState{
+		hasMore: true,
+		page:    history.cursor.ReceivePage,
+		query:   fmt.Sprintf(`"transfer.recipient='%s'"`, address),
 	}
 
-	txHistory := &TxHistory{
-		TotalPages: totalPages,
-		Txs:        txs,
+	txHistory, err := history.fetch()
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to get tx history for address: %s", address)
 	}
 
 	return txHistory, nil

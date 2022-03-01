@@ -50,7 +50,7 @@ func (o *GenesisResponseResult) GetGenesis() GenesisResponseResultGenesis {
 // GetGenesisOk returns a tuple with the Genesis field value
 // and a boolean to check if the value has been set.
 func (o *GenesisResponseResult) GetGenesisOk() (*GenesisResponseResultGenesis, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Genesis, true

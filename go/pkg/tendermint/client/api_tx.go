@@ -12,22 +12,18 @@ package client
 
 import (
 	"bytes"
-	_context "context"
-	_ioutil "io/ioutil"
-	_nethttp "net/http"
-	_neturl "net/url"
+	"context"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 )
 
-// Linger please
-var (
-	_ _context.Context
-)
 
 // TxApiService TxApi service
 type TxApiService service
 
 type ApiBroadcastTxAsyncRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *TxApiService
 	tx *string
 }
@@ -38,7 +34,7 @@ func (r ApiBroadcastTxAsyncRequest) Tx(tx string) ApiBroadcastTxAsyncRequest {
 	return r
 }
 
-func (r ApiBroadcastTxAsyncRequest) Execute() (BroadcastTxResponse, *_nethttp.Response, error) {
+func (r ApiBroadcastTxAsyncRequest) Execute() (*BroadcastTxResponse, *http.Response, error) {
 	return r.ApiService.BroadcastTxAsyncExecute(r)
 }
 
@@ -63,10 +59,10 @@ https://docs.tendermint.com/master/tendermint-core/using-tendermint.html#formatt
 for formatting/encoding rules.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiBroadcastTxAsyncRequest
 */
-func (a *TxApiService) BroadcastTxAsync(ctx _context.Context) ApiBroadcastTxAsyncRequest {
+func (a *TxApiService) BroadcastTxAsync(ctx context.Context) ApiBroadcastTxAsyncRequest {
 	return ApiBroadcastTxAsyncRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -75,24 +71,24 @@ func (a *TxApiService) BroadcastTxAsync(ctx _context.Context) ApiBroadcastTxAsyn
 
 // Execute executes the request
 //  @return BroadcastTxResponse
-func (a *TxApiService) BroadcastTxAsyncExecute(r ApiBroadcastTxAsyncRequest) (BroadcastTxResponse, *_nethttp.Response, error) {
+func (a *TxApiService) BroadcastTxAsyncExecute(r ApiBroadcastTxAsyncRequest) (*BroadcastTxResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  BroadcastTxResponse
+		localVarReturnValue  *BroadcastTxResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TxApiService.BroadcastTxAsync")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/broadcast_tx_async"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if r.tx == nil {
 		return localVarReturnValue, nil, reportError("tx is required and must be specified")
 	}
@@ -125,15 +121,15 @@ func (a *TxApiService) BroadcastTxAsyncExecute(r ApiBroadcastTxAsyncRequest) (Br
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -151,7 +147,7 @@ func (a *TxApiService) BroadcastTxAsyncExecute(r ApiBroadcastTxAsyncRequest) (Br
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -162,7 +158,7 @@ func (a *TxApiService) BroadcastTxAsyncExecute(r ApiBroadcastTxAsyncRequest) (Br
 }
 
 type ApiBroadcastTxCommitRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *TxApiService
 	tx *string
 }
@@ -173,7 +169,7 @@ func (r ApiBroadcastTxCommitRequest) Tx(tx string) ApiBroadcastTxCommitRequest {
 	return r
 }
 
-func (r ApiBroadcastTxCommitRequest) Execute() (BroadcastTxCommitResponse, *_nethttp.Response, error) {
+func (r ApiBroadcastTxCommitRequest) Execute() (*BroadcastTxCommitResponse, *http.Response, error) {
 	return r.ApiService.BroadcastTxCommitExecute(r)
 }
 
@@ -196,10 +192,10 @@ https://docs.tendermint.com/master/tendermint-core/using-tendermint.html#formatt
 for formatting/encoding rules.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiBroadcastTxCommitRequest
 */
-func (a *TxApiService) BroadcastTxCommit(ctx _context.Context) ApiBroadcastTxCommitRequest {
+func (a *TxApiService) BroadcastTxCommit(ctx context.Context) ApiBroadcastTxCommitRequest {
 	return ApiBroadcastTxCommitRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -208,24 +204,24 @@ func (a *TxApiService) BroadcastTxCommit(ctx _context.Context) ApiBroadcastTxCom
 
 // Execute executes the request
 //  @return BroadcastTxCommitResponse
-func (a *TxApiService) BroadcastTxCommitExecute(r ApiBroadcastTxCommitRequest) (BroadcastTxCommitResponse, *_nethttp.Response, error) {
+func (a *TxApiService) BroadcastTxCommitExecute(r ApiBroadcastTxCommitRequest) (*BroadcastTxCommitResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  BroadcastTxCommitResponse
+		localVarReturnValue  *BroadcastTxCommitResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TxApiService.BroadcastTxCommit")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/broadcast_tx_commit"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if r.tx == nil {
 		return localVarReturnValue, nil, reportError("tx is required and must be specified")
 	}
@@ -258,15 +254,15 @@ func (a *TxApiService) BroadcastTxCommitExecute(r ApiBroadcastTxCommitRequest) (
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -284,7 +280,7 @@ func (a *TxApiService) BroadcastTxCommitExecute(r ApiBroadcastTxCommitRequest) (
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -295,7 +291,7 @@ func (a *TxApiService) BroadcastTxCommitExecute(r ApiBroadcastTxCommitRequest) (
 }
 
 type ApiBroadcastTxSyncRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *TxApiService
 	tx *string
 }
@@ -306,7 +302,7 @@ func (r ApiBroadcastTxSyncRequest) Tx(tx string) ApiBroadcastTxSyncRequest {
 	return r
 }
 
-func (r ApiBroadcastTxSyncRequest) Execute() (BroadcastTxResponse, *_nethttp.Response, error) {
+func (r ApiBroadcastTxSyncRequest) Execute() (*BroadcastTxResponse, *http.Response, error) {
 	return r.ApiService.BroadcastTxSyncExecute(r)
 }
 
@@ -331,10 +327,10 @@ https://docs.tendermint.com/master/tendermint-core/using-tendermint.html#formatt
 for formatting/encoding rules.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiBroadcastTxSyncRequest
 */
-func (a *TxApiService) BroadcastTxSync(ctx _context.Context) ApiBroadcastTxSyncRequest {
+func (a *TxApiService) BroadcastTxSync(ctx context.Context) ApiBroadcastTxSyncRequest {
 	return ApiBroadcastTxSyncRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -343,24 +339,24 @@ func (a *TxApiService) BroadcastTxSync(ctx _context.Context) ApiBroadcastTxSyncR
 
 // Execute executes the request
 //  @return BroadcastTxResponse
-func (a *TxApiService) BroadcastTxSyncExecute(r ApiBroadcastTxSyncRequest) (BroadcastTxResponse, *_nethttp.Response, error) {
+func (a *TxApiService) BroadcastTxSyncExecute(r ApiBroadcastTxSyncRequest) (*BroadcastTxResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  BroadcastTxResponse
+		localVarReturnValue  *BroadcastTxResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TxApiService.BroadcastTxSync")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/broadcast_tx_sync"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if r.tx == nil {
 		return localVarReturnValue, nil, reportError("tx is required and must be specified")
 	}
@@ -393,15 +389,15 @@ func (a *TxApiService) BroadcastTxSyncExecute(r ApiBroadcastTxSyncRequest) (Broa
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -419,7 +415,7 @@ func (a *TxApiService) BroadcastTxSyncExecute(r ApiBroadcastTxSyncRequest) (Broa
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -430,7 +426,7 @@ func (a *TxApiService) BroadcastTxSyncExecute(r ApiBroadcastTxSyncRequest) (Broa
 }
 
 type ApiCheckTxRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *TxApiService
 	tx *string
 }
@@ -441,7 +437,7 @@ func (r ApiCheckTxRequest) Tx(tx string) ApiCheckTxRequest {
 	return r
 }
 
-func (r ApiCheckTxRequest) Execute() (CheckTxResponse, *_nethttp.Response, error) {
+func (r ApiCheckTxRequest) Execute() (*CheckTxResponse, *http.Response, error) {
 	return r.ApiService.CheckTxExecute(r)
 }
 
@@ -455,10 +451,10 @@ https://docs.tendermint.com/master/tendermint-core/using-tendermint.html#formatt
 for formatting/encoding rules.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiCheckTxRequest
 */
-func (a *TxApiService) CheckTx(ctx _context.Context) ApiCheckTxRequest {
+func (a *TxApiService) CheckTx(ctx context.Context) ApiCheckTxRequest {
 	return ApiCheckTxRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -467,24 +463,24 @@ func (a *TxApiService) CheckTx(ctx _context.Context) ApiCheckTxRequest {
 
 // Execute executes the request
 //  @return CheckTxResponse
-func (a *TxApiService) CheckTxExecute(r ApiCheckTxRequest) (CheckTxResponse, *_nethttp.Response, error) {
+func (a *TxApiService) CheckTxExecute(r ApiCheckTxRequest) (*CheckTxResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  CheckTxResponse
+		localVarReturnValue  *CheckTxResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TxApiService.CheckTx")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/check_tx"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if r.tx == nil {
 		return localVarReturnValue, nil, reportError("tx is required and must be specified")
 	}
@@ -517,15 +513,15 @@ func (a *TxApiService) CheckTxExecute(r ApiCheckTxRequest) (CheckTxResponse, *_n
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -543,7 +539,7 @@ func (a *TxApiService) CheckTxExecute(r ApiCheckTxRequest) (CheckTxResponse, *_n
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
