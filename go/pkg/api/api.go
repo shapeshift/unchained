@@ -161,6 +161,9 @@ type TxParam struct {
 // swagger:model TransactionHash
 type TransactionHash string
 
+// swagger:model GasAmount
+type GasAmount string
+
 // BaseAPI interface for all coinstacks to implement
 type BaseAPI interface {
 	GetInfo() (Info, error)
