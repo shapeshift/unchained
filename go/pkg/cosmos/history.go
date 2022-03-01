@@ -98,6 +98,7 @@ func (h *History) filterByCursor(txs []client.TxSearchResponseResultTxs) ([]clie
 		// and the transaction id matches one of the last txids seen
 		// or the transaction index is less than the last tx index
 		if txHeight == h.cursor.BlockHeight {
+			// TODO: test if txids are necessary or if txIndex is sufficent
 			if *tx.Hash == h.cursor.SendTxID || *tx.Hash == h.cursor.ReceiveTxID {
 				continue
 			}
@@ -214,6 +215,7 @@ func (h *History) fetch() (*TxHistory, error) {
 
 	// encode cursor if there are more txs available to be fetched
 	var cursor string
+	// TODO: test to ensure no cursor returned on final tx
 	if len(h.send.txs) > 0 || len(h.receive.txs) > 0 {
 		cursor, err = h.cursor.encode()
 		if err != nil {
@@ -267,6 +269,7 @@ func (h *History) removeDuplicateTxs() {
 }
 
 func getMostRecentHeight(txs []client.TxSearchResponseResultTxs) (int, error) {
+	// TODO: test no txs case to ensure it falls through correctly
 	if len(txs) == 0 {
 		return -2, nil
 	}
