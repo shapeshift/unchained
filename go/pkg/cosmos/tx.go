@@ -2,6 +2,7 @@ package cosmos
 
 import (
 	"encoding/base64"
+	"fmt"
 
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/simapp/params"
@@ -13,27 +14,33 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	"github.com/pkg/errors"
-	"github.com/shapeshift/unchained/pkg/tendermint/client"
 )
 
 func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (*TxHistory, error) {
 	history := &History{
-		ctx:               c.ctx,
-		address:           address,
-		cursor:            Cursor{SendPage: 1, ReceivePage: 1},
-		sendTxs:           []client.TxSearchResponseResultTxs{},
-		hasMoreSendTxs:    true,
-		receiveTxs:        []client.TxSearchResponseResultTxs{},
-		hasMoreReceiveTxs: true,
-		pageSize:          pageSize,
-		tendermintClient:  c.tendermintClient,
-		encoding:          c.encoding,
+		ctx:              c.ctx,
+		cursor:           &Cursor{SendPage: 1, ReceivePage: 1},
+		pageSize:         pageSize,
+		tendermintClient: c.tendermintClient,
+		encoding:         c.encoding,
 	}
 
 	if cursor != "" {
 		if err := history.cursor.decode(cursor); err != nil {
 			return nil, errors.Wrapf(err, "failed to decode cursor: %s", cursor)
 		}
+	}
+
+	history.send = &TxState{
+		hasMore: true,
+		page:    history.cursor.SendPage,
+		query:   fmt.Sprintf(`"message.sender='%s'"`, address),
+	}
+
+	history.receive = &TxState{
+		hasMore: true,
+		page:    history.cursor.ReceivePage,
+		query:   fmt.Sprintf(`"transfer.recipient='%s'"`, address),
 	}
 
 	txHistory, err := history.fetch()

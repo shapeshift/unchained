@@ -3,7 +3,6 @@ package cosmos
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -12,142 +11,75 @@ import (
 	"github.com/shapeshift/unchained/pkg/tendermint/client"
 )
 
-type TxType int
-
-const (
-	Send = iota
-	Receive
-)
-
-func (t TxType) String() string {
-	switch t {
-	case Send:
-		return "send"
-	case Receive:
-		return "receive"
-	default:
-		return fmt.Sprintf("unknown (%d)", t)
-	}
+// TxState stores state for a specific query source
+type TxState struct {
+	hasMore bool
+	lastID  string
+	page    int
+	query   string
+	txs     []client.TxSearchResponseResultTxs
 }
 
-// History stores state to complete the request
+// History stores state for multiple query sources to complete a paginated request
 type History struct {
-	ctx               context.Context
-	address           string
-	pageSize          int
-	cursor            Cursor
-	sendTxs           []client.TxSearchResponseResultTxs
-	hasMoreSendTxs    bool
-	receiveTxs        []client.TxSearchResponseResultTxs
-	hasMoreReceiveTxs bool
-	encoding          *params.EncodingConfig
-	tendermintClient  *client.APIClient
+	ctx              context.Context
+	cursor           *Cursor
+	encoding         *params.EncodingConfig
+	pageSize         int
+	receive          *TxState
+	send             *TxState
+	tendermintClient *client.APIClient
 }
 
-func (h *History) String() string {
-	return fmt.Sprintf(`{address: %s, pageSize: %d, sendTxs: %d, hasMoreSendTxs: %t, receiveTxs: %d, hasMoreReceiveTxs: %t} %+v`,
-		h.address, h.pageSize, len(h.sendTxs), h.hasMoreSendTxs, len(h.receiveTxs), h.hasMoreReceiveTxs, h.cursor)
-}
-
-func (h *History) doRequest(txType TxType) (*client.TxSearchResponse, error) {
+func (h *History) doRequest(txState *TxState) (*client.TxSearchResponse, error) {
 	for {
-		req := h.tendermintClient.InfoApi.TxSearch(h.ctx).PerPage(int32(h.pageSize)).OrderBy("\"desc\"")
-
-		switch txType {
-		case Send:
-			res, httpRes, err := req.Query(fmt.Sprintf(`"message.sender='%s'"`, h.address)).Page(int32(h.cursor.SendPage)).Execute()
-			if err != nil {
-				var e struct {
-					Error struct {
-						Data string `json:"data"`
-					} `json:"error"`
-				}
-
-				json.NewDecoder(httpRes.Body).Decode(&e)
-
-				// error is returned if page is out of range past page 1
-				if strings.Contains(e.Error.Data, "page should be within") {
-					h.hasMoreSendTxs = false
-					return &client.TxSearchResponse{}, nil
-				}
-
-				return nil, errors.Wrapf(err, "failed to get tx history: %s", e.Error.Data)
+		res, httpRes, err := h.tendermintClient.InfoApi.TxSearch(h.ctx).PerPage(int32(h.pageSize)).OrderBy("\"desc\"").Query(txState.query).Page(int32(txState.page)).Execute()
+		if err != nil {
+			var e struct {
+				Error struct {
+					Data string `json:"data"`
+				} `json:"error"`
 			}
 
-			// no txs returned, mark as no more transactions
-			if len(res.Result.Txs) == 0 {
-				h.hasMoreSendTxs = false
-				return res, nil
-			}
+			json.NewDecoder(httpRes.Body).Decode(&e)
 
-			// no cursor provided by client, return response
-			if h.cursor.LastSendTxIndex == nil {
-				return res, nil
-			}
-
-			res.Result.Txs, err = h.filterByCursor(res.Result.Txs, h.cursor.LastSendTxIndex)
-			if err != nil {
-				return nil, errors.Wrapf(err, "failed to filter transactions by cursor")
-			}
-
-			// fetch the next page if no transactions exist after filtering
-			if len(res.Result.Txs) == 0 {
-				h.cursor.SendPage++
-				continue
-			}
-
-			return res, nil
-		case Receive:
-			res, httpRes, err := req.Query(fmt.Sprintf(`"transfer.recipient='%s'"`, h.address)).Page(int32(h.cursor.ReceivePage)).Execute()
-			if err != nil {
-				var e struct {
-					Error struct {
-						Data string `json:"data"`
-					} `json:"error"`
-				}
-
-				json.NewDecoder(httpRes.Body).Decode(&e)
-
-				// error is returned if page is out of range past page 1
-				if strings.Contains(e.Error.Data, "page should be within") {
-					h.hasMoreReceiveTxs = false
-					return &client.TxSearchResponse{}, nil
-				}
-
-				return nil, errors.Wrapf(err, "failed to get tx history: %s", e.Error.Data)
-			}
-
-			// no txs returned, mark as no more transactions
-			if len(res.Result.Txs) == 0 {
-				h.hasMoreSendTxs = false
+			// error is returned if page is out of range past page 1, mark as no more transactions
+			if strings.Contains(e.Error.Data, "page should be within") {
+				txState.hasMore = false
 				return &client.TxSearchResponse{}, nil
 			}
 
-			// no cursor provided by client, return response
-			if h.cursor.LastReceiveTxIndex == nil {
-				return res, nil
-			}
-
-			res.Result.Txs, err = h.filterByCursor(res.Result.Txs, h.cursor.LastReceiveTxIndex)
-			if err != nil {
-				return nil, errors.Wrapf(err, "failed to filter transactions by cursor")
-			}
-
-			// fetch the next page if no transactions exist after filtering
-			if len(res.Result.Txs) == 0 {
-				h.cursor.ReceivePage++
-				continue
-			}
-
-			return res, nil
-		default:
-			return nil, errors.Errorf("invalid TxType: %s", txType)
+			return nil, errors.Wrapf(err, "failed to get tx history: %s", e.Error.Data)
 		}
+
+		// no txs returned, mark as no more transactions
+		if len(res.Result.Txs) == 0 {
+			txState.hasMore = false
+			return res, nil
+		}
+
+		// no cursor provided by client, return response
+		if h.cursor.TxIndex == nil {
+			return res, nil
+		}
+
+		res.Result.Txs, err = h.filterByCursor(res.Result.Txs)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to filter transactions by cursor")
+		}
+
+		// fetch the next page if no transactions exist after filtering
+		if len(res.Result.Txs) == 0 {
+			txState.page++
+			continue
+		}
+
+		return res, nil
 	}
 }
 
 // filterByCursor will filter out any transactions that we have already returned to the client based on the state of the cursor
-func (h *History) filterByCursor(txs []client.TxSearchResponseResultTxs, lastTxIndex *int32) ([]client.TxSearchResponseResultTxs, error) {
+func (h *History) filterByCursor(txs []client.TxSearchResponseResultTxs) ([]client.TxSearchResponseResultTxs, error) {
 	filtered := []client.TxSearchResponseResultTxs{}
 	for _, tx := range txs {
 		txHeight, err := strconv.Atoi(*tx.Height)
@@ -156,13 +88,20 @@ func (h *History) filterByCursor(txs []client.TxSearchResponseResultTxs, lastTxI
 		}
 
 		// do not include transaction if height is more recent than the last tx returned
-		if txHeight > h.cursor.LastBlockHeight {
+		if txHeight > h.cursor.BlockHeight {
 			continue
 		}
 
-		// do not include transaction if same height but tx index is more recent than the last tx returned
-		if txHeight == h.cursor.LastBlockHeight && *tx.Index <= *lastTxIndex {
-			continue
+		// do not include transaction if height is the same as the last tx returned
+		// and the transaction id matches one of the last txids seen
+		// or the transaction index is less than the last tx index
+		if txHeight == h.cursor.BlockHeight {
+			if *tx.Hash == h.cursor.LastSendTxID || *tx.Hash == h.cursor.LastReceiveTxID {
+				continue
+			}
+			if *tx.Index <= *h.cursor.TxIndex {
+				continue
+			}
 		}
 
 		filtered = append(filtered, tx)
@@ -172,22 +111,22 @@ func (h *History) filterByCursor(txs []client.TxSearchResponseResultTxs, lastTxI
 }
 
 func (h *History) fetch() (*TxHistory, error) {
-	res, err := h.doRequest(Send)
+	res, err := h.doRequest(h.send)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get send tx history")
 	}
-	h.sendTxs = res.Result.Txs
+	h.send.txs = res.Result.Txs
 
-	res, err = h.doRequest(Receive)
+	res, err = h.doRequest(h.receive)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get receive tx history")
 	}
-	h.receiveTxs = res.Result.Txs
+	h.receive.txs = res.Result.Txs
 
 	h.removeDuplicateTxs()
 
 	// no transaction history detected
-	if len(h.sendTxs) == 0 && len(h.receiveTxs) == 0 {
+	if len(h.send.txs) == 0 && len(h.receive.txs) == 0 {
 		return &TxHistory{}, nil
 	}
 
@@ -196,30 +135,30 @@ func (h *History) fetch() (*TxHistory, error) {
 	txs := []Tx{}
 	for len(txs) < h.pageSize {
 		// fetch more send transactions if we have run out and more are available
-		if len(h.sendTxs) == 0 && h.hasMoreSendTxs {
-			if err = h.fetchMore(Send); err != nil {
+		if len(h.send.txs) == 0 && h.send.hasMore {
+			if err = h.fetchMore(h.send); err != nil {
 				return nil, errors.Wrap(err, "failed to fetch more send txs")
 			}
 		}
 
 		// fetch more receive transactions if we have run out and more are available
-		if len(h.receiveTxs) == 0 && h.hasMoreReceiveTxs {
-			if err := h.fetchMore(Receive); err != nil {
+		if len(h.receive.txs) == 0 && h.receive.hasMore {
+			if err := h.fetchMore(h.receive); err != nil {
 				return nil, errors.Wrap(err, "failed to fetch more receive txs")
 			}
 		}
 
 		// no more transaction history available
-		if len(h.sendTxs) == 0 && len(h.receiveTxs) == 0 {
+		if len(h.send.txs) == 0 && len(h.receive.txs) == 0 {
 			break
 		}
 
-		sendHeight, err := getMostRecentHeight(h.sendTxs)
+		sendHeight, err := getMostRecentHeight(h.send.txs)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to get most recent send tx height")
 		}
 
-		receiveHeight, err := getMostRecentHeight(h.receiveTxs)
+		receiveHeight, err := getMostRecentHeight(h.receive.txs)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to get most recent receive tx height")
 		}
@@ -227,13 +166,13 @@ func (h *History) fetch() (*TxHistory, error) {
 		// find the next most recent transaction and remove from the txs set
 		var next client.TxSearchResponseResultTxs
 		if sendHeight >= receiveHeight {
-			next = h.sendTxs[0]
-			h.sendTxs = h.sendTxs[1:]
-			h.cursor.LastSendTxIndex = next.Index
+			next = h.send.txs[0]
+			h.send.txs = h.send.txs[1:]
+			h.send.lastID = *next.Hash
 		} else {
-			next = h.receiveTxs[0]
-			h.receiveTxs = h.receiveTxs[1:]
-			h.cursor.LastReceiveTxIndex = next.Index
+			next = h.receive.txs[0]
+			h.receive.txs = h.receive.txs[1:]
+			h.receive.lastID = *next.Hash
 		}
 
 		cosmosTx, signingTx, err := DecodeTx(*h.encoding, *next.Tx)
@@ -251,16 +190,29 @@ func (h *History) fetch() (*TxHistory, error) {
 		txs = append(txs, tx)
 	}
 
-	lastBlockHeight, err := strconv.Atoi(*txs[len(txs)-1].TendermintTx.Height)
+	// no paginated data to return
+	if len(txs) == 0 {
+		return &TxHistory{}, nil
+	}
+
+	lastTx := txs[len(txs)-1]
+
+	blockHeight, err := strconv.Atoi(*lastTx.TendermintTx.Height)
 	if err != nil {
 		logger.Errorf("error parsing blockHeight %s: %s", err)
 	}
 
-	h.cursor.LastBlockHeight = lastBlockHeight
+	// set cursor state
+	h.cursor.BlockHeight = blockHeight
+	h.cursor.TxIndex = lastTx.TendermintTx.Index
+	h.cursor.SendPage = h.send.page
+	h.cursor.ReceivePage = h.receive.page
+	h.cursor.LastReceiveTxID = h.receive.lastID
+	h.cursor.LastSendTxID = h.send.lastID
 
 	// encode cursor if there are more txs available to be fetched
 	var cursor string
-	if len(h.sendTxs) > 0 || len(h.receiveTxs) > 0 {
+	if len(h.send.txs) > 0 || len(h.receive.txs) > 0 {
 		cursor, err = h.cursor.encode()
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to encode cursor: %+v", h.cursor)
@@ -275,29 +227,17 @@ func (h *History) fetch() (*TxHistory, error) {
 	return txHistory, nil
 }
 
-func (h *History) fetchMore(txType TxType) error {
-	switch txType {
-	case Send:
-		h.cursor.SendPage++
-		res, err := h.doRequest(txType)
-		if err != nil {
-			return errors.Wrapf(err, "error reading next page of txs for %s", h.address)
-		}
+func (h *History) fetchMore(txState *TxState) error {
+	txState.page++
 
-		h.sendTxs = res.Result.Txs
-		h.removeDuplicateTxs()
-	case Receive:
-		h.cursor.ReceivePage++
-		res, err := h.doRequest(txType)
-		if err != nil {
-			return errors.Wrapf(err, "error reading next page of txs for %s", h.address)
-		}
-
-		h.receiveTxs = res.Result.Txs
-		h.removeDuplicateTxs()
-	default:
-		return errors.Errorf("invalid TxType: %s", txType)
+	res, err := h.doRequest(txState)
+	if err != nil {
+		return errors.Wrapf(err, "failed to fetch more txs")
 	}
+
+	txState.txs = res.Result.Txs
+
+	h.removeDuplicateTxs()
 
 	return nil
 }
@@ -306,22 +246,22 @@ func (h *History) removeDuplicateTxs() {
 	seenTxs := make(map[string]bool)
 
 	sendTxs := []client.TxSearchResponseResultTxs{}
-	for _, tx := range h.sendTxs {
+	for _, tx := range h.send.txs {
 		if _, seen := seenTxs[*tx.Hash]; !seen {
 			seenTxs[*tx.Hash] = true
 			sendTxs = append(sendTxs, tx)
 		}
 	}
-	h.sendTxs = sendTxs
+	h.send.txs = sendTxs
 
 	receiveTxs := []client.TxSearchResponseResultTxs{}
-	for _, tx := range h.receiveTxs {
+	for _, tx := range h.receive.txs {
 		if _, seen := seenTxs[*tx.Hash]; !seen {
 			seenTxs[*tx.Hash] = true
 			receiveTxs = append(receiveTxs, tx)
 		}
 	}
-	h.receiveTxs = receiveTxs
+	h.receive.txs = receiveTxs
 }
 
 func getMostRecentHeight(txs []client.TxSearchResponseResultTxs) (int, error) {
