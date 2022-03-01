@@ -41,6 +41,11 @@ export class Parser implements GenericParser<BlockbookTx> {
     if (!data) return
 
     const txSigHash = getSigHash(data)
+    const isSupportedSigHash = txSigHash
+      ? [this.approvalSigHash, this.depositSigHash, this.withdrawSigHash].includes(txSigHash)
+      : false
+    if (!isSupportedSigHash) return
+
     const abiInterface = this.getAbiInterface(txSigHash)
     if (!abiInterface) return
 
@@ -61,10 +66,13 @@ export class Parser implements GenericParser<BlockbookTx> {
     )
       return
 
+    const interactedWith = txSigHash === this.approvalSigHash ? decoded?.args._spender : receiveAddress
+
     return {
       data: {
         method: decoded?.name,
         parser: 'yearn',
+        interactedWith,
       },
     }
   }

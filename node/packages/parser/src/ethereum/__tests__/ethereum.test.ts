@@ -1122,6 +1122,7 @@ describe('parseTx', () => {
         data: {
           method: 'approve',
           parser: 'yearn',
+          interactedWith: SHAPE_SHIFT_ROUTER_CONTRACT,
         },
         value: tx.value,
         status: Status.Confirmed,
@@ -1151,6 +1152,7 @@ describe('parseTx', () => {
         data: {
           method: 'deposit',
           parser: 'yearn',
+          interactedWith: SHAPE_SHIFT_ROUTER_CONTRACT,
         },
         value: tx.value,
         status: Status.Confirmed,
@@ -1199,6 +1201,7 @@ describe('parseTx', () => {
         data: {
           method: 'withdraw',
           parser: 'yearn',
+          interactedWith: linkYearnVault.contract,
         },
         value: tx.value,
         status: Status.Confirmed,
