@@ -52,7 +52,7 @@ func (o *CommitResponseResult) GetSignedHeader() CommitResponseResultSignedHeade
 // GetSignedHeaderOk returns a tuple with the SignedHeader field value
 // and a boolean to check if the value has been set.
 func (o *CommitResponseResult) GetSignedHeaderOk() (*CommitResponseResultSignedHeader, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.SignedHeader, true
@@ -76,7 +76,7 @@ func (o *CommitResponseResult) GetCanonical() bool {
 // GetCanonicalOk returns a tuple with the Canonical field value
 // and a boolean to check if the value has been set.
 func (o *CommitResponseResult) GetCanonicalOk() (*bool, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Canonical, true

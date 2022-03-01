@@ -56,7 +56,7 @@ func (o *BroadcastTxCommitResponseResult) GetHeight() string {
 // GetHeightOk returns a tuple with the Height field value
 // and a boolean to check if the value has been set.
 func (o *BroadcastTxCommitResponseResult) GetHeightOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Height, true
@@ -80,7 +80,7 @@ func (o *BroadcastTxCommitResponseResult) GetHash() string {
 // GetHashOk returns a tuple with the Hash field value
 // and a boolean to check if the value has been set.
 func (o *BroadcastTxCommitResponseResult) GetHashOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Hash, true
@@ -104,7 +104,7 @@ func (o *BroadcastTxCommitResponseResult) GetDeliverTx() BroadcastTxCommitRespon
 // GetDeliverTxOk returns a tuple with the DeliverTx field value
 // and a boolean to check if the value has been set.
 func (o *BroadcastTxCommitResponseResult) GetDeliverTxOk() (*BroadcastTxCommitResponseResultDeliverTx, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.DeliverTx, true
@@ -128,7 +128,7 @@ func (o *BroadcastTxCommitResponseResult) GetCheckTx() BroadcastTxCommitResponse
 // GetCheckTxOk returns a tuple with the CheckTx field value
 // and a boolean to check if the value has been set.
 func (o *BroadcastTxCommitResponseResult) GetCheckTxOk() (*BroadcastTxCommitResponseResultDeliverTx, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.CheckTx, true

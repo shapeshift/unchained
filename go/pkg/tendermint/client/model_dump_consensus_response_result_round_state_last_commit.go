@@ -53,11 +53,11 @@ func (o *DumpConsensusResponseResultRoundStateLastCommit) GetVotes() []string {
 
 // GetVotesOk returns a tuple with the Votes field value
 // and a boolean to check if the value has been set.
-func (o *DumpConsensusResponseResultRoundStateLastCommit) GetVotesOk() (*[]string, bool) {
-	if o == nil  {
+func (o *DumpConsensusResponseResultRoundStateLastCommit) GetVotesOk() ([]string, bool) {
+	if o == nil {
 		return nil, false
 	}
-	return &o.Votes, true
+	return o.Votes, true
 }
 
 // SetVotes sets field value
@@ -78,7 +78,7 @@ func (o *DumpConsensusResponseResultRoundStateLastCommit) GetVotesBitArray() str
 // GetVotesBitArrayOk returns a tuple with the VotesBitArray field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultRoundStateLastCommit) GetVotesBitArrayOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.VotesBitArray, true
@@ -101,11 +101,11 @@ func (o *DumpConsensusResponseResultRoundStateLastCommit) GetPeerMaj23s() map[st
 
 // GetPeerMaj23sOk returns a tuple with the PeerMaj23s field value
 // and a boolean to check if the value has been set.
-func (o *DumpConsensusResponseResultRoundStateLastCommit) GetPeerMaj23sOk() (*map[string]interface{}, bool) {
-	if o == nil  {
+func (o *DumpConsensusResponseResultRoundStateLastCommit) GetPeerMaj23sOk() (map[string]interface{}, bool) {
+	if o == nil {
 		return nil, false
 	}
-	return &o.PeerMaj23s, true
+	return o.PeerMaj23s, true
 }
 
 // SetPeerMaj23s sets field value

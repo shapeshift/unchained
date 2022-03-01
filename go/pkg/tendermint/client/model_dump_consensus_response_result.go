@@ -52,7 +52,7 @@ func (o *DumpConsensusResponseResult) GetRoundState() DumpConsensusResponseResul
 // GetRoundStateOk returns a tuple with the RoundState field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResult) GetRoundStateOk() (*DumpConsensusResponseResultRoundState, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.RoundState, true
@@ -75,11 +75,11 @@ func (o *DumpConsensusResponseResult) GetPeers() []DumpConsensusResponseResultPe
 
 // GetPeersOk returns a tuple with the Peers field value
 // and a boolean to check if the value has been set.
-func (o *DumpConsensusResponseResult) GetPeersOk() (*[]DumpConsensusResponseResultPeers, bool) {
-	if o == nil  {
+func (o *DumpConsensusResponseResult) GetPeersOk() ([]DumpConsensusResponseResultPeers, bool) {
+	if o == nil {
 		return nil, false
 	}
-	return &o.Peers, true
+	return o.Peers, true
 }
 
 // SetPeers sets field value

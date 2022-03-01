@@ -52,7 +52,7 @@ func (o *BlockIDParts) GetTotal() int32 {
 // GetTotalOk returns a tuple with the Total field value
 // and a boolean to check if the value has been set.
 func (o *BlockIDParts) GetTotalOk() (*int32, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Total, true
@@ -76,7 +76,7 @@ func (o *BlockIDParts) GetHash() string {
 // GetHashOk returns a tuple with the Hash field value
 // and a boolean to check if the value has been set.
 func (o *BlockIDParts) GetHashOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Hash, true

@@ -56,7 +56,7 @@ func (o *BlockResultsResponseResult) GetHeight() string {
 // GetHeightOk returns a tuple with the Height field value
 // and a boolean to check if the value has been set.
 func (o *BlockResultsResponseResult) GetHeightOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Height, true
@@ -69,7 +69,7 @@ func (o *BlockResultsResponseResult) SetHeight(v string) {
 
 // GetTxsResults returns the TxsResults field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *BlockResultsResponseResult) GetTxsResults() []BlockResultsResponseResultTxsResults {
-	if o == nil  {
+	if o == nil {
 		var ret []BlockResultsResponseResultTxsResults
 		return ret
 	}
@@ -79,11 +79,11 @@ func (o *BlockResultsResponseResult) GetTxsResults() []BlockResultsResponseResul
 // GetTxsResultsOk returns a tuple with the TxsResults field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *BlockResultsResponseResult) GetTxsResultsOk() (*[]BlockResultsResponseResultTxsResults, bool) {
+func (o *BlockResultsResponseResult) GetTxsResultsOk() ([]BlockResultsResponseResultTxsResults, bool) {
 	if o == nil || o.TxsResults == nil {
 		return nil, false
 	}
-	return &o.TxsResults, true
+	return o.TxsResults, true
 }
 
 // HasTxsResults returns a boolean if a field has been set.
@@ -134,7 +134,7 @@ func (o *BlockResultsResponseResult) SetTotalGasUsed(v string) {
 
 // GetBeginBlockEvents returns the BeginBlockEvents field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *BlockResultsResponseResult) GetBeginBlockEvents() []BlockResultsResponseResultEvents {
-	if o == nil  {
+	if o == nil {
 		var ret []BlockResultsResponseResultEvents
 		return ret
 	}
@@ -144,11 +144,11 @@ func (o *BlockResultsResponseResult) GetBeginBlockEvents() []BlockResultsRespons
 // GetBeginBlockEventsOk returns a tuple with the BeginBlockEvents field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *BlockResultsResponseResult) GetBeginBlockEventsOk() (*[]BlockResultsResponseResultEvents, bool) {
+func (o *BlockResultsResponseResult) GetBeginBlockEventsOk() ([]BlockResultsResponseResultEvents, bool) {
 	if o == nil || o.BeginBlockEvents == nil {
 		return nil, false
 	}
-	return &o.BeginBlockEvents, true
+	return o.BeginBlockEvents, true
 }
 
 // HasBeginBlockEvents returns a boolean if a field has been set.
@@ -167,7 +167,7 @@ func (o *BlockResultsResponseResult) SetBeginBlockEvents(v []BlockResultsRespons
 
 // GetEndBlock returns the EndBlock field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *BlockResultsResponseResult) GetEndBlock() []BlockResultsResponseResultEvents {
-	if o == nil  {
+	if o == nil {
 		var ret []BlockResultsResponseResultEvents
 		return ret
 	}
@@ -177,11 +177,11 @@ func (o *BlockResultsResponseResult) GetEndBlock() []BlockResultsResponseResultE
 // GetEndBlockOk returns a tuple with the EndBlock field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *BlockResultsResponseResult) GetEndBlockOk() (*[]BlockResultsResponseResultEvents, bool) {
+func (o *BlockResultsResponseResult) GetEndBlockOk() ([]BlockResultsResponseResultEvents, bool) {
 	if o == nil || o.EndBlock == nil {
 		return nil, false
 	}
-	return &o.EndBlock, true
+	return o.EndBlock, true
 }
 
 // HasEndBlock returns a boolean if a field has been set.
@@ -200,7 +200,7 @@ func (o *BlockResultsResponseResult) SetEndBlock(v []BlockResultsResponseResultE
 
 // GetValidatorUpdates returns the ValidatorUpdates field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *BlockResultsResponseResult) GetValidatorUpdates() []BlockResultsResponseResultValidatorUpdates {
-	if o == nil  {
+	if o == nil {
 		var ret []BlockResultsResponseResultValidatorUpdates
 		return ret
 	}
@@ -210,11 +210,11 @@ func (o *BlockResultsResponseResult) GetValidatorUpdates() []BlockResultsRespons
 // GetValidatorUpdatesOk returns a tuple with the ValidatorUpdates field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *BlockResultsResponseResult) GetValidatorUpdatesOk() (*[]BlockResultsResponseResultValidatorUpdates, bool) {
+func (o *BlockResultsResponseResult) GetValidatorUpdatesOk() ([]BlockResultsResponseResultValidatorUpdates, bool) {
 	if o == nil || o.ValidatorUpdates == nil {
 		return nil, false
 	}
-	return &o.ValidatorUpdates, true
+	return o.ValidatorUpdates, true
 }
 
 // HasValidatorUpdates returns a boolean if a field has been set.
@@ -244,7 +244,7 @@ func (o *BlockResultsResponseResult) GetConsensusParamsUpdates() ConsensusParams
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *BlockResultsResponseResult) GetConsensusParamsUpdatesOk() (*ConsensusParams, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return o.ConsensusParamsUpdates.Get(), o.ConsensusParamsUpdates.IsSet()

@@ -50,7 +50,7 @@ func (o *ConsensusParamsEvidence) GetMaxAge() string {
 // GetMaxAgeOk returns a tuple with the MaxAge field value
 // and a boolean to check if the value has been set.
 func (o *ConsensusParamsEvidence) GetMaxAgeOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.MaxAge, true

@@ -6,6 +6,7 @@ import (
 	"github.com/shapeshift/unchained/pkg/tendermint/client"
 )
 
+// Account info common return payload
 type Account struct {
 	Address       string
 	AccountNumber int
@@ -23,6 +24,7 @@ type Attribute struct {
 	Value string `json:"value"`
 }
 
+// Balance info common return payload
 type Balance struct {
 	Amount string  `json:"amount"`
 	Assets []Value `json:"assets"`
@@ -63,6 +65,7 @@ type Message struct {
 	Value Value  `json:"value,omitempty"`
 }
 
+// Pagination info cosmos-sdk response
 type Pagination struct {
 	NextKey *[]byte `json:"next_key,omitempty"`
 	Total   uint64  `json:"total,string,omitempty"`
@@ -90,15 +93,17 @@ type RedelegationEntry struct {
 	Shares string `json:"shares"`
 }
 
+// Tx info common return payload
 type Tx struct {
 	TendermintTx client.TxSearchResponseResultTxs
 	CosmosTx     sdk.Tx
 	SigningTx    signing.Tx
 }
 
+// TxHistory info common return payload
 type TxHistory struct {
-	TotalPages int
-	Txs        []Tx
+	Cursor string
+	Txs    []Tx
 }
 
 // Contains info about a staking unbonding

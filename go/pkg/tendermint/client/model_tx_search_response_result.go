@@ -51,11 +51,11 @@ func (o *TxSearchResponseResult) GetTxs() []TxSearchResponseResultTxs {
 
 // GetTxsOk returns a tuple with the Txs field value
 // and a boolean to check if the value has been set.
-func (o *TxSearchResponseResult) GetTxsOk() (*[]TxSearchResponseResultTxs, bool) {
-	if o == nil  {
+func (o *TxSearchResponseResult) GetTxsOk() ([]TxSearchResponseResultTxs, bool) {
+	if o == nil {
 		return nil, false
 	}
-	return &o.Txs, true
+	return o.Txs, true
 }
 
 // SetTxs sets field value
@@ -76,7 +76,7 @@ func (o *TxSearchResponseResult) GetTotalCount() string {
 // GetTotalCountOk returns a tuple with the TotalCount field value
 // and a boolean to check if the value has been set.
 func (o *TxSearchResponseResult) GetTotalCountOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.TotalCount, true

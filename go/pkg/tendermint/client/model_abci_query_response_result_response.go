@@ -62,7 +62,7 @@ func (o *ABCIQueryResponseResultResponse) GetLog() string {
 // GetLogOk returns a tuple with the Log field value
 // and a boolean to check if the value has been set.
 func (o *ABCIQueryResponseResultResponse) GetLogOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Log, true
@@ -86,7 +86,7 @@ func (o *ABCIQueryResponseResultResponse) GetHeight() string {
 // GetHeightOk returns a tuple with the Height field value
 // and a boolean to check if the value has been set.
 func (o *ABCIQueryResponseResultResponse) GetHeightOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Height, true
@@ -110,7 +110,7 @@ func (o *ABCIQueryResponseResultResponse) GetProof() string {
 // GetProofOk returns a tuple with the Proof field value
 // and a boolean to check if the value has been set.
 func (o *ABCIQueryResponseResultResponse) GetProofOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Proof, true
@@ -134,7 +134,7 @@ func (o *ABCIQueryResponseResultResponse) GetValue() string {
 // GetValueOk returns a tuple with the Value field value
 // and a boolean to check if the value has been set.
 func (o *ABCIQueryResponseResultResponse) GetValueOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Value, true
@@ -158,7 +158,7 @@ func (o *ABCIQueryResponseResultResponse) GetKey() string {
 // GetKeyOk returns a tuple with the Key field value
 // and a boolean to check if the value has been set.
 func (o *ABCIQueryResponseResultResponse) GetKeyOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Key, true
@@ -182,7 +182,7 @@ func (o *ABCIQueryResponseResultResponse) GetIndex() string {
 // GetIndexOk returns a tuple with the Index field value
 // and a boolean to check if the value has been set.
 func (o *ABCIQueryResponseResultResponse) GetIndexOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Index, true
@@ -206,7 +206,7 @@ func (o *ABCIQueryResponseResultResponse) GetCode() string {
 // GetCodeOk returns a tuple with the Code field value
 // and a boolean to check if the value has been set.
 func (o *ABCIQueryResponseResultResponse) GetCodeOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Code, true
