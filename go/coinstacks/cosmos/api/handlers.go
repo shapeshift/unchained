@@ -187,3 +187,12 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 func (h *Handler) SendTx(rawTx string) (string, error) {
 	return h.httpClient.BroadcastTx([]byte(rawTx))
 }
+
+func (h *Handler) GetGasEstimation(hex string) (api.Gas, error) {
+
+	res, err := h.httpClient.GetGasEstimation([]byte(hex))
+	if err != nil {
+		return "", err
+	}
+	return api.Gas(res), nil
+}
