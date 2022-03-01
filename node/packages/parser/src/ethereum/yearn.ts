@@ -48,9 +48,8 @@ export class Parser implements GenericParser {
     const receiveAddress = tx.vout?.[0].addresses?.[0]
 
     if (!this.yearnTokenVaultAddresses) {
-      this.yearnTokenVaultAddresses = await this.yearnSdk?.vaults
-        .get()
-        .then((result) => result.map((vault) => vault.address))
+      const vaults = await this.yearnSdk?.vaults.get()
+      this.yearnTokenVaultAddresses = vaults?.map((vault) => vault.address)
     }
 
     if (txSigHash === this.approvalSigHash && decoded?.args._spender !== SHAPE_SHIFT_ROUTER_CONTRACT) return
