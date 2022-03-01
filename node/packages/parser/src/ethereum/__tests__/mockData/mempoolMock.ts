@@ -7,7 +7,6 @@ export const mempoolMock = (tx: Tx, tokenTransfers = false) => {
     confirmations: 0,
     fees: '0',
     blockHash: undefined,
-    rbf: true,
     tokenTransfers: tokenTransfers ? tx.tokenTransfers : [],
     ethereumSpecific: Object.assign({}, tx.ethereumSpecific, ethereumSpecificOverride),
   }
