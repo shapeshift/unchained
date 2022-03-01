@@ -41,11 +41,6 @@ export class Parser implements GenericParser<BlockbookTx> {
     if (!data) return
 
     const txSigHash = getSigHash(data)
-    const isSupportedSigHash = txSigHash
-      ? [this.approvalSigHash, this.depositSigHash, this.withdrawSigHash].includes(txSigHash)
-      : false
-    if (!isSupportedSigHash) return
-
     const abiInterface = this.getAbiInterface(txSigHash)
     if (!abiInterface) return
 
@@ -78,16 +73,14 @@ export class Parser implements GenericParser<BlockbookTx> {
   }
 
   getAbiInterface(txSigHash: string | undefined): ethers.utils.Interface | undefined {
-    return (() => {
-      switch (txSigHash) {
-        case this.approvalSigHash:
-        case this.withdrawSigHash:
-          return this.yearnInterface
-        case this.depositSigHash:
-          return this.shapeShiftInterface
-        default:
-          return undefined
-      }
-    })()
+    switch (txSigHash) {
+      case this.approvalSigHash:
+      case this.withdrawSigHash:
+        return this.yearnInterface
+      case this.depositSigHash:
+        return this.shapeShiftInterface
+      default:
+        return undefined
+    }
   }
 }
