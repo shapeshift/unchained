@@ -1,4 +1,5 @@
 const YEARN_LINK_TOKEN_VAULT = '0x671a912C10bba0CFA74Cfc2d6Fba9BA1ed9530B2'
+import { mempoolMock } from './mempoolMock'
 
 const yearnWithdrawal = {
   txid: '0xf76726fa317df7e7785254f5f9f59d68fd303aeba108e8f883c938250afcfd46',
@@ -78,5 +79,5 @@ const yearnWithdrawal = {
 
 export default {
   tx: yearnWithdrawal,
-  txMempool: { ...yearnWithdrawal, blockHeight: -1, confirmations: 0, fee: 0, ethereumSpecific: undefined },
+  txMempool: mempoolMock(yearnWithdrawal),
 }
