@@ -28,9 +28,12 @@ export class Parser implements GenericParser {
 
   constructor(args: ParserArgs) {
     this.provider = args.provider
+
     // The only Yearn-supported chain we currently support is mainnet
-    const network = args.network === 'mainnet' ? 1 : undefined // 1 for EthMain (@yfi/sdk/dist/chain.d.ts)
-    this.yearnSdk = network ? new Yearn(network, { provider: this.provider, disableAllowlist: true }) : undefined
+    if (args.network == 'mainnet') {
+      // 1 for EthMain (@yfi/sdk/dist/chain.d.ts)
+      this.yearnSdk = new Yearn(1, { provider: this.provider, disableAllowlist: true })
+    }
   }
 
   async parse(tx: Tx): Promise<TxSpecific<YearnTx> | undefined> {
