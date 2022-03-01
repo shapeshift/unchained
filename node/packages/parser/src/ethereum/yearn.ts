@@ -4,7 +4,8 @@ import shapeShiftRouter from './abi/shapeShiftRouter'
 import yearnVault from './abi/yearnVault'
 import { ethers } from 'ethers'
 import { SHAPE_SHIFT_ROUTER_CONTRACT } from './constants'
-import { getSigHash, getYearnTokenVaultAddresses } from './utils'
+import { getSigHash } from './utils'
+import { Yearn, ChainId } from '@yfi/sdk'
 
 interface ParserArgs {
   provider: ethers.providers.JsonRpcProvider
@@ -12,6 +13,7 @@ interface ParserArgs {
 
 export class Parser implements GenericParser {
   provider: ethers.providers.JsonRpcProvider
+  yearnSdk: Yearn<ChainId>
 
   yearnTokenVaultAddresses: string[] | undefined
   shapeShiftInterface = new ethers.utils.Interface(shapeShiftRouter)
@@ -24,6 +26,8 @@ export class Parser implements GenericParser {
 
   constructor(args: ParserArgs) {
     this.provider = args.provider
+    const network = 1 // 1 for mainnet
+    this.yearnSdk = new Yearn(network, { provider: this.provider, disableAllowlist: true })
   }
 
   async parse(tx: Tx): Promise<TxSpecific<YearnTx> | undefined> {
@@ -38,7 +42,9 @@ export class Parser implements GenericParser {
     const receiveAddress = tx.vout?.[0].addresses?.[0]
 
     if (!this.yearnTokenVaultAddresses) {
-      this.yearnTokenVaultAddresses = await getYearnTokenVaultAddresses(this.provider)
+      this.yearnTokenVaultAddresses = await this.yearnSdk.vaults
+        .get()
+        .then((result) => result.map((vault) => vault.address))
     }
 
     if (txSigHash === this.approvalSigHash && decoded?.args._spender !== SHAPE_SHIFT_ROUTER_CONTRACT) return

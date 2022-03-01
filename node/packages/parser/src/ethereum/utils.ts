@@ -27,14 +27,6 @@ export const txInteractsWithContract = (tx: Tx, contract: string) => {
   return receiveAddress === contract
 }
 
-export const getYearnTokenVaultAddresses = async (provider: ethers.providers.JsonRpcProvider) => {
-  const network = 1 // 1 for mainnet
-  const yearnSdk = new Yearn(network, { provider, disableAllowlist: true })
-  await yearnSdk.ready
-  const vaults = await yearnSdk.vaults.get()
-  return vaults.map((vault) => vault.address)
-}
-
 export const SENDMULTISIG_SIG_HASH = ((): string => {
   const abiInterface = new ethers.utils.Interface(MULTISIG_ABI)
   return abiInterface.getSighash('sendMultiSig')
