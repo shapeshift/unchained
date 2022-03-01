@@ -96,7 +96,7 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient 
 	v1.HandleFunc("/send", a.SendTx).Methods("POST")
 
 	v1gas := v1.PathPrefix("/gas").Subrouter()
-	v1gas.HandleFunc("/estimate", a.GasEstimation).Methods("POST")
+	v1gas.HandleFunc("/estimate", a.EstimateGas).Methods("POST")
 
 	v1Account := v1.PathPrefix("/account").Subrouter()
 	v1Account.Use(cosmos.ValidatePubkey)
@@ -280,24 +280,29 @@ func (a *API) SendTx(w http.ResponseWriter, r *http.Request) {
 	api.HandleResponse(w, http.StatusOK, txHash)
 }
 
-// swagger:route GET /api/v1/gas/estimation v1 GasEstimation
+// swagger:route POST /api/v1/gas/estimation v1 EstimateGas
 //
-// Get
+// Get the estimated gas cost for a transaction
 //
 // responses:
 //   200: GasAmount
 //   400: BadRequestError
 //   422: ValidationError
 //   500: InternalServerError
-func (a *API) GasEstimation(w http.ResponseWriter, r *http.Request) {
+func (a *API) EstimateGas(w http.ResponseWriter, r *http.Request) {
 	rawTx := &api.TxBody{}
 
 	err := json.NewDecoder(r.Body).Decode(rawTx)
-	gasUsed, err := a.handler.GetGasEstimation(rawTx.Hex)
 	if err != nil {
-		handleError(w, http.StatusInternalServerError, err.Error())
+		api.HandleError(w, http.StatusBadRequest, "invalid post body")
 		return
 	}
-	handleResponse(w, http.StatusOK, gasUsed)
+	estimatedGas, err := a.handler.EstimateGas(rawTx.Hex)
+	if err != nil {
+		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	api.HandleResponse(w, http.StatusOK, estimatedGas)
 
 }
