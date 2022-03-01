@@ -171,4 +171,5 @@ type BaseAPI interface {
 	GetAccount(pubkey string) (Account, error)
 	GetTxHistory(pubkey string, cursor string, pageSize int) (TxHistory, error)
 	SendTx(hex string) (string, error)
+	EstimateGas(hex string) (string, error)
 }
