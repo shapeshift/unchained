@@ -196,5 +196,5 @@ func (h *Handler) SendTx(hex string) (string, error) {
 }
 
 func (h *Handler) EstimateGas(hex string) (string, error) {
-	return h.httpClient.GetGasEstimation([]byte(hex))
+	return h.httpClient.GetEstimateGas([]byte(hex))
 }

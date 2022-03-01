@@ -2,16 +2,19 @@ package cosmos
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/pkg/errors"
 	"strconv"
 )
 
-func (c *HTTPClient) GetGasEstimation(txBytes []byte) (string, error) {
+func (c *HTTPClient) GetEstimateGas(txBytes []byte) (string, error) {
 	var res txtypes.SimulateResponse
-	//var errMsg struct{
-	//	msg interface{}
-	//}
+	type retStatus struct {
+		Code   uint32        `json:"code"`
+		Msg    string        `json:"message"`
+		Detail []interface{} `json:"detail"`
+	}
 	reqData, err := base64.StdEncoding.DecodeString(string(txBytes))
 	if err != nil {
 		return "", errors.Wrapf(err, "error decoding transaction from base64")
@@ -23,15 +26,16 @@ func (c *HTTPClient) GetGasEstimation(txBytes []byte) (string, error) {
 	}
 
 	ret, err := c.cosmos.R().SetBody(jsonBody).SetResult(&res).Post("/cosmos/tx/v1beta1/simulate")
-	if err != nil || ret.IsError() {
-
-		return "", errors.Wrapf(err, "error ")
+	if err != nil || ret.StatusCode() != 200 {
+		var errorMsg = retStatus{}
+		json.Unmarshal(ret.Body(), &errorMsg)
+		return errorMsg.Msg, errors.Wrapf(err, errorMsg.Msg)
 	}
 
 	return strconv.FormatUint(res.GasInfo.GasUsed, 10), nil
 }
 
-func (c *GRPCClient) GetGasEstimation(txBytes []byte) (string, error) {
+func (c *GRPCClient) GetEstimateGas(txBytes []byte) (string, error) {
 
 	res, err := c.tx.Simulate(c.ctx, &txtypes.SimulateRequest{TxBytes: txBytes})
 	if err != nil {
