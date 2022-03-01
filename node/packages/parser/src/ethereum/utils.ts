@@ -3,7 +3,6 @@ import { Tx } from '@shapeshiftoss/blockbook'
 import { Network } from './types'
 import { ethers } from 'ethers'
 import MULTISIG_ABI from './abi/multiSig'
-import { Yearn } from '@yfi/sdk'
 
 export const toNetworkType = (network: Network): NetworkTypes => {
   switch (network) {
