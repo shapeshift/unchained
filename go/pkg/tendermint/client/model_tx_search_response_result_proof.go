@@ -54,7 +54,7 @@ func (o *TxSearchResponseResultProof) GetRootHash() string {
 // GetRootHashOk returns a tuple with the RootHash field value
 // and a boolean to check if the value has been set.
 func (o *TxSearchResponseResultProof) GetRootHashOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.RootHash, true
@@ -78,7 +78,7 @@ func (o *TxSearchResponseResultProof) GetData() string {
 // GetDataOk returns a tuple with the Data field value
 // and a boolean to check if the value has been set.
 func (o *TxSearchResponseResultProof) GetDataOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Data, true
@@ -102,7 +102,7 @@ func (o *TxSearchResponseResultProof) GetProof() TxSearchResponseResultProofProo
 // GetProofOk returns a tuple with the Proof field value
 // and a boolean to check if the value has been set.
 func (o *TxSearchResponseResultProof) GetProofOk() (*TxSearchResponseResultProofProof, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Proof, true

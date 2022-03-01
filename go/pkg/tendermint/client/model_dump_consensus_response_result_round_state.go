@@ -74,7 +74,7 @@ func (o *DumpConsensusResponseResultRoundState) GetHeight() string {
 // GetHeightOk returns a tuple with the Height field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultRoundState) GetHeightOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Height, true
@@ -98,7 +98,7 @@ func (o *DumpConsensusResponseResultRoundState) GetRound() int32 {
 // GetRoundOk returns a tuple with the Round field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultRoundState) GetRoundOk() (*int32, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Round, true
@@ -122,7 +122,7 @@ func (o *DumpConsensusResponseResultRoundState) GetStep() int32 {
 // GetStepOk returns a tuple with the Step field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultRoundState) GetStepOk() (*int32, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Step, true
@@ -146,7 +146,7 @@ func (o *DumpConsensusResponseResultRoundState) GetStartTime() string {
 // GetStartTimeOk returns a tuple with the StartTime field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultRoundState) GetStartTimeOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.StartTime, true
@@ -170,7 +170,7 @@ func (o *DumpConsensusResponseResultRoundState) GetCommitTime() string {
 // GetCommitTimeOk returns a tuple with the CommitTime field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultRoundState) GetCommitTimeOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.CommitTime, true
@@ -194,7 +194,7 @@ func (o *DumpConsensusResponseResultRoundState) GetValidators() DumpConsensusRes
 // GetValidatorsOk returns a tuple with the Validators field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultRoundState) GetValidatorsOk() (*DumpConsensusResponseResultRoundStateValidators, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Validators, true
@@ -218,7 +218,7 @@ func (o *DumpConsensusResponseResultRoundState) GetLockedRound() int32 {
 // GetLockedRoundOk returns a tuple with the LockedRound field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultRoundState) GetLockedRoundOk() (*int32, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.LockedRound, true
@@ -242,7 +242,7 @@ func (o *DumpConsensusResponseResultRoundState) GetValidRound() string {
 // GetValidRoundOk returns a tuple with the ValidRound field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultRoundState) GetValidRoundOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.ValidRound, true
@@ -265,11 +265,11 @@ func (o *DumpConsensusResponseResultRoundState) GetVotes() []DumpConsensusRespon
 
 // GetVotesOk returns a tuple with the Votes field value
 // and a boolean to check if the value has been set.
-func (o *DumpConsensusResponseResultRoundState) GetVotesOk() (*[]DumpConsensusResponseResultRoundStateVotes, bool) {
-	if o == nil  {
+func (o *DumpConsensusResponseResultRoundState) GetVotesOk() ([]DumpConsensusResponseResultRoundStateVotes, bool) {
+	if o == nil {
 		return nil, false
 	}
-	return &o.Votes, true
+	return o.Votes, true
 }
 
 // SetVotes sets field value
@@ -290,7 +290,7 @@ func (o *DumpConsensusResponseResultRoundState) GetCommitRound() int32 {
 // GetCommitRoundOk returns a tuple with the CommitRound field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultRoundState) GetCommitRoundOk() (*int32, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.CommitRound, true
@@ -316,7 +316,7 @@ func (o *DumpConsensusResponseResultRoundState) GetLastCommit() DumpConsensusRes
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *DumpConsensusResponseResultRoundState) GetLastCommitOk() (*DumpConsensusResponseResultRoundStateLastCommit, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return o.LastCommit.Get(), o.LastCommit.IsSet()
@@ -340,7 +340,7 @@ func (o *DumpConsensusResponseResultRoundState) GetLastValidators() DumpConsensu
 // GetLastValidatorsOk returns a tuple with the LastValidators field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultRoundState) GetLastValidatorsOk() (*DumpConsensusResponseResultRoundStateValidators, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.LastValidators, true
@@ -364,7 +364,7 @@ func (o *DumpConsensusResponseResultRoundState) GetTriggeredTimeoutPrecommit() b
 // GetTriggeredTimeoutPrecommitOk returns a tuple with the TriggeredTimeoutPrecommit field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultRoundState) GetTriggeredTimeoutPrecommitOk() (*bool, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.TriggeredTimeoutPrecommit, true

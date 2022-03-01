@@ -17,7 +17,7 @@ import (
 // BlockResultsResponseResultEvents struct for BlockResultsResponseResultEvents
 type BlockResultsResponseResultEvents struct {
 	Type *string `json:"type,omitempty"`
-	Attributes *[]Event `json:"attributes,omitempty"`
+	Attributes []Event `json:"attributes,omitempty"`
 }
 
 // NewBlockResultsResponseResultEvents instantiates a new BlockResultsResponseResultEvents object
@@ -75,12 +75,12 @@ func (o *BlockResultsResponseResultEvents) GetAttributes() []Event {
 		var ret []Event
 		return ret
 	}
-	return *o.Attributes
+	return o.Attributes
 }
 
 // GetAttributesOk returns a tuple with the Attributes field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *BlockResultsResponseResultEvents) GetAttributesOk() (*[]Event, bool) {
+func (o *BlockResultsResponseResultEvents) GetAttributesOk() ([]Event, bool) {
 	if o == nil || o.Attributes == nil {
 		return nil, false
 	}
@@ -98,7 +98,7 @@ func (o *BlockResultsResponseResultEvents) HasAttributes() bool {
 
 // SetAttributes gets a reference to the given []Event and assigns it to the Attributes field.
 func (o *BlockResultsResponseResultEvents) SetAttributes(v []Event) {
-	o.Attributes = &v
+	o.Attributes = v
 }
 
 func (o BlockResultsResponseResultEvents) MarshalJSON() ([]byte, error) {
