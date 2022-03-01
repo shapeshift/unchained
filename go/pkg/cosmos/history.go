@@ -11,6 +11,8 @@ import (
 	"github.com/shapeshift/unchained/pkg/tendermint/client"
 )
 
+const STATIC_PAGE_SIZE int32 = 25
+
 // TxState stores state for a specific query source
 type TxState struct {
 	hasMore bool
@@ -33,7 +35,7 @@ type History struct {
 
 func (h *History) doRequest(txState *TxState) (*client.TxSearchResponse, error) {
 	for {
-		res, httpRes, err := h.tendermintClient.InfoApi.TxSearch(h.ctx).PerPage(int32(h.pageSize)).OrderBy("\"desc\"").Query(txState.query).Page(int32(txState.page)).Execute()
+		res, httpRes, err := h.tendermintClient.InfoApi.TxSearch(h.ctx).PerPage(STATIC_PAGE_SIZE).OrderBy("\"desc\"").Query(txState.query).Page(int32(txState.page)).Execute()
 		if err != nil {
 			var e struct {
 				Error struct {
@@ -96,7 +98,7 @@ func (h *History) filterByCursor(txs []client.TxSearchResponseResultTxs) ([]clie
 		// and the transaction id matches one of the last txids seen
 		// or the transaction index is less than the last tx index
 		if txHeight == h.cursor.BlockHeight {
-			if *tx.Hash == h.cursor.LastSendTxID || *tx.Hash == h.cursor.LastReceiveTxID {
+			if *tx.Hash == h.cursor.SendTxID || *tx.Hash == h.cursor.ReceiveTxID {
 				continue
 			}
 			if *tx.Index <= *h.cursor.TxIndex {
@@ -207,8 +209,8 @@ func (h *History) fetch() (*TxHistory, error) {
 	h.cursor.TxIndex = lastTx.TendermintTx.Index
 	h.cursor.SendPage = h.send.page
 	h.cursor.ReceivePage = h.receive.page
-	h.cursor.LastReceiveTxID = h.receive.lastID
-	h.cursor.LastSendTxID = h.send.lastID
+	h.cursor.ReceiveTxID = h.receive.lastID
+	h.cursor.SendTxID = h.send.lastID
 
 	// encode cursor if there are more txs available to be fetched
 	var cursor string
