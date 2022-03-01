@@ -1,6 +1,7 @@
 package cosmos
 
 import (
+	"encoding/base64"
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/pkg/errors"
 	"strconv"
@@ -8,8 +9,14 @@ import (
 
 func (c *HTTPClient) GetGasEstimation(txBytes []byte) (string, error) {
 	var res txtypes.SimulateResponse
-
-	reqRawBody := txtypes.SimulateRequest{TxBytes: txBytes}
+	//var errMsg struct{
+	//	msg interface{}
+	//}
+	reqData, err := base64.StdEncoding.DecodeString(string(txBytes))
+	if err != nil {
+		return "", errors.Wrapf(err, "error decoding transaction from base64")
+	}
+	reqRawBody := txtypes.SimulateRequest{TxBytes: reqData}
 	jsonBody, err := c.encoding.Marshaler.MarshalJSON(&reqRawBody)
 	if err != nil {
 		return "", err
@@ -17,7 +24,8 @@ func (c *HTTPClient) GetGasEstimation(txBytes []byte) (string, error) {
 
 	ret, err := c.cosmos.R().SetBody(jsonBody).SetResult(&res).Post("/cosmos/tx/v1beta1/simulate")
 	if err != nil || ret.IsError() {
-		return "", err
+
+		return "", errors.Wrapf(err, "error ")
 	}
 
 	return strconv.FormatUint(res.GasInfo.GasUsed, 10), nil
