@@ -1,12 +1,12 @@
+import { ChainId, Yearn } from '@yfi/sdk'
 import { Tx } from '@shapeshiftoss/blockbook'
-import { GenericParser, TxSpecific, YearnTx } from '../types'
-import shapeShiftRouter from './abi/shapeShiftRouter'
-import yearnVault from './abi/yearnVault'
 import { ethers } from 'ethers'
+import { GenericParser, TxSpecific, YearnTx } from '../types'
 import { SHAPE_SHIFT_ROUTER_CONTRACT } from './constants'
 import { getSigHash } from './utils'
-import { Yearn, ChainId } from '@yfi/sdk'
 import { Network } from './types'
+import shapeShiftRouter from './abi/shapeShiftRouter'
+import yearnVault from './abi/yearnVault'
 
 interface ParserArgs {
   network: Network
