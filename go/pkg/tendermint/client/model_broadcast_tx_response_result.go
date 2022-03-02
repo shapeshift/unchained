@@ -57,7 +57,7 @@ func (o *BroadcastTxResponseResult) GetCode() string {
 // GetCodeOk returns a tuple with the Code field value
 // and a boolean to check if the value has been set.
 func (o *BroadcastTxResponseResult) GetCodeOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Code, true
@@ -81,7 +81,7 @@ func (o *BroadcastTxResponseResult) GetData() string {
 // GetDataOk returns a tuple with the Data field value
 // and a boolean to check if the value has been set.
 func (o *BroadcastTxResponseResult) GetDataOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Data, true
@@ -105,7 +105,7 @@ func (o *BroadcastTxResponseResult) GetLog() string {
 // GetLogOk returns a tuple with the Log field value
 // and a boolean to check if the value has been set.
 func (o *BroadcastTxResponseResult) GetLogOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Log, true
@@ -161,7 +161,7 @@ func (o *BroadcastTxResponseResult) GetHash() string {
 // GetHashOk returns a tuple with the Hash field value
 // and a boolean to check if the value has been set.
 func (o *BroadcastTxResponseResult) GetHashOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Hash, true

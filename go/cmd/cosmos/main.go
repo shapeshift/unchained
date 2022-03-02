@@ -25,6 +25,7 @@ type Config struct {
 	GRPCURL string `mapstructure:"GRPC_URL"`
 	LCDURL  string `mapstructure:"LCD_URL"`
 	RPCURL  string `mapstructure:"RPC_URL"`
+	WSURL   string `mapstructure:"WS_URL"`
 }
 
 func main() {
@@ -36,7 +37,7 @@ func main() {
 
 	conf := &Config{}
 	if *envPath == "" {
-		if err := config.LoadFromEnv(conf, "API_KEY", "GRPC_URL", "LCD_URL", "RPC_URL"); err != nil {
+		if err := config.LoadFromEnv(conf, "API_KEY", "GRPC_URL", "LCD_URL", "RPC_URL", "WS_URL"); err != nil {
 			logger.Panicf("failed to load config from env: %+v", err)
 		}
 	} else {
@@ -55,6 +56,7 @@ func main() {
 		GRPCURL:          conf.GRPCURL,
 		LCDURL:           conf.LCDURL,
 		RPCURL:           conf.RPCURL,
+		WSURL:            conf.WSURL,
 	}
 
 	httpClient, err := cosmos.NewHTTPClient(cfg)

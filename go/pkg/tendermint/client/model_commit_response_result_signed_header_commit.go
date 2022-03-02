@@ -56,7 +56,7 @@ func (o *CommitResponseResultSignedHeaderCommit) GetHeight() string {
 // GetHeightOk returns a tuple with the Height field value
 // and a boolean to check if the value has been set.
 func (o *CommitResponseResultSignedHeaderCommit) GetHeightOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Height, true
@@ -80,7 +80,7 @@ func (o *CommitResponseResultSignedHeaderCommit) GetRound() int32 {
 // GetRoundOk returns a tuple with the Round field value
 // and a boolean to check if the value has been set.
 func (o *CommitResponseResultSignedHeaderCommit) GetRoundOk() (*int32, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Round, true
@@ -104,7 +104,7 @@ func (o *CommitResponseResultSignedHeaderCommit) GetBlockId() BlockID {
 // GetBlockIdOk returns a tuple with the BlockId field value
 // and a boolean to check if the value has been set.
 func (o *CommitResponseResultSignedHeaderCommit) GetBlockIdOk() (*BlockID, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.BlockId, true
@@ -127,11 +127,11 @@ func (o *CommitResponseResultSignedHeaderCommit) GetSignatures() []CommitRespons
 
 // GetSignaturesOk returns a tuple with the Signatures field value
 // and a boolean to check if the value has been set.
-func (o *CommitResponseResultSignedHeaderCommit) GetSignaturesOk() (*[]CommitResponseResultSignedHeaderCommitSignatures, bool) {
-	if o == nil  {
+func (o *CommitResponseResultSignedHeaderCommit) GetSignaturesOk() ([]CommitResponseResultSignedHeaderCommitSignatures, bool) {
+	if o == nil {
 		return nil, false
 	}
-	return &o.Signatures, true
+	return o.Signatures, true
 }
 
 // SetSignatures sets field value

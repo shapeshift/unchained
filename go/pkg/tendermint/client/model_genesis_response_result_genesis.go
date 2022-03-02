@@ -22,7 +22,7 @@ type GenesisResponseResultGenesis struct {
 	ConsensusParams NullableConsensusParams `json:"consensus_params"`
 	Validators []GenesisResponseResultGenesisValidators `json:"validators"`
 	AppHash string `json:"app_hash"`
-	AppState *map[string]interface{} `json:"app_state,omitempty"`
+	AppState map[string]interface{} `json:"app_state,omitempty"`
 }
 
 // NewGenesisResponseResultGenesis instantiates a new GenesisResponseResultGenesis object
@@ -61,7 +61,7 @@ func (o *GenesisResponseResultGenesis) GetGenesisTime() string {
 // GetGenesisTimeOk returns a tuple with the GenesisTime field value
 // and a boolean to check if the value has been set.
 func (o *GenesisResponseResultGenesis) GetGenesisTimeOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.GenesisTime, true
@@ -85,7 +85,7 @@ func (o *GenesisResponseResultGenesis) GetChainId() string {
 // GetChainIdOk returns a tuple with the ChainId field value
 // and a boolean to check if the value has been set.
 func (o *GenesisResponseResultGenesis) GetChainIdOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.ChainId, true
@@ -109,7 +109,7 @@ func (o *GenesisResponseResultGenesis) GetInitialHeight() string {
 // GetInitialHeightOk returns a tuple with the InitialHeight field value
 // and a boolean to check if the value has been set.
 func (o *GenesisResponseResultGenesis) GetInitialHeightOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.InitialHeight, true
@@ -135,7 +135,7 @@ func (o *GenesisResponseResultGenesis) GetConsensusParams() ConsensusParams {
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *GenesisResponseResultGenesis) GetConsensusParamsOk() (*ConsensusParams, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return o.ConsensusParams.Get(), o.ConsensusParams.IsSet()
@@ -158,11 +158,11 @@ func (o *GenesisResponseResultGenesis) GetValidators() []GenesisResponseResultGe
 
 // GetValidatorsOk returns a tuple with the Validators field value
 // and a boolean to check if the value has been set.
-func (o *GenesisResponseResultGenesis) GetValidatorsOk() (*[]GenesisResponseResultGenesisValidators, bool) {
-	if o == nil  {
+func (o *GenesisResponseResultGenesis) GetValidatorsOk() ([]GenesisResponseResultGenesisValidators, bool) {
+	if o == nil {
 		return nil, false
 	}
-	return &o.Validators, true
+	return o.Validators, true
 }
 
 // SetValidators sets field value
@@ -183,7 +183,7 @@ func (o *GenesisResponseResultGenesis) GetAppHash() string {
 // GetAppHashOk returns a tuple with the AppHash field value
 // and a boolean to check if the value has been set.
 func (o *GenesisResponseResultGenesis) GetAppHashOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.AppHash, true
@@ -200,12 +200,12 @@ func (o *GenesisResponseResultGenesis) GetAppState() map[string]interface{} {
 		var ret map[string]interface{}
 		return ret
 	}
-	return *o.AppState
+	return o.AppState
 }
 
 // GetAppStateOk returns a tuple with the AppState field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *GenesisResponseResultGenesis) GetAppStateOk() (*map[string]interface{}, bool) {
+func (o *GenesisResponseResultGenesis) GetAppStateOk() (map[string]interface{}, bool) {
 	if o == nil || o.AppState == nil {
 		return nil, false
 	}
@@ -223,7 +223,7 @@ func (o *GenesisResponseResultGenesis) HasAppState() bool {
 
 // SetAppState gets a reference to the given map[string]interface{} and assigns it to the AppState field.
 func (o *GenesisResponseResultGenesis) SetAppState(v map[string]interface{}) {
-	o.AppState = &v
+	o.AppState = v
 }
 
 func (o GenesisResponseResultGenesis) MarshalJSON() ([]byte, error) {

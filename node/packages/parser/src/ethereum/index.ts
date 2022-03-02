@@ -3,7 +3,7 @@ import { ethers } from 'ethers'
 import { Tx } from '@shapeshiftoss/blockbook'
 import { caip19, caip2, AssetNamespace, AssetReference } from '@shapeshiftoss/caip'
 import { ChainTypes } from '@shapeshiftoss/types'
-import { GenericParser, Status, Token, TransferType, Tx as ParseTx, TxSpecific } from '../types'
+import { GenericParser, Status, Token, TransferType, Tx as ParsedTx, TxSpecific } from '../types'
 import { aggregateTransfer, findAsyncSequential } from '../utils'
 import { InternalTx, Network } from './types'
 import { getInternalMultisigAddress, getSigHash, SENDMULTISIG_SIG_HASH, toNetworkType } from './utils'
@@ -11,6 +11,7 @@ import * as thor from './thor'
 import * as uniV2 from './uniV2'
 import * as zrx from './zrx'
 import * as yearn from './yearn'
+import { Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 
 export * from './types'
 
@@ -27,7 +28,7 @@ export class TransactionParser {
   private readonly uniV2: uniV2.Parser
   private readonly zrx: zrx.Parser
   private readonly yearn: yearn.Parser
-  private readonly parsers: Array<GenericParser>
+  private readonly parsers: Array<GenericParser<BlockbookTx>>
 
   constructor(args: TransactionParserArgs) {
     const provider = new ethers.providers.JsonRpcProvider(args.rpcUrl)
@@ -37,7 +38,7 @@ export class TransactionParser {
     this.thor = new thor.Parser({ network: this.network, midgardUrl: args.midgardUrl, rpcUrl: args.rpcUrl })
     this.uniV2 = new uniV2.Parser({ network: this.network, provider })
     this.zrx = new zrx.Parser()
-    this.yearn = new yearn.Parser()
+    this.yearn = new yearn.Parser({ provider, network: this.network })
 
     this.parsers = [this.zrx, this.thor, this.uniV2, this.yearn]
   }
@@ -54,14 +55,14 @@ export class TransactionParser {
     }
   }
 
-  async parse(tx: Tx, address: string, internalTxs?: Array<InternalTx>): Promise<ParseTx> {
+  async parse(tx: Tx, address: string, internalTxs?: Array<InternalTx>): Promise<ParsedTx> {
     // We expect only one Parser to return a result. If multiple do, we take the first and early exit.
-    const contractParserResult = await findAsyncSequential<GenericParser, TxSpecific<ParseTx>>(
+    const contractParserResult = await findAsyncSequential<GenericParser<BlockbookTx>, TxSpecific<ParsedTx>>(
       this.parsers,
       async (parser) => await parser.parse(tx)
     )
 
-    const parsedTx: ParseTx = {
+    const parsedTx: ParsedTx = {
       address,
       blockHash: tx.blockHash,
       blockHeight: tx.blockHeight,
@@ -89,7 +90,7 @@ export class TransactionParser {
     return Status.Unknown
   }
 
-  private getParsedTxWithTransfers(tx: Tx, parsedTx: ParseTx, address: string, internalTxs?: Array<InternalTx>) {
+  private getParsedTxWithTransfers(tx: Tx, parsedTx: ParsedTx, address: string, internalTxs?: Array<InternalTx>) {
     const caip19Ethereum = caip19.toCAIP19({
       chain: ChainTypes.Ethereum,
       network: toNetworkType(this.network),

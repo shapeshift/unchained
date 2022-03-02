@@ -40,7 +40,7 @@ aliases:
     rabbit-storage-size: "10Gi"
     indexer-cpu-limit: "4"
     indexer-memory-limit: 24Gi
-    indexer-replicas: 3
+    indexer-replicas: 2
     indexer-storage-size: 500Gi
     indexer-url: http://bitcoin-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://bitcoin-indexer-svc.unchained.svc.cluster.local:8001/websocket
@@ -101,7 +101,7 @@ aliases:
     rabbit-storage-size: "10Gi"
     indexer-cpu-limit: "4"
     indexer-memory-limit: 12Gi
-    indexer-replicas: 3
+    indexer-replicas: 2
     indexer-storage-size: 500Gi
     indexer-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-indexer-svc.unchained.svc.cluster.local:8001/websocket

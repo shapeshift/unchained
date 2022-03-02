@@ -17,6 +17,7 @@
     "@shapeshiftoss/caip": "^1.11.1",
     "@shapeshiftoss/thorchain": "^5.2.0",
     "@shapeshiftoss/types": "^1.23.0",
-    "bignumber.js": "^9.0.1"
+    "bignumber.js": "^9.0.1",
+    "@yfi/sdk": "^1.0.30"
   }
 }

@@ -54,7 +54,7 @@ func (o *BroadcastTxCommitResponseResultDeliverTx) GetLog() string {
 // GetLogOk returns a tuple with the Log field value
 // and a boolean to check if the value has been set.
 func (o *BroadcastTxCommitResponseResultDeliverTx) GetLogOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Log, true
@@ -78,7 +78,7 @@ func (o *BroadcastTxCommitResponseResultDeliverTx) GetData() string {
 // GetDataOk returns a tuple with the Data field value
 // and a boolean to check if the value has been set.
 func (o *BroadcastTxCommitResponseResultDeliverTx) GetDataOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Data, true
@@ -102,7 +102,7 @@ func (o *BroadcastTxCommitResponseResultDeliverTx) GetCode() string {
 // GetCodeOk returns a tuple with the Code field value
 // and a boolean to check if the value has been set.
 func (o *BroadcastTxCommitResponseResultDeliverTx) GetCodeOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Code, true

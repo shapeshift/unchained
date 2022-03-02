@@ -12,22 +12,18 @@ package client
 
 import (
 	"bytes"
-	_context "context"
-	_ioutil "io/ioutil"
-	_nethttp "net/http"
-	_neturl "net/url"
+	"context"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 )
 
-// Linger please
-var (
-	_ _context.Context
-)
 
 // TxKeyApiService TxKeyApi service
 type TxKeyApiService service
 
 type ApiRemoveTxRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *TxKeyApiService
 	txKey *string
 }
@@ -38,17 +34,17 @@ func (r ApiRemoveTxRequest) TxKey(txKey string) ApiRemoveTxRequest {
 	return r
 }
 
-func (r ApiRemoveTxRequest) Execute() (*_nethttp.Response, error) {
+func (r ApiRemoveTxRequest) Execute() (*http.Response, error) {
 	return r.ApiService.RemoveTxExecute(r)
 }
 
 /*
 RemoveTx Removes a transaction from the mempool.
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiRemoveTxRequest
 */
-func (a *TxKeyApiService) RemoveTx(ctx _context.Context) ApiRemoveTxRequest {
+func (a *TxKeyApiService) RemoveTx(ctx context.Context) ApiRemoveTxRequest {
 	return ApiRemoveTxRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -56,23 +52,23 @@ func (a *TxKeyApiService) RemoveTx(ctx _context.Context) ApiRemoveTxRequest {
 }
 
 // Execute executes the request
-func (a *TxKeyApiService) RemoveTxExecute(r ApiRemoveTxRequest) (*_nethttp.Response, error) {
+func (a *TxKeyApiService) RemoveTxExecute(r ApiRemoveTxRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TxKeyApiService.RemoveTx")
 	if err != nil {
-		return nil, GenericOpenAPIError{error: err.Error()}
+		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/remove_tx"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if r.txKey == nil {
 		return nil, reportError("txKey is required and must be specified")
 	}
@@ -105,15 +101,15 @@ func (a *TxKeyApiService) RemoveTxExecute(r ApiRemoveTxRequest) (*_nethttp.Respo
 		return localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}

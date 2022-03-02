@@ -19,7 +19,7 @@ type ConnectionStatus struct {
 	Duration *string `json:"Duration,omitempty"`
 	SendMonitor *Monitor `json:"SendMonitor,omitempty"`
 	RecvMonitor *Monitor `json:"RecvMonitor,omitempty"`
-	Channels *[]Channel `json:"Channels,omitempty"`
+	Channels []Channel `json:"Channels,omitempty"`
 }
 
 // NewConnectionStatus instantiates a new ConnectionStatus object
@@ -141,12 +141,12 @@ func (o *ConnectionStatus) GetChannels() []Channel {
 		var ret []Channel
 		return ret
 	}
-	return *o.Channels
+	return o.Channels
 }
 
 // GetChannelsOk returns a tuple with the Channels field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ConnectionStatus) GetChannelsOk() (*[]Channel, bool) {
+func (o *ConnectionStatus) GetChannelsOk() ([]Channel, bool) {
 	if o == nil || o.Channels == nil {
 		return nil, false
 	}
@@ -164,7 +164,7 @@ func (o *ConnectionStatus) HasChannels() bool {
 
 // SetChannels gets a reference to the given []Channel and assigns it to the Channels field.
 func (o *ConnectionStatus) SetChannels(v []Channel) {
-	o.Channels = &v
+	o.Channels = v
 }
 
 func (o ConnectionStatus) MarshalJSON() ([]byte, error) {

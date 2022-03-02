@@ -237,7 +237,7 @@ func (o *BlockResultsResponseResultTxsResults) SetGasUsed(v string) {
 
 // GetEvents returns the Events field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *BlockResultsResponseResultTxsResults) GetEvents() []BlockResultsResponseResultEvents {
-	if o == nil  {
+	if o == nil {
 		var ret []BlockResultsResponseResultEvents
 		return ret
 	}
@@ -247,11 +247,11 @@ func (o *BlockResultsResponseResultTxsResults) GetEvents() []BlockResultsRespons
 // GetEventsOk returns a tuple with the Events field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *BlockResultsResponseResultTxsResults) GetEventsOk() (*[]BlockResultsResponseResultEvents, bool) {
+func (o *BlockResultsResponseResultTxsResults) GetEventsOk() ([]BlockResultsResponseResultEvents, bool) {
 	if o == nil || o.Events == nil {
 		return nil, false
 	}
-	return &o.Events, true
+	return o.Events, true
 }
 
 // HasEvents returns a boolean if a field has been set.

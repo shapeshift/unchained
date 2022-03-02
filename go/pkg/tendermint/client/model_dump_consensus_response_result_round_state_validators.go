@@ -51,11 +51,11 @@ func (o *DumpConsensusResponseResultRoundStateValidators) GetValidators() []Vali
 
 // GetValidatorsOk returns a tuple with the Validators field value
 // and a boolean to check if the value has been set.
-func (o *DumpConsensusResponseResultRoundStateValidators) GetValidatorsOk() (*[]ValidatorPriority, bool) {
-	if o == nil  {
+func (o *DumpConsensusResponseResultRoundStateValidators) GetValidatorsOk() ([]ValidatorPriority, bool) {
+	if o == nil {
 		return nil, false
 	}
-	return &o.Validators, true
+	return o.Validators, true
 }
 
 // SetValidators sets field value
@@ -76,7 +76,7 @@ func (o *DumpConsensusResponseResultRoundStateValidators) GetProposer() Validato
 // GetProposerOk returns a tuple with the Proposer field value
 // and a boolean to check if the value has been set.
 func (o *DumpConsensusResponseResultRoundStateValidators) GetProposerOk() (*ValidatorPriority, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Proposer, true
