@@ -1,5 +1,5 @@
 import { ChainId, Yearn } from '@yfi/sdk'
-import { Tx } from '@shapeshiftoss/blockbook'
+import { Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { ethers } from 'ethers'
 import { GenericParser, TxSpecific, YearnTx } from '../types'
 import { SHAPE_SHIFT_ROUTER_CONTRACT } from './constants'
@@ -13,7 +13,7 @@ interface ParserArgs {
   provider: ethers.providers.JsonRpcProvider
 }
 
-export class Parser implements GenericParser<Tx> {
+export class Parser implements GenericParser<BlockbookTx> {
   provider: ethers.providers.JsonRpcProvider
   yearnSdk: Yearn<ChainId> | undefined
 
@@ -36,7 +36,7 @@ export class Parser implements GenericParser<Tx> {
     }
   }
 
-  async parse(tx: Tx): Promise<TxSpecific<YearnTx> | undefined> {
+  async parse(tx: BlockbookTx): Promise<TxSpecific<YearnTx> | undefined> {
     const data = tx.ethereumSpecific?.data
     if (!data) return
 
