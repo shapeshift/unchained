@@ -3,7 +3,7 @@ import { Dex, GenericParser, TradeType, TxSpecific, ZrxTx } from '../types'
 import { txInteractsWithContract } from './utils'
 import { ZRX_PROXY_CONTRACT } from './constants'
 
-export class Parser implements GenericParser {
+export class Parser implements GenericParser<Tx> {
   async parse(tx: Tx): Promise<TxSpecific<ZrxTx> | undefined> {
     if (!txInteractsWithContract(tx, ZRX_PROXY_CONTRACT)) return
     if (!(tx.tokenTransfers && tx.tokenTransfers.length)) return

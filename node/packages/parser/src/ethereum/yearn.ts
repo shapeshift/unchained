@@ -13,7 +13,7 @@ interface ParserArgs {
   provider: ethers.providers.JsonRpcProvider
 }
 
-export class Parser implements GenericParser {
+export class Parser implements GenericParser<Tx> {
   provider: ethers.providers.JsonRpcProvider
   yearnSdk: Yearn<ChainId> | undefined
 

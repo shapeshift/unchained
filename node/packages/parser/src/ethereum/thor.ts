@@ -1,10 +1,10 @@
-import { ethers } from 'ethers'
+import { Tx } from '@shapeshiftoss/blockbook'
 import { Thorchain } from '@shapeshiftoss/thorchain'
+import { ethers } from 'ethers'
 import { Dex, GenericParser, ThorTx, TradeType, TxSpecific } from '../types'
 import { Network } from './types'
 import THOR_ABI from './abi/thor'
 import { getSigHash, txInteractsWithContract } from './utils'
-import { Tx } from '@shapeshiftoss/blockbook'
 import { THOR_ROUTER_CONTRACT_MAINNET, THOR_ROUTER_CONTRACT_ROPSTEN } from './constants'
 
 const SWAP_TYPES = ['SWAP', '=', 's']
@@ -15,7 +15,7 @@ export interface ParserArgs {
   rpcUrl: string
 }
 
-export class Parser implements GenericParser {
+export class Parser implements GenericParser<Tx> {
   abiInterface: ethers.utils.Interface
   thorchain: Thorchain
 
