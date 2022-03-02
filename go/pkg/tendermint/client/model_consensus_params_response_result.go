@@ -52,7 +52,7 @@ func (o *ConsensusParamsResponseResult) GetBlockHeight() string {
 // GetBlockHeightOk returns a tuple with the BlockHeight field value
 // and a boolean to check if the value has been set.
 func (o *ConsensusParamsResponseResult) GetBlockHeightOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.BlockHeight, true
@@ -78,7 +78,7 @@ func (o *ConsensusParamsResponseResult) GetConsensusParams() ConsensusParams {
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ConsensusParamsResponseResult) GetConsensusParamsOk() (*ConsensusParams, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return o.ConsensusParams.Get(), o.ConsensusParams.IsSet()

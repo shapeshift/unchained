@@ -54,7 +54,7 @@ func (o *ConsensusParams) GetBlock() ConsensusParamsBlock {
 // GetBlockOk returns a tuple with the Block field value
 // and a boolean to check if the value has been set.
 func (o *ConsensusParams) GetBlockOk() (*ConsensusParamsBlock, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Block, true
@@ -78,7 +78,7 @@ func (o *ConsensusParams) GetEvidence() ConsensusParamsEvidence {
 // GetEvidenceOk returns a tuple with the Evidence field value
 // and a boolean to check if the value has been set.
 func (o *ConsensusParams) GetEvidenceOk() (*ConsensusParamsEvidence, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Evidence, true
@@ -102,7 +102,7 @@ func (o *ConsensusParams) GetValidator() ConsensusParamsValidator {
 // GetValidatorOk returns a tuple with the Validator field value
 // and a boolean to check if the value has been set.
 func (o *ConsensusParams) GetValidatorOk() (*ConsensusParamsValidator, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Validator, true

@@ -12,23 +12,19 @@ package client
 
 import (
 	"bytes"
-	_context "context"
-	_ioutil "io/ioutil"
-	_nethttp "net/http"
-	_neturl "net/url"
+	"context"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 	"reflect"
 )
 
-// Linger please
-var (
-	_ _context.Context
-)
 
 // UnsafeApiService UnsafeApi service
 type UnsafeApiService service
 
 type ApiDialPeersRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *UnsafeApiService
 	persistent *bool
 	unconditional *bool
@@ -41,23 +37,26 @@ func (r ApiDialPeersRequest) Persistent(persistent bool) ApiDialPeersRequest {
 	r.persistent = &persistent
 	return r
 }
+
 // Have the peers you are dialing be unconditional
 func (r ApiDialPeersRequest) Unconditional(unconditional bool) ApiDialPeersRequest {
 	r.unconditional = &unconditional
 	return r
 }
+
 // Have the peers you are dialing be private
 func (r ApiDialPeersRequest) Private(private bool) ApiDialPeersRequest {
 	r.private = &private
 	return r
 }
+
 // array of peers to dial
 func (r ApiDialPeersRequest) Peers(peers []string) ApiDialPeersRequest {
 	r.peers = &peers
 	return r
 }
 
-func (r ApiDialPeersRequest) Execute() (DialResp, *_nethttp.Response, error) {
+func (r ApiDialPeersRequest) Execute() (*DialResp, *http.Response, error) {
 	return r.ApiService.DialPeersExecute(r)
 }
 
@@ -69,10 +68,10 @@ Set a persistent peer, this route in under unsafe, and has to manually enabled t
 **Example:** curl 'localhost:26657/dial_peers?peers=\["f9baeaa15fedf5e1ef7448dd60f46c01f1a9e9c4@1.2.3.4:26656","0491d373a8e0fcf1023aaf18c51d6a1d0d4f31bd@5.6.7.8:26656"\]&persistent=false'
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiDialPeersRequest
 */
-func (a *UnsafeApiService) DialPeers(ctx _context.Context) ApiDialPeersRequest {
+func (a *UnsafeApiService) DialPeers(ctx context.Context) ApiDialPeersRequest {
 	return ApiDialPeersRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -81,24 +80,24 @@ func (a *UnsafeApiService) DialPeers(ctx _context.Context) ApiDialPeersRequest {
 
 // Execute executes the request
 //  @return DialResp
-func (a *UnsafeApiService) DialPeersExecute(r ApiDialPeersRequest) (DialResp, *_nethttp.Response, error) {
+func (a *UnsafeApiService) DialPeersExecute(r ApiDialPeersRequest) (*DialResp, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  DialResp
+		localVarReturnValue  *DialResp
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UnsafeApiService.DialPeers")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/dial_peers"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 
 	if r.persistent != nil {
 		localVarQueryParams.Add("persistent", parameterToString(*r.persistent, ""))
@@ -147,15 +146,15 @@ func (a *UnsafeApiService) DialPeersExecute(r ApiDialPeersRequest) (DialResp, *_
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -173,7 +172,7 @@ func (a *UnsafeApiService) DialPeersExecute(r ApiDialPeersRequest) (DialResp, *_
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -184,7 +183,7 @@ func (a *UnsafeApiService) DialPeersExecute(r ApiDialPeersRequest) (DialResp, *_
 }
 
 type ApiDialSeedsRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *UnsafeApiService
 	peers *[]string
 }
@@ -195,7 +194,7 @@ func (r ApiDialSeedsRequest) Peers(peers []string) ApiDialSeedsRequest {
 	return r
 }
 
-func (r ApiDialSeedsRequest) Execute() (DialResp, *_nethttp.Response, error) {
+func (r ApiDialSeedsRequest) Execute() (*DialResp, *http.Response, error) {
 	return r.ApiService.DialSeedsExecute(r)
 }
 
@@ -207,10 +206,10 @@ Dial a peer, this route in under unsafe, and has to manually enabled to use
   **Example:** curl 'localhost:26657/dial_seeds?seeds=\["f9baeaa15fedf5e1ef7448dd60f46c01f1a9e9c4@1.2.3.4:26656","0491d373a8e0fcf1023aaf18c51d6a1d0d4f31bd@5.6.7.8:26656"\]'
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiDialSeedsRequest
 */
-func (a *UnsafeApiService) DialSeeds(ctx _context.Context) ApiDialSeedsRequest {
+func (a *UnsafeApiService) DialSeeds(ctx context.Context) ApiDialSeedsRequest {
 	return ApiDialSeedsRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -219,24 +218,24 @@ func (a *UnsafeApiService) DialSeeds(ctx _context.Context) ApiDialSeedsRequest {
 
 // Execute executes the request
 //  @return DialResp
-func (a *UnsafeApiService) DialSeedsExecute(r ApiDialSeedsRequest) (DialResp, *_nethttp.Response, error) {
+func (a *UnsafeApiService) DialSeedsExecute(r ApiDialSeedsRequest) (*DialResp, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  DialResp
+		localVarReturnValue  *DialResp
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UnsafeApiService.DialSeeds")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/dial_seeds"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 
 	if r.peers != nil {
 		t := *r.peers
@@ -276,15 +275,15 @@ func (a *UnsafeApiService) DialSeedsExecute(r ApiDialSeedsRequest) (DialResp, *_
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -302,7 +301,7 @@ func (a *UnsafeApiService) DialSeedsExecute(r ApiDialSeedsRequest) (DialResp, *_
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -313,12 +312,11 @@ func (a *UnsafeApiService) DialSeedsExecute(r ApiDialSeedsRequest) (DialResp, *_
 }
 
 type ApiUnsafeFlushMempoolRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *UnsafeApiService
 }
 
-
-func (r ApiUnsafeFlushMempoolRequest) Execute() (EmptyResponse, *_nethttp.Response, error) {
+func (r ApiUnsafeFlushMempoolRequest) Execute() (*EmptyResponse, *http.Response, error) {
 	return r.ApiService.UnsafeFlushMempoolExecute(r)
 }
 
@@ -332,10 +330,10 @@ from the store and all indexes and finally resets the cache.
 Note, flushing the mempool may leave the mempool in an inconsistent state.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiUnsafeFlushMempoolRequest
 */
-func (a *UnsafeApiService) UnsafeFlushMempool(ctx _context.Context) ApiUnsafeFlushMempoolRequest {
+func (a *UnsafeApiService) UnsafeFlushMempool(ctx context.Context) ApiUnsafeFlushMempoolRequest {
 	return ApiUnsafeFlushMempoolRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -344,24 +342,24 @@ func (a *UnsafeApiService) UnsafeFlushMempool(ctx _context.Context) ApiUnsafeFlu
 
 // Execute executes the request
 //  @return EmptyResponse
-func (a *UnsafeApiService) UnsafeFlushMempoolExecute(r ApiUnsafeFlushMempoolRequest) (EmptyResponse, *_nethttp.Response, error) {
+func (a *UnsafeApiService) UnsafeFlushMempoolExecute(r ApiUnsafeFlushMempoolRequest) (*EmptyResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  EmptyResponse
+		localVarReturnValue  *EmptyResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UnsafeApiService.UnsafeFlushMempool")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/unsafe_flush_mempool"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -390,15 +388,15 @@ func (a *UnsafeApiService) UnsafeFlushMempoolExecute(r ApiUnsafeFlushMempoolRequ
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -416,7 +414,7 @@ func (a *UnsafeApiService) UnsafeFlushMempoolExecute(r ApiUnsafeFlushMempoolRequ
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}

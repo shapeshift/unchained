@@ -56,7 +56,7 @@ func (o *CheckTxResponse) GetError() string {
 // GetErrorOk returns a tuple with the Error field value
 // and a boolean to check if the value has been set.
 func (o *CheckTxResponse) GetErrorOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Error, true
@@ -80,7 +80,7 @@ func (o *CheckTxResponse) GetResult() CheckTxResponseResult {
 // GetResultOk returns a tuple with the Result field value
 // and a boolean to check if the value has been set.
 func (o *CheckTxResponse) GetResultOk() (*CheckTxResponseResult, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Result, true
@@ -104,7 +104,7 @@ func (o *CheckTxResponse) GetId() int32 {
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 func (o *CheckTxResponse) GetIdOk() (*int32, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Id, true
@@ -128,7 +128,7 @@ func (o *CheckTxResponse) GetJsonrpc() string {
 // GetJsonrpcOk returns a tuple with the Jsonrpc field value
 // and a boolean to check if the value has been set.
 func (o *CheckTxResponse) GetJsonrpcOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Jsonrpc, true

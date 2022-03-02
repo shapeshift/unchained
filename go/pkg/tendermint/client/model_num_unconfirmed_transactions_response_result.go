@@ -54,7 +54,7 @@ func (o *NumUnconfirmedTransactionsResponseResult) GetNTxs() string {
 // GetNTxsOk returns a tuple with the NTxs field value
 // and a boolean to check if the value has been set.
 func (o *NumUnconfirmedTransactionsResponseResult) GetNTxsOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.NTxs, true
@@ -78,7 +78,7 @@ func (o *NumUnconfirmedTransactionsResponseResult) GetTotal() string {
 // GetTotalOk returns a tuple with the Total field value
 // and a boolean to check if the value has been set.
 func (o *NumUnconfirmedTransactionsResponseResult) GetTotalOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Total, true
@@ -102,7 +102,7 @@ func (o *NumUnconfirmedTransactionsResponseResult) GetTotalBytes() string {
 // GetTotalBytesOk returns a tuple with the TotalBytes field value
 // and a boolean to check if the value has been set.
 func (o *NumUnconfirmedTransactionsResponseResult) GetTotalBytesOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.TotalBytes, true

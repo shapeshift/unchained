@@ -19,7 +19,7 @@ type BlockLastCommit struct {
 	Height *int32 `json:"height,omitempty"`
 	Round *int32 `json:"round,omitempty"`
 	BlockId *BlockID `json:"block_id,omitempty"`
-	Signatures *[]Commit `json:"signatures,omitempty"`
+	Signatures []Commit `json:"signatures,omitempty"`
 }
 
 // NewBlockLastCommit instantiates a new BlockLastCommit object
@@ -141,12 +141,12 @@ func (o *BlockLastCommit) GetSignatures() []Commit {
 		var ret []Commit
 		return ret
 	}
-	return *o.Signatures
+	return o.Signatures
 }
 
 // GetSignaturesOk returns a tuple with the Signatures field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *BlockLastCommit) GetSignaturesOk() (*[]Commit, bool) {
+func (o *BlockLastCommit) GetSignaturesOk() ([]Commit, bool) {
 	if o == nil || o.Signatures == nil {
 		return nil, false
 	}
@@ -164,7 +164,7 @@ func (o *BlockLastCommit) HasSignatures() bool {
 
 // SetSignatures gets a reference to the given []Commit and assigns it to the Signatures field.
 func (o *BlockLastCommit) SetSignatures(v []Commit) {
-	o.Signatures = &v
+	o.Signatures = v
 }
 
 func (o BlockLastCommit) MarshalJSON() ([]byte, error) {

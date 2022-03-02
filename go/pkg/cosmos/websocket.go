@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"net/url"
 
 	"github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/pkg/errors"
@@ -24,10 +25,14 @@ type WSClient struct {
 }
 
 func NewWebsocketClient(conf Config) (*WSClient, error) {
-	path := fmt.Sprintf("/apikey/%s/websocket", conf.APIKey)
-	url := fmt.Sprintf("wss://%s", conf.RPCURL)
+	wsURL, err := url.Parse(conf.WSURL)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse WSURL: %s", conf.WSURL)
+	}
 
-	txsClient, err := tendermint.NewWS(url, path)
+	path := fmt.Sprintf("/apikey/%s/websocket", conf.APIKey)
+
+	txsClient, err := tendermint.NewWS(wsURL.String(), path)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create websocket client")
 	}

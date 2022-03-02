@@ -56,7 +56,7 @@ func (o *UnconfirmedTransactionsResponseResult) GetNTxs() string {
 // GetNTxsOk returns a tuple with the NTxs field value
 // and a boolean to check if the value has been set.
 func (o *UnconfirmedTransactionsResponseResult) GetNTxsOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.NTxs, true
@@ -80,7 +80,7 @@ func (o *UnconfirmedTransactionsResponseResult) GetTotal() string {
 // GetTotalOk returns a tuple with the Total field value
 // and a boolean to check if the value has been set.
 func (o *UnconfirmedTransactionsResponseResult) GetTotalOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Total, true
@@ -104,7 +104,7 @@ func (o *UnconfirmedTransactionsResponseResult) GetTotalBytes() string {
 // GetTotalBytesOk returns a tuple with the TotalBytes field value
 // and a boolean to check if the value has been set.
 func (o *UnconfirmedTransactionsResponseResult) GetTotalBytesOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.TotalBytes, true
@@ -129,11 +129,11 @@ func (o *UnconfirmedTransactionsResponseResult) GetTxs() []*string {
 // GetTxsOk returns a tuple with the Txs field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *UnconfirmedTransactionsResponseResult) GetTxsOk() (*[]*string, bool) {
+func (o *UnconfirmedTransactionsResponseResult) GetTxsOk() ([]*string, bool) {
 	if o == nil || o.Txs == nil {
 		return nil, false
 	}
-	return &o.Txs, true
+	return o.Txs, true
 }
 
 // SetTxs sets field value

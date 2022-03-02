@@ -74,15 +74,13 @@ func (b BaseAccount) pubkey() string {
 	return b.Pubkey
 }
 
-// Contains info about pagination for large sets of data
+// Contains info about pagination metadata
 // swagger:model Pagination
 type Pagination struct {
+	// Base64 encoded string to fetch next page or undefined if no more data avaiable
 	// required: true
-	// example: 1
-	Page int `json:"page"`
-	// required: true
-	// example: 10
-	TotalPages int `json:"totalPages"`
+	// example: d2l0aGRyYXdfZGVsZWdhdG9yX3Jld2FyZA==
+	Cursor string `json:"cursor,omitempty"`
 }
 
 type Tx interface {
@@ -109,12 +107,15 @@ type TxHistory interface {
 	txs() []Tx
 }
 
+// Contains info about required base transaction history details
+// swagger:model BaseTxHistory
 type BaseTxHistory struct {
 	// swagger:allOf
 	Pagination
 	// required: true
 	Pubkey string `json:"pubkey"`
-	Txs    []Tx   `json:"txs"`
+	// required: true
+	Txs []Tx `json:"txs"`
 }
 
 func (b BaseTxHistory) pubkey() string {
@@ -126,9 +127,9 @@ func (b BaseTxHistory) txs() []Tx {
 }
 
 type TxBody struct {
-	// Raw transaction hex
+	// Raw transaction
 	// required: true
-	Hex string `json:"hex"`
+	RawTx string `json:"rawTx"`
 }
 
 // swagger:parameters GetAccount
@@ -142,10 +143,10 @@ type PubkeyParam struct {
 // swagger:parameters GetTxHistory
 type PaginatedPubkeyParam struct {
 	PubkeyParam
-	// Page number (default 1)
+	// Pagination cursor from previous response or empty string for first page fetch
 	// in: query
-	Page int `json:"page"`
-	// Page size (default 25)
+	Cursor string `json:"cursor"`
+	// Page size
 	// in: query
 	PageSize int `json:"pageSize"`
 }
@@ -165,6 +166,6 @@ type TransactionHash string
 type BaseAPI interface {
 	GetInfo() (Info, error)
 	GetAccount(pubkey string) (Account, error)
-	GetTxHistory(pubkey string, page int, pageSize int) (TxHistory, error)
+	GetTxHistory(pubkey string, cursor string, pageSize int) (TxHistory, error)
 	SendTx(hex string) (string, error)
 }

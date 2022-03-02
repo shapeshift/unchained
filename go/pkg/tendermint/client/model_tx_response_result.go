@@ -58,7 +58,7 @@ func (o *TxResponseResult) GetHash() string {
 // GetHashOk returns a tuple with the Hash field value
 // and a boolean to check if the value has been set.
 func (o *TxResponseResult) GetHashOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Hash, true
@@ -82,7 +82,7 @@ func (o *TxResponseResult) GetHeight() string {
 // GetHeightOk returns a tuple with the Height field value
 // and a boolean to check if the value has been set.
 func (o *TxResponseResult) GetHeightOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Height, true
@@ -106,7 +106,7 @@ func (o *TxResponseResult) GetIndex() int32 {
 // GetIndexOk returns a tuple with the Index field value
 // and a boolean to check if the value has been set.
 func (o *TxResponseResult) GetIndexOk() (*int32, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Index, true
@@ -130,7 +130,7 @@ func (o *TxResponseResult) GetTxResult() TxResponseResultTxResult {
 // GetTxResultOk returns a tuple with the TxResult field value
 // and a boolean to check if the value has been set.
 func (o *TxResponseResult) GetTxResultOk() (*TxResponseResultTxResult, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.TxResult, true
@@ -154,7 +154,7 @@ func (o *TxResponseResult) GetTx() string {
 // GetTxOk returns a tuple with the Tx field value
 // and a boolean to check if the value has been set.
 func (o *TxResponseResult) GetTxOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Tx, true

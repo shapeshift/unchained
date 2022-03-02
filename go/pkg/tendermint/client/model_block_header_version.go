@@ -52,7 +52,7 @@ func (o *BlockHeaderVersion) GetBlock() string {
 // GetBlockOk returns a tuple with the Block field value
 // and a boolean to check if the value has been set.
 func (o *BlockHeaderVersion) GetBlockOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Block, true
@@ -76,7 +76,7 @@ func (o *BlockHeaderVersion) GetApp() string {
 // GetAppOk returns a tuple with the App field value
 // and a boolean to check if the value has been set.
 func (o *BlockHeaderVersion) GetAppOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.App, true

@@ -59,7 +59,7 @@ func (o *CheckTxResponseResult) GetCode() string {
 // GetCodeOk returns a tuple with the Code field value
 // and a boolean to check if the value has been set.
 func (o *CheckTxResponseResult) GetCodeOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Code, true
@@ -83,7 +83,7 @@ func (o *CheckTxResponseResult) GetData() string {
 // GetDataOk returns a tuple with the Data field value
 // and a boolean to check if the value has been set.
 func (o *CheckTxResponseResult) GetDataOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Data, true
@@ -107,7 +107,7 @@ func (o *CheckTxResponseResult) GetLog() string {
 // GetLogOk returns a tuple with the Log field value
 // and a boolean to check if the value has been set.
 func (o *CheckTxResponseResult) GetLogOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Log, true
@@ -216,7 +216,7 @@ func (o *CheckTxResponseResult) SetGasUsed(v string) {
 
 // GetEvents returns the Events field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *CheckTxResponseResult) GetEvents() []BlockResultsResponseResultEvents {
-	if o == nil  {
+	if o == nil {
 		var ret []BlockResultsResponseResultEvents
 		return ret
 	}
@@ -226,11 +226,11 @@ func (o *CheckTxResponseResult) GetEvents() []BlockResultsResponseResultEvents {
 // GetEventsOk returns a tuple with the Events field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *CheckTxResponseResult) GetEventsOk() (*[]BlockResultsResponseResultEvents, bool) {
+func (o *CheckTxResponseResult) GetEventsOk() ([]BlockResultsResponseResultEvents, bool) {
 	if o == nil || o.Events == nil {
 		return nil, false
 	}
-	return &o.Events, true
+	return o.Events, true
 }
 
 // HasEvents returns a boolean if a field has been set.

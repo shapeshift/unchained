@@ -62,7 +62,7 @@ func (o *ConsensusStateResponseResultRoundState) GetHeightRoundStep() string {
 // GetHeightRoundStepOk returns a tuple with the HeightRoundStep field value
 // and a boolean to check if the value has been set.
 func (o *ConsensusStateResponseResultRoundState) GetHeightRoundStepOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.HeightRoundStep, true
@@ -86,7 +86,7 @@ func (o *ConsensusStateResponseResultRoundState) GetStartTime() string {
 // GetStartTimeOk returns a tuple with the StartTime field value
 // and a boolean to check if the value has been set.
 func (o *ConsensusStateResponseResultRoundState) GetStartTimeOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.StartTime, true
@@ -110,7 +110,7 @@ func (o *ConsensusStateResponseResultRoundState) GetProposalBlockHash() string {
 // GetProposalBlockHashOk returns a tuple with the ProposalBlockHash field value
 // and a boolean to check if the value has been set.
 func (o *ConsensusStateResponseResultRoundState) GetProposalBlockHashOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.ProposalBlockHash, true
@@ -134,7 +134,7 @@ func (o *ConsensusStateResponseResultRoundState) GetLockedBlockHash() string {
 // GetLockedBlockHashOk returns a tuple with the LockedBlockHash field value
 // and a boolean to check if the value has been set.
 func (o *ConsensusStateResponseResultRoundState) GetLockedBlockHashOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.LockedBlockHash, true
@@ -158,7 +158,7 @@ func (o *ConsensusStateResponseResultRoundState) GetValidBlockHash() string {
 // GetValidBlockHashOk returns a tuple with the ValidBlockHash field value
 // and a boolean to check if the value has been set.
 func (o *ConsensusStateResponseResultRoundState) GetValidBlockHashOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.ValidBlockHash, true
@@ -181,11 +181,11 @@ func (o *ConsensusStateResponseResultRoundState) GetHeightVoteSet() []ConsensusS
 
 // GetHeightVoteSetOk returns a tuple with the HeightVoteSet field value
 // and a boolean to check if the value has been set.
-func (o *ConsensusStateResponseResultRoundState) GetHeightVoteSetOk() (*[]ConsensusStateResponseResultRoundStateHeightVoteSet, bool) {
-	if o == nil  {
+func (o *ConsensusStateResponseResultRoundState) GetHeightVoteSetOk() ([]ConsensusStateResponseResultRoundStateHeightVoteSet, bool) {
+	if o == nil {
 		return nil, false
 	}
-	return &o.HeightVoteSet, true
+	return o.HeightVoteSet, true
 }
 
 // SetHeightVoteSet sets field value
@@ -206,7 +206,7 @@ func (o *ConsensusStateResponseResultRoundState) GetProposer() ConsensusStateRes
 // GetProposerOk returns a tuple with the Proposer field value
 // and a boolean to check if the value has been set.
 func (o *ConsensusStateResponseResultRoundState) GetProposerOk() (*ConsensusStateResponseResultRoundStateProposer, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Proposer, true
