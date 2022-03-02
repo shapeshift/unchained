@@ -290,14 +290,14 @@ func (a *API) SendTx(w http.ResponseWriter, r *http.Request) {
 //   422: ValidationError
 //   500: InternalServerError
 func (a *API) EstimateGas(w http.ResponseWriter, r *http.Request) {
-	rawTx := &api.TxBody{}
+	body := &api.TxBody{}
 
-	err := json.NewDecoder(r.Body).Decode(rawTx)
+	err := json.NewDecoder(r.Body).Decode(body)
 	if err != nil {
 		api.HandleError(w, http.StatusBadRequest, "invalid post body")
 		return
 	}
-	estimatedGas, err := a.handler.EstimateGas(rawTx.Hex)
+	estimatedGas, err := a.handler.EstimateGas(body.Hex)
 	if err != nil {
 		api.HandleError(w, http.StatusInternalServerError, err.Error())
 		return

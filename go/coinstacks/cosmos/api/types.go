@@ -69,7 +69,3 @@ type TxHistory struct {
 	// required: true
 	Txs []Tx `json:"txs"`
 }
-
-// Contains info about gas Amount
-// swagger:model GasAmount
-type GasAmount string
