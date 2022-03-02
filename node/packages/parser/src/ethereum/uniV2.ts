@@ -1,7 +1,7 @@
-import { ethers } from 'ethers'
-import { Tx } from '@shapeshiftoss/blockbook'
 import { caip19 } from '@shapeshiftoss/caip'
 import { ChainTypes, ContractTypes } from '@shapeshiftoss/types'
+import { Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
+import { ethers } from 'ethers'
 import { GenericParser, Transfer, TransferType, TxSpecific, UniV2Tx } from '../types'
 import { Network } from './types'
 import UNIV2_ABI from './abi/uniV2'
@@ -14,7 +14,7 @@ export interface ParserArgs {
   provider: ethers.providers.JsonRpcProvider
 }
 
-export class Parser implements GenericParser {
+export class Parser implements GenericParser<BlockbookTx> {
   abiInterface = new ethers.utils.Interface(UNIV2_ABI)
   network: Network
   provider: ethers.providers.JsonRpcProvider
@@ -35,7 +35,7 @@ export class Parser implements GenericParser {
     }[this.network]
   }
 
-  async parse(tx: Tx): Promise<TxSpecific<UniV2Tx> | undefined> {
+  async parse(tx: BlockbookTx): Promise<TxSpecific<UniV2Tx> | undefined> {
     if (!tx.ethereumSpecific?.data) return
     if (!txInteractsWithContract(tx, UNI_V2_ROUTER_CONTRACT)) return
     if (!(tx.confirmations === 0)) return
@@ -60,7 +60,7 @@ export class Parser implements GenericParser {
     return ethers.utils.getCreate2Address(factoryContract, salt, initCodeHash)
   }
 
-  private async getTransfers(tx: Tx): Promise<Transfer[] | undefined> {
+  private async getTransfers(tx: BlockbookTx): Promise<Transfer[] | undefined> {
     const data = tx.ethereumSpecific?.data
     if (!data) return
     const sendAddress = tx.vin[0].addresses?.[0] ?? ''
