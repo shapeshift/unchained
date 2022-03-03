@@ -1,27 +1,23 @@
 import { BigNumber } from 'bignumber.js'
-import { caip2, caip19 } from '@shapeshiftoss/caip'
-import { ChainTypes } from '@shapeshiftoss/types'
+import { caip19, CAIP2 } from '@shapeshiftoss/caip'
+import { cosmos } from '@shapeshiftoss/unchained-client'
 import { Tx as ParseTx, Status, TransferType } from '../types'
 import { aggregateTransfer } from '../utils'
-import { Tx, Network } from './types'
-import { toNetworkType } from './utils'
-
-export * from './types'
+import { ChainTypes, NetworkTypes } from '@shapeshiftoss/types'
 
 export interface TransactionParserArgs {
-  network?: Network
-  rpcUrl: string
+  chainId: CAIP2
 }
 
 export class TransactionParser {
-  network: Network
+  chainId: CAIP2
 
   constructor(args: TransactionParserArgs) {
-    this.network = args.network ?? 'mainnet'
+    this.chainId = args.chainId
   }
 
-  async parse(tx: Tx, address: string): Promise<ParseTx> {
-    const caip19Cosmos = caip19.toCAIP19({ chain: ChainTypes.Cosmos, network: toNetworkType(this.network) })
+  async parse(tx: cosmos.Tx, address: string): Promise<ParseTx> {
+    const caip19Cosmos = caip19.toCAIP19({ chain: ChainTypes.Cosmos, network: NetworkTypes.COSMOSHUB_MAINNET })
 
     const blockHeight = Number(tx.blockHeight)
     const blockTime = Number(tx.timestamp)
@@ -31,7 +27,7 @@ export class TransactionParser {
       blockHash: tx.blockHash,
       blockHeight: isNaN(blockHeight) ? -1 : blockHeight,
       blockTime: isNaN(blockTime) ? -1 : blockTime,
-      caip2: caip2.toCAIP2({ chain: ChainTypes.Cosmos, network: toNetworkType(this.network) }),
+      caip2: this.chainId,
       confirmations: -1, // TODO: confirmations not tracked by cosmos coinstack
       status: Status.Confirmed, // no mempool provided by cosmos coinstack currently, and can be inferred from confirmations when added
       transfers: [],

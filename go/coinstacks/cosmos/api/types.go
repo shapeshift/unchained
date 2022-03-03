@@ -56,9 +56,9 @@ type Tx struct {
 	// required: true
 	// 123456789
 	Value string `json:"value"`
-	// swagger:allOf
+	// required: true
 	Messages []cosmos.Message `json:"messages"`
-	// swagger:allOf
+	// required: true
 	Events []cosmos.Event `json:"events"`
 }
 

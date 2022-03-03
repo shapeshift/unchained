@@ -1,30 +1,29 @@
 import WebSocket from 'isomorphic-ws'
 import type { ErrorResponse, RequestPayload, Topics, TxsTopicData } from '@shapeshiftoss/common-api'
-import type { SequencedTx } from '@shapeshiftoss/unchained-tx-parser'
 
 export interface Connection {
   ws: WebSocket
   pingTimeout?: NodeJS.Timeout
 }
 
-export interface TransactionMessage {
+export interface TransactionMessage<T> {
   subscriptionId: string
-  data: SequencedTx
+  data: T
 }
 
-export interface TxsParams {
+export interface TxsParams<T> {
   data: TxsTopicData | undefined
-  onMessage: (message: SequencedTx) => void
+  onMessage: (message: T) => void
   onError?: (err: ErrorResponse) => void
 }
 
 export type SubscriptionId = string
 
-export class Client {
+export class Client<T> {
   private readonly url: string
   private readonly connections: Record<Topics, Connection | undefined>
 
-  private txs: Record<SubscriptionId, TxsParams> = {}
+  private txs: Record<SubscriptionId, TxsParams<T>> = {}
 
   constructor(url: string) {
     this.url = url
@@ -62,7 +61,7 @@ export class Client {
   async subscribeTxs(
     subscriptionId: string,
     data: TxsTopicData,
-    onMessage: (message: SequencedTx) => void,
+    onMessage: (message: T) => void,
     onError?: (err: ErrorResponse) => void
   ): Promise<void> {
     // keep track of the onMessage and onError handlers associated with each subscriptionId
@@ -103,21 +102,20 @@ export class Client {
 
     ws.onmessage = (event) => {
       if (!event) return
-
-      // TODO: check event.type and handle non desired messages separately (noop)
+      if (event.type !== 'message') return
 
       try {
-        const message = JSON.parse(event.data.toString()) as TransactionMessage | ErrorResponse
+        const message = JSON.parse(event.data.toString()) as TransactionMessage<T> | ErrorResponse
 
         // narrow type to ErrorResponse if key `type` exists and forward to correct onError handler
         if ('type' in message) {
-          const onErrorHandler = this.txs[message.subscriptionId]?.onError
+          const onErrorHandler = this.txs[message.subscriptionId || subscriptionId]?.onError
           onErrorHandler && onErrorHandler(message)
           return
         }
 
         // forward the transaction message to the correct onMessage handler
-        const onMessageHandler = this.txs[message.subscriptionId]?.onMessage
+        const onMessageHandler = this.txs[message.subscriptionId || subscriptionId]?.onMessage
         onMessageHandler && onMessageHandler(message.data)
       } catch (err) {
         console.log(`failed to handle onmessage event: ${JSON.stringify(event)}: ${err}`)

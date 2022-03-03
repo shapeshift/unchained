@@ -2,6 +2,7 @@ package cosmos
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/url"
@@ -9,13 +10,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/websocket"
-	"github.com/tendermint/tendermint/libs/json"
+	tendermintjson "github.com/tendermint/tendermint/libs/json"
 	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 	tendermint "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 	"github.com/tendermint/tendermint/types"
 )
 
-type TxHandlerFunc = func(tx types.EventDataTx) ([]byte, []string, error)
+type TxHandlerFunc = func(tx types.EventDataTx) (interface{}, []string, error)
 
 type WSClient struct {
 	*websocket.Registry
@@ -87,7 +88,7 @@ func (ws *WSClient) listenTxs() {
 		}
 
 		result := &coretypes.ResultEvent{}
-		if err := json.Unmarshal(r.Result, result); err != nil {
+		if err := tendermintjson.Unmarshal(r.Result, result); err != nil {
 			logger.Errorf("failed to unmarshal tx message: %v", err)
 			continue
 		}
@@ -104,9 +105,15 @@ func (ws *WSClient) listenTxs() {
 }
 
 func (ws *WSClient) handleTx(tx types.EventDataTx) {
-	msg, addrs, err := ws.txHandler(tx)
+	data, addrs, err := ws.txHandler(tx)
 	if err != nil {
 		logger.Errorf("failed to handle tx: %v", err)
+		return
+	}
+
+	msg, err := json.Marshal(websocket.MessageResponse{Data: data})
+	if err != nil {
+		logger.Errorf("failed to marshal tx message: %v", err)
 		return
 	}
 

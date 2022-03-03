@@ -20,15 +20,23 @@ const (
 var logger = log.WithoutFields()
 
 type RequestPayload struct {
-	SubscriptionID string   `json:"subscriptionId"`
-	Method         string   `json:"method"`
-	Data           []string `json:"data"`
+	SubscriptionID string `json:"subscriptionId"`
+	Method         string `json:"method"`
+	Data           struct {
+		Topic     string   `json:"topic"`
+		Addresses []string `json:"addresses"`
+	} `json:"data"`
 }
 
 type ErrorResponse struct {
 	SubscriptionID string `json:"subscriptionId"`
 	Type           string `json:"type"`
 	Message        string `json:"message"`
+}
+
+type MessageResponse struct {
+	SubscriptionID string      `json:"subscriptionId"`
+	Data           interface{} `json:"data"`
 }
 
 // Connection represents a single websocket connection on the unchained api server
@@ -127,15 +135,15 @@ func (c *Connection) read() {
 
 		r := &RequestPayload{}
 		if err := json.Unmarshal(msg, r); err != nil {
-			logger.Errorf("failed to parse message: %v", err)
+			c.writeError(fmt.Sprintf("failed to parse message: %v", err), "")
 			continue
 		}
 
 		switch r.Method {
 		case "subscribe":
-			c.handler.Subscribe(c.clientID, r.Data, c.msgChan)
+			c.handler.Subscribe(c.clientID, r.Data.Addresses, c.msgChan)
 		case "unsubscribe":
-			c.handler.Unsubscribe(c.clientID, r.Data, c.msgChan)
+			c.handler.Unsubscribe(c.clientID, r.Data.Addresses, c.msgChan)
 		default:
 			c.writeError(fmt.Sprintf("%s method not implemented", r.Method), r.SubscriptionID)
 		}
