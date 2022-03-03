@@ -17,6 +17,6 @@
     "@shapeshiftoss/logger": "^1.0.0",
     "@shapeshiftoss/thorchain": "^5.2.0",
     "@shapeshiftoss/unchained-tx-parser": "^5.2.0",
-    "axios": "^0.21.2"
+    "axios": "^0.26.0"
   }
 }
