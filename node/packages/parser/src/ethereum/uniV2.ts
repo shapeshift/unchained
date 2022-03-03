@@ -1,4 +1,4 @@
-import { caip19, AssetNamespace, AssetReference } from '@shapeshiftoss/caip'
+import { caip19, AssetNamespace } from '@shapeshiftoss/caip'
 import { ChainTypes } from '@shapeshiftoss/types'
 import { Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { ethers } from 'ethers'

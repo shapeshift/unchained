@@ -95,7 +95,7 @@ export class TransactionParser {
       chain: ChainTypes.Ethereum,
       network: toNetworkType(this.network),
       assetNamespace: AssetNamespace.Slip44,
-      AssetReference: AssetReference.Ethereum,
+      assetReference: AssetReference.Ethereum,
     })
     const sendAddress = tx.vin[0].addresses?.[0] ?? ''
     const receiveAddress = tx.vout[0].addresses?.[0] ?? ''
