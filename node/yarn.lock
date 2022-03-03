@@ -2167,10 +2167,10 @@
   resolved "https://registry.yarnpkg.com/@pulumi/query/-/query-0.3.0.tgz#f496608e86a18c3dd31b6c533408e2441c29071d"
   integrity sha512-xfo+yLRM2zVjVEA4p23IjQWzyWl1ZhWOGobsBqRpIarzLvwNH/RAGaoehdxlhx4X92302DrpdIFgTICMN4P38w==
 
-"@shapeshiftoss/caip@^1.11.1":
-  version "1.11.1"
-  resolved "https://registry.yarnpkg.com/@shapeshiftoss/caip/-/caip-1.11.1.tgz#3b81f4c8973b4d9af635256e2abbf993aa577eac"
-  integrity sha512-8Cqn/4tqpNJDL6RHD2duQGe2U289I0A7gGp7bPQGMbtvy7cr5LIwo5nrPIuYfZUl2h1hvpyoVFkjkGWGMiqdRA==
+"@shapeshiftoss/caip@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@shapeshiftoss/caip/-/caip-2.0.0.tgz#6aba7a86eb0cb27576ae6d62dd9257e3d754d8a1"
+  integrity sha512-R3KpNrJFF4hibcZpBD81ANKJWmj5HuvYtVg59UVccUYWU3eNn5SNYkl+zukDvSnXcewwzJ0ukpcKHeSictpe6A==
 
 "@shapeshiftoss/cluster-launcher@0.7.2":
   version "0.7.2"
@@ -2188,10 +2188,10 @@
   resolved "https://registry.yarnpkg.com/@shapeshiftoss/logger/-/logger-1.0.1.tgz#fc9d9f68a626e526bd55053dbd56b14e4b63edf1"
   integrity sha512-xxAHoUozg1WtSI6XzaPAJDFJOkMkWIAWKUCadwIMXHYjxP9FPYWoOBcwftnb5B81gZyxT6FEScIduwNq2laH+Q==
 
-"@shapeshiftoss/types@^1.23.0":
-  version "1.23.0"
-  resolved "https://registry.yarnpkg.com/@shapeshiftoss/types/-/types-1.23.0.tgz#d9d542616fa927244591ebe8d405006ebb2fe5db"
-  integrity sha512-itqM2tN5/2ZlQEYbZMHGVYzwb6eYWDp9FnNUUuRAljkTG8OFRhNoQtg97K+d+t4NwZT486RA/D6PD+B8MHd72g==
+"@shapeshiftoss/types@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@shapeshiftoss/types/-/types-2.0.0.tgz#de64b40bc777551d83c0938a319ba805069caf10"
+  integrity sha512-1NOcxKikRX9T8JRu6d+cSvaWscrnVzqanOrDhPkCzDfjmqZQ5JgVR1dz7bTN6s83oZiRcM80zAIfX9lJ06cHTg==
 
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
