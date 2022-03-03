@@ -33,11 +33,11 @@ aliases:
     mongo-cpu-limit: 512m
     mongo-memory-limit: 512Mi
     mongo-replicas: 3
-    mongo-storage-size: 10Gi
+    mongo-storage-size: 5Gi
     mongo-url: mongodb://bitcoin-mongodb-0.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017,bitcoin-mongodb-1.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017,bitcoin-mongodb-2.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
     rabbit-cpu-limit: "2"
     rabbit-memory-limit: "8Gi"
-    rabbit-storage-size: "10Gi"
+    rabbit-storage-size: "5Gi"
     indexer-cpu-limit: "4"
     indexer-memory-limit: 24Gi
     indexer-replicas: 2
@@ -94,11 +94,11 @@ aliases:
     mongo-cpu-limit: 512m
     mongo-memory-limit: 512Mi
     mongo-replicas: 3
-    mongo-storage-size: 10Gi
+    mongo-storage-size: 5Gi
     mongo-url: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-2.ethereum-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
     rabbit-cpu-limit: "2"
     rabbit-memory-limit: "8Gi"
-    rabbit-storage-size: "10Gi"
+    rabbit-storage-size: "5Gi"
     indexer-cpu-limit: "4"
     indexer-memory-limit: 12Gi
     indexer-replicas: 2
@@ -155,11 +155,11 @@ aliases:
     mongo-cpu-limit: 512m
     mongo-memory-limit: 512Mi
     mongo-replicas: 3
-    mongo-storage-size: 10Gi
+    mongo-storage-size: 5Gi
     mongo-url: mongodb://ethereum-ropsten-mongodb-0.ethereum-ropsten-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-ropsten-mongodb-1.ethereum-ropsten-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-ropsten-mongodb-2.ethereum-ropsten-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
     rabbit-cpu-limit: "1"
     rabbit-memory-limit: "4Gi"
-    rabbit-storage-size: "10Gi"
+    rabbit-storage-size: "5Gi"
     indexer-cpu-limit: "4"
     indexer-memory-limit: 12Gi
     indexer-replicas: 2
@@ -788,6 +788,7 @@ workflows:
           name: deploy bitcoin develop (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
+          daemon-storage-size: 650Gi
           requires:
             - deploy dependencies (shapeshift)
           <<: *bitcoin-dev
@@ -797,6 +798,7 @@ workflows:
           name: deploy ethereum develop (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
+          indexer-storage-size: 300Gi
           requires:
             - deploy dependencies (shapeshift)
           <<: *ethereum-dev
@@ -806,6 +808,8 @@ workflows:
           name: deploy ethereum-ropsten develop (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
+          indexer-storage-size: 50Gi
+          daemon-storage-size: 300Gi
           requires:
             - deploy dependencies (shapeshift)
           <<: *ethereum-ropsten-dev
