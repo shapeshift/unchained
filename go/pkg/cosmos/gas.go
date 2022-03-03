@@ -3,9 +3,10 @@ package cosmos
 import (
 	"encoding/base64"
 	"encoding/json"
+	"strconv"
+
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/pkg/errors"
-	"strconv"
 )
 
 func (c *HTTPClient) GetEstimateGas(txBytes []byte) (string, error) {

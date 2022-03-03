@@ -126,6 +126,7 @@ func (b BaseTxHistory) txs() []Tx {
 	return b.Txs
 }
 
+// swagger:parameters GetEstimateGas
 type TxBody struct {
 	// Raw transaction
 	// required: true

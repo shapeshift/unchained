@@ -188,6 +188,6 @@ func (h *Handler) SendTx(rawTx string) (string, error) {
 	return h.httpClient.BroadcastTx([]byte(rawTx))
 }
 
-func (h *Handler) EstimateGas(hex string) (string, error) {
-	return h.httpClient.GetEstimateGas([]byte(hex))
+func (h *Handler) EstimateGas(rawTx string) (string, error) {
+	return h.httpClient.GetEstimateGas([]byte(rawTx))
 }
