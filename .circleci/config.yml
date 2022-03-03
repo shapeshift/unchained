@@ -213,9 +213,10 @@ aliases:
     coinstack: cosmos
     pulumi-stack: public
     pulumi-dir: coinstacks/cosmos/pulumi
-    lcd-url: cosmoshub-4--lcd--archive.datahub.figment.io
+    lcd-url: https://cosmoshub-4--lcd--archive.datahub.figment.io
     grpc-url: cosmoshub-4--grpc--archive.grpc.datahub.figment.io:443
-    rpc-url: cosmoshub-4--rpc--archive.datahub.figment.io
+    rpc-url: https://cosmoshub-4--rpc--archive.datahub.figment.io
+    ws-url: wss://cosmoshub-4--rpc--archive.datahub.figment.io
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -643,6 +644,8 @@ jobs:
         type: string
       rpc-url:
         type: string
+      ws-url:
+        type: string
       api-autoscaling:
         type: boolean
       api-cpu-threshold:
@@ -668,6 +671,7 @@ jobs:
             echo 'export LCD_URL=<< parameters.lcd-url >>' >> $BASH_ENV
             echo 'export GRPC_URL=<< parameters.grpc-url >>' >> $BASH_ENV
             echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
+            echo 'export WS_URL=<< parameters.ws-url >>' >> $BASH_ENV
             echo 'export API_KEY=$<< parameters.organization >>_DATAHUB_API_KEY' >> $BASH_ENV
       - run:
           name: pulumi
