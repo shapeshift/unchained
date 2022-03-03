@@ -1,5 +1,5 @@
-import { caip19 } from '@shapeshiftoss/caip'
-import { ChainTypes, ContractTypes } from '@shapeshiftoss/types'
+import { caip19, AssetNamespace } from '@shapeshiftoss/caip'
+import { ChainTypes } from '@shapeshiftoss/types'
 import { Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { ethers } from 'ethers'
 import { GenericParser, Transfer, TransferType, TxSpecific, UniV2Tx } from '../types'
@@ -84,8 +84,8 @@ export class Parser implements GenericParser<BlockbookTx> {
             caip19: caip19.toCAIP19({
               chain: ChainTypes.Ethereum,
               network: toNetworkType(this.network),
-              contractType: ContractTypes.ERC20,
-              tokenId: tokenAddress,
+              assetNamespace: AssetNamespace.ERC20,
+              assetReference: tokenAddress,
             }),
             totalValue: value,
             components: [{ value }],
@@ -112,8 +112,8 @@ export class Parser implements GenericParser<BlockbookTx> {
             caip19: caip19.toCAIP19({
               chain: ChainTypes.Ethereum,
               network: toNetworkType(this.network),
-              contractType: ContractTypes.ERC20,
-              tokenId: lpTokenAddress,
+              assetNamespace: AssetNamespace.ERC20,
+              assetReference: lpTokenAddress,
             }),
             totalValue: value,
             components: [{ value }],
