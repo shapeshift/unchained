@@ -811,7 +811,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy ethereum-ropsten develop (shapeshift)
           organization: SHAPESHIFT
-          pulumi-command: up -f --yes
+          pulumi-command: destroy -f --yes
           indexer-storage-size: 50Gi
           daemon-storage-size: 300Gi
           requires:
@@ -873,7 +873,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy ethereum-ropsten develop (taxistake)
           organization: TAXISTAKE
-          pulumi-command: up -f --yes
+          pulumi-command: destroy -f --yes
           requires:
             - deploy dependencies (taxistake)
           <<: *ethereum-ropsten-dev
