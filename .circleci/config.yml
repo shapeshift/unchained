@@ -12,12 +12,14 @@ aliases:
         ignore:
           - main
           - develop
+          - remove-ropsten
 
   - &only-develop
     filters:
       branches:
         only:
           - develop
+          - remove-ropsten
 
   - &only-main
     filters:
