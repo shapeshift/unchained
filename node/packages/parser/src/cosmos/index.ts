@@ -1,5 +1,5 @@
 import { BigNumber } from 'bignumber.js'
-import { caip2, caip19 } from '@shapeshiftoss/caip'
+import { caip2, caip19, AssetNamespace, AssetReference } from '@shapeshiftoss/caip'
 import { ChainTypes } from '@shapeshiftoss/types'
 import { Tx as ParseTx, Status, TransferType } from '../types'
 import { aggregateTransfer } from '../utils'
@@ -21,7 +21,12 @@ export class TransactionParser {
   }
 
   async parse(tx: Tx, address: string): Promise<ParseTx> {
-    const caip19Cosmos = caip19.toCAIP19({ chain: ChainTypes.Cosmos, network: toNetworkType(this.network) })
+    const caip19Cosmos = caip19.toCAIP19({
+      chain: ChainTypes.Cosmos,
+      network: toNetworkType(this.network),
+      assetNamespace: AssetNamespace.Slip44,
+      assetReference: AssetReference.Cosmos,
+    })
 
     const blockHeight = Number(tx.blockHeight)
     const blockTime = Number(tx.timestamp)
