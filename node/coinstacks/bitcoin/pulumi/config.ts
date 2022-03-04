@@ -62,6 +62,7 @@ export const getConfig = async (): Promise<BitcoinConfig> => {
     if (!config.api.autoscaling.maxReplicas) missingRequiredConfig.push('api.autoscaling.maxReplicas')
     if (!config.api.autoscaling.cpuThreshold) missingRequiredConfig.push('api.autoscaling.cpuThreshold')
     if (!config.api.cpuLimit) missingRequiredConfig.push('api.cpuLimit')
+    if (!config.api.cpuRequest) missingRequiredConfig.push('api.cpuRequest')
     if (!config.api.memoryLimit) missingRequiredConfig.push('api.memoryLimit')
     if (!config.api.replicas) missingRequiredConfig.push('api.replicas')
   }
@@ -70,6 +71,7 @@ export const getConfig = async (): Promise<BitcoinConfig> => {
     config.mongo.storageClass = getStorageClassName(config.cluster)
 
     if (!config.mongo.cpuLimit) missingRequiredConfig.push('mongo.cpuLimit')
+    if (!config.mongo.cpuRequest) missingRequiredConfig.push('mongo.cpuRequest')
     if (!config.mongo.helmChartVersion) missingRequiredConfig.push('mongo.helmChartVersion')
     if (!config.mongo.memoryLimit) missingRequiredConfig.push('mongo.memoryLimit')
     if (!config.mongo.replicaCount) missingRequiredConfig.push('mongo.replicaCount')
@@ -80,6 +82,7 @@ export const getConfig = async (): Promise<BitcoinConfig> => {
     config.indexer.storageClass = getStorageClassName(config.cluster)
 
     if (!config.indexer.cpuLimit) missingRequiredConfig.push('indexer.cpuLimit')
+    if (!config.indexer.cpuRequest) missingRequiredConfig.push('indexer.cpuRequest')
     if (!config.indexer.memoryLimit) missingRequiredConfig.push('indexer.memoryLimit')
     if (!config.indexer.replicas) missingRequiredConfig.push('indexer.replicas')
     if (!config.indexer.storageSize) missingRequiredConfig.push('indexer.storageSize')
@@ -89,6 +92,7 @@ export const getConfig = async (): Promise<BitcoinConfig> => {
     config.indexer.daemon.storageClass = getStorageClassName(config.cluster)
 
     if (!config.indexer.daemon.cpuLimit) missingRequiredConfig.push('indexer.daemon.cpuLimit')
+    if (!config.indexer.daemon.cpuRequest) missingRequiredConfig.push('indexer.daemon.cpuRequest')
     if (!config.indexer.daemon.image) missingRequiredConfig.push('indexer.daemon.image')
     if (!config.indexer.daemon.memoryLimit) missingRequiredConfig.push('indexer.daemon.memoryLimit')
     if (!config.indexer.daemon.storageSize) missingRequiredConfig.push('indexer.daemon.storageSize')
@@ -99,6 +103,7 @@ export const getConfig = async (): Promise<BitcoinConfig> => {
     if (!config.ingester.autoscaling.maxReplicas) missingRequiredConfig.push('ingester.autoscaling.maxReplicas')
     if (!config.ingester.autoscaling.cpuThreshold) missingRequiredConfig.push('ingester.autoscaling.cpuThreshold')
     if (!config.ingester.cpuLimit) missingRequiredConfig.push('ingester.cpuLimit')
+    if (!config.ingester.cpuRequest) missingRequiredConfig.push('ingester.cpuRequest')
     if (!config.ingester.memoryLimit) missingRequiredConfig.push('ingester.memoryLimit')
     if (!config.ingester.replicas) missingRequiredConfig.push('ingester.replicas')
   }
@@ -107,6 +112,7 @@ export const getConfig = async (): Promise<BitcoinConfig> => {
     config.rabbit.storageClassName = getStorageClassName(config.cluster)
 
     if (!config.rabbit.cpuLimit) missingRequiredConfig.push('rabbit.cpuLimit')
+    if (!config.rabbit.cpuRequest) missingRequiredConfig.push('rabbit.cpuRequest')
     if (!config.rabbit.memoryLimit) missingRequiredConfig.push('rabbit.memoryLimit')
     if (!config.rabbit.storageSize) missingRequiredConfig.push('rabbit.storageSize')
   }

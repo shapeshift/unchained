@@ -5,6 +5,7 @@ import { Config } from '@shapeshiftoss/common-pulumi'
 
 interface DaemonConfig {
   cpuLimit: string
+  cpuRequest: string
   image: string
   memoryLimit: string
   storageClass: 'gp2' | 'hostpath' | 'standard'
@@ -13,6 +14,7 @@ interface DaemonConfig {
 
 export interface IndexerConfig {
   cpuLimit: string
+  cpuRequest: string
   daemon?: DaemonConfig
   memoryLimit: string
   replicas: number
@@ -128,6 +130,9 @@ export async function deployIndexer(
               cpu: config.indexer.cpuLimit,
               memory: config.indexer.memoryLimit,
             },
+            requests: {
+              cpu: config.indexer.cpuRequest ?? config.indexer.cpuLimit,
+            },
           },
         },
         {
@@ -176,6 +181,9 @@ export async function deployIndexer(
                   limits: {
                     cpu: config.indexer.daemon.cpuLimit,
                     memory: config.indexer.daemon.memoryLimit,
+                  },
+                  requests: {
+                    cpu: config.indexer.daemon.cpuRequest ?? config.indexer.daemon.cpuLimit,
                   },
                 },
                 ports: [{ containerPort: 8332, name: 'daemon-rpc' }],

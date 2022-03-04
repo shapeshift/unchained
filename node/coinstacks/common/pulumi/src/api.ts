@@ -10,6 +10,7 @@ import { buildAndPushImage, Config, hasTag, getBaseHash } from './index'
 
 export interface ApiConfig {
   cpuLimit: string
+  cpuRequest: string
   memoryLimit: string
   replicas: number
   autoscaling: { enabled: boolean; maxReplicas: number; cpuThreshold: number }
@@ -254,6 +255,9 @@ export async function deployApi(
             limits: {
               cpu: config.api.cpuLimit,
               memory: config.api.memoryLimit,
+            },
+            requests: {
+              cpu: config.api.cpuRequest ?? config.api.cpuLimit,
             },
           },
           readinessProbe: {

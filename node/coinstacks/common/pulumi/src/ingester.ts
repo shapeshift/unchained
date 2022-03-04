@@ -11,6 +11,7 @@ import { buildAndPushImage, Config, hasTag, getBaseHash } from './index'
 export interface IngesterConfig {
   autoscaling: { enabled: boolean; cpuThreshold: number; maxReplicas: number }
   cpuLimit: string
+  cpuRequest: string
   memoryLimit: string
   replicas: number
   enableDatadogLogs?: boolean
@@ -185,7 +186,7 @@ export async function deployIngester(
     worker({ name: 'worker-registry', path: 'workers/registry', replicas: 1, autoscaling: false }),
   ]
 
-  const { enableDatadogLogs, cpuLimit, memoryLimit, autoscaling } = config.ingester
+  const { enableDatadogLogs, cpuLimit, cpuRequest, memoryLimit, autoscaling } = config.ingester
 
   return workers.map((worker) => {
     const datadogAnnotation = enableDatadogLogs
@@ -226,6 +227,9 @@ export async function deployIngester(
               limits: {
                 cpu: cpuLimit,
                 memory: memoryLimit,
+              },
+              requests: {
+                cpu: cpuRequest ?? cpuLimit,
               },
             },
             readinessProbe: {
