@@ -1,14 +1,14 @@
 {
   "name": "@shapeshiftoss/bitcoin-pulumi",
-  "version": "5.3.0",
+  "version": "5.4.0",
   "license": "MIT",
   "private": true,
   "scripts": {
     "clean": "rm -rf dist node_modules"
   },
   "dependencies": {
-    "@shapeshiftoss/blockbook-pulumi": "^5.3.0",
-    "@shapeshiftoss/common-pulumi": "^5.3.0",
+    "@shapeshiftoss/blockbook-pulumi": "^5.4.0",
+    "@shapeshiftoss/common-pulumi": "^5.4.0",
     "@types/folder-hash": "^4.0.0",
     "folder-hash": "^4.0.0"
   }
