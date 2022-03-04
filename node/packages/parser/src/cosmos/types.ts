@@ -1,5 +1,3 @@
-export type Network = 'mainnet'
-
 interface Value {
   amount: string
   denom: string
