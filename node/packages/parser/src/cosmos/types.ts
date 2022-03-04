@@ -29,8 +29,8 @@ export interface Tx {
   gasUsed: string
   gasWanted: string
   index: number
-  memo: string
+  memo?: string
   value: string
-  messages?: Array<Message>
-  events?: Array<Event>
+  messages: Array<Message>
+  events: Array<Event>
 }
