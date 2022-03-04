@@ -146,7 +146,7 @@ type PaginatedPubkeyParam struct {
 	// Pagination cursor from previous response or empty string for first page fetch
 	// in: query
 	Cursor string `json:"cursor"`
-	// Page size
+	// Page size (default 10)
 	// in: query
 	PageSize int `json:"pageSize"`
 }

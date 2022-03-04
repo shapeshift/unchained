@@ -218,7 +218,12 @@ func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 
 	cursor := r.URL.Query().Get("cursor")
 
-	pageSize, err := strconv.Atoi(r.URL.Query().Get("pageSize"))
+	pageSizeQ := r.URL.Query().Get("pageSize")
+	if pageSizeQ == "" {
+		pageSizeQ = "10"
+	}
+
+	pageSize, err := strconv.Atoi(pageSizeQ)
 	if err != nil {
 		api.HandleError(w, http.StatusBadRequest, err.Error())
 		return
