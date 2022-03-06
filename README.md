@@ -45,7 +45,7 @@ Unchained is a multi-blockchain backend interface with three main goals:
 
 ![](docs/coinstack.png)
 
-No Indexer | With Indexer
+With Indexer | No Indexer
 :---------:|:------------:
 ![](docs/coinstackWithIndexer.drawio.svg) | ![](docs/coinstackNoIndexer.drawio.svg)
 
