@@ -1,2 +1,3 @@
-export * as api from '../generated/ethereum'
-export * as ws from './websocket'
+export * from '../generated/ethereum'
+export * from './parser'
+export * from './types'

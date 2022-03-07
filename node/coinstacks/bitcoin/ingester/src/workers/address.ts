@@ -1,6 +1,6 @@
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Message, Worker, SyncTx } from '@shapeshiftoss/common-ingester'
-import { bitcoin, SequencedTx } from '@shapeshiftoss/unchained-tx-parser'
+import { bitcoin, SequencedTx } from '@shapeshiftoss/unchained-client'
 import { logger } from '../logger'
 
 const INDEXER_URL = process.env.INDEXER_URL
