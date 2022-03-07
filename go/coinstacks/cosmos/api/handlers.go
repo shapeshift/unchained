@@ -64,7 +64,7 @@ func (h *Handler) StartWebsocket() error {
 			// unique set of addresses
 			for _, addr := range m.Addresses {
 				if _, ok := seen[addr]; !ok {
-					addrs = append(addrs, m.Addresses...)
+					addrs = append(addrs, addr)
 					seen[addr] = true
 				}
 			}

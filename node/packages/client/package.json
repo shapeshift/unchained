@@ -11,12 +11,11 @@
   "scripts": {
     "build": "yarn generate && tsc",
     "clean": "rm -rf dist node_modules src/generated",
-    "generate": "JAVA_OPTS='-Dlog.level=warn' openapi-generator-cli generate",
+    "generate": "JAVA_OPTS='-Dlog.level=error' openapi-generator-cli generate",
     "watch": "nodemon"
   },
   "dependencies": {
     "@shapeshiftoss/blockbook": "^5.2.0",
-    "@shapeshiftoss/unchained-tx-parser": "^5.2.0",
     "isomorphic-ws": "^4.0.1",
     "ws": "^8.3.0"
   },
