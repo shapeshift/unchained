@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { utils } from 'ethers'
 import { Blockbook, Tx } from '@shapeshiftoss/blockbook'
-import { ethereum } from '@shapeshiftoss/unchained-tx-parser'
+import { ethereum } from '@shapeshiftoss/unchained-client'
 import { Message, Worker } from '@shapeshiftoss/common-ingester'
 import { RegistryService } from '@shapeshiftoss/common-mongo'
 import { logger } from '../logger'

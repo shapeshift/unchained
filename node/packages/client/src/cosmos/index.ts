@@ -1,2 +1,2 @@
-export * as api from '../generated/cosmos'
-export type { Tx } from '../generated/cosmos'
+export * from '../generated/cosmos'
+export * from './parser'

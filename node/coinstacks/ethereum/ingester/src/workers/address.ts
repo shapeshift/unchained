@@ -1,6 +1,6 @@
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Message, Worker } from '@shapeshiftoss/common-ingester'
-import { ethereum, SequencedTx } from '@shapeshiftoss/unchained-tx-parser'
+import { ethereum, SequencedTx } from '@shapeshiftoss/unchained-client'
 import { logger } from '../logger'
 import { ETHSyncTx } from '../types'
 

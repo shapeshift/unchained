@@ -14,13 +14,41 @@ Using yarn:
 yarn add @shapeshiftoss/unchained-client
 ```
 
+## Resources
+
+- [CAIP-2](https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-2.md) naming conventions used for `chainId`
+- [CAIP-19](https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-19.md) naming conventions used for `assetId`
+
 ## Usage
 
 ```
-import { Ethereum } from '@shapeshiftoss/unchained-client'
+import * as unchained from '@shapeshiftoss/unchained-client'
 
-const config = new Ethereum.Configuration({ basePath: 'https://api.ethereum.shapeshift.com' })
-const ethClient = new Ethereum.V1Api(config)
+const address = 'cosmos1t5u0jfg3ljsjrh2m9e47d4ny2hea7eehxrzdgd'
 
-const { data } = await ethClient.getBalance({ pubkey: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa' })
+// configuration for the api client
+const config = new unchained.cosmos.Configuration({ basePath: 'https://dev-api.cosmos.shapeshift.com' })
+
+// create new instance of the api client
+const apiClient = new unchained.cosmos.V1Api(config)
+
+// create new instance of the ws client
+const wsClient = new unchained.ws.Client<unchained.cosmos.Tx>('wss://dev-api.cosmos.shapeshift.com')
+
+// create new instance of the transaction parser
+// chainId is in the format of [Caip2](https://github.com/ChainAgnostic/CAIPs/blob/master/CAIPs/caip-2.md)
+const parser = new unchained.cosmos.TransactionParser({ chainId: 'cosmos:cosmoshub-4' })
+
+// example api client request
+const { data } = await apiClient.getBalance({ pubkey: address })
+
+// example websocket subscription for new transaction and transaction parsing
+await this.providers.ws.subscribeTxs(
+  'test',
+  { topic: 'txs', addresses: [address] },
+  async (msg) => {
+        const tx = await parser.parse(msg.data, msg.address)
+  },
+  (err) => console.warn(err)
+)
 ```

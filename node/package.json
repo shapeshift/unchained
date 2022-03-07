@@ -11,7 +11,7 @@
     "pulumi"
   ],
   "scripts": {
-    "build": "lerna run build --include-dependencies --scope @shapeshiftoss/* --ignore @shapeshiftoss/unchained-client && lerna run build --scope @shapeshiftoss/unchained-client",
+    "build": "lerna run build --scope @shapeshiftoss/* --ignore @shapeshiftoss/unchained-client --ignore @shapeshiftoss/*-ingester && lerna run build --scope @shapeshiftoss/unchained-client && lerna run build --scope @shapeshiftoss/*-ingester",
     "clean": "lerna run clean --scope @shapeshiftoss/* && rm -rf coverage dist node_modules",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",

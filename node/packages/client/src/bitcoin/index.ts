@@ -1,1 +1,3 @@
-export * as api from '../generated/bitcoin'
+export * from '../generated/bitcoin'
+export * from './parser'
+export * from './types'

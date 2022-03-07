@@ -7,13 +7,14 @@ export interface Connection {
 }
 
 export interface TransactionMessage<T> {
-  subscriptionId: string
+  address: string
   data: T
+  subscriptionId: string
 }
 
 export interface TxsParams<T> {
   data: TxsTopicData | undefined
-  onMessage: (message: T) => void
+  onMessage: (message: TransactionMessage<T>) => void
   onError?: (err: ErrorResponse) => void
 }
 
@@ -61,7 +62,7 @@ export class Client<T> {
   async subscribeTxs(
     subscriptionId: string,
     data: TxsTopicData,
-    onMessage: (message: T) => void,
+    onMessage: (message: TransactionMessage<T>) => void,
     onError?: (err: ErrorResponse) => void
   ): Promise<void> {
     // keep track of the onMessage and onError handlers associated with each subscriptionId
@@ -116,7 +117,7 @@ export class Client<T> {
 
         // forward the transaction message to the correct onMessage handler
         const onMessageHandler = this.txs[message.subscriptionId || subscriptionId]?.onMessage
-        onMessageHandler && onMessageHandler(message.data)
+        onMessageHandler && onMessageHandler(message)
       } catch (err) {
         console.log(`failed to handle onmessage event: ${JSON.stringify(event)}: ${err}`)
       }
