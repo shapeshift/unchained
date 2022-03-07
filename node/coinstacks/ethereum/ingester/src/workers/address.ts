@@ -6,22 +6,16 @@ import { ETHSyncTx } from '../types'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
-const MIDGARD_URL = process.env.MIDGARD_URL
 const NETWORK = process.env.NETWORK
 const RPC_URL = process.env.RPC_URL
 
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
-if (!MIDGARD_URL) throw new Error('MIDGARD_URL env var not set')
 if (!NETWORK) throw new Error('NETWORK env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
-const parser = new ethereum.TransactionParser({
-  midgardUrl: MIDGARD_URL,
-  rpcUrl: RPC_URL,
-  network: NETWORK as ethereum.Network,
-})
+const parser = new ethereum.TransactionParser({ rpcUrl: RPC_URL, network: NETWORK as ethereum.Network })
 
 const msgLogger = logger.child({ namespace: ['workers', 'address'], fn: 'onMessage' })
 const onMessage = (worker: Worker) => async (message: Message) => {

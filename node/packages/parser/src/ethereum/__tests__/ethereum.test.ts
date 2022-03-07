@@ -36,9 +36,7 @@ import {
 } from './mockData/tokens'
 import { SHAPE_SHIFT_ROUTER_CONTRACT } from '../constants'
 
-jest.mock('@shapeshiftoss/thorchain')
-
-const txParser = new TransactionParser({ midgardUrl: '', rpcUrl: '' })
+const txParser = new TransactionParser({ rpcUrl: '' })
 
 describe('parseTx', () => {
   describe('multiSig', () => {

@@ -15,7 +15,6 @@
   "dependencies": {
     "@shapeshiftoss/blockbook": "^5.2.0",
     "@shapeshiftoss/caip": "^1.11.1",
-    "@shapeshiftoss/thorchain": "^5.2.0",
     "@shapeshiftoss/types": "^1.23.0",
     "@shapeshiftoss/unchained-client": "^5.2.0",
     "bignumber.js": "^9.0.1",

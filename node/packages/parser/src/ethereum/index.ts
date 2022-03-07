@@ -16,7 +16,6 @@ export * from './types'
 
 export interface TransactionParserArgs {
   network?: Network
-  midgardUrl: string
   rpcUrl: string
 }
 
@@ -34,7 +33,7 @@ export class TransactionParser {
 
     this.network = args.network ?? 'mainnet'
 
-    this.thor = new thor.Parser({ network: this.network, midgardUrl: args.midgardUrl, rpcUrl: args.rpcUrl })
+    this.thor = new thor.Parser({ network: this.network, rpcUrl: args.rpcUrl })
     this.uniV2 = new uniV2.Parser({ network: this.network, provider })
     this.zrx = new zrx.Parser()
     this.yearn = new yearn.Parser()

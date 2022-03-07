@@ -1,5 +1,4 @@
 import { ethers } from 'ethers'
-import { Thorchain } from '@shapeshiftoss/thorchain'
 import { Dex, GenericParser, ThorTx, TradeType, TxSpecific } from '../types'
 import { Network } from './types'
 import THOR_ABI from './abi/thor'
@@ -10,14 +9,12 @@ import { THOR_ROUTER_CONTRACT_MAINNET, THOR_ROUTER_CONTRACT_ROPSTEN } from './co
 const SWAP_TYPES = ['SWAP', '=', 's']
 
 export interface ParserArgs {
-  midgardUrl: string
   network: Network
   rpcUrl: string
 }
 
 export class Parser implements GenericParser {
   abiInterface: ethers.utils.Interface
-  thorchain: Thorchain
 
   readonly depositSigHash: string
   readonly transferOutSigHash: string
@@ -25,7 +22,6 @@ export class Parser implements GenericParser {
 
   constructor(args: ParserArgs) {
     this.abiInterface = new ethers.utils.Interface(THOR_ABI)
-    this.thorchain = new Thorchain({ midgardUrl: args.midgardUrl, rpcUrl: args.rpcUrl })
 
     this.depositSigHash = this.abiInterface.getSighash('deposit')
     this.transferOutSigHash = this.abiInterface.getSighash('transferOut')
