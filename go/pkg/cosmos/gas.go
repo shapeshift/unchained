@@ -2,46 +2,37 @@ package cosmos
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"strconv"
 
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/pkg/errors"
 )
 
-func (c *HTTPClient) GetEstimateGas(txBytes []byte) (string, error) {
-	var res txtypes.SimulateResponse
-	type retStatus struct {
-		Code   uint32        `json:"code"`
-		Msg    string        `json:"message"`
-		Detail []interface{} `json:"detail"`
-	}
-	reqData, err := base64.StdEncoding.DecodeString(string(txBytes))
+func (c *HTTPClient) GetEstimateGas(rawTx string) (string, error) {
+	txBytes, err := base64.StdEncoding.DecodeString(rawTx)
 	if err != nil {
-		return "", errors.Wrapf(err, "error decoding transaction from base64")
+		return "", errors.Wrapf(err, "failed to decode rawTx: %s", rawTx)
 	}
-	reqRawBody := txtypes.SimulateRequest{TxBytes: reqData}
-	jsonBody, err := c.encoding.Marshaler.MarshalJSON(&reqRawBody)
+	e := &ErrorResponse{}
+	res := &txtypes.SimulateResponse{}
+	_, err = c.cosmos.R().SetBody(txtypes.SimulateRequest{TxBytes: txBytes}).SetResult(res).SetError(e).Post("/cosmos/tx/v1beta1/simulate")
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "failed to estimate gas")
 	}
-
-	ret, err := c.cosmos.R().SetBody(jsonBody).SetResult(&res).Post("/cosmos/tx/v1beta1/simulate")
-	if err != nil || ret.StatusCode() != 200 {
-		var errorMsg = retStatus{}
-		json.Unmarshal(ret.Body(), &errorMsg)
-		return errorMsg.Msg, errors.Wrapf(err, errorMsg.Msg)
+	if e != nil {
+		return "", errors.Errorf("failed to estimate gas: %s", e.Msg)
 	}
-
 	return strconv.FormatUint(res.GasInfo.GasUsed, 10), nil
 }
 
-func (c *GRPCClient) GetEstimateGas(txBytes []byte) (string, error) {
-
+func (c *GRPCClient) GetEstimateGas(rawTx string) (string, error) {
+	txBytes, err := base64.StdEncoding.DecodeString(rawTx)
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to decode rawTx: %s", rawTx)
+	}
 	res, err := c.tx.Simulate(c.ctx, &txtypes.SimulateRequest{TxBytes: txBytes})
 	if err != nil {
-		return "", errors.Wrap(err, "failed to Get transaction's gas estimation")
+		return "", errors.Wrap(err, "failed to estimate gas")
 	}
-
 	return strconv.FormatUint(res.GasInfo.GasUsed, 10), nil
 }

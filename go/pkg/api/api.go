@@ -126,7 +126,7 @@ func (b BaseTxHistory) txs() []Tx {
 	return b.Txs
 }
 
-// swagger:parameters GetEstimateGas
+//swagger:parameters SendTx EstimateGas
 type TxBody struct {
 	// Raw transaction
 	// required: true
@@ -172,5 +172,4 @@ type BaseAPI interface {
 	GetAccount(pubkey string) (Account, error)
 	GetTxHistory(pubkey string, cursor string, pageSize int) (TxHistory, error)
 	SendTx(hex string) (string, error)
-	EstimateGas(hex string) (string, error)
 }
