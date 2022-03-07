@@ -2,7 +2,6 @@ package cosmos
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net"
 	"net/url"
@@ -111,11 +110,5 @@ func (ws *WSClient) handleTx(tx types.EventDataTx) {
 		return
 	}
 
-	msg, err := json.Marshal(websocket.MessageResponse{Data: data})
-	if err != nil {
-		logger.Errorf("failed to marshal tx message: %v", err)
-		return
-	}
-
-	ws.Publish(addrs, msg)
+	ws.Publish(addrs, data)
 }

@@ -20,23 +20,24 @@ const (
 var logger = log.WithoutFields()
 
 type RequestPayload struct {
-	SubscriptionID string `json:"subscriptionId"`
-	Method         string `json:"method"`
-	Data           struct {
+	Data struct {
 		Topic     string   `json:"topic"`
 		Addresses []string `json:"addresses"`
 	} `json:"data"`
+	Method         string `json:"method"`
+	SubscriptionID string `json:"subscriptionId"`
 }
 
 type ErrorResponse struct {
+	Message        string `json:"message"`
 	SubscriptionID string `json:"subscriptionId"`
 	Type           string `json:"type"`
-	Message        string `json:"message"`
 }
 
 type MessageResponse struct {
-	SubscriptionID string      `json:"subscriptionId"`
+	Address        string      `json:"address"`
 	Data           interface{} `json:"data"`
+	SubscriptionID string      `json:"subscriptionId"`
 }
 
 // Connection represents a single websocket connection on the unchained api server
