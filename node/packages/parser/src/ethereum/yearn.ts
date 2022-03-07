@@ -1,12 +1,22 @@
-import { Tx } from '@shapeshiftoss/blockbook'
+import { ChainId, Yearn } from '@yfi/sdk'
+import { Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
+import { ethers } from 'ethers'
 import { GenericParser, TxSpecific, YearnTx } from '../types'
+import { SHAPE_SHIFT_ROUTER_CONTRACT } from './constants'
+import { getSigHash } from './utils'
+import { Network } from './types'
 import shapeShiftRouter from './abi/shapeShiftRouter'
 import yearnVault from './abi/yearnVault'
-import { ethers } from 'ethers'
-import { SHAPE_SHIFT_ROUTER_CONTRACT } from './constants'
-import { getSigHash, getYearnTokenVaultAddresses } from './utils'
 
-export class Parser implements GenericParser {
+interface ParserArgs {
+  network: Network
+  provider: ethers.providers.JsonRpcProvider
+}
+
+export class Parser implements GenericParser<BlockbookTx> {
+  provider: ethers.providers.JsonRpcProvider
+  yearnSdk: Yearn<ChainId> | undefined
+
   yearnTokenVaultAddresses: string[] | undefined
   shapeShiftInterface = new ethers.utils.Interface(shapeShiftRouter)
   yearnInterface = new ethers.utils.Interface(yearnVault)
@@ -16,7 +26,17 @@ export class Parser implements GenericParser {
   depositSigHash = '0x20e8c565'
   withdrawSigHash = '0x00f714ce'
 
-  async parse(tx: Tx): Promise<TxSpecific<YearnTx> | undefined> {
+  constructor(args: ParserArgs) {
+    this.provider = args.provider
+
+    // The only Yearn-supported chain we currently support is mainnet
+    if (args.network == 'mainnet') {
+      // 1 for EthMain (@yfi/sdk/dist/chain.d.ts)
+      this.yearnSdk = new Yearn(1, { provider: this.provider, disableAllowlist: true })
+    }
+  }
+
+  async parse(tx: BlockbookTx): Promise<TxSpecific<YearnTx> | undefined> {
     const data = tx.ethereumSpecific?.data
     if (!data) return
 
@@ -28,7 +48,8 @@ export class Parser implements GenericParser {
     const receiveAddress = tx.vout?.[0].addresses?.[0]
 
     if (!this.yearnTokenVaultAddresses) {
-      this.yearnTokenVaultAddresses = await getYearnTokenVaultAddresses()
+      const vaults = await this.yearnSdk?.vaults.get()
+      this.yearnTokenVaultAddresses = vaults?.map((vault) => vault.address)
     }
 
     if (txSigHash === this.approvalSigHash && decoded?.args._spender !== SHAPE_SHIFT_ROUTER_CONTRACT) return

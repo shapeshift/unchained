@@ -1,7 +1,6 @@
 import { NetworkTypes } from '@shapeshiftoss/types'
 import { Tx } from '@shapeshiftoss/blockbook'
-import { Network, YearnTokenVault } from './types'
-import axios from 'axios'
+import { Network } from './types'
 import { ethers } from 'ethers'
 import MULTISIG_ABI from './abi/multiSig'
 
@@ -25,11 +24,6 @@ export const getSigHash = (inputData: string | undefined): string | undefined =>
 export const txInteractsWithContract = (tx: Tx, contract: string) => {
   const receiveAddress = tx.vout[0].addresses?.[0] ?? ''
   return receiveAddress === contract
-}
-
-export const getYearnTokenVaultAddresses = async (): Promise<Array<string> | undefined> => {
-  const yearnTokenVaultResponse = await axios.get<YearnTokenVault[]>('https://api.yearn.finance/v1/chains/1/vaults/all')
-  return yearnTokenVaultResponse.status === 200 ? yearnTokenVaultResponse.data.map((vault) => vault.address) : undefined
 }
 
 export const SENDMULTISIG_SIG_HASH = ((): string => {

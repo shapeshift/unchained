@@ -2,7 +2,7 @@ import { Status, Tx, TransferType } from '../../types'
 import { TransactionParser } from '../index'
 import standard from './mockData/standard'
 
-const txParser = new TransactionParser({ rpcUrl: '' })
+const txParser = new TransactionParser({ chainId: 'cosmos:cosmoshub-4' })
 
 describe('parseTx', () => {
   it('should be able to parse a standard send tx', async () => {
@@ -38,6 +38,7 @@ describe('parseTx', () => {
 
     expect(expected).toEqual(actual)
   })
+
   it('should be able to parse a standard receive tx', async () => {
     const { tx } = standard
     const address = 'cosmos14e25lpsedq863vgweqg4m9n0z28c203kfdlzmz'

@@ -1,9 +1,8 @@
 import { BigNumber } from 'bignumber.js'
-import { caip19, CAIP2 } from '@shapeshiftoss/caip'
-import { cosmos } from '@shapeshiftoss/unchained-client'
-import { Tx as ParseTx, Status, TransferType } from '../types'
+import { caip2, caip19, AssetNamespace, AssetReference, CAIP2, CAIP19 } from '@shapeshiftoss/caip'
+import { Tx as ParsedTx, Status, TransferType } from '../types'
 import { aggregateTransfer } from '../utils'
-import { ChainTypes, NetworkTypes } from '@shapeshiftoss/types'
+import { Tx } from './types'
 
 export interface TransactionParserArgs {
   chainId: CAIP2
@@ -11,18 +10,23 @@ export interface TransactionParserArgs {
 
 export class TransactionParser {
   chainId: CAIP2
+  assetId: CAIP19
 
   constructor(args: TransactionParserArgs) {
     this.chainId = args.chainId
+
+    this.assetId = caip19.toCAIP19({
+      ...caip2.fromCAIP2(this.chainId),
+      assetNamespace: AssetNamespace.Slip44,
+      assetReference: AssetReference.Cosmos,
+    })
   }
 
-  async parse(tx: cosmos.Tx, address: string): Promise<ParseTx> {
-    const caip19Cosmos = caip19.toCAIP19({ chain: ChainTypes.Cosmos, network: NetworkTypes.COSMOSHUB_MAINNET })
-
+  async parse(tx: Tx, address: string): Promise<ParsedTx> {
     const blockHeight = Number(tx.blockHeight)
     const blockTime = Number(tx.timestamp)
 
-    const parsedTx: ParseTx = {
+    const parsedTx: ParsedTx = {
       address,
       blockHash: tx.blockHash,
       blockHeight: isNaN(blockHeight) ? -1 : blockHeight,
@@ -45,7 +49,7 @@ export class TransactionParser {
           parsedTx.transfers = aggregateTransfer(
             parsedTx.transfers,
             TransferType.Send,
-            caip19Cosmos,
+            this.assetId,
             msg.from ?? '',
             msg.to ?? '',
             sendValue.toString(10)
@@ -55,7 +59,7 @@ export class TransactionParser {
         // network fee
         const fees = new BigNumber(tx.fee.amount)
         if (fees.gt(0)) {
-          parsedTx.fee = { caip19: caip19Cosmos, value: fees.toString(10) }
+          parsedTx.fee = { caip19: this.assetId, value: fees.toString(10) }
         }
       }
 
@@ -66,7 +70,7 @@ export class TransactionParser {
           parsedTx.transfers = aggregateTransfer(
             parsedTx.transfers,
             TransferType.Receive,
-            caip19Cosmos,
+            this.assetId,
             msg.from ?? '',
             msg.to ?? '',
             receiveValue.toString(10)

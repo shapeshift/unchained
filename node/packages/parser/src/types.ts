@@ -1,5 +1,3 @@
-import { Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
-
 export enum Dex {
   Thor = 'thor',
   Zrx = 'zrx',
@@ -96,6 +94,6 @@ export type Tx = StandardTx | UniV2Tx | ZrxTx | ThorTx
 
 export type TxSpecific<T extends Tx> = Partial<Pick<T, 'trade' | 'transfers' | 'data'>>
 
-export interface GenericParser {
-  parse: (tx: BlockbookTx) => Promise<TxSpecific<Tx> | undefined>
+export interface GenericParser<T> {
+  parse: (tx: T) => Promise<TxSpecific<Tx> | undefined>
 }

@@ -33,11 +33,11 @@ aliases:
     mongo-cpu-limit: 512m
     mongo-memory-limit: 512Mi
     mongo-replicas: 3
-    mongo-storage-size: 10Gi
+    mongo-storage-size: 5Gi
     mongo-url: mongodb://bitcoin-mongodb-0.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017,bitcoin-mongodb-1.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017,bitcoin-mongodb-2.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
     rabbit-cpu-limit: "2"
     rabbit-memory-limit: "8Gi"
-    rabbit-storage-size: "10Gi"
+    rabbit-storage-size: "5Gi"
     indexer-cpu-limit: "4"
     indexer-memory-limit: 24Gi
     indexer-replicas: 2
@@ -94,11 +94,11 @@ aliases:
     mongo-cpu-limit: 512m
     mongo-memory-limit: 512Mi
     mongo-replicas: 3
-    mongo-storage-size: 10Gi
+    mongo-storage-size: 5Gi
     mongo-url: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-2.ethereum-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
     rabbit-cpu-limit: "2"
     rabbit-memory-limit: "8Gi"
-    rabbit-storage-size: "10Gi"
+    rabbit-storage-size: "5Gi"
     indexer-cpu-limit: "4"
     indexer-memory-limit: 12Gi
     indexer-replicas: 2
@@ -147,75 +147,14 @@ aliases:
     ingester-cpu-threshold: 20
     ingester-memory-limit: "2Gi"
 
-  - &ethereum-ropsten
-    coinstack: ethereum
-    pulumi-stack: public-ropsten
-    pulumi-dir: coinstacks/ethereum/pulumi
-    broker-url: ethereum-ropsten-rabbitmq-svc.unchained.svc.cluster.local:5672
-    mongo-cpu-limit: 512m
-    mongo-memory-limit: 512Mi
-    mongo-replicas: 3
-    mongo-storage-size: 10Gi
-    mongo-url: mongodb://ethereum-ropsten-mongodb-0.ethereum-ropsten-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-ropsten-mongodb-1.ethereum-ropsten-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-ropsten-mongodb-2.ethereum-ropsten-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
-    rabbit-cpu-limit: "1"
-    rabbit-memory-limit: "4Gi"
-    rabbit-storage-size: "10Gi"
-    indexer-cpu-limit: "4"
-    indexer-memory-limit: 12Gi
-    indexer-replicas: 2
-    indexer-storage-size: 250Gi
-    indexer-url: http://ethereum-ropsten-indexer-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://ethereum-ropsten-indexer-svc.unchained.svc.cluster.local:8001/websocket
-    daemon-image: ethereum/client-go:v1.10.15
-    daemon-cpu-limit: "2"
-    daemon-memory-limit: 24Gi
-    daemon-storage-size: 500Gi
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-threshold: 30
-    api-cpu-limit: "500m"
-    api-memory-limit: "2Gi"
-    ingester-autoscaling: true
-    ingester-replicas: 2
-    ingester-max-replicas: 4
-    ingester-cpu-threshold: 20
-    ingester-cpu-limit: "500m"
-    ingester-memory-limit: "3Gi"
-    rpc-url: http://ethereum-ropsten-indexer-svc.unchained.svc.cluster.local:8332
-
-  - &ethereum-ropsten-dev
-    <<: *ethereum-ropsten
-    environment: dev
-    network: ropsten
-    pulumi-stack: public-dev-ropsten
-    broker-url: ethereum-ropsten-rabbitmq-svc.unchained-dev.svc.cluster.local:5672
-    mongo-replicas: 2
-    mongo-url: mongodb://ethereum-ropsten-mongodb-0.ethereum-ropsten-mongodb-headless.unchained-dev.svc.cluster.local:27017,ethereum-ropsten-mongodb-1.ethereum-ropsten-mongodb-headless.unchained-dev.svc.cluster.local:27017/?replicaSet=rs0
-    indexer-replicas: 1
-    indexer-url: http://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8001
-    indexer-ws-url: ws://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
-    rpc-url: http://ethereum-ropsten-indexer-svc.unchained-dev.svc.cluster.local:8332
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 3
-    api-cpu-limit: "300m"
-    api-cpu-threshold: 30
-    api-memory-limit: "1Gi"
-    ingester-autoscaling: true
-    ingester-replicas: 1
-    ingester-max-replicas: 2
-    ingester-cpu-limit: "500m"
-    ingester-cpu-threshold: 20
-    ingester-memory-limit: "2Gi"
-
   - &cosmos
     coinstack: cosmos
     pulumi-stack: public
     pulumi-dir: coinstacks/cosmos/pulumi
-    lcd-url: cosmoshub-4--lcd--archive.datahub.figment.io
+    lcd-url: https://cosmoshub-4--lcd--archive.datahub.figment.io
     grpc-url: cosmoshub-4--grpc--archive.grpc.datahub.figment.io:443
-    rpc-url: cosmoshub-4--rpc--archive.datahub.figment.io
+    rpc-url: https://cosmoshub-4--rpc--archive.datahub.figment.io
+    ws-url: wss://cosmoshub-4--rpc--archive.datahub.figment.io
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -643,6 +582,8 @@ jobs:
         type: string
       rpc-url:
         type: string
+      ws-url:
+        type: string
       api-autoscaling:
         type: boolean
       api-cpu-threshold:
@@ -668,6 +609,7 @@ jobs:
             echo 'export LCD_URL=<< parameters.lcd-url >>' >> $BASH_ENV
             echo 'export GRPC_URL=<< parameters.grpc-url >>' >> $BASH_ENV
             echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
+            echo 'export WS_URL=<< parameters.ws-url >>' >> $BASH_ENV
             echo 'export API_KEY=$<< parameters.organization >>_DATAHUB_API_KEY' >> $BASH_ENV
       - run:
           name: pulumi
@@ -788,6 +730,7 @@ workflows:
           name: deploy bitcoin develop (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
+          daemon-storage-size: 650Gi
           requires:
             - deploy dependencies (shapeshift)
           <<: *bitcoin-dev
@@ -797,18 +740,10 @@ workflows:
           name: deploy ethereum develop (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
+          indexer-storage-size: 300Gi
           requires:
             - deploy dependencies (shapeshift)
           <<: *ethereum-dev
-          <<: *only-develop
-
-      - deploy-coinstack-node:
-          name: deploy ethereum-ropsten develop (shapeshift)
-          organization: SHAPESHIFT
-          pulumi-command: up -f --yes
-          requires:
-            - deploy dependencies (shapeshift)
-          <<: *ethereum-ropsten-dev
           <<: *only-develop
 
       - deploy-coinstack-go:
@@ -860,15 +795,6 @@ workflows:
           requires:
             - deploy dependencies (taxistake)
           <<: *ethereum-dev
-          <<: *only-develop
-
-      - deploy-coinstack-node:
-          name: deploy ethereum-ropsten develop (taxistake)
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - deploy dependencies (taxistake)
-          <<: *ethereum-ropsten-dev
           <<: *only-develop
 
   deploy-monitoring:

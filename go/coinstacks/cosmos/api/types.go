@@ -50,9 +50,8 @@ type Tx struct {
 	GasWanted string `json:"gasWanted"`
 	// required: true
 	// example: 1
-	Index int `json:"index"`
-	// required: true
-	Memo string `json:"memo,omitempty"`
+	Index int    `json:"index"`
+	Memo  string `json:"memo,omitempty"`
 	// required: true
 	// 123456789
 	Value string `json:"value"`
