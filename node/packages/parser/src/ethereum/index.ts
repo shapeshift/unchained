@@ -1,6 +1,6 @@
 import { BigNumber } from 'bignumber.js'
 import { ethers } from 'ethers'
-import { Tx } from '@shapeshiftoss/blockbook'
+import { Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { caip19, caip2, AssetNamespace, AssetReference } from '@shapeshiftoss/caip'
 import { ChainTypes } from '@shapeshiftoss/types'
 import { GenericParser, Status, Token, TransferType, Tx as ParsedTx, TxSpecific } from '../types'
@@ -11,7 +11,6 @@ import * as thor from './thor'
 import * as uniV2 from './uniV2'
 import * as zrx from './zrx'
 import * as yearn from './yearn'
-import { Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 
 export * from './types'
 
@@ -54,7 +53,7 @@ export class TransactionParser {
     }
   }
 
-  async parse(tx: Tx, address: string, internalTxs?: Array<InternalTx>): Promise<ParsedTx> {
+  async parse(tx: BlockbookTx, address: string, internalTxs?: Array<InternalTx>): Promise<ParsedTx> {
     // We expect only one Parser to return a result. If multiple do, we take the first and early exit.
     const contractParserResult = await findAsyncSequential<GenericParser<BlockbookTx>, TxSpecific<ParsedTx>>(
       this.parsers,
@@ -79,7 +78,7 @@ export class TransactionParser {
     return this.getParsedTxWithTransfers(tx, parsedTx, address, internalTxs)
   }
 
-  private static getStatus(tx: Tx): Status {
+  private static getStatus(tx: BlockbookTx): Status {
     const status = tx.ethereumSpecific?.status
 
     if (status === -1 && tx.confirmations <= 0) return Status.Pending
@@ -89,7 +88,12 @@ export class TransactionParser {
     return Status.Unknown
   }
 
-  private getParsedTxWithTransfers(tx: Tx, parsedTx: ParsedTx, address: string, internalTxs?: Array<InternalTx>) {
+  private getParsedTxWithTransfers(
+    tx: BlockbookTx,
+    parsedTx: ParsedTx,
+    address: string,
+    internalTxs?: Array<InternalTx>
+  ) {
     const caip19Ethereum = caip19.toCAIP19({
       chain: ChainTypes.Ethereum,
       network: toNetworkType(this.network),

@@ -1,7 +1,7 @@
-import { NetworkTypes } from '@shapeshiftoss/types'
-import { Tx } from '@shapeshiftoss/blockbook'
-import { Network } from './types'
 import { ethers } from 'ethers'
+import { Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
+import { NetworkTypes } from '@shapeshiftoss/types'
+import { Network } from './types'
 import MULTISIG_ABI from './abi/multiSig'
 
 export const toNetworkType = (network: Network): NetworkTypes => {
@@ -21,7 +21,7 @@ export const getSigHash = (inputData: string | undefined): string | undefined =>
   return inputData.slice(0, length)
 }
 
-export const txInteractsWithContract = (tx: Tx, contract: string) => {
+export const txInteractsWithContract = (tx: BlockbookTx, contract: string) => {
   const receiveAddress = tx.vout[0].addresses?.[0] ?? ''
   return receiveAddress === contract
 }

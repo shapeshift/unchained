@@ -1,6 +1,6 @@
-import { Tx } from '@shapeshiftoss/blockbook'
+import { Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 
-export const mempoolMock = (tx: Tx, tokenTransfers = false) => {
+export const mempoolMock = (tx: BlockbookTx, tokenTransfers = false) => {
   const ethereumSpecificOverride = { status: -1, gasUsed: null }
   const mempoolSpecific = {
     blockHeight: -1,
