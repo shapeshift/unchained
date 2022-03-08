@@ -12,12 +12,14 @@ aliases:
         ignore:
           - main
           - develop
+          - remove-taxistake-dev
 
   - &only-develop
     filters:
       branches:
         only:
           - develop
+          - remove-taxistake-dev
 
   - &only-main
     filters:
