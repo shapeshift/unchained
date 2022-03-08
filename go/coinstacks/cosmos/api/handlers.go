@@ -187,3 +187,7 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 func (h *Handler) SendTx(rawTx string) (string, error) {
 	return h.httpClient.BroadcastTx([]byte(rawTx))
 }
+
+func (h *Handler) EstimateGas(rawTx string) (string, error) {
+	return h.httpClient.GetEstimateGas(rawTx)
+}
