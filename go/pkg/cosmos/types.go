@@ -43,6 +43,13 @@ type Delegation struct {
 	Balance Value `json:"balance"`
 }
 
+// ErrorResponse payload for an api request
+type ErrorResponse struct {
+	Code   int           `json:"code"`
+	Msg    string        `json:"message"`
+	Detail []interface{} `json:"detail"`
+}
+
 // Contains info about a transaction log event
 // swagger:model Event
 type Event struct {
