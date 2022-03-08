@@ -1,2 +1,3 @@
-export * as api from '../generated/bitcoin'
-export * as ws from './websocket'
+export * from '../generated/bitcoin'
+export * from './parser'
+export * from './types'

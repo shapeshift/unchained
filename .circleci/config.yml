@@ -917,6 +917,7 @@ workflows:
           name: preview bitcoin (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: preview
+          daemon-storage-size: 650Gi
           requires:
             - validate dependencies (shapeshift)
           <<: *bitcoin
@@ -933,6 +934,7 @@ workflows:
           name: deploy bitcoin (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
+          daemon-storage-size: 650Gi
           requires:
             - approve bitcoin coinstack (shapeshift)
           <<: *bitcoin
@@ -943,6 +945,7 @@ workflows:
           name: preview ethereum (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: preview
+          indexer-storage-size: 300Gi
           requires:
             - validate dependencies (shapeshift)
           <<: *ethereum
@@ -959,6 +962,7 @@ workflows:
           name: deploy ethereum (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
+          indexer-storage-size: 300Gi
           requires:
             - approve ethereum coinstack (shapeshift)
           <<: *ethereum
