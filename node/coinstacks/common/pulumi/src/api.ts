@@ -260,7 +260,7 @@ export async function deployApi(
               requests: {
                 cpu: config.api.cpuRequest,
               },
-            })
+            }),
           },
           readinessProbe: {
             httpGet: { path: '/health', port: 3000 },
