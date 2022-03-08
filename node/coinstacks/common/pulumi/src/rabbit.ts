@@ -5,6 +5,7 @@ import { Config } from './index'
 export interface RabbitConfig {
   adminPort?: number
   cpuLimit: string
+  cpuRequest?: string
   memoryLimit: string
   rabbitPort?: number
   storageClassName: 'hostpath' | 'standard' | 'gp2'
@@ -67,6 +68,11 @@ export async function deployRabbit(
         cpu: config.rabbit.cpuLimit,
         memory: config.rabbit.memoryLimit,
       },
+      ...(config.rabbit.cpuRequest && {
+        requests: {
+          cpu: config.rabbit.cpuRequest,
+        },
+      }),
     },
     volumeMounts: [
       {

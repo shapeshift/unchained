@@ -24,10 +24,10 @@ config:
         enabled: false
         cpuThreshold: 30
         maxReplicas: 2
-      cpuLimit: '300m'
-      memoryLimit: '512Mi'
+      cpuLimit: "300m"
+      cpuRequest: "300m"
+      memoryLimit: "512Mi"
       replicas: 1
-
 
     ## ingester - if specified all ingestion workers will be deployed
     ## All ingesters use 1 replica with the exception of tx and address workers, which are configured for high availability
@@ -38,13 +38,15 @@ config:
         enabled: false
         cpuThreshold: 30
         maxReplicas: 2
-      cpuLimit: '300m'
-      memoryLimit: '512Mi'
+      cpuLimit: "300m"
+      cpuRequest: "300m"
+      memoryLimit: "512Mi"
       replicas: 1
 
     ## mongo - if specified a mongo database will be deployed
     mongo:
-      cpuLimit: "0.25"
+      cpuLimit: "250m"
+      cpuRequest: "250m"
       helmChartVersion: "10.19.0"
       memoryLimit: "256Mi"
       replicaCount: 1
@@ -52,6 +54,7 @@ config:
 
     rabbit:
       cpuLimit: "1"
+      cpuRequest: "1"
       memoryLimit: "2Gi"
       storageSize: "10Gi"
 
@@ -59,11 +62,13 @@ config:
     ## this is very resource intensive, so you can point at public endpoints instead of running your own.
     #indexer:
     #  cpuLimit: '2'
+    #  cpuRequest: '2'
     #  memoryLimit: '8Gi'
     #  replicas: 1
     #  storageSize: '250Gi'
     #  daemon:
     #    cpuLimit: '2'
+    #    cpuRequest: '2'
     #    image: 'ethereum/client-go:v1.10.15'
     #    memoryLimit: '24Gi'
     #    storageSize: '1500Gi'

@@ -30,15 +30,18 @@ aliases:
     pulumi-stack: public
     pulumi-dir: coinstacks/bitcoin/pulumi
     broker-url: bitcoin-rabbitmq-svc.unchained.svc.cluster.local:5672
-    mongo-cpu-limit: 512m
+    mongo-cpu-limit: 500m
+    mongo-cpu-request: 500m
     mongo-memory-limit: 512Mi
     mongo-replicas: 3
     mongo-storage-size: 5Gi
     mongo-url: mongodb://bitcoin-mongodb-0.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017,bitcoin-mongodb-1.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017,bitcoin-mongodb-2.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
-    rabbit-cpu-limit: "2"
+    rabbit-cpu-limit: "1"
+    rabbit-cpu-request: "1"
     rabbit-memory-limit: "8Gi"
     rabbit-storage-size: "5Gi"
     indexer-cpu-limit: "4"
+    indexer-cpu-request: "4"
     indexer-memory-limit: 24Gi
     indexer-replicas: 2
     indexer-storage-size: 500Gi
@@ -46,12 +49,14 @@ aliases:
     indexer-ws-url: ws://bitcoin-indexer-svc.unchained.svc.cluster.local:8001/websocket
     daemon-image: ruimarinho/bitcoin-core:0.21.0
     daemon-cpu-limit: "2"
+    daemon-cpu-request: "2"
     daemon-memory-limit: 12Gi
     daemon-storage-size: 1500Gi
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
     api-cpu-limit: "500m"
+    api-cpu-request: "500m"
     api-cpu-threshold: 30
     api-memory-limit: "2Gi"
     ingester-autoscaling: true
@@ -59,6 +64,7 @@ aliases:
     ingester-max-replicas: 4
     ingester-cpu-threshold: 20
     ingester-cpu-limit: "500m"
+    ingester-cpu-request: "500m"
     ingester-memory-limit: "3Gi"
     rpc-url: http://user:password@bitcoin-indexer-svc.unchained.svc.cluster.local:8332
 
@@ -77,12 +83,14 @@ aliases:
     api-replicas: 2
     api-max-replicas: 3
     api-cpu-limit: "300m"
+    api-cpu-request: "200m"
     api-cpu-threshold: 30
     api-memory-limit: "1Gi"
     ingester-autoscaling: true
     ingester-replicas: 1
     ingester-max-replicas: 2
     ingester-cpu-limit: "500m"
+    ingester-cpu-request: "250m"
     ingester-cpu-threshold: 20
     ingester-memory-limit: "2Gi"
 
@@ -91,15 +99,18 @@ aliases:
     pulumi-stack: public
     pulumi-dir: coinstacks/ethereum/pulumi
     broker-url: ethereum-rabbitmq-svc.unchained.svc.cluster.local:5672
-    mongo-cpu-limit: 512m
+    mongo-cpu-limit: 500m
+    mongo-cpu-request: 500m
     mongo-memory-limit: 512Mi
     mongo-replicas: 3
     mongo-storage-size: 5Gi
     mongo-url: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-2.ethereum-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
-    rabbit-cpu-limit: "2"
+    rabbit-cpu-limit: "1"
+    rabbit-cpu-request: "1"
     rabbit-memory-limit: "8Gi"
     rabbit-storage-size: "5Gi"
     indexer-cpu-limit: "4"
+    indexer-cpu-request: "4"
     indexer-memory-limit: 12Gi
     indexer-replicas: 2
     indexer-storage-size: 500Gi
@@ -107,12 +118,14 @@ aliases:
     indexer-ws-url: ws://ethereum-indexer-svc.unchained.svc.cluster.local:8001/websocket
     daemon-image: ethereum/client-go:v1.10.15
     daemon-cpu-limit: "4"
+    daemon-cpu-request: "4"
     daemon-memory-limit: 32Gi
     daemon-storage-size: 2000Gi
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
     api-cpu-limit: "500m"
+    api-cpu-request: "500m"
     api-cpu-threshold: 30
     api-memory-limit: "2Gi"
     ingester-autoscaling: true
@@ -120,6 +133,7 @@ aliases:
     ingester-max-replicas: 4
     ingester-cpu-threshold: 20
     ingester-cpu-limit: "500m"
+    ingester-cpu-request: "500m"
     ingester-memory-limit: "3Gi"
     rpc-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8332
 
@@ -138,12 +152,14 @@ aliases:
     api-replicas: 2
     api-max-replicas: 3
     api-cpu-limit: "300m"
+    api-cpu-request: "200m"
     api-cpu-threshold: 30
     api-memory-limit: "1Gi"
     ingester-autoscaling: true
     ingester-replicas: 1
     ingester-max-replicas: 2
     ingester-cpu-limit: "500m"
+    ingester-cpu-request: "250m"
     ingester-cpu-threshold: 20
     ingester-memory-limit: "2Gi"
 
@@ -159,6 +175,7 @@ aliases:
     api-replicas: 2
     api-max-replicas: 6
     api-cpu-limit: "500m"
+    api-cpu-request: "500m"
     api-cpu-threshold: 30
     api-memory-limit: "2Gi"
 
@@ -170,6 +187,7 @@ aliases:
     api-replicas: 2
     api-max-replicas: 3
     api-cpu-limit: "300m"
+    api-cpu-request: "300m"
     api-cpu-threshold: 30
     api-memory-limit: "1Gi"
 
@@ -433,6 +451,8 @@ jobs:
         type: string
       mongo-cpu-limit:
         type: string
+      mongo-cpu-request:
+        type: string
       mongo-memory-limit:
         type: string
       mongo-replicas:
@@ -443,11 +463,15 @@ jobs:
         type: string
       rabbit-cpu-limit:
         type: string
+      rabbit-cpu-request:
+        type: string
       rabbit-memory-limit:
         type: string
       rabbit-storage-size:
         type: string
       indexer-cpu-limit:
+        type: string
+      indexer-cpu-request:
         type: string
       indexer-memory-limit:
         type: string
@@ -465,6 +489,8 @@ jobs:
         type: string
       daemon-cpu-limit:
         type: string
+      daemon-cpu-request:
+        type: string
       daemon-memory-limit:
         type: string
       daemon-storage-size:
@@ -477,6 +503,8 @@ jobs:
         type: integer
       api-cpu-limit:
         type: string
+      api-cpu-request:
+        type: string
       api-memory-limit:
         type: string
       api-replicas:
@@ -484,6 +512,8 @@ jobs:
       ingester-autoscaling:
         type: boolean
       ingester-cpu-limit:
+        type: string
+      ingester-cpu-request:
         type: string
       ingester-cpu-threshold:
         type: integer
@@ -522,29 +552,35 @@ jobs:
             pulumi config set --path unchained:<< parameters.coinstack >>.api.autoscaling.cpuThreshold << parameters.api-cpu-threshold >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.autoscaling.maxReplicas << parameters.api-max-replicas >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.cpuLimit << parameters.api-cpu-limit >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.api.cpuRequest << parameters.api-cpu-request >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.memoryLimit << parameters.api-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.replicas << parameters.api-replicas >>
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.enableDatadogLogs true
             pulumi config set --path unchained:<< parameters.coinstack >>.mongo.cpuLimit << parameters.mongo-cpu-limit >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.mongo.cpuRequest << parameters.mongo-cpu-request >>
             pulumi config set --path unchained:<< parameters.coinstack >>.mongo.memoryLimit << parameters.mongo-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.mongo.helmChartVersion 10.19.0
             pulumi config set --path unchained:<< parameters.coinstack >>.mongo.replicaCount << parameters.mongo-replicas >>
             pulumi config set --path unchained:<< parameters.coinstack >>.mongo.storageSize << parameters.mongo-storage-size >>
             pulumi config set --path unchained:<< parameters.coinstack >>.rabbit.cpuLimit << parameters.rabbit-cpu-limit >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.rabbit.cpuRequest << parameters.rabbit-cpu-request >>
             pulumi config set --path unchained:<< parameters.coinstack >>.rabbit.memoryLimit << parameters.rabbit-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.rabbit.storageSize << parameters.rabbit-storage-size >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.cpuLimit << parameters.indexer-cpu-limit >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.cpuRequest << parameters.indexer-cpu-request >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.memoryLimit << parameters.indexer-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.replicas << parameters.indexer-replicas >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.storageSize << parameters.indexer-storage-size >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.image << parameters.daemon-image >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.cpuLimit << parameters.daemon-cpu-limit >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.cpuRequest << parameters.daemon-cpu-request >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.memoryLimit << parameters.daemon-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.storageSize << parameters.daemon-storage-size >>
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.autoscaling.enabled << parameters.ingester-autoscaling >>
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.autoscaling.cpuThreshold << parameters.ingester-cpu-threshold >>
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.autoscaling.maxReplicas << parameters.ingester-max-replicas >>
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.cpuLimit << parameters.ingester-cpu-limit >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.ingester.cpuRequest << parameters.ingester-cpu-request >>
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.memoryLimit << parameters.ingester-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.ingester.replicas << parameters.ingester-replicas >>
             pulumi << parameters.pulumi-command >> --suppress-outputs
@@ -592,6 +628,8 @@ jobs:
         type: integer
       api-cpu-limit:
         type: string
+      api-cpu-request:
+        type: string
       api-memory-limit:
         type: string
       api-replicas:
@@ -624,6 +662,7 @@ jobs:
             pulumi config set --path unchained:<< parameters.coinstack >>.api.autoscaling.cpuThreshold << parameters.api-cpu-threshold >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.autoscaling.maxReplicas << parameters.api-max-replicas >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.cpuLimit << parameters.api-cpu-limit >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.api.cpuRequest << parameters.api-cpu-request >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.memoryLimit << parameters.api-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.replicas << parameters.api-replicas >>
             pulumi << parameters.pulumi-command >> --suppress-outputs
