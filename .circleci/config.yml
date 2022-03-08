@@ -779,24 +779,6 @@ workflows:
             - approve taxistake
           <<: *only-develop
 
-      - deploy-coinstack-node:
-          name: deploy bitcoin develop (taxistake)
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - deploy dependencies (taxistake)
-          <<: *bitcoin-dev
-          <<: *only-develop
-
-      - deploy-coinstack-node:
-          name: deploy ethereum develop (taxistake)
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - deploy dependencies (taxistake)
-          <<: *ethereum-dev
-          <<: *only-develop
-
   deploy-monitoring:
     jobs:
       - approve-monitoring-workflow:
