@@ -26,10 +26,10 @@
   make
   ```
 
-- Copy sample config file:
+- Copy sample env file:
 
   ```sh
-  cp cmd/ethereum/sample.config.json cmd/ethereum/config.json
+  cp cmd/ethereum/sample.env cmd/ethereum/.env
   ```
 
 - Fill out any missing variables

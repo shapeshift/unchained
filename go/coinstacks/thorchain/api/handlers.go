@@ -160,5 +160,5 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 }
 
 func (h *Handler) SendTx(hex string) (string, error) {
-	return h.httpClient.BroadcastTx([]byte(hex))
+	return h.httpClient.BroadcastTx(hex)
 }
