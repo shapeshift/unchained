@@ -51,7 +51,12 @@ func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (
 	return txHistory, nil
 }
 
-func (c *HTTPClient) BroadcastTx(txBytes []byte) (string, error) {
+func (c *HTTPClient) BroadcastTx(rawTx string) (string, error) {
+	txBytes, err := base64.StdEncoding.DecodeString(rawTx)
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to decode rawTx: %s", rawTx)
+	}
+
 	var res struct {
 		TxResponse struct {
 			Height    int64               `json:"height,string"`
@@ -69,7 +74,7 @@ func (c *HTTPClient) BroadcastTx(txBytes []byte) (string, error) {
 		} `json:"tx_response"`
 	}
 
-	_, err := c.cosmos.R().SetBody(&txtypes.BroadcastTxRequest{TxBytes: txBytes, Mode: txtypes.BroadcastMode_BROADCAST_MODE_SYNC}).SetResult(&res).Post("/cosmos/tx/v1beta1/txs")
+	_, err = c.cosmos.R().SetBody(&txtypes.BroadcastTxRequest{TxBytes: txBytes, Mode: txtypes.BroadcastMode_BROADCAST_MODE_SYNC}).SetResult(&res).Post("/cosmos/tx/v1beta1/txs")
 	if err != nil {
 		return "", errors.Wrap(err, "failed to broadcast transaction")
 	}
@@ -81,7 +86,12 @@ func (c *HTTPClient) BroadcastTx(txBytes []byte) (string, error) {
 	return res.TxResponse.TxHash, nil
 }
 
-func (c *GRPCClient) BroadcastTx(txBytes []byte) (string, error) {
+func (c *GRPCClient) BroadcastTx(rawTx string) (string, error) {
+	txBytes, err := base64.StdEncoding.DecodeString(rawTx)
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to decode rawTx: %s", rawTx)
+	}
+
 	res, err := c.tx.BroadcastTx(c.ctx, &txtypes.BroadcastTxRequest{TxBytes: txBytes, Mode: txtypes.BroadcastMode_BROADCAST_MODE_SYNC})
 	if err != nil {
 		return "", errors.Wrap(err, "failed to broadcast transaction")

@@ -126,7 +126,6 @@ func (b BaseTxHistory) txs() []Tx {
 	return b.Txs
 }
 
-//swagger:parameters SendTx EstimateGas
 type TxBody struct {
 	// Raw transaction
 	// required: true
@@ -152,7 +151,7 @@ type PaginatedPubkeyParam struct {
 	PageSize int `json:"pageSize"`
 }
 
-// swagger:parameters SendTx
+// swagger:parameters SendTx EstimateGas
 type TxParam struct {
 	// in:body
 	Body struct {
