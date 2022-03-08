@@ -11,7 +11,7 @@ import { buildAndPushImage, Config, hasTag, getBaseHash } from './index'
 export interface IngesterConfig {
   autoscaling: { enabled: boolean; cpuThreshold: number; maxReplicas: number }
   cpuLimit: string
-  cpuRequest: string
+  cpuRequest?: string
   memoryLimit: string
   replicas: number
   enableDatadogLogs?: boolean
@@ -228,9 +228,11 @@ export async function deployIngester(
                 cpu: cpuLimit,
                 memory: memoryLimit,
               },
-              requests: {
-                cpu: cpuRequest ?? cpuLimit,
-              },
+              ...(cpuRequest && {
+                requests: {
+                  cpu: cpuRequest,
+                },
+              }),
             },
             readinessProbe: {
               exec: { command: ['cat', '/tmp/ready'] },

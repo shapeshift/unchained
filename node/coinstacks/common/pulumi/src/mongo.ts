@@ -4,7 +4,7 @@ import { Config } from './index'
 
 export interface MongoConfig {
   cpuLimit: string
-  cpuRequest: string
+  cpuRequest?: string
   helmChartVersion: string
   memoryLimit: string
   replicaCount: number
@@ -71,9 +71,11 @@ export async function deployMongo(
             cpu: config.mongo.cpuLimit,
             memory: config.mongo.memoryLimit,
           },
-          requests: {
-            cpu: config.mongo.cpuRequest ?? config.mongo.cpuLimit,
-          },
+          ...(config.mongo.cpuRequest && {
+            requests: {
+              cpu: config.mongo.cpuRequest,
+            },
+          }),
         },
       },
     },
