@@ -12,14 +12,12 @@ aliases:
         ignore:
           - main
           - develop
-          - remove-taxistake-dev
 
   - &only-develop
     filters:
       branches:
         only:
           - develop
-          - remove-taxistake-dev
 
   - &only-main
     filters:
@@ -779,24 +777,6 @@ workflows:
           pulumi-command: up -f --yes
           requires:
             - approve taxistake
-          <<: *only-develop
-
-      - deploy-coinstack-node:
-          name: deploy bitcoin develop (taxistake)
-          organization: TAXISTAKE
-          pulumi-command: destroy -f --yes
-          requires:
-            - deploy dependencies (taxistake)
-          <<: *bitcoin-dev
-          <<: *only-develop
-
-      - deploy-coinstack-node:
-          name: deploy ethereum develop (taxistake)
-          organization: TAXISTAKE
-          pulumi-command: destroy -f --yes
-          requires:
-            - deploy dependencies (taxistake)
-          <<: *ethereum-dev
           <<: *only-develop
 
   deploy-monitoring:
