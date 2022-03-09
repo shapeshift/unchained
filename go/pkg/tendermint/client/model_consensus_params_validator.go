@@ -49,11 +49,11 @@ func (o *ConsensusParamsValidator) GetPubKeyTypes() []string {
 
 // GetPubKeyTypesOk returns a tuple with the PubKeyTypes field value
 // and a boolean to check if the value has been set.
-func (o *ConsensusParamsValidator) GetPubKeyTypesOk() (*[]string, bool) {
-	if o == nil  {
+func (o *ConsensusParamsValidator) GetPubKeyTypesOk() ([]string, bool) {
+	if o == nil {
 		return nil, false
 	}
-	return &o.PubKeyTypes, true
+	return o.PubKeyTypes, true
 }
 
 // SetPubKeyTypes sets field value

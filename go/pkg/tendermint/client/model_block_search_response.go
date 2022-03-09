@@ -54,7 +54,7 @@ func (o *BlockSearchResponse) GetJsonrpc() string {
 // GetJsonrpcOk returns a tuple with the Jsonrpc field value
 // and a boolean to check if the value has been set.
 func (o *BlockSearchResponse) GetJsonrpcOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Jsonrpc, true
@@ -78,7 +78,7 @@ func (o *BlockSearchResponse) GetId() int32 {
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 func (o *BlockSearchResponse) GetIdOk() (*int32, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Id, true
@@ -102,7 +102,7 @@ func (o *BlockSearchResponse) GetResult() BlockSearchResponseResult {
 // GetResultOk returns a tuple with the Result field value
 // and a boolean to check if the value has been set.
 func (o *BlockSearchResponse) GetResultOk() (*BlockSearchResponseResult, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Result, true

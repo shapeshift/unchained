@@ -3,53 +3,25 @@ info:
   contact:
     name: Tendermint RPC
     url: https://github.com/tendermint/tendermint/issues/new/choose
-  description: |
-    Tendermint supports the following RPC protocols:
-
-    * URI over HTTP
-    * JSONRPC over HTTP
-    * JSONRPC over websockets
-
-    ## Configuration
-
-    RPC can be configured by tuning parameters under `[rpc]` table in the
-    `$TMHOME/config/config.toml` file or by using the `--rpc.X` command-line
-    flags.
-
-    Default rpc listen address is `tcp://0.0.0.0:26657`.
-    To set another address, set the `laddr` config parameter to desired value.
-    CORS (Cross-Origin Resource Sharing) can be enabled by setting
-    `cors_allowed_origins`, `cors_allowed_methods`, `cors_allowed_headers`
-    config parameters.
-
-    ## Arguments
-
-    Arguments which expect strings or byte arrays may be passed as quoted
-    strings, like `"abc"` or as `0x`-prefixed strings, like `0x616263`.
-
-    ## URI/HTTP
-
-    A REST like interface.
-
-        curl localhost:26657/block?height=5
-
-    ## JSONRPC/HTTP
-
-    JSONRPC requests can be POST'd to the root RPC endpoint via HTTP.
-
-        curl --header "Content-Type: application/json" --request POST --data '{"method": "block", "params": ["5"], "id": 1}' localhost:26657
-
-    ## JSONRPC/websockets
-
-    JSONRPC requests can be also made via websocket.
-    The websocket endpoint is at `/websocket`, e.g. `localhost:26657/websocket`.
-    Asynchronous RPC functions like event `subscribe` and `unsubscribe` are
-    only available via websockets.
-
-    Example using https://github.com/hashrocket/ws:
-
-        ws ws://localhost:26657/websocket
-        > { "jsonrpc": "2.0", "method": "subscribe", "params": ["tm.event='NewBlock'"], "id": 1 }
+  description: "Tendermint supports the following RPC protocols:\n\n* URI over HTTP\n\
+    * JSONRPC over HTTP\n* JSONRPC over websockets\n\n## Configuration\n\nRPC can\
+    \ be configured by tuning parameters under `[rpc]` table in the\n`$TMHOME/config/config.toml`\
+    \ file or by using the `--rpc.X` command-line\nflags.\n\nDefault rpc listen address\
+    \ is `tcp://0.0.0.0:26657`.\nTo set another address, set the `laddr` config parameter\
+    \ to desired value.\nCORS (Cross-Origin Resource Sharing) can be enabled by setting\n\
+    `cors_allowed_origins`, `cors_allowed_methods`, `cors_allowed_headers`\nconfig\
+    \ parameters.\n\n## Arguments\n\nArguments which expect strings or byte arrays\
+    \ may be passed as quoted\nstrings, like `\"abc\"` or as `0x`-prefixed strings,\
+    \ like `0x616263`.\n\n## URI/HTTP\n\nA REST like interface.\n\n    curl localhost:26657/block?height=5\n\
+    \n## JSONRPC/HTTP\n\nJSONRPC requests can be POST'd to the root RPC endpoint via\
+    \ HTTP.\n\n    curl --header \"Content-Type: application/json\" --request POST\
+    \ --data '{\"method\": \"block\", \"params\": [\"5\"], \"id\": 1}' localhost:26657\n\
+    \n## JSONRPC/websockets\n\nJSONRPC requests can be also made via websocket.\n\
+    The websocket endpoint is at `/websocket`, e.g. `localhost:26657/websocket`.\n\
+    Asynchronous RPC functions like event `subscribe` and `unsubscribe` are\nonly\
+    \ available via websockets.\n\nExample using https://github.com/hashrocket/ws:\n\
+    \n    ws ws://localhost:26657/websocket\n    > { \"jsonrpc\": \"2.0\", \"method\"\
+    : \"subscribe\", \"params\": [\"tm.event='NewBlock'\"], \"id\": 1 }\n"
   license:
     name: Apache 2.0
     url: https://github.com/tendermint/tendermint/blob/master/LICENSE
@@ -76,23 +48,15 @@ tags:
 paths:
   /broadcast_tx_sync:
     get:
-      description: |
-        If you want to be sure that the transaction is included in a block, you can
-        subscribe for the result using JSONRPC via a websocket. See
-        https://docs.tendermint.com/master/app-dev/subscribing-to-events-via-websocket.html
-        If you haven't received anything after a couple of blocks, resend it. If the
-        same happens again, send it to some other node. A few reasons why it could
-        happen:
-
-        1. malicious node can drop or pretend it had committed your tx
-        2. malicious proposer (not necessary the one you're communicating with) can
-        drop transactions, which might become valid in the future
-        (https://github.com/tendermint/tendermint/issues/3322)
-
-
-        Please refer to
-        https://docs.tendermint.com/master/tendermint-core/using-tendermint.html#formatting
-        for formatting/encoding rules.
+      description: "If you want to be sure that the transaction is included in a block,\
+        \ you can\nsubscribe for the result using JSONRPC via a websocket. See\nhttps://docs.tendermint.com/master/app-dev/subscribing-to-events-via-websocket.html\n\
+        If you haven't received anything after a couple of blocks, resend it. If the\n\
+        same happens again, send it to some other node. A few reasons why it could\n\
+        happen:\n\n1. malicious node can drop or pretend it had committed your tx\n\
+        2. malicious proposer (not necessary the one you're communicating with) can\n\
+        drop transactions, which might become valid in the future\n(https://github.com/tendermint/tendermint/issues/3322)\n\
+        \n\nPlease refer to\nhttps://docs.tendermint.com/master/tendermint-core/using-tendermint.html#formatting\n\
+        for formatting/encoding rules.\n"
       operationId: broadcast_tx_sync
       parameters:
       - description: The transaction
@@ -123,23 +87,15 @@ paths:
       - Tx
   /broadcast_tx_async:
     get:
-      description: |
-        If you want to be sure that the transaction is included in a block, you can
-        subscribe for the result using JSONRPC via a websocket. See
-        https://docs.tendermint.com/master/app-dev/subscribing-to-events-via-websocket.html
-        If you haven't received anything after a couple of blocks, resend it. If the
-        same happens again, send it to some other node. A few reasons why it could
-        happen:
-
-        1. malicious node can drop or pretend it had committed your tx
-        2. malicious proposer (not necessary the one you're communicating with) can
-        drop transactions, which might become valid in the future
-        (https://github.com/tendermint/tendermint/issues/3322)
-        3. node can be offline
-
-        Please refer to
-        https://docs.tendermint.com/master/tendermint-core/using-tendermint.html#formatting
-        for formatting/encoding rules.
+      description: "If you want to be sure that the transaction is included in a block,\
+        \ you can\nsubscribe for the result using JSONRPC via a websocket. See\nhttps://docs.tendermint.com/master/app-dev/subscribing-to-events-via-websocket.html\n\
+        If you haven't received anything after a couple of blocks, resend it. If the\n\
+        same happens again, send it to some other node. A few reasons why it could\n\
+        happen:\n\n1. malicious node can drop or pretend it had committed your tx\n\
+        2. malicious proposer (not necessary the one you're communicating with) can\n\
+        drop transactions, which might become valid in the future\n(https://github.com/tendermint/tendermint/issues/3322)\n\
+        3. node can be offline\n\nPlease refer to\nhttps://docs.tendermint.com/master/tendermint-core/using-tendermint.html#formatting\n\
+        for formatting/encoding rules.\n"
       operationId: broadcast_tx_async
       parameters:
       - description: The transaction
@@ -164,27 +120,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: empty error
-      summary: Returns right away, with no response. Does not wait for CheckTx nor
-        DeliverTx results.
+      summary: "Returns right away, with no response. Does not wait for CheckTx nor\
+        \ DeliverTx results."
       tags:
       - Tx
   /broadcast_tx_commit:
     get:
-      description: |
-        IMPORTANT: use only for testing and development. In production, use
-        BroadcastTxSync or BroadcastTxAsync. You can subscribe for the transaction
-        result using JSONRPC via a websocket. See
-        https://docs.tendermint.com/master/app-dev/subscribing-to-events-via-websocket.html
-
-        CONTRACT: only returns error if mempool.CheckTx() errs or if we timeout
-        waiting for tx to commit.
-
-        If CheckTx or DeliverTx fail, no error will be returned, but the returned result
-        will contain a non-OK ABCI code.
-
-        Please refer to
-        https://docs.tendermint.com/master/tendermint-core/using-tendermint.html#formatting
-        for formatting/encoding rules.
+      description: "IMPORTANT: use only for testing and development. In production,\
+        \ use\nBroadcastTxSync or BroadcastTxAsync. You can subscribe for the transaction\n\
+        result using JSONRPC via a websocket. See\nhttps://docs.tendermint.com/master/app-dev/subscribing-to-events-via-websocket.html\n\
+        \nCONTRACT: only returns error if mempool.CheckTx() errs or if we timeout\n\
+        waiting for tx to commit.\n\nIf CheckTx or DeliverTx fail, no error will be\
+        \ returned, but the returned result\nwill contain a non-OK ABCI code.\n\n\
+        Please refer to\nhttps://docs.tendermint.com/master/tendermint-core/using-tendermint.html#formatting\n\
+        for formatting/encoding rules.\n"
       operationId: broadcast_tx_commit
       parameters:
       - description: The transaction
@@ -274,134 +223,73 @@ paths:
       - TxKey
   /subscribe:
     get:
-      description: |
-        To tell which events you want, you need to provide a query. query is a
-        string, which has a form: "condition AND condition ..." (no OR at the
-        moment). condition has a form: "key operation operand". key is a string with
-        a restricted set of possible symbols ( \t\n\r\\()"'=>< are not allowed).
-        operation can be "=", "<", "<=", ">", ">=", "CONTAINS" AND "EXISTS". operand
-        can be a string (escaped with single quotes), number, date or time.
-
-        Examples:
-              tm.event = 'NewBlock'               # new blocks
-              tm.event = 'CompleteProposal'       # node got a complete proposal
-              tm.event = 'Tx' AND tx.hash = 'XYZ' # single transaction
-              tm.event = 'Tx' AND tx.height = 5   # all txs of the fifth block
-              tx.height = 5                       # all txs of the fifth block
-
-        Tendermint provides a few predefined keys: tm.event, tx.hash and tx.height.
-        Note for transactions, you can define additional keys by providing events with
-        DeliverTx response.
-
-        import (
-            abci "github.com/tendermint/tendermint/abci/types"
-            "github.com/tendermint/tendermint/libs/pubsub/query"
-        )
-
-        abci.ResponseDeliverTx{
-          Events: []abci.Event{
-              {
-                  Type: "rewards.withdraw",
-                  Attributes: []abci.EventAttribute{
-                      {Key: "address", Value: "AddrA", Index: true},
-                      {Key: "source", Value: "SrcX", Index: true},
-                      {Key: "amount", Value: "...", Index: true},
-                      {Key: "balance", Value: "...", Index: true},
-                  },
-              },
-              {
-                  Type: "rewards.withdraw",
-                  Attributes: []abci.EventAttribute{
-                      {Key: "address", Value: "AddrB", Index: true},
-                      {Key: "source", Value: "SrcY", Index: true},
-                      {Key: "amount", Value: "...", Index: true},
-                      {Key: "balance", Value: "...", Index: true},
-                  },
-              },
-              {
-                  Type: "transfer",
-                  Attributes: []abci.EventAttribute{
-                      {Key: "sender", Value: "AddrC", Index: true},
-                      {Key: "recipient", Value: "AddrD", Index: true},
-                      {Key: "amount", Value: "...", Index: true},
-                  },
-              },
-          },
-        }
-
-        All events are indexed by a composite key of the form {eventType}.{evenAttrKey}.
-        In the above examples, the following keys would be indexed:
-           - rewards.withdraw.address
-           - rewards.withdraw.source
-           - rewards.withdraw.amount
-           - rewards.withdraw.balance
-           - transfer.sender
-           - transfer.recipient
-           - transfer.amount
-
-        Multiple event types with duplicate keys are allowed and are meant to
-        categorize unique and distinct events. In the above example, all events
-        indexed under the key `rewards.withdraw.address` will have the following
-        values stored and queryable:
-
-           - AddrA
-           - AddrB
-
-        To create a query for txs where address AddrA withdrew rewards:
-        query.MustParse("tm.event = 'Tx' AND rewards.withdraw.address = 'AddrA'")
-
-        To create a query for txs where address AddrA withdrew rewards from source Y:
-        query.MustParse("tm.event = 'Tx' AND rewards.withdraw.address = 'AddrA' AND rewards.withdraw.source = 'Y'")
-
-        To create a query for txs where AddrA transferred funds:
-        query.MustParse("tm.event = 'Tx' AND transfer.sender = 'AddrA'")
-
-        The following queries would return no results:
-        query.MustParse("tm.event = 'Tx' AND transfer.sender = 'AddrZ'")
-        query.MustParse("tm.event = 'Tx' AND rewards.withdraw.address = 'AddrZ'")
-        query.MustParse("tm.event = 'Tx' AND rewards.withdraw.source = 'W'")
-
-        See list of all possible events here
-        https://godoc.org/github.com/tendermint/tendermint/types#pkg-constants
-
-        For complete query syntax, check out
-        https://godoc.org/github.com/tendermint/tendermint/libs/pubsub/query.
-
-        ```go
-        import rpchttp "github.com/tendermint/rpc/client/http"
-        import "github.com/tendermint/tendermint/types"
-
-        client := rpchttp.New("tcp://0.0.0.0:26657")
-        err := client.Start()
-        if err != nil {
-          handle error
-        }
-        defer client.Stop()
-        ctx, cancel := context.WithTimeout(context.Background(), 1 * time.Second)
-        defer cancel()
-        query := "tm.event = 'Tx' AND tx.height = 3"
-        txs, err := client.Subscribe(ctx, "test-client", query)
-        if err != nil {
-          handle error
-        }
-
-        go func() {
-         for e := range txs {
-           fmt.Println("got ", e.Data.(types.EventDataTx))
-           }
-        }()
-        ```
-
-        NOTE: if you're not reading events fast enough, Tendermint might
-        terminate the subscription.
+      description: "To tell which events you want, you need to provide a query. query\
+        \ is a\nstring, which has a form: \"condition AND condition ...\" (no OR at\
+        \ the\nmoment). condition has a form: \"key operation operand\". key is a\
+        \ string with\na restricted set of possible symbols ( \\t\\n\\r\\\\()\"'=><\
+        \ are not allowed).\noperation can be \"=\", \"<\", \"<=\", \">\", \">=\"\
+        , \"CONTAINS\" AND \"EXISTS\". operand\ncan be a string (escaped with single\
+        \ quotes), number, date or time.\n\nExamples:\n      tm.event = 'NewBlock'\
+        \               # new blocks\n      tm.event = 'CompleteProposal'       #\
+        \ node got a complete proposal\n      tm.event = 'Tx' AND tx.hash = 'XYZ'\
+        \ # single transaction\n      tm.event = 'Tx' AND tx.height = 5   # all txs\
+        \ of the fifth block\n      tx.height = 5                       # all txs\
+        \ of the fifth block\n\nTendermint provides a few predefined keys: tm.event,\
+        \ tx.hash and tx.height.\nNote for transactions, you can define additional\
+        \ keys by providing events with\nDeliverTx response.\n\nimport (\n    abci\
+        \ \"github.com/tendermint/tendermint/abci/types\"\n    \"github.com/tendermint/tendermint/libs/pubsub/query\"\
+        \n)\n\nabci.ResponseDeliverTx{\n  Events: []abci.Event{\n      {\n       \
+        \   Type: \"rewards.withdraw\",\n          Attributes: []abci.EventAttribute{\n\
+        \              {Key: \"address\", Value: \"AddrA\", Index: true},\n      \
+        \        {Key: \"source\", Value: \"SrcX\", Index: true},\n              {Key:\
+        \ \"amount\", Value: \"...\", Index: true},\n              {Key: \"balance\"\
+        , Value: \"...\", Index: true},\n          },\n      },\n      {\n       \
+        \   Type: \"rewards.withdraw\",\n          Attributes: []abci.EventAttribute{\n\
+        \              {Key: \"address\", Value: \"AddrB\", Index: true},\n      \
+        \        {Key: \"source\", Value: \"SrcY\", Index: true},\n              {Key:\
+        \ \"amount\", Value: \"...\", Index: true},\n              {Key: \"balance\"\
+        , Value: \"...\", Index: true},\n          },\n      },\n      {\n       \
+        \   Type: \"transfer\",\n          Attributes: []abci.EventAttribute{\n  \
+        \            {Key: \"sender\", Value: \"AddrC\", Index: true},\n         \
+        \     {Key: \"recipient\", Value: \"AddrD\", Index: true},\n             \
+        \ {Key: \"amount\", Value: \"...\", Index: true},\n          },\n      },\n\
+        \  },\n}\n\nAll events are indexed by a composite key of the form {eventType}.{evenAttrKey}.\n\
+        In the above examples, the following keys would be indexed:\n   - rewards.withdraw.address\n\
+        \   - rewards.withdraw.source\n   - rewards.withdraw.amount\n   - rewards.withdraw.balance\n\
+        \   - transfer.sender\n   - transfer.recipient\n   - transfer.amount\n\nMultiple\
+        \ event types with duplicate keys are allowed and are meant to\ncategorize\
+        \ unique and distinct events. In the above example, all events\nindexed under\
+        \ the key `rewards.withdraw.address` will have the following\nvalues stored\
+        \ and queryable:\n\n   - AddrA\n   - AddrB\n\nTo create a query for txs where\
+        \ address AddrA withdrew rewards:\nquery.MustParse(\"tm.event = 'Tx' AND rewards.withdraw.address\
+        \ = 'AddrA'\")\n\nTo create a query for txs where address AddrA withdrew rewards\
+        \ from source Y:\nquery.MustParse(\"tm.event = 'Tx' AND rewards.withdraw.address\
+        \ = 'AddrA' AND rewards.withdraw.source = 'Y'\")\n\nTo create a query for\
+        \ txs where AddrA transferred funds:\nquery.MustParse(\"tm.event = 'Tx' AND\
+        \ transfer.sender = 'AddrA'\")\n\nThe following queries would return no results:\n\
+        query.MustParse(\"tm.event = 'Tx' AND transfer.sender = 'AddrZ'\")\nquery.MustParse(\"\
+        tm.event = 'Tx' AND rewards.withdraw.address = 'AddrZ'\")\nquery.MustParse(\"\
+        tm.event = 'Tx' AND rewards.withdraw.source = 'W'\")\n\nSee list of all possible\
+        \ events here\nhttps://godoc.org/github.com/tendermint/tendermint/types#pkg-constants\n\
+        \nFor complete query syntax, check out\nhttps://godoc.org/github.com/tendermint/tendermint/libs/pubsub/query.\n\
+        \n```go\nimport rpchttp \"github.com/tendermint/rpc/client/http\"\nimport\
+        \ \"github.com/tendermint/tendermint/types\"\n\nclient, err := rpchttp.New(\"\
+        tcp://0.0.0.0:26657\", \"/websocket\")\nif err != nil {\n  // handle error\n\
+        }\n\nerr = client.Start()\nif err != nil {\n  // handle error\n}\ndefer client.Stop()\n\
+        ctx, cancel := context.WithTimeout(context.Background(), 1 * time.Second)\n\
+        defer cancel()\nquery := \"tm.event = 'Tx' AND tx.height = 3\"\ntxs, err :=\
+        \ client.Subscribe(ctx, \"test-client\", query)\nif err != nil {\n  // handle\
+        \ error\n}\n\ngo func() {\n for e := range txs {\n   fmt.Println(\"got \"\
+        , e.Data.(types.EventDataTx))\n   }\n}()\n```\n\nNOTE: if you're not reading\
+        \ events fast enough, Tendermint might\nterminate the subscription.\n"
       operationId: subscribe
       parameters:
-      - description: |
-          query is a string, which has a form: "condition AND condition ..." (no OR at the
-          moment). condition has a form: "key operation operand". key is a string with
-          a restricted set of possible symbols ( \t\n\r\\()"'=>< are not allowed).
-          operation can be "=", "<", "<=", ">", ">=", "CONTAINS". operand can be a
-          string (escaped with single quotes), number, date or time.
+      - description: "query is a string, which has a form: \"condition AND condition\
+          \ ...\" (no OR at the\nmoment). condition has a form: \"key operation operand\"\
+          . key is a string with\na restricted set of possible symbols ( \\t\\n\\\
+          r\\\\()\"'=>< are not allowed).\noperation can be \"=\", \"<\", \"<=\",\
+          \ \">\", \">=\", \"CONTAINS\". operand can be a\nstring (escaped with single\
+          \ quotes), number, date or time.\n"
         explode: true
         in: query
         name: query
@@ -428,28 +316,19 @@ paths:
       - Websocket
   /unsubscribe:
     get:
-      description: |
-        ```go
-        client := rpchttp.New("tcp://0.0.0.0:26657")
-        err := client.Start()
-        if err != nil {
-           handle error
-        }
-        defer client.Stop()
-        query := "tm.event = 'Tx' AND tx.height = 3"
-        err = client.Unsubscribe(context.Background(), "test-client", query)
-        if err != nil {
-           handle error
-        }
-        ```
+      description: "```go\nclient, err := rpchttp.New(\"tcp://0.0.0.0:26657\", \"\
+        /websocket\")\nif err != nil {\n  // handle error\n}\n\nerr := client.Start()\n\
+        if err != nil {\n  // handle error\n}\ndefer client.Stop()\nquery := \"tm.event\
+        \ = 'Tx' AND tx.height = 3\"\nerr = client.Unsubscribe(context.Background(),\
+        \ \"test-client\", query)\nif err != nil {\n  // handle error\n}\n```\n"
       operationId: unsubscribe
       parameters:
-      - description: |
-          query is a string, which has a form: "condition AND condition ..." (no OR at the
-          moment). condition has a form: "key operation operand". key is a string with
-          a restricted set of possible symbols ( \t\n\r\\()"'=>< are not allowed).
-          operation can be "=", "<", "<=", ">", ">=", "CONTAINS". operand can be a
-          string (escaped with single quotes), number, date or time.
+      - description: "query is a string, which has a form: \"condition AND condition\
+          \ ...\" (no OR at the\nmoment). condition has a form: \"key operation operand\"\
+          . key is a string with\na restricted set of possible symbols ( \\t\\n\\\
+          r\\\\()\"'=>< are not allowed).\noperation can be \"=\", \"<\", \"<=\",\
+          \ \">\", \">=\", \"CONTAINS\". operand can be a\nstring (escaped with single\
+          \ quotes), number, date or time.\n"
         explode: true
         in: query
         name: query
@@ -497,8 +376,8 @@ paths:
       - Websocket
   /health:
     get:
-      description: |
-        Get node health. Returns empty result (200 OK) on success, no response - in case of an error.
+      description: "Get node health. Returns empty result (200 OK) on success, no\
+        \ response - in case of an error.\n"
       operationId: health
       responses:
         "200":
@@ -518,8 +397,8 @@ paths:
       - Info
   /status:
     get:
-      description: |
-        Get Tendermint status including node info, pubkey, latest block hash, app hash, block height, current max peer height, and time.
+      description: "Get Tendermint status including node info, pubkey, latest block\
+        \ hash, app hash, block height, current max peer height, and time.\n"
       operationId: status
       responses:
         "200":
@@ -560,10 +439,9 @@ paths:
       - Info
   /dial_seeds:
     get:
-      description: |
-        Dial a peer, this route in under unsafe, and has to manually enabled to use
-
-          **Example:** curl 'localhost:26657/dial_seeds?seeds=\["f9baeaa15fedf5e1ef7448dd60f46c01f1a9e9c4@1.2.3.4:26656","0491d373a8e0fcf1023aaf18c51d6a1d0d4f31bd@5.6.7.8:26656"\]'
+      description: "Dial a peer, this route in under unsafe, and has to manually enabled\
+        \ to use\n\n  **Example:** curl 'localhost:26657/dial_seeds?seeds=\\[\"f9baeaa15fedf5e1ef7448dd60f46c01f1a9e9c4@1.2.3.4:26656\"\
+        ,\"0491d373a8e0fcf1023aaf18c51d6a1d0d4f31bd@5.6.7.8:26656\"\\]'\n"
       operationId: dial_seeds
       parameters:
       - description: list of seed nodes to dial
@@ -595,10 +473,10 @@ paths:
       - Unsafe
   /dial_peers:
     get:
-      description: |
-        Set a persistent peer, this route in under unsafe, and has to manually enabled to use.
-
-        **Example:** curl 'localhost:26657/dial_peers?peers=\["f9baeaa15fedf5e1ef7448dd60f46c01f1a9e9c4@1.2.3.4:26656","0491d373a8e0fcf1023aaf18c51d6a1d0d4f31bd@5.6.7.8:26656"\]&persistent=false'
+      description: "Set a persistent peer, this route in under unsafe, and has to\
+        \ manually enabled to use.\n\n**Example:** curl 'localhost:26657/dial_peers?peers=\\\
+        [\"f9baeaa15fedf5e1ef7448dd60f46c01f1a9e9c4@1.2.3.4:26656\",\"0491d373a8e0fcf1023aaf18c51d6a1d0d4f31bd@5.6.7.8:26656\"\
+        \\]&persistent=false'\n"
       operationId: dial_peers
       parameters:
       - description: Have the peers you are dialing be persistent
@@ -657,12 +535,10 @@ paths:
       - Unsafe
   /unsafe_flush_mempool:
     get:
-      description: |
-        Flush flushes out the mempool. It acquires a read-lock, fetches all the
-        transactions currently in the transaction store and removes each transaction
-        from the store and all indexes and finally resets the cache.
-
-        Note, flushing the mempool may leave the mempool in an inconsistent state.
+      description: "Flush flushes out the mempool. It acquires a read-lock, fetches\
+        \ all the\ntransactions currently in the transaction store and removes each\
+        \ transaction\nfrom the store and all indexes and finally resets the cache.\n\
+        \nNote, flushing the mempool may leave the mempool in an inconsistent state.\n"
       operationId: unsafe_flush_mempool
       responses:
         "200":
@@ -682,15 +558,11 @@ paths:
       - Unsafe
   /blockchain:
     get:
-      description: |
-        Get block headers for minHeight <= height maxHeight.
-
-        If maxHeight does not yet exist, blocks up to the current height will
-        be returned. If minHeight does not exist (due to pruning), earliest
-        existing height will be used.
-
-        At most 20 items will be returned. Block headers are returned in
-        descending order (highest first).
+      description: "Get block headers for minHeight <= height maxHeight.\n\nIf maxHeight\
+        \ does not yet exist, blocks up to the current height will\nbe returned. If\
+        \ minHeight does not exist (due to pruning), earliest\nexisting height will\
+        \ be used.\n\nAt most 20 items will be returned. Block headers are returned\
+        \ in\ndescending order (highest first).\n"
       operationId: blockchain
       parameters:
       - description: Minimum block height to return
@@ -717,14 +589,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BlockchainResponse'
-          description: Block headers, returned in descending order (highest first).
+          description: "Block headers, returned in descending order (highest first)."
         "500":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Error
-      summary: 'Get block headers (max: 20) for minHeight <= height <= maxHeight.'
+      summary: "Get block headers (max: 20) for minHeight <= height <= maxHeight."
       tags:
       - Info
   /header:
@@ -733,8 +605,8 @@ paths:
         Retrieve the block header corresponding to a specified height.
       operationId: header
       parameters:
-      - description: height to return. If no height is provided, it will fetch the
-          latest height.
+      - description: "height to return. If no height is provided, it will fetch the\
+          \ latest height."
         explode: true
         in: query
         name: height
@@ -797,8 +669,8 @@ paths:
         Get Block.
       operationId: block
       parameters:
-      - description: height to return. If no height is provided, it will fetch the
-          latest block.
+      - description: "height to return. If no height is provided, it will fetch the\
+          \ latest block."
         explode: true
         in: query
         name: height
@@ -861,8 +733,8 @@ paths:
         Get block_results.
       operationId: block_results
       parameters:
-      - description: height to return. If no height is provided, it will fetch information
-          regarding the latest block.
+      - description: "height to return. If no height is provided, it will fetch information\
+          \ regarding the latest block."
         explode: true
         in: query
         name: height
@@ -894,8 +766,8 @@ paths:
         Get Commit.
       operationId: commit
       parameters:
-      - description: height to return. If no height is provided, it will fetch commit
-          information regarding the latest block.
+      - description: "height to return. If no height is provided, it will fetch commit\
+          \ information regarding the latest block."
         explode: true
         in: query
         name: height
@@ -926,12 +798,12 @@ paths:
       - Info
   /validators:
     get:
-      description: |
-        Get Validators. Validators are sorted first by voting power (descending), then by address (ascending).
+      description: "Get Validators. Validators are sorted first by voting power (descending),\
+        \ then by address (ascending).\n"
       operationId: validators
       parameters:
-      - description: height to return. If no height is provided, it will fetch validator
-          set which corresponds to the latest block.
+      - description: "height to return. If no height is provided, it will fetch validator\
+          \ set which corresponds to the latest block."
         explode: true
         in: query
         name: height
@@ -951,7 +823,7 @@ paths:
           example: 1
           type: integer
         style: form
-      - description: 'Number of entries per page (max: 100)'
+      - description: "Number of entries per page (max: 100)"
         explode: true
         in: query
         name: per_page
@@ -1086,8 +958,8 @@ paths:
         Get consensus parameters.
       operationId: consensus_params
       parameters:
-      - description: height to return. If no height is provided, it will fetch commit
-          information regarding the latest block.
+      - description: "height to return. If no height is provided, it will fetch commit\
+          \ information regarding the latest block."
         explode: true
         in: query
         name: height
@@ -1203,7 +1075,7 @@ paths:
           example: 1
           type: integer
         style: form
-      - description: 'Number of entries per page (max: 100)'
+      - description: "Number of entries per page (max: 100)"
         explode: true
         in: query
         name: per_page
@@ -1213,8 +1085,8 @@ paths:
           example: 30
           type: integer
         style: form
-      - description: Order in which transactions are sorted ("asc" or "desc"), by
-          height & index. If empty, default sorting will be still applied.
+      - description: "Order in which transactions are sorted (\"asc\" or \"desc\"\
+          ), by height & index. If empty, default sorting will be still applied."
         explode: true
         in: query
         name: order_by
@@ -1267,7 +1139,7 @@ paths:
           example: 1
           type: integer
         style: form
-      - description: 'Number of entries per page (max: 100)'
+      - description: "Number of entries per page (max: 100)"
         explode: true
         in: query
         name: per_page
@@ -1277,8 +1149,8 @@ paths:
           example: 30
           type: integer
         style: form
-      - description: Order in which blocks are sorted ("asc" or "desc"), by height.
-          If empty, default sorting will be still applied.
+      - description: "Order in which blocks are sorted (\"asc\" or \"desc\"), by height.\
+          \ If empty, default sorting will be still applied."
         explode: true
         in: query
         name: order_by
@@ -2206,13 +2078,13 @@ components:
           total: "25"
           validators:
           - address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-            proposer_priority: -11896414
+            proposer_priority: "-11896414"
             pub_key:
               type: tendermint/PubKeyEd25519
               value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
             voting_power: "239727"
           - address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-            proposer_priority: -11896414
+            proposer_priority: "-11896414"
             pub_key:
               type: tendermint/PubKeyEd25519
               value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
@@ -2239,7 +2111,7 @@ components:
       example:
         result:
           genesis:
-            app_state: '{}'
+            app_state: "{}"
             genesis_time: 2019-04-22T17:00:00Z
             chain_id: cosmoshub-2
             initial_height: "2"
@@ -2285,7 +2157,7 @@ components:
       type: object
     GenesisChunkedResponse:
       example:
-        result: '{}'
+        result: "{}"
         id: 0
         jsonrpc: "2.0"
       properties:
@@ -2366,29 +2238,29 @@ components:
           round_state:
             locked_round: -1
             last_commit:
-              votes_bit_array: BA{100:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}
-                170220253/170220253 = 1.00
-              peer_maj_23s: '{}'
+              votes_bit_array: "BA{100:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}\
+                \ 170220253/170220253 = 1.00"
+              peer_maj_23s: "{}"
               votes:
-              - Vote{0:000001E443FD 1311800/00/2(Precommit) 3071ADB27D1A 77EE1B6B6847
-                @ 2019-08-05T11:28:43.810128139Z}
+              - "Vote{0:000001E443FD 1311800/00/2(Precommit) 3071ADB27D1A 77EE1B6B6847\
+                \ @ 2019-08-05T11:28:43.810128139Z}"
             validators:
               validators:
               - address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-                proposer_priority: -11896414
+                proposer_priority: "-11896414"
                 pub_key:
                   type: tendermint/PubKeyEd25519
                   value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
                 voting_power: "239727"
               - address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-                proposer_priority: -11896414
+                proposer_priority: "-11896414"
                 pub_key:
                   type: tendermint/PubKeyEd25519
                   value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
                 voting_power: "239727"
               proposer:
                 address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-                proposer_priority: -11896414
+                proposer_priority: "-11896414"
                 pub_key:
                   type: tendermint/PubKeyEd25519
                   value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
@@ -2399,49 +2271,49 @@ components:
             last_validators:
               validators:
               - address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-                proposer_priority: -11896414
+                proposer_priority: "-11896414"
                 pub_key:
                   type: tendermint/PubKeyEd25519
                   value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
                 voting_power: "239727"
               - address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-                proposer_priority: -11896414
+                proposer_priority: "-11896414"
                 pub_key:
                   type: tendermint/PubKeyEd25519
                   value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
                 voting_power: "239727"
               proposer:
                 address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-                proposer_priority: -11896414
+                proposer_priority: "-11896414"
                 pub_key:
                   type: tendermint/PubKeyEd25519
                   value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
                 voting_power: "239727"
             start_time: 2019-08-05T11:28:49.064658805Z
             round: 0
-            valid_round: -1
+            valid_round: "-1"
             step: 3
             votes:
             - prevotes:
               - nil-Vote
-              - Vote{19:46A3F8B8393B 1311801/00/1(Prevote) 000000000000 64CE682305CB
-                @ 2019-08-05T11:28:47.374703444Z}
-              prevotes_bit_array: BA{100:___________________x________________________________________________________________________________}
-                209706/170220253 = 0.00
+              - "Vote{19:46A3F8B8393B 1311801/00/1(Prevote) 000000000000 64CE682305CB\
+                \ @ 2019-08-05T11:28:47.374703444Z}"
+              prevotes_bit_array: "BA{100:___________________x________________________________________________________________________________}\
+                \ 209706/170220253 = 0.00"
               round: "0"
-              precommits_bit_array: BA{100:____________________________________________________________________________________________________}
-                0/170220253 = 0.00
+              precommits_bit_array: "BA{100:____________________________________________________________________________________________________}\
+                \ 0/170220253 = 0.00"
               precommits:
               - nil-Vote
             - prevotes:
               - nil-Vote
-              - Vote{19:46A3F8B8393B 1311801/00/1(Prevote) 000000000000 64CE682305CB
-                @ 2019-08-05T11:28:47.374703444Z}
-              prevotes_bit_array: BA{100:___________________x________________________________________________________________________________}
-                209706/170220253 = 0.00
+              - "Vote{19:46A3F8B8393B 1311801/00/1(Prevote) 000000000000 64CE682305CB\
+                \ @ 2019-08-05T11:28:47.374703444Z}"
+              prevotes_bit_array: "BA{100:___________________x________________________________________________________________________________}\
+                \ 209706/170220253 = 0.00"
               round: "0"
-              precommits_bit_array: BA{100:____________________________________________________________________________________________________}
-                0/170220253 = 0.00
+              precommits_bit_array: "BA{100:____________________________________________________________________________________________________}\
+                \ 0/170220253 = 0.00"
               precommits:
               - nil-Vote
             height: "1311801"
@@ -2474,30 +2346,30 @@ components:
             valid_block_hash: 634ADAF1F402663BEC2ABC340ECE8B4B45AA906FA603272ACC5F5EED3097E009
             height_vote_set:
             - prevotes:
-              - Vote{0:000001E443FD 1262197/00/1(Prevote) 634ADAF1F402 7BB974E1BA40
-                @ 2019-08-01T11:52:35.513572509Z}
+              - "Vote{0:000001E443FD 1262197/00/1(Prevote) 634ADAF1F402 7BB974E1BA40\
+                \ @ 2019-08-01T11:52:35.513572509Z}"
               - nil-Vote
-              prevotes_bit_array: BA{100:xxxxxxxxxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}
-                169753436/170151262 = 1.00
+              prevotes_bit_array: "BA{100:xxxxxxxxxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}\
+                \ 169753436/170151262 = 1.00"
               round: 0
-              precommits_bit_array: BA{100:xxxxxx_xxxxx_xxxx_x_xxx_xx_xx_xx__x_x_x__xxxxxxxxxxxxxx_xxxx_xx_xxxxxx_xxxxxxxx_xxxx_xxx_x_xxxx__xxx}
-                118726247/170151262 = 0.70
+              precommits_bit_array: "BA{100:xxxxxx_xxxxx_xxxx_x_xxx_xx_xx_xx__x_x_x__xxxxxxxxxxxxxx_xxxx_xx_xxxxxx_xxxxxxxx_xxxx_xxx_x_xxxx__xxx}\
+                \ 118726247/170151262 = 0.70"
               precommits:
-              - Vote{5:18C78D135C9D 1262197/00/2(Precommit) 634ADAF1F402 8B5EFFFEABCD
-                @ 2019-08-01T11:52:36.25600005Z}
+              - "Vote{5:18C78D135C9D 1262197/00/2(Precommit) 634ADAF1F402 8B5EFFFEABCD\
+                \ @ 2019-08-01T11:52:36.25600005Z}"
               - nil-Vote
             - prevotes:
-              - Vote{0:000001E443FD 1262197/00/1(Prevote) 634ADAF1F402 7BB974E1BA40
-                @ 2019-08-01T11:52:35.513572509Z}
+              - "Vote{0:000001E443FD 1262197/00/1(Prevote) 634ADAF1F402 7BB974E1BA40\
+                \ @ 2019-08-01T11:52:35.513572509Z}"
               - nil-Vote
-              prevotes_bit_array: BA{100:xxxxxxxxxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}
-                169753436/170151262 = 1.00
+              prevotes_bit_array: "BA{100:xxxxxxxxxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}\
+                \ 169753436/170151262 = 1.00"
               round: 0
-              precommits_bit_array: BA{100:xxxxxx_xxxxx_xxxx_x_xxx_xx_xx_xx__x_x_x__xxxxxxxxxxxxxx_xxxx_xx_xxxxxx_xxxxxxxx_xxxx_xxx_x_xxxx__xxx}
-                118726247/170151262 = 0.70
+              precommits_bit_array: "BA{100:xxxxxx_xxxxx_xxxx_x_xxx_xx_xx_xx__x_x_x__xxxxxxxxxxxxxx_xxxx_xx_xxxxxx_xxxxxxxx_xxxx_xxx_x_xxxx__xxx}\
+                \ 118726247/170151262 = 0.70"
               precommits:
-              - Vote{5:18C78D135C9D 1262197/00/2(Precommit) 634ADAF1F402 8B5EFFFEABCD
-                @ 2019-08-01T11:52:36.25600005Z}
+              - "Vote{5:18C78D135C9D 1262197/00/2(Precommit) 634ADAF1F402 8B5EFFFEABCD\
+                \ @ 2019-08-01T11:52:36.25600005Z}"
               - nil-Vote
             height/round/step: 1262197/0/8
         id: 0
@@ -2599,7 +2471,7 @@ components:
           txs:
           - tx: 5wHwYl3uCkaoo2GaChQmSIu8hxpJxLcCuIi8fiHN4TMwrRIU/Af1cEG7Rcs/6LjTl7YjRSymJfYaFAoFdWF0b20SCzE0OTk5OTk1MDAwEhMKDQoFdWF0b20SBDUwMDAQwJoMGmoKJuta6YchAwswBShaB1wkZBctLIhYqBC3JrAI28XGzxP+rVEticGEEkAc+khTkKL9CDE47aDvjEHvUNt+izJfT4KVF2v2JkC+bmlH9K08q3PqHeMI9Z5up+XMusnTqlP985KF+SI5J3ZOIhhNYWRlIGJ5IENpcmNsZSB3aXRoIGxvdmU=
             tx_result:
-              log: '[{"msg_index":"0","success":true,"log":""}]'
+              log: "[{\"msg_index\":\"0\",\"success\":true,\"log\":\"\"}]"
               gas_used: "28596"
               gas_wanted: "200000"
               tags:
@@ -2620,7 +2492,7 @@ components:
             height: "1000"
           - tx: 5wHwYl3uCkaoo2GaChQmSIu8hxpJxLcCuIi8fiHN4TMwrRIU/Af1cEG7Rcs/6LjTl7YjRSymJfYaFAoFdWF0b20SCzE0OTk5OTk1MDAwEhMKDQoFdWF0b20SBDUwMDAQwJoMGmoKJuta6YchAwswBShaB1wkZBctLIhYqBC3JrAI28XGzxP+rVEticGEEkAc+khTkKL9CDE47aDvjEHvUNt+izJfT4KVF2v2JkC+bmlH9K08q3PqHeMI9Z5up+XMusnTqlP985KF+SI5J3ZOIhhNYWRlIGJ5IENpcmNsZSB3aXRoIGxvdmU=
             tx_result:
-              log: '[{"msg_index":"0","success":true,"log":""}]'
+              log: "[{\"msg_index\":\"0\",\"success\":true,\"log\":\"\"}]"
               gas_used: "28596"
               gas_wanted: "200000"
               tags:
@@ -2660,7 +2532,7 @@ components:
         result:
           tx: 5wHwYl3uCkaoo2GaChQmSIu8hxpJxLcCuIi8fiHN4TMwrRIU/Af1cEG7Rcs/6LjTl7YjRSymJfYaFAoFdWF0b20SCzE0OTk5OTk1MDAwEhMKDQoFdWF0b20SBDUwMDAQwJoMGmoKJuta6YchAwswBShaB1wkZBctLIhYqBC3JrAI28XGzxP+rVEticGEEkAc+khTkKL9CDE47aDvjEHvUNt+izJfT4KVF2v2JkC+bmlH9K08q3PqHeMI9Z5up+XMusnTqlP985KF+SI5J3ZOIhhNYWRlIGJ5IENpcmNsZSB3aXRoIGxvdmU=
           tx_result:
-            log: '[{"msg_index":"0","success":true,"log":""}]'
+            log: "[{\"msg_index\":\"0\",\"success\":true,\"log\":\"\"}]"
             gas_used: "28596"
             gas_wanted: "200000"
             tags:
@@ -2693,7 +2565,7 @@ components:
       example:
         result:
           response:
-            data: '{"size":0}'
+            data: "{\"size\":0}"
             app_version: "1314126"
             version: 0.16.1
         id: 0
@@ -2717,7 +2589,7 @@ components:
           response:
             code: "0"
             log: exists
-            index: -1
+            index: "-1"
             proof: 010114FED0DAD959F36091AD761C922ABA3CBF1D8349990101020103011406AA2262E2F448242DF2C2607C3CDC705313EE3B0001149D16177BC71E445476174622EA559715C293740C
             value: "61626364"
             key: "61626364"
@@ -3077,7 +2949,7 @@ components:
     ValidatorPriority:
       example:
         address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-        proposer_priority: -11896414
+        proposer_priority: "-11896414"
         pub_key:
           type: tendermint/PubKeyEd25519
           value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
@@ -3092,7 +2964,7 @@ components:
           example: "239727"
           type: string
         proposer_priority:
-          example: -11896414
+          example: "-11896414"
           type: string
       type: object
     Validator:
@@ -3739,13 +3611,13 @@ components:
         total: "25"
         validators:
         - address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-          proposer_priority: -11896414
+          proposer_priority: "-11896414"
           pub_key:
             type: tendermint/PubKeyEd25519
             value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
           voting_power: "239727"
         - address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-          proposer_priority: -11896414
+          proposer_priority: "-11896414"
           pub_key:
             type: tendermint/PubKeyEd25519
             value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
@@ -3808,7 +3680,7 @@ components:
       type: object
     GenesisResponse_result_genesis:
       example:
-        app_state: '{}'
+        app_state: "{}"
         genesis_time: 2019-04-22T17:00:00Z
         chain_id: cosmoshub-2
         initial_height: "2"
@@ -3869,7 +3741,7 @@ components:
     GenesisResponse_result:
       example:
         genesis:
-          app_state: '{}'
+          app_state: "{}"
           genesis_time: 2019-04-22T17:00:00Z
           chain_id: cosmoshub-2
           initial_height: "2"
@@ -3907,20 +3779,20 @@ components:
       example:
         validators:
         - address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-          proposer_priority: -11896414
+          proposer_priority: "-11896414"
           pub_key:
             type: tendermint/PubKeyEd25519
             value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
           voting_power: "239727"
         - address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-          proposer_priority: -11896414
+          proposer_priority: "-11896414"
           pub_key:
             type: tendermint/PubKeyEd25519
             value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
           voting_power: "239727"
         proposer:
           address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-          proposer_priority: -11896414
+          proposer_priority: "-11896414"
           pub_key:
             type: tendermint/PubKeyEd25519
             value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
@@ -3940,12 +3812,13 @@ components:
       example:
         prevotes:
         - nil-Vote
-        - Vote{19:46A3F8B8393B 1311801/00/1(Prevote) 000000000000 64CE682305CB @ 2019-08-05T11:28:47.374703444Z}
-        prevotes_bit_array: BA{100:___________________x________________________________________________________________________________}
-          209706/170220253 = 0.00
+        - "Vote{19:46A3F8B8393B 1311801/00/1(Prevote) 000000000000 64CE682305CB @\
+          \ 2019-08-05T11:28:47.374703444Z}"
+        prevotes_bit_array: "BA{100:___________________x________________________________________________________________________________}\
+          \ 209706/170220253 = 0.00"
         round: "0"
-        precommits_bit_array: BA{100:____________________________________________________________________________________________________}
-          0/170220253 = 0.00
+        precommits_bit_array: "BA{100:____________________________________________________________________________________________________}\
+          \ 0/170220253 = 0.00"
         precommits:
         - nil-Vote
       properties:
@@ -3955,15 +3828,15 @@ components:
         prevotes:
           example:
           - nil-Vote
-          - Vote{19:46A3F8B8393B 1311801/00/1(Prevote) 000000000000 64CE682305CB @
-            2019-08-05T11:28:47.374703444Z}
+          - "Vote{19:46A3F8B8393B 1311801/00/1(Prevote) 000000000000 64CE682305CB\
+            \ @ 2019-08-05T11:28:47.374703444Z}"
           items:
             type: string
           nullable: true
           type: array
         prevotes_bit_array:
-          example: BA{100:___________________x________________________________________________________________________________}
-            209706/170220253 = 0.00
+          example: "BA{100:___________________x________________________________________________________________________________}\
+            \ 209706/170220253 = 0.00"
           type: string
         precommits:
           example:
@@ -3973,30 +3846,30 @@ components:
           nullable: true
           type: array
         precommits_bit_array:
-          example: BA{100:____________________________________________________________________________________________________}
-            0/170220253 = 0.00
+          example: "BA{100:____________________________________________________________________________________________________}\
+            \ 0/170220253 = 0.00"
           type: string
       type: object
     DumpConsensusResponse_result_round_state_last_commit:
       example:
-        votes_bit_array: BA{100:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}
-          170220253/170220253 = 1.00
-        peer_maj_23s: '{}'
+        votes_bit_array: "BA{100:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}\
+          \ 170220253/170220253 = 1.00"
+        peer_maj_23s: "{}"
         votes:
-        - Vote{0:000001E443FD 1311800/00/2(Precommit) 3071ADB27D1A 77EE1B6B6847 @
-          2019-08-05T11:28:43.810128139Z}
+        - "Vote{0:000001E443FD 1311800/00/2(Precommit) 3071ADB27D1A 77EE1B6B6847 @\
+          \ 2019-08-05T11:28:43.810128139Z}"
       nullable: true
       properties:
         votes:
           example:
-          - Vote{0:000001E443FD 1311800/00/2(Precommit) 3071ADB27D1A 77EE1B6B6847
-            @ 2019-08-05T11:28:43.810128139Z}
+          - "Vote{0:000001E443FD 1311800/00/2(Precommit) 3071ADB27D1A 77EE1B6B6847\
+            \ @ 2019-08-05T11:28:43.810128139Z}"
           items:
             type: string
           type: array
         votes_bit_array:
-          example: BA{100:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}
-            170220253/170220253 = 1.00
+          example: "BA{100:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}\
+            \ 170220253/170220253 = 1.00"
           type: string
         peer_maj_23s:
           properties: {}
@@ -4010,29 +3883,29 @@ components:
       example:
         locked_round: -1
         last_commit:
-          votes_bit_array: BA{100:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}
-            170220253/170220253 = 1.00
-          peer_maj_23s: '{}'
+          votes_bit_array: "BA{100:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}\
+            \ 170220253/170220253 = 1.00"
+          peer_maj_23s: "{}"
           votes:
-          - Vote{0:000001E443FD 1311800/00/2(Precommit) 3071ADB27D1A 77EE1B6B6847
-            @ 2019-08-05T11:28:43.810128139Z}
+          - "Vote{0:000001E443FD 1311800/00/2(Precommit) 3071ADB27D1A 77EE1B6B6847\
+            \ @ 2019-08-05T11:28:43.810128139Z}"
         validators:
           validators:
           - address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-            proposer_priority: -11896414
+            proposer_priority: "-11896414"
             pub_key:
               type: tendermint/PubKeyEd25519
               value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
             voting_power: "239727"
           - address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-            proposer_priority: -11896414
+            proposer_priority: "-11896414"
             pub_key:
               type: tendermint/PubKeyEd25519
               value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
             voting_power: "239727"
           proposer:
             address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-            proposer_priority: -11896414
+            proposer_priority: "-11896414"
             pub_key:
               type: tendermint/PubKeyEd25519
               value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
@@ -4043,49 +3916,49 @@ components:
         last_validators:
           validators:
           - address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-            proposer_priority: -11896414
+            proposer_priority: "-11896414"
             pub_key:
               type: tendermint/PubKeyEd25519
               value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
             voting_power: "239727"
           - address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-            proposer_priority: -11896414
+            proposer_priority: "-11896414"
             pub_key:
               type: tendermint/PubKeyEd25519
               value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
             voting_power: "239727"
           proposer:
             address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-            proposer_priority: -11896414
+            proposer_priority: "-11896414"
             pub_key:
               type: tendermint/PubKeyEd25519
               value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
             voting_power: "239727"
         start_time: 2019-08-05T11:28:49.064658805Z
         round: 0
-        valid_round: -1
+        valid_round: "-1"
         step: 3
         votes:
         - prevotes:
           - nil-Vote
-          - Vote{19:46A3F8B8393B 1311801/00/1(Prevote) 000000000000 64CE682305CB @
-            2019-08-05T11:28:47.374703444Z}
-          prevotes_bit_array: BA{100:___________________x________________________________________________________________________________}
-            209706/170220253 = 0.00
+          - "Vote{19:46A3F8B8393B 1311801/00/1(Prevote) 000000000000 64CE682305CB\
+            \ @ 2019-08-05T11:28:47.374703444Z}"
+          prevotes_bit_array: "BA{100:___________________x________________________________________________________________________________}\
+            \ 209706/170220253 = 0.00"
           round: "0"
-          precommits_bit_array: BA{100:____________________________________________________________________________________________________}
-            0/170220253 = 0.00
+          precommits_bit_array: "BA{100:____________________________________________________________________________________________________}\
+            \ 0/170220253 = 0.00"
           precommits:
           - nil-Vote
         - prevotes:
           - nil-Vote
-          - Vote{19:46A3F8B8393B 1311801/00/1(Prevote) 000000000000 64CE682305CB @
-            2019-08-05T11:28:47.374703444Z}
-          prevotes_bit_array: BA{100:___________________x________________________________________________________________________________}
-            209706/170220253 = 0.00
+          - "Vote{19:46A3F8B8393B 1311801/00/1(Prevote) 000000000000 64CE682305CB\
+            \ @ 2019-08-05T11:28:47.374703444Z}"
+          prevotes_bit_array: "BA{100:___________________x________________________________________________________________________________}\
+            \ 209706/170220253 = 0.00"
           round: "0"
-          precommits_bit_array: BA{100:____________________________________________________________________________________________________}
-            0/170220253 = 0.00
+          precommits_bit_array: "BA{100:____________________________________________________________________________________________________}\
+            \ 0/170220253 = 0.00"
           precommits:
           - nil-Vote
         height: "1311801"
@@ -4111,7 +3984,7 @@ components:
           example: -1
           type: integer
         valid_round:
-          example: -1
+          example: "-1"
           type: string
         votes:
           items:
@@ -4376,29 +4249,29 @@ components:
         round_state:
           locked_round: -1
           last_commit:
-            votes_bit_array: BA{100:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}
-              170220253/170220253 = 1.00
-            peer_maj_23s: '{}'
+            votes_bit_array: "BA{100:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}\
+              \ 170220253/170220253 = 1.00"
+            peer_maj_23s: "{}"
             votes:
-            - Vote{0:000001E443FD 1311800/00/2(Precommit) 3071ADB27D1A 77EE1B6B6847
-              @ 2019-08-05T11:28:43.810128139Z}
+            - "Vote{0:000001E443FD 1311800/00/2(Precommit) 3071ADB27D1A 77EE1B6B6847\
+              \ @ 2019-08-05T11:28:43.810128139Z}"
           validators:
             validators:
             - address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-              proposer_priority: -11896414
+              proposer_priority: "-11896414"
               pub_key:
                 type: tendermint/PubKeyEd25519
                 value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
               voting_power: "239727"
             - address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-              proposer_priority: -11896414
+              proposer_priority: "-11896414"
               pub_key:
                 type: tendermint/PubKeyEd25519
                 value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
               voting_power: "239727"
             proposer:
               address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-              proposer_priority: -11896414
+              proposer_priority: "-11896414"
               pub_key:
                 type: tendermint/PubKeyEd25519
                 value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
@@ -4409,49 +4282,49 @@ components:
           last_validators:
             validators:
             - address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-              proposer_priority: -11896414
+              proposer_priority: "-11896414"
               pub_key:
                 type: tendermint/PubKeyEd25519
                 value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
               voting_power: "239727"
             - address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-              proposer_priority: -11896414
+              proposer_priority: "-11896414"
               pub_key:
                 type: tendermint/PubKeyEd25519
                 value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
               voting_power: "239727"
             proposer:
               address: 000001E443FD237E4B616E2FA69DF4EE3D49A94F
-              proposer_priority: -11896414
+              proposer_priority: "-11896414"
               pub_key:
                 type: tendermint/PubKeyEd25519
                 value: 9tK9IT+FPdf2qm+5c2qaxi10sWP+3erWTKgftn2PaQM=
               voting_power: "239727"
           start_time: 2019-08-05T11:28:49.064658805Z
           round: 0
-          valid_round: -1
+          valid_round: "-1"
           step: 3
           votes:
           - prevotes:
             - nil-Vote
-            - Vote{19:46A3F8B8393B 1311801/00/1(Prevote) 000000000000 64CE682305CB
-              @ 2019-08-05T11:28:47.374703444Z}
-            prevotes_bit_array: BA{100:___________________x________________________________________________________________________________}
-              209706/170220253 = 0.00
+            - "Vote{19:46A3F8B8393B 1311801/00/1(Prevote) 000000000000 64CE682305CB\
+              \ @ 2019-08-05T11:28:47.374703444Z}"
+            prevotes_bit_array: "BA{100:___________________x________________________________________________________________________________}\
+              \ 209706/170220253 = 0.00"
             round: "0"
-            precommits_bit_array: BA{100:____________________________________________________________________________________________________}
-              0/170220253 = 0.00
+            precommits_bit_array: "BA{100:____________________________________________________________________________________________________}\
+              \ 0/170220253 = 0.00"
             precommits:
             - nil-Vote
           - prevotes:
             - nil-Vote
-            - Vote{19:46A3F8B8393B 1311801/00/1(Prevote) 000000000000 64CE682305CB
-              @ 2019-08-05T11:28:47.374703444Z}
-            prevotes_bit_array: BA{100:___________________x________________________________________________________________________________}
-              209706/170220253 = 0.00
+            - "Vote{19:46A3F8B8393B 1311801/00/1(Prevote) 000000000000 64CE682305CB\
+              \ @ 2019-08-05T11:28:47.374703444Z}"
+            prevotes_bit_array: "BA{100:___________________x________________________________________________________________________________}\
+              \ 209706/170220253 = 0.00"
             round: "0"
-            precommits_bit_array: BA{100:____________________________________________________________________________________________________}
-              0/170220253 = 0.00
+            precommits_bit_array: "BA{100:____________________________________________________________________________________________________}\
+              \ 0/170220253 = 0.00"
             precommits:
             - nil-Vote
           height: "1311801"
@@ -4469,16 +4342,16 @@ components:
     ConsensusStateResponse_result_round_state_height_vote_set:
       example:
         prevotes:
-        - Vote{0:000001E443FD 1262197/00/1(Prevote) 634ADAF1F402 7BB974E1BA40 @ 2019-08-01T11:52:35.513572509Z}
+        - "Vote{0:000001E443FD 1262197/00/1(Prevote) 634ADAF1F402 7BB974E1BA40 @ 2019-08-01T11:52:35.513572509Z}"
         - nil-Vote
-        prevotes_bit_array: BA{100:xxxxxxxxxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}
-          169753436/170151262 = 1.00
+        prevotes_bit_array: "BA{100:xxxxxxxxxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}\
+          \ 169753436/170151262 = 1.00"
         round: 0
-        precommits_bit_array: BA{100:xxxxxx_xxxxx_xxxx_x_xxx_xx_xx_xx__x_x_x__xxxxxxxxxxxxxx_xxxx_xx_xxxxxx_xxxxxxxx_xxxx_xxx_x_xxxx__xxx}
-          118726247/170151262 = 0.70
+        precommits_bit_array: "BA{100:xxxxxx_xxxxx_xxxx_x_xxx_xx_xx_xx__x_x_x__xxxxxxxxxxxxxx_xxxx_xx_xxxxxx_xxxxxxxx_xxxx_xxx_x_xxxx__xxx}\
+          \ 118726247/170151262 = 0.70"
         precommits:
-        - Vote{5:18C78D135C9D 1262197/00/2(Precommit) 634ADAF1F402 8B5EFFFEABCD @
-          2019-08-01T11:52:36.25600005Z}
+        - "Vote{5:18C78D135C9D 1262197/00/2(Precommit) 634ADAF1F402 8B5EFFFEABCD @\
+          \ 2019-08-01T11:52:36.25600005Z}"
         - nil-Vote
       properties:
         round:
@@ -4486,27 +4359,27 @@ components:
           type: integer
         prevotes:
           example:
-          - Vote{0:000001E443FD 1262197/00/1(Prevote) 634ADAF1F402 7BB974E1BA40 @
-            2019-08-01T11:52:35.513572509Z}
+          - "Vote{0:000001E443FD 1262197/00/1(Prevote) 634ADAF1F402 7BB974E1BA40 @\
+            \ 2019-08-01T11:52:35.513572509Z}"
           - nil-Vote
           items:
             type: string
           type: array
         prevotes_bit_array:
-          example: BA{100:xxxxxxxxxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}
-            169753436/170151262 = 1.00
+          example: "BA{100:xxxxxxxxxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}\
+            \ 169753436/170151262 = 1.00"
           type: string
         precommits:
           example:
-          - Vote{5:18C78D135C9D 1262197/00/2(Precommit) 634ADAF1F402 8B5EFFFEABCD
-            @ 2019-08-01T11:52:36.25600005Z}
+          - "Vote{5:18C78D135C9D 1262197/00/2(Precommit) 634ADAF1F402 8B5EFFFEABCD\
+            \ @ 2019-08-01T11:52:36.25600005Z}"
           - nil-Vote
           items:
             type: string
           type: array
         precommits_bit_array:
-          example: BA{100:xxxxxx_xxxxx_xxxx_x_xxx_xx_xx_xx__x_x_x__xxxxxxxxxxxxxx_xxxx_xx_xxxxxx_xxxxxxxx_xxxx_xxx_x_xxxx__xxx}
-            118726247/170151262 = 0.70
+          example: "BA{100:xxxxxx_xxxxx_xxxx_x_xxx_xx_xx_xx__x_x_x__xxxxxxxxxxxxxx_xxxx_xx_xxxxxx_xxxxxxxx_xxxx_xxx_x_xxxx__xxx}\
+            \ 118726247/170151262 = 0.70"
           type: string
       type: object
     ConsensusStateResponse_result_round_state_proposer:
@@ -4532,30 +4405,30 @@ components:
         valid_block_hash: 634ADAF1F402663BEC2ABC340ECE8B4B45AA906FA603272ACC5F5EED3097E009
         height_vote_set:
         - prevotes:
-          - Vote{0:000001E443FD 1262197/00/1(Prevote) 634ADAF1F402 7BB974E1BA40 @
-            2019-08-01T11:52:35.513572509Z}
+          - "Vote{0:000001E443FD 1262197/00/1(Prevote) 634ADAF1F402 7BB974E1BA40 @\
+            \ 2019-08-01T11:52:35.513572509Z}"
           - nil-Vote
-          prevotes_bit_array: BA{100:xxxxxxxxxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}
-            169753436/170151262 = 1.00
+          prevotes_bit_array: "BA{100:xxxxxxxxxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}\
+            \ 169753436/170151262 = 1.00"
           round: 0
-          precommits_bit_array: BA{100:xxxxxx_xxxxx_xxxx_x_xxx_xx_xx_xx__x_x_x__xxxxxxxxxxxxxx_xxxx_xx_xxxxxx_xxxxxxxx_xxxx_xxx_x_xxxx__xxx}
-            118726247/170151262 = 0.70
+          precommits_bit_array: "BA{100:xxxxxx_xxxxx_xxxx_x_xxx_xx_xx_xx__x_x_x__xxxxxxxxxxxxxx_xxxx_xx_xxxxxx_xxxxxxxx_xxxx_xxx_x_xxxx__xxx}\
+            \ 118726247/170151262 = 0.70"
           precommits:
-          - Vote{5:18C78D135C9D 1262197/00/2(Precommit) 634ADAF1F402 8B5EFFFEABCD
-            @ 2019-08-01T11:52:36.25600005Z}
+          - "Vote{5:18C78D135C9D 1262197/00/2(Precommit) 634ADAF1F402 8B5EFFFEABCD\
+            \ @ 2019-08-01T11:52:36.25600005Z}"
           - nil-Vote
         - prevotes:
-          - Vote{0:000001E443FD 1262197/00/1(Prevote) 634ADAF1F402 7BB974E1BA40 @
-            2019-08-01T11:52:35.513572509Z}
+          - "Vote{0:000001E443FD 1262197/00/1(Prevote) 634ADAF1F402 7BB974E1BA40 @\
+            \ 2019-08-01T11:52:35.513572509Z}"
           - nil-Vote
-          prevotes_bit_array: BA{100:xxxxxxxxxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}
-            169753436/170151262 = 1.00
+          prevotes_bit_array: "BA{100:xxxxxxxxxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}\
+            \ 169753436/170151262 = 1.00"
           round: 0
-          precommits_bit_array: BA{100:xxxxxx_xxxxx_xxxx_x_xxx_xx_xx_xx__x_x_x__xxxxxxxxxxxxxx_xxxx_xx_xxxxxx_xxxxxxxx_xxxx_xxx_x_xxxx__xxx}
-            118726247/170151262 = 0.70
+          precommits_bit_array: "BA{100:xxxxxx_xxxxx_xxxx_x_xxx_xx_xx_xx__x_x_x__xxxxxxxxxxxxxx_xxxx_xx_xxxxxx_xxxxxxxx_xxxx_xxx_x_xxxx__xxx}\
+            \ 118726247/170151262 = 0.70"
           precommits:
-          - Vote{5:18C78D135C9D 1262197/00/2(Precommit) 634ADAF1F402 8B5EFFFEABCD
-            @ 2019-08-01T11:52:36.25600005Z}
+          - "Vote{5:18C78D135C9D 1262197/00/2(Precommit) 634ADAF1F402 8B5EFFFEABCD\
+            \ @ 2019-08-01T11:52:36.25600005Z}"
           - nil-Vote
         height/round/step: 1262197/0/8
       properties:
@@ -4601,30 +4474,30 @@ components:
           valid_block_hash: 634ADAF1F402663BEC2ABC340ECE8B4B45AA906FA603272ACC5F5EED3097E009
           height_vote_set:
           - prevotes:
-            - Vote{0:000001E443FD 1262197/00/1(Prevote) 634ADAF1F402 7BB974E1BA40
-              @ 2019-08-01T11:52:35.513572509Z}
+            - "Vote{0:000001E443FD 1262197/00/1(Prevote) 634ADAF1F402 7BB974E1BA40\
+              \ @ 2019-08-01T11:52:35.513572509Z}"
             - nil-Vote
-            prevotes_bit_array: BA{100:xxxxxxxxxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}
-              169753436/170151262 = 1.00
+            prevotes_bit_array: "BA{100:xxxxxxxxxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}\
+              \ 169753436/170151262 = 1.00"
             round: 0
-            precommits_bit_array: BA{100:xxxxxx_xxxxx_xxxx_x_xxx_xx_xx_xx__x_x_x__xxxxxxxxxxxxxx_xxxx_xx_xxxxxx_xxxxxxxx_xxxx_xxx_x_xxxx__xxx}
-              118726247/170151262 = 0.70
+            precommits_bit_array: "BA{100:xxxxxx_xxxxx_xxxx_x_xxx_xx_xx_xx__x_x_x__xxxxxxxxxxxxxx_xxxx_xx_xxxxxx_xxxxxxxx_xxxx_xxx_x_xxxx__xxx}\
+              \ 118726247/170151262 = 0.70"
             precommits:
-            - Vote{5:18C78D135C9D 1262197/00/2(Precommit) 634ADAF1F402 8B5EFFFEABCD
-              @ 2019-08-01T11:52:36.25600005Z}
+            - "Vote{5:18C78D135C9D 1262197/00/2(Precommit) 634ADAF1F402 8B5EFFFEABCD\
+              \ @ 2019-08-01T11:52:36.25600005Z}"
             - nil-Vote
           - prevotes:
-            - Vote{0:000001E443FD 1262197/00/1(Prevote) 634ADAF1F402 7BB974E1BA40
-              @ 2019-08-01T11:52:35.513572509Z}
+            - "Vote{0:000001E443FD 1262197/00/1(Prevote) 634ADAF1F402 7BB974E1BA40\
+              \ @ 2019-08-01T11:52:35.513572509Z}"
             - nil-Vote
-            prevotes_bit_array: BA{100:xxxxxxxxxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}
-              169753436/170151262 = 1.00
+            prevotes_bit_array: "BA{100:xxxxxxxxxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}\
+              \ 169753436/170151262 = 1.00"
             round: 0
-            precommits_bit_array: BA{100:xxxxxx_xxxxx_xxxx_x_xxx_xx_xx_xx__x_x_x__xxxxxxxxxxxxxx_xxxx_xx_xxxxxx_xxxxxxxx_xxxx_xxx_x_xxxx__xxx}
-              118726247/170151262 = 0.70
+            precommits_bit_array: "BA{100:xxxxxx_xxxxx_xxxx_x_xxx_xx_xx_xx__x_x_x__xxxxxxxxxxxxxx_xxxx_xx_xxxxxx_xxxxxxxx_xxxx_xxx_x_xxxx__xxx}\
+              \ 118726247/170151262 = 0.70"
             precommits:
-            - Vote{5:18C78D135C9D 1262197/00/2(Precommit) 634ADAF1F402 8B5EFFFEABCD
-              @ 2019-08-01T11:52:36.25600005Z}
+            - "Vote{5:18C78D135C9D 1262197/00/2(Precommit) 634ADAF1F402 8B5EFFFEABCD\
+              \ @ 2019-08-01T11:52:36.25600005Z}"
             - nil-Vote
           height/round/step: 1262197/0/8
       properties:
@@ -4709,7 +4582,7 @@ components:
       type: object
     TxSearchResponse_result_tx_result:
       example:
-        log: '[{"msg_index":"0","success":true,"log":""}]'
+        log: "[{\"msg_index\":\"0\",\"success\":true,\"log\":\"\"}]"
         gas_used: "28596"
         gas_wanted: "200000"
         tags:
@@ -4718,7 +4591,7 @@ components:
           key: YWN0aW9u
       properties:
         log:
-          example: '[{"msg_index":"0","success":true,"log":""}]'
+          example: "[{\"msg_index\":\"0\",\"success\":true,\"log\":\"\"}]"
           type: string
         gas_wanted:
           example: "200000"
@@ -4791,7 +4664,7 @@ components:
       example:
         tx: 5wHwYl3uCkaoo2GaChQmSIu8hxpJxLcCuIi8fiHN4TMwrRIU/Af1cEG7Rcs/6LjTl7YjRSymJfYaFAoFdWF0b20SCzE0OTk5OTk1MDAwEhMKDQoFdWF0b20SBDUwMDAQwJoMGmoKJuta6YchAwswBShaB1wkZBctLIhYqBC3JrAI28XGzxP+rVEticGEEkAc+khTkKL9CDE47aDvjEHvUNt+izJfT4KVF2v2JkC+bmlH9K08q3PqHeMI9Z5up+XMusnTqlP985KF+SI5J3ZOIhhNYWRlIGJ5IENpcmNsZSB3aXRoIGxvdmU=
         tx_result:
-          log: '[{"msg_index":"0","success":true,"log":""}]'
+          log: "[{\"msg_index\":\"0\",\"success\":true,\"log\":\"\"}]"
           gas_used: "28596"
           gas_wanted: "200000"
           tags:
@@ -4834,7 +4707,7 @@ components:
         txs:
         - tx: 5wHwYl3uCkaoo2GaChQmSIu8hxpJxLcCuIi8fiHN4TMwrRIU/Af1cEG7Rcs/6LjTl7YjRSymJfYaFAoFdWF0b20SCzE0OTk5OTk1MDAwEhMKDQoFdWF0b20SBDUwMDAQwJoMGmoKJuta6YchAwswBShaB1wkZBctLIhYqBC3JrAI28XGzxP+rVEticGEEkAc+khTkKL9CDE47aDvjEHvUNt+izJfT4KVF2v2JkC+bmlH9K08q3PqHeMI9Z5up+XMusnTqlP985KF+SI5J3ZOIhhNYWRlIGJ5IENpcmNsZSB3aXRoIGxvdmU=
           tx_result:
-            log: '[{"msg_index":"0","success":true,"log":""}]'
+            log: "[{\"msg_index\":\"0\",\"success\":true,\"log\":\"\"}]"
             gas_used: "28596"
             gas_wanted: "200000"
             tags:
@@ -4855,7 +4728,7 @@ components:
           height: "1000"
         - tx: 5wHwYl3uCkaoo2GaChQmSIu8hxpJxLcCuIi8fiHN4TMwrRIU/Af1cEG7Rcs/6LjTl7YjRSymJfYaFAoFdWF0b20SCzE0OTk5OTk1MDAwEhMKDQoFdWF0b20SBDUwMDAQwJoMGmoKJuta6YchAwswBShaB1wkZBctLIhYqBC3JrAI28XGzxP+rVEticGEEkAc+khTkKL9CDE47aDvjEHvUNt+izJfT4KVF2v2JkC+bmlH9K08q3PqHeMI9Z5up+XMusnTqlP985KF+SI5J3ZOIhhNYWRlIGJ5IENpcmNsZSB3aXRoIGxvdmU=
           tx_result:
-            log: '[{"msg_index":"0","success":true,"log":""}]'
+            log: "[{\"msg_index\":\"0\",\"success\":true,\"log\":\"\"}]"
             gas_used: "28596"
             gas_wanted: "200000"
             tags:
@@ -4888,7 +4761,7 @@ components:
       type: object
     TxResponse_result_tx_result:
       example:
-        log: '[{"msg_index":"0","success":true,"log":""}]'
+        log: "[{\"msg_index\":\"0\",\"success\":true,\"log\":\"\"}]"
         gas_used: "28596"
         gas_wanted: "200000"
         tags:
@@ -4900,7 +4773,7 @@ components:
           key: YWN0aW9u
       properties:
         log:
-          example: '[{"msg_index":"0","success":true,"log":""}]'
+          example: "[{\"msg_index\":\"0\",\"success\":true,\"log\":\"\"}]"
           type: string
         gas_wanted:
           example: "200000"
@@ -4922,7 +4795,7 @@ components:
       example:
         tx: 5wHwYl3uCkaoo2GaChQmSIu8hxpJxLcCuIi8fiHN4TMwrRIU/Af1cEG7Rcs/6LjTl7YjRSymJfYaFAoFdWF0b20SCzE0OTk5OTk1MDAwEhMKDQoFdWF0b20SBDUwMDAQwJoMGmoKJuta6YchAwswBShaB1wkZBctLIhYqBC3JrAI28XGzxP+rVEticGEEkAc+khTkKL9CDE47aDvjEHvUNt+izJfT4KVF2v2JkC+bmlH9K08q3PqHeMI9Z5up+XMusnTqlP985KF+SI5J3ZOIhhNYWRlIGJ5IENpcmNsZSB3aXRoIGxvdmU=
         tx_result:
-          log: '[{"msg_index":"0","success":true,"log":""}]'
+          log: "[{\"msg_index\":\"0\",\"success\":true,\"log\":\"\"}]"
           gas_used: "28596"
           gas_wanted: "200000"
           tags:
@@ -4959,12 +4832,12 @@ components:
       type: object
     ABCIInfoResponse_result_response:
       example:
-        data: '{"size":0}'
+        data: "{\"size\":0}"
         app_version: "1314126"
         version: 0.16.1
       properties:
         data:
-          example: '{"size":0}'
+          example: "{\"size\":0}"
           type: string
         version:
           example: 0.16.1
@@ -4980,7 +4853,7 @@ components:
     ABCIInfoResponse_result:
       example:
         response:
-          data: '{"size":0}'
+          data: "{\"size\":0}"
           app_version: "1314126"
           version: 0.16.1
       properties:
@@ -4993,7 +4866,7 @@ components:
       example:
         code: "0"
         log: exists
-        index: -1
+        index: "-1"
         proof: 010114FED0DAD959F36091AD761C922ABA3CBF1D8349990101020103011406AA2262E2F448242DF2C2607C3CDC705313EE3B0001149D16177BC71E445476174622EA559715C293740C
         value: "61626364"
         key: "61626364"
@@ -5015,7 +4888,7 @@ components:
           example: "61626364"
           type: string
         index:
-          example: -1
+          example: "-1"
           type: string
         code:
           example: "0"
@@ -5034,7 +4907,7 @@ components:
         response:
           code: "0"
           log: exists
-          index: -1
+          index: "-1"
           proof: 010114FED0DAD959F36091AD761C922ABA3CBF1D8349990101020103011406AA2262E2F448242DF2C2607C3CDC705313EE3B0001149D16177BC71E445476174622EA559715C293740C
           value: "61626364"
           key: "61626364"

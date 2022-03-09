@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/unchained-client",
-  "version": "5.2.0",
+  "version": "6.0.0",
   "license": "MIT",
   "main": "dist/index.js",
   "source": "src/index.ts",
@@ -11,18 +11,22 @@
   "scripts": {
     "build": "yarn generate && tsc",
     "clean": "rm -rf dist node_modules src/generated",
-    "generate": "JAVA_OPTS='-Dlog.level=warn' openapi-generator-cli generate",
+    "generate": "JAVA_OPTS='-Dlog.level=error' openapi-generator-cli generate",
     "watch": "nodemon"
   },
   "dependencies": {
-    "@shapeshiftoss/blockbook": "^5.2.0",
-    "@shapeshiftoss/unchained-tx-parser": "^5.2.0",
+    "@shapeshiftoss/blockbook": "^6.0.0",
+    "@shapeshiftoss/caip": "^2.0.0",
+    "@shapeshiftoss/types": "^2.0.0",
+    "@yfi/sdk": "^1.0.30",
+    "bignumber.js": "^9.0.1",
+    "ethers": "^5.5.3",
     "isomorphic-ws": "^4.0.1",
     "ws": "^8.3.0"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.4.4",
-    "@shapeshiftoss/common-api": "^5.2.0",
+    "@shapeshiftoss/common-api": "^6.0.0",
     "@types/ws": "^8.2.1"
   }
 }

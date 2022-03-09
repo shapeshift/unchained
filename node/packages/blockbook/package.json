@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/blockbook",
-  "version": "5.2.0",
+  "version": "6.0.0",
   "license": "MIT",
   "main": "dist/index.js",
   "source": "src/index.ts",
@@ -17,7 +17,7 @@
     "watch": "nodemon -e ts --watch src --ignore src/routes.ts -x yarn build"
   },
   "dependencies": {
-    "axios": "^0.21.2",
+    "axios": "^0.26.0",
     "express": "^4.17.1",
     "swagger-ui-express": "^4.1.5",
     "tsoa": "^3.4.0",

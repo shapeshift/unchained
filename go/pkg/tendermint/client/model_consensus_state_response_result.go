@@ -50,7 +50,7 @@ func (o *ConsensusStateResponseResult) GetRoundState() ConsensusStateResponseRes
 // GetRoundStateOk returns a tuple with the RoundState field value
 // and a boolean to check if the value has been set.
 func (o *ConsensusStateResponseResult) GetRoundStateOk() (*ConsensusStateResponseResultRoundState, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.RoundState, true

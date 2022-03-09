@@ -64,7 +64,7 @@ func (o *Commit) GetType() int32 {
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
 func (o *Commit) GetTypeOk() (*int32, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Type, true
@@ -88,7 +88,7 @@ func (o *Commit) GetHeight() string {
 // GetHeightOk returns a tuple with the Height field value
 // and a boolean to check if the value has been set.
 func (o *Commit) GetHeightOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Height, true
@@ -112,7 +112,7 @@ func (o *Commit) GetRound() int32 {
 // GetRoundOk returns a tuple with the Round field value
 // and a boolean to check if the value has been set.
 func (o *Commit) GetRoundOk() (*int32, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Round, true
@@ -136,7 +136,7 @@ func (o *Commit) GetBlockId() BlockID {
 // GetBlockIdOk returns a tuple with the BlockId field value
 // and a boolean to check if the value has been set.
 func (o *Commit) GetBlockIdOk() (*BlockID, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.BlockId, true
@@ -160,7 +160,7 @@ func (o *Commit) GetTimestamp() string {
 // GetTimestampOk returns a tuple with the Timestamp field value
 // and a boolean to check if the value has been set.
 func (o *Commit) GetTimestampOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Timestamp, true
@@ -184,7 +184,7 @@ func (o *Commit) GetValidatorAddress() string {
 // GetValidatorAddressOk returns a tuple with the ValidatorAddress field value
 // and a boolean to check if the value has been set.
 func (o *Commit) GetValidatorAddressOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.ValidatorAddress, true
@@ -208,7 +208,7 @@ func (o *Commit) GetValidatorIndex() int32 {
 // GetValidatorIndexOk returns a tuple with the ValidatorIndex field value
 // and a boolean to check if the value has been set.
 func (o *Commit) GetValidatorIndexOk() (*int32, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.ValidatorIndex, true
@@ -232,7 +232,7 @@ func (o *Commit) GetSignature() string {
 // GetSignatureOk returns a tuple with the Signature field value
 // and a boolean to check if the value has been set.
 func (o *Commit) GetSignatureOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Signature, true

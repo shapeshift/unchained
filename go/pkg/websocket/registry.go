@@ -1,9 +1,11 @@
 package websocket
 
+import "encoding/json"
+
 type Registrar interface {
 	Subscribe(clientID string, addrs []string, msg chan<- []byte)
 	Unsubscribe(clientID string, addrs []string, msg chan<- []byte)
-	Publish(addrs []string, msg []byte)
+	Publish(addrs []string, data interface{})
 }
 
 type Registry struct {
@@ -71,10 +73,16 @@ func (r *Registry) Unsubscribe(clientID string, addrs []string, msgChan chan<- [
 }
 
 // Publish message to all clients subscribed to any of the addresses provided
-func (r *Registry) Publish(addrs []string, msg []byte) {
+func (r *Registry) Publish(addrs []string, data interface{}) {
 	for _, addr := range addrs {
 		if _, ok := r.addresses[addr]; !ok {
 			continue
+		}
+
+		msg, err := json.Marshal(MessageResponse{Address: addr, Data: data})
+		if err != nil {
+			logger.Errorf("failed to marshal tx message: %v", err)
+			return
 		}
 
 		for _, msgChan := range r.addresses[addr] {

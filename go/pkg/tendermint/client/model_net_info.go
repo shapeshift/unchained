@@ -17,9 +17,9 @@ import (
 // NetInfo struct for NetInfo
 type NetInfo struct {
 	Listening *bool `json:"listening,omitempty"`
-	Listeners *[]string `json:"listeners,omitempty"`
+	Listeners []string `json:"listeners,omitempty"`
 	NPeers *string `json:"n_peers,omitempty"`
-	Peers *[]Peer `json:"peers,omitempty"`
+	Peers []Peer `json:"peers,omitempty"`
 }
 
 // NewNetInfo instantiates a new NetInfo object
@@ -77,12 +77,12 @@ func (o *NetInfo) GetListeners() []string {
 		var ret []string
 		return ret
 	}
-	return *o.Listeners
+	return o.Listeners
 }
 
 // GetListenersOk returns a tuple with the Listeners field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *NetInfo) GetListenersOk() (*[]string, bool) {
+func (o *NetInfo) GetListenersOk() ([]string, bool) {
 	if o == nil || o.Listeners == nil {
 		return nil, false
 	}
@@ -100,7 +100,7 @@ func (o *NetInfo) HasListeners() bool {
 
 // SetListeners gets a reference to the given []string and assigns it to the Listeners field.
 func (o *NetInfo) SetListeners(v []string) {
-	o.Listeners = &v
+	o.Listeners = v
 }
 
 // GetNPeers returns the NPeers field value if set, zero value otherwise.
@@ -141,12 +141,12 @@ func (o *NetInfo) GetPeers() []Peer {
 		var ret []Peer
 		return ret
 	}
-	return *o.Peers
+	return o.Peers
 }
 
 // GetPeersOk returns a tuple with the Peers field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *NetInfo) GetPeersOk() (*[]Peer, bool) {
+func (o *NetInfo) GetPeersOk() ([]Peer, bool) {
 	if o == nil || o.Peers == nil {
 		return nil, false
 	}
@@ -164,7 +164,7 @@ func (o *NetInfo) HasPeers() bool {
 
 // SetPeers gets a reference to the given []Peer and assigns it to the Peers field.
 func (o *NetInfo) SetPeers(v []Peer) {
-	o.Peers = &v
+	o.Peers = v
 }
 
 func (o NetInfo) MarshalJSON() ([]byte, error) {

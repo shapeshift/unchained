@@ -54,7 +54,7 @@ func (o *ValidatorsResponseResult) GetBlockHeight() string {
 // GetBlockHeightOk returns a tuple with the BlockHeight field value
 // and a boolean to check if the value has been set.
 func (o *ValidatorsResponseResult) GetBlockHeightOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.BlockHeight, true
@@ -77,11 +77,11 @@ func (o *ValidatorsResponseResult) GetValidators() []ValidatorPriority {
 
 // GetValidatorsOk returns a tuple with the Validators field value
 // and a boolean to check if the value has been set.
-func (o *ValidatorsResponseResult) GetValidatorsOk() (*[]ValidatorPriority, bool) {
-	if o == nil  {
+func (o *ValidatorsResponseResult) GetValidatorsOk() ([]ValidatorPriority, bool) {
+	if o == nil {
 		return nil, false
 	}
-	return &o.Validators, true
+	return o.Validators, true
 }
 
 // SetValidators sets field value

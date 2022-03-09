@@ -34,11 +34,12 @@ import (
 )
 
 const (
-	PORT              = 3000
-	GRACEFUL_SHUTDOWN = 15 * time.Second
-	WRITE_TIMEOUT     = 15 * time.Second
-	READ_TIMEOUT      = 15 * time.Second
-	IDLE_TIMEOUT      = 60 * time.Second
+	PORT                     = 3000
+	GRACEFUL_SHUTDOWN        = 15 * time.Second
+	WRITE_TIMEOUT            = 15 * time.Second
+	READ_TIMEOUT             = 15 * time.Second
+	IDLE_TIMEOUT             = 60 * time.Second
+	MAX_PAGE_SIZE_TX_HISTORY = 100
 )
 
 var (
@@ -98,6 +99,9 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient 
 	v1Account.Use(cosmos.ValidatePubkey)
 	v1Account.HandleFunc("/{pubkey}", a.Account).Methods("GET")
 	v1Account.HandleFunc("/{pubkey}/txs", a.TxHistory).Methods("GET")
+
+	v1Gas := v1.PathPrefix("/gas").Subrouter()
+	v1Gas.HandleFunc("/estimate", a.EstimateGas).Methods("POST")
 
 	// docs redirect paths
 	r.HandleFunc("/docs", docsRedirect).Methods("GET")
@@ -217,17 +221,30 @@ func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page, err := strconv.Atoi(r.URL.Query().Get("page"))
-	if err != nil {
-		page = 1
+	cursor := r.URL.Query().Get("cursor")
+
+	pageSizeQ := r.URL.Query().Get("pageSize")
+	if pageSizeQ == "" {
+		pageSizeQ = "10"
 	}
 
-	pageSize, err := strconv.Atoi(r.URL.Query().Get("pageSize"))
+	pageSize, err := strconv.Atoi(pageSizeQ)
 	if err != nil {
-		pageSize = 25
+		api.HandleError(w, http.StatusBadRequest, err.Error())
+		return
 	}
 
-	txHistory, err := a.handler.GetTxHistory(pubkey, page, pageSize)
+	if pageSize > MAX_PAGE_SIZE_TX_HISTORY {
+		api.HandleError(w, http.StatusBadRequest, fmt.Sprintf("page size max is %d", MAX_PAGE_SIZE_TX_HISTORY))
+		return
+	}
+
+	if pageSize == 0 {
+		api.HandleError(w, http.StatusBadRequest, "page size cannot be 0")
+		return
+	}
+
+	txHistory, err := a.handler.GetTxHistory(pubkey, cursor, pageSize)
 	if err != nil {
 		api.HandleError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -254,11 +271,38 @@ func (a *API) SendTx(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	txHash, err := a.handler.SendTx(body.Hex)
+	txHash, err := a.handler.SendTx(body.RawTx)
 	if err != nil {
 		api.HandleError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	api.HandleResponse(w, http.StatusOK, txHash)
+}
+
+// swagger:route POST /api/v1/gas/estimate v1 EstimateGas
+//
+// Get the estimated gas cost for a transaction
+//
+// responses:
+//   200: GasAmount
+//   400: BadRequestError
+//   422: ValidationError
+//   500: InternalServerError
+func (a *API) EstimateGas(w http.ResponseWriter, r *http.Request) {
+	body := &api.TxBody{}
+
+	err := json.NewDecoder(r.Body).Decode(body)
+	if err != nil {
+		api.HandleError(w, http.StatusBadRequest, "invalid post body")
+		return
+	}
+
+	estimatedGas, err := a.handler.EstimateGas(body.RawTx)
+	if err != nil {
+		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	api.HandleResponse(w, http.StatusOK, estimatedGas)
 }

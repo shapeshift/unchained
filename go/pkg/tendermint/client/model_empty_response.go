@@ -18,7 +18,7 @@ import (
 type EmptyResponse struct {
 	Id *int32 `json:"id,omitempty"`
 	Jsonrpc *string `json:"jsonrpc,omitempty"`
-	Result *map[string]interface{} `json:"result,omitempty"`
+	Result map[string]interface{} `json:"result,omitempty"`
 }
 
 // NewEmptyResponse instantiates a new EmptyResponse object
@@ -108,12 +108,12 @@ func (o *EmptyResponse) GetResult() map[string]interface{} {
 		var ret map[string]interface{}
 		return ret
 	}
-	return *o.Result
+	return o.Result
 }
 
 // GetResultOk returns a tuple with the Result field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *EmptyResponse) GetResultOk() (*map[string]interface{}, bool) {
+func (o *EmptyResponse) GetResultOk() (map[string]interface{}, bool) {
 	if o == nil || o.Result == nil {
 		return nil, false
 	}
@@ -131,7 +131,7 @@ func (o *EmptyResponse) HasResult() bool {
 
 // SetResult gets a reference to the given map[string]interface{} and assigns it to the Result field.
 func (o *EmptyResponse) SetResult(v map[string]interface{}) {
-	o.Result = &v
+	o.Result = v
 }
 
 func (o EmptyResponse) MarshalJSON() ([]byte, error) {

@@ -12,27 +12,22 @@ package client
 
 import (
 	"bytes"
-	_context "context"
-	_ioutil "io/ioutil"
-	_nethttp "net/http"
-	_neturl "net/url"
+	"context"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 )
 
-// Linger please
-var (
-	_ _context.Context
-)
 
 // ABCIApiService ABCIApi service
 type ABCIApiService service
 
 type ApiAbciInfoRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *ABCIApiService
 }
 
-
-func (r ApiAbciInfoRequest) Execute() (ABCIInfoResponse, *_nethttp.Response, error) {
+func (r ApiAbciInfoRequest) Execute() (*ABCIInfoResponse, *http.Response, error) {
 	return r.ApiService.AbciInfoExecute(r)
 }
 
@@ -42,10 +37,10 @@ AbciInfo Get some info about the application.
 Get some info about the application.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiAbciInfoRequest
 */
-func (a *ABCIApiService) AbciInfo(ctx _context.Context) ApiAbciInfoRequest {
+func (a *ABCIApiService) AbciInfo(ctx context.Context) ApiAbciInfoRequest {
 	return ApiAbciInfoRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -54,24 +49,24 @@ func (a *ABCIApiService) AbciInfo(ctx _context.Context) ApiAbciInfoRequest {
 
 // Execute executes the request
 //  @return ABCIInfoResponse
-func (a *ABCIApiService) AbciInfoExecute(r ApiAbciInfoRequest) (ABCIInfoResponse, *_nethttp.Response, error) {
+func (a *ABCIApiService) AbciInfoExecute(r ApiAbciInfoRequest) (*ABCIInfoResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  ABCIInfoResponse
+		localVarReturnValue  *ABCIInfoResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ABCIApiService.AbciInfo")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/abci_info"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -100,15 +95,15 @@ func (a *ABCIApiService) AbciInfoExecute(r ApiAbciInfoRequest) (ABCIInfoResponse
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -126,7 +121,7 @@ func (a *ABCIApiService) AbciInfoExecute(r ApiAbciInfoRequest) (ABCIInfoResponse
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}
@@ -137,7 +132,7 @@ func (a *ABCIApiService) AbciInfoExecute(r ApiAbciInfoRequest) (ABCIInfoResponse
 }
 
 type ApiAbciQueryRequest struct {
-	ctx _context.Context
+	ctx context.Context
 	ApiService *ABCIApiService
 	path *string
 	data *string
@@ -150,23 +145,26 @@ func (r ApiAbciQueryRequest) Path(path string) ApiAbciQueryRequest {
 	r.path = &path
 	return r
 }
+
 // Data
 func (r ApiAbciQueryRequest) Data(data string) ApiAbciQueryRequest {
 	r.data = &data
 	return r
 }
+
 // Height (0 means latest)
 func (r ApiAbciQueryRequest) Height(height int32) ApiAbciQueryRequest {
 	r.height = &height
 	return r
 }
+
 // Include proofs of the transactions inclusion in the block
 func (r ApiAbciQueryRequest) Prove(prove bool) ApiAbciQueryRequest {
 	r.prove = &prove
 	return r
 }
 
-func (r ApiAbciQueryRequest) Execute() (ABCIQueryResponse, *_nethttp.Response, error) {
+func (r ApiAbciQueryRequest) Execute() (*ABCIQueryResponse, *http.Response, error) {
 	return r.ApiService.AbciQueryExecute(r)
 }
 
@@ -176,10 +174,10 @@ AbciQuery Query the application for some information.
 Query the application for some information.
 
 
- @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiAbciQueryRequest
 */
-func (a *ABCIApiService) AbciQuery(ctx _context.Context) ApiAbciQueryRequest {
+func (a *ABCIApiService) AbciQuery(ctx context.Context) ApiAbciQueryRequest {
 	return ApiAbciQueryRequest{
 		ApiService: a,
 		ctx: ctx,
@@ -188,24 +186,24 @@ func (a *ABCIApiService) AbciQuery(ctx _context.Context) ApiAbciQueryRequest {
 
 // Execute executes the request
 //  @return ABCIQueryResponse
-func (a *ABCIApiService) AbciQueryExecute(r ApiAbciQueryRequest) (ABCIQueryResponse, *_nethttp.Response, error) {
+func (a *ABCIApiService) AbciQueryExecute(r ApiAbciQueryRequest) (*ABCIQueryResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodGet
+		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  ABCIQueryResponse
+		localVarReturnValue  *ABCIQueryResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ABCIApiService.AbciQuery")
 	if err != nil {
-		return localVarReturnValue, nil, GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/abci_query"
 
 	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := _neturl.Values{}
-	localVarFormParams := _neturl.Values{}
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
 	if r.path == nil {
 		return localVarReturnValue, nil, reportError("path is required and must be specified")
 	}
@@ -248,15 +246,15 @@ func (a *ABCIApiService) AbciQueryExecute(r ApiAbciQueryRequest) (ABCIQueryRespo
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := _ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = _ioutil.NopCloser(bytes.NewBuffer(localVarBody))
+	localVarHTTPResponse.Body = ioutil.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
@@ -274,7 +272,7 @@ func (a *ABCIApiService) AbciQueryExecute(r ApiAbciQueryRequest) (ABCIQueryRespo
 
 	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 	if err != nil {
-		newErr := GenericOpenAPIError{
+		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: err.Error(),
 		}

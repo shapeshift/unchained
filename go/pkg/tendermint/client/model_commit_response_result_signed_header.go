@@ -52,7 +52,7 @@ func (o *CommitResponseResultSignedHeader) GetHeader() BlockHeader {
 // GetHeaderOk returns a tuple with the Header field value
 // and a boolean to check if the value has been set.
 func (o *CommitResponseResultSignedHeader) GetHeaderOk() (*BlockHeader, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Header, true
@@ -76,7 +76,7 @@ func (o *CommitResponseResultSignedHeader) GetCommit() CommitResponseResultSigne
 // GetCommitOk returns a tuple with the Commit field value
 // and a boolean to check if the value has been set.
 func (o *CommitResponseResultSignedHeader) GetCommitOk() (*CommitResponseResultSignedHeaderCommit, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Commit, true

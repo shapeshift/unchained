@@ -2,7 +2,6 @@ package api
 
 import (
 	"crypto/sha256"
-	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -20,7 +19,7 @@ type Handler struct {
 }
 
 func (h *Handler) StartWebsocket() error {
-	h.wsClient.TxHandler(func(tx types.EventDataTx) ([]byte, []string, error) {
+	h.wsClient.TxHandler(func(tx types.EventDataTx) (interface{}, []string, error) {
 		cosmosTx, signingTx, err := cosmos.DecodeTx(h.wsClient.EncodingConfig(), tx.Tx)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to decode tx: %v", tx.Tx)
@@ -55,11 +54,6 @@ func (h *Handler) StartWebsocket() error {
 			Messages:  cosmos.Messages(cosmosTx.GetMsgs()),
 		}
 
-		msg, err := json.Marshal(t)
-		if err != nil {
-			return nil, nil, errors.Wrapf(err, "failed to marshal tx: %v", t)
-		}
-
 		seen := make(map[string]bool)
 		addrs := []string{}
 		for _, m := range t.Messages {
@@ -70,13 +64,13 @@ func (h *Handler) StartWebsocket() error {
 			// unique set of addresses
 			for _, addr := range m.Addresses {
 				if _, ok := seen[addr]; !ok {
-					addrs = append(addrs, m.Addresses...)
+					addrs = append(addrs, addr)
 					seen[addr] = true
 				}
 			}
 		}
 
-		return msg, addrs, nil
+		return t, addrs, nil
 	})
 
 	err := h.wsClient.Start()
@@ -146,10 +140,10 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 	return account, nil
 }
 
-func (h *Handler) GetTxHistory(pubkey string, page int, pageSize int) (api.TxHistory, error) {
-	res, err := h.httpClient.GetTxHistory(pubkey, page, pageSize)
+func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
+	res, err := h.httpClient.GetTxHistory(pubkey, cursor, pageSize)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "failed to get tx history")
 	}
 
 	txs := []Tx{}
@@ -180,8 +174,7 @@ func (h *Handler) GetTxHistory(pubkey string, page int, pageSize int) (api.TxHis
 	txHistory := TxHistory{
 		BaseTxHistory: api.BaseTxHistory{
 			Pagination: api.Pagination{
-				Page:       page,
-				TotalPages: res.TotalPages,
+				Cursor: res.Cursor,
 			},
 			Pubkey: pubkey,
 		},
@@ -191,6 +184,10 @@ func (h *Handler) GetTxHistory(pubkey string, page int, pageSize int) (api.TxHis
 	return txHistory, nil
 }
 
-func (h *Handler) SendTx(hex string) (string, error) {
-	return h.httpClient.BroadcastTx([]byte(hex))
+func (h *Handler) SendTx(rawTx string) (string, error) {
+	return h.httpClient.BroadcastTx(rawTx)
+}
+
+func (h *Handler) EstimateGas(rawTx string) (string, error) {
+	return h.httpClient.GetEstimateGas(rawTx)
 }

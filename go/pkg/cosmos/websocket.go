@@ -4,17 +4,18 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"net/url"
 
 	"github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/websocket"
-	"github.com/tendermint/tendermint/libs/json"
+	tendermintjson "github.com/tendermint/tendermint/libs/json"
 	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 	tendermint "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 	"github.com/tendermint/tendermint/types"
 )
 
-type TxHandlerFunc = func(tx types.EventDataTx) ([]byte, []string, error)
+type TxHandlerFunc = func(tx types.EventDataTx) (interface{}, []string, error)
 
 type WSClient struct {
 	*websocket.Registry
@@ -24,10 +25,14 @@ type WSClient struct {
 }
 
 func NewWebsocketClient(conf Config) (*WSClient, error) {
-	path := fmt.Sprintf("/apikey/%s/websocket", conf.APIKey)
-	url := fmt.Sprintf("wss://%s", conf.RPCURL)
+	wsURL, err := url.Parse(conf.WSURL)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse WSURL: %s", conf.WSURL)
+	}
 
-	txsClient, err := tendermint.NewWS(url, path)
+	path := fmt.Sprintf("/apikey/%s/websocket", conf.APIKey)
+
+	txsClient, err := tendermint.NewWS(wsURL.String(), path)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create websocket client")
 	}
@@ -82,7 +87,7 @@ func (ws *WSClient) listenTxs() {
 		}
 
 		result := &coretypes.ResultEvent{}
-		if err := json.Unmarshal(r.Result, result); err != nil {
+		if err := tendermintjson.Unmarshal(r.Result, result); err != nil {
 			logger.Errorf("failed to unmarshal tx message: %v", err)
 			continue
 		}
@@ -99,11 +104,11 @@ func (ws *WSClient) listenTxs() {
 }
 
 func (ws *WSClient) handleTx(tx types.EventDataTx) {
-	msg, addrs, err := ws.txHandler(tx)
+	data, addrs, err := ws.txHandler(tx)
 	if err != nil {
 		logger.Errorf("failed to handle tx: %v", err)
 		return
 	}
 
-	ws.Publish(addrs, msg)
+	ws.Publish(addrs, data)
 }

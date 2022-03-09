@@ -54,7 +54,7 @@ func (o *GenesisChunkedResponse) GetJsonrpc() string {
 // GetJsonrpcOk returns a tuple with the Jsonrpc field value
 // and a boolean to check if the value has been set.
 func (o *GenesisChunkedResponse) GetJsonrpcOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Jsonrpc, true
@@ -78,7 +78,7 @@ func (o *GenesisChunkedResponse) GetId() int32 {
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 func (o *GenesisChunkedResponse) GetIdOk() (*int32, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Id, true

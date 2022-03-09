@@ -50,7 +50,7 @@ func (o *ABCIInfoResponseResult) GetResponse() ABCIInfoResponseResultResponse {
 // GetResponseOk returns a tuple with the Response field value
 // and a boolean to check if the value has been set.
 func (o *ABCIInfoResponseResult) GetResponseOk() (*ABCIInfoResponseResultResponse, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Response, true
