@@ -1,7 +1,7 @@
 import { ethers } from 'ethers'
 import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import { TransactionRequest } from '@ethersproject/abstract-provider'
-import { Blockbook } from '@shapeshiftoss/blockbook'
+import { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import {
   ApiError,
   BadRequestError,
@@ -9,11 +9,11 @@ import {
   Info,
   InternalServerError,
   SendTxBody,
-  Tx,
-  TxHistory,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { EthereumAPI, EthereumAccount, Token, GasFees } from './models'
+import { EthereumAPI, EthereumAccount, EthereumTxHistory, Token, GasFees, EthereumTx } from './models'
+
+import { logger } from './logger'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -27,6 +27,7 @@ if (!RPC_URL) throw new Error('RPC_URL env var not set')
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
+const { base64 } = ethers.utils
 
 @Route('api/v1')
 @Tags('v1')
@@ -114,22 +115,20 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
    * Get transaction history by address
    *
    * @param {string} pubkey account address
-   * @param {number} [page] page number
+   * @param {string} [cursor] page cursor
    * @param {number} [pageSize] page size
-   * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
    *
-   * @returns {Promise<TxHistory>} transaction history
+   * @returns {Promise<EthereumTxHistory>} transaction history
    *
    * @example pubkey "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
    */
-  @Example<TxHistory>({
-    page: 1,
-    totalPages: 1,
-    txs: 1,
-    transactions: [
+  @Example<EthereumTxHistory>({
+    pubkey: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
+    cursor: '', // TODO: cursor example
+    txs: [
       {
         txid: '0x85092cf7a2ec34ba4109ef1215b5b486911163b9d3391e3508670229f4d866e7',
-        status: 'confirmed',
+        status: 9,
         from: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
         to: '0x34249a379Af1Fe3b53e143c0f1B5590778ce2cfC',
         blockHash: '0xc962b0662752ac15671512ca612c894051d8b671375de1cd84f12c5e720dc7ef',
@@ -138,6 +137,8 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
         timestamp: 1607632210,
         value: '20000000000000000',
         fee: '5250000000000000',
+        gasLimit: '21000',
+        gasPrice: '250'
       },
     ],
   })
@@ -146,30 +147,37 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}/txs')
   async getTxHistory(
-    @Path() pubkey: string,
-    @Query() page?: number,
-    @Query() pageSize = 25,
-    @Query() contract?: string
-  ): Promise<TxHistory> {
+    @Path() pubkey: string, 
+    @Query() cursor?: string, 
+    @Query() pageSize = 25
+  ): Promise<EthereumTxHistory> {
     try {
-      const data = await blockbook.getAddress(pubkey, page, pageSize, undefined, undefined, 'txs', contract)
+      
+      let page
+      if (cursor === undefined) {
+        page = 1
+      } else {
+        // const edge = base64.decode(cursor)
+      }
+
+      const data = await blockbook.getAddress(pubkey, page, pageSize, undefined, undefined, 'txs')
 
       return {
-        page: data.page ?? 1,
-        totalPages: data.totalPages ?? 1,
-        txs: data.txs,
-        transactions:
-          data.transactions?.map<Tx>((tx) => ({
+        pubkey,
+        txs:
+          data.transactions?.map((tx: BlockbookTx): EthereumTx => ({
             txid: tx.txid,
-            status: tx.confirmations > 0 ? 'confirmed' : 'pending',
+            status: tx.confirmations,
             from: tx.vin[0].addresses?.[0] ?? 'coinbase',
-            to: tx.vout[0].addresses?.[0],
+            to: tx.vout[0].addresses?.[0] ?? '',
             blockHash: tx.blockHash,
             blockHeight: tx.blockHeight,
             confirmations: tx.confirmations,
             timestamp: tx.blockTime,
             value: tx.tokenTransfers?.[0].value ?? tx.value,
             fee: tx.fees ?? '0',
+            gasLimit: tx.ethereumSpecific?.gasLimit.toString() ?? '',
+            gasPrice: tx.ethereumSpecific?.gasPrice ?? ''
           })) ?? [],
       }
     } catch (err) {

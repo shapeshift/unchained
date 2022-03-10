@@ -1,4 +1,4 @@
-import { Account, Info, SendTxBody, TxHistory } from './models'
+import { Account, Info, SendTxBody } from './models'
 
 export * from './models'
 export * as middleware from './middleware'
@@ -45,19 +45,6 @@ export interface BaseAPI {
    */
   // @Get('account/{pubkey}')
   getAccount(pubkey: string): Promise<Account>
-
-  /**
-   * Get transaction history by address or xpub
-   *
-   * @param {string} pubkey account address or xpub
-   * @param {number} [page] page number
-   * @param {number} [pageSize] page size
-   * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
-   *
-   * @returns {Promise<TxHistory>} transaction history
-   */
-  // @Get('account/{pubkey}/txs')
-  getTxHistory(pubkey: string, page?: number, pageSize?: number, contract?: string): Promise<TxHistory>
 
   /**
    * Sends raw transaction to be broadcast to the node.

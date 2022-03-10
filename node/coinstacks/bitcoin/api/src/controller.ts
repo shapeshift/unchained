@@ -7,8 +7,6 @@ import {
   Info,
   InternalServerError,
   SendTxBody,
-  Tx,
-  TxHistory,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
 import {
@@ -19,6 +17,8 @@ import {
   BTCNetworkFee,
   BTCNetworkFees,
   Utxo,
+  BtcTx,
+  BtcTxHistory,
 } from './models'
 
 const NETWORK = process.env.NETWORK
@@ -141,12 +141,12 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
    * @param {number} [pageSize] page size
    * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
    *
-   * @returns {Promise<TxHistory>} transaction history
+   * @returns {Promise<BtcTxHistory>} transaction history
    *
    * @example pubkey "336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU"
    * @example pubkey "xpub6DQYbVJSVvJPzpYenir7zVSf2WPZRu69LxZuMezzAKuT6biPcug6Vw1zMk4knPBeNKvioutc4EGpPQ8cZiWtjcXYvJ6wPiwcGmCkihA9Jy3"
    */
-  @Example<TxHistory>({
+  @Example<BtcTxHistory>({
     page: 1,
     totalPages: 1,
     txs: 1,
@@ -174,7 +174,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
     @Query() page?: number,
     @Query() pageSize = 25,
     @Query() contract?: string
-  ): Promise<TxHistory> {
+  ): Promise<BtcTxHistory> {
     try {
       let data: Address | Xpub
       if (isXpub(pubkey)) {
@@ -188,7 +188,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
         totalPages: data.totalPages ?? 1,
         txs: data.txs,
         transactions:
-          data.transactions?.map<Tx>((tx) => ({
+          data.transactions?.map<BtcTx>((tx) => ({
             txid: tx.txid,
             status: tx.confirmations > 0 ? 'confirmed' : 'pending',
             from: tx.vin[0].addresses?.[0] ?? 'coinbase',

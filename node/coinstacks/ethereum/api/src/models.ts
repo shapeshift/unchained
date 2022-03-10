@@ -1,5 +1,5 @@
 /* unable to import models from a module with tsoa */
-import { Account } from '../../../common/api/src'
+import { Account, Tx, TxHistory } from '../../../common/api/src'
 
 /**
  * Contains info about current recommended fees to use in a transaction
@@ -85,4 +85,53 @@ export interface EthereumAPI {
    */
   // @Get('/gas/fees')
   getGasFees(): Promise<GasFees>
+
+  // !IMPORTANT: temporary location for getTxHistory method to prevent type
+  // interference with bitcoin api
+  // TODO: move to BaseApi when bitcoin api is ready
+
+  /**
+   * Get transaction history by address or xpub
+   *
+   * @param {string} pubkey account address or xpub
+   * @param {string} [cursor] page cursor
+   * @param {number} [pageSize] page size
+   *
+   * @returns {Promise<TxHistory>} transaction history
+   */
+  // @Get('account/{pubkey}/txs')
+  getTxHistory(pubkey: string, cursor?: string, pageSize?: number): Promise<TxHistory>
+}
+
+/**
+ * Contains data about a token transfer
+ */
+export interface TokenTransfer extends Token {
+  from: string
+  to: string
+  value: string
+}
+
+/**
+ * Ethereum transaction
+ */
+export interface EthereumTx extends Tx {
+  from: string
+  to: string
+  confirmations: number
+  value: string
+  fee: string
+  gasLimit: string
+  gasUsed?: string
+  gasPrice: string
+  status: number
+  inputData?: string
+  tokenTransfers?: Array<TokenTransfer>
+}
+
+/**
+ * Ethereum transaction list ordered by block number
+ */
+export interface EthereumTxHistory extends TxHistory {
+  txs: Array<EthereumTx>
 }

@@ -2,6 +2,22 @@
 import { Account } from '../../../common/api/src'
 
 /**
+ * Contains info about a transaction
+ */
+ export interface BtcTx {
+  txid: string
+  status: string
+  blockHash?: string
+  blockHeight?: number
+  confirmations?: number
+  timestamp?: number
+  from: string
+  to?: string
+  value: string
+  fee: string
+}
+
+/**
  * Contains bitcoin specific transaction info as returned from the node
  */
 export interface BitcoinTxSpecific {
@@ -82,6 +98,18 @@ export interface BitcoinAccount extends Account {
 }
 
 /**
+ * Contains paginated transaction history
+ */
+ export interface BtcTxHistory {
+  // from Pagination
+  page: number
+  totalPages: number
+  // from TxHistory
+  txs: number
+  transactions: Array<BtcTx>
+}
+
+/**
  * BitcoinAPI coin specific implementation
  */
 export interface BitcoinAPI {
@@ -111,6 +139,21 @@ export interface BitcoinAPI {
    * @returns {Promise<BTCNetworkFees>} network fee estimates
    */
   getNetworkFees(): Promise<BTCNetworkFees>
+
+  // !IMPORTANT: pulled from BaseApi to prevent type conflict with ethereum
+ /**
+  * Get transaction history by address or xpub
+  *
+  * @param {string} pubkey account address or xpub
+  * @param {number} [page] page number
+  * @param {number} [pageSize] page size
+  * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
+  *
+  * @returns {Promise<TxHistory>} transaction history
+  */
+  // @Get('account/{pubkey}/txs')
+  getTxHistory(pubkey: string, page?: number, pageSize?: number, contract?: string): Promise<BtcTxHistory>
+
 }
 
 /**
