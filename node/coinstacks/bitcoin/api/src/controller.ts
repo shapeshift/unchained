@@ -9,6 +9,7 @@ import {
   SendTxBody,
   TxHistory,
   ValidationError,
+  Tx,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
 import {
   BitcoinAddress,
@@ -147,7 +148,14 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   @Example<TxHistory>({
     cursor: 'MQ==',
     pubkey: '336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU',
-    txs: [],
+    txs: [
+      {
+        txid: '77810bfcb0bf66216391838772b790dde1b7419ae57f3b266c718ea937989155',
+        blockHash: '00000000000000000008b5901008aa05d05330fa54abc01a73587c0a1b1291f2',
+        blockHeight: 645850,
+        timestamp: 1598700231,
+      },
+    ],
   })
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
@@ -155,15 +163,41 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   @Get('account/{pubkey}/txs')
   async getTxHistory(@Path() pubkey: string, @Query() cursor?: string, @Query() pageSize?: number): Promise<TxHistory> {
     try {
-      let makeTscHappy = ''
-      if (cursor && pageSize) {
-        makeTscHappy = ''
+      let page = 1
+      if (cursor) {
+        const cursorDecoded = Buffer.from(cursor, 'base64').toString('binary')
+        if (isNaN(Number(cursorDecoded))) {
+          throw new ApiError('Bad Request', 400, 'Invalid cursor')
+        }
+        page = Number(cursorDecoded)
       }
 
+      const pageSizeWithDefault = pageSize || 25
+
+      let data: Address | Xpub
+      if (isXpub(pubkey)) {
+        data = await blockbook.getXpub(pubkey, page, pageSizeWithDefault, undefined, undefined, 'txs')
+      } else {
+        data = await blockbook.getAddress(pubkey, page, pageSizeWithDefault, undefined, undefined, 'txs')
+      }
+
+      const nextPage = page + 1
+
+      const nextCursor =
+        (data.transactions?.length ?? 0) == pageSizeWithDefault
+          ? { cursor: Buffer.from(nextPage.toString(), 'binary').toString('base64') }
+          : undefined
+
       return {
-        cursor: makeTscHappy,
         pubkey: pubkey,
-        txs: [],
+        ...nextCursor,
+        txs:
+          data.transactions?.map<Tx>((tx) => ({
+            txid: tx.txid,
+            blockHash: tx.blockHash,
+            blockHeight: tx.blockHeight,
+            timestamp: tx.blockTime,
+          })) ?? [],
       }
     } catch (err) {
       if (err.response) {
