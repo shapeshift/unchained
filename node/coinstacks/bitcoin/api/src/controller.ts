@@ -145,36 +145,26 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
    * @example pubkey "xpub6DQYbVJSVvJPzpYenir7zVSf2WPZRu69LxZuMezzAKuT6biPcug6Vw1zMk4knPBeNKvioutc4EGpPQ8cZiWtjcXYvJ6wPiwcGmCkihA9Jy3"
    */
   @Example<TxHistory>({
-    cursor: "MQ==",
-    pubkey: "336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU",
-    txs: [
-    ],
+    cursor: 'MQ==',
+    pubkey: '336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU',
+    txs: [],
   })
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}/txs')
-  async getTxHistory(
-    @Path() pubkey: string, 
-    @Query() cursor?: string, 
-    @Query() pageSize?: number
-    ): Promise<TxHistory> { 
-            
-      try {
+  async getTxHistory(@Path() pubkey: string, @Query() cursor?: string, @Query() pageSize?: number): Promise<TxHistory> {
+    try {
+      let makeTscHappy = ''
+      if (cursor && pageSize) {
+        makeTscHappy = ''
+      }
 
-        const pageTODO = Number(cursor || "1")
-        const pageSizeTODO = pageSize || 2
-        const contractTODO = undefined
-        const data = await blockbook.getAddress(pubkey, pageTODO, pageSizeTODO, undefined, undefined, 'txs', contractTODO)
-  
-        console.log(data.balance)
-        return {
-          // page: data.page ?? 1,
-          // totalPages: data.totalPages ?? 1,
-          // cursor: "MQ==",
-          pubkey: "TODO",
-          txs: []
-        }
+      return {
+        cursor: makeTscHappy,
+        pubkey: pubkey,
+        txs: [],
+      }
     } catch (err) {
       if (err.response) {
         throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))

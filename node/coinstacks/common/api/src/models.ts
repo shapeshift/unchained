@@ -64,7 +64,6 @@ export interface Tx {
   blockHash?: string
   blockHeight?: number
   timestamp?: number
-  
 }
 
 /**

@@ -1,7 +1,6 @@
 /* unable to import models from a module with tsoa */
 import { Account, Tx, TxHistory } from '../../../common/api/src'
 
-
 /**
  * Contains info about current recommended fees to use in a transaction
  */
@@ -88,7 +87,7 @@ export interface EthereumTx extends Tx {
 /**
  * Contains info about a EthereumTxHistory
  */
- export interface EthereumTxHistory extends TxHistory {
+export interface EthereumTxHistory extends TxHistory {
   txs: Array<EthereumTx>
 }
 

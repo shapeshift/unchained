@@ -11,7 +11,7 @@ import {
   SendTxBody,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { EthereumAPI, EthereumAccount, Token, GasFees, EthereumTxHistory,EthereumTx, TokenTransfer } from './models'
+import { EthereumAPI, EthereumAccount, Token, GasFees, EthereumTxHistory, EthereumTx, TokenTransfer } from './models'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -123,99 +123,94 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
     pubkey: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
     cursor: 'MQ==',
     txs: [
-    {
-      txid: '0x8e3528c933483770a3c8377c2ee7e34f846908653168188fd0d90a20b295d002',
-      blockHash: '0x94228c1b7052720846e2d7b9f36de30acf45d9a06ec483bd4433c5c38c8673a8',
-      blockHeight: 12267105,
-      timestamp: 1618788849,
-      status: 1,
-      from: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
-      to: '0x642F4Bda144C63f6DC47EE0fDfbac0a193e2eDb7',
-      confirmations: 2088440,
-      value: '737092621690531649',
-      fee: '3180000000009000',
-      gasLimit: '21000',
-      gasUsed: '21000',
-      gasPrice: '151428571429',
-      inputData: '0x'
-    }
-  ]
+      {
+        txid: '0x8e3528c933483770a3c8377c2ee7e34f846908653168188fd0d90a20b295d002',
+        blockHash: '0x94228c1b7052720846e2d7b9f36de30acf45d9a06ec483bd4433c5c38c8673a8',
+        blockHeight: 12267105,
+        timestamp: 1618788849,
+        status: 1,
+        from: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
+        to: '0x642F4Bda144C63f6DC47EE0fDfbac0a193e2eDb7',
+        confirmations: 2088440,
+        value: '737092621690531649',
+        fee: '3180000000009000',
+        gasLimit: '21000',
+        gasUsed: '21000',
+        gasPrice: '151428571429',
+        inputData: '0x',
+      },
+    ],
   })
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}/txs')
   async getTxHistory(
-    @Path() pubkey: string, 
-    @Query() cursor?: string, 
+    @Path() pubkey: string,
+    @Query() cursor?: string,
     @Query() pageSize?: number
-    ): Promise<EthereumTxHistory> { 
-            
-      try {
-        
-        var pageNumber = 0
-        if (cursor) {
-          const cursorDecoded = Buffer.from(cursor, 'base64').toString('binary');
-          if (Number(cursorDecoded) === NaN) {
-            throw new ApiError("",1,"Invalid cursor") // TODO: create errror message in localization
-          }
-          pageNumber = Number(cursorDecoded)
+  ): Promise<EthereumTxHistory> {
+    try {
+      let pageNumber = 0
+      if (cursor) {
+        const cursorDecoded = Buffer.from(cursor, 'base64').toString('binary')
+        if (isNaN(Number(cursorDecoded))) {
+          throw new ApiError('', 1, 'Invalid cursor')
         }
-        
-        const pageSizeWithDefault = pageSize || 25
-
-        const data = await blockbook.getAddress(pubkey, pageNumber, pageSizeWithDefault, undefined, undefined, 'txs')
-  
-        const nextPageNumber = pageNumber + 1 
-        // const nextCursor = (data.transactions?.length ?? 0) == pageSizeWithDefault ? Buffer.from(nextPageNumber.toString(), 'binary').toString('base64') : undefined
-        var nextCursor = (data.transactions?.length ?? 0) == pageSizeWithDefault ? {cursor: Buffer.from(nextPageNumber.toString(), 'binary').toString('base64')} : undefined
-
-
-        return {
-          pubkey: pubkey,
-          ...nextCursor,
-          txs:
-            data.transactions?.map<EthereumTx>((tx) => ({
-              txid: tx.txid,
-              blockHash: tx.blockHash,
-              blockHeight: tx.blockHeight,
-              timestamp: tx.blockTime,
-              status: tx.ethereumSpecific?.status ?? tx.confirmations > 0 ? 1 : -1, // assuming confirmed=1 pending=-1 based on mock data
-              from: tx.vin[0].addresses?.[0] ?? 'coinbase',
-              to: tx.vout[0].addresses?.[0] ?? 'unavailable',   // assuming an arbitrary default
-              confirmations: tx.confirmations,
-              value: tx.tokenTransfers?.[0].value ?? tx.value,
-              fee: tx.fees ?? '0',
-              gasLimit:  tx.ethereumSpecific?.gasLimit.toString() ?? 'unavailable', // assuming an arbitrary default
-              gasUsed: tx.ethereumSpecific?.gasUsed?.toString(),
-              gasPrice: tx.ethereumSpecific?.gasPrice.toString() ?? 'unavailable', // assuming an arbitrary default
-              inputData: tx.ethereumSpecific?.data,
-              tokenTransfers: tx.tokenTransfers?.map<TokenTransfer>((tt) => ({
-                balance: "",
-                contract: "",
-                decimals: tt.decimals,
-                name: tt.name,
-                symbol: tt.symbol,
-                type: tt.type,
-                from: tt.from,
-                to: tt.to,
-                value: tt.value
-              }))
-
-            })) ?? [],
-        }
-      } catch (err) {
-        if (err.response) {
-          throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
-        }
-  
-        throw err
+        pageNumber = Number(cursorDecoded)
       }
 
+      const pageSizeWithDefault = pageSize || 25
 
+      const data = await blockbook.getAddress(pubkey, pageNumber, pageSizeWithDefault, undefined, undefined, 'txs')
+
+      const nextPageNumber = pageNumber + 1
+
+      const nextCursor =
+        (data.transactions?.length ?? 0) == pageSizeWithDefault
+          ? { cursor: Buffer.from(nextPageNumber.toString(), 'binary').toString('base64') }
+          : undefined
+
+      return {
+        pubkey: pubkey,
+        ...nextCursor,
+        txs:
+          data.transactions?.map<EthereumTx>((tx) => ({
+            txid: tx.txid,
+            blockHash: tx.blockHash,
+            blockHeight: tx.blockHeight,
+            timestamp: tx.blockTime,
+            status: tx.ethereumSpecific?.status ?? tx.confirmations > 0 ? 1 : -1, // assuming confirmed=1 pending=-1 based on mock data
+            from: tx.vin[0].addresses?.[0] ?? 'coinbase',
+            to: tx.vout[0].addresses?.[0] ?? 'unavailable', // assuming an arbitrary default
+            confirmations: tx.confirmations,
+            value: tx.tokenTransfers?.[0].value ?? tx.value,
+            fee: tx.fees ?? '0',
+            gasLimit: tx.ethereumSpecific?.gasLimit.toString() ?? 'unavailable', // assuming an arbitrary default
+            gasUsed: tx.ethereumSpecific?.gasUsed?.toString(),
+            gasPrice: tx.ethereumSpecific?.gasPrice.toString() ?? 'unavailable', // assuming an arbitrary default
+            inputData: tx.ethereumSpecific?.data,
+            tokenTransfers: tx.tokenTransfers?.map<TokenTransfer>((tt) => ({
+              balance: '',
+              contract: '',
+              decimals: tt.decimals,
+              name: tt.name,
+              symbol: tt.symbol,
+              type: tt.type,
+              from: tt.from,
+              to: tt.to,
+              value: tt.value,
+            })),
+          })) ?? [],
+      }
+    } catch (err) {
+      if (err.response) {
+        throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+      }
+
+      throw err
+    }
   }
-
-
 
   /**
    * Get the estimated gas cost of a transaction
