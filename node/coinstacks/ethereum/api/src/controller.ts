@@ -151,24 +151,24 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
     @Query() pageSize?: number
   ): Promise<EthereumTxHistory> {
     try {
-      let pageNumber = 0
+      let page = 1
       if (cursor) {
         const cursorDecoded = Buffer.from(cursor, 'base64').toString('binary')
         if (isNaN(Number(cursorDecoded))) {
-          throw new ApiError('', 1, 'Invalid cursor')
+          throw new ApiError('Bad Request', 400, 'Invalid cursor')
         }
-        pageNumber = Number(cursorDecoded)
+        page = Number(cursorDecoded)
       }
 
       const pageSizeWithDefault = pageSize || 25
 
-      const data = await blockbook.getAddress(pubkey, pageNumber, pageSizeWithDefault, undefined, undefined, 'txs')
+      const data = await blockbook.getAddress(pubkey, page, pageSizeWithDefault, undefined, undefined, 'txs')
 
-      const nextPageNumber = pageNumber + 1
+      const nextPage = page + 1
 
       const nextCursor =
         (data.transactions?.length ?? 0) == pageSizeWithDefault
-          ? { cursor: Buffer.from(nextPageNumber.toString(), 'binary').toString('base64') }
+          ? { cursor: Buffer.from(nextPage.toString(), 'binary').toString('base64') }
           : undefined
 
       return {
@@ -180,7 +180,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
             blockHash: tx.blockHash,
             blockHeight: tx.blockHeight,
             timestamp: tx.blockTime,
-            status: tx.ethereumSpecific?.status ?? tx.confirmations > 0 ? 1 : -1, // assuming confirmed=1 pending=-1 based on mock data
+            status: tx.ethereumSpecific?.status ?? tx.confirmations > 0 ? 1 : -1, // assuming confirmed=1 pending=-1 based on previous implementation and TransactionParser.getStatus()
             from: tx.vin[0].addresses?.[0] ?? 'coinbase',
             to: tx.vout[0].addresses?.[0] ?? 'unavailable', // assuming an arbitrary default
             confirmations: tx.confirmations,
@@ -191,8 +191,8 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
             gasPrice: tx.ethereumSpecific?.gasPrice.toString() ?? 'unavailable', // assuming an arbitrary default
             inputData: tx.ethereumSpecific?.data,
             tokenTransfers: tx.tokenTransfers?.map<TokenTransfer>((tt) => ({
-              balance: '',
-              contract: '',
+              balance: (data.tokens || []).find((t) => t.contract === tt.token)?.balance ?? 'unavailable', // assuming an arbitrary default
+              contract: tt.token ?? 'unavailable', // assuming an arbitrary default
               decimals: tt.decimals,
               name: tt.name,
               symbol: tt.symbol,
