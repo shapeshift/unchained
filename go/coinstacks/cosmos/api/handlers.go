@@ -148,7 +148,14 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 
 	txs := []Tx{}
 	for _, t := range res.Txs {
-		fee := t.SigningTx.GetFee()[0]
+		var fee sdk.Coin
+
+		fees := t.SigningTx.GetFee()
+		if len(fees) == 0 {
+			fee = sdk.Coin{Denom: "uatom", Amount: sdk.NewInt(0)}
+		} else {
+			fee = fees[0]
+		}
 		msgs := t.CosmosTx.GetMsgs()
 
 		tx := Tx{
