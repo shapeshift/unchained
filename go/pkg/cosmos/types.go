@@ -143,6 +143,14 @@ type Value struct {
 	Denom string `json:"denom"`
 }
 
+type RPCErrorResponse struct {
+	Jsonrpc string `json:"jsonrpc"`
+	Id      int32  `json:"id"`
+	Error   struct {
+		Data string `json:"data"`
+	} `json:"error"`
+}
+
 type TxSearchResponse struct {
 	Jsonrpc string                 `json:"jsonrpc"`
 	Id      int32                  `json:"id"`

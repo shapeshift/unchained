@@ -2,8 +2,6 @@ package cosmos
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -37,40 +35,28 @@ type History struct {
 func (h *History) doRequest(txState *TxState) (*TxSearchResponse, error) {
 	for {
 		var res *TxSearchResponse
+		var resErr *RPCErrorResponse
 
-		resErr := &ErrorResponse{}
-		httpRes, err := h.tendermint.R().SetResult(&res).SetError(resErr).SetQueryParams(map[string]string{
-			"per_page": fmt.Sprint(STATIC_PAGE_SIZE),
+		queryParams := map[string]string{
+			"per_page": strconv.Itoa(int(STATIC_PAGE_SIZE)),
 			"order_by": "\"desc\"",
 			"query":    txState.query,
-			"page":     fmt.Sprint(txState.page),
-		}).Get("/tx_search")
-
-		if resErr.Code != 0 {
-			return nil, errors.Errorf("failed to query tx: %s", resErr.Msg)
+			"page":     strconv.Itoa(txState.page),
 		}
 
-		if err != nil || httpRes.StatusCode() >= 500 {
-			var e struct {
-				Jsonrpc string `json:"jsonrpc"`
-				Id      int32  `json:"id"`
-				Error   struct {
-					Data string `json:"data"`
-				} `json:"error"`
-			}
-			json.Unmarshal(httpRes.Body(), &e)
+		_, err := h.tendermint.R().SetResult(&res).SetError(&resErr).SetQueryParams(queryParams).Get("/tx_search")
 
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to do request")
+		}
+
+		if resErr != nil {
 			// error is returned if page is out of range past page 1, mark as no more transactions
-			if strings.Contains(e.Error.Data, "page should be within") {
+			if strings.Contains(resErr.Error.Data, "page should be within") {
 				txState.hasMore = false
 				return &TxSearchResponse{}, nil
 			}
-
-			if err == nil {
-				return nil, errors.Errorf("failed to query tx: %s", e.Error.Data)
-			}
-
-			return nil, errors.Wrapf(err, "failed to get tx history: %s", e.Error.Data)
+			return nil, errors.Errorf("failed to get tx history: %s", resErr.Error.Data)
 		}
 
 		// no txs returned, mark as no more transactions
