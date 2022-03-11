@@ -137,8 +137,8 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
    * Get transaction history by address or xpub
    *
    * @param {string} pubkey account address or xpub
-   * @param {number} [page] page number
-   * @param {number} [pageSize] page size
+   * @param {string} [cursor] pagination cursor from previous response or empty string for first page fetch
+   * @param {number} [pageSize] page size (default 25)
    * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
    *
    * @returns {Promise<TxHistory>} transaction history
@@ -147,21 +147,20 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
    * @example pubkey "xpub6DQYbVJSVvJPzpYenir7zVSf2WPZRu69LxZuMezzAKuT6biPcug6Vw1zMk4knPBeNKvioutc4EGpPQ8cZiWtjcXYvJ6wPiwcGmCkihA9Jy3"
    */
   @Example<TxHistory>({
-    page: 1,
-    totalPages: 1,
-    txs: 1,
-    transactions: [
+    cursor: 'Mw==',
+    pubkey: '336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU',
+    txs: [
       {
-        txid: '77810bfcb0bf66216391838772b790dde1b7419ae57f3b266c718ea937989155',
-        status: 'confirmed',
-        from: '1Dmthegfep7fXVqWAPmQ5rMmKcg58GjEF1',
-        to: '336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU',
-        blockHash: '00000000000000000008b5901008aa05d05330fa54abc01a73587c0a1b1291f2',
-        blockHeight: 645850,
-        confirmations: 54972,
-        timestamp: 1598700231,
-        value: '510611',
-        fee: '224',
+        txid: 'd4a0ec05d50d239d2dd0d67004f2cb5999da7177c37d584ada2dd406964b34ac',
+        blockHash: '00000000000000000001e11d2a7cd9f41c1620a711673303098825a723fd2e53',
+        blockHeight: 620944,
+        timestamp: 1583757917,
+      },
+      {
+        txid: 'c6740f99b1d89fd6f6796b3c64675d830f791ada8aeeb0e4b7059af678ad7f31',
+        blockHash: '0000000000000000000889f01affae945c8f3c8d8df593efc50e6167b8c43eda',
+        blockHeight: 605326,
+        timestamp: 1574665532,
       },
     ],
   })
@@ -171,11 +170,26 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   @Get('account/{pubkey}/txs')
   async getTxHistory(
     @Path() pubkey: string,
-    @Query() page?: number,
+    @Query() cursor?: string,
     @Query() pageSize = 25,
     @Query() contract?: string
   ): Promise<TxHistory> {
     try {
+      let page = 1
+
+      if (cursor) {
+        page = Number(Buffer.from(cursor, 'base64').toString('binary'))
+
+        // Validate the decoded cursor
+        if (!Number.isInteger(page) || page <= 0) {
+          throw new ApiError(
+            'Validation Error',
+            422,
+            'Invalid cursor. Cursor must be a base64 encoded integer greater than 0.'
+          )
+        }
+      }
+
       let data: Address | Xpub
       if (isXpub(pubkey)) {
         data = await blockbook.getXpub(pubkey, page, pageSize, undefined, undefined, 'txs')
@@ -183,14 +197,20 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
         data = await blockbook.getAddress(pubkey, page, pageSize, undefined, undefined, 'txs', contract)
       }
 
+      let newCursor
+
+      if (data.transactions?.length === pageSize) {
+        const newPage = (data.page ?? 1) + 1
+        newCursor = Buffer.from(newPage.toString(), 'binary').toString('base64')
+      }
+
       return {
-        page: data.page ?? 1,
-        totalPages: data.totalPages ?? 1,
-        txs: data.txs,
-        transactions:
+        cursor: newCursor,
+        pubkey,
+        txs:
           data.transactions?.map<Tx>((tx) => ({
             txid: tx.txid,
-            status: tx.confirmations > 0 ? 'confirmed' : 'pending',
+            status: tx.confirmations > 0 ? 1 : 0,
             from: tx.vin[0].addresses?.[0] ?? 'coinbase',
             to: tx.vout[0].addresses?.[0],
             blockHash: tx.blockHash,

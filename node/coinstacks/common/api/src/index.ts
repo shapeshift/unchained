@@ -50,7 +50,7 @@ export interface BaseAPI {
    * Get transaction history by address or xpub
    *
    * @param {string} pubkey account address or xpub
-   * @param {string} [cursor] base64 cursor (encoded page number)
+   * @param {string} [cursor] pagination cursor from previous response or empty string for first page fetch
    * @param {number} [pageSize] page size
    *
    * @returns {Promise<TxHistory>} transaction history
