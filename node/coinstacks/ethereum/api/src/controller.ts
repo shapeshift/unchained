@@ -1,7 +1,7 @@
 import { ethers } from 'ethers'
 import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import { TransactionRequest } from '@ethersproject/abstract-provider'
-import { Blockbook } from '@shapeshiftoss/blockbook'
+import { Blockbook, Tx as BlockbookTx, TokenTransfer as BlockbookTokenTransfer } from '@shapeshiftoss/blockbook'
 import {
   ApiError,
   BadRequestError,
@@ -9,11 +9,9 @@ import {
   Info,
   InternalServerError,
   SendTxBody,
-  Tx,
-  TxHistory,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { EthereumAPI, EthereumAccount, Token, GasFees } from './models'
+import { EthereumAPI, EthereumAccount, Token, GasFees, EthereumTxHistory, EthereumTx, TokenTransfer } from './models'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -114,30 +112,46 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
    * Get transaction history by address
    *
    * @param {string} pubkey account address
-   * @param {number} [page] page number
-   * @param {number} [pageSize] page size
-   * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
+   * @param {string} [cursor] pagination cursor from previous response or empty string for first page fetch
+   * @param {number} [pageSize] page size (default 25)
    *
    * @returns {Promise<TxHistory>} transaction history
    *
    * @example pubkey "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
    */
-  @Example<TxHistory>({
-    page: 1,
-    totalPages: 1,
-    txs: 1,
-    transactions: [
+  @Example<EthereumTxHistory>({
+    cursor: 'NA==',
+    pubkey: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
+    txs: [
       {
-        txid: '0x85092cf7a2ec34ba4109ef1215b5b486911163b9d3391e3508670229f4d866e7',
-        status: 'confirmed',
+        txid: '0x32f33d676db1102dff0cc8bbc5cb60b50b345b8bd9b1fd3b36b5bb10ca4dbc1c',
+        blockHash: '0xba7812af0c62013e82c858ba6caf76fef7a1f9517987a32d50ad9d953fb8e099',
+        blockHeight: 12222600,
+        timestamp: 1618195015,
         from: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
-        to: '0x34249a379Af1Fe3b53e143c0f1B5590778ce2cfC',
-        blockHash: '0xc962b0662752ac15671512ca612c894051d8b671375de1cd84f12c5e720dc7ef',
-        blockHeight: 11427335,
-        confirmations: 9,
-        timestamp: 1607632210,
-        value: '20000000000000000',
-        fee: '5250000000000000',
+        to: '0x12D79c345cAc7B050A5fF0797B5a607e254C73F5',
+        confirmations: 2139476,
+        value: '924100',
+        fee: '2310720000000000',
+        gasLimit: '200000',
+        gasUsed: '38512',
+        gasPrice: '60000000000',
+        status: 1,
+        inputData:
+          '0xa9059cbb0000000000000000000000006ec19ae0c9381443ec81301e9436d4d886e2994b00000000000000000000000000000000000000000000000000000000000e19c4',
+        tokenTransfers: [
+          {
+            balance: '1216066296447',
+            contract: '0x12D79c345cAc7B050A5fF0797B5a607e254C73F5',
+            decimals: 4,
+            name: 'Buytex',
+            symbol: 'BUX',
+            type: 'ERC20',
+            from: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
+            to: '0x6EC19ae0C9381443ec81301e9436d4D886E2994b',
+            value: '924100',
+          },
+        ],
       },
     ],
   })
@@ -147,29 +161,65 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   @Get('account/{pubkey}/txs')
   async getTxHistory(
     @Path() pubkey: string,
-    @Query() page?: number,
-    @Query() pageSize = 25,
-    @Query() contract?: string
-  ): Promise<TxHistory> {
+    @Query() cursor?: string,
+    @Query() pageSize = 25
+  ): Promise<EthereumTxHistory> {
     try {
-      const data = await blockbook.getAddress(pubkey, page, pageSize, undefined, undefined, 'txs', contract)
+      let page = 1
+
+      if (cursor) {
+        page = Number(Buffer.from(cursor, 'base64').toString('binary'))
+
+        // Validate the decoded cursor
+        if (!Number.isInteger(page) || page <= 0) {
+          throw new ApiError(
+            'Validation Error',
+            422,
+            'Invalid cursor. Cursor must be a base64 encoded integer greater than 0.'
+          )
+        }
+      }
+
+      const data = await blockbook.getAddress(pubkey, page, pageSize, undefined, undefined, 'txs')
+
+      let newCursor
+
+      if (data.transactions?.length === pageSize) {
+        const newPage = (data.page ?? 1) + 1
+        newCursor = Buffer.from(newPage.toString(), 'binary').toString('base64')
+      }
 
       return {
-        page: data.page ?? 1,
-        totalPages: data.totalPages ?? 1,
-        txs: data.txs,
-        transactions:
-          data.transactions?.map<Tx>((tx) => ({
+        cursor: newCursor,
+        pubkey,
+        txs:
+          data.transactions?.map<EthereumTx>((tx: BlockbookTx) => ({
             txid: tx.txid,
-            status: tx.confirmations > 0 ? 'confirmed' : 'pending',
-            from: tx.vin[0].addresses?.[0] ?? 'coinbase',
-            to: tx.vout[0].addresses?.[0],
             blockHash: tx.blockHash,
             blockHeight: tx.blockHeight,
-            confirmations: tx.confirmations,
             timestamp: tx.blockTime,
+            from: tx.vin[0].addresses?.[0] ?? 'coinbase',
+            to: tx.vout[0].addresses?.[0] ?? '',
+            confirmations: tx.confirmations,
             value: tx.tokenTransfers?.[0].value ?? tx.value,
             fee: tx.fees ?? '0',
+            gasLimit: tx.ethereumSpecific?.gasLimit.toString() ?? '',
+            gasUsed: tx.ethereumSpecific?.gasUsed?.toString(),
+            gasPrice: tx.ethereumSpecific?.gasPrice.toString() ?? '',
+            status: tx.ethereumSpecific?.status ?? tx.confirmations > 0 ? 1 : 0,
+            inputData: tx.ethereumSpecific?.data,
+            tokenTransfers:
+              tx.tokenTransfers?.map<TokenTransfer>((tt: BlockbookTokenTransfer) => ({
+                balance: data.tokens?.find((e) => e.contract === tt.token)?.balance ?? '0',
+                contract: tt.token,
+                decimals: tt.decimals,
+                name: tt.name,
+                symbol: tt.symbol,
+                type: tt.type,
+                from: tt.from,
+                to: tt.to,
+                value: tt.value,
+              })) ?? [],
           })) ?? [],
       }
     } catch (err) {

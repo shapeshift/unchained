@@ -47,8 +47,7 @@ export interface Info {
  * Contains info for pagination
  */
 export interface Pagination {
-  page: number
-  totalPages: number
+  cursor?: string
 }
 
 /**
@@ -63,21 +62,15 @@ export interface SendTxBody {
  */
 export interface Tx {
   txid: string
-  status: string
   blockHash?: string
   blockHeight?: number
-  confirmations?: number
   timestamp?: number
-  from: string
-  to?: string
-  value: string
-  fee: string
 }
 
 /**
  * Contains paginated transaction history
  */
 export interface TxHistory extends Pagination {
-  txs: number
-  transactions: Array<Tx>
+  pubkey: string
+  txs: Array<Tx>
 }
