@@ -161,30 +161,28 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}/txs')
-  async getTxHistory(@Path() pubkey: string, @Query() cursor?: string, @Query() pageSize?: number): Promise<TxHistory> {
+  async getTxHistory(@Path() pubkey: string, @Query() cursor?: string, @Query() pageSize = 25): Promise<TxHistory> {
     try {
       let page = 1
       if (cursor) {
         const cursorDecoded = Buffer.from(cursor, 'base64').toString('binary')
         if (isNaN(Number(cursorDecoded))) {
-          throw new ApiError('Bad Request', 400, 'Invalid cursor')
+          throw new ApiError('Bad Request', 400, 'Invalid cursor, please use the cursor returned in previous page')
         }
         page = Number(cursorDecoded)
       }
 
-      const pageSizeWithDefault = pageSize || 25
-
       let data: Address | Xpub
       if (isXpub(pubkey)) {
-        data = await blockbook.getXpub(pubkey, page, pageSizeWithDefault, undefined, undefined, 'txs')
+        data = await blockbook.getXpub(pubkey, page, pageSize, undefined, undefined, 'txs')
       } else {
-        data = await blockbook.getAddress(pubkey, page, pageSizeWithDefault, undefined, undefined, 'txs')
+        data = await blockbook.getAddress(pubkey, page, pageSize, undefined, undefined, 'txs')
       }
 
       const nextPage = page + 1
 
       const nextCursor =
-        (data.transactions?.length ?? 0) == pageSizeWithDefault
+        (data.transactions?.length ?? 0) == pageSize
           ? { cursor: Buffer.from(nextPage.toString(), 'binary').toString('base64') }
           : undefined
 
