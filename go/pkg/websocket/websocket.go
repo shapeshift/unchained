@@ -123,6 +123,7 @@ func (c *Connection) cleanup() {
 	c.ticker.Stop()
 	c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 	c.conn.Close()
+	close(c.msgChan)
 }
 
 func (c *Connection) read() {
