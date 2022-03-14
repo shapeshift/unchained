@@ -44,7 +44,7 @@ export class TransactionParser {
     tx.messages?.forEach((msg) => {
 
       // Not a message we care about
-      if(address !== msg.from && msg.from !== msg.to)
+      if(address !== msg.from && msg.to !== msg.to)
         return
 
       const value = new BigNumber(msg.value?.amount ?? 0).toString(10)
@@ -54,7 +54,7 @@ export class TransactionParser {
       const to = msg.to ?? ''
 
       parsedTx.transfers = [...parsedTx.transfers, { type, caip19, from, to, totalValue: value, components: [{ value }] }]
-      
+
       const fees = new BigNumber(tx.fee.amount ?? 0)
       parsedTx.fee = { caip19: this.assetId, value: fees.toString(10) }
     })
