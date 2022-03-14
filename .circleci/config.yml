@@ -51,7 +51,7 @@ aliases:
     daemon-cpu-limit: "2"
     daemon-cpu-request: "2"
     daemon-memory-limit: 12Gi
-    daemon-storage-size: 1500Gi
+    daemon-storage-size: 650Gi
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -113,7 +113,7 @@ aliases:
     indexer-cpu-request: "4"
     indexer-memory-limit: 12Gi
     indexer-replicas: 2
-    indexer-storage-size: 500Gi
+    indexer-storage-size: 300Gi
     indexer-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-indexer-svc.unchained.svc.cluster.local:8001/websocket
     daemon-image: ethereum/client-go:v1.10.15
@@ -769,7 +769,6 @@ workflows:
           name: deploy bitcoin develop (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
-          daemon-storage-size: 650Gi
           requires:
             - deploy dependencies (shapeshift)
           <<: *bitcoin-dev
@@ -779,7 +778,6 @@ workflows:
           name: deploy ethereum develop (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
-          indexer-storage-size: 300Gi
           requires:
             - deploy dependencies (shapeshift)
           <<: *ethereum-dev
@@ -899,7 +897,6 @@ workflows:
           name: preview bitcoin (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: preview
-          daemon-storage-size: 650Gi
           requires:
             - validate dependencies (shapeshift)
           <<: *bitcoin
@@ -916,7 +913,6 @@ workflows:
           name: deploy bitcoin (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
-          daemon-storage-size: 650Gi
           requires:
             - approve bitcoin coinstack (shapeshift)
           <<: *bitcoin
@@ -927,7 +923,6 @@ workflows:
           name: preview ethereum (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: preview
-          indexer-storage-size: 300Gi
           requires:
             - validate dependencies (shapeshift)
           <<: *ethereum
@@ -944,7 +939,6 @@ workflows:
           name: deploy ethereum (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
-          indexer-storage-size: 300Gi
           requires:
             - approve ethereum coinstack (shapeshift)
           <<: *ethereum
