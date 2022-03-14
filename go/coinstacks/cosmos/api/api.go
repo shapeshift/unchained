@@ -135,7 +135,10 @@ func (a *API) Shutdown() {
 
 	a.handler.grpcClient.Close()
 	a.handler.wsClient.Stop()
-	a.server.Shutdown(ctx)
+	err := a.server.Shutdown(ctx)
+	if err != nil {
+		logger.Errorf("error shutting down server: %+v", err)
+	}
 }
 
 func (a *API) Root(w http.ResponseWriter, r *http.Request) {

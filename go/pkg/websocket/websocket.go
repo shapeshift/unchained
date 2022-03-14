@@ -73,12 +73,17 @@ func (c *Connection) Start() {
 	c.ticker = time.NewTicker(pingPeriod)
 
 	c.conn.SetReadLimit(maxMessageSize)
-	c.conn.SetReadDeadline(time.Now().Add(readWait))
+	err := c.conn.SetReadDeadline(time.Now().Add(readWait))
+	if err != nil {
+		logger.Errorf("failed to set read deadline: %+v", err)
+	}
 
 	// handle ping message from client heartbeat.
 	// if there is an error responding to client, connection will be closed.
 	c.conn.SetPingHandler(func(string) error {
-		c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+		if err := c.conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
+			return err
+		}
 		if err := c.conn.WriteMessage(websocket.PongMessage, nil); err != nil {
 			return err
 		}
@@ -88,7 +93,10 @@ func (c *Connection) Start() {
 	// handle pong response from client and reset read deadline.
 	// if no pong is receive before read deadline expires, connection will be closed.
 	c.conn.SetPongHandler(func(string) error {
-		c.conn.SetReadDeadline(time.Now().Add(readWait))
+		err := c.conn.SetReadDeadline(time.Now().Add(readWait))
+		if err != nil {
+			return err
+		}
 		return nil
 	})
 
@@ -96,7 +104,9 @@ func (c *Connection) Start() {
 	// if there is an error responding to client, connection will be closed.
 	go func() {
 		for range c.ticker.C {
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err := c.conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
+				logger.Errorf("failed to set write deadline: %+v", err)
+			}
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				return
 			}
@@ -121,7 +131,10 @@ func (c *Connection) Stop() {
 func (c *Connection) cleanup() {
 	<-c.doneChan
 	c.ticker.Stop()
-	c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+	err := c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+	if err != nil {
+		logger.Errorf("failed to write close message: %+v", err)
+	}
 	c.conn.Close()
 	close(c.msgChan)
 }
@@ -154,8 +167,12 @@ func (c *Connection) read() {
 
 func (c *Connection) write() {
 	for msg := range c.msgChan {
-		c.conn.SetWriteDeadline(time.Now().Add(writeWait))
-		c.conn.WriteMessage(websocket.TextMessage, msg)
+		if err := c.conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
+			logger.Errorf("failed to set write deadline: %+v", err)
+		}
+		if err := c.conn.WriteMessage(websocket.TextMessage, msg); err != nil {
+			return
+		}
 	}
 }
 
@@ -172,6 +189,10 @@ func (c *Connection) writeError(message string, subscriptionID string) {
 		return
 	}
 
-	c.conn.SetWriteDeadline(time.Now().Add(writeWait))
-	c.conn.WriteMessage(websocket.TextMessage, msg)
+	if err := c.conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
+		logger.Errorf("failed to set write deadline: %+v", err)
+	}
+	if err := c.conn.WriteMessage(websocket.TextMessage, msg); err != nil {
+		return
+	}
 }
