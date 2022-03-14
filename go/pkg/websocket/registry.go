@@ -1,6 +1,8 @@
 package websocket
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 type Registrar interface {
 	Subscribe(clientID string, addrs []string, msg chan<- []byte)
@@ -64,7 +66,6 @@ func (r *Registry) Unsubscribe(clientID string, addrs []string, msgChan chan<- [
 		}
 
 		delete(r.clients, clientID)
-		close(msgChan)
 	} else {
 		for _, addr := range addrs {
 			unregister(clientID, addr)
