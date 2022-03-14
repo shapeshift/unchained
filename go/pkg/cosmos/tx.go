@@ -18,11 +18,11 @@ import (
 
 func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (*TxHistory, error) {
 	history := &History{
-		ctx:              c.ctx,
-		cursor:           &Cursor{SendPage: 1, ReceivePage: 1},
-		pageSize:         pageSize,
-		tendermintClient: c.tendermintClient,
-		encoding:         c.encoding,
+		ctx:        c.ctx,
+		cursor:     &Cursor{SendPage: 1, ReceivePage: 1},
+		pageSize:   pageSize,
+		tendermint: c.tendermint,
+		encoding:   c.encoding,
 	}
 
 	if cursor != "" {
