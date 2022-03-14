@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strconv"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
@@ -28,25 +27,14 @@ func (h *Handler) StartWebsocket() error {
 		blockHeight := strconv.Itoa(int(tx.Height))
 		txid := fmt.Sprintf("%X", sha256.Sum256(tx.Tx))
 
-		fees := signingTx.GetFee()
-		if len(fees) == 0 {
-			logger.Warnf("txid: %s, no fees detected", txid)
-			fees = []sdk.Coin{{Denom: "uatom", Amount: sdk.NewInt(0)}}
-		} else if len(fees) > 1 {
-			logger.Warnf("txid: %s - multiple fees detected (defaulting to index 0): %+v", txid, fees)
-		}
-
 		t := Tx{
 			BaseTx: api.BaseTx{
 				// TODO: blockHash and timestamp
 				TxID:        txid,
 				BlockHeight: &blockHeight,
 			},
-			Events: cosmos.Events(tx.Result.Log),
-			Fee: cosmos.Value{
-				Amount: fees[0].Amount.String(),
-				Denom:  fees[0].Denom,
-			},
+			Events:    cosmos.Events(tx.Result.Log),
+			Fee:       cosmos.Fee(signingTx, txid, "uatom"),
 			GasWanted: strconv.Itoa(int(tx.Result.GasWanted)),
 			GasUsed:   strconv.Itoa(int(tx.Result.GasUsed)),
 			Index:     int(tx.Index),
@@ -148,31 +136,18 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 
 	txs := []Tx{}
 	for _, t := range res.Txs {
-		var fee sdk.Coin
-
-		fees := t.SigningTx.GetFee()
-		if len(fees) == 0 {
-			fee = sdk.Coin{Denom: "uatom", Amount: sdk.NewInt(0)}
-		} else {
-			fee = fees[0]
-		}
-		msgs := t.CosmosTx.GetMsgs()
-
 		tx := Tx{
 			BaseTx: api.BaseTx{
 				TxID:        *t.TendermintTx.Hash,
 				BlockHeight: t.TendermintTx.Height,
 			},
-			Events: cosmos.Events(t.TendermintTx.TxResult.Log),
-			Fee: cosmos.Value{
-				Amount: fee.Amount.String(),
-				Denom:  fee.Denom,
-			},
+			Events:    cosmos.Events(t.TendermintTx.TxResult.Log),
+			Fee:       cosmos.Fee(t.SigningTx, *t.TendermintTx.Hash, "uatom"),
 			GasWanted: t.TendermintTx.TxResult.GasWanted,
 			GasUsed:   t.TendermintTx.TxResult.GasUsed,
 			Index:     int(t.TendermintTx.GetIndex()),
 			Memo:      t.SigningTx.GetMemo(),
-			Messages:  cosmos.Messages(msgs),
+			Messages:  cosmos.Messages(t.CosmosTx.GetMsgs()),
 		}
 
 		txs = append(txs, tx)
