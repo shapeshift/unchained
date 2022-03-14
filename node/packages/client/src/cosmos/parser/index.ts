@@ -41,42 +41,22 @@ export class TransactionParser {
 
     // messages make best attempt to track where value is transferring to for a variety of tx types
     // logs provide more specific information if needed as more complex tx types are added
-    tx.messages.forEach((msg) => {
-      if (msg.from === address) {
-        // send amount
-        const sendValue = new BigNumber(msg.value?.amount ?? 0)
-        if (sendValue.gt(0)) {
-          parsedTx.transfers = aggregateTransfer(
-            parsedTx.transfers,
-            TransferType.Send,
-            this.assetId,
-            msg.from ?? '',
-            msg.to ?? '',
-            sendValue.toString(10)
-          )
-        }
+    tx.messages?.forEach((msg) => {
 
-        // network fee
-        const fees = new BigNumber(tx.fee.amount)
-        if (fees.gt(0)) {
-          parsedTx.fee = { caip19: this.assetId, value: fees.toString(10) }
-        }
-      }
+      // Not a message we care about
+      if(address !== msg.from && msg.from !== msg.to)
+        return
 
-      if (msg.to === address) {
-        // receive amount
-        const receiveValue = new BigNumber(msg.value?.amount ?? 0)
-        if (receiveValue.gt(0)) {
-          parsedTx.transfers = aggregateTransfer(
-            parsedTx.transfers,
-            TransferType.Receive,
-            this.assetId,
-            msg.from ?? '',
-            msg.to ?? '',
-            receiveValue.toString(10)
-          )
-        }
-      }
+      const value = new BigNumber(msg.value?.amount ?? 0).toString(10)
+      const type = msg.from === address ? TransferType.Send : TransferType.Receive
+      const caip19 = this.assetId
+      const from = msg.from ?? ''
+      const to = msg.to ?? ''
+
+      parsedTx.transfers = [...parsedTx.transfers, { type, caip19, from, to, totalValue: value, components: [{ value }] }]
+      
+      const fees = new BigNumber(tx.fee.amount ?? 0)
+      parsedTx.fee = { caip19: this.assetId, value: fees.toString(10) }
     })
 
     return parsedTx
