@@ -56,7 +56,7 @@ export class TransactionParser {
       parsedTx.transfers = [...parsedTx.transfers, { type, caip19, from, to, totalValue: value, components: [{ value }] }]
 
       const fees = new BigNumber(tx.fee.amount ?? 0)
-      parsedTx.fee = { caip19: this.assetId, value: fees.toString(10) }
+      parsedTx.fee = { caip19, value: fees.toString(10) }
     })
 
     return parsedTx
