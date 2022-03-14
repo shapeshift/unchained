@@ -210,7 +210,7 @@ commands:
             curl -sSL "https://golang.org/dl/go1.17.6.linux-amd64.tar.gz" | sudo tar -xz -C /usr/local/
             mkdir -p /home/circleci/go/bin
             curl -sSL "https://github.com/gotestyourself/gotestsum/releases/download/v1.7.0/gotestsum_1.7.0_linux_amd64.tar.gz" | sudo tar -xz -C /usr/local/bin gotestsum
-            curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sudo sh -s -- -b /usr/local/bin v1.43.0
+            curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sudo sh -s -- -b /usr/local/bin v1.44.2
       - run:
           name: node
           command: |
@@ -271,10 +271,10 @@ commands:
           working_directory: go/pulumi
           name: install common pulumi dependencies
           command: yarn install --immutable
-      #- run:
-      #    working_directory: go
-      #    name: lint
-      #    command: golangci-lint run
+      - run:
+         working_directory: go
+         name: lint
+         command: golangci-lint run
       #- run:
       #    working_directory: go
       #    name: test
