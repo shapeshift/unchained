@@ -1,7 +1,6 @@
 import { BigNumber } from 'bignumber.js'
 import { caip2, caip19, AssetNamespace, AssetReference, CAIP2, CAIP19 } from '@shapeshiftoss/caip'
 import { Tx as ParsedTx, Status, TransferType } from '../../types'
-import { aggregateTransfer } from '../../utils'
 import { Tx as CosmosTx } from '../index'
 
 export interface TransactionParserArgs {
@@ -42,18 +41,18 @@ export class TransactionParser {
     // messages make best attempt to track where value is transferring to for a variety of tx types
     // logs provide more specific information if needed as more complex tx types are added
     tx.messages?.forEach((msg) => {
-
       // Not a message we care about
-      if(address !== msg.from && msg.to !== msg.to)
-        return
-
+      if (address !== msg.from && msg.to !== msg.to) return
       const value = new BigNumber(msg.value?.amount ?? 0).toString(10)
       const type = msg.from === address ? TransferType.Send : TransferType.Receive
       const caip19 = this.assetId
       const from = msg.from ?? ''
       const to = msg.to ?? ''
 
-      parsedTx.transfers = [...parsedTx.transfers, { type, caip19, from, to, totalValue: value, components: [{ value }] }]
+      parsedTx.transfers = [
+        ...parsedTx.transfers,
+        { type, caip19, from, to, totalValue: value, components: [{ value }] },
+      ]
 
       const fees = new BigNumber(tx.fee.amount ?? 0)
       parsedTx.fee = { caip19, value: fees.toString(10) }
