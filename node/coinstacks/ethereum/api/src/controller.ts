@@ -9,11 +9,9 @@ import {
   Info,
   InternalServerError,
   SendTxBody,
-  Tx,
-  TxHistory,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { EthereumAPI, EthereumAccount, Token, GasFees } from './models'
+import { EthereumAPI, EthereumAccount, Token, GasFees, EthereumTxHistory, EthereumTx, TokenTransfer } from './models'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -114,30 +112,32 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
    * Get transaction history by address
    *
    * @param {string} pubkey account address
-   * @param {number} [page] page number
+   * @param {string} [cursor] the cursor returned in previous query
    * @param {number} [pageSize] page size
-   * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
    *
    * @returns {Promise<TxHistory>} transaction history
    *
    * @example pubkey "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
    */
-  @Example<TxHistory>({
-    page: 1,
-    totalPages: 1,
-    txs: 1,
-    transactions: [
+  @Example<EthereumTxHistory>({
+    pubkey: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
+    cursor: 'MQ==',
+    txs: [
       {
-        txid: '0x85092cf7a2ec34ba4109ef1215b5b486911163b9d3391e3508670229f4d866e7',
-        status: 'confirmed',
+        txid: '0x8e3528c933483770a3c8377c2ee7e34f846908653168188fd0d90a20b295d002',
+        blockHash: '0x94228c1b7052720846e2d7b9f36de30acf45d9a06ec483bd4433c5c38c8673a8',
+        blockHeight: 12267105,
+        timestamp: 1618788849,
+        status: 1,
         from: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
-        to: '0x34249a379Af1Fe3b53e143c0f1B5590778ce2cfC',
-        blockHash: '0xc962b0662752ac15671512ca612c894051d8b671375de1cd84f12c5e720dc7ef',
-        blockHeight: 11427335,
-        confirmations: 9,
-        timestamp: 1607632210,
-        value: '20000000000000000',
-        fee: '5250000000000000',
+        to: '0x642F4Bda144C63f6DC47EE0fDfbac0a193e2eDb7',
+        confirmations: 2088440,
+        value: '737092621690531649',
+        fee: '3180000000009000',
+        gasLimit: '21000',
+        gasUsed: '21000',
+        gasPrice: '151428571429',
+        inputData: '0x',
       },
     ],
   })
@@ -147,29 +147,57 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   @Get('account/{pubkey}/txs')
   async getTxHistory(
     @Path() pubkey: string,
-    @Query() page?: number,
-    @Query() pageSize = 25,
-    @Query() contract?: string
-  ): Promise<TxHistory> {
+    @Query() cursor?: string,
+    @Query() pageSize = 25
+  ): Promise<EthereumTxHistory> {
     try {
-      const data = await blockbook.getAddress(pubkey, page, pageSize, undefined, undefined, 'txs', contract)
+      let page = 1
+      if (cursor) {
+        page = Number(Buffer.from(cursor, 'base64').toString('binary'))
+        if (isNaN(page) || page < 1) {
+          throw new ApiError('Bad Request', 400, 'Invalid cursor, please use the cursor returned in previous page')
+        }
+      }
+
+      const data = await blockbook.getAddress(pubkey, page, pageSize, undefined, undefined, 'txs')
+
+      const nextPage = page + 1
+
+      let nextCursor = ''
+      if (nextPage <= (data.totalPages ?? 0)) {
+        nextCursor = Buffer.from(nextPage.toString(), 'binary').toString('base64')
+      }
 
       return {
-        page: data.page ?? 1,
-        totalPages: data.totalPages ?? 1,
-        txs: data.txs,
-        transactions:
-          data.transactions?.map<Tx>((tx) => ({
+        pubkey: pubkey,
+        cursor: nextCursor,
+        txs:
+          data.transactions?.map<EthereumTx>((tx) => ({
             txid: tx.txid,
-            status: tx.confirmations > 0 ? 'confirmed' : 'pending',
-            from: tx.vin[0].addresses?.[0] ?? 'coinbase',
-            to: tx.vout[0].addresses?.[0],
             blockHash: tx.blockHash,
             blockHeight: tx.blockHeight,
-            confirmations: tx.confirmations,
             timestamp: tx.blockTime,
+            status: tx.ethereumSpecific?.status ?? -1,
+            from: tx.vin[0].addresses?.[0] ?? '',
+            to: tx.vout[0].addresses?.[0] ?? '',
+            confirmations: tx.confirmations,
             value: tx.tokenTransfers?.[0].value ?? tx.value,
             fee: tx.fees ?? '0',
+            gasLimit: tx.ethereumSpecific?.gasLimit.toString() ?? '',
+            gasUsed: tx.ethereumSpecific?.gasUsed?.toString(),
+            gasPrice: tx.ethereumSpecific?.gasPrice.toString() ?? '',
+            inputData: tx.ethereumSpecific?.data,
+            tokenTransfers: tx.tokenTransfers?.map<TokenTransfer>((tt) => ({
+              balance: (data.tokens || []).find((t) => t.contract === tt.token)?.balance ?? '',
+              contract: tt.token ?? '',
+              decimals: tt.decimals,
+              name: tt.name,
+              symbol: tt.symbol,
+              type: tt.type,
+              from: tt.from,
+              to: tt.to,
+              value: tt.value,
+            })),
           })) ?? [],
       }
     } catch (err) {

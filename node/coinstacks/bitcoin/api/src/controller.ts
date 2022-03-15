@@ -7,9 +7,9 @@ import {
   Info,
   InternalServerError,
   SendTxBody,
-  Tx,
   TxHistory,
   ValidationError,
+  Tx,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
 import {
   BitcoinAddress,
@@ -137,9 +137,8 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
    * Get transaction history by address or xpub
    *
    * @param {string} pubkey account address or xpub
-   * @param {number} [page] page number
+   * @param {string} [cursor] the cursor returned in previous query
    * @param {number} [pageSize] page size
-   * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
    *
    * @returns {Promise<TxHistory>} transaction history
    *
@@ -147,21 +146,14 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
    * @example pubkey "xpub6DQYbVJSVvJPzpYenir7zVSf2WPZRu69LxZuMezzAKuT6biPcug6Vw1zMk4knPBeNKvioutc4EGpPQ8cZiWtjcXYvJ6wPiwcGmCkihA9Jy3"
    */
   @Example<TxHistory>({
-    page: 1,
-    totalPages: 1,
-    txs: 1,
-    transactions: [
+    cursor: 'MQ==',
+    pubkey: '336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU',
+    txs: [
       {
         txid: '77810bfcb0bf66216391838772b790dde1b7419ae57f3b266c718ea937989155',
-        status: 'confirmed',
-        from: '1Dmthegfep7fXVqWAPmQ5rMmKcg58GjEF1',
-        to: '336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU',
         blockHash: '00000000000000000008b5901008aa05d05330fa54abc01a73587c0a1b1291f2',
         blockHeight: 645850,
-        confirmations: 54972,
         timestamp: 1598700231,
-        value: '510611',
-        fee: '224',
       },
     ],
   })
@@ -169,36 +161,39 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}/txs')
-  async getTxHistory(
-    @Path() pubkey: string,
-    @Query() page?: number,
-    @Query() pageSize = 25,
-    @Query() contract?: string
-  ): Promise<TxHistory> {
+  async getTxHistory(@Path() pubkey: string, @Query() cursor?: string, @Query() pageSize = 25): Promise<TxHistory> {
     try {
+      let page = 1
+      if (cursor) {
+        page = Number(Buffer.from(cursor, 'base64').toString('binary'))
+        if (isNaN(page) || page < 1) {
+          throw new ApiError('Bad Request', 400, 'Invalid cursor, please use the cursor returned in previous page')
+        }
+      }
+
       let data: Address | Xpub
       if (isXpub(pubkey)) {
         data = await blockbook.getXpub(pubkey, page, pageSize, undefined, undefined, 'txs')
       } else {
-        data = await blockbook.getAddress(pubkey, page, pageSize, undefined, undefined, 'txs', contract)
+        data = await blockbook.getAddress(pubkey, page, pageSize, undefined, undefined, 'txs')
+      }
+
+      const nextPage = page + 1
+
+      let nextCursor = ''
+      if (nextPage <= (data.totalPages ?? 0)) {
+        nextCursor = Buffer.from(nextPage.toString(), 'binary').toString('base64')
       }
 
       return {
-        page: data.page ?? 1,
-        totalPages: data.totalPages ?? 1,
-        txs: data.txs,
-        transactions:
+        pubkey: pubkey,
+        cursor: nextCursor,
+        txs:
           data.transactions?.map<Tx>((tx) => ({
             txid: tx.txid,
-            status: tx.confirmations > 0 ? 'confirmed' : 'pending',
-            from: tx.vin[0].addresses?.[0] ?? 'coinbase',
-            to: tx.vout[0].addresses?.[0],
             blockHash: tx.blockHash,
             blockHeight: tx.blockHeight,
-            confirmations: tx.confirmations,
             timestamp: tx.blockTime,
-            value: tx.tokenTransfers?.[0].value ?? tx.value,
-            fee: tx.fees ?? '0',
           })) ?? [],
       }
     } catch (err) {
