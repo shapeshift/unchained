@@ -143,6 +143,7 @@ type Value struct {
 	Denom string `json:"denom"`
 }
 
+// RPCErrorResponse payload for an rpc request
 type RPCErrorResponse struct {
 	Jsonrpc string `json:"jsonrpc"`
 	Id      int32  `json:"id"`
