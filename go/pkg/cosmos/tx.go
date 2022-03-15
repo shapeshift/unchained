@@ -207,6 +207,22 @@ func Messages(msgs []sdk.Msg) []Message {
 	return messages
 }
 
+func Fee(tx signing.Tx, txid string, defaultDenom string) Value {
+	fees := tx.GetFee()
+
+	if len(fees) == 0 {
+		logger.Warnf("txid: %s, no fees detected", txid)
+		fees = []sdk.Coin{{Denom: "uatom", Amount: sdk.NewInt(0)}}
+	} else if len(fees) > 1 {
+		logger.Warnf("txid: %s - multiple fees detected (defaulting to index 0): %+v", txid, fees)
+	}
+
+	return Value{
+		Amount: fees[0].Amount.String(),
+		Denom:  fees[0].Denom,
+	}
+}
+
 // DecodeTx will attempt to decode a raw transaction in the form of
 // a base64 encoded string or a protobuf encoded byte slice
 func DecodeTx(encoding params.EncodingConfig, rawTx interface{}) (sdk.Tx, signing.Tx, error) {

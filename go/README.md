@@ -8,10 +8,16 @@
 
 ## Dependencies
 
-- [Golang](https://go.dev/)
+- [go](https://go.dev/)
+- [goimports](https://pkg.go.dev/golang.org/x/tools/cmd/goimports)
+- [golangci-lint](https://golangci-lint.run/)
 
 ## Notes
 
+- It is suggested configuring your editor of choice to utilize the following tooling:
+  - [gopls](https://pkg.go.dev/golang.org/x/tools/gopls) language server
+  - [golangci-lint](https://golangci-lint.run/) to match the linter used in CI
+  - [goimports](https://pkg.go.dev/golang.org/x/tools/cmd/goimports) to match the formatting run on git pre-commit hook (default behavior when using gopls)
 - Visual Studio Code expects any golang projects to be opened up with a `go.mod` file at the root directory for the tooling to work properly, so be sure to open up the project at `unchained/go`
 
 ## Initial Setup
