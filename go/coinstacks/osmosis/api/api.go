@@ -130,7 +130,9 @@ func (a *API) Shutdown() {
 	defer cancel()
 
 	a.handler.wsClient.Stop()
-	a.server.Shutdown(ctx)
+	if err := a.server.Shutdown(ctx); err != nil {
+		logger.Errorf("error shutting down server: %+v", err)
+	}
 }
 
 func (a *API) Root(w http.ResponseWriter, r *http.Request) {
