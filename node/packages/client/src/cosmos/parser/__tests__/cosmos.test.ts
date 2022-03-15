@@ -52,6 +52,10 @@ describe('parseTx', () => {
       address: address,
       caip2: 'cosmos:cosmoshub-4',
       value: tx.value,
+      fee: {
+        caip19: 'cosmos:cosmoshub-4/slip44:118',
+        value: '2500',
+      },
       transfers: [
         {
           type: TransferType.Receive,
