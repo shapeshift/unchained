@@ -73,8 +73,7 @@ func (c *Connection) Start() {
 	c.ticker = time.NewTicker(pingPeriod)
 
 	c.conn.SetReadLimit(maxMessageSize)
-	err := c.conn.SetReadDeadline(time.Now().Add(readWait))
-	if err != nil {
+	if err := c.conn.SetReadDeadline(time.Now().Add(readWait)); err != nil {
 		logger.Errorf("failed to set read deadline: %+v", err)
 	}
 
@@ -93,8 +92,7 @@ func (c *Connection) Start() {
 	// handle pong response from client and reset read deadline.
 	// if no pong is receive before read deadline expires, connection will be closed.
 	c.conn.SetPongHandler(func(string) error {
-		err := c.conn.SetReadDeadline(time.Now().Add(readWait))
-		if err != nil {
+		if err := c.conn.SetReadDeadline(time.Now().Add(readWait)); err != nil {
 			return err
 		}
 		return nil
@@ -131,8 +129,7 @@ func (c *Connection) Stop() {
 func (c *Connection) cleanup() {
 	<-c.doneChan
 	c.ticker.Stop()
-	err := c.conn.WriteMessage(websocket.CloseMessage, []byte{})
-	if err != nil {
+	if err := c.conn.WriteMessage(websocket.CloseMessage, []byte{}); err != nil {
 		logger.Errorf("failed to write close message: %+v", err)
 	}
 	c.conn.Close()

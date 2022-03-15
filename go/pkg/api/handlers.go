@@ -12,8 +12,7 @@ var logger = log.WithoutFields()
 func HandleResponse(w http.ResponseWriter, status int, res interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	err := json.NewEncoder(w).Encode(res)
-	if err != nil {
+	if err := json.NewEncoder(w).Encode(res); err != nil {
 		logger.Errorf("failed to encode response: %+v", err)
 	}
 }
@@ -33,8 +32,7 @@ func HandleError(w http.ResponseWriter, status int, message string) {
 		e = Error{Message: message}
 	}
 
-	err := json.NewEncoder(w).Encode(e)
-	if err != nil {
+	if err := json.NewEncoder(w).Encode(e); err != nil {
 		logger.Errorf("failed to encode response: %+v", err)
 	}
 }
