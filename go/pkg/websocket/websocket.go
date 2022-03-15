@@ -172,7 +172,6 @@ func (c *Connection) write() {
 		}
 		if err := c.conn.WriteMessage(websocket.TextMessage, msg); err != nil {
 			logger.Errorf("failed to write message: %+v", err)
-			return
 		}
 	}
 }
@@ -195,6 +194,5 @@ func (c *Connection) writeError(message string, subscriptionID string) {
 	}
 	if err := c.conn.WriteMessage(websocket.TextMessage, msg); err != nil {
 		logger.Errorf("failed to write message: %+v", err)
-		return
 	}
 }
