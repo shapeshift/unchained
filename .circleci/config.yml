@@ -743,26 +743,11 @@ workflows:
 
       ########## (SHAPESHIFT) ##########
       - deploy-dependencies:
-          name: preview dependencies (shapeshift)
-          organization: SHAPESHIFT
-          pulumi-command: preview
-          requires:
-            - lint and test project (persist to workspace)
-          <<: *only-develop
-
-      - approve-shapeshift:
-          name: approve shapeshift
-          type: approval
-          requires:
-            - preview dependencies (shapeshift)
-          <<: *only-develop
-
-      - deploy-dependencies:
           name: deploy dependencies (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
           requires:
-            - approve shapeshift
+            - lint and test project (persist to workspace)
           <<: *only-develop
 
       - deploy-coinstack-node:
@@ -790,30 +775,6 @@ workflows:
           requires:
             - deploy dependencies (shapeshift)
           <<: *cosmos-dev
-          <<: *only-develop
-
-      ########## (TAXISTAKE) ##########
-      - deploy-dependencies:
-          name: preview dependencies (taxistake)
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - lint and test project (persist to workspace)
-          <<: *only-develop
-
-      - approve-taxistake:
-          name: approve taxistake
-          type: approval
-          requires:
-            - preview dependencies (taxistake)
-          <<: *only-develop
-
-      - deploy-dependencies:
-          name: deploy dependencies (taxistake)
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve taxistake
           <<: *only-develop
 
   deploy-monitoring:
@@ -946,11 +907,26 @@ workflows:
 
       ########## (TAXISTAKE) ##########
       - deploy-dependencies:
-          name: validate dependencies (taxistake)
+          name: preview dependencies (taxistake)
           organization: TAXISTAKE
-          pulumi-command: preview --expect-no-changes
+          pulumi-command: preview
           requires:
             - lint and test project (persist to workspace)
+          <<: *only-main
+
+      - approve-shapeshift:
+          name: approve dependencies (taxistake)
+          type: approval
+          requires:
+            - preview dependencies (taxistake)
+          <<: *only-main
+
+      - deploy-dependencies:
+          name: deploy dependencies (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve dependencies (taxistake)
           <<: *only-main
 
       ####### BITCOIN
@@ -959,7 +935,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: preview
           requires:
-            - validate dependencies (taxistake)
+            - deploy dependencies (taxistake)
           <<: *bitcoin
           <<: *only-main
 
@@ -985,7 +961,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: preview
           requires:
-            - validate dependencies (taxistake)
+            - deploy dependencies (taxistake)
           <<: *ethereum
           <<: *only-main
 
