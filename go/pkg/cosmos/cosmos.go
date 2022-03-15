@@ -22,7 +22,6 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/internal/log"
-	tendermintclient "github.com/shapeshift/unchained/pkg/tendermint/client"
 	liquiditytypes "github.com/tendermint/liquidity/x/liquidity/types"
 	abcitypes "github.com/tendermint/tendermint/abci/types"
 	"google.golang.org/grpc"
@@ -51,7 +50,6 @@ type HTTPClient struct {
 
 	cosmos           *resty.Client
 	tendermint       *resty.Client
-	tendermintClient *tendermintclient.APIClient
 }
 
 // NewHTTPClient configures and creates an HTTPClient
@@ -68,12 +66,6 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 		return nil, errors.Wrapf(err, "failed to parse RPCURL: %s", conf.RPCURL)
 	}
 
-	tConf := tendermintclient.NewConfiguration()
-	tConf.Scheme = rpcURL.Scheme
-	tConf.Servers = []tendermintclient.ServerConfiguration{{URL: rpcURL.Host}}
-	tConf.AddDefaultHeader("Authorization", conf.APIKey)
-	tClient := tendermintclient.NewAPIClient(tConf)
-
 	// untyped resty http clients
 	headers := map[string]string{"Accept": "application/json", "Authorization": conf.APIKey}
 	cosmos := resty.New().SetScheme(lcdURL.Scheme).SetBaseURL(lcdURL.Host).SetHeaders(headers)
@@ -84,7 +76,6 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 		encoding:         conf.Encoding,
 		cosmos:           cosmos,
 		tendermint:       tendermint,
-		tendermintClient: tClient,
 	}
 
 	return c, nil

@@ -2,13 +2,12 @@ package cosmos
 
 import (
 	"context"
-	"encoding/json"
 	"strconv"
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/simapp/params"
+	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
-	"github.com/shapeshift/unchained/pkg/tendermint/client"
 )
 
 const STATIC_PAGE_SIZE int32 = 25
@@ -19,39 +18,45 @@ type TxState struct {
 	lastID  string
 	page    int
 	query   string
-	txs     []client.TxSearchResponseResultTxs
+	txs     []TxSearchResponseResultTxs
 }
 
 // History stores state for multiple query sources to complete a paginated request
 type History struct {
-	ctx              context.Context
-	cursor           *Cursor
-	encoding         *params.EncodingConfig
-	pageSize         int
-	receive          *TxState
-	send             *TxState
-	tendermintClient *client.APIClient
+	ctx        context.Context
+	cursor     *Cursor
+	encoding   *params.EncodingConfig
+	pageSize   int
+	receive    *TxState
+	send       *TxState
+	tendermint *resty.Client
 }
 
-func (h *History) doRequest(txState *TxState) (*client.TxSearchResponse, error) {
+func (h *History) doRequest(txState *TxState) (*TxSearchResponse, error) {
 	for {
-		res, httpRes, err := h.tendermintClient.InfoApi.TxSearch(h.ctx).PerPage(STATIC_PAGE_SIZE).OrderBy("\"desc\"").Query(txState.query).Page(int32(txState.page)).Execute()
+		var res *TxSearchResponse
+		var resErr *RPCErrorResponse
+
+		queryParams := map[string]string{
+			"per_page": strconv.Itoa(int(STATIC_PAGE_SIZE)),
+			"order_by": "\"desc\"",
+			"query":    txState.query,
+			"page":     strconv.Itoa(txState.page),
+		}
+
+		_, err := h.tendermint.R().SetResult(&res).SetError(&resErr).SetQueryParams(queryParams).Get("/tx_search")
+
 		if err != nil {
-			var e struct {
-				Error struct {
-					Data string `json:"data"`
-				} `json:"error"`
-			}
+			return nil, errors.Wrap(err, "failed to do request")
+		}
 
-			json.NewDecoder(httpRes.Body).Decode(&e)
-
+		if resErr != nil {
 			// error is returned if page is out of range past page 1, mark as no more transactions
-			if strings.Contains(e.Error.Data, "page should be within") {
+			if strings.Contains(resErr.Error.Data, "page should be within") {
 				txState.hasMore = false
-				return &client.TxSearchResponse{}, nil
+				return &TxSearchResponse{}, nil
 			}
-
-			return nil, errors.Wrapf(err, "failed to get tx history: %s", e.Error.Data)
+			return nil, errors.Errorf("failed to get tx history: %s", resErr.Error.Data)
 		}
 
 		// no txs returned, mark as no more transactions
@@ -81,8 +86,8 @@ func (h *History) doRequest(txState *TxState) (*client.TxSearchResponse, error) 
 }
 
 // filterByCursor will filter out any transactions that we have already returned to the client based on the state of the cursor
-func (h *History) filterByCursor(txs []client.TxSearchResponseResultTxs) ([]client.TxSearchResponseResultTxs, error) {
-	filtered := []client.TxSearchResponseResultTxs{}
+func (h *History) filterByCursor(txs []TxSearchResponseResultTxs) ([]TxSearchResponseResultTxs, error) {
+	filtered := []TxSearchResponseResultTxs{}
 	for _, tx := range txs {
 		txHeight, err := strconv.Atoi(*tx.Height)
 		if err != nil {
@@ -167,7 +172,7 @@ func (h *History) fetch() (*TxHistory, error) {
 		}
 
 		// find the next most recent transaction and remove from the txs set
-		var next client.TxSearchResponseResultTxs
+		var next TxSearchResponseResultTxs
 		if sendHeight >= receiveHeight {
 			next = h.send.txs[0]
 			h.send.txs = h.send.txs[1:]
@@ -249,7 +254,7 @@ func (h *History) fetchMore(txState *TxState) error {
 func (h *History) removeDuplicateTxs() {
 	seenTxs := make(map[string]bool)
 
-	sendTxs := []client.TxSearchResponseResultTxs{}
+	sendTxs := []TxSearchResponseResultTxs{}
 	for _, tx := range h.send.txs {
 		if _, seen := seenTxs[*tx.Hash]; !seen {
 			seenTxs[*tx.Hash] = true
@@ -258,7 +263,7 @@ func (h *History) removeDuplicateTxs() {
 	}
 	h.send.txs = sendTxs
 
-	receiveTxs := []client.TxSearchResponseResultTxs{}
+	receiveTxs := []TxSearchResponseResultTxs{}
 	for _, tx := range h.receive.txs {
 		if _, seen := seenTxs[*tx.Hash]; !seen {
 			seenTxs[*tx.Hash] = true
@@ -268,7 +273,7 @@ func (h *History) removeDuplicateTxs() {
 	h.receive.txs = receiveTxs
 }
 
-func getMostRecentHeight(txs []client.TxSearchResponseResultTxs) (int, error) {
+func getMostRecentHeight(txs []TxSearchResponseResultTxs) (int, error) {
 	// TODO: test no txs case to ensure it falls through correctly
 	if len(txs) == 0 {
 		return -2, nil

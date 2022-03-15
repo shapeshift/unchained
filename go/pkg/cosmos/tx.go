@@ -18,11 +18,11 @@ import (
 
 func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (*TxHistory, error) {
 	history := &History{
-		ctx:              c.ctx,
-		cursor:           &Cursor{SendPage: 1, ReceivePage: 1},
-		pageSize:         pageSize,
-		tendermintClient: c.tendermintClient,
-		encoding:         c.encoding,
+		ctx:        c.ctx,
+		cursor:     &Cursor{SendPage: 1, ReceivePage: 1},
+		pageSize:   pageSize,
+		tendermint: c.tendermint,
+		encoding:   c.encoding,
 	}
 
 	if cursor != "" {
@@ -205,6 +205,22 @@ func Messages(msgs []sdk.Msg) []Message {
 	}
 
 	return messages
+}
+
+func Fee(tx signing.Tx, txid string, defaultDenom string) Value {
+	fees := tx.GetFee()
+
+	if len(fees) == 0 {
+		logger.Warnf("txid: %s, no fees detected", txid)
+		fees = []sdk.Coin{{Denom: "uatom", Amount: sdk.NewInt(0)}}
+	} else if len(fees) > 1 {
+		logger.Warnf("txid: %s - multiple fees detected (defaulting to index 0): %+v", txid, fees)
+	}
+
+	return Value{
+		Amount: fees[0].Amount.String(),
+		Denom:  fees[0].Denom,
+	}
 }
 
 // DecodeTx will attempt to decode a raw transaction in the form of
