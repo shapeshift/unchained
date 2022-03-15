@@ -165,11 +165,10 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
     try {
       let page = 1
       if (cursor) {
-        const cursorDecoded = Buffer.from(cursor, 'base64').toString('binary')
-        if (isNaN(Number(cursorDecoded))) {
+        page = Number(Buffer.from(cursor, 'base64').toString('binary'))
+        if (isNaN(page) || page < 1) {
           throw new ApiError('Bad Request', 400, 'Invalid cursor, please use the cursor returned in previous page')
         }
-        page = Number(cursorDecoded)
       }
 
       let data: Address | Xpub
@@ -181,14 +180,14 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
 
       const nextPage = page + 1
 
-      const nextCursor =
-        (data.transactions?.length ?? 0) == pageSize
-          ? { cursor: Buffer.from(nextPage.toString(), 'binary').toString('base64') }
-          : undefined
+      let nextCursor = ''
+      if (nextPage <= (data.totalPages ?? 0)) {
+        nextCursor = Buffer.from(nextPage.toString(), 'binary').toString('base64')
+      }
 
       return {
         pubkey: pubkey,
-        ...nextCursor,
+        cursor: nextCursor,
         txs:
           data.transactions?.map<Tx>((tx) => ({
             txid: tx.txid,

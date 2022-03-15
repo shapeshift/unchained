@@ -153,44 +153,43 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
     try {
       let page = 1
       if (cursor) {
-        const cursorDecoded = Buffer.from(cursor, 'base64').toString('binary')
-        if (isNaN(Number(cursorDecoded))) {
+        page = Number(Buffer.from(cursor, 'base64').toString('binary'))
+        if (isNaN(page) || page < 1) {
           throw new ApiError('Bad Request', 400, 'Invalid cursor, please use the cursor returned in previous page')
         }
-        page = Number(cursorDecoded)
       }
 
       const data = await blockbook.getAddress(pubkey, page, pageSize, undefined, undefined, 'txs')
 
       const nextPage = page + 1
 
-      const nextCursor =
-        (data.transactions?.length ?? 0) == pageSize
-          ? { cursor: Buffer.from(nextPage.toString(), 'binary').toString('base64') }
-          : undefined
+      let nextCursor = ''
+      if (nextPage <= (data.totalPages ?? 0)) {
+        nextCursor = Buffer.from(nextPage.toString(), 'binary').toString('base64')
+      }
 
       return {
         pubkey: pubkey,
-        ...nextCursor,
+        cursor: nextCursor,
         txs:
           data.transactions?.map<EthereumTx>((tx) => ({
             txid: tx.txid,
             blockHash: tx.blockHash,
             blockHeight: tx.blockHeight,
             timestamp: tx.blockTime,
-            status: tx.ethereumSpecific?.status ?? tx.confirmations > 0 ? 1 : -1, // assuming confirmed=1 pending=-1 based on previous implementation and TransactionParser.getStatus()
-            from: tx.vin[0].addresses?.[0] ?? 'coinbase',
-            to: tx.vout[0].addresses?.[0] ?? 'unavailable', // assuming an arbitrary default
+            status: tx.ethereumSpecific?.status ?? -1,
+            from: tx.vin[0].addresses?.[0] ?? '',
+            to: tx.vout[0].addresses?.[0] ?? '',
             confirmations: tx.confirmations,
             value: tx.tokenTransfers?.[0].value ?? tx.value,
             fee: tx.fees ?? '0',
-            gasLimit: tx.ethereumSpecific?.gasLimit.toString() ?? 'unavailable', // assuming an arbitrary default
+            gasLimit: tx.ethereumSpecific?.gasLimit.toString() ?? '',
             gasUsed: tx.ethereumSpecific?.gasUsed?.toString(),
-            gasPrice: tx.ethereumSpecific?.gasPrice.toString() ?? 'unavailable', // assuming an arbitrary default
+            gasPrice: tx.ethereumSpecific?.gasPrice.toString() ?? '',
             inputData: tx.ethereumSpecific?.data,
             tokenTransfers: tx.tokenTransfers?.map<TokenTransfer>((tt) => ({
-              balance: (data.tokens || []).find((t) => t.contract === tt.token)?.balance ?? 'unavailable', // assuming an arbitrary default
-              contract: tt.token ?? 'unavailable', // assuming an arbitrary default
+              balance: (data.tokens || []).find((t) => t.contract === tt.token)?.balance ?? '',
+              contract: tt.token ?? '',
               decimals: tt.decimals,
               name: tt.name,
               symbol: tt.symbol,
