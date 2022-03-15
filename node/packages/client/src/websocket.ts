@@ -95,15 +95,16 @@ export class Client<T> {
     // clear heartbeat timeout on close
     ws.onclose = () => this.connections.txs?.pingTimeout && clearTimeout(this.connections.txs.pingTimeout)
 
-    // trigger heartbeat keep alive on ping event and respond with pong
-    ws.on('ping', () => {
-      this.heartbeat('txs')
-      ws.pong()
-    })
-
     ws.onmessage = (event) => {
       if (!event) return
       if (event.type !== 'message') return
+
+      // browsers do not support ping/pong frame, handle message instead
+      // trigger heartbeat keep alive on ping message and respond with pong
+      if (event.data === 'ping') {
+        this.heartbeat('txs')
+        return
+      }
 
       try {
         const message = JSON.parse(event.data.toString()) as TransactionMessage<T> | ErrorResponse

@@ -10,7 +10,7 @@ if (!BROKER_URI) throw new Error('BROKER_URI env var not set')
 
 export interface RequestPayload {
   subscriptionId: string
-  method: 'subscribe' | 'unsubscribe'
+  method: 'subscribe' | 'unsubscribe' | 'ping'
   data?: TxsTopicData
 }
 
@@ -68,6 +68,7 @@ export class ConnectionHandler {
 
       this.isAlive = false
       this.websocket.ping()
+      this.websocket.send('ping') // browsers do not support ping/pong frame, send message instead
     }, 10000)
 
     this.websocket = websocket
@@ -98,6 +99,11 @@ export class ConnectionHandler {
       const payload: RequestPayload = JSON.parse(event.data.toString())
 
       switch (payload.method) {
+        // browsers do not support ping/pong frame, handle message instead
+        case 'ping': {
+          this.websocket.send('pong')
+          break
+        }
         case 'subscribe':
         case 'unsubscribe': {
           const topic = payload.data?.topic
