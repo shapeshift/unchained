@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from 'fs'
 import { join } from 'path'
 import * as k8s from '@pulumi/kubernetes'
 import { all } from '@pulumi/pulumi'
-import { deployApi, deployMongo, deployIngester, deployRabbit } from '@shapeshiftoss/common-pulumi'
+import { deployApi } from '@shapeshiftoss/common-pulumi'
 import { deployIndexer } from '@shapeshiftoss/blockbook-pulumi'
 import { getConfig } from './config'
 
@@ -52,14 +52,8 @@ export = async (): Promise<Outputs> => {
 
   new k8s.core.v1.Secret(asset, { metadata: { name: asset, namespace }, stringData }, { provider })
 
-  const mongo = await deployMongo(name, asset, provider, namespace, config)
-  const rabbit = await deployRabbit(name, asset, provider, namespace, config)
-
-  const deps = all([mongo, rabbit]).apply(([mongoResources, rabbitResource]) => [...mongoResources, rabbitResource])
-
   await deployIndexer(name, asset, provider, namespace, config)
-  await deployIngester(name, asset, provider, namespace, config, deps)
-  await deployApi(name, asset, provider, namespace, config, deps)
+  await deployApi(name, asset, provider, namespace, config)
 
   return outputs
 }

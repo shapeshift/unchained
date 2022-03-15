@@ -14,7 +14,6 @@
   "dependencies": {
     "@shapeshiftoss/blockbook": "^6.0.0",
     "@shapeshiftoss/common-api": "^6.0.0",
-    "@shapeshiftoss/ethereum-ingester": "^6.0.0",
     "@shapeshiftoss/logger": "^1.0.0",
     "cors": "^2.8.5",
     "ethers": "^5.5.3",

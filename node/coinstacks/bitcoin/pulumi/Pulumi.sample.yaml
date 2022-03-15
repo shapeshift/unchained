@@ -19,7 +19,6 @@ config:
 
     ## api - if specified an api service will be deployed
     api:
-      enableDatadogLogs: false
       autoscaling:
         enabled: false
         cpuThreshold: 30
@@ -28,35 +27,6 @@ config:
       cpuRequest: "300m"
       memoryLimit: "512Mi"
       replicas: 1
-
-    ## ingester - if specified all ingestion workers will be deployed
-    ## All ingesters use 1 replica with the exception of tx and address workers, which are configured for high availability
-    ## If autoscaling is enabled, horizontal pod autoscalers will be deployed to high availability workers
-    ingester:
-      enableDatadogLogs: false
-      autoscaling:
-        enabled: false
-        cpuThreshold: 30
-        maxReplicas: 2
-      cpuLimit: "300m"
-      cpuRequest: "300m"
-      memoryLimit: "512Mi"
-      replicas: 1
-
-    ## mongo - if specified a mongo database will be deployed
-    mongo:
-      cpuLimit: "250m"
-      cpuRequest: "250m"
-      helmChartVersion: "10.19.0"
-      memoryLimit: "256Mi"
-      replicaCount: 1
-      storageSize: "1Gi"
-
-    rabbit:
-      cpuLimit: "1"
-      cpuRequest: "1"
-      memoryLimit: "2Gi"
-      storageSize: "10Gi"
 
     ## indexer - if specified an indexer service and optional node will be deployed
     ## this is very resource intensive, so you can point at public endpoints instead of running your own.

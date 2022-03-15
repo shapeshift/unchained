@@ -12,7 +12,6 @@
     "generate": "tsoa spec-and-routes"
   },
   "dependencies": {
-    "@shapeshiftoss/bitcoin-ingester": "^6.0.0",
     "@shapeshiftoss/blockbook": "^6.0.0",
     "@shapeshiftoss/common-api": "^6.0.0",
     "@shapeshiftoss/logger": "^1.0.0",

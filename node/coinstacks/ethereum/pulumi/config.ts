@@ -66,16 +66,6 @@ export const getConfig = async (): Promise<EthereumConfig> => {
     if (!config.api.replicas) missingRequiredConfig.push('api.replicas')
   }
 
-  if (config.mongo) {
-    config.mongo.storageClass = getStorageClassName(config.cluster)
-
-    if (!config.mongo.cpuLimit) missingRequiredConfig.push('mongo.cpuLimit')
-    if (!config.mongo.helmChartVersion) missingRequiredConfig.push('mongo.helmChartVersion')
-    if (!config.mongo.memoryLimit) missingRequiredConfig.push('mongo.memoryLimit')
-    if (!config.mongo.replicaCount) missingRequiredConfig.push('mongo.replicaCount')
-    if (!config.mongo.storageSize) missingRequiredConfig.push('mongo.storageSize')
-  }
-
   if (config.indexer) {
     config.indexer.storageClass = getStorageClassName(config.cluster)
 
@@ -92,23 +82,6 @@ export const getConfig = async (): Promise<EthereumConfig> => {
     if (!config.indexer.daemon.image) missingRequiredConfig.push('indexer.daemon.image')
     if (!config.indexer.daemon.memoryLimit) missingRequiredConfig.push('indexer.daemon.memoryLimit')
     if (!config.indexer.daemon.storageSize) missingRequiredConfig.push('indexer.daemon.storageSize')
-  }
-
-  if (config.ingester) {
-    if (!config.ingester.autoscaling.enabled) missingRequiredConfig.push('ingester.autoscaling.enabled')
-    if (!config.ingester.autoscaling.maxReplicas) missingRequiredConfig.push('ingester.autoscaling.maxReplicas')
-    if (!config.ingester.autoscaling.cpuThreshold) missingRequiredConfig.push('ingester.autoscaling.cpuThreshold')
-    if (!config.ingester.cpuLimit) missingRequiredConfig.push('ingester.cpuLimit')
-    if (!config.ingester.memoryLimit) missingRequiredConfig.push('ingester.memoryLimit')
-    if (!config.ingester.replicas) missingRequiredConfig.push('ingester.replicas')
-  }
-
-  if (config.rabbit) {
-    config.rabbit.storageClassName = getStorageClassName(config.cluster)
-
-    if (!config.rabbit.cpuLimit) missingRequiredConfig.push('rabbit.cpuLimit')
-    if (!config.rabbit.memoryLimit) missingRequiredConfig.push('rabbit.memoryLimit')
-    if (!config.rabbit.storageSize) missingRequiredConfig.push('rabbit.storageSize')
   }
 
   if (missingRequiredConfig.length) {

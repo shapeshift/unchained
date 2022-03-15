@@ -13,11 +13,6 @@
 - [Docker Desktop](docs/docker-desktop.md)
 - [Minikube](docs/minikube.md)
 
-## Development
-
-- [API Load Testing with Vegeta](docs/loadtesting.md)
-- [Ingester](docs/ingester.md)
-
 ## Miscellaneous
 
 - [Bootstrap from EBS Volume](docs/volumes.md)

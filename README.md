@@ -31,19 +31,9 @@ Unchained is a multi-blockchain backend interface with three main goals:
 
 - **Node** - coin specific node daemon providing historical blockchain data (ex. bitcoind, geth, etc)
 - **Indexer** - optional service that indexes transaction and balance history by address, or any other applicable information, if not provided by the node directly
-- **[Ingester (TO BE REMOVED)](docs/ingester.md)** - ingests blockchain data providing:
-  - websocket notification of any newly confirmed or pending transactions
-  - stream of historical transaction history
-  - additional parsing logic not provided by the indexer or node
 - **[API](https://api.ethereum.shapeshift.com/docs/)** - provides a base set of functionality via REST and WebSocket that can be extended with coin specific logic
 
 ## Architecture Diagrams
-
-**<p align="center">With Ingester (TO BE REMOVED)</p>**
-
----
-
-![](docs/coinstack.png)
 
 With Indexer | No Indexer
 :---------:|:------------:
@@ -60,9 +50,7 @@ With Indexer | No Indexer
 We use traefik as a reverse-proxy to expose all of our docker containers. Traefik is exposed at port `80`. Traefik Dashboard is exposed at port `8080`
 
 Traefik routes requests based on host name. which includes the coinstack name. For Example:
-- `api.bitcoin.localhost`
-- `mongo.bitcoin.localhost`
-- `rabbit-admin.bitcoin.localhost`
+- `api.ethereum.localhost`
 
 ## Setup
 
@@ -97,11 +85,6 @@ Traefik routes requests based on host name. which includes the coinstack name. F
   ```sh
   cd coinstacks/ethereum && docker-compose up
   ```
-  - If only developing on the API:
-
-    ```sh
-    cd coinstacks/ethereum && docker-compose up api
-    ```
 
 - Visit http://api.ethereum.localhost/docs to view the OpenAPI documentation for the API
 

@@ -89,11 +89,3 @@ config:
 
     ## rootDomainName - requires configured Route53 domain name and DNS Registrar (https://github.com/shapeshift/cluster-launcher/blob/main/README.md#configure-route53--dns-registrar)
     #rootDomainName:
-
-    # rabbit - creates an internal rabbitmq cluster (useful if you don't have a hosted rabbit cluster to point at)
-    rabbit:
-      adminPort: 31672
-      rabbitPort: 30672
-      cpuLimit: '1'
-      memoryLimit: '256Mi'
-      storageSize: '1Gi'

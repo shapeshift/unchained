@@ -68,13 +68,3 @@ Exporters are used
 #### Node Exporter
 
 This component is a daemonset that ships all node information to prometheus, it is currently packaged with the Prometheus helm chart.
-
-#### RabbitMQ Exporter
-[Helm Chart](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-rabbitmq-exporter)
-
-This component connects directly to rabbitmq components and exposes metrics to prometheus for consumption.
-
-#### MongoDB Exporter
-[Helm Chart](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-mongodb-exporter)
-
-This component connects directly to mongodb components and exposes metrics to prometheus for consumption.

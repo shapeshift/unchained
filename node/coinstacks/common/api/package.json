@@ -14,18 +14,12 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@shapeshiftoss/common-ingester": "^6.0.0",
-    "@shapeshiftoss/common-mongo": "^6.0.0",
-    "amqp-ts": "^1.8.0",
-    "mongodb": "^3.6.3",
     "tsoa": "^3.4.0",
     "uuid": "^8.3.2",
     "ws": "^8.3.0"
   },
   "devDependencies": {
-    "@types/amqplib": "^0.5.16",
     "@types/express": "^4.17.9",
-    "@types/mongodb": "^3.6.3",
     "@types/uuid": "^8.3.1",
     "@types/ws": "^8.2.1"
   }
