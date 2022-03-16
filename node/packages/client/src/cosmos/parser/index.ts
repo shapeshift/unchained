@@ -52,7 +52,9 @@ export class TransactionParser {
             this.assetId,
             msg.from ?? '',
             msg.to ?? '',
-            sendValue.toString(10)
+            sendValue.toString(10),
+            undefined,
+            msg.type
           )
         }
 
@@ -73,12 +75,42 @@ export class TransactionParser {
             this.assetId,
             msg.from ?? '',
             msg.to ?? '',
-            receiveValue.toString(10)
+            receiveValue.toString(10),
+            undefined,
+            msg.type
           )
         }
       }
     })
 
     return parsedTx
+  }
+
+  /**
+   * Some message such as withdraw_delegator_reward have an empty value
+   * This gets the value for a given message from events if possible
+   * @param msg message with an empty value
+   * @returns corresponding value from event logs
+   */
+  private valueFromEvents = (msg: any, events: any): string => {
+    if (msg.type === 'withdraw_delegator_reward') {
+      const validator = msg.to
+
+      const rewardEvents = events.find((event: any) => event.type === 'withdraw_rewards')
+
+      const rewardEvent = rewardEvents?.find((event: any) => {
+        const attributes = event.attributes
+
+        const attribute = attributes?.find(
+          (attribute: any) => attribute.key === 'validator' && attribute.value === validator
+        )
+
+        return !!attribute
+      })
+
+      const valueUnparsed = rewardEvent?.attributes.find((attribute: any) => attribute.key === 'amount')?.value
+
+      return '123'
+    } else throw new Error('valueFromEvents unsupported message type')
   }
 }

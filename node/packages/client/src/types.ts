@@ -48,6 +48,7 @@ export interface Transfer {
   totalValue: string
   components: Array<{ value: string }>
   token?: Token
+  subtype?: string
 }
 
 export enum TransferType {

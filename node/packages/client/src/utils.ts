@@ -22,11 +22,14 @@ export function aggregateTransfer(
   from: string,
   to: string,
   value: string,
-  token?: Token
+  token?: Token,
+  subtype?: string
 ): Array<Transfer> {
   if (!new BigNumber(value).gt(0)) return transfers
 
-  const index = transfers?.findIndex((t) => t.type === type && t.caip19 === caip19 && t.from === from && t.to === to)
+  const index = transfers?.findIndex(
+    (t) => t.type === type && t.caip19 === caip19 && t.from === from && t.to === to && t.subtype === subtype
+  )
   const transfer = transfers?.[index]
 
   if (transfer) {
