@@ -70,7 +70,7 @@ describe('parseTx', () => {
     expect(expected).toEqual(actual)
   })
 
-  it.only('should be able to parse a withdraw_delegator_reward tx', async () => {
+  it('should be able to parse a withdraw_delegator_reward tx', async () => {
     const { tx } = reward
     const address = 'cosmos179k2lz70rxvjrvvr65cynw9x5c8v3kftg46v05'
 
