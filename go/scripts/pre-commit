@@ -1,0 +1,25 @@
+#!/bin/sh
+
+STAGED_GO_FILES=$(git diff --cached --name-only | grep ".go$")
+
+if [[ "$STAGED_GO_FILES" = "" ]]; then
+  exit 0
+fi
+
+PASS=true
+for FILE in $STAGED_GO_FILES
+do
+  diff=$(goimports -d $FILE)
+  if [[ $diff != "" ]]; then
+    PASS=false
+  fi
+  goimports -w $FILE
+done
+
+if ! $PASS; then
+  printf "goimports has fixed some errors in your code.\n"
+  printf "Please run 'git add' and commit again.\n"
+  exit 1
+fi
+
+exit 0
