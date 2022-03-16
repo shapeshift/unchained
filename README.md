@@ -82,9 +82,7 @@ Traefik routes requests based on host name. which includes the coinstack name. F
 
 #### **Running**
 
-- Commands should be run from the language subdirectory (ex. `unchained/go`, `unchained/node`)
-
-- Start the reverse proxy and any common service (ex. hot reloading)
+- Start the reverse proxy and any common service (ex. hot reloading):
 
   ```sh
   docker-compose up -d
@@ -95,12 +93,12 @@ Traefik routes requests based on host name. which includes the coinstack name. F
 - Start a coinstack:
 
   ```sh
-  cd coinstacks/ethereum && docker-compose up
+  cd node/coinstacks/ethereum && docker-compose up
   ```
   - If only developing on the API:
 
     ```sh
-    cd coinstacks/ethereum && docker-compose up api
+    cd node/coinstacks/ethereum && docker-compose up api
     ```
 
 - Visit http://api.ethereum.localhost/docs to view the OpenAPI documentation for the API
@@ -108,7 +106,7 @@ Traefik routes requests based on host name. which includes the coinstack name. F
 - Tear down a coinstack (including docker volumes):
 
   ```sh
-  cd coinstacks/ethereum && docker-compose down -v
+  cd node/coinstacks/ethereum && docker-compose down -v
   ```
 
 #### **Common Issues**
