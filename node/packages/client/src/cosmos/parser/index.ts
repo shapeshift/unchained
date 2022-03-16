@@ -24,7 +24,6 @@ export class TransactionParser {
   }
 
   async parse(tx: CosmosTx, address: string): Promise<ParsedTx> {
-    console.log('parse')
     const blockHeight = Number(tx.blockHeight)
     const blockTime = Number(tx.timestamp)
 
