@@ -1,4 +1,4 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-cd node && pretty-quick --staged
+cd node && yarn pretty-quick --staged

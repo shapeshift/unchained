@@ -21,7 +21,8 @@
     "test:coverage": "jest --coverage",
     "version:major": "lerna version major --force-publish --no-push",
     "version:minor": "lerna version minor --force-publish --no-push",
-    "version:patch": "lerna version patch --force-publish --no-push"
+    "version:patch": "lerna version patch --force-publish --no-push",
+    "prepare": "cd .. && husky install"
   },
   "dependencies": {
     "@pulumi/kubernetes": "3.6.3",
@@ -37,6 +38,7 @@
     "eslint": "^8.0.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
+    "husky": "^7.0.4",
     "jest": "^27.2.5",
     "nodemon": "^2.0.6",
     "prettier": "^2.2.1",
