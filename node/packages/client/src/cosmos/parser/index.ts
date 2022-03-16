@@ -24,6 +24,7 @@ export class TransactionParser {
   }
 
   async parse(tx: CosmosTx, address: string): Promise<ParsedTx> {
+    console.log('parse')
     const blockHeight = Number(tx.blockHeight)
     const blockTime = Number(tx.timestamp)
 
@@ -45,7 +46,7 @@ export class TransactionParser {
     tx.messages.forEach((msg) => {
       // Not all cosmos messages have a value on the message
       // for example `withdraw_delegator_reward` must look at events for value
-      const value = new BigNumber(msg.value?.amount ?? valueFromEvents(msg, tx.events) ?? 0)
+      const value = new BigNumber(msg.value?.amount || valueFromEvents(msg, tx.events) || 0)
 
       const transferType = msg.from === address ? TransferType.Send : TransferType.Receive
 

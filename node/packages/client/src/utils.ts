@@ -26,7 +26,6 @@ export function aggregateTransfer(
   subtype?: string
 ): Array<Transfer> {
   if (!new BigNumber(value).gt(0)) return transfers
-
   const index = transfers?.findIndex(
     (t) => t.type === type && t.caip19 === caip19 && t.from === from && t.to === to && t.subtype === subtype
   )
@@ -37,7 +36,10 @@ export function aggregateTransfer(
     transfer.components.push({ value: value })
     transfers[index] = transfer
   } else {
-    transfers = [...transfers, { type, caip19, from, to, totalValue: value, components: [{ value: value }], token }]
+    transfers = [
+      ...transfers,
+      { type, caip19, from, to, totalValue: value, components: [{ value: value }], token, subtype },
+    ]
   }
 
   return transfers
