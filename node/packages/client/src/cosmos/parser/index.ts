@@ -3,6 +3,7 @@ import { caip2, caip19, AssetNamespace, AssetReference, CAIP2, CAIP19 } from '@s
 import { Tx as ParsedTx, Status, TransferType } from '../../types'
 import { aggregateTransfer } from '../../utils'
 import { Tx as CosmosTx } from '../index'
+import { valueFromEvents } from './utils'
 
 export interface TransactionParserArgs {
   chainId: CAIP2
@@ -42,22 +43,13 @@ export class TransactionParser {
     // messages make best attempt to track where value is transferring to for a variety of tx types
     // logs provide more specific information if needed as more complex tx types are added
     tx.messages.forEach((msg) => {
-      if (msg.from === address) {
-        // send amount
-        const sendValue = new BigNumber(msg.value?.amount ?? 0)
-        if (sendValue.gt(0)) {
-          parsedTx.transfers = aggregateTransfer(
-            parsedTx.transfers,
-            TransferType.Send,
-            this.assetId,
-            msg.from ?? '',
-            msg.to ?? '',
-            sendValue.toString(10),
-            undefined,
-            msg.type
-          )
-        }
+      // Not all cosmos messages have a value on the message
+      // for example `withdraw_delegator_reward` must look at events for value
+      const value = new BigNumber(msg.value?.amount ?? valueFromEvents(msg, tx.events) ?? 0)
 
+      const transferType = msg.from === address ? TransferType.Send : TransferType.Receive
+
+      if (transferType === TransferType.Send) {
         // network fee
         const fees = new BigNumber(tx.fee.amount)
         if (fees.gt(0)) {
@@ -65,52 +57,18 @@ export class TransactionParser {
         }
       }
 
-      if (msg.to === address) {
-        // receive amount
-        const receiveValue = new BigNumber(msg.value?.amount ?? 0)
-        if (receiveValue.gt(0)) {
-          parsedTx.transfers = aggregateTransfer(
-            parsedTx.transfers,
-            TransferType.Receive,
-            this.assetId,
-            msg.from ?? '',
-            msg.to ?? '',
-            receiveValue.toString(10),
-            undefined,
-            msg.type
-          )
-        }
-      }
+      parsedTx.transfers = aggregateTransfer(
+        parsedTx.transfers,
+        transferType,
+        this.assetId,
+        msg.from ?? '',
+        msg.to ?? '',
+        value.toString(10),
+        undefined,
+        msg.type
+      )
     })
 
     return parsedTx
-  }
-
-  /**
-   * Some message such as withdraw_delegator_reward have an empty value
-   * This gets the value for a given message from events if possible
-   * @param msg message with an empty value
-   * @returns corresponding value from event logs
-   */
-  private valueFromEvents = (msg: any, events: any): string => {
-    if (msg.type === 'withdraw_delegator_reward') {
-      const validator = msg.to
-
-      const rewardEvents = events.find((event: any) => event.type === 'withdraw_rewards')
-
-      const rewardEvent = rewardEvents?.find((event: any) => {
-        const attributes = event.attributes
-
-        const attribute = attributes?.find(
-          (attribute: any) => attribute.key === 'validator' && attribute.value === validator
-        )
-
-        return !!attribute
-      })
-
-      const valueUnparsed = rewardEvent?.attributes.find((attribute: any) => attribute.key === 'amount')?.value
-
-      return '123'
-    } else throw new Error('valueFromEvents unsupported message type')
   }
 }
