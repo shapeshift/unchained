@@ -12,7 +12,7 @@ import {
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { Cursor, EthereumAccount, EthereumAPI, EthereumTx, EthereumTxHistory, GasFees, TokenBalance } from './models'
-import { logger } from './logger'
+import { logger} from './logger'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
