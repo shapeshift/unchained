@@ -3,4 +3,4 @@
 
 echo "HERE"
 
-tesh.sh
+cd node && pretty-quick --staged
