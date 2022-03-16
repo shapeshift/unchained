@@ -82,6 +82,12 @@ Traefik routes requests based on host name. which includes the coinstack name. F
 
 #### **Running**
 
+- `unchained/node/packages/client` generates a typescript client for each coinstack using the generated `swagger.json` files. To ensure everything successfully builds, make the golang coinstacks first:
+
+  ```sh
+  cd go && make
+  ```
+
 - Start the reverse proxy and any common service (ex. hot reloading):
 
   ```sh
