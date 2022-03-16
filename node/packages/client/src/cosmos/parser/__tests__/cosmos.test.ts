@@ -31,6 +31,7 @@ describe('parseTx', () => {
           caip19: 'cosmos:cosmoshub-4/slip44:118',
           totalValue: '2002965',
           components: [{ value: '2002965' }],
+          subtype: 'send',
         },
       ],
     }
@@ -61,6 +62,7 @@ describe('parseTx', () => {
           caip19: 'cosmos:cosmoshub-4/slip44:118',
           totalValue: '2002965',
           components: [{ value: '2002965' }],
+          subtype: 'send',
         },
       ],
     }
@@ -115,8 +117,6 @@ describe('parseTx', () => {
 
     const actual = await txParser.parse(tx, address)
 
-    console.log('actual', JSON.stringify(actual, null, 2))
-    //    console.log('expected', expected)
     expect(expected).toEqual(actual)
   })
 })
