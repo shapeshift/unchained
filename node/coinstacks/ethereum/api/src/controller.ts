@@ -11,7 +11,17 @@ import {
   SendTxBody,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { EthereumAPI, EthereumAccount, Token, GasFees, EthereumTxHistory, EthereumTx, TokenTransfer } from './models'
+import {
+  Cursor,
+  EthereumAccount,
+  EthereumAPI,
+  EthereumTx,
+  EthereumTxHistory,
+  GasFees,
+  TokenBalance,
+  TokenTransfer,
+} from './models'
+import { logger } from './logger'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -77,7 +87,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
     try {
       const data = await blockbook.getAddress(pubkey, undefined, undefined, undefined, undefined, 'tokenBalances')
 
-      const tokens = (data.tokens ?? []).reduce<Array<Token>>((prev, token) => {
+      const tokens = (data.tokens ?? []).reduce<Array<TokenBalance>>((prev, token) => {
         if (token.balance && token.contract && token.decimals && token.symbol) {
           prev.push({
             balance: token.balance,
@@ -121,7 +131,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
    */
   @Example<EthereumTxHistory>({
     pubkey: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
-    cursor: 'MQ==',
+    cursor: 'eyJwYWdlIjoyfQ==',
     txs: [
       {
         txid: '0x8e3528c933483770a3c8377c2ee7e34f846908653168188fd0d90a20b295d002',
@@ -148,48 +158,63 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   async getTxHistory(
     @Path() pubkey: string,
     @Query() cursor?: string,
-    @Query() pageSize = 25
+    @Query() pageSize = 10
   ): Promise<EthereumTxHistory> {
-    try {
-      let page = 1
-      if (cursor) {
-        page = Number(Buffer.from(cursor, 'base64').toString('binary'))
-        if (isNaN(page) || page < 1) {
-          throw new ApiError('Bad Request', 400, 'Invalid cursor, please use the cursor returned in previous page')
+    const curCursor = ((): Cursor => {
+      try {
+        if (!cursor) return { page: 1 }
+        return JSON.parse(Buffer.from(cursor, 'base64').toString('binary'))
+      } catch (err) {
+        if (err instanceof Error) {
+          logger.error(err, `failed to decode cursor: ${cursor}`)
         }
+
+        const e: BadRequestError = { error: `invalid base64 cursor: ${cursor}` }
+        throw new ApiError('Bad Request', 400, JSON.stringify(e))
       }
+    })()
 
-      const data = await blockbook.getAddress(pubkey, page, pageSize, undefined, undefined, 'txs')
+    if (curCursor.page === undefined) {
+      const e: BadRequestError = { error: `invalid json cursor: ${JSON.stringify(curCursor)}` }
+      throw new ApiError('Bad Request', 400, JSON.stringify(e))
+    }
 
-      const nextPage = page + 1
+    try {
+      const data = await blockbook.getAddress(pubkey, curCursor.page, pageSize, undefined, undefined, 'txs')
 
-      let nextCursor = ''
-      if (nextPage <= (data.totalPages ?? 0)) {
-        nextCursor = Buffer.from(nextPage.toString(), 'binary').toString('base64')
+      curCursor.page++
+
+      let nextCursor: string | undefined
+      if (curCursor.page <= (data.totalPages ?? 0)) {
+        nextCursor = Buffer.from(JSON.stringify(curCursor), 'binary').toString('base64')
       }
 
       return {
         pubkey: pubkey,
         cursor: nextCursor,
-        txs:
-          data.transactions?.map<EthereumTx>((tx) => ({
+        txs: (data.transactions ?? []).reduce<Array<EthereumTx>>((prev, tx) => {
+          if (!tx.ethereumSpecific) {
+            logger.warn(`ethereumSpecific data missing from txid: ${tx.txid}`)
+            return prev
+          }
+
+          prev.push({
             txid: tx.txid,
             blockHash: tx.blockHash,
             blockHeight: tx.blockHeight,
             timestamp: tx.blockTime,
-            status: tx.ethereumSpecific?.status ?? -1,
+            status: tx.ethereumSpecific.status,
             from: tx.vin[0].addresses?.[0] ?? '',
             to: tx.vout[0].addresses?.[0] ?? '',
             confirmations: tx.confirmations,
-            value: tx.tokenTransfers?.[0].value ?? tx.value,
+            value: tx.value,
             fee: tx.fees ?? '0',
-            gasLimit: tx.ethereumSpecific?.gasLimit.toString() ?? '',
-            gasUsed: tx.ethereumSpecific?.gasUsed?.toString(),
-            gasPrice: tx.ethereumSpecific?.gasPrice.toString() ?? '',
-            inputData: tx.ethereumSpecific?.data,
-            tokenTransfers: tx.tokenTransfers?.map<TokenTransfer>((tt) => ({
-              balance: (data.tokens || []).find((t) => t.contract === tt.token)?.balance ?? '',
-              contract: tt.token ?? '',
+            gasLimit: tx.ethereumSpecific.gasLimit.toString(),
+            gasUsed: tx.ethereumSpecific.gasUsed?.toString(),
+            gasPrice: tx.ethereumSpecific.gasPrice.toString(),
+            inputData: tx.ethereumSpecific.data,
+            tokenTransfers: tx.tokenTransfers?.map((tt) => ({
+              contract: tt.token,
               decimals: tt.decimals,
               name: tt.name,
               symbol: tt.symbol,
@@ -198,7 +223,10 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
               to: tt.to,
               value: tt.value,
             })),
-          })) ?? [],
+          })
+
+          return prev
+        }, []),
       }
     } catch (err) {
       if (err.response) {

@@ -2,6 +2,13 @@
 import { Account, Tx, TxHistory } from '../../../common/api/src'
 
 /**
+ * Contains info for cursor based pagination
+ */
+export interface Cursor {
+  page: number
+}
+
+/**
  * Contains info about current recommended fees to use in a transaction
  */
 export interface GasFees {
@@ -11,10 +18,9 @@ export interface GasFees {
 }
 
 /**
- * Contains info about a token including balance for an address
+ * Contains info about a token
  */
 export interface Token {
-  balance: string
   contract: string
   decimals: number
   name: string
@@ -23,11 +29,27 @@ export interface Token {
 }
 
 /**
+ * Contains info about a token including balance for an address
+ */
+export interface TokenBalance extends Token {
+  balance: string
+}
+
+/**
+ * Contains info about a token including transfer details
+ */
+export interface TokenTransfer extends Token {
+  from: string
+  to: string
+  value: string
+}
+
+/**
  * Contains additional ethereum specific info
  */
 export interface EthereumAccount extends Account {
   nonce: number
-  tokens: Array<Token>
+  tokens: Array<TokenBalance>
 }
 
 /**
@@ -56,15 +78,6 @@ export interface EthereumTxSpecific {
       data: string
     }>
   }
-}
-
-/**
- * Contains info about a TokenTransfer
- */
-export interface TokenTransfer extends Token {
-  from: string
-  to: string
-  value: string
 }
 
 /**
