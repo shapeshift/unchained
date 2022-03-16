@@ -1,37 +1,39 @@
-version: '3.6'
+version: "3.6"
 
 services:
   unchained-local:
     image: unchained-local
     build:
-      context: .
+      context: ./node
       dockerfile: Dockerfile.local
 
   watcher:
     image: unchained-local
-    working_dir: /app
+    working_dir: /app/node
     command: sh -c "yarn lerna run watch --scope @shapeshiftoss/* --parallel"
     volumes:
-      - .:/app
+      - ./:/app
 
   reverse-proxy:
     # The official v2 Traefik docker image
     image: traefik:v2.5
     # Enables the web UI and tells Traefik to listen to docker
     command:
-      - '--api.insecure=true'
+      - "--api.insecure=true"
       # Enabling docker provider
-      - '--providers.docker=true'
+      - "--providers.docker=true"
       # Do not expose containers unless explicitly told so
-      - '--providers.docker.exposedbydefault=false'
+      - "--providers.docker.exposedbydefault=false"
     networks:
+      - cosmos_default
       - bitcoin_default
       - ethereum_default
+      - osmosis_default
     ports:
       # The HTTP port
-      - '80:80'
+      - "80:80"
       # The Web UI (enabled by --api.insecure=true)
-      - '8080:8080'
+      - "8080:8080"
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
@@ -39,5 +41,9 @@ services:
 networks:
   bitcoin_default:
     name: bitcoin_default
+  cosmos_default:
+    name: cosmos_default
   ethereum_default:
     name: ethereum_default
+  osmosis_default:
+    name: osmosis_default
