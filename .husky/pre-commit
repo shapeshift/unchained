@@ -2,3 +2,5 @@
 . "$(dirname "$0")/_/husky.sh"
 
 cd node && yarn pretty-quick --staged
+
+cd .. && go/scripts/git-format-staged.py --formatter 'goimports "{}"' 'go/*.go'
