@@ -7,9 +7,8 @@ import {
   Info,
   InternalServerError,
   SendTxBody,
-  TxHistory,
   ValidationError,
-  Tx,
+  Cursor,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
 import {
   BitcoinAddress,
@@ -19,6 +18,10 @@ import {
   BTCNetworkFee,
   BTCNetworkFees,
   Utxo,
+  BitcoinTxHistory,
+  BitcoinTx,
+  Vin,
+  Vout,
 } from './models'
 
 const NETWORK = process.env.NETWORK
@@ -138,22 +141,57 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
    *
    * @param {string} pubkey account address or xpub
    * @param {string} [cursor] the cursor returned in previous query
-   * @param {number} [pageSize] page size
+   * @param {number} [pageSize] page size (10 by default)
    *
    * @returns {Promise<TxHistory>} transaction history
    *
    * @example pubkey "336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU"
    * @example pubkey "xpub6DQYbVJSVvJPzpYenir7zVSf2WPZRu69LxZuMezzAKuT6biPcug6Vw1zMk4knPBeNKvioutc4EGpPQ8cZiWtjcXYvJ6wPiwcGmCkihA9Jy3"
    */
-  @Example<TxHistory>({
-    cursor: 'MQ==',
+  @Example<BitcoinTxHistory>({
     pubkey: '336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU',
+    cursor: 'eyJwYWdlIjoyfQ==',
     txs: [
       {
         txid: '77810bfcb0bf66216391838772b790dde1b7419ae57f3b266c718ea937989155',
         blockHash: '00000000000000000008b5901008aa05d05330fa54abc01a73587c0a1b1291f2',
         blockHeight: 645850,
         timestamp: 1598700231,
+        confirmations: 81971,
+        value: '510611',
+        fee: '224',
+        hex:
+          '020000000158c53ac5b9e1b56b571c9530dc214af7be2efae45974a337d24e555d77d57b16010000006a47304402200e13f2e48612bfe1b8d69f59dfcfc288f3f896a248aac7d70b1dcc2e860e2f70022057487d594e247d6980b330e767c9e2b3e99dc975481999bb0307b5dc96c3923b012102174a52f766c3c174adbcaf1677818e04879cb8f27153d7a44775b050e11a44e0feffffff02090300000000000017a9140f7f0fc4f882ea62f32b06f0946f12b055ab91bf878ac70700000000001976a9148c1ef82c52a7e80621c838008b2de791be3a307988ac98d80900',
+        vin: [
+          {
+            txid: '167bd5775d554ed237a37459e4fa2ebef74a21dc30951c576bb5e1b9c53ac558',
+            vout: '1',
+            sequence: 4294967294,
+            scriptSig: {
+              hex:
+                '47304402200e13f2e48612bfe1b8d69f59dfcfc288f3f896a248aac7d70b1dcc2e860e2f70022057487d594e247d6980b330e767c9e2b3e99dc975481999bb0307b5dc96c3923b012102174a52f766c3c174adbcaf1677818e04879cb8f27153d7a44775b050e11a44e0',
+            },
+            addresses: ['1Dmthegfep7fXVqWAPmQ5rMmKcg58GjEF1'],
+          },
+        ],
+        vout: [
+          {
+            value: '777',
+            n: 0,
+            scriptPubKey: {
+              hex: 'a9140f7f0fc4f882ea62f32b06f0946f12b055ab91bf87',
+              addresses: ['336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU'],
+            },
+          },
+          {
+            value: '509834',
+            n: 1,
+            scriptPubKey: {
+              hex: '76a9148c1ef82c52a7e80621c838008b2de791be3a307988ac',
+              addresses: ['1Dmthegfep7fXVqWAPmQ5rMmKcg58GjEF1'],
+            },
+          },
+        ],
       },
     ],
   })
@@ -161,39 +199,80 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}/txs')
-  async getTxHistory(@Path() pubkey: string, @Query() cursor?: string, @Query() pageSize = 25): Promise<TxHistory> {
+  async getTxHistory(
+    @Path() pubkey: string,
+    @Query() cursor?: string,
+    @Query() pageSize = 10
+  ): Promise<BitcoinTxHistory> {
     try {
-      let page = 1
-      if (cursor) {
-        page = Number(Buffer.from(cursor, 'base64').toString('binary'))
-        if (isNaN(page) || page < 1) {
-          throw new ApiError('Bad Request', 400, 'Invalid cursor, please use the cursor returned in previous page')
+      const curCursor = ((): Cursor => {
+        try {
+          if (!cursor) return { page: 1 }
+
+          const decodedCursor = JSON.parse(Buffer.from(cursor, 'base64').toString('binary'))
+
+          // Validate that the cursor contains a 'page' property this is a positive integer
+          if (!('page' in decodedCursor && Number.isInteger(decodedCursor.page) && decodedCursor.page >= 1)) {
+            throw 'invalid base64 cursor'
+          }
+
+          return decodedCursor
+        } catch (err) {
+          const e: BadRequestError = { error: `invalid base64 cursor: ${cursor}` }
+          throw new ApiError('Bad Request', 400, JSON.stringify(e))
         }
-      }
+      })()
 
       let data: Address | Xpub
       if (isXpub(pubkey)) {
-        data = await blockbook.getXpub(pubkey, page, pageSize, undefined, undefined, 'txs')
+        data = await blockbook.getXpub(pubkey, curCursor.page, pageSize, undefined, undefined, 'txs')
       } else {
-        data = await blockbook.getAddress(pubkey, page, pageSize, undefined, undefined, 'txs')
+        data = await blockbook.getAddress(pubkey, curCursor.page, pageSize, undefined, undefined, 'txs')
       }
 
-      const nextPage = page + 1
+      curCursor.page++
 
-      let nextCursor = ''
-      if (nextPage <= (data.totalPages ?? 0)) {
-        nextCursor = Buffer.from(nextPage.toString(), 'binary').toString('base64')
+      let nextCursor: string | undefined
+      if (curCursor.page <= (data.totalPages ?? 0)) {
+        nextCursor = Buffer.from(JSON.stringify(curCursor), 'binary').toString('base64')
       }
 
       return {
         pubkey: pubkey,
         cursor: nextCursor,
         txs:
-          data.transactions?.map<Tx>((tx) => ({
+          data.transactions?.map<BitcoinTx>((tx) => ({
             txid: tx.txid,
             blockHash: tx.blockHash,
             blockHeight: tx.blockHeight,
             timestamp: tx.blockTime,
+            confirmations: tx.confirmations,
+            value: tx.value,
+            fee: tx.fees ?? '0',
+            hex: tx.hex ?? '',
+            vin:
+              tx.vin?.map<Vin>((vin) => ({
+                txid: vin.txid ?? '',
+                vout: vin.vout?.toString() ?? '',
+                sequence: vin.sequence,
+                coinbase: vin.coinbase,
+                scriptSig: {
+                  asm: vin.asm,
+                  hex: vin.hex,
+                },
+                addresses: vin.addresses ?? [],
+              })) ?? [],
+            vout:
+              tx.vout?.map<Vout>((vout) => ({
+                value: vout.value ?? 0,
+                n: vout.n,
+                scriptPubKey: {
+                  asm: vout.asm,
+                  hex: vout.hex,
+                  type: vout.type,
+                  addresses: vout.addresses ?? [],
+                },
+              })) ?? [],
           })) ?? [],
       }
     } catch (err) {

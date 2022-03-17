@@ -49,6 +49,14 @@ export interface Info {
 export interface Pagination {
   cursor?: string
 }
+
+/**
+ * Contains info for the cursor used for pagination
+ */
+export interface Cursor {
+  page: number
+}
+
 /**
  * Contains the serialized raw transaction hex
  */
