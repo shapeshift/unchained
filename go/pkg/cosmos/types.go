@@ -49,6 +49,10 @@ type ErrorResponse struct {
 	Detail []interface{} `json:"detail"`
 }
 
+// Cosmos events mapped by message index
+// swagger:model EventsByMsgIndex
+type EventsByMsgIndex map[string][]Event
+
 // Contains info about a transaction log event
 // swagger:model Event
 type Event struct {
