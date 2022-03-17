@@ -50,7 +50,7 @@ type Tx struct {
 	// required: true
 	Messages []cosmos.Message `json:"messages"`
 	// required: true
-	Events []cosmos.Event `json:"events"`
+	Events map[int][]cosmos.Event `json:"events"`
 }
 
 // Contains info about transaction history for an address or xpub
