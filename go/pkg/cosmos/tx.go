@@ -100,8 +100,11 @@ func (c *GRPCClient) BroadcastTx(rawTx string) (string, error) {
 	return res.TxResponse.TxHash, nil
 }
 
-func Events(log string) []Event {
+func Events(log string) map[int][]Event {
 	logs, err := sdk.ParseABCILogs(log)
+
+	events := make(map[int][]Event)
+
 	if err != nil {
 		// transaction error logs are not in json format and will fail to parse
 		// return error event with the log message
@@ -109,11 +112,10 @@ func Events(log string) []Event {
 			Type:       "error",
 			Attributes: []Attribute{{Key: "message", Value: log}},
 		}
-
-		return []Event{event}
+		events[0] = []Event{event}
+		return events
 	}
 
-	events := []Event{}
 	for _, l := range logs {
 		for _, e := range l.GetEvents() {
 			attributes := []Attribute{}
@@ -129,7 +131,7 @@ func Events(log string) []Event {
 				Type:       e.Type,
 				Attributes: attributes,
 			}
-			events = append(events, event)
+			events[int(l.GetMsgIndex())] = append(events[int(l.GetMsgIndex())], event)
 		}
 	}
 
