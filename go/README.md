@@ -41,7 +41,7 @@
 - Fill out any missing variables
   - Create a [Datahub Account](https://datahub-beta.figment.io/signup) for a free API key
 
-- Go to `unchained/node` and install dependencies by running `yarn` (which will also prepare the git  pre-commit hook with `goimports`)
+- Go to `unchained/node` and install dependencies by running `yarn` (which will also prepare the git pre-commit hook with `goimports`)
   ```sh
   yarn
   ```

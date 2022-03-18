@@ -69,6 +69,10 @@ Traefik routes requests based on host name. which includes the coinstack name. F
 - Each language subdirectory has setup requirements before running a coinstack locally
   - [Go](go/README.md#initialsetup) - `unchained/go`
   - [Node](node/README.md) - `unchained/node`
+- Both `go` and `node` module have linter installed in git pre-commit hook. To set up the hook:
+  ```sh
+  cd node && yarn
+  ```
 
 ## Docker-Compose Local Dev Instructions
 
