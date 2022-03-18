@@ -5,5 +5,7 @@ README.md
 routes.ts
 swagger.json
 generated
+lerna.json
+*.yml
 *.yaml
 *.xml

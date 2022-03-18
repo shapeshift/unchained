@@ -50,14 +50,13 @@ export interface BaseAPI {
    * Get transaction history by address or xpub
    *
    * @param {string} pubkey account address or xpub
-   * @param {number} [page] page number
+   * @param {string} [cursor] the cursor returned in previous query
    * @param {number} [pageSize] page size
-   * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
    *
    * @returns {Promise<TxHistory>} transaction history
    */
   // @Get('account/{pubkey}/txs')
-  getTxHistory(pubkey: string, page?: number, pageSize?: number, contract?: string): Promise<TxHistory>
+  getTxHistory(pubkey: string, cursor?: string, pageSize?: number): Promise<TxHistory>
 
   /**
    * Sends raw transaction to be broadcast to the node.

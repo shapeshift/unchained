@@ -1,5 +1,12 @@
 /* unable to import models from a module with tsoa */
-import { Account } from '../../../common/api/src'
+import { Account, Tx, TxHistory } from '../../../common/api/src'
+
+/**
+ * Contains info for cursor based pagination
+ */
+export interface Cursor {
+  page: number
+}
 
 /**
  * Contains info about current recommended fees to use in a transaction
@@ -11,10 +18,9 @@ export interface GasFees {
 }
 
 /**
- * Contains info about a token including balance for an address
+ * Contains info about a token
  */
 export interface Token {
-  balance: string
   contract: string
   decimals: number
   name: string
@@ -23,11 +29,27 @@ export interface Token {
 }
 
 /**
+ * Contains info about a token including balance for an address
+ */
+export interface TokenBalance extends Token {
+  balance: string
+}
+
+/**
+ * Contains info about a token including transfer details
+ */
+export interface TokenTransfer extends Token {
+  from: string
+  to: string
+  value: string
+}
+
+/**
  * Contains additional ethereum specific info
  */
 export interface EthereumAccount extends Account {
   nonce: number
-  tokens: Array<Token>
+  tokens: Array<TokenBalance>
 }
 
 /**
@@ -56,6 +78,30 @@ export interface EthereumTxSpecific {
       data: string
     }>
   }
+}
+
+/**
+ * Contains info about a EthereumTx
+ */
+export interface EthereumTx extends Tx {
+  from: string
+  to: string
+  confirmations: number
+  value: string
+  fee: string
+  gasLimit: string
+  gasUsed?: string
+  gasPrice: string
+  status: number
+  inputData?: string
+  tokenTransfers?: Array<TokenTransfer>
+}
+
+/**
+ * Contains info about a EthereumTxHistory
+ */
+export interface EthereumTxHistory extends TxHistory {
+  txs: Array<EthereumTx>
 }
 
 /**

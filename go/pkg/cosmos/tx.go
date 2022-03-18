@@ -3,6 +3,7 @@ package cosmos
 import (
 	"encoding/base64"
 	"fmt"
+	"strconv"
 
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/simapp/params"
@@ -100,8 +101,11 @@ func (c *GRPCClient) BroadcastTx(rawTx string) (string, error) {
 	return res.TxResponse.TxHash, nil
 }
 
-func Events(log string) []Event {
+func Events(log string) EventsByMsgIndex {
 	logs, err := sdk.ParseABCILogs(log)
+
+	events := make(EventsByMsgIndex)
+
 	if err != nil {
 		// transaction error logs are not in json format and will fail to parse
 		// return error event with the log message
@@ -109,11 +113,11 @@ func Events(log string) []Event {
 			Type:       "error",
 			Attributes: []Attribute{{Key: "message", Value: log}},
 		}
-
-		return []Event{event}
+		// TODO Figure out how to better handle this error case
+		events["0"] = []Event{event}
+		return events
 	}
 
-	events := []Event{}
 	for _, l := range logs {
 		for _, e := range l.GetEvents() {
 			attributes := []Attribute{}
@@ -129,7 +133,8 @@ func Events(log string) []Event {
 				Type:       e.Type,
 				Attributes: attributes,
 			}
-			events = append(events, event)
+			msgIndex := strconv.Itoa(int(l.GetMsgIndex()))
+			events[msgIndex] = append(events[msgIndex], event)
 		}
 	}
 

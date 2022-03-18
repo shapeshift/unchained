@@ -29,14 +29,14 @@ type Account struct {
 
 type Tx struct {
 	api.BaseTx
-	Fee       cosmos.Value     `json:"fee"`
-	GasUsed   string           `json:"gasUsed"`
-	GasWanted string           `json:"gasWanted"`
-	Index     int              `json:"index"`
-	Memo      string           `json:"memo,omitempty"`
-	Value     string           `json:"value"`
-	Messages  []cosmos.Message `json:"messages"`
-	Events    []cosmos.Event   `json:"events"`
+	Fee       cosmos.Value            `json:"fee"`
+	GasUsed   string                  `json:"gasUsed"`
+	GasWanted string                  `json:"gasWanted"`
+	Index     int                     `json:"index"`
+	Memo      string                  `json:"memo,omitempty"`
+	Value     string                  `json:"value"`
+	Messages  []cosmos.Message        `json:"messages"`
+	Events    cosmos.EventsByMsgIndex `json:"events"`
 }
 
 type TxHistory struct {

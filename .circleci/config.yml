@@ -37,11 +37,11 @@ aliases:
     mongo-storage-size: 5Gi
     mongo-url: mongodb://bitcoin-mongodb-0.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017,bitcoin-mongodb-1.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017,bitcoin-mongodb-2.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
     rabbit-cpu-limit: "1"
-    rabbit-cpu-request: "1"
-    rabbit-memory-limit: "8Gi"
-    rabbit-storage-size: "5Gi"
+    rabbit-cpu-request: 500m
+    rabbit-memory-limit: 8Gi
+    rabbit-storage-size: 5Gi
     indexer-cpu-limit: "4"
-    indexer-cpu-request: "4"
+    indexer-cpu-request: "2"
     indexer-memory-limit: 24Gi
     indexer-replicas: 2
     indexer-storage-size: 500Gi
@@ -49,23 +49,23 @@ aliases:
     indexer-ws-url: ws://bitcoin-indexer-svc.unchained.svc.cluster.local:8001/websocket
     daemon-image: ruimarinho/bitcoin-core:0.21.0
     daemon-cpu-limit: "2"
-    daemon-cpu-request: "2"
+    daemon-cpu-request: "1"
     daemon-memory-limit: 12Gi
     daemon-storage-size: 650Gi
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: "500m"
-    api-cpu-request: "500m"
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     api-cpu-threshold: 30
-    api-memory-limit: "2Gi"
+    api-memory-limit: 2Gi
     ingester-autoscaling: true
     ingester-replicas: 2
     ingester-max-replicas: 4
     ingester-cpu-threshold: 20
-    ingester-cpu-limit: "500m"
-    ingester-cpu-request: "500m"
-    ingester-memory-limit: "3Gi"
+    ingester-cpu-limit: 500m
+    ingester-cpu-request: 250m
+    ingester-memory-limit: 3Gi
     rpc-url: http://user:password@bitcoin-indexer-svc.unchained.svc.cluster.local:8332
 
   - &bitcoin-dev
@@ -82,17 +82,17 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 3
-    api-cpu-limit: "300m"
-    api-cpu-request: "200m"
+    api-cpu-limit: 300m
+    api-cpu-request: 250m
     api-cpu-threshold: 30
-    api-memory-limit: "1Gi"
+    api-memory-limit: 1Gi
     ingester-autoscaling: true
     ingester-replicas: 1
     ingester-max-replicas: 2
-    ingester-cpu-limit: "500m"
-    ingester-cpu-request: "250m"
+    ingester-cpu-limit: 500m
+    ingester-cpu-request: 250m
     ingester-cpu-threshold: 20
-    ingester-memory-limit: "2Gi"
+    ingester-memory-limit: 2Gi
 
   - &ethereum
     coinstack: ethereum
@@ -106,11 +106,11 @@ aliases:
     mongo-storage-size: 5Gi
     mongo-url: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-2.ethereum-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
     rabbit-cpu-limit: "1"
-    rabbit-cpu-request: "1"
-    rabbit-memory-limit: "8Gi"
-    rabbit-storage-size: "5Gi"
+    rabbit-cpu-request: 500m
+    rabbit-memory-limit: 8Gi
+    rabbit-storage-size: 5Gi
     indexer-cpu-limit: "4"
-    indexer-cpu-request: "4"
+    indexer-cpu-request: "2"
     indexer-memory-limit: 12Gi
     indexer-replicas: 2
     indexer-storage-size: 300Gi
@@ -118,23 +118,23 @@ aliases:
     indexer-ws-url: ws://ethereum-indexer-svc.unchained.svc.cluster.local:8001/websocket
     daemon-image: ethereum/client-go:v1.10.15
     daemon-cpu-limit: "4"
-    daemon-cpu-request: "4"
+    daemon-cpu-request: "3"
     daemon-memory-limit: 32Gi
     daemon-storage-size: 2000Gi
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: "500m"
-    api-cpu-request: "500m"
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     api-cpu-threshold: 30
-    api-memory-limit: "2Gi"
+    api-memory-limit: 2Gi
     ingester-autoscaling: true
     ingester-replicas: 2
     ingester-max-replicas: 4
     ingester-cpu-threshold: 20
-    ingester-cpu-limit: "500m"
-    ingester-cpu-request: "500m"
-    ingester-memory-limit: "3Gi"
+    ingester-cpu-limit: 500m
+    ingester-cpu-request: 250m
+    ingester-memory-limit: 3Gi
     rpc-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8332
 
   - &ethereum-dev
@@ -151,17 +151,17 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 3
-    api-cpu-limit: "300m"
-    api-cpu-request: "200m"
+    api-cpu-limit: 300m
+    api-cpu-request: 20m
     api-cpu-threshold: 30
-    api-memory-limit: "1Gi"
+    api-memory-limit: 1Gi
     ingester-autoscaling: true
     ingester-replicas: 1
     ingester-max-replicas: 2
-    ingester-cpu-limit: "500m"
-    ingester-cpu-request: "250m"
+    ingester-cpu-limit: 500m
+    ingester-cpu-request: 250m
     ingester-cpu-threshold: 20
-    ingester-memory-limit: "2Gi"
+    ingester-memory-limit: 2Gi
 
   - &cosmos
     coinstack: cosmos
@@ -174,10 +174,10 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: "500m"
-    api-cpu-request: "500m"
+    api-cpu-limit: 500m
+    api-cpu-request: 500m
     api-cpu-threshold: 30
-    api-memory-limit: "2Gi"
+    api-memory-limit: 2Gi
 
   - &cosmos-dev
     <<: *cosmos
@@ -186,10 +186,10 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 3
-    api-cpu-limit: "300m"
-    api-cpu-request: "300m"
+    api-cpu-limit: 300m
+    api-cpu-request: 300m
     api-cpu-threshold: 30
-    api-memory-limit: "1Gi"
+    api-memory-limit: 1Gi
 
 commands:
   setup-runtime:
@@ -373,7 +373,7 @@ jobs:
             pulumi config set --path unchained:common.eks.cidrBlock 10.0.0.0/16
             pulumi config set --path unchained:common.eks.nodeGroups[0].name spot
             pulumi config set --path unchained:common.eks.nodeGroups[0].type SPOT
-            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 2
+            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 1
             pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 5
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[0] r5.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r5a.4xlarge
@@ -743,26 +743,11 @@ workflows:
 
       ########## (SHAPESHIFT) ##########
       - deploy-dependencies:
-          name: preview dependencies (shapeshift)
-          organization: SHAPESHIFT
-          pulumi-command: preview
-          requires:
-            - lint and test project (persist to workspace)
-          <<: *only-develop
-
-      - approve-shapeshift:
-          name: approve shapeshift
-          type: approval
-          requires:
-            - preview dependencies (shapeshift)
-          <<: *only-develop
-
-      - deploy-dependencies:
           name: deploy dependencies (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
           requires:
-            - approve shapeshift
+            - lint and test project (persist to workspace)
           <<: *only-develop
 
       - deploy-coinstack-node:
@@ -790,30 +775,6 @@ workflows:
           requires:
             - deploy dependencies (shapeshift)
           <<: *cosmos-dev
-          <<: *only-develop
-
-      ########## (TAXISTAKE) ##########
-      - deploy-dependencies:
-          name: preview dependencies (taxistake)
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - lint and test project (persist to workspace)
-          <<: *only-develop
-
-      - approve-taxistake:
-          name: approve taxistake
-          type: approval
-          requires:
-            - preview dependencies (taxistake)
-          <<: *only-develop
-
-      - deploy-dependencies:
-          name: deploy dependencies (taxistake)
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve taxistake
           <<: *only-develop
 
   deploy-monitoring:
@@ -944,13 +905,54 @@ workflows:
           <<: *ethereum
           <<: *only-main
 
+      ####### COSMOS
+      - deploy-coinstack-go:
+          name: preview cosmos (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: preview
+          requires:
+            - validate dependencies (shapeshift)
+          <<: *cosmos
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve cosmos coinstack (shapeshift)
+          type: approval
+          requires:
+            - preview cosmos (shapeshift)
+          <<: *only-main
+
+      - deploy-coinstack-go:
+          name: deploy cosmos (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: up -f --yes
+          requires:
+            - approve cosmos coinstack (shapeshift)
+          <<: *cosmos
+          <<: *only-main
+
       ########## (TAXISTAKE) ##########
       - deploy-dependencies:
-          name: validate dependencies (taxistake)
+          name: preview dependencies (taxistake)
           organization: TAXISTAKE
-          pulumi-command: preview --expect-no-changes
+          pulumi-command: preview
           requires:
             - lint and test project (persist to workspace)
+          <<: *only-main
+
+      - approve-shapeshift:
+          name: approve dependencies (taxistake)
+          type: approval
+          requires:
+            - preview dependencies (taxistake)
+          <<: *only-main
+
+      - deploy-dependencies:
+          name: deploy dependencies (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve dependencies (taxistake)
           <<: *only-main
 
       ####### BITCOIN
@@ -959,7 +961,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: preview
           requires:
-            - validate dependencies (taxistake)
+            - deploy dependencies (taxistake)
           <<: *bitcoin
           <<: *only-main
 
@@ -985,7 +987,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: preview
           requires:
-            - validate dependencies (taxistake)
+            - deploy dependencies (taxistake)
           <<: *ethereum
           <<: *only-main
 
@@ -1003,4 +1005,30 @@ workflows:
           requires:
             - approve ethereum coinstack (taxistake)
           <<: *ethereum
+          <<: *only-main
+
+      ####### COSMOS
+      - deploy-coinstack-go:
+          name: preview cosmos (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - deploy dependencies (taxistake)
+          <<: *cosmos
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve cosmos coinstack (taxistake)
+          type: approval
+          requires:
+            - preview cosmos (taxistake)
+          <<: *only-main
+
+      - deploy-coinstack-go:
+          name: deploy cosmos (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve cosmos coinstack (taxistake)
+          <<: *cosmos
           <<: *only-main

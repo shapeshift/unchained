@@ -13,8 +13,9 @@ import (
 )
 
 type Handler struct {
-	httpClient *cosmos.HTTPClient
-	wsClient   *cosmos.WSClient
+	httpClient   *cosmos.HTTPClient
+	wsClient     *cosmos.WSClient
+	blockService *cosmos.BlockService
 }
 
 func (h *Handler) StartWebsocket() error {
@@ -24,14 +25,19 @@ func (h *Handler) StartWebsocket() error {
 			return nil, nil, errors.Wrapf(err, "failed to decode tx: %v", tx.Tx)
 		}
 
-		blockHeight := strconv.Itoa(int(tx.Height))
 		txid := fmt.Sprintf("%X", sha256.Sum256(tx.Tx))
+
+		block, err := h.blockService.GetBlock(int(tx.Height))
+		if err != nil {
+			return nil, nil, errors.Wrapf(err, "failed to handle tx: %s", txid)
+		}
 
 		t := Tx{
 			BaseTx: api.BaseTx{
-				// TODO: blockHash and timestamp
 				TxID:        fmt.Sprintf("%X", sha256.Sum256(tx.Tx)),
-				BlockHeight: &blockHeight,
+				BlockHash:   &block.Hash,
+				BlockHeight: &block.Height,
+				Timestamp:   &block.Timestamp,
 			},
 			Events:    cosmos.Events(tx.Result.Log),
 			Fee:       cosmos.Fee(signingTx, txid, "uosmo"),
@@ -112,10 +118,22 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 
 	txs := []Tx{}
 	for _, t := range res.Txs {
+		height, err := strconv.Atoi(*t.TendermintTx.Height)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+
+		block, err := h.blockService.GetBlock(height)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to get tx history")
+		}
+
 		tx := Tx{
 			BaseTx: api.BaseTx{
 				TxID:        *t.TendermintTx.Hash,
-				BlockHeight: t.TendermintTx.Height,
+				BlockHash:   &block.Hash,
+				BlockHeight: &block.Height,
+				Timestamp:   &block.Timestamp,
 			},
 			Events:    cosmos.Events(t.TendermintTx.TxResult.Log),
 			Fee:       cosmos.Fee(t.SigningTx, *t.TendermintTx.Hash, "uosmo"),
