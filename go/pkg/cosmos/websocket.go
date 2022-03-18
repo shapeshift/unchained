@@ -110,7 +110,7 @@ func (ws *WSClient) listenTxs() {
 func (ws *WSClient) handleTx(tx types.EventDataTx) {
 	data, addrs, err := ws.txHandler(tx)
 	if err != nil {
-		logger.Errorf("failed to handle tx: %v", err)
+		logger.Error(err)
 		return
 	}
 
