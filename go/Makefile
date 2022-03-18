@@ -1,17 +1,17 @@
 COINSTACKS := $(wildcard coinstacks/*)
 MAKEFLAGS += --no-print-directory
 
-.PHONY: all build clean $(COINSTACKS) git-format-staged
+.PHONY: all build clean $(COINSTACKS) husky
 
-all: $(COINSTACKS) install-goimports git-format-staged
+all: $(COINSTACKS) install-goimports husky
 
 $(COINSTACKS):; $(MAKE) -C $@ generate
 
 install-goimports:
 	go install golang.org/x/tools/cmd/goimports@latest
 
-git-format-staged:
-	chmod +x ./scripts/git-format-staged.py
+husky:
+	cd .. && ./node/node_modules/.bin/husky install
 
 build:
 	go build ./...

@@ -1,6 +1,6 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-cd node && yarn pretty-quick --staged
-
-cd .. && go/scripts/git-format-staged.py --formatter 'goimports "{}"' 'go/*.go'
+# have to use yarn instead of npx because of npx's weird behavior
+cd node && yarn lint-staged
+cd ../go && ../node/node_modules/.bin/lint-staged

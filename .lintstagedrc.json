@@ -1,0 +1,5 @@
+{
+  "*.js": "prettier --write",
+  "*.ts": "prettier --write",
+  "*.go": "goimports -w"
+}
