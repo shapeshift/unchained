@@ -49,7 +49,7 @@ type ErrorResponse struct {
 	Detail []interface{} `json:"detail"`
 }
 
-// Cosmos events mapped by message index
+// contains info about tx events keyed by message index
 // swagger:model EventsByMsgIndex
 type EventsByMsgIndex map[string][]Event
 
