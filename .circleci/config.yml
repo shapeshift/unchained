@@ -379,12 +379,6 @@ jobs:
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r5a.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r5b.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[3] r5n.4xlarge
-            pulumi config set --path unchained:common.eks.nodeGroups[1].name spot2x
-            pulumi config set --path unchained:common.eks.nodeGroups[1].type SPOT
-            pulumi config set --path unchained:common.eks.nodeGroups[1].minSize 1
-            pulumi config set --path unchained:common.eks.nodeGroups[1].maxSize 5
-            pulumi config set --path unchained:common.eks.nodeGroups[1].instanceTypes[0] r5.2xlarge
-            pulumi config set --path unchained:common.eks.nodeGroups[1].instanceTypes[1] r5a.2xlarge
             pulumi config set --path unchained:common.eks.traefik.autoscaling.enabled true
             pulumi config set --path unchained:common.eks.traefik.autoscaling.cpuThreshold 20
             pulumi config set --path unchained:common.eks.traefik.autoscaling.maxReplicas 15
@@ -911,6 +905,32 @@ workflows:
           <<: *ethereum
           <<: *only-main
 
+      ####### COSMOS
+      - deploy-coinstack-go:
+          name: preview cosmos (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: preview
+          requires:
+            - validate dependencies (shapeshift)
+          <<: *cosmos
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve cosmos coinstack (shapeshift)
+          type: approval
+          requires:
+            - preview cosmos (shapeshift)
+          <<: *only-main
+
+      - deploy-coinstack-go:
+          name: deploy cosmos (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: up -f --yes
+          requires:
+            - approve cosmos coinstack (shapeshift)
+          <<: *cosmos
+          <<: *only-main
+
       ########## (TAXISTAKE) ##########
       - deploy-dependencies:
           name: preview dependencies (taxistake)
@@ -985,4 +1005,30 @@ workflows:
           requires:
             - approve ethereum coinstack (taxistake)
           <<: *ethereum
+          <<: *only-main
+
+      ####### COSMOS
+      - deploy-coinstack-go:
+          name: preview cosmos (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - deploy dependencies (taxistake)
+          <<: *cosmos
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve cosmos coinstack (taxistake)
+          type: approval
+          requires:
+            - preview cosmos (taxistake)
+          <<: *only-main
+
+      - deploy-coinstack-go:
+          name: deploy cosmos (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve cosmos coinstack (taxistake)
+          <<: *cosmos
           <<: *only-main
