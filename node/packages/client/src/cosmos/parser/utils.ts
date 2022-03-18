@@ -21,9 +21,7 @@ export const valueFromEvents = (msg: CosmosMessage, events: Array<CosmosEvent>):
 const getRewardValue = ({ msg, events }: { msg: CosmosMessage; events: Array<CosmosEvent> }): string => {
   const validator = msg.from
 
-  const rewardEvents = events.filter((event: CosmosEvent) => event.type === 'withdraw_rewards')
-
-  const rewardEvent = rewardEvents.find((event: CosmosEvent) => {
+  const rewardEvent = events.find((event: CosmosEvent) => {
     const attributes = event.attributes
 
     const attribute = attributes.find(

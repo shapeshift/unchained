@@ -48,12 +48,17 @@ export interface Transfer {
   totalValue: string
   components: Array<{ value: string }>
   token?: Token
-  subtype?: string
+  data?: TransferMetaData
+}
+
+export interface TransferMetaData {
+  action?: string
 }
 
 export enum TransferType {
   Send = 'send',
   Receive = 'receive',
+  FeeOnly = 'feeonly',
 }
 
 export interface TxMetadata {

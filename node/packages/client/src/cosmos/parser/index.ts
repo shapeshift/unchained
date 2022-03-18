@@ -42,14 +42,15 @@ export class TransactionParser {
 
     // messages make best attempt to track where value is transferring to for a variety of tx types
     // logs provide more specific information if needed as more complex tx types are added
-    tx.messages.forEach((msg) => {
+    tx.messages.forEach((msg, i) => {
       // Not all cosmos messages have a value on the message
       // for example `withdraw_delegator_reward` must look at events for value
-      const value = new BigNumber(msg.value?.amount || valueFromEvents(msg, tx.events) || 0)
+      const value = new BigNumber(msg.value?.amount || valueFromEvents(msg, tx.events[i]) || 0)
 
-      const transferType = msg.from === address ? TransferType.Send : TransferType.Receive
+      const transferType =
+        msg.from === address ? TransferType.Send : msg.to === address ? TransferType.Receive : TransferType.FeeOnly
 
-      if (transferType === TransferType.Send) {
+      if (transferType === TransferType.Send || transferType === TransferType.FeeOnly) {
         // network fee
         const fees = new BigNumber(tx.fee.amount)
         if (fees.gt(0)) {
@@ -65,7 +66,7 @@ export class TransactionParser {
         msg.to ?? '',
         value.toString(10),
         undefined,
-        msg.type
+        { action: msg.type }
       )
     })
 

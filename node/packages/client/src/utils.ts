@@ -1,5 +1,5 @@
 import { BigNumber } from 'bignumber.js'
-import { Token, TransferType, Transfer } from './types'
+import { Token, TransferType, Transfer, TransferMetaData } from './types'
 
 export async function findAsyncSequential<T, U>(
   array: T[],
@@ -23,11 +23,11 @@ export function aggregateTransfer(
   to: string,
   value: string,
   token?: Token,
-  subtype?: string
+  data?: TransferMetaData
 ): Array<Transfer> {
   if (!new BigNumber(value).gt(0)) return transfers
   const index = transfers?.findIndex(
-    (t) => t.type === type && t.caip19 === caip19 && t.from === from && t.to === to && t.subtype === subtype
+    (t) => t.type === type && t.caip19 === caip19 && t.from === from && t.to === to && JSON.stringify(t.data) === data
   )
   const transfer = transfers?.[index]
 
@@ -38,7 +38,7 @@ export function aggregateTransfer(
   } else {
     transfers = [
       ...transfers,
-      { type, caip19, from, to, totalValue: value, components: [{ value: value }], token, subtype },
+      { type, caip19, from, to, totalValue: value, components: [{ value: value }], token, data },
     ]
   }
 
