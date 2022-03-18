@@ -29,6 +29,13 @@ type Balance struct {
 	Assets []Value `json:"assets"`
 }
 
+// Block info common return payload
+type Block struct {
+	Height    string
+	Hash      string
+	Timestamp string
+}
+
 // Contains info about a staking delegation
 // swagger:model Delegation
 type Delegation struct {

@@ -53,14 +53,15 @@ type API struct {
 	server  *http.Server
 }
 
-func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient *cosmos.WSClient, swaggerPath string) *API {
+func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, swaggerPath string) *API {
 	r := mux.NewRouter()
 
 	a := &API{
 		handler: &Handler{
-			httpClient: httpClient,
-			grpcClient: grpcClient,
-			wsClient:   wsClient,
+			httpClient:   httpClient,
+			grpcClient:   grpcClient,
+			wsClient:     wsClient,
+			blockService: blockService,
 		},
 		manager: websocket.NewManager(),
 		server: &http.Server{

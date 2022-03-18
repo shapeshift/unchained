@@ -12,9 +12,10 @@ import (
 )
 
 type Handler struct {
-	httpClient *cosmos.HTTPClient
-	grpcClient *cosmos.GRPCClient
-	wsClient   *cosmos.WSClient
+	httpClient   *cosmos.HTTPClient
+	grpcClient   *cosmos.GRPCClient
+	wsClient     *cosmos.WSClient
+	blockService *cosmos.BlockService
 }
 
 func (h *Handler) StartWebsocket() error {
@@ -136,10 +137,22 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 
 	txs := []Tx{}
 	for _, t := range res.Txs {
+		height, err := strconv.Atoi(*t.TendermintTx.Height)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+
+		block, err := h.blockService.GetBlock(height)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to get tx history")
+		}
+
 		tx := Tx{
 			BaseTx: api.BaseTx{
 				TxID:        *t.TendermintTx.Hash,
-				BlockHeight: t.TendermintTx.Height,
+				BlockHash:   &block.Hash,
+				BlockHeight: &block.Height,
+				Timestamp:   &block.Timestamp,
 			},
 			Events:    cosmos.Events(t.TendermintTx.TxResult.Log),
 			Fee:       cosmos.Fee(t.SigningTx, *t.TendermintTx.Hash, "uatom"),
