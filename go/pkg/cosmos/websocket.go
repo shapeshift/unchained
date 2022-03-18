@@ -19,12 +19,13 @@ type TxHandlerFunc = func(tx types.EventDataTx) (interface{}, []string, error)
 
 type WSClient struct {
 	*websocket.Registry
-	txs       *tendermint.WSClient
-	encoding  *params.EncodingConfig
-	txHandler TxHandlerFunc
+	txs          *tendermint.WSClient
+	encoding     *params.EncodingConfig
+	txHandler    TxHandlerFunc
+	blockService *BlockService
 }
 
-func NewWebsocketClient(conf Config) (*WSClient, error) {
+func NewWebsocketClient(conf Config, blockService *BlockService) (*WSClient, error) {
 	wsURL, err := url.Parse(conf.WSURL)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to parse WSURL: %s", conf.WSURL)
@@ -37,13 +38,16 @@ func NewWebsocketClient(conf Config) (*WSClient, error) {
 		return nil, errors.Wrapf(err, "failed to create websocket client")
 	}
 
+	//TODO: blockClient and update block service on new blocks
+
 	// use default dialer
 	txsClient.Dialer = net.Dial
 
 	ws := &WSClient{
-		Registry: websocket.NewRegistry(),
-		encoding: conf.Encoding,
-		txs:      txsClient,
+		Registry:     websocket.NewRegistry(),
+		encoding:     conf.Encoding,
+		txs:          txsClient,
+		blockService: blockService,
 	}
 
 	return ws, nil
