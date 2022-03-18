@@ -19,19 +19,14 @@ export const valueFromEvents = (msg: CosmosMessage, events: Array<CosmosEvent>):
  * @returns amount of reward claimed
  */
 const getRewardValue = ({ msg, events }: { msg: CosmosMessage; events: Array<CosmosEvent> }): string => {
-  const validator = msg.from
+  const expectedValidator = msg.from
 
-  const rewardEvent = events.find((event: CosmosEvent) => {
-    const attributes = event.attributes
-
-    const attribute = attributes.find(
-      (attribute: CosmosAttribute) => attribute.key === 'validator' && attribute.value === validator
-    )
-    return !!attribute
-  })
+  const rewardEvent = events.find((event: CosmosEvent) => event.type === 'withdraw_rewards')
 
   const valueUnparsed = rewardEvent?.attributes.find((attribute: CosmosAttribute) => attribute.key === 'amount')?.value
+  const validator = rewardEvent?.attributes.find((attribute: CosmosAttribute) => attribute.key === 'validator')?.value
 
+  if (expectedValidator !== validator) throw new Error('valueFromEvents unexpected delegator')
   if (!valueUnparsed) throw new Error('valueFromEvents couldnt get value from events')
 
   return valueUnparsed.slice(0, valueUnparsed.length - 'uatom'.length)

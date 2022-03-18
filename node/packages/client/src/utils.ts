@@ -27,7 +27,12 @@ export function aggregateTransfer(
 ): Array<Transfer> {
   if (!new BigNumber(value).gt(0)) return transfers
   const index = transfers?.findIndex(
-    (t) => t.type === type && t.caip19 === caip19 && t.from === from && t.to === to && JSON.stringify(t.data) === data
+    (t) =>
+      t.type === type &&
+      t.caip19 === caip19 &&
+      t.from === from &&
+      t.to === to &&
+      JSON.stringify(t.data) === JSON.stringify(data)
   )
   const transfer = transfers?.[index]
 
