@@ -25,14 +25,19 @@ func (h *Handler) StartWebsocket() error {
 			return nil, nil, errors.Wrapf(err, "failed to decode tx: %v", tx.Tx)
 		}
 
-		blockHeight := strconv.Itoa(int(tx.Height))
 		txid := fmt.Sprintf("%X", sha256.Sum256(tx.Tx))
+
+		block, err := h.blockService.GetBlock(int(tx.Height))
+		if err != nil {
+			return nil, nil, errors.Wrapf(err, "failed to handle tx: %s", txid)
+		}
 
 		t := Tx{
 			BaseTx: api.BaseTx{
-				// TODO: blockHash and timestamp
 				TxID:        txid,
-				BlockHeight: &blockHeight,
+				BlockHash:   &block.Hash,
+				BlockHeight: &block.Height,
+				Timestamp:   &block.Timestamp,
 			},
 			Events:    cosmos.Events(tx.Result.Log),
 			Fee:       cosmos.Fee(signingTx, txid, "uatom"),
@@ -144,7 +149,7 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 
 		block, err := h.blockService.GetBlock(height)
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed to get tx history")
+			return nil, errors.Wrap(err, "failed to get tx history")
 		}
 
 		tx := Tx{

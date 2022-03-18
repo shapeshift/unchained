@@ -29,12 +29,6 @@ func (s *BlockService) NewBlock(block *Block) {
 	s.Blocks[block.Height] = block
 }
 
-func (s *BlockService) AddBlock(block *Block) {
-	s.m.Lock()
-	defer s.m.Unlock()
-	s.Blocks[block.Height] = block
-}
-
 func (s *BlockService) GetBlock(height int) (*Block, error) {
 	s.m.RLock()
 	defer s.m.RUnlock()
