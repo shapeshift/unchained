@@ -379,12 +379,6 @@ jobs:
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r5a.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r5b.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[3] r5n.4xlarge
-            pulumi config set --path unchained:common.eks.nodeGroups[1].name spot2x
-            pulumi config set --path unchained:common.eks.nodeGroups[1].type SPOT
-            pulumi config set --path unchained:common.eks.nodeGroups[1].minSize 1
-            pulumi config set --path unchained:common.eks.nodeGroups[1].maxSize 5
-            pulumi config set --path unchained:common.eks.nodeGroups[1].instanceTypes[0] r5.2xlarge
-            pulumi config set --path unchained:common.eks.nodeGroups[1].instanceTypes[1] r5a.2xlarge
             pulumi config set --path unchained:common.eks.traefik.autoscaling.enabled true
             pulumi config set --path unchained:common.eks.traefik.autoscaling.cpuThreshold 20
             pulumi config set --path unchained:common.eks.traefik.autoscaling.maxReplicas 15
