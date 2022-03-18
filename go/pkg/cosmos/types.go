@@ -49,7 +49,7 @@ type ErrorResponse struct {
 	Detail []interface{} `json:"detail"`
 }
 
-// contains info about tx events keyed by message index
+// Contains info about tx events keyed by message index
 // swagger:model EventsByMsgIndex
 type EventsByMsgIndex map[string][]Event
 
