@@ -2,5 +2,6 @@
 . "$(dirname "$0")/_/husky.sh"
 
 # have to use yarn instead of npx because of npx's weird behavior
-cd node && yarn lint-staged
-cd ../go && ../node/node_modules/.bin/lint-staged
+cd node
+yarn lint-staged
+yarn lint-staged --cwd ../go
