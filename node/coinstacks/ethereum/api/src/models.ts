@@ -46,7 +46,7 @@ export interface EthereumAccount extends Account {
 }
 
 /**
- * Contains Ethereum specific transaction info as returned from the node
+ * Contains Ethereum specific transaction info
  */
 export interface EthereumTx extends Tx {
   from: string

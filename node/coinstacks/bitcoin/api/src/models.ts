@@ -31,7 +31,7 @@ export interface Vout {
 }
 
 /**
- * Contains Bitcoin specific transaction info as returned from the node (new implementation)
+ * Contains Bitcoin specific transaction info
  */
 export interface BitcoinTx extends Tx {
   vin: Array<Vin>
