@@ -1,17 +1,14 @@
 COINSTACKS := $(wildcard coinstacks/*)
 MAKEFLAGS += --no-print-directory
 
-.PHONY: all build clean $(COINSTACKS) husky
+.PHONY: all build clean $(COINSTACKS)
 
-all: $(COINSTACKS) install-goimports husky
+all: $(COINSTACKS) install-goimports
 
 $(COINSTACKS):; $(MAKE) -C $@ generate
 
 install-goimports:
 	go install golang.org/x/tools/cmd/goimports@latest
-
-husky:
-	cd .. && ./node/node_modules/.bin/husky install
 
 build:
 	go build ./...
