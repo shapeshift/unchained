@@ -121,8 +121,15 @@ Traefik routes requests based on host name. which includes the coinstack name. F
 
 #### **Common Issues**
 
-- If you are running [Docker Desktop](https://docs.docker.com/desktop/) and see any `SIGKILL` errors, increase your resource limits in the Resources Tab
-
+- If you are running [Docker Desktop](https://docs.docker.com/desktop/) and see any `SIGKILL` errors, increase your resource limits in the Resources Tab.
+- To fix the error:
+  ```
+  Error response from daemon: pull access denied for unchained-local, repository does not exist or may require 'docker login': denied: requested access to the resource is denied
+  ```
+  Run the following command to force building the local image from the root `unchained/` directory:
+  ```sh
+  docker-compose up unchained-local
+  ```
 
 ## Kubernetes Local Dev Instructions
 
