@@ -44,7 +44,13 @@ const (
 
 var (
 	logger   = log.WithoutFields()
-	upgrader = ws.Upgrader{ReadBufferSize: 1024, WriteBufferSize: 1024}
+	upgrader = ws.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
 )
 
 type API struct {
