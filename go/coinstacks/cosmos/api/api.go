@@ -2,7 +2,7 @@
 //
 // Provides access to cosmos chain data
 //
-// Version: 5.1.1
+// Version: 6.1.1
 // License: MIT http://opensource.org/licenses/MIT
 //
 // Consumes:
@@ -23,10 +23,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	ws "github.com/gorilla/websocket"
 	"github.com/pkg/errors"
+	"github.com/rs/cors"
 	"github.com/shapeshift/unchained/internal/log"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
@@ -53,14 +53,15 @@ type API struct {
 	server  *http.Server
 }
 
-func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient *cosmos.WSClient, swaggerPath string) *API {
+func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, swaggerPath string) *API {
 	r := mux.NewRouter()
 
 	a := &API{
 		handler: &Handler{
-			httpClient: httpClient,
-			grpcClient: grpcClient,
-			wsClient:   wsClient,
+			httpClient:   httpClient,
+			grpcClient:   grpcClient,
+			wsClient:     wsClient,
+			blockService: blockService,
 		},
 		manager: websocket.NewManager(),
 		server: &http.Server{
@@ -68,14 +69,13 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient 
 			WriteTimeout: WRITE_TIMEOUT,
 			ReadTimeout:  READ_TIMEOUT,
 			IdleTimeout:  IDLE_TIMEOUT,
-			Handler:      r,
+			Handler:      cors.AllowAll().Handler(r),
 		},
 	}
 
 	// compile check to ensure Handler implements BaseAPI
 	var _ api.BaseAPI = a.handler
 
-	r.Use(handlers.CORS())
 	r.Use(api.Scheme)
 	r.Use(api.Logger)
 

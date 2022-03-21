@@ -105,8 +105,13 @@ func (c *Connection) Start() {
 			if err := c.conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
 				logger.Errorf("failed to set write deadline: %+v", err)
 			}
+			// server side ping frame
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-				return
+				logger.Errorf("failed to write ping message packet: %+v", err)
+			}
+			// browsers side ping message
+			if err := c.conn.WriteMessage(websocket.TextMessage, []byte("ping")); err != nil {
+				logger.Errorf("failed to write ping message: %+v", err)
 			}
 		}
 	}()
@@ -152,6 +157,11 @@ func (c *Connection) read() {
 		}
 
 		switch r.Method {
+		case "ping":
+			// browsers side pong message
+			if err := c.conn.WriteMessage(websocket.TextMessage, []byte("pong")); err != nil {
+				logger.Errorf("failed to write pong message: %+v", err)
+			}
 		case "subscribe":
 			c.handler.Subscribe(c.clientID, r.Data.Addresses, c.msgChan)
 		case "unsubscribe":
