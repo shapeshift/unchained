@@ -46,7 +46,7 @@ export interface EthereumAccount extends Account {
 }
 
 /**
- * Contains Ethereum specific transaction info
+ * Contains info about an Ethereum transaction
  */
 export interface EthereumTx extends Tx {
   from: string
@@ -63,7 +63,7 @@ export interface EthereumTx extends Tx {
 }
 
 /**
- * Contains Ethereum specific transaction history
+ * Contains info about Ethereum transaction history
  */
 export interface EthereumTxHistory extends TxHistory {
   txs: Array<EthereumTx>

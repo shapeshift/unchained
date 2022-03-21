@@ -140,7 +140,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
    * Get transaction history by address or xpub
    *
    * @param {string} pubkey account address or xpub
-   * @param {string} [cursor] the cursor returned in previous query
+   * @param {string} [cursor] the cursor returned in previous query (base64 encoded json object with a 'page' property)
    * @param {number} [pageSize] page size (10 by default)
    *
    * @returns {Promise<TxHistory>} transaction history
@@ -211,7 +211,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
 
           const decodedCursor = JSON.parse(Buffer.from(cursor, 'base64').toString('binary'))
 
-          // Validate that the cursor contains a 'page' property this is a positive integer
+          // Validate that the cursor contains a 'page' property that is a positive integer
           if (!('page' in decodedCursor && Number.isInteger(decodedCursor.page) && decodedCursor.page >= 1)) {
             throw 'invalid base64 cursor'
           }
@@ -219,7 +219,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
           return decodedCursor
         } catch (err) {
           const e: BadRequestError = { error: `invalid base64 cursor: ${cursor}` }
-          throw new ApiError('Bad Request', 400, JSON.stringify(e))
+          throw new ApiError('Bad Request', 422, JSON.stringify(e))
         }
       })()
 
