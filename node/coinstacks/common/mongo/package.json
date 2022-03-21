@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/common-mongo",
-  "version": "6.1.1",
+  "version": "6.2.0",
   "license": "MIT",
   "main": "dist/index.js",
   "source": "src/index.ts",
