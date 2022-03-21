@@ -38,13 +38,14 @@ func (h *Handler) StartWebsocket() error {
 				BlockHeight: &block.Height,
 				Timestamp:   &block.Timestamp,
 			},
-			Events:    cosmos.Events(tx.Result.Log),
-			Fee:       cosmos.Fee(signingTx, txid, "rune"),
-			GasWanted: strconv.Itoa(int(tx.Result.GasWanted)),
-			GasUsed:   strconv.Itoa(int(tx.Result.GasUsed)),
-			Index:     int(tx.Index),
-			Memo:      signingTx.GetMemo(),
-			Messages:  cosmos.Messages(cosmosTx.GetMsgs()),
+			Confirmations: 1,
+			Events:        cosmos.Events(tx.Result.Log),
+			Fee:           cosmos.Fee(signingTx, txid, "rune"),
+			GasWanted:     strconv.Itoa(int(tx.Result.GasWanted)),
+			GasUsed:       strconv.Itoa(int(tx.Result.GasUsed)),
+			Index:         int(tx.Index),
+			Memo:          signingTx.GetMemo(),
+			Messages:      cosmos.Messages(cosmosTx.GetMsgs()),
 		}
 
 		seen := make(map[string]bool)
@@ -134,13 +135,14 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 				BlockHeight: &block.Height,
 				Timestamp:   &block.Timestamp,
 			},
-			Events:    cosmos.Events(t.TendermintTx.TxResult.Log),
-			Fee:       cosmos.Fee(t.SigningTx, *t.TendermintTx.Hash, "rune"),
-			GasWanted: t.TendermintTx.TxResult.GasWanted,
-			GasUsed:   t.TendermintTx.TxResult.GasUsed,
-			Index:     int(t.TendermintTx.GetIndex()),
-			Memo:      t.SigningTx.GetMemo(),
-			Messages:  cosmos.Messages(t.CosmosTx.GetMsgs()),
+			Confirmations: h.blockService.Latest.Height - height + 1,
+			Events:        cosmos.Events(t.TendermintTx.TxResult.Log),
+			Fee:           cosmos.Fee(t.SigningTx, *t.TendermintTx.Hash, "rune"),
+			GasWanted:     t.TendermintTx.TxResult.GasWanted,
+			GasUsed:       t.TendermintTx.TxResult.GasUsed,
+			Index:         int(t.TendermintTx.GetIndex()),
+			Memo:          t.SigningTx.GetMemo(),
+			Messages:      cosmos.Messages(t.CosmosTx.GetMsgs()),
 		}
 
 		txs = append(txs, tx)

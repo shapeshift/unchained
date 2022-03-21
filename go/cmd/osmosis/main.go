@@ -64,7 +64,10 @@ func main() {
 		logger.Panicf("failed to create new http client: %+v", err)
 	}
 
-	blockService := cosmos.NewBlockService(httpClient)
+	blockService, err := cosmos.NewBlockService(httpClient)
+	if err != nil {
+		logger.Panicf("failed to create new block service: %+v", err)
+	}
 
 	wsClient, err := cosmos.NewWebsocketClient(cfg, blockService)
 	if err != nil {

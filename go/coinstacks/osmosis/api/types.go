@@ -33,6 +33,8 @@ type Tx struct {
 	// swagger:allOf
 	api.BaseTx
 	// required: true
+	Confirmations int `json:"confirmations"`
+	// required: true
 	Fee cosmos.Value `json:"fee"`
 	// required: true
 	// example: 888
