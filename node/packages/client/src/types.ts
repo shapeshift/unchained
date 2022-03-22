@@ -48,22 +48,22 @@ export interface Transfer {
   totalValue: string
   components: Array<{ value: string }>
   token?: Token
-  data?: TransferMetaData
-}
-
-export interface TransferMetaData {
-  action?: string
 }
 
 export enum TransferType {
   Send = 'send',
   Receive = 'receive',
-  FeeOnly = 'feeonly',
 }
 
 export interface TxMetadata {
   method?: string
   parser: string
+  extras?: {
+    caip19?: string
+    from?: string
+    to?: string
+    value?: string
+  }
 }
 
 export interface StandardTx {

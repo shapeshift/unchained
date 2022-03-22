@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { BigNumber } from 'bignumber.js'
 import { caip2, caip19, AssetNamespace, AssetReference, CAIP2, CAIP19 } from '@shapeshiftoss/caip'
 import { Tx as ParsedTx, Status, TransferType } from '../../types'
@@ -27,6 +28,13 @@ export class TransactionParser {
     const blockHeight = Number(tx.blockHeight)
     const blockTime = Number(tx.timestamp)
 
+    const msg = tx.messages[0]
+    const msgEvents = tx.events[0]
+
+    // Not all cosmos messages have a value on the message
+    // for example `withdraw_delegator_reward` must look at events for value
+    const value = new BigNumber(msg.value?.amount || valueFromEvents(msg, msgEvents) || 0).toString(10)
+
     const parsedTx: ParsedTx = {
       address,
       blockHash: tx.blockHash,
@@ -37,38 +45,47 @@ export class TransactionParser {
       status: Status.Confirmed, // no mempool provided by cosmos coinstack currently, and can be inferred from confirmations when added
       transfers: [],
       txid: tx.txid,
-      value: tx.value,
+      value,
+      data: {
+        parser: 'cosmos',
+        method: msg.type,
+        extras: {
+          from: msg.from,
+          to: msg.to,
+          caip19: this.assetId,
+          value,
+        },
+      },
     }
 
-    // messages make best attempt to track where value is transferring to for a variety of tx types
-    // logs provide more specific information if needed as more complex tx types are added
-    tx.messages.forEach((msg, i) => {
-      // Not all cosmos messages have a value on the message
-      // for example `withdraw_delegator_reward` must look at events for value
-      const value = new BigNumber(msg.value?.amount || valueFromEvents(msg, tx.events[i]) || 0)
-
-      const transferType =
-        msg.from === address ? TransferType.Send : msg.to === address ? TransferType.Receive : TransferType.FeeOnly
-
-      if (transferType === TransferType.Send || transferType === TransferType.FeeOnly) {
-        // network fee
-        const fees = new BigNumber(tx.fee.amount)
-        if (fees.gt(0)) {
-          parsedTx.fee = { caip19: this.assetId, value: fees.toString(10) }
-        }
-      }
-
+    if (msg.from === address) {
       parsedTx.transfers = aggregateTransfer(
         parsedTx.transfers,
-        transferType,
+        TransferType.Send,
         this.assetId,
         msg.from ?? '',
         msg.to ?? '',
-        value.toString(10),
-        undefined,
-        { action: msg.type }
+        value
       )
-    })
+    }
+    if (msg.to === address) {
+      parsedTx.transfers = aggregateTransfer(
+        parsedTx.transfers,
+        TransferType.Receive,
+        this.assetId,
+        msg.from ?? '',
+        msg.to ?? '',
+        value
+      )
+    }
+    // Fees applies to the original tx sender. msg.from is not a reliable indicator of original sender
+    // For example with redelegate `from` is a validator (not sender)
+    if (msg.to !== address) {
+      const fees = new BigNumber(tx?.fee?.amount)
+      if (fees.gt(0)) {
+        parsedTx.fee = { caip19: this.assetId, value: fees.toString(10) }
+      }
+    }
 
     return parsedTx
   }
