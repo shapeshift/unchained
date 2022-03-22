@@ -74,6 +74,7 @@ type Event struct {
 // swagger:model Message
 type Message struct {
 	Addresses []string `json:"-"`
+	Origin    string   `json:"origin,omitempty"`
 	From      string   `json:"from,omitempty"`
 	To        string   `json:"to,omitempty"`
 	// required: true
