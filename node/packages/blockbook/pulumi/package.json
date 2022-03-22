@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/blockbook-pulumi",
-  "version": "6.0.0",
+  "version": "6.2.0",
   "license": "MIT",
   "private": true,
   "main": "index.ts",

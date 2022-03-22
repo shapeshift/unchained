@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strconv"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
@@ -13,8 +12,9 @@ import (
 )
 
 type Handler struct {
-	httpClient *cosmos.HTTPClient
-	wsClient   *cosmos.WSClient
+	httpClient   *cosmos.HTTPClient
+	wsClient     *cosmos.WSClient
+	blockService *cosmos.BlockService
 }
 
 func (h *Handler) StartWebsocket() error {
@@ -24,33 +24,28 @@ func (h *Handler) StartWebsocket() error {
 			return nil, nil, errors.Wrapf(err, "failed to decode tx: %v", tx.Tx)
 		}
 
-		blockHeight := strconv.Itoa(int(tx.Height))
 		txid := fmt.Sprintf("%X", sha256.Sum256(tx.Tx))
 
-		fees := signingTx.GetFee()
-		if len(fees) == 0 {
-			logger.Warnf("txid: %s, no fees detected", txid)
-			fees = []sdk.Coin{{Denom: "rune", Amount: sdk.NewInt(0)}}
-		} else if len(fees) > 1 {
-			logger.Warnf("txid: %s - multiple fees detected (defaulting to index 0): %+v", txid, fees)
+		block, err := h.blockService.GetBlock(int(tx.Height))
+		if err != nil {
+			return nil, nil, errors.Wrapf(err, "failed to handle tx: %s", txid)
 		}
 
 		t := Tx{
 			BaseTx: api.BaseTx{
-				// TODO: blockHash and timestamp
 				TxID:        txid,
-				BlockHeight: &blockHeight,
+				BlockHash:   &block.Hash,
+				BlockHeight: &block.Height,
+				Timestamp:   &block.Timestamp,
 			},
-			Events: cosmos.Events(tx.Result.Log),
-			Fee: cosmos.Value{
-				Amount: fees[0].Amount.String(),
-				Denom:  fees[0].Denom,
-			},
-			GasWanted: strconv.Itoa(int(tx.Result.GasWanted)),
-			GasUsed:   strconv.Itoa(int(tx.Result.GasUsed)),
-			Index:     int(tx.Index),
-			Memo:      signingTx.GetMemo(),
-			Messages:  cosmos.Messages(cosmosTx.GetMsgs()),
+			Confirmations: 1,
+			Events:        cosmos.Events(tx.Result.Log),
+			Fee:           cosmos.Fee(signingTx, txid, "rune"),
+			GasWanted:     strconv.Itoa(int(tx.Result.GasWanted)),
+			GasUsed:       strconv.Itoa(int(tx.Result.GasUsed)),
+			Index:         int(tx.Index),
+			Memo:          signingTx.GetMemo(),
+			Messages:      cosmos.Messages(cosmosTx.GetMsgs()),
 		}
 
 		seen := make(map[string]bool)
@@ -123,24 +118,31 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 
 	txs := []Tx{}
 	for _, t := range res.Txs {
-		fee := t.SigningTx.GetFee()[0]
-		msgs := t.CosmosTx.GetMsgs()
+		height, err := strconv.Atoi(*t.TendermintTx.Height)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+
+		block, err := h.blockService.GetBlock(height)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to get tx history")
+		}
 
 		tx := Tx{
 			BaseTx: api.BaseTx{
 				TxID:        *t.TendermintTx.Hash,
-				BlockHeight: t.TendermintTx.Height,
+				BlockHash:   &block.Hash,
+				BlockHeight: &block.Height,
+				Timestamp:   &block.Timestamp,
 			},
-			Events: cosmos.Events(t.TendermintTx.TxResult.Log),
-			Fee: cosmos.Value{
-				Amount: fee.Amount.String(),
-				Denom:  fee.Denom,
-			},
-			GasWanted: t.TendermintTx.TxResult.GasWanted,
-			GasUsed:   t.TendermintTx.TxResult.GasUsed,
-			Index:     int(t.TendermintTx.GetIndex()),
-			Memo:      t.SigningTx.GetMemo(),
-			Messages:  cosmos.Messages(msgs),
+			Confirmations: h.blockService.Latest.Height - height + 1,
+			Events:        cosmos.Events(t.TendermintTx.TxResult.Log),
+			Fee:           cosmos.Fee(t.SigningTx, *t.TendermintTx.Hash, "rune"),
+			GasWanted:     t.TendermintTx.TxResult.GasWanted,
+			GasUsed:       t.TendermintTx.TxResult.GasUsed,
+			Index:         int(t.TendermintTx.GetIndex()),
+			Memo:          t.SigningTx.GetMemo(),
+			Messages:      cosmos.Messages(t.CosmosTx.GetMsgs()),
 		}
 
 		txs = append(txs, tx)

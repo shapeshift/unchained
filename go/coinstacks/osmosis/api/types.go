@@ -33,6 +33,8 @@ type Tx struct {
 	// swagger:allOf
 	api.BaseTx
 	// required: true
+	Confirmations int `json:"confirmations"`
+	// required: true
 	Fee cosmos.Value `json:"fee"`
 	// required: true
 	// example: 888
@@ -50,7 +52,7 @@ type Tx struct {
 	// required: true
 	Messages []cosmos.Message `json:"messages"`
 	// required: true
-	Events []cosmos.Event `json:"events"`
+	Events cosmos.EventsByMsgIndex `json:"events"`
 }
 
 // Contains info about transaction history for an address or xpub

@@ -57,6 +57,10 @@ Traefik routes requests based on host name. which includes the coinstack name. F
 - Each language subdirectory has setup requirements before running a coinstack locally
   - [Go](go/README.md#initialsetup) - `unchained/go`
   - [Node](node/README.md) - `unchained/node`
+- Both `go` and `node` module have linter installed in git pre-commit hook. To set up the hook:
+  ```sh
+  cd node && yarn
+  ```
 
 ## Docker-Compose Local Dev Instructions
 
@@ -70,9 +74,13 @@ Traefik routes requests based on host name. which includes the coinstack name. F
 
 #### **Running**
 
-- Commands should be run from the language subdirectory (ex. `unchained/go`, `unchained/node`)
+- `unchained/node/packages/client` generates a typescript client for each coinstack using the generated `swagger.json` files. To ensure everything successfully builds, make the golang coinstacks first:
 
-- Start the reverse proxy and any common service (ex. hot reloading)
+  ```sh
+  cd go && make
+  ```
+
+- Start the reverse proxy and any common service (ex. hot reloading):
 
   ```sh
   docker-compose up -d
@@ -83,7 +91,7 @@ Traefik routes requests based on host name. which includes the coinstack name. F
 - Start a coinstack:
 
   ```sh
-  cd coinstacks/ethereum && docker-compose up
+  cd node/coinstacks/ethereum && docker-compose up
   ```
 
 - Visit http://api.ethereum.localhost/docs to view the OpenAPI documentation for the API
@@ -91,13 +99,20 @@ Traefik routes requests based on host name. which includes the coinstack name. F
 - Tear down a coinstack (including docker volumes):
 
   ```sh
-  cd coinstacks/ethereum && docker-compose down -v
+  cd node/coinstacks/ethereum && docker-compose down -v
   ```
 
 #### **Common Issues**
 
-- If you are running [Docker Desktop](https://docs.docker.com/desktop/) and see any `SIGKILL` errors, increase your resource limits in the Resources Tab
-
+- If you are running [Docker Desktop](https://docs.docker.com/desktop/) and see any `SIGKILL` errors, increase your resource limits in the Resources Tab.
+- To fix the error:
+  ```
+  Error response from daemon: pull access denied for unchained-local, repository does not exist or may require 'docker login': denied: requested access to the resource is denied
+  ```
+  Run the following command to force building the local image from the root `unchained/` directory:
+  ```sh
+  docker-compose up unchained-local
+  ```
 
 ## Kubernetes Local Dev Instructions
 

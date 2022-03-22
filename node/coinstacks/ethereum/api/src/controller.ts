@@ -6,14 +6,14 @@ import {
   ApiError,
   BadRequestError,
   BaseAPI,
+  Cursor,
   Info,
   InternalServerError,
   SendTxBody,
-  Tx,
-  TxHistory,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { EthereumAPI, EthereumAccount, Token, GasFees } from './models'
+import { EthereumAccount, EthereumAPI, EthereumTx, EthereumTxHistory, GasFees, TokenBalance } from './models'
+import { logger } from './logger'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -79,7 +79,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
     try {
       const data = await blockbook.getAddress(pubkey, undefined, undefined, undefined, undefined, 'tokenBalances')
 
-      const tokens = (data.tokens ?? []).reduce<Array<Token>>((prev, token) => {
+      const tokens = (data.tokens ?? []).reduce<Array<TokenBalance>>((prev, token) => {
         if (token.balance && token.contract && token.decimals && token.symbol) {
           prev.push({
             balance: token.balance,
@@ -114,30 +114,32 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
    * Get transaction history by address
    *
    * @param {string} pubkey account address
-   * @param {number} [page] page number
-   * @param {number} [pageSize] page size
-   * @param {string} [contract] filter by contract address (only supported by coins which support contracts)
+   * @param {string} [cursor] the cursor returned in previous query (base64 encoded json object with a 'page' property)
+   * @param {number} [pageSize] page size (10 by default)
    *
    * @returns {Promise<TxHistory>} transaction history
    *
    * @example pubkey "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
    */
-  @Example<TxHistory>({
-    page: 1,
-    totalPages: 1,
-    txs: 1,
-    transactions: [
+  @Example<EthereumTxHistory>({
+    pubkey: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
+    cursor: 'eyJwYWdlIjoyfQ==',
+    txs: [
       {
-        txid: '0x85092cf7a2ec34ba4109ef1215b5b486911163b9d3391e3508670229f4d866e7',
-        status: 'confirmed',
+        txid: '0x8e3528c933483770a3c8377c2ee7e34f846908653168188fd0d90a20b295d002',
+        blockHash: '0x94228c1b7052720846e2d7b9f36de30acf45d9a06ec483bd4433c5c38c8673a8',
+        blockHeight: 12267105,
+        timestamp: 1618788849,
+        status: 1,
         from: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
-        to: '0x34249a379Af1Fe3b53e143c0f1B5590778ce2cfC',
-        blockHash: '0xc962b0662752ac15671512ca612c894051d8b671375de1cd84f12c5e720dc7ef',
-        blockHeight: 11427335,
-        confirmations: 9,
-        timestamp: 1607632210,
-        value: '20000000000000000',
-        fee: '5250000000000000',
+        to: '0x642F4Bda144C63f6DC47EE0fDfbac0a193e2eDb7',
+        confirmations: 2088440,
+        value: '737092621690531649',
+        fee: '3180000000009000',
+        gasLimit: '21000',
+        gasUsed: '21000',
+        gasPrice: '151428571429',
+        inputData: '0x',
       },
     ],
   })
@@ -147,30 +149,79 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   @Get('account/{pubkey}/txs')
   async getTxHistory(
     @Path() pubkey: string,
-    @Query() page?: number,
-    @Query() pageSize = 25,
-    @Query() contract?: string
-  ): Promise<TxHistory> {
+    @Query() cursor?: string,
+    @Query() pageSize = 10
+  ): Promise<EthereumTxHistory> {
+    const curCursor = ((): Cursor => {
+      try {
+        if (!cursor) return { page: 1 }
+
+        const decodedCursor = JSON.parse(Buffer.from(cursor, 'base64').toString('binary'))
+
+        // Validate that the cursor contains a 'page' property that is a positive integer
+        if (!('page' in decodedCursor && Number.isInteger(decodedCursor.page) && decodedCursor.page >= 1)) {
+          throw 'invalid base64 cursor'
+        }
+
+        return decodedCursor
+      } catch (err) {
+        if (err instanceof Error) {
+          logger.error(err, `failed to decode cursor: ${cursor}`)
+        }
+
+        const e: BadRequestError = { error: `invalid base64 cursor: ${cursor}` }
+        throw new ApiError('Bad Request', 422, JSON.stringify(e))
+      }
+    })()
+
     try {
-      const data = await blockbook.getAddress(pubkey, page, pageSize, undefined, undefined, 'txs', contract)
+      const data = await blockbook.getAddress(pubkey, curCursor.page, pageSize, undefined, undefined, 'txs')
+
+      curCursor.page++
+
+      let nextCursor: string | undefined
+      if (curCursor.page <= (data.totalPages ?? 0)) {
+        nextCursor = Buffer.from(JSON.stringify(curCursor), 'binary').toString('base64')
+      }
 
       return {
-        page: data.page ?? 1,
-        totalPages: data.totalPages ?? 1,
-        txs: data.txs,
-        transactions:
-          data.transactions?.map<Tx>((tx) => ({
+        pubkey: pubkey,
+        cursor: nextCursor,
+        txs: (data.transactions ?? []).reduce<Array<EthereumTx>>((prev, tx) => {
+          if (!tx.ethereumSpecific) {
+            logger.warn(`ethereumSpecific data missing from txid: ${tx.txid}`)
+            return prev
+          }
+
+          prev.push({
             txid: tx.txid,
-            status: tx.confirmations > 0 ? 'confirmed' : 'pending',
-            from: tx.vin[0].addresses?.[0] ?? 'coinbase',
-            to: tx.vout[0].addresses?.[0],
             blockHash: tx.blockHash,
             blockHeight: tx.blockHeight,
-            confirmations: tx.confirmations,
             timestamp: tx.blockTime,
-            value: tx.tokenTransfers?.[0].value ?? tx.value,
+            status: tx.ethereumSpecific.status,
+            from: tx.vin[0].addresses?.[0] ?? '',
+            to: tx.vout[0].addresses?.[0] ?? '',
+            confirmations: tx.confirmations,
+            value: tx.value,
             fee: tx.fees ?? '0',
-          })) ?? [],
+            gasLimit: tx.ethereumSpecific.gasLimit.toString(),
+            gasUsed: tx.ethereumSpecific.gasUsed?.toString(),
+            gasPrice: tx.ethereumSpecific.gasPrice.toString(),
+            inputData: tx.ethereumSpecific.data,
+            tokenTransfers: tx.tokenTransfers?.map((tt) => ({
+              contract: tt.token,
+              decimals: tt.decimals,
+              name: tt.name,
+              symbol: tt.symbol,
+              type: tt.type,
+              from: tt.from,
+              to: tt.to,
+              value: tt.value,
+            })),
+          })
+
+          return prev
+        }, []),
       }
     } catch (err) {
       if (err.response) {

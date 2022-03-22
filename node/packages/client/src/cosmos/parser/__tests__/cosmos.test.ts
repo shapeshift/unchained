@@ -11,9 +11,10 @@ describe('parseTx', () => {
 
     const expected: Tx = {
       txid: tx.txid,
-      blockHeight: Number(tx.blockHeight),
-      blockTime: -1,
-      confirmations: -1,
+      blockHash: tx.blockHash,
+      blockHeight: tx.blockHeight,
+      blockTime: tx.timestamp,
+      confirmations: tx.confirmations,
       status: Status.Confirmed,
       address: address,
       caip2: 'cosmos:cosmoshub-4',
@@ -45,9 +46,10 @@ describe('parseTx', () => {
 
     const expected: Tx = {
       txid: tx.txid,
-      blockHeight: Number(tx.blockHeight),
-      blockTime: -1,
-      confirmations: -1,
+      blockHash: tx.blockHash,
+      blockHeight: tx.blockHeight,
+      blockTime: tx.timestamp,
+      confirmations: tx.confirmations,
       status: Status.Confirmed,
       address: address,
       caip2: 'cosmos:cosmoshub-4',

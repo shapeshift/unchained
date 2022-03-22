@@ -6,7 +6,7 @@
   "singleQuote": true,
   "overrides": [
     {
-      "files": ["*.json", "*.yaml"],
+      "files": ["*.json"],
       "options": {
         "singleQuote": false
       }

@@ -30,7 +30,7 @@ aliases:
     pulumi-stack: public
     pulumi-dir: coinstacks/bitcoin/pulumi
     indexer-cpu-limit: "4"
-    indexer-cpu-request: "4"
+    indexer-cpu-request: "2"
     indexer-memory-limit: 24Gi
     indexer-replicas: 2
     indexer-storage-size: 500Gi
@@ -38,16 +38,16 @@ aliases:
     indexer-ws-url: ws://bitcoin-indexer-svc.unchained.svc.cluster.local:8001/websocket
     daemon-image: ruimarinho/bitcoin-core:0.21.0
     daemon-cpu-limit: "2"
-    daemon-cpu-request: "2"
+    daemon-cpu-request: "1"
     daemon-memory-limit: 12Gi
-    daemon-storage-size: 1500Gi
+    daemon-storage-size: 650Gi
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: "500m"
-    api-cpu-request: "500m"
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     api-cpu-threshold: 30
-    api-memory-limit: "2Gi"
+    api-memory-limit: 2Gi
     rpc-url: http://user:password@bitcoin-indexer-svc.unchained.svc.cluster.local:8332
 
   - &bitcoin-dev
@@ -61,34 +61,34 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 3
-    api-cpu-limit: "300m"
-    api-cpu-request: "200m"
+    api-cpu-limit: 300m
+    api-cpu-request: 250m
     api-cpu-threshold: 30
-    api-memory-limit: "1Gi"
+    api-memory-limit: 1Gi
 
   - &ethereum
     coinstack: ethereum
     pulumi-stack: public
     pulumi-dir: coinstacks/ethereum/pulumi
     indexer-cpu-limit: "4"
-    indexer-cpu-request: "4"
+    indexer-cpu-request: "2"
     indexer-memory-limit: 12Gi
     indexer-replicas: 2
-    indexer-storage-size: 500Gi
+    indexer-storage-size: 300Gi
     indexer-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-indexer-svc.unchained.svc.cluster.local:8001/websocket
     daemon-image: ethereum/client-go:v1.10.15
     daemon-cpu-limit: "4"
-    daemon-cpu-request: "4"
+    daemon-cpu-request: "3"
     daemon-memory-limit: 32Gi
     daemon-storage-size: 2000Gi
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: "500m"
-    api-cpu-request: "500m"
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     api-cpu-threshold: 30
-    api-memory-limit: "2Gi"
+    api-memory-limit: 2Gi
     rpc-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8332
 
   - &ethereum-dev
@@ -102,10 +102,10 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 3
-    api-cpu-limit: "300m"
-    api-cpu-request: "200m"
+    api-cpu-limit: 300m
+    api-cpu-request: 20m
     api-cpu-threshold: 30
-    api-memory-limit: "1Gi"
+    api-memory-limit: 1Gi
 
   - &cosmos
     coinstack: cosmos
@@ -118,10 +118,10 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: "500m"
-    api-cpu-request: "500m"
+    api-cpu-limit: 500m
+    api-cpu-request: 500m
     api-cpu-threshold: 30
-    api-memory-limit: "2Gi"
+    api-memory-limit: 2Gi
 
   - &cosmos-dev
     <<: *cosmos
@@ -130,10 +130,10 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 3
-    api-cpu-limit: "300m"
-    api-cpu-request: "300m"
+    api-cpu-limit: 300m
+    api-cpu-request: 300m
     api-cpu-threshold: 30
-    api-memory-limit: "1Gi"
+    api-memory-limit: 1Gi
 
 commands:
   setup-runtime:
@@ -154,7 +154,7 @@ commands:
             curl -sSL "https://golang.org/dl/go1.17.6.linux-amd64.tar.gz" | sudo tar -xz -C /usr/local/
             mkdir -p /home/circleci/go/bin
             curl -sSL "https://github.com/gotestyourself/gotestsum/releases/download/v1.7.0/gotestsum_1.7.0_linux_amd64.tar.gz" | sudo tar -xz -C /usr/local/bin gotestsum
-            curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sudo sh -s -- -b /usr/local/bin v1.43.0
+            curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sudo sh -s -- -b /usr/local/bin v1.44.2
       - run:
           name: node
           command: |
@@ -215,10 +215,10 @@ commands:
           working_directory: go/pulumi
           name: install common pulumi dependencies
           command: yarn install --immutable
-      #- run:
-      #    working_directory: go
-      #    name: lint
-      #    command: golangci-lint run
+      - run:
+         working_directory: go
+         name: lint
+         command: golangci-lint run
       #- run:
       #    working_directory: go
       #    name: test
@@ -317,7 +317,7 @@ jobs:
             pulumi config set --path unchained:common.eks.cidrBlock 10.0.0.0/16
             pulumi config set --path unchained:common.eks.nodeGroups[0].name spot
             pulumi config set --path unchained:common.eks.nodeGroups[0].type SPOT
-            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 2
+            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 1
             pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 5
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[0] r5.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r5a.4xlarge
@@ -630,33 +630,17 @@ workflows:
 
       ########## (SHAPESHIFT) ##########
       - deploy-dependencies:
-          name: preview dependencies (shapeshift)
-          organization: SHAPESHIFT
-          pulumi-command: preview
-          requires:
-            - lint and test project (persist to workspace)
-          <<: *only-develop
-
-      - approve-shapeshift:
-          name: approve shapeshift
-          type: approval
-          requires:
-            - preview dependencies (shapeshift)
-          <<: *only-develop
-
-      - deploy-dependencies:
           name: deploy dependencies (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
           requires:
-            - approve shapeshift
+            - lint and test project (persist to workspace)
           <<: *only-develop
 
       - deploy-coinstack-node:
           name: deploy bitcoin develop (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
-          daemon-storage-size: 650Gi
           requires:
             - deploy dependencies (shapeshift)
           <<: *bitcoin-dev
@@ -666,7 +650,6 @@ workflows:
           name: deploy ethereum develop (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
-          indexer-storage-size: 300Gi
           requires:
             - deploy dependencies (shapeshift)
           <<: *ethereum-dev
@@ -679,30 +662,6 @@ workflows:
           requires:
             - deploy dependencies (shapeshift)
           <<: *cosmos-dev
-          <<: *only-develop
-
-      ########## (TAXISTAKE) ##########
-      - deploy-dependencies:
-          name: preview dependencies (taxistake)
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - lint and test project (persist to workspace)
-          <<: *only-develop
-
-      - approve-taxistake:
-          name: approve taxistake
-          type: approval
-          requires:
-            - preview dependencies (taxistake)
-          <<: *only-develop
-
-      - deploy-dependencies:
-          name: deploy dependencies (taxistake)
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve taxistake
           <<: *only-develop
 
   deploy-monitoring:
@@ -786,7 +745,6 @@ workflows:
           name: preview bitcoin (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: preview
-          daemon-storage-size: 650Gi
           requires:
             - validate dependencies (shapeshift)
           <<: *bitcoin
@@ -803,7 +761,6 @@ workflows:
           name: deploy bitcoin (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
-          daemon-storage-size: 650Gi
           requires:
             - approve bitcoin coinstack (shapeshift)
           <<: *bitcoin
@@ -814,7 +771,6 @@ workflows:
           name: preview ethereum (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: preview
-          indexer-storage-size: 300Gi
           requires:
             - validate dependencies (shapeshift)
           <<: *ethereum
@@ -831,19 +787,59 @@ workflows:
           name: deploy ethereum (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
-          indexer-storage-size: 300Gi
           requires:
             - approve ethereum coinstack (shapeshift)
           <<: *ethereum
           <<: *only-main
 
+      ####### COSMOS
+      - deploy-coinstack-go:
+          name: preview cosmos (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: preview
+          requires:
+            - validate dependencies (shapeshift)
+          <<: *cosmos
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve cosmos coinstack (shapeshift)
+          type: approval
+          requires:
+            - preview cosmos (shapeshift)
+          <<: *only-main
+
+      - deploy-coinstack-go:
+          name: deploy cosmos (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: up -f --yes
+          requires:
+            - approve cosmos coinstack (shapeshift)
+          <<: *cosmos
+          <<: *only-main
+
       ########## (TAXISTAKE) ##########
       - deploy-dependencies:
-          name: validate dependencies (taxistake)
+          name: preview dependencies (taxistake)
           organization: TAXISTAKE
-          pulumi-command: preview --expect-no-changes
+          pulumi-command: preview
           requires:
             - lint and test project (persist to workspace)
+          <<: *only-main
+
+      - approve-shapeshift:
+          name: approve dependencies (taxistake)
+          type: approval
+          requires:
+            - preview dependencies (taxistake)
+          <<: *only-main
+
+      - deploy-dependencies:
+          name: deploy dependencies (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve dependencies (taxistake)
           <<: *only-main
 
       ####### BITCOIN
@@ -852,7 +848,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: preview
           requires:
-            - validate dependencies (taxistake)
+            - deploy dependencies (taxistake)
           <<: *bitcoin
           <<: *only-main
 
@@ -878,7 +874,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: preview
           requires:
-            - validate dependencies (taxistake)
+            - deploy dependencies (taxistake)
           <<: *ethereum
           <<: *only-main
 
@@ -896,4 +892,30 @@ workflows:
           requires:
             - approve ethereum coinstack (taxistake)
           <<: *ethereum
+          <<: *only-main
+
+      ####### COSMOS
+      - deploy-coinstack-go:
+          name: preview cosmos (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - deploy dependencies (taxistake)
+          <<: *cosmos
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve cosmos coinstack (taxistake)
+          type: approval
+          requires:
+            - preview cosmos (taxistake)
+          <<: *only-main
+
+      - deploy-coinstack-go:
+          name: deploy cosmos (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve cosmos coinstack (taxistake)
+          <<: *cosmos
           <<: *only-main

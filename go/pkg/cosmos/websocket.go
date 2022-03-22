@@ -19,12 +19,13 @@ type TxHandlerFunc = func(tx types.EventDataTx) (interface{}, []string, error)
 
 type WSClient struct {
 	*websocket.Registry
-	txs       *tendermint.WSClient
-	encoding  *params.EncodingConfig
-	txHandler TxHandlerFunc
+	client       *tendermint.WSClient
+	encoding     *params.EncodingConfig
+	txHandler    TxHandlerFunc
+	blockService *BlockService
 }
 
-func NewWebsocketClient(conf Config) (*WSClient, error) {
+func NewWebsocketClient(conf Config, blockService *BlockService) (*WSClient, error) {
 	wsURL, err := url.Parse(conf.WSURL)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to parse WSURL: %s", conf.WSURL)
@@ -32,42 +33,48 @@ func NewWebsocketClient(conf Config) (*WSClient, error) {
 
 	path := fmt.Sprintf("/apikey/%s/websocket", conf.APIKey)
 
-	txsClient, err := tendermint.NewWS(wsURL.String(), path)
+	client, err := tendermint.NewWS(wsURL.String(), path)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create websocket client")
 	}
 
 	// use default dialer
-	txsClient.Dialer = net.Dial
+	client.Dialer = net.Dial
 
 	ws := &WSClient{
-		Registry: websocket.NewRegistry(),
-		encoding: conf.Encoding,
-		txs:      txsClient,
+		Registry:     websocket.NewRegistry(),
+		encoding:     conf.Encoding,
+		client:       client,
+		blockService: blockService,
 	}
 
 	return ws, nil
 }
 
 func (ws *WSClient) Start() error {
-	err := ws.txs.Start()
+	err := ws.client.Start()
 	if err != nil {
-		return errors.Wrap(err, "failed to start txs websocket")
+		return errors.Wrap(err, "failed to start websocket client")
 	}
 
-	err = ws.txs.Subscribe(context.Background(), types.EventQueryTx.String())
+	err = ws.client.Subscribe(context.Background(), types.EventQueryTx.String())
 	if err != nil {
 		return errors.Wrap(err, "failed to subscribe to txs")
 	}
 
-	go ws.listenTxs()
+	err = ws.client.Subscribe(context.Background(), types.EventQueryNewBlockHeader.String())
+	if err != nil {
+		return errors.Wrap(err, "failed to subscribe to newBlocks")
+	}
+
+	go ws.listen()
 
 	return nil
 }
 
 func (ws *WSClient) Stop() {
-	if err := ws.txs.Stop(); err != nil {
-		logger.Errorf("failed to stop txs client: %v", err)
+	if err := ws.client.Stop(); err != nil {
+		logger.Errorf("failed to stop the websocket client: %v", err)
 	}
 }
 
@@ -79,8 +86,8 @@ func (ws *WSClient) EncodingConfig() params.EncodingConfig {
 	return *ws.encoding
 }
 
-func (ws *WSClient) listenTxs() {
-	for r := range ws.txs.ResponsesCh {
+func (ws *WSClient) listen() {
+	for r := range ws.client.ResponsesCh {
 		if r.Error != nil {
 			logger.Error(r.Error.Error())
 			continue
@@ -96,6 +103,8 @@ func (ws *WSClient) listenTxs() {
 			switch result.Data.(type) {
 			case types.EventDataTx:
 				go ws.handleTx(result.Data.(types.EventDataTx))
+			case types.EventDataNewBlockHeader:
+				go ws.handleNewBlockHeader(result.Data.(types.EventDataNewBlockHeader))
 			default:
 				fmt.Printf("unsupported result type: %T", result.Data)
 			}
@@ -106,9 +115,19 @@ func (ws *WSClient) listenTxs() {
 func (ws *WSClient) handleTx(tx types.EventDataTx) {
 	data, addrs, err := ws.txHandler(tx)
 	if err != nil {
-		logger.Errorf("failed to handle tx: %v", err)
+		logger.Error(err)
 		return
 	}
 
 	ws.Publish(addrs, data)
+}
+
+func (ws *WSClient) handleNewBlockHeader(block types.EventDataNewBlockHeader) {
+	b := &Block{
+		Height:    int(block.Header.Height),
+		Hash:      block.Header.Hash().String(),
+		Timestamp: int(block.Header.Time.Unix()),
+	}
+
+	ws.blockService.WriteBlock(b, true)
 }

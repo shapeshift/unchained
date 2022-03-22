@@ -23,17 +23,14 @@ export class TransactionParser {
   }
 
   async parse(tx: CosmosTx, address: string): Promise<ParsedTx> {
-    const blockHeight = Number(tx.blockHeight)
-    const blockTime = Number(tx.timestamp)
-
     const parsedTx: ParsedTx = {
       address,
       blockHash: tx.blockHash,
-      blockHeight: isNaN(blockHeight) ? -1 : blockHeight,
-      blockTime: isNaN(blockTime) ? -1 : blockTime,
+      blockHeight: tx.blockHeight ?? -1,
+      blockTime: tx.timestamp ?? Math.floor(Date.now() / 1000),
       caip2: this.chainId,
-      confirmations: -1, // TODO: confirmations not tracked by cosmos coinstack
-      status: Status.Confirmed, // no mempool provided by cosmos coinstack currently, and can be inferred from confirmations when added
+      confirmations: tx.confirmations,
+      status: tx.confirmations > 0 ? Status.Confirmed : Status.Pending, // TODO: handle failed case
       transfers: [],
       txid: tx.txid,
       value: tx.value,
