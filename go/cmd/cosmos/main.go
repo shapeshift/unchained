@@ -69,12 +69,17 @@ func main() {
 		logger.Panicf("failed to create new grpc client: %+v", err)
 	}
 
-	wsClient, err := cosmos.NewWebsocketClient(cfg)
+	blockService, err := cosmos.NewBlockService(httpClient)
+	if err != nil {
+		logger.Panicf("failed to create new block service: %+v", err)
+	}
+
+	wsClient, err := cosmos.NewWebsocketClient(cfg, blockService)
 	if err != nil {
 		logger.Panicf("failed to create new websocket client: %+v", err)
 	}
 
-	api := api.New(httpClient, grpcClient, wsClient, *swaggerPath)
+	api := api.New(httpClient, grpcClient, wsClient, blockService, *swaggerPath)
 	defer api.Shutdown()
 
 	go api.Serve(errChan)
