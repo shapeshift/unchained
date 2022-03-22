@@ -6,12 +6,13 @@ import {
   ApiError,
   BadRequestError,
   BaseAPI,
+  Cursor,
   Info,
   InternalServerError,
   SendTxBody,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { Cursor, EthereumAccount, EthereumAPI, EthereumTx, EthereumTxHistory, GasFees, TokenBalance } from './models'
+import { EthereumAccount, EthereumAPI, EthereumTx, EthereumTxHistory, GasFees, TokenBalance } from './models'
 import { logger } from './logger'
 
 const INDEXER_URL = process.env.INDEXER_URL
@@ -113,8 +114,8 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
    * Get transaction history by address
    *
    * @param {string} pubkey account address
-   * @param {string} [cursor] the cursor returned in previous query
-   * @param {number} [pageSize] page size
+   * @param {string} [cursor] the cursor returned in previous query (base64 encoded json object with a 'page' property)
+   * @param {number} [pageSize] page size (10 by default)
    *
    * @returns {Promise<TxHistory>} transaction history
    *
@@ -154,21 +155,24 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
     const curCursor = ((): Cursor => {
       try {
         if (!cursor) return { page: 1 }
-        return JSON.parse(Buffer.from(cursor, 'base64').toString('binary'))
+
+        const decodedCursor = JSON.parse(Buffer.from(cursor, 'base64').toString('binary'))
+
+        // Validate that the cursor contains a 'page' property that is a positive integer
+        if (!('page' in decodedCursor && Number.isInteger(decodedCursor.page) && decodedCursor.page >= 1)) {
+          throw 'invalid base64 cursor'
+        }
+
+        return decodedCursor
       } catch (err) {
         if (err instanceof Error) {
           logger.error(err, `failed to decode cursor: ${cursor}`)
         }
 
         const e: BadRequestError = { error: `invalid base64 cursor: ${cursor}` }
-        throw new ApiError('Bad Request', 400, JSON.stringify(e))
+        throw new ApiError('Bad Request', 422, JSON.stringify(e))
       }
     })()
-
-    if (curCursor.page === undefined) {
-      const e: BadRequestError = { error: `invalid json cursor: ${JSON.stringify(curCursor)}` }
-      throw new ApiError('Bad Request', 400, JSON.stringify(e))
-    }
 
     try {
       const data = await blockbook.getAddress(pubkey, curCursor.page, pageSize, undefined, undefined, 'txs')

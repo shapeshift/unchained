@@ -2,8 +2,9 @@ export default {
   tx: {
     txid: '8136FF781B38919958249308CFABFD253CF371514661119BCD231875968BD06B',
     blockHash: 'D8186504233B8AD92ED2799D88A16A38F706889A99F1AEC49A6EA96EC94AE4E7',
-    blockHeight: '9636923',
-    timestamp: '2022-03-04T21:37:22.247088664Z',
+    blockHeight: 9636923,
+    timestamp: 1645207449,
+    confirmations: 358801,
     fee: {
       amount: '6250',
       denom: 'uatom',

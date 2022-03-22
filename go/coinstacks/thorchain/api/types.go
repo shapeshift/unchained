@@ -27,19 +27,39 @@ type Account struct {
 	Assets []cosmos.Value `json:"assets"`
 }
 
+// Contains info about a transaction
+// swagger:model Tx
 type Tx struct {
+	// swagger:allOf
 	api.BaseTx
-	Fee       cosmos.Value            `json:"fee"`
-	GasUsed   string                  `json:"gasUsed"`
-	GasWanted string                  `json:"gasWanted"`
-	Index     int                     `json:"index"`
-	Memo      string                  `json:"memo,omitempty"`
-	Value     string                  `json:"value"`
-	Messages  []cosmos.Message        `json:"messages"`
-	Events    cosmos.EventsByMsgIndex `json:"events"`
+	// required: true
+	Confirmations int `json:"confirmations"`
+	// required: true
+	Fee cosmos.Value `json:"fee"`
+	// required: true
+	// example: 888
+	GasUsed string `json:"gasUsed"`
+	// required: true
+	// example: 999
+	GasWanted string `json:"gasWanted"`
+	// required: true
+	// example: 1
+	Index int    `json:"index"`
+	Memo  string `json:"memo,omitempty"`
+	// required: true
+	// 123456789
+	Value string `json:"value"`
+	// required: true
+	Messages []cosmos.Message `json:"messages"`
+	// required: true
+	Events cosmos.EventsByMsgIndex `json:"events"`
 }
 
+// Contains info about transaction history for an address or xpub
+// swagger:model TxHistory
 type TxHistory struct {
+	// swagger:allOf
 	api.BaseTxHistory
+	// required: true
 	Txs []Tx `json:"txs"`
 }

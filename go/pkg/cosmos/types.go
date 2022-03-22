@@ -31,9 +31,9 @@ type Balance struct {
 
 // Block info common return payload
 type Block struct {
-	Height    string
+	Height    int
 	Hash      string
-	Timestamp string
+	Timestamp int
 }
 
 // Contains info about a staking delegation
@@ -152,62 +152,4 @@ type Value struct {
 	// required: true
 	// example: udenom
 	Denom string `json:"denom"`
-}
-
-// RPCErrorResponse payload for an rpc request
-type RPCErrorResponse struct {
-	Jsonrpc string `json:"jsonrpc"`
-	Id      int32  `json:"id"`
-	Error   struct {
-		Data string `json:"data"`
-	} `json:"error"`
-}
-
-type TxSearchResponse struct {
-	Jsonrpc string                 `json:"jsonrpc"`
-	Id      int32                  `json:"id"`
-	Result  TxSearchResponseResult `json:"result"`
-}
-
-type TxSearchResponseResult struct {
-	Txs        []TxSearchResponseResultTxs `json:"txs"`
-	TotalCount string                      `json:"total_count"`
-}
-
-type TxSearchResponseResultTxs struct {
-	Hash     *string                         `json:"hash,omitempty"`
-	Height   *string                         `json:"height,omitempty"`
-	Index    *int32                          `json:"index,omitempty"`
-	TxResult *TxSearchResponseResultTxResult `json:"tx_result,omitempty"`
-	Tx       *string                         `json:"tx,omitempty"`
-	Proof    *TxSearchResponseResultProof    `json:"proof,omitempty"`
-}
-
-// GetIndex returns the Index field value if set, zero value otherwise.
-func (o *TxSearchResponseResultTxs) GetIndex() int32 {
-	if o == nil || o.Index == nil {
-		var ret int32
-		return ret
-	}
-	return *o.Index
-}
-
-type TxSearchResponseResultTxResult struct {
-	Log       string `json:"log"`
-	GasWanted string `json:"gas_wanted"`
-	GasUsed   string `json:"gas_used"`
-	Tags      Event  `json:"tags"`
-}
-
-type TxSearchResponseResultProof struct {
-	RootHash string                           `json:"RootHash"`
-	Data     string                           `json:"Data"`
-	Proof    TxSearchResponseResultProofProof `json:"Proof"`
-}
-
-type TxSearchResponseResultProofProof struct {
-	Total    string   `json:"total"`
-	Index    string   `json:"index"`
-	LeafHash string   `json:"leaf_hash"`
-	Aunts    []string `json:"aunts"`
 }
