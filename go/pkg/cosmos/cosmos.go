@@ -13,6 +13,7 @@ import (
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	authztypes "github.com/cosmos/cosmos-sdk/x/authz"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
@@ -48,8 +49,8 @@ type HTTPClient struct {
 	ctx      context.Context
 	encoding *params.EncodingConfig
 
-	cosmos           *resty.Client
-	tendermint       *resty.Client
+	cosmos     *resty.Client
+	tendermint *resty.Client
 }
 
 // NewHTTPClient configures and creates an HTTPClient
@@ -72,10 +73,10 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 	tendermint := resty.New().SetScheme(rpcURL.Scheme).SetBaseURL(rpcURL.Host).SetHeaders(headers)
 
 	c := &HTTPClient{
-		ctx:              context.Background(),
-		encoding:         conf.Encoding,
-		cosmos:           cosmos,
-		tendermint:       tendermint,
+		ctx:        context.Background(),
+		encoding:   conf.Encoding,
+		cosmos:     cosmos,
+		tendermint: tendermint,
 	}
 
 	return c, nil
@@ -148,6 +149,7 @@ func NewEncoding(registerInterfaces ...func(r codectypes.InterfaceRegistry)) *pa
 	registry := codectypes.NewInterfaceRegistry()
 
 	// register base protobuf types
+	authztypes.RegisterInterfaces(registry)
 	banktypes.RegisterInterfaces(registry)
 	distributiontypes.RegisterInterfaces(registry)
 	govtypes.RegisterInterfaces(registry)

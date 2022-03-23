@@ -125,6 +125,7 @@ func (c *HTTPClient) GetRedelegations(address string) ([]Redelegation, error) {
 			entry := RedelegationEntry{
 				CompletionTime: strconv.FormatInt(e.RedelegationEntry.CompletionTime.Unix(), 10),
 				Shares:         e.RedelegationEntry.SharesDst,
+				Balance:        e.Balance,
 			}
 
 			entries = append(entries, entry)
