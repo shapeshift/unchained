@@ -10,11 +10,6 @@ export interface Fee {
   value: string
 }
 
-export type SequencedTx = Tx & {
-  sequence: number
-  total: number
-}
-
 export enum Status {
   Confirmed = 'confirmed',
   Pending = 'pending',
