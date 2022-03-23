@@ -3,6 +3,7 @@ import { Account, Info, SendTxBody, TxHistory } from './models'
 export * from './models'
 export * as middleware from './middleware'
 export * from './websocket'
+export * from './registry'
 
 /**
  * Generic api error for handling failed requests

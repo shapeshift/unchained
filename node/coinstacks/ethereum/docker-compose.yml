@@ -8,8 +8,6 @@ services:
       - 'traefik.http.services.ethereum-api.loadbalancer.server.port=3000'
     image: unchained-local
     env_file: .env
-    environment:
-      <<: *env
     working_dir: /app/coinstacks/ethereum/api
     command: yarn nodemon
     volumes:

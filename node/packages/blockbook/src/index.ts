@@ -2,6 +2,7 @@ import { Tx } from './models'
 
 export { Blockbook } from './controller'
 export * from './models'
+export * from './websocket'
 
 export interface NewBlock {
   height: number

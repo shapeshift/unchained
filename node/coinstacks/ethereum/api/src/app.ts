@@ -3,11 +3,15 @@ import cors from 'cors'
 import { join } from 'path'
 import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
-import { middleware, ConnectionHandler } from '@shapeshiftoss/common-api'
+import { middleware, ConnectionHandler, Registry } from '@shapeshiftoss/common-api'
+import { WebsocketClient } from '@shapeshiftoss/blockbook'
 import { logger } from './logger'
 import { RegisterRoutes } from './routes'
 
-const port = process.env.PORT ?? 3000
+const PORT = process.env.PORT ?? 3000
+const INDEXER_WS_URL = process.env.INDEXER_WS_URL
+
+if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 
 const app = express()
 
@@ -38,8 +42,11 @@ app.get('/', async (_, res) => {
 app.use(middleware.errorHandler)
 app.use(middleware.notFoundHandler)
 
-const server = app.listen(port, () => logger.info({ port }, 'Server started'))
-
+const registry = new Registry()
+const server = app.listen(PORT, () => logger.info({ port: PORT }, 'Server started'))
 const wsServer = new Server({ server })
 
-wsServer.on('connection', (connection) => ConnectionHandler.start(connection))
+wsServer.on('connection', (connection) => ConnectionHandler.start(connection, registry))
+
+const wsClient = new WebsocketClient(INDEXER_WS_URL)
+wsClient.onMessage(registry.handleMessage)

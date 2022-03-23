@@ -8,8 +8,6 @@ services:
       - 'traefik.http.services.bitcoin-api.loadbalancer.server.port=3000'
     image: unchained-local
     env_file: .env
-    environment:
-      <<: *env
     working_dir: /app/coinstacks/bitcoin/api
     command: yarn nodemon
     volumes:
