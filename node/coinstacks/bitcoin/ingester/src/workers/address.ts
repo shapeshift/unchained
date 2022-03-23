@@ -1,6 +1,6 @@
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Message, Worker, SyncTx } from '@shapeshiftoss/common-ingester'
-import { bitcoin, SequencedTx } from '@shapeshiftoss/unchained-client'
+import { bitcoin } from '@shapeshiftoss/unchained-client'
 import { logger } from '../logger'
 
 const INDEXER_URL = process.env.INDEXER_URL
@@ -21,7 +21,7 @@ const parser = new bitcoin.TransactionParser({
 
 const msgLogger = logger.child({ namespace: ['workers', 'address'], fn: 'onMessage' })
 const onMessage = (worker: Worker) => async (message: Message) => {
-  const { address, txid, client_id, sequence, total }: SyncTx = message.getContent()
+  const { address, txid, client_id }: SyncTx = message.getContent()
   const retryKey = `${client_id}:${address}:${txid}`
 
   try {
@@ -30,7 +30,7 @@ const onMessage = (worker: Worker) => async (message: Message) => {
 
     const parsedTx = await parser.parse(tx, address)
 
-    worker.sendMessage(new Message({ ...parsedTx, sequence, total } as SequencedTx), client_id)
+    worker.sendMessage(new Message(parsedTx), client_id)
     worker.ackMessage(message, retryKey)
 
     msgLogger.debug({ address, txid, client_id }, 'Transaction published')

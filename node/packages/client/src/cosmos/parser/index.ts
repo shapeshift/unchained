@@ -1,8 +1,9 @@
 import { BigNumber } from 'bignumber.js'
 import { caip2, caip19, AssetNamespace, AssetReference, CAIP2, CAIP19 } from '@shapeshiftoss/caip'
-import { Tx as ParsedTx, Status, TransferType } from '../../types'
+import { Status, TransferType } from '../../types'
 import { aggregateTransfer } from '../../utils'
 import { Tx as CosmosTx } from '../index'
+import { ParsedTx } from '../types'
 
 export interface TransactionParserArgs {
   chainId: CAIP2

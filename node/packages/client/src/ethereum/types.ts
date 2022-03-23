@@ -1,4 +1,5 @@
-import { StandardTx, TxMetadata } from '../types'
+import { Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
+import { StandardTx, StandardTxMetadata } from '../types'
 
 export interface InternalTx {
   blockNumber: string
@@ -17,20 +18,14 @@ export interface InternalTx {
   errCode: string
 }
 
+export interface ParsedTx extends StandardTx {
+  data?: StandardTxMetadata
+}
+
+export type TxSpecific = Partial<Pick<ParsedTx, 'trade' | 'transfers' | 'data'>>
+
 export type Network = 'mainnet' | 'ropsten'
 
-export interface UniV2Tx extends StandardTx {
-  data?: TxMetadata // TODO = Type and extend any specific properties
-}
-
-export interface ZrxTx extends StandardTx {
-  data?: TxMetadata // TODO = Type and extend any specific properties
-}
-
-export interface ThorTx extends StandardTx {
-  data?: TxMetadata // TODO = Type and extend any specific properties
-}
-
-export interface YearnTx extends StandardTx {
-  data?: TxMetadata // TODO = Type and extend any specific properties
+export interface SubParser {
+  parse(tx: BlockbookTx): Promise<TxSpecific | undefined>
 }
