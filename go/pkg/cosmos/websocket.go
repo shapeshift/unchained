@@ -23,9 +23,10 @@ type WSClient struct {
 	encoding     *params.EncodingConfig
 	txHandler    TxHandlerFunc
 	blockService *BlockService
+	errChan      chan<- error
 }
 
-func NewWebsocketClient(conf Config, blockService *BlockService) (*WSClient, error) {
+func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- error) (*WSClient, error) {
 	wsURL, err := url.Parse(conf.WSURL)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to parse WSURL: %s", conf.WSURL)
@@ -38,6 +39,13 @@ func NewWebsocketClient(conf Config, blockService *BlockService) (*WSClient, err
 		return nil, errors.Wrapf(err, "failed to create websocket client")
 	}
 
+	tendermint.MaxReconnectAttempts(10)(client)
+	tendermint.OnReconnect(func() {
+		logger.Info("OnReconnect triggered: resubscribing")
+		_ = client.Subscribe(context.Background(), types.EventQueryTx.String())
+		_ = client.Subscribe(context.Background(), types.EventQueryNewBlockHeader.String())
+	})(client)
+
 	// use default dialer
 	client.Dialer = net.Dial
 
@@ -46,6 +54,7 @@ func NewWebsocketClient(conf Config, blockService *BlockService) (*WSClient, err
 		encoding:     conf.Encoding,
 		client:       client,
 		blockService: blockService,
+		errChan:      errChan,
 	}
 
 	return ws, nil
@@ -110,6 +119,9 @@ func (ws *WSClient) listen() {
 			}
 		}
 	}
+
+	// if reconnect fails, ResponsesCh is closed
+	ws.errChan <- errors.New("websocket client connection closed by server")
 }
 
 func (ws *WSClient) handleTx(tx types.EventDataTx) {
