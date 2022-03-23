@@ -109,6 +109,9 @@ type RedelegationEntry struct {
 	// required: true
 	// example: 123456.789
 	Shares string `json:"shares"`
+	// required: true
+	// example: 123456
+	Balance string `json:"balance"`
 }
 
 // Tx info common return payload
