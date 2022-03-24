@@ -112,16 +112,34 @@ describe('parseTx', () => {
 
   it('should be able to parse a undelegate tx', async () => {
     const { tx } = undelegate
-    const address = 'cosmos179k2lz70rxvjrvvr65cynw9x5c8v3kftg46v05'
+    const address = 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e'
     const expected: ParsedTx = {
-      address: 'cosmos179k2lz70rxvjrvvr65cynw9x5c8v3kftg46v05',
+      address: address,
       blockHash: '140D9DEC3087EA26248B60559D9C044F649749E4483E8E1F30143A8E47E7FFE8',
       blockHeight: 9636932,
-      blockTime: 1645207449,
+      blockTime: 1646429915,
       caip2: 'cosmos:cosmoshub-4',
-      confirmations: 358801,
+      confirmations: 229191,
       status: Status.Confirmed,
-      transfers: [],
+      fee: {
+        caip19: 'cosmos:cosmoshub-4/slip44:118',
+        value: '6250',
+      },
+      transfers: [
+        {
+          caip19: 'cosmos:cosmoshub-4/slip44:118',
+          components: [
+            {
+              value: '200000',
+            },
+          ],
+          from: 'cosmosvaloper1sjllsnramtg3ewxqwwrwjxfgc4n4ef9u2lcnj0',
+          to: 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e',
+          token: undefined,
+          totalValue: '200000',
+          type: TransferType.Receive,
+        },
+      ],
       txid: '1795FE6ED7B5A8C5478CBDE27F35C8FB64FC6229B7B90FA47D4406AA2078BBAB',
       data: {
         parser: 'cosmos',
