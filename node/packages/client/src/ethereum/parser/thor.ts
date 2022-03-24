@@ -1,7 +1,7 @@
 import { ethers } from 'ethers'
 import { Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
-import { Dex, GenericParser, TradeType, TxSpecific } from '../../types'
-import { Network, ThorTx } from '../types'
+import { Dex, TradeType } from '../../types'
+import { Network, SubParser, TxSpecific } from '../types'
 import THOR_ABI from './abi/thor'
 import { getSigHash, txInteractsWithContract } from './utils'
 import { THOR_ROUTER_CONTRACT_MAINNET, THOR_ROUTER_CONTRACT_ROPSTEN } from './constants'
@@ -13,7 +13,7 @@ export interface ParserArgs {
   rpcUrl: string
 }
 
-export class Parser implements GenericParser<BlockbookTx> {
+export class Parser implements SubParser {
   abiInterface: ethers.utils.Interface
 
   readonly depositSigHash: string
@@ -45,7 +45,7 @@ export class Parser implements GenericParser<BlockbookTx> {
     return result.to
   }
 
-  async parse(tx: BlockbookTx): Promise<TxSpecific<ThorTx> | undefined> {
+  async parse(tx: BlockbookTx): Promise<TxSpecific | undefined> {
     const txData = tx.ethereumSpecific?.data
     if (!txInteractsWithContract(tx, this.routerContract)) return
     if (!txData) return

@@ -2,8 +2,8 @@ import { caip19, AssetNamespace } from '@shapeshiftoss/caip'
 import { ChainTypes } from '@shapeshiftoss/types'
 import { Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { ethers } from 'ethers'
-import { GenericParser, Transfer, TransferType, TxSpecific } from '../../types'
-import { Network, UniV2Tx } from '../types'
+import { Transfer, TransferType } from '../../types'
+import { Network, SubParser, TxSpecific } from '../types'
 import UNIV2_ABI from './abi/uniV2'
 import ERC20_ABI from './abi/erc20'
 import { getSigHash, toNetworkType, txInteractsWithContract } from './utils'
@@ -14,7 +14,7 @@ export interface ParserArgs {
   provider: ethers.providers.JsonRpcProvider
 }
 
-export class Parser implements GenericParser<BlockbookTx> {
+export class Parser implements SubParser {
   abiInterface = new ethers.utils.Interface(UNIV2_ABI)
   network: Network
   provider: ethers.providers.JsonRpcProvider
@@ -35,7 +35,7 @@ export class Parser implements GenericParser<BlockbookTx> {
     }[this.network]
   }
 
-  async parse(tx: BlockbookTx): Promise<TxSpecific<UniV2Tx> | undefined> {
+  async parse(tx: BlockbookTx): Promise<TxSpecific | undefined> {
     if (!tx.ethereumSpecific?.data) return
     if (!txInteractsWithContract(tx, UNI_V2_ROUTER_CONTRACT)) return
     if (!(tx.confirmations === 0)) return
