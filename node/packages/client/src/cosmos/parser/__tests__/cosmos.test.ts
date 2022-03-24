@@ -156,9 +156,9 @@ describe('parseTx', () => {
 
   it('should be able to parse a redelegate tx', async () => {
     const { tx } = redelegate
-    const address = 'cosmos179k2lz70rxvjrvvr65cynw9x5c8v3kftg46v05'
+    const address = 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e'
     const expected: ParsedTx = {
-      address: 'cosmos179k2lz70rxvjrvvr65cynw9x5c8v3kftg46v05',
+      address,
       blockHash: 'C3B387CF51B0957D52A79CF5EB4E50665661AC9528C6A65501EB45DA3D3A4A49',
       blockHeight: 9636911,
       blockTime: 1646429755,
@@ -173,6 +173,10 @@ describe('parseTx', () => {
         sourceValidator: 'cosmosvaloper1sjllsnramtg3ewxqwwrwjxfgc4n4ef9u2lcnj0',
         delegator: 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e',
         destinationValidator: 'cosmosvaloper156gqf9837u7d4c4678yt3rl4ls9c5vuursrrzf',
+      },
+      fee: {
+        caip19: 'cosmos:cosmoshub-4/slip44:118',
+        value: '6250',
       },
     }
 
