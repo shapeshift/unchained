@@ -25,14 +25,6 @@ export class TransactionParser {
   }
 
   async parse(tx: CosmosTx, address: string): Promise<ParsedTx> {
-    const msg = tx.messages[0]
-    const events = tx.events[0]
-
-    const data = metaData(msg, events, this.assetId)
-
-    // fall back on metaData value if it isn't found in the message (ie. withdraw_delegator_reward)
-    const value = new BigNumber(msg.value?.amount || data?.value || 0)
-
     const parsedTx: ParsedTx = {
       address,
       blockHash: tx.blockHash,
@@ -43,9 +35,17 @@ export class TransactionParser {
       status: tx.confirmations > 0 ? Status.Confirmed : Status.Pending, // TODO: handle failed case
       transfers: [],
       txid: tx.txid,
-      data: data,
     }
 
+    const msg = tx.messages[0]
+    const events = tx.events[0]
+
+    if (!msg) return parsedTx
+
+    parsedTx.data = metaData(msg, events, this.assetId)
+
+    // fall back on metaData value if it isn't found in the message (ie. withdraw_delegator_reward)
+    const value = new BigNumber(msg.value?.amount || parsedTx.data?.value || 0)
     if (msg.from === address) {
       if (value.gt(0)) {
         parsedTx.transfers = aggregateTransfer(
