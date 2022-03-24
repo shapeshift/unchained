@@ -161,9 +161,9 @@ describe('parseTx', () => {
       address: 'cosmos179k2lz70rxvjrvvr65cynw9x5c8v3kftg46v05',
       blockHash: 'C3B387CF51B0957D52A79CF5EB4E50665661AC9528C6A65501EB45DA3D3A4A49',
       blockHeight: 9636911,
-      blockTime: 1645207449,
+      blockTime: 1646429755,
       caip2: 'cosmos:cosmoshub-4',
-      confirmations: 358801,
+      confirmations: 229341,
       status: Status.Confirmed,
       transfers: [],
       txid: 'A69531AE72161D6556CEE744D5D6B3D0661443FA66C89360F40EC75CF7E278CA',
@@ -171,6 +171,7 @@ describe('parseTx', () => {
         parser: 'cosmos',
         method: 'begin_redelegate',
         sourceValidator: 'cosmosvaloper1sjllsnramtg3ewxqwwrwjxfgc4n4ef9u2lcnj0',
+        delegator: 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e',
         destinationValidator: 'cosmosvaloper156gqf9837u7d4c4678yt3rl4ls9c5vuursrrzf',
       },
     }
@@ -185,10 +186,11 @@ describe('parseTx', () => {
     const address = 'cosmos179k2lz70rxvjrvvr65cynw9x5c8v3kftg46v05'
     const expected: ParsedTx = {
       address: 'cosmos179k2lz70rxvjrvvr65cynw9x5c8v3kftg46v05',
+      blockHash: 'DFFDB4B083138492721673E6754FAE5533C8D2D0AFC1928E959CDBB464E20864',
       blockHeight: 9636957,
-      blockTime: 1645207449,
+      blockTime: 1646430088,
       caip2: 'cosmos:cosmoshub-4',
-      confirmations: 358801,
+      confirmations: 229248,
       status: Status.Confirmed,
       transfers: [],
       txid: 'E34AFB3A28198957040073034E16D4A979B403E672859651B41C207538136ABE',
@@ -199,6 +201,7 @@ describe('parseTx', () => {
         value: '39447',
         caip19: 'cosmos:cosmoshub-4/slip44:118',
       },
+      fee: { caip19: 'cosmos:cosmoshub-4/slip44:118', value: '7000' },
     }
 
     const actual = await txParser.parse(tx, address)

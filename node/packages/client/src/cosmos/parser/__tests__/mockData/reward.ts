@@ -1,9 +1,10 @@
 export default {
   tx: {
     txid: 'E34AFB3A28198957040073034E16D4A979B403E672859651B41C207538136ABE',
+    blockHash: 'DFFDB4B083138492721673E6754FAE5533C8D2D0AFC1928E959CDBB464E20864',
     blockHeight: 9636957,
-    timestamp: 1645207449,
-    confirmations: 358801,
+    timestamp: 1646430088,
+    confirmations: 229248,
     fee: {
       amount: '7000',
       denom: 'uatom',
@@ -14,6 +15,7 @@ export default {
     value: '',
     messages: [
       {
+        origin: 'cosmos179k2lz70rxvjrvvr65cynw9x5c8v3kftg46v05',
         from: 'cosmosvaloper1hdrlqvyjfy5sdrseecjrutyws9khtxxaux62l7',
         to: 'cosmos179k2lz70rxvjrvvr65cynw9x5c8v3kftg46v05',
         type: 'withdraw_delegator_reward',
@@ -23,6 +25,7 @@ export default {
         },
       },
       {
+        origin: 'cosmos179k2lz70rxvjrvvr65cynw9x5c8v3kftg46v05',
         from: 'cosmosvaloper1lzhlnpahvznwfv4jmay2tgaha5kmz5qxerarrl',
         to: 'cosmos179k2lz70rxvjrvvr65cynw9x5c8v3kftg46v05',
         type: 'withdraw_delegator_reward',
