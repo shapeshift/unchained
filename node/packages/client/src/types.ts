@@ -67,7 +67,6 @@ export interface StandardTx {
   trade?: Trade
   transfers: Array<Transfer>
   txid: string
-  value: string
 }
 
 export type Tx = StandardTx

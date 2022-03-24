@@ -1,4 +1,5 @@
-import { Dex, Status, Trade, TradeType, TransferType, Tx } from '../../../types'
+import { Dex, Status, Trade, TradeType, TransferType } from '../../../types'
+import { ParsedTx as Tx } from '../../types'
 import { TransactionParser } from '../index'
 import multiSigSendEth from './mockData/multiSigSendEth'
 import thorSwapDepositEth from './mockData/thorSwapDepositEth'
@@ -63,7 +64,6 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: undefined,
-        value: tx.value,
         status: Status.Confirmed,
         transfers: [standardTransfer],
       }
@@ -104,7 +104,6 @@ describe('parseTx', () => {
           method: 'deposit',
           parser: 'thor',
         },
-        value: tx.value,
         status: Status.Confirmed,
         fee: {
           caip19: 'eip155:1/slip44:60',
@@ -149,7 +148,6 @@ describe('parseTx', () => {
           method: 'deposit',
           parser: 'thor',
         },
-        value: tx.value,
         status: Status.Confirmed,
         fee: {
           caip19: 'eip155:1/slip44:60',
@@ -194,7 +192,6 @@ describe('parseTx', () => {
           method: 'transferOut',
           parser: 'thor',
         },
-        value: tx.value,
         status: Status.Confirmed,
         transfers: [buyTransfer],
         trade,
@@ -235,7 +232,6 @@ describe('parseTx', () => {
           method: 'transferOut',
           parser: 'thor',
         },
-        value: tx.value,
         status: Status.Confirmed,
         transfers: [buyTransfer],
         trade,
@@ -276,7 +272,6 @@ describe('parseTx', () => {
           method: 'transferOut',
           parser: 'thor',
         },
-        value: tx.value,
         status: Status.Confirmed,
         transfers: [buyTransfer],
         trade,
@@ -336,7 +331,6 @@ describe('parseTx', () => {
           method: undefined,
           parser: 'zrx',
         },
-        value: tx.value,
         status: Status.Confirmed,
         fee: {
           value: '8308480000000000',
@@ -399,7 +393,6 @@ describe('parseTx', () => {
           method: undefined,
           parser: 'zrx',
         },
-        value: tx.value,
         status: Status.Confirmed,
         fee: {
           value: '19815285000000000',
@@ -454,7 +447,6 @@ describe('parseTx', () => {
           method: undefined,
           parser: 'zrx',
         },
-        value: tx.value,
         status: Status.Confirmed,
         fee: {
           value: '78183644000000000',
@@ -529,7 +521,6 @@ describe('parseTx', () => {
           method: undefined,
           parser: 'zrx',
         },
-        value: tx.value,
         status: Status.Confirmed,
         fee: {
           value: '18399681000000000',
@@ -558,7 +549,6 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: txMempool.confirmations,
         data: undefined,
-        value: txMempool.value,
         status: Status.Pending,
         transfers: [
           {
@@ -598,7 +588,6 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: undefined,
-        value: tx.value,
         status: Status.Confirmed,
         fee: {
           value: '399000000000000',
@@ -641,7 +630,6 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: txMempool.confirmations,
         data: undefined,
-        value: txMempool.value,
         status: Status.Pending,
         transfers: [
           {
@@ -683,7 +671,6 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: undefined,
-        value: tx.value,
         status: Status.Confirmed,
         fee: {
           value: '1011738000000000',
@@ -731,7 +718,6 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: undefined,
-        value: tx.value,
         status: Status.Confirmed,
         fee: {
           value: '1447243200000000',
@@ -760,7 +746,6 @@ describe('parseTx', () => {
           method: 'addLiquidityETH',
           parser: 'uniV2',
         },
-        value: txMempool.value,
         status: Status.Pending,
         transfers: [
           {
@@ -806,7 +791,6 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: undefined,
-        value: tx.value,
         status: Status.Confirmed,
         fee: {
           value: '26926494400000000',
@@ -862,7 +846,6 @@ describe('parseTx', () => {
           method: 'removeLiquidityETH',
           parser: 'uniV2',
         },
-        value: txMempool.value,
         status: Status.Pending,
         transfers: [
           {
@@ -895,7 +878,6 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: undefined,
-        value: tx.value,
         status: Status.Confirmed,
         fee: {
           value: '4082585000000000',
@@ -951,7 +933,6 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: undefined,
-        value: tx.value,
         status: Status.Confirmed,
         fee: {
           value: '2559843000000000',
@@ -988,7 +969,6 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: txMempool.confirmations,
         data: undefined,
-        value: txMempool.value,
         status: Status.Pending,
         transfers: [],
       }
@@ -1011,7 +991,6 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: undefined,
-        value: tx.value,
         status: Status.Confirmed,
         fee: {
           value: '4650509500000000',
@@ -1047,7 +1026,6 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: txMempool.confirmations,
         data: undefined,
-        value: txMempool.value,
         status: Status.Pending,
         transfers: [],
       }
@@ -1070,7 +1048,6 @@ describe('parseTx', () => {
         caip2: 'eip155:1',
         confirmations: tx.confirmations,
         data: undefined,
-        value: tx.value,
         status: Status.Confirmed,
         fee: {
           value: '6136186875000000',
@@ -1121,7 +1098,6 @@ describe('parseTx', () => {
           method: 'approve',
           parser: 'yearn',
         },
-        value: tx.value,
         status: Status.Confirmed,
         fee: {
           value: '4519526097650998',
@@ -1150,7 +1126,6 @@ describe('parseTx', () => {
           method: 'deposit',
           parser: 'yearn',
         },
-        value: tx.value,
         status: Status.Confirmed,
         fee: {
           value: '18139009291874667',
@@ -1198,7 +1173,6 @@ describe('parseTx', () => {
           method: 'withdraw',
           parser: 'yearn',
         },
-        value: tx.value,
         status: Status.Confirmed,
         fee: {
           value: '19460274119661600',

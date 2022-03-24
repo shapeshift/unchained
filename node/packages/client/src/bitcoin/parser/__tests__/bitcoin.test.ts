@@ -18,7 +18,6 @@ describe('parseTx', () => {
       status: Status.Pending,
       address: address,
       caip2: 'bip122:000000000019d6689c085ae165831e93',
-      value: txMempool.value,
       fee: {
         caip19: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
         value: '6528',
@@ -53,7 +52,6 @@ describe('parseTx', () => {
       status: Status.Confirmed,
       address: address,
       caip2: 'bip122:000000000019d6689c085ae165831e93',
-      value: tx.value,
       fee: {
         caip19: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
         value: '6528',
@@ -87,7 +85,6 @@ describe('parseTx', () => {
       status: Status.Pending,
       address: address,
       caip2: 'bip122:000000000019d6689c085ae165831e93',
-      value: txMempool.value,
       transfers: [
         {
           type: TransferType.Receive,
@@ -118,7 +115,6 @@ describe('parseTx', () => {
       status: Status.Confirmed,
       address: address,
       caip2: 'bip122:000000000019d6689c085ae165831e93',
-      value: tx.value,
       transfers: [
         {
           type: TransferType.Receive,
@@ -148,7 +144,6 @@ describe('parseTx', () => {
       status: Status.Pending,
       address: address,
       caip2: 'bip122:000000000019d6689c085ae165831e93',
-      value: txMempool.value,
       fee: {
         caip19: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
         value: '6112',
@@ -191,7 +186,6 @@ describe('parseTx', () => {
       status: Status.Confirmed,
       address: address,
       caip2: 'bip122:000000000019d6689c085ae165831e93',
-      value: tx.value,
       fee: {
         caip19: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
         value: '6112',

@@ -69,7 +69,6 @@ export class TransactionParser {
       trade: contractParserResult?.trade,
       transfers: contractParserResult?.transfers ?? [],
       txid: tx.txid,
-      value: tx.value,
       data: contractParserResult?.data,
     }
 

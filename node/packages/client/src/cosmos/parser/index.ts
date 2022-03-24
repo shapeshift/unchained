@@ -4,6 +4,7 @@ import { Status, TransferType } from '../../types'
 import { aggregateTransfer } from '../../utils'
 import { Tx as CosmosTx } from '../index'
 import { ParsedTx } from '../types'
+import { metaData } from './utils'
 
 export interface TransactionParserArgs {
   chainId: CAIP2
@@ -24,6 +25,14 @@ export class TransactionParser {
   }
 
   async parse(tx: CosmosTx, address: string): Promise<ParsedTx> {
+    const msg = tx.messages[0]
+    const events = tx.events[0]
+
+    const data = metaData(msg, events, address, this.chainId)
+
+    // fall back on metaData value if it isnt in the message (withdraw rewards)
+    const value = new BigNumber(msg.value?.amount ?? data.value ?? 0)
+
     const parsedTx: ParsedTx = {
       address,
       blockHash: tx.blockHash,
@@ -34,48 +43,45 @@ export class TransactionParser {
       status: tx.confirmations > 0 ? Status.Confirmed : Status.Pending, // TODO: handle failed case
       transfers: [],
       txid: tx.txid,
-      value: tx.value,
     }
 
-    // messages make best attempt to track where value is transferring to for a variety of tx types
-    // logs provide more specific information if needed as more complex tx types are added
-    tx.messages.forEach((msg) => {
-      if (msg.from === address) {
-        // send amount
-        const sendValue = new BigNumber(msg.value?.amount ?? 0)
-        if (sendValue.gt(0)) {
-          parsedTx.transfers = aggregateTransfer(
-            parsedTx.transfers,
-            TransferType.Send,
-            this.assetId,
-            msg.from ?? '',
-            msg.to ?? '',
-            sendValue.toString(10)
-          )
-        }
+    if (msg.type !== 'send') {
+      parsedTx.data = data
+    }
 
-        // network fee
-        const fees = new BigNumber(tx.fee.amount)
-        if (fees.gt(0)) {
-          parsedTx.fee = { caip19: this.assetId, value: fees.toString(10) }
-        }
+    if (msg.from === address) {
+      if (value.gt(0)) {
+        parsedTx.transfers = aggregateTransfer(
+          parsedTx.transfers,
+          TransferType.Send,
+          this.assetId,
+          msg.from ?? '',
+          msg.to ?? '',
+          value.toString(10)
+        )
       }
+    }
 
-      if (msg.to === address) {
-        // receive amount
-        const receiveValue = new BigNumber(msg.value?.amount ?? 0)
-        if (receiveValue.gt(0)) {
-          parsedTx.transfers = aggregateTransfer(
-            parsedTx.transfers,
-            TransferType.Receive,
-            this.assetId,
-            msg.from ?? '',
-            msg.to ?? '',
-            receiveValue.toString(10)
-          )
-        }
+    if (msg.to === address) {
+      if (value.gt(0)) {
+        parsedTx.transfers = aggregateTransfer(
+          parsedTx.transfers,
+          TransferType.Receive,
+          this.assetId,
+          msg.from ?? '',
+          msg.to ?? '',
+          value.toString(10)
+        )
       }
-    })
+    }
+
+    if (msg.origin === address) {
+      // network fee
+      const fees = new BigNumber(tx.fee.amount)
+      if (fees.gt(0)) {
+        parsedTx.fee = { caip19: this.assetId, value: fees.toString(10) }
+      }
+    }
 
     return parsedTx
   }

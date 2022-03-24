@@ -5,7 +5,7 @@ import standard from './mockData/standard'
 const txParser = new TransactionParser({ chainId: 'cosmos:cosmoshub-4' })
 
 describe('parseTx', () => {
-  it('should be able to parse a standard send tx', async () => {
+  it.only('should be able to parse a standard send tx', async () => {
     const { tx } = standard
     const address = 'cosmos1t5u0jfg3ljsjrh2m9e47d4ny2hea7eehxrzdgd'
 
@@ -18,7 +18,6 @@ describe('parseTx', () => {
       status: Status.Confirmed,
       address: address,
       caip2: 'cosmos:cosmoshub-4',
-      value: tx.value,
       fee: {
         caip19: 'cosmos:cosmoshub-4/slip44:118',
         value: '2500',
@@ -53,7 +52,6 @@ describe('parseTx', () => {
       status: Status.Confirmed,
       address: address,
       caip2: 'cosmos:cosmoshub-4',
-      value: tx.value,
       transfers: [
         {
           type: TransferType.Receive,
