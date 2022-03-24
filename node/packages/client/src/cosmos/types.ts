@@ -3,11 +3,9 @@ import { StandardTx, StandardTxMetadata } from '../types'
 export interface TxMetadata extends StandardTxMetadata {
   parser: 'cosmos'
   delegator?: string
-  oldValidator?: string
-  validator?: string
+  sourceValidator?: string
+  destinationValidator?: string
   caip19?: string
-  from?: string
-  to?: string
   value?: string
 }
 
