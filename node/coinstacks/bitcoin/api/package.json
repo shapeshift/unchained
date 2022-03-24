@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/bitcoin-api",
-  "version": "6.4.0",
+  "version": "6.5.0",
   "license": "MIT",
   "private": true,
   "files": [
@@ -12,9 +12,9 @@
     "generate": "tsoa spec-and-routes"
   },
   "dependencies": {
-    "@shapeshiftoss/bitcoin-ingester": "^6.4.0",
-    "@shapeshiftoss/blockbook": "^6.4.0",
-    "@shapeshiftoss/common-api": "^6.4.0",
+    "@shapeshiftoss/bitcoin-ingester": "^6.5.0",
+    "@shapeshiftoss/blockbook": "^6.5.0",
+    "@shapeshiftoss/common-api": "^6.5.0",
     "@shapeshiftoss/logger": "^1.0.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
