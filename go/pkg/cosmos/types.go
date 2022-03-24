@@ -147,6 +147,31 @@ type UnbondingEntry struct {
 	Balance Value `json:"balance"`
 }
 
+type ValidatorUnbonding struct {
+	Height    int `json:"height"`
+	Timestamp int `json:"timestamp"`
+}
+
+type ValidatorCommission struct {
+	Rate          string `json:"rate"`
+	MaxRate       string `json:"maxRate"`
+	MaxChangeRate string `json:"maxChangeRate"`
+}
+
+// Validator info common return payload
+type Validator struct {
+	Address     string              `json:"address"`
+	Moniker     string              `json:"moniker"`
+	Jailed      bool                `json:"jailed"`
+	Status      string              `json:"status"`
+	Tokens      string              `json:"tokens"`
+	Shares      string              `json:"shares`
+	Website     string              `json:"website"`
+	Description string              `json:"description"`
+	Unbonding   ValidatorUnbonding  `json:"unbonding"`
+	Commission  ValidatorCommission `json:"commission"`
+}
+
 // Contains info about an asset value
 // swagger:model Value
 type Value struct {

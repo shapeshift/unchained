@@ -77,6 +77,13 @@ func (h *Handler) StartWebsocket() error {
 }
 
 func (h *Handler) GetInfo() (api.Info, error) {
+	validatorsRes, err := h.httpClient.GetValidators()
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Printf("%+v\n", validatorsRes)
+
 	info := Info{
 		BaseInfo: api.BaseInfo{
 			Network: "mainnet",

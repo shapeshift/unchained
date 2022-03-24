@@ -77,11 +77,11 @@ type Commit struct {
 }
 
 type Evidence struct {
-	Type             *string    `json:"type,omitempty"`
-	Height           *int32     `json:"height,omitempty"`
-	Time             *int32     `json:"time,omitempty"`
-	TotalVotingPower *int32     `json:"total_voting_power,omitempty"`
-	Validator        *Validator `json:"validator,omitempty"`
+	Type             *string              `json:"type,omitempty"`
+	Height           *int32               `json:"height,omitempty"`
+	Time             *int32               `json:"time,omitempty"`
+	TotalVotingPower *int32               `json:"total_voting_power,omitempty"`
+	Validator        *TendermintValidator `json:"validator,omitempty"`
 }
 
 type PubKey struct {
@@ -148,7 +148,7 @@ type TxSearchResponseResultProofProof struct {
 	Aunts    []string `json:"aunts"`
 }
 
-type Validator struct {
+type TendermintValidator struct {
 	PubKey      *PubKey `json:"pub_key,omitempty"`
 	VotingPower *int32  `json:"voting_power,omitempty"`
 	Address     *string `json:"address,omitempty"`
