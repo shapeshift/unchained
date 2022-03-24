@@ -190,9 +190,18 @@ describe('parseTx', () => {
       blockHeight: 9636957,
       blockTime: 1646430088,
       caip2: 'cosmos:cosmoshub-4',
-      confirmations: 229248,
+      confirmations: 229401,
       status: Status.Confirmed,
-      transfers: [],
+      transfers: [
+        {
+          type: TransferType.Receive,
+          caip19: 'cosmos:cosmoshub-4/slip44:118',
+          from: 'cosmosvaloper1hdrlqvyjfy5sdrseecjrutyws9khtxxaux62l7',
+          to: 'cosmos179k2lz70rxvjrvvr65cynw9x5c8v3kftg46v05',
+          totalValue: '39447',
+          components: [{ value: '39447' }],
+        },
+      ],
       txid: 'E34AFB3A28198957040073034E16D4A979B403E672859651B41C207538136ABE',
       data: {
         parser: 'cosmos',

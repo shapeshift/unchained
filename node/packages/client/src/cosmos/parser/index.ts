@@ -31,7 +31,7 @@ export class TransactionParser {
     const data = metaData(msg, events, this.assetId)
 
     // fall back on metaData value if it isn't found in the message (ie. withdraw_delegator_reward)
-    const value = new BigNumber(msg.value?.amount ?? data?.value ?? 0)
+    const value = new BigNumber(msg.value?.amount || data?.value || 0)
 
     const parsedTx: ParsedTx = {
       address,

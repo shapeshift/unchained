@@ -4,7 +4,7 @@ export default {
     blockHash: 'DFFDB4B083138492721673E6754FAE5533C8D2D0AFC1928E959CDBB464E20864',
     blockHeight: 9636957,
     timestamp: 1646430088,
-    confirmations: 229248,
+    confirmations: 229401,
     fee: {
       amount: '7000',
       denom: 'uatom',
