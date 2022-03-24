@@ -2,7 +2,7 @@ import { TxMetadata } from '../types'
 import { Event, Message } from '../../generated/cosmos'
 import { Event as CosmosEvent, Message as CosmosMessage, Attribute as CosmosAttribute } from '../index'
 
-export const metaData = (msg: Message, events: Event[], address: string, caip19: string): TxMetadata => {
+export const metaData = (msg: Message, events: Event[], address: string, caip19: string): TxMetadata | undefined => {
   const parser = 'cosmos'
   const method = msg.type
 
@@ -16,22 +16,23 @@ export const metaData = (msg: Message, events: Event[], address: string, caip19:
 
   if (method === 'delegate') {
     delegator = address
-    validator = to || ''
+    validator = to ?? ''
     value = msg?.value?.amount ?? '0'
   } else if (method === 'begin_redelegate') {
-    oldValidator = from || ''
-    validator = to || ''
+    oldValidator = from ?? ''
+    validator = to ?? ''
     value = msg?.value?.amount ?? '0'
   } else if (method === 'begin_unbonding') {
-    validator = from || ''
-    delegator = to || ''
+    validator = from ?? ''
+    delegator = to ?? ''
     value = msg?.value?.amount ?? '0'
   } else if (method === 'withdraw_delegator_reward') {
-    validator = from || ''
-    delegator = to || ''
+    validator = from ?? ''
+    delegator = to ?? ''
     value = getRewardValue({ msg, events }) ?? '0'
   } else {
     console.error(`cosmos parser metaData unsupported message type ${method}`)
+    return undefined
   }
 
   return {

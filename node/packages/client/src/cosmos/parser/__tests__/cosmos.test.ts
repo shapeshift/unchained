@@ -5,7 +5,7 @@ import standard from './mockData/standard'
 const txParser = new TransactionParser({ chainId: 'cosmos:cosmoshub-4' })
 
 describe('parseTx', () => {
-  it.only('should be able to parse a standard send tx', async () => {
+  it('should be able to parse a standard send tx', async () => {
     const { tx } = standard
     const address = 'cosmos1t5u0jfg3ljsjrh2m9e47d4ny2hea7eehxrzdgd'
 

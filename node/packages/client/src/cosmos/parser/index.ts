@@ -31,7 +31,7 @@ export class TransactionParser {
     const data = metaData(msg, events, address, this.chainId)
 
     // fall back on metaData value if it isnt in the message (withdraw rewards)
-    const value = new BigNumber(msg.value?.amount ?? data.value ?? 0)
+    const value = new BigNumber(msg.value?.amount ?? data?.value ?? 0)
 
     const parsedTx: ParsedTx = {
       address,
@@ -43,10 +43,6 @@ export class TransactionParser {
       status: tx.confirmations > 0 ? Status.Confirmed : Status.Pending, // TODO: handle failed case
       transfers: [],
       txid: tx.txid,
-    }
-
-    if (msg.type !== 'send') {
-      parsedTx.data = data
     }
 
     if (msg.from === address) {
@@ -75,6 +71,7 @@ export class TransactionParser {
       }
     }
 
+    // We use origin for fees because some txs have a different from and origin addresses
     if (msg.origin === address) {
       // network fee
       const fees = new BigNumber(tx.fee.amount)
