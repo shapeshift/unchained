@@ -9,6 +9,10 @@ type QueryValidatorsResponse struct {
 	Pagination PageResponse        `json:"pagination,omitempty"`
 }
 
+type QueryValidatorResponse struct {
+	Validator ValidatorResponse `json:"validator"`
+}
+
 type PageResponse struct {
 	NextKey string `json:"next_key,omitempty"`
 	Total   int    `json:"total,omitempty,string"`
@@ -23,9 +27,9 @@ type DescriptionResponse struct {
 }
 
 type CommissionRates struct {
-	Rate          string `json:"rate"`
-	MaxRate       string `json:"max_rate"`
-	MaxChangeRate string `json:"max_change_rate"`
+	Rate          float64 `json:"rate,string"`
+	MaxRate       string  `json:"max_rate"`
+	MaxChangeRate string  `json:"max_change_rate"`
 }
 
 type Commission struct {

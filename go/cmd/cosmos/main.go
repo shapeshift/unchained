@@ -49,14 +49,16 @@ func main() {
 	encoding := cosmos.NewEncoding()
 
 	cfg := cosmos.Config{
-		APIKey:           conf.APIKey,
-		Bech32AddrPrefix: "cosmos",
-		Bech32PkPrefix:   "cosmospub",
-		Encoding:         encoding,
-		GRPCURL:          conf.GRPCURL,
-		LCDURL:           conf.LCDURL,
-		RPCURL:           conf.RPCURL,
-		WSURL:            conf.WSURL,
+		APIKey:            conf.APIKey,
+		Bech32AddrPrefix:  "cosmos",
+		Bech32PkPrefix:    "cosmospub",
+		Bech32ValPrefix:   "cosmosvaloper",
+		Bech32PkValPrefix: "cosmosvalpub",
+		Encoding:          encoding,
+		GRPCURL:           conf.GRPCURL,
+		LCDURL:            conf.LCDURL,
+		RPCURL:            conf.RPCURL,
+		WSURL:             conf.WSURL,
 	}
 
 	httpClient, err := cosmos.NewHTTPClient(cfg)

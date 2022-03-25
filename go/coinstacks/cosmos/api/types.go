@@ -1,6 +1,8 @@
 package api
 
 import (
+	"math/big"
+
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 )
@@ -11,8 +13,6 @@ type Info struct {
 	// swagger:allOf
 	api.BaseInfo
 	// required: true
-	Validators []cosmos.Validator `json:"validators"`
-	// required: true
 	// example: 291107634956378
 	TotalSupply string `json:"totalSupply"`
 	// required: true
@@ -20,7 +20,7 @@ type Info struct {
 	BondedTokens string `json:"bondedTokens"`
 	// required: true
 	// example: 0.1541068456
-	APR string `json:"apr"`
+	APR *big.Float `json:"apr"`
 	// required: true
 	// example: 29255184955917.174457731278996910
 	AnnualProvisions string `json:"annualProvisions"`
@@ -49,7 +49,7 @@ type Account struct {
 	// required: true
 	Unbondings []cosmos.Unbonding `json:"unbondings"`
 	// required: true
-	Rewards []cosmos.Value `json:"rewards"`
+	Rewards []cosmos.Reward `json:"rewards"`
 }
 
 // Contains info about a transaction

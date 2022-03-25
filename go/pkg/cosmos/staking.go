@@ -1,11 +1,14 @@
 package cosmos
 
 import (
+	"fmt"
+	"math/big"
+
 	"github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/pkg/errors"
 )
 
-func (c *HTTPClient) GetValidators() ([]Validator, error) {
+func (c *HTTPClient) GetValidators(apr *big.Float) ([]Validator, error) {
 	var res QueryValidatorsResponse
 
 	_, err := c.cosmos.R().SetResult(&res).Get("/cosmos/staking/v1beta1/validators")
@@ -15,37 +18,51 @@ func (c *HTTPClient) GetValidators() ([]Validator, error) {
 
 	validators := []Validator{}
 	for _, v := range res.Validators {
-		unbonding := ValidatorUnbonding{
-			Height:    v.UnbondingHeight,
-			Timestamp: int(v.UnbondingTime.Unix()),
-		}
-
-		commission := ValidatorCommission{
-			Rate:          v.Commission.Rate,
-			MaxRate:       v.Commission.MaxRate,
-			MaxChangeRate: v.Commission.MaxChangeRate,
-		}
-
-		validator := Validator{
-			Address:     v.OperatorAddress,
-			Moniker:     v.Description.Moniker,
-			Jailed:      v.Jailed,
-			Status:      v.Status,
-			Tokens:      v.Tokens,
-			Shares:      v.DelegatorShares,
-			Website:     v.Description.Website,
-			Description: v.Description.Details,
-			Unbonding:   unbonding,
-			Commission:  commission,
-		}
-
-		validators = append(validators, validator)
+		validators = append(validators, *httpValidator(v, apr))
 	}
 
 	return validators, nil
 }
 
-func (c *GRPCClient) GetValidators() ([]Validator, error) {
+func (c *HTTPClient) GetValidator(addr string, apr *big.Float) (*Validator, error) {
+	var res QueryValidatorResponse
+
+	_, err := c.cosmos.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/staking/v1beta1/validators/%s", addr))
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get validators")
+	}
+
+	return httpValidator(res.Validator, apr), nil
+}
+
+func httpValidator(validator ValidatorResponse, apr *big.Float) *Validator {
+	unbonding := ValidatorUnbonding{
+		Height:    validator.UnbondingHeight,
+		Timestamp: int(validator.UnbondingTime.Unix()),
+	}
+
+	commission := ValidatorCommission{
+		Rate:          big.NewFloat(validator.Commission.Rate),
+		MaxRate:       validator.Commission.MaxRate,
+		MaxChangeRate: validator.Commission.MaxChangeRate,
+	}
+
+	return &Validator{
+		Address:     validator.OperatorAddress,
+		Moniker:     validator.Description.Moniker,
+		Jailed:      validator.Jailed,
+		Status:      validator.Status,
+		Tokens:      validator.Tokens,
+		Shares:      validator.DelegatorShares,
+		Website:     validator.Description.Website,
+		Description: validator.Description.Details,
+		APR:         new(big.Float).Mul(apr, new(big.Float).Sub(big.NewFloat(1), commission.Rate)),
+		Unbonding:   unbonding,
+		Commission:  commission,
+	}
+}
+
+func (c *GRPCClient) GetValidators(apr *big.Float) ([]Validator, error) {
 	res, err := c.staking.Validators(c.ctx, &types.QueryValidatorsRequest{})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get validators")
@@ -53,32 +70,49 @@ func (c *GRPCClient) GetValidators() ([]Validator, error) {
 
 	validators := []Validator{}
 	for _, v := range res.Validators {
-		unbonding := ValidatorUnbonding{
-			Height:    int(v.UnbondingHeight),
-			Timestamp: int(v.UnbondingTime.Unix()),
-		}
-
-		commission := ValidatorCommission{
-			Rate:          v.Commission.Rate.String(),
-			MaxRate:       v.Commission.MaxRate.String(),
-			MaxChangeRate: v.Commission.MaxChangeRate.String(),
-		}
-
-		validator := Validator{
-			Address:     v.OperatorAddress,
-			Moniker:     v.Description.Moniker,
-			Jailed:      v.Jailed,
-			Status:      v.Status.String(),
-			Tokens:      v.Tokens.String(),
-			Shares:      v.DelegatorShares.String(),
-			Website:     v.Description.Website,
-			Description: v.Description.Details,
-			Unbonding:   unbonding,
-			Commission:  commission,
-		}
-
-		validators = append(validators, validator)
+		validators = append(validators, *grpcValidator(v, apr))
 	}
 
 	return validators, nil
+}
+
+func (c *GRPCClient) GetValidator(addr string, apr *big.Float) (*Validator, error) {
+	res, err := c.staking.Validator(c.ctx, &types.QueryValidatorRequest{ValidatorAddr: addr})
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get validators")
+	}
+
+	return grpcValidator(res.Validator, apr), nil
+}
+
+func grpcValidator(validator types.Validator, apr *big.Float) *Validator {
+	unbonding := ValidatorUnbonding{
+		Height:    int(validator.UnbondingHeight),
+		Timestamp: int(validator.UnbondingTime.Unix()),
+	}
+
+	commissionRate, err := validator.Commission.Rate.Float64()
+	if err != nil {
+		commissionRate = 0
+	}
+
+	commission := ValidatorCommission{
+		Rate:          big.NewFloat(commissionRate),
+		MaxRate:       validator.Commission.MaxRate.String(),
+		MaxChangeRate: validator.Commission.MaxChangeRate.String(),
+	}
+
+	return &Validator{
+		Address:     validator.OperatorAddress,
+		Moniker:     validator.Description.Moniker,
+		Jailed:      validator.Jailed,
+		Status:      validator.Status.String(),
+		Tokens:      validator.Tokens.String(),
+		Shares:      validator.DelegatorShares.String(),
+		Website:     validator.Description.Website,
+		Description: validator.Description.Details,
+		APR:         new(big.Float).Mul(apr, new(big.Float).Sub(big.NewFloat(1), commission.Rate)),
+		Unbonding:   unbonding,
+		Commission:  commission,
+	}
 }

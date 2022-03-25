@@ -1,6 +1,8 @@
 package cosmos
 
 import (
+	"math/big"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 )
@@ -40,7 +42,7 @@ type Block struct {
 // swagger:model Delegation
 type Delegation struct {
 	// required: true
-	Validator string `json:"validator"`
+	Validator *Validator `json:"validator"`
 	// required: true
 	// example: 123456.789
 	Shares string `json:"shares"`
@@ -93,9 +95,9 @@ type Pagination struct {
 // swagger:model Redelegation
 type Redelegation struct {
 	// required: true
-	SourceValidator string `json:"sourceValidator"`
+	SourceValidator *Validator `json:"sourceValidator"`
 	// required: true
-	DestinationValidator string `json:"destinationValidator"`
+	DestinationValidator *Validator `json:"destinationValidator"`
 	// required: true
 	Entries []RedelegationEntry `json:"entries"`
 }
@@ -112,6 +114,11 @@ type RedelegationEntry struct {
 	// required: true
 	// example: 123456
 	Balance string `json:"balance"`
+}
+
+type Reward struct {
+	Validator *Validator `json:"validator"`
+	Rewards   []Value    `json:"rewards"`
 }
 
 // Tx info common return payload
@@ -131,7 +138,7 @@ type TxHistory struct {
 // swagger:model Unbonding
 type Unbonding struct {
 	// required: true
-	Validator string `json:"validator"`
+	Validator *Validator `json:"validator"`
 	// required: true
 	Entries []UnbondingEntry `json:"entries"`
 }
@@ -163,13 +170,19 @@ type ValidatorUnbonding struct {
 type ValidatorCommission struct {
 	// required: true
 	// example: 0.050000000000000000
-	Rate string `json:"rate"`
+	Rate *big.Float `json:"rate"`
 	// required: true
 	// example: 0.200000000000000000
 	MaxRate string `json:"maxRate"`
 	// required: true
 	// example: 0.010000000000000000
 	MaxChangeRate string `json:"maxChangeRate"`
+}
+
+// Contains a list of validators
+// swagger:model Validators
+type Validators struct {
+	Validators []Validator `json:"validators"`
 }
 
 // Contains info about a validator
@@ -198,6 +211,9 @@ type Validator struct {
 	// required: true
 	// example: Your most super validator around!
 	Description string `json:"description"`
+	// required: true
+	// example: 0.1541068456
+	APR *big.Float `json:"apr"`
 	// required: true
 	Unbonding ValidatorUnbonding `json:"unbonding"`
 	// required: true

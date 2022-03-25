@@ -131,59 +131,64 @@ func (h *Handler) GetInfo() (api.Info, error) {
 		BondedTokens:     bondedTokens,
 		AnnualProvisions: annualProvisions,
 		CommunityTax:     communityTax,
-		APR:              apr.String(),
+		APR:              apr,
 	}
 
 	return info, nil
 }
 
 func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
-	accRes, err := h.httpClient.GetAccount(pubkey)
+	info, err := h.GetInfo()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get info")
+	}
+
+	account, err := h.httpClient.GetAccount(pubkey)
 	if err != nil {
 		return nil, err
 	}
 
-	balRes, err := h.httpClient.GetBalance(pubkey, "uatom")
+	balance, err := h.httpClient.GetBalance(pubkey, "uatom")
 	if err != nil {
 		return nil, err
 	}
 
-	delRes, err := h.httpClient.GetDelegations(pubkey)
+	delegations, err := h.httpClient.GetDelegations(pubkey, info.(Info).APR)
 	if err != nil {
 		return nil, err
 	}
 
-	redelRes, err := h.httpClient.GetRedelegations(pubkey)
+	redelegations, err := h.httpClient.GetRedelegations(pubkey, info.(Info).APR)
 	if err != nil {
 		return nil, err
 	}
 
-	unbondingsRes, err := h.httpClient.GetUnbondings(pubkey, "uatom")
+	unbondings, err := h.httpClient.GetUnbondings(pubkey, "uatom", info.(Info).APR)
 	if err != nil {
 		return nil, err
 	}
 
-	rewardsRes, err := h.httpClient.GetRewards(pubkey)
+	rewards, err := h.httpClient.GetRewards(pubkey, info.(Info).APR)
 	if err != nil {
 		return nil, err
 	}
 
-	account := &Account{
+	a := &Account{
 		BaseAccount: api.BaseAccount{
-			Balance:            balRes.Amount,
+			Balance:            balance.Amount,
 			UnconfirmedBalance: "0",
-			Pubkey:             accRes.Address,
+			Pubkey:             account.Address,
 		},
-		AccountNumber: int(accRes.AccountNumber),
-		Sequence:      int(accRes.Sequence),
-		Assets:        balRes.Assets,
-		Delegations:   delRes,
-		Redelegations: redelRes,
-		Unbondings:    unbondingsRes,
-		Rewards:       rewardsRes,
+		AccountNumber: int(account.AccountNumber),
+		Sequence:      int(account.Sequence),
+		Assets:        balance.Assets,
+		Delegations:   delegations,
+		Redelegations: redelegations,
+		Unbondings:    unbondings,
+		Rewards:       rewards,
 	}
 
-	return account, nil
+	return a, nil
 }
 
 func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
@@ -243,4 +248,22 @@ func (h *Handler) SendTx(rawTx string) (string, error) {
 
 func (h *Handler) EstimateGas(rawTx string) (string, error) {
 	return h.httpClient.GetEstimateGas(rawTx)
+}
+
+func (h *Handler) GetValidators() ([]cosmos.Validator, error) {
+	info, err := h.GetInfo()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get info")
+	}
+
+	return h.httpClient.GetValidators(info.(Info).APR)
+}
+
+func (h *Handler) GetValidator(address string) (*cosmos.Validator, error) {
+	info, err := h.GetInfo()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get info")
+	}
+
+	return h.httpClient.GetValidator(address, info.(Info).APR)
 }

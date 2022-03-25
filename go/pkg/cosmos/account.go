@@ -2,6 +2,7 @@ package cosmos
 
 import (
 	"fmt"
+	"math/big"
 	"strconv"
 	"time"
 
@@ -55,7 +56,7 @@ func (c *HTTPClient) GetBalance(address string, baseDenom string) (*Balance, err
 	return balance(res.Balances, baseDenom)
 }
 
-func (c *HTTPClient) GetDelegations(address string) ([]Delegation, error) {
+func (c *HTTPClient) GetDelegations(address string, apr *big.Float) ([]Delegation, error) {
 	var res struct {
 		DelegationResponses []struct {
 			Delegation struct {
@@ -75,8 +76,13 @@ func (c *HTTPClient) GetDelegations(address string) ([]Delegation, error) {
 
 	delgations := []Delegation{}
 	for _, r := range res.DelegationResponses {
+		validator, err := c.GetValidator(r.Delegation.ValidatorAddress, apr)
+		if err != nil {
+			validator = &Validator{Address: r.Delegation.ValidatorAddress}
+		}
+
 		d := Delegation{
-			Validator: r.Delegation.ValidatorAddress,
+			Validator: validator,
 			Shares:    r.Delegation.Shares,
 			Balance: Value{
 				Amount: r.Balance.Amount.String(),
@@ -89,7 +95,7 @@ func (c *HTTPClient) GetDelegations(address string) ([]Delegation, error) {
 	return delgations, nil
 }
 
-func (c *HTTPClient) GetRedelegations(address string) ([]Redelegation, error) {
+func (c *HTTPClient) GetRedelegations(address string, apr *big.Float) ([]Redelegation, error) {
 	type Entry struct {
 		CreationHeight int       `json:"creation_height"`
 		CompletionTime time.Time `json:"completion_time"`
@@ -131,9 +137,19 @@ func (c *HTTPClient) GetRedelegations(address string) ([]Redelegation, error) {
 			entries = append(entries, entry)
 		}
 
+		sourceValidator, err := c.GetValidator(r.Redelegation.ValidatorSrcAddress, apr)
+		if err != nil {
+			sourceValidator = &Validator{Address: r.Redelegation.ValidatorSrcAddress}
+		}
+
+		destinationValidator, err := c.GetValidator(r.Redelegation.ValidatorDstAddress, apr)
+		if err != nil {
+			destinationValidator = &Validator{Address: r.Redelegation.ValidatorDstAddress}
+		}
+
 		redelegation := Redelegation{
-			SourceValidator:      r.Redelegation.ValidatorSrcAddress,
-			DestinationValidator: r.Redelegation.ValidatorDstAddress,
+			SourceValidator:      sourceValidator,
+			DestinationValidator: destinationValidator,
 			Entries:              entries,
 		}
 		redelgations = append(redelgations, redelegation)
@@ -142,7 +158,7 @@ func (c *HTTPClient) GetRedelegations(address string) ([]Redelegation, error) {
 	return redelgations, nil
 }
 
-func (c *HTTPClient) GetUnbondings(address string, baseDenom string) ([]Unbonding, error) {
+func (c *HTTPClient) GetUnbondings(address string, baseDenom string, apr *big.Float) ([]Unbonding, error) {
 	var res struct {
 		UnbondingResponses []struct {
 			DelegatorAddress string `json:"delegator_address"`
@@ -173,8 +189,13 @@ func (c *HTTPClient) GetUnbondings(address string, baseDenom string) ([]Unbondin
 			entries = append(entries, entry)
 		}
 
+		validator, err := c.GetValidator(r.ValidatorAddress, apr)
+		if err != nil {
+			validator = &Validator{Address: r.ValidatorAddress}
+		}
+
 		u := Unbonding{
-			Validator: r.ValidatorAddress,
+			Validator: validator,
 			Entries:   entries,
 		}
 		unbondings = append(unbondings, u)
@@ -183,18 +204,19 @@ func (c *HTTPClient) GetUnbondings(address string, baseDenom string) ([]Unbondin
 	return unbondings, nil
 }
 
-func (c *HTTPClient) GetRewards(address string) ([]Value, error) {
-	type Reward struct {
-		Amount string `json:"amount"`
-		Denom  string `json:"denom"`
-	}
-
+func (c *HTTPClient) GetRewards(address string, apr *big.Float) ([]Reward, error) {
 	var res struct {
-		UnbondingResponses []struct {
-			ValidatorAddress string   `json:"validator_address"`
-			Reward           []Reward `json:"reward"`
+		Rewards []struct {
+			ValidatorAddress string `json:"validator_address"`
+			Reward           []struct {
+				Amount string `json:"amount"`
+				Denom  string `json:"denom"`
+			} `json:"reward"`
 		} `json:"rewards"`
-		Total []Reward `json:"total"`
+		Total []struct {
+			Amount string `json:"amount"`
+			Denom  string `json:"denom"`
+		} `json:"total"`
 	}
 
 	_, err := c.cosmos.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/distribution/v1beta1/delegators/%s/rewards", address))
@@ -202,9 +224,24 @@ func (c *HTTPClient) GetRewards(address string) ([]Value, error) {
 		return nil, errors.Wrap(err, "failed to get unbondings")
 	}
 
-	rewards := []Value{}
-	for _, r := range res.Total {
-		rewards = append(rewards, Value(r))
+	rewards := []Reward{}
+	for _, r := range res.Rewards {
+		validator, err := c.GetValidator(r.ValidatorAddress, apr)
+		if err != nil {
+			validator = &Validator{Address: r.ValidatorAddress}
+		}
+
+		valRewards := []Value{}
+		for _, r := range r.Reward {
+			valRewards = append(valRewards, Value(r))
+		}
+
+		reward := Reward{
+			Validator: validator,
+			Rewards:   valRewards,
+		}
+
+		rewards = append(rewards, reward)
 	}
 
 	return rewards, nil
@@ -239,7 +276,7 @@ func (c *GRPCClient) GetBalance(address string, baseDenom string) (*Balance, err
 	return balance(res.Balances, baseDenom)
 }
 
-func (c *GRPCClient) GetDelegations(address string) ([]Delegation, error) {
+func (c *GRPCClient) GetDelegations(address string, apr *big.Float) ([]Delegation, error) {
 	res, err := c.staking.DelegatorDelegations(c.ctx, &stakingtypes.QueryDelegatorDelegationsRequest{DelegatorAddr: address})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get delegations")
@@ -247,8 +284,13 @@ func (c *GRPCClient) GetDelegations(address string) ([]Delegation, error) {
 
 	delgations := []Delegation{}
 	for _, r := range res.DelegationResponses {
+		validator, err := c.GetValidator(r.Delegation.ValidatorAddress, apr)
+		if err != nil {
+			validator = &Validator{Address: r.Delegation.ValidatorAddress}
+		}
+
 		d := Delegation{
-			Validator: r.Delegation.ValidatorAddress,
+			Validator: validator,
 			Shares:    r.Delegation.Shares.String(),
 			Balance: Value{
 				Amount: r.Balance.Amount.String(),
@@ -261,7 +303,7 @@ func (c *GRPCClient) GetDelegations(address string) ([]Delegation, error) {
 	return delgations, nil
 }
 
-func (c *GRPCClient) GetRedelegations(address string) ([]Redelegation, error) {
+func (c *GRPCClient) GetRedelegations(address string, apr *big.Float) ([]Redelegation, error) {
 	res, err := c.staking.Redelegations(c.ctx, &stakingtypes.QueryRedelegationsRequest{DelegatorAddr: address})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get redelegations")
@@ -279,9 +321,19 @@ func (c *GRPCClient) GetRedelegations(address string) ([]Redelegation, error) {
 			entries = append(entries, entry)
 		}
 
+		sourceValidator, err := c.GetValidator(r.Redelegation.ValidatorSrcAddress, apr)
+		if err != nil {
+			sourceValidator = &Validator{Address: r.Redelegation.ValidatorSrcAddress}
+		}
+
+		destinationValidator, err := c.GetValidator(r.Redelegation.ValidatorDstAddress, apr)
+		if err != nil {
+			destinationValidator = &Validator{Address: r.Redelegation.ValidatorDstAddress}
+		}
+
 		redelegation := Redelegation{
-			SourceValidator:      r.Redelegation.ValidatorSrcAddress,
-			DestinationValidator: r.Redelegation.ValidatorDstAddress,
+			SourceValidator:      sourceValidator,
+			DestinationValidator: destinationValidator,
 			Entries:              entries,
 		}
 		redelgations = append(redelgations, redelegation)
@@ -290,7 +342,7 @@ func (c *GRPCClient) GetRedelegations(address string) ([]Redelegation, error) {
 	return redelgations, nil
 }
 
-func (c *GRPCClient) GetUnbondings(address string, baseDenom string) ([]Unbonding, error) {
+func (c *GRPCClient) GetUnbondings(address string, baseDenom string, apr *big.Float) ([]Unbonding, error) {
 	res, err := c.staking.DelegatorUnbondingDelegations(c.ctx, &stakingtypes.QueryDelegatorUnbondingDelegationsRequest{DelegatorAddr: address})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get unbondings")
@@ -307,8 +359,13 @@ func (c *GRPCClient) GetUnbondings(address string, baseDenom string) ([]Unbondin
 			entries = append(entries, entry)
 		}
 
+		validator, err := c.GetValidator(r.ValidatorAddress, apr)
+		if err != nil {
+			validator = &Validator{Address: r.ValidatorAddress}
+		}
+
 		u := Unbonding{
-			Validator: r.ValidatorAddress,
+			Validator: validator,
 			Entries:   entries,
 		}
 		unbondings = append(unbondings, u)
@@ -317,15 +374,34 @@ func (c *GRPCClient) GetUnbondings(address string, baseDenom string) ([]Unbondin
 	return unbondings, nil
 }
 
-func (c *GRPCClient) GetRewards(address string) ([]Value, error) {
+func (c *GRPCClient) GetRewards(address string, apr *big.Float) ([]Reward, error) {
 	res, err := c.distribution.DelegationTotalRewards(c.ctx, &distributiontypes.QueryDelegationTotalRewardsRequest{DelegatorAddress: address})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get rewards")
 	}
 
-	rewards := []Value{}
-	for _, r := range res.Total {
-		rewards = append(rewards, Value{Amount: r.Amount.String(), Denom: r.Denom})
+	rewards := []Reward{}
+	for _, r := range res.Rewards {
+		validator, err := c.GetValidator(r.ValidatorAddress, apr)
+		if err != nil {
+			validator = &Validator{Address: r.ValidatorAddress}
+		}
+
+		valRewards := []Value{}
+		for _, r := range r.Reward {
+			valReward := Value{
+				Amount: r.Amount.String(),
+				Denom:  r.Denom,
+			}
+			valRewards = append(valRewards, valReward)
+		}
+
+		reward := Reward{
+			Validator: validator,
+			Rewards:   valRewards,
+		}
+
+		rewards = append(rewards, reward)
 	}
 
 	return rewards, nil

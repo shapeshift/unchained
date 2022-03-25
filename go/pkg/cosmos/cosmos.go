@@ -35,14 +35,16 @@ var logger = log.WithoutFields()
 
 // Config for cosmos
 type Config struct {
-	APIKey           string
-	Bech32AddrPrefix string
-	Bech32PkPrefix   string
-	Encoding         *params.EncodingConfig
-	GRPCURL          string
-	LCDURL           string
-	RPCURL           string
-	WSURL            string
+	APIKey            string
+	Bech32AddrPrefix  string
+	Bech32ValPrefix   string
+	Bech32PkPrefix    string
+	Bech32PkValPrefix string
+	Encoding          *params.EncodingConfig
+	GRPCURL           string
+	LCDURL            string
+	RPCURL            string
+	WSURL             string
 }
 
 // HTTPClient allows communicating over http
@@ -57,6 +59,7 @@ type HTTPClient struct {
 // NewHTTPClient configures and creates an HTTPClient
 func NewHTTPClient(conf Config) (*HTTPClient, error) {
 	sdk.GetConfig().SetBech32PrefixForAccount(conf.Bech32AddrPrefix, conf.Bech32PkPrefix)
+	sdk.GetConfig().SetBech32PrefixForValidator(conf.Bech32ValPrefix, conf.Bech32PkValPrefix)
 
 	lcdURL, err := url.Parse(conf.LCDURL)
 	if err != nil {
@@ -180,6 +183,14 @@ func NewEncoding(registerInterfaces ...func(r codectypes.InterfaceRegistry)) *pa
 
 func IsValidAddress(address string) bool {
 	if _, err := sdk.AccAddressFromBech32(address); err != nil {
+		return false
+	}
+
+	return true
+}
+
+func IsValidValidatorAddress(address string) bool {
+	if _, err := sdk.ValAddressFromBech32(address); err != nil {
 		return false
 	}
 
