@@ -17,6 +17,7 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	ibccoretypes "github.com/cosmos/ibc-go/v3/modules/core/types"
@@ -92,6 +93,7 @@ type GRPCClient struct {
 	auth         authtypes.QueryClient
 	bank         banktypes.QueryClient
 	distribution distributiontypes.QueryClient
+	mint         minttypes.QueryClient
 	staking      stakingtypes.QueryClient
 	tx           txtypes.ServiceClient
 }
@@ -117,12 +119,13 @@ func NewGRPCClient(conf Config) (*GRPCClient, error) {
 		return nil, errors.Wrapf(err, "unable to connect to: %s", grpcURL)
 	}
 
+	abci := abcitypes.NewABCIApplicationClient(grpcConn)
 	auth := authtypes.NewQueryClient(grpcConn)
 	bank := banktypes.NewQueryClient(grpcConn)
 	distribution := distributiontypes.NewQueryClient(grpcConn)
+	mint := minttypes.NewQueryClient(grpcConn)
 	staking := stakingtypes.NewQueryClient(grpcConn)
 	tx := txtypes.NewServiceClient(grpcConn)
-	abci := abcitypes.NewABCIApplicationClient(grpcConn)
 
 	c := &GRPCClient{
 		ctx:          ctx,
@@ -132,6 +135,7 @@ func NewGRPCClient(conf Config) (*GRPCClient, error) {
 		auth:         auth,
 		bank:         bank,
 		distribution: distribution,
+		mint:         mint,
 		staking:      staking,
 		tx:           tx,
 	}

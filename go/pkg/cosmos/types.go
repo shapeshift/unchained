@@ -147,29 +147,61 @@ type UnbondingEntry struct {
 	Balance Value `json:"balance"`
 }
 
+// Contains info about validator unbonding settings
+// swagger:model ValidatorUnbonding
 type ValidatorUnbonding struct {
-	Height    int `json:"height"`
+	// required: true
+	// example: 8897990
+	Height int `json:"height"`
+	// required: true
+	// example: 1642776702
 	Timestamp int `json:"timestamp"`
 }
 
+// Contains info about validator commission settings
+// swagger:model ValidatorCommission
 type ValidatorCommission struct {
-	Rate          string `json:"rate"`
-	MaxRate       string `json:"maxRate"`
+	// required: true
+	// example: 0.050000000000000000
+	Rate string `json:"rate"`
+	// required: true
+	// example: 0.200000000000000000
+	MaxRate string `json:"maxRate"`
+	// required: true
+	// example: 0.010000000000000000
 	MaxChangeRate string `json:"maxChangeRate"`
 }
 
-// Validator info common return payload
+// Contains info about a validator
+// swagger:model Validator
 type Validator struct {
-	Address     string              `json:"address"`
-	Moniker     string              `json:"moniker"`
-	Jailed      bool                `json:"jailed"`
-	Status      string              `json:"status"`
-	Tokens      string              `json:"tokens"`
-	Shares      string              `json:"shares`
-	Website     string              `json:"website"`
-	Description string              `json:"description"`
-	Unbonding   ValidatorUnbonding  `json:"unbonding"`
-	Commission  ValidatorCommission `json:"commission"`
+	// required: true
+	Address string `json:"address"`
+	// required: true
+	// example: SuperVal
+	Moniker string `json:"moniker"`
+	// required: true
+	// example: false
+	Jailed bool `json:"jailed"`
+	// required: true
+	// example: BOND_STATUS_BONDED
+	Status string `json:"status"`
+	// required: true
+	// example: 12345
+	Tokens string `json:"tokens"`
+	// required: true
+	// example: 12345.6789
+	Shares string `json:"shares"`
+	// required: true
+	// example: http://superval.com
+	Website string `json:"website"`
+	// required: true
+	// example: Your most super validator around!
+	Description string `json:"description"`
+	// required: true
+	Unbonding ValidatorUnbonding `json:"unbonding"`
+	// required: true
+	Commission ValidatorCommission `json:"commission"`
 }
 
 // Contains info about an asset value

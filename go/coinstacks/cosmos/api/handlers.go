@@ -3,6 +3,7 @@ package api
 import (
 	"crypto/sha256"
 	"fmt"
+	"math/big"
 	"strconv"
 
 	"github.com/pkg/errors"
@@ -77,17 +78,60 @@ func (h *Handler) StartWebsocket() error {
 }
 
 func (h *Handler) GetInfo() (api.Info, error) {
-	validatorsRes, err := h.httpClient.GetValidators()
+	totalSupply, err := h.httpClient.GetTotalSupply("uatom")
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Printf("%+v\n", validatorsRes)
+	annualProvisions, err := h.httpClient.GetAnnualProvisions()
+	if err != nil {
+		return nil, err
+	}
+
+	communityTax, err := h.httpClient.GetCommunityTax()
+	if err != nil {
+		return nil, err
+	}
+
+	bondedTokens, err := h.httpClient.GetBondedTokens()
+	if err != nil {
+		return nil, err
+	}
+
+	bTotalSupply, _, err := new(big.Float).Parse(totalSupply, 10)
+	if err != nil {
+		return nil, err
+	}
+
+	bAnnualProvisions, _, err := new(big.Float).Parse(annualProvisions, 10)
+	if err != nil {
+		return nil, err
+	}
+
+	bCommunityTax, _, err := new(big.Float).Parse(communityTax, 10)
+	if err != nil {
+		return nil, err
+	}
+
+	bBondedTokens, _, err := new(big.Float).Parse(bondedTokens, 10)
+	if err != nil {
+		return nil, err
+	}
+
+	bInflationRate := new(big.Float).Quo(bAnnualProvisions, bTotalSupply)
+	bBondedTokenRatio := new(big.Float).Quo(bBondedTokens, bTotalSupply)
+	bTaxRate := new(big.Float).Mul(bInflationRate, (new(big.Float).Sub(big.NewFloat(1), bCommunityTax)))
+	apr := new(big.Float).Quo(bTaxRate, bBondedTokenRatio)
 
 	info := Info{
 		BaseInfo: api.BaseInfo{
 			Network: "mainnet",
 		},
+		TotalSupply:      totalSupply,
+		BondedTokens:     bondedTokens,
+		AnnualProvisions: annualProvisions,
+		CommunityTax:     communityTax,
+		APR:              apr.String(),
 	}
 
 	return info, nil
