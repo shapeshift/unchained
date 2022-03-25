@@ -1,5 +1,3 @@
-import * as ethereum from './ethereum/types'
-
 export enum Dex {
   Thor = 'thor',
   Zrx = 'zrx',
@@ -8,11 +6,6 @@ export enum Dex {
 export interface Fee {
   caip19: string
   value: string
-}
-
-export type SequencedTx = Tx & {
-  sequence: number
-  total: number
 }
 
 export enum Status {
@@ -55,10 +48,12 @@ export enum TransferType {
   Receive = 'receive',
 }
 
-export interface TxMetadata {
+export interface StandardTxMetadata {
   method?: string
   parser: string
 }
+
+export type TxMetadata = StandardTxMetadata
 
 export interface StandardTx {
   address: string
@@ -72,14 +67,6 @@ export interface StandardTx {
   trade?: Trade
   transfers: Array<Transfer>
   txid: string
-  value: string
-  data?: TxMetadata
 }
 
-export type Tx = StandardTx | ethereum.UniV2Tx | ethereum.ZrxTx | ethereum.ThorTx
-
-export type TxSpecific<T extends Tx> = Partial<Pick<T, 'trade' | 'transfers' | 'data'>>
-
-export interface GenericParser<T> {
-  parse: (tx: T) => Promise<TxSpecific<Tx> | undefined>
-}
+export type Tx = StandardTx

@@ -37,7 +37,6 @@ export class TransactionParser {
       status: tx.confirmations > 0 ? Status.Confirmed : Status.Pending,
       transfers: [],
       txid: tx.txid,
-      value: tx.value,
     }
 
     tx.vin.forEach((vin) => {

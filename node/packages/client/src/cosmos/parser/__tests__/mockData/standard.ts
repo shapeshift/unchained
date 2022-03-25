@@ -22,6 +22,7 @@ export default {
           amount: '2002965',
           denom: 'uatom',
         },
+        origin: 'cosmos1t5u0jfg3ljsjrh2m9e47d4ny2hea7eehxrzdgd',
       },
     ],
     events: {
