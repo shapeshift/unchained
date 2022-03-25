@@ -331,7 +331,7 @@ func (a *API) GetValidators(w http.ResponseWriter, r *http.Request) {
 
 // swagger:route Get /api/v1/validators/{pubkey} v1 GetValidator
 //
-// Get the list of current validators
+// Get a specific validator
 //
 // responses:
 //   200: Validator

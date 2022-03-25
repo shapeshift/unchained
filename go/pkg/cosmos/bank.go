@@ -6,6 +6,7 @@ import (
 	bankTypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	mintTypes "github.com/cosmos/cosmos-sdk/x/mint/types"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/pkg/errors"
 )
 
@@ -93,4 +94,13 @@ func (c *GRPCClient) GetCommunityTax() (string, error) {
 	}
 
 	return res.Params.CommunityTax.String(), nil
+}
+
+func (c *GRPCClient) GetBondedTokens() (string, error) {
+	res, err := c.staking.Pool(c.ctx, &stakingtypes.QueryPoolRequest{})
+	if err != nil {
+		return "0", errors.Wrap(err, "failed to get bonded tokens")
+	}
+
+	return res.Pool.BondedTokens.String(), nil
 }

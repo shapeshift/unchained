@@ -118,10 +118,11 @@ func (h *Handler) GetInfo() (api.Info, error) {
 		return nil, err
 	}
 
+	// stakingAPR = [Inflation * (1-Community Tax)] / Bonded Tokens Ratio
 	bInflationRate := new(big.Float).Quo(bAnnualProvisions, bTotalSupply)
 	bBondedTokenRatio := new(big.Float).Quo(bBondedTokens, bTotalSupply)
-	bTaxRate := new(big.Float).Mul(bInflationRate, (new(big.Float).Sub(big.NewFloat(1), bCommunityTax)))
-	apr := new(big.Float).Quo(bTaxRate, bBondedTokenRatio)
+	bRewardRate := new(big.Float).Mul(bInflationRate, (new(big.Float).Sub(big.NewFloat(1), bCommunityTax)))
+	apr := new(big.Float).Quo(bRewardRate, bBondedTokenRatio)
 
 	info := Info{
 		BaseInfo: api.BaseInfo{
