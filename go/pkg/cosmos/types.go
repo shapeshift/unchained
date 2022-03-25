@@ -40,7 +40,7 @@ type Block struct {
 // swagger:model Delegation
 type Delegation struct {
 	// required: true
-	Validator string `json:"validator"`
+	Validator *Validator `json:"validator"`
 	// required: true
 	// example: 123456.789
 	Shares string `json:"shares"`
@@ -93,9 +93,9 @@ type Pagination struct {
 // swagger:model Redelegation
 type Redelegation struct {
 	// required: true
-	SourceValidator string `json:"sourceValidator"`
+	SourceValidator *Validator `json:"sourceValidator"`
 	// required: true
-	DestinationValidator string `json:"destinationValidator"`
+	DestinationValidator *Validator `json:"destinationValidator"`
 	// required: true
 	Entries []RedelegationEntry `json:"entries"`
 }
@@ -112,6 +112,15 @@ type RedelegationEntry struct {
 	// required: true
 	// example: 123456
 	Balance string `json:"balance"`
+}
+
+// Contains info about a validator reward
+// swagger:model Reward
+type Reward struct {
+	// required: true
+	Validator *Validator `json:"validator"`
+	// required: true
+	Rewards []Value `json:"rewards"`
 }
 
 // Tx info common return payload
@@ -131,7 +140,7 @@ type TxHistory struct {
 // swagger:model Unbonding
 type Unbonding struct {
 	// required: true
-	Validator string `json:"validator"`
+	Validator *Validator `json:"validator"`
 	// required: true
 	Entries []UnbondingEntry `json:"entries"`
 }
@@ -145,6 +154,73 @@ type UnbondingEntry struct {
 	// required: true
 	// example: 123456789
 	Balance Value `json:"balance"`
+}
+
+// Contains info about validator unbonding settings
+// swagger:model ValidatorUnbonding
+type ValidatorUnbonding struct {
+	// required: true
+	// example: 8897990
+	Height int `json:"height"`
+	// required: true
+	// example: 1642776702
+	Timestamp int `json:"timestamp"`
+}
+
+// Contains info about validator commission settings
+// swagger:model ValidatorCommission
+type ValidatorCommission struct {
+	// required: true
+	// example: 0.050000000000000000
+	Rate string `json:"rate"`
+	// required: true
+	// example: 0.200000000000000000
+	MaxRate string `json:"maxRate"`
+	// required: true
+	// example: 0.010000000000000000
+	MaxChangeRate string `json:"maxChangeRate"`
+}
+
+// Contains a list of validators
+// swagger:model Validators
+type Validators struct {
+	// required: true
+	Validators []Validator `json:"validators"`
+}
+
+// Contains info about a validator
+// swagger:model Validator
+type Validator struct {
+	// required: true
+	Address string `json:"address"`
+	// required: true
+	// example: SuperVal
+	Moniker string `json:"moniker"`
+	// required: true
+	// example: false
+	Jailed bool `json:"jailed"`
+	// required: true
+	// example: BOND_STATUS_BONDED
+	Status string `json:"status"`
+	// required: true
+	// example: 12345
+	Tokens string `json:"tokens"`
+	// required: true
+	// example: 12345.6789
+	Shares string `json:"shares"`
+	// required: true
+	// example: http://superval.com
+	Website string `json:"website"`
+	// required: true
+	// example: Your most super validator around!
+	Description string `json:"description"`
+	// required: true
+	// example: 0.1541068456
+	APR string `json:"apr"`
+	// required: true
+	Unbonding ValidatorUnbonding `json:"unbonding"`
+	// required: true
+	Commission ValidatorCommission `json:"commission"`
 }
 
 // Contains info about an asset value

@@ -33,6 +33,9 @@ export const metaData = (msg: Message, events: Event[], caip19: string): TxMetad
         value: getRewardValue(msg, events) ?? '0',
         caip19: caip19,
       }
+    // known message types with no applicable metadata
+    case 'send':
+      return
     default:
       logger.warn(`unsupported message type: ${msg.type}`)
       return

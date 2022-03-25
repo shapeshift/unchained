@@ -3,6 +3,7 @@ package api
 import (
 	"crypto/sha256"
 	"fmt"
+	"math/big"
 	"strconv"
 
 	"github.com/pkg/errors"
@@ -77,62 +78,123 @@ func (h *Handler) StartWebsocket() error {
 }
 
 func (h *Handler) GetInfo() (api.Info, error) {
+	totalSupply, err := h.httpClient.GetTotalSupply("uatom")
+	if err != nil {
+		return nil, err
+	}
+
+	annualProvisions, err := h.httpClient.GetAnnualProvisions()
+	if err != nil {
+		return nil, err
+	}
+
+	communityTax, err := h.httpClient.GetCommunityTax()
+	if err != nil {
+		return nil, err
+	}
+
+	bondedTokens, err := h.httpClient.GetBondedTokens()
+	if err != nil {
+		return nil, err
+	}
+
+	bTotalSupply, _, err := new(big.Float).Parse(totalSupply, 10)
+	if err != nil {
+		return nil, err
+	}
+
+	bAnnualProvisions, _, err := new(big.Float).Parse(annualProvisions, 10)
+	if err != nil {
+		return nil, err
+	}
+
+	bCommunityTax, _, err := new(big.Float).Parse(communityTax, 10)
+	if err != nil {
+		return nil, err
+	}
+
+	bBondedTokens, _, err := new(big.Float).Parse(bondedTokens, 10)
+	if err != nil {
+		return nil, err
+	}
+
+	// stakingAPR = [Inflation * (1-Community Tax)] / Bonded Tokens Ratio
+	bInflationRate := new(big.Float).Quo(bAnnualProvisions, bTotalSupply)
+	bBondedTokenRatio := new(big.Float).Quo(bBondedTokens, bTotalSupply)
+	bRewardRate := new(big.Float).Mul(bInflationRate, (new(big.Float).Sub(big.NewFloat(1), bCommunityTax)))
+	apr := new(big.Float).Quo(bRewardRate, bBondedTokenRatio)
+
 	info := Info{
 		BaseInfo: api.BaseInfo{
 			Network: "mainnet",
 		},
+		TotalSupply:      totalSupply,
+		BondedTokens:     bondedTokens,
+		AnnualProvisions: annualProvisions,
+		CommunityTax:     communityTax,
+		APR:              apr.String(),
 	}
 
 	return info, nil
 }
 
 func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
-	accRes, err := h.httpClient.GetAccount(pubkey)
+	info, err := h.GetInfo()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get info")
+	}
+
+	apr, _, err := new(big.Float).Parse(info.(Info).APR, 10)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse apr: %s", apr)
+	}
+
+	account, err := h.httpClient.GetAccount(pubkey)
 	if err != nil {
 		return nil, err
 	}
 
-	balRes, err := h.httpClient.GetBalance(pubkey, "uatom")
+	balance, err := h.httpClient.GetBalance(pubkey, "uatom")
 	if err != nil {
 		return nil, err
 	}
 
-	delRes, err := h.httpClient.GetDelegations(pubkey)
+	delegations, err := h.httpClient.GetDelegations(pubkey, apr)
 	if err != nil {
 		return nil, err
 	}
 
-	redelRes, err := h.httpClient.GetRedelegations(pubkey)
+	redelegations, err := h.httpClient.GetRedelegations(pubkey, apr)
 	if err != nil {
 		return nil, err
 	}
 
-	unbondingsRes, err := h.httpClient.GetUnbondings(pubkey, "uatom")
+	unbondings, err := h.httpClient.GetUnbondings(pubkey, "uatom", apr)
 	if err != nil {
 		return nil, err
 	}
 
-	rewardsRes, err := h.httpClient.GetRewards(pubkey)
+	rewards, err := h.httpClient.GetRewards(pubkey, apr)
 	if err != nil {
 		return nil, err
 	}
 
-	account := &Account{
+	a := &Account{
 		BaseAccount: api.BaseAccount{
-			Balance:            balRes.Amount,
+			Balance:            balance.Amount,
 			UnconfirmedBalance: "0",
-			Pubkey:             accRes.Address,
+			Pubkey:             account.Address,
 		},
-		AccountNumber: int(accRes.AccountNumber),
-		Sequence:      int(accRes.Sequence),
-		Assets:        balRes.Assets,
-		Delegations:   delRes,
-		Redelegations: redelRes,
-		Unbondings:    unbondingsRes,
-		Rewards:       rewardsRes,
+		AccountNumber: int(account.AccountNumber),
+		Sequence:      int(account.Sequence),
+		Assets:        balance.Assets,
+		Delegations:   delegations,
+		Redelegations: redelegations,
+		Unbondings:    unbondings,
+		Rewards:       rewards,
 	}
 
-	return account, nil
+	return a, nil
 }
 
 func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
@@ -192,4 +254,32 @@ func (h *Handler) SendTx(rawTx string) (string, error) {
 
 func (h *Handler) EstimateGas(rawTx string) (string, error) {
 	return h.httpClient.GetEstimateGas(rawTx)
+}
+
+func (h *Handler) GetValidators() ([]cosmos.Validator, error) {
+	info, err := h.GetInfo()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get info")
+	}
+
+	apr, _, err := new(big.Float).Parse(info.(Info).APR, 10)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse apr: %s", apr)
+	}
+
+	return h.httpClient.GetValidators(apr)
+}
+
+func (h *Handler) GetValidator(address string) (*cosmos.Validator, error) {
+	info, err := h.GetInfo()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get info")
+	}
+
+	apr, _, err := new(big.Float).Parse(info.(Info).APR, 10)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse apr: %s", apr)
+	}
+
+	return h.httpClient.GetValidator(address, apr)
 }

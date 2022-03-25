@@ -132,7 +132,7 @@ type TxBody struct {
 	RawTx string `json:"rawTx"`
 }
 
-// swagger:parameters GetAccount
+// swagger:parameters GetAccount GetValidator
 type PubkeyParam struct {
 	// Account address or xpub
 	// in: path
