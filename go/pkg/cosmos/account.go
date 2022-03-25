@@ -126,6 +126,16 @@ func (c *HTTPClient) GetRedelegations(address string, apr *big.Float) ([]Redeleg
 
 	redelgations := []Redelegation{}
 	for _, r := range res.RedelegationResponses {
+		sourceValidator, err := c.GetValidator(r.Redelegation.ValidatorSrcAddress, apr)
+		if err != nil {
+			sourceValidator = &Validator{Address: r.Redelegation.ValidatorSrcAddress}
+		}
+
+		destinationValidator, err := c.GetValidator(r.Redelegation.ValidatorDstAddress, apr)
+		if err != nil {
+			destinationValidator = &Validator{Address: r.Redelegation.ValidatorDstAddress}
+		}
+
 		entries := []RedelegationEntry{}
 		for _, e := range r.Entries {
 			entry := RedelegationEntry{
@@ -135,16 +145,6 @@ func (c *HTTPClient) GetRedelegations(address string, apr *big.Float) ([]Redeleg
 			}
 
 			entries = append(entries, entry)
-		}
-
-		sourceValidator, err := c.GetValidator(r.Redelegation.ValidatorSrcAddress, apr)
-		if err != nil {
-			sourceValidator = &Validator{Address: r.Redelegation.ValidatorSrcAddress}
-		}
-
-		destinationValidator, err := c.GetValidator(r.Redelegation.ValidatorDstAddress, apr)
-		if err != nil {
-			destinationValidator = &Validator{Address: r.Redelegation.ValidatorDstAddress}
 		}
 
 		redelegation := Redelegation{
@@ -180,6 +180,11 @@ func (c *HTTPClient) GetUnbondings(address string, baseDenom string, apr *big.Fl
 
 	unbondings := []Unbonding{}
 	for _, r := range res.UnbondingResponses {
+		validator, err := c.GetValidator(r.ValidatorAddress, apr)
+		if err != nil {
+			validator = &Validator{Address: r.ValidatorAddress}
+		}
+
 		entries := []UnbondingEntry{}
 		for _, e := range r.Entries {
 			entry := UnbondingEntry{
@@ -187,11 +192,6 @@ func (c *HTTPClient) GetUnbondings(address string, baseDenom string, apr *big.Fl
 				Balance:        Value{Amount: e.Balance, Denom: baseDenom},
 			}
 			entries = append(entries, entry)
-		}
-
-		validator, err := c.GetValidator(r.ValidatorAddress, apr)
-		if err != nil {
-			validator = &Validator{Address: r.ValidatorAddress}
 		}
 
 		u := Unbonding{
@@ -311,16 +311,6 @@ func (c *GRPCClient) GetRedelegations(address string, apr *big.Float) ([]Redeleg
 
 	redelgations := []Redelegation{}
 	for _, r := range res.RedelegationResponses {
-		entries := []RedelegationEntry{}
-		for _, e := range r.Entries {
-			entry := RedelegationEntry{
-				CompletionTime: strconv.FormatInt(e.RedelegationEntry.CompletionTime.Unix(), 10),
-				Shares:         e.RedelegationEntry.SharesDst.String(),
-			}
-
-			entries = append(entries, entry)
-		}
-
 		sourceValidator, err := c.GetValidator(r.Redelegation.ValidatorSrcAddress, apr)
 		if err != nil {
 			sourceValidator = &Validator{Address: r.Redelegation.ValidatorSrcAddress}
@@ -329,6 +319,16 @@ func (c *GRPCClient) GetRedelegations(address string, apr *big.Float) ([]Redeleg
 		destinationValidator, err := c.GetValidator(r.Redelegation.ValidatorDstAddress, apr)
 		if err != nil {
 			destinationValidator = &Validator{Address: r.Redelegation.ValidatorDstAddress}
+		}
+
+		entries := []RedelegationEntry{}
+		for _, e := range r.Entries {
+			entry := RedelegationEntry{
+				CompletionTime: strconv.FormatInt(e.RedelegationEntry.CompletionTime.Unix(), 10),
+				Shares:         e.RedelegationEntry.SharesDst.String(),
+			}
+
+			entries = append(entries, entry)
 		}
 
 		redelegation := Redelegation{
@@ -350,6 +350,11 @@ func (c *GRPCClient) GetUnbondings(address string, baseDenom string, apr *big.Fl
 
 	unbondings := []Unbonding{}
 	for _, r := range res.UnbondingResponses {
+		validator, err := c.GetValidator(r.ValidatorAddress, apr)
+		if err != nil {
+			validator = &Validator{Address: r.ValidatorAddress}
+		}
+
 		entries := []UnbondingEntry{}
 		for _, e := range r.Entries {
 			entry := UnbondingEntry{
@@ -357,11 +362,6 @@ func (c *GRPCClient) GetUnbondings(address string, baseDenom string, apr *big.Fl
 				Balance:        Value{Amount: e.Balance.String(), Denom: baseDenom},
 			}
 			entries = append(entries, entry)
-		}
-
-		validator, err := c.GetValidator(r.ValidatorAddress, apr)
-		if err != nil {
-			validator = &Validator{Address: r.ValidatorAddress}
 		}
 
 		u := Unbonding{

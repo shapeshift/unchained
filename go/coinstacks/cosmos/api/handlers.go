@@ -131,7 +131,7 @@ func (h *Handler) GetInfo() (api.Info, error) {
 		BondedTokens:     bondedTokens,
 		AnnualProvisions: annualProvisions,
 		CommunityTax:     communityTax,
-		APR:              apr,
+		APR:              apr.String(),
 	}
 
 	return info, nil
@@ -141,6 +141,11 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 	info, err := h.GetInfo()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get info")
+	}
+
+	apr, _, err := new(big.Float).Parse(info.(Info).APR, 10)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse apr: %s", apr)
 	}
 
 	account, err := h.httpClient.GetAccount(pubkey)
@@ -153,22 +158,22 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 		return nil, err
 	}
 
-	delegations, err := h.httpClient.GetDelegations(pubkey, info.(Info).APR)
+	delegations, err := h.httpClient.GetDelegations(pubkey, apr)
 	if err != nil {
 		return nil, err
 	}
 
-	redelegations, err := h.httpClient.GetRedelegations(pubkey, info.(Info).APR)
+	redelegations, err := h.httpClient.GetRedelegations(pubkey, apr)
 	if err != nil {
 		return nil, err
 	}
 
-	unbondings, err := h.httpClient.GetUnbondings(pubkey, "uatom", info.(Info).APR)
+	unbondings, err := h.httpClient.GetUnbondings(pubkey, "uatom", apr)
 	if err != nil {
 		return nil, err
 	}
 
-	rewards, err := h.httpClient.GetRewards(pubkey, info.(Info).APR)
+	rewards, err := h.httpClient.GetRewards(pubkey, apr)
 	if err != nil {
 		return nil, err
 	}
@@ -256,7 +261,12 @@ func (h *Handler) GetValidators() ([]cosmos.Validator, error) {
 		return nil, errors.Wrap(err, "failed to get info")
 	}
 
-	return h.httpClient.GetValidators(info.(Info).APR)
+	apr, _, err := new(big.Float).Parse(info.(Info).APR, 10)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse apr: %s", apr)
+	}
+
+	return h.httpClient.GetValidators(apr)
 }
 
 func (h *Handler) GetValidator(address string) (*cosmos.Validator, error) {
@@ -265,5 +275,10 @@ func (h *Handler) GetValidator(address string) (*cosmos.Validator, error) {
 		return nil, errors.Wrap(err, "failed to get info")
 	}
 
-	return h.httpClient.GetValidator(address, info.(Info).APR)
+	apr, _, err := new(big.Float).Parse(info.(Info).APR, 10)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse apr: %s", apr)
+	}
+
+	return h.httpClient.GetValidator(address, apr)
 }

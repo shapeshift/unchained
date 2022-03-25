@@ -27,9 +27,9 @@ type DescriptionResponse struct {
 }
 
 type CommissionRates struct {
-	Rate          float64 `json:"rate,string"`
-	MaxRate       string  `json:"max_rate"`
-	MaxChangeRate string  `json:"max_change_rate"`
+	Rate          string `json:"rate"`
+	MaxRate       string `json:"max_rate"`
+	MaxChangeRate string `json:"max_change_rate"`
 }
 
 type Commission struct {

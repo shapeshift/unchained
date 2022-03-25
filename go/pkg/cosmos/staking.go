@@ -42,9 +42,14 @@ func httpValidator(validator ValidatorResponse, apr *big.Float) *Validator {
 	}
 
 	commission := ValidatorCommission{
-		Rate:          big.NewFloat(validator.Commission.Rate),
+		Rate:          validator.Commission.Rate,
 		MaxRate:       validator.Commission.MaxRate,
 		MaxChangeRate: validator.Commission.MaxChangeRate,
+	}
+
+	commissionRate, _, err := new(big.Float).Parse(commission.Rate, 10)
+	if err != nil {
+		commissionRate = big.NewFloat(0)
 	}
 
 	return &Validator{
@@ -56,7 +61,7 @@ func httpValidator(validator ValidatorResponse, apr *big.Float) *Validator {
 		Shares:      validator.DelegatorShares,
 		Website:     validator.Description.Website,
 		Description: validator.Description.Details,
-		APR:         new(big.Float).Mul(apr, new(big.Float).Sub(big.NewFloat(1), commission.Rate)),
+		APR:         new(big.Float).Mul(apr, new(big.Float).Sub(big.NewFloat(1), commissionRate)).String(),
 		Unbonding:   unbonding,
 		Commission:  commission,
 	}
@@ -91,15 +96,15 @@ func grpcValidator(validator types.Validator, apr *big.Float) *Validator {
 		Timestamp: int(validator.UnbondingTime.Unix()),
 	}
 
-	commissionRate, err := validator.Commission.Rate.Float64()
-	if err != nil {
-		commissionRate = 0
-	}
-
 	commission := ValidatorCommission{
-		Rate:          big.NewFloat(commissionRate),
+		Rate:          validator.Commission.Rate.String(),
 		MaxRate:       validator.Commission.MaxRate.String(),
 		MaxChangeRate: validator.Commission.MaxChangeRate.String(),
+	}
+
+	commissionRate, _, err := new(big.Float).Parse(commission.Rate, 10)
+	if err != nil {
+		commissionRate = big.NewFloat(0)
 	}
 
 	return &Validator{
@@ -111,7 +116,7 @@ func grpcValidator(validator types.Validator, apr *big.Float) *Validator {
 		Shares:      validator.DelegatorShares.String(),
 		Website:     validator.Description.Website,
 		Description: validator.Description.Details,
-		APR:         new(big.Float).Mul(apr, new(big.Float).Sub(big.NewFloat(1), commission.Rate)),
+		APR:         new(big.Float).Mul(apr, new(big.Float).Sub(big.NewFloat(1), commissionRate)).String(),
 		Unbonding:   unbonding,
 		Commission:  commission,
 	}

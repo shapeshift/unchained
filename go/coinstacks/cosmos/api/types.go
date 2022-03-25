@@ -1,8 +1,6 @@
 package api
 
 import (
-	"math/big"
-
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 )
@@ -20,7 +18,7 @@ type Info struct {
 	BondedTokens string `json:"bondedTokens"`
 	// required: true
 	// example: 0.1541068456
-	APR *big.Float `json:"apr"`
+	APR string `json:"apr"`
 	// required: true
 	// example: 29255184955917.174457731278996910
 	AnnualProvisions string `json:"annualProvisions"`

@@ -1,8 +1,6 @@
 package cosmos
 
 import (
-	"math/big"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 )
@@ -116,9 +114,13 @@ type RedelegationEntry struct {
 	Balance string `json:"balance"`
 }
 
+// Contains info about a validator reward
+// swagger:model Reward
 type Reward struct {
+	// required: true
 	Validator *Validator `json:"validator"`
-	Rewards   []Value    `json:"rewards"`
+	// required: true
+	Rewards []Value `json:"rewards"`
 }
 
 // Tx info common return payload
@@ -170,7 +172,7 @@ type ValidatorUnbonding struct {
 type ValidatorCommission struct {
 	// required: true
 	// example: 0.050000000000000000
-	Rate *big.Float `json:"rate"`
+	Rate string `json:"rate"`
 	// required: true
 	// example: 0.200000000000000000
 	MaxRate string `json:"maxRate"`
@@ -213,7 +215,7 @@ type Validator struct {
 	Description string `json:"description"`
 	// required: true
 	// example: 0.1541068456
-	APR *big.Float `json:"apr"`
+	APR string `json:"apr"`
 	// required: true
 	Unbonding ValidatorUnbonding `json:"unbonding"`
 	// required: true
