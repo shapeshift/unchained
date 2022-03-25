@@ -184,6 +184,7 @@ type ValidatorCommission struct {
 // Contains a list of validators
 // swagger:model Validators
 type Validators struct {
+	// required: true
 	Validators []Validator `json:"validators"`
 }
 
