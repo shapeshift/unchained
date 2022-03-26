@@ -22,6 +22,7 @@ import foxExit from './mockData/foxExit'
 import yearnDeposit from './mockData/yearnDeposit'
 import yearnApproval from './mockData/yearnApproval'
 import yearnWithdrawal from './mockData/yearnWithdrawal'
+import yearnDepositShapeShiftRouter from './mockData/yearnDepositShapeShiftRouter'
 import {
   bondToken,
   foxToken,
@@ -1110,8 +1111,8 @@ describe('parseTx', () => {
       expect(expected).toEqual(actual)
     })
 
-    it('should parse deposit', async () => {
-      const { tx } = yearnDeposit
+    it('should parse Yearn deposit to ShapeShift router', async () => {
+      const { tx } = yearnDepositShapeShiftRouter
       const address = '0x1399D13F3A0aaf08f7C5028D81447a311e4760c4'
 
       const expected: Tx = {
@@ -1198,6 +1199,30 @@ describe('parseTx', () => {
             token: linkToken,
           },
         ],
+      }
+
+      const actual = await txParser.parse(tx, address)
+      expect(expected).toEqual(actual)
+    })
+
+    it('should parse Yearn deposit', async () => {
+      const { tx } = yearnDeposit
+      const address = '0x1399D13F3A0aaf08f7C5028D81447a311e4760c4'
+
+      const expected: Tx = {
+        txid: tx.txid,
+        blockHeight: tx.blockHeight,
+        blockTime: tx.blockTime,
+        blockHash: tx.blockHash,
+        address: address,
+        caip2: 'eip155:1',
+        confirmations: tx.confirmations,
+        data: {
+          method: 'deposit',
+          parser: 'yearn',
+        },
+        status: Status.Confirmed,
+        transfers: [],
       }
 
       const actual = await txParser.parse(tx, address)
