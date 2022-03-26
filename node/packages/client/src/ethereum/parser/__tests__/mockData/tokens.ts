@@ -19,6 +19,13 @@ export const usdcToken = {
   symbol: 'USDC',
 }
 
+export const yvUsdcToken = {
+  contract: '0x5f18C75AbDAe578b483E5F43f12a39cF75b973a9',
+  decimals: 6,
+  name: 'USDC yVault',
+  symbol: 'yvUSDC',
+}
+
 export const tribeToken = {
   contract: '0xc7283b66Eb1EB5FB86327f08e1B5816b0720212B',
   decimals: 18,
