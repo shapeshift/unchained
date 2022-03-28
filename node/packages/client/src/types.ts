@@ -48,9 +48,17 @@ export enum TransferType {
   Receive = 'receive',
 }
 
+export enum TxParser {
+  Cosmos = 'cosmos',
+  Yearn = 'yearn',
+  UniV2 = 'uniV2',
+  ZRX = 'zrx',
+  Thor = 'thor',
+}
+
 export interface StandardTxMetadata {
   method?: string
-  parser: string
+  parser: TxParser
 }
 
 export type TxMetadata = StandardTxMetadata

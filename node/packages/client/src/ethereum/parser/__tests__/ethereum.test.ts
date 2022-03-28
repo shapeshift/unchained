@@ -1,4 +1,4 @@
-import { Dex, Status, Trade, TradeType, TransferType } from '../../../types'
+import { Dex, Status, Trade, TradeType, TransferType, TxParser } from '../../../types'
 import { ParsedTx as Tx } from '../../types'
 import { TransactionParser } from '../index'
 import multiSigSendEth from './mockData/multiSigSendEth'
@@ -102,7 +102,7 @@ describe('parseTx', () => {
         confirmations: tx.confirmations,
         data: {
           method: 'deposit',
-          parser: 'thor',
+          parser: TxParser.Thor,
         },
         status: Status.Confirmed,
         fee: {
@@ -146,7 +146,7 @@ describe('parseTx', () => {
         confirmations: tx.confirmations,
         data: {
           method: 'deposit',
-          parser: 'thor',
+          parser: TxParser.Thor,
         },
         status: Status.Confirmed,
         fee: {
@@ -190,7 +190,7 @@ describe('parseTx', () => {
         confirmations: tx.confirmations,
         data: {
           method: 'transferOut',
-          parser: 'thor',
+          parser: TxParser.Thor,
         },
         status: Status.Confirmed,
         transfers: [buyTransfer],
@@ -230,7 +230,7 @@ describe('parseTx', () => {
         confirmations: tx.confirmations,
         data: {
           method: 'transferOut',
-          parser: 'thor',
+          parser: TxParser.Thor,
         },
         status: Status.Confirmed,
         transfers: [buyTransfer],
@@ -270,7 +270,7 @@ describe('parseTx', () => {
         confirmations: tx.confirmations,
         data: {
           method: 'transferOut',
-          parser: 'thor',
+          parser: TxParser.Thor,
         },
         status: Status.Confirmed,
         transfers: [buyTransfer],
@@ -329,7 +329,7 @@ describe('parseTx', () => {
         confirmations: tx.confirmations,
         data: {
           method: undefined,
-          parser: 'zrx',
+          parser: TxParser.ZRX,
         },
         status: Status.Confirmed,
         fee: {
@@ -391,7 +391,7 @@ describe('parseTx', () => {
         confirmations: tx.confirmations,
         data: {
           method: undefined,
-          parser: 'zrx',
+          parser: TxParser.ZRX,
         },
         status: Status.Confirmed,
         fee: {
@@ -445,7 +445,7 @@ describe('parseTx', () => {
         confirmations: tx.confirmations,
         data: {
           method: undefined,
-          parser: 'zrx',
+          parser: TxParser.ZRX,
         },
         status: Status.Confirmed,
         fee: {
@@ -519,7 +519,7 @@ describe('parseTx', () => {
         confirmations: tx.confirmations,
         data: {
           method: undefined,
-          parser: 'zrx',
+          parser: TxParser.ZRX,
         },
         status: Status.Confirmed,
         fee: {
@@ -744,7 +744,7 @@ describe('parseTx', () => {
         confirmations: txMempool.confirmations,
         data: {
           method: 'addLiquidityETH',
-          parser: 'uniV2',
+          parser: TxParser.UniV2,
         },
         status: Status.Pending,
         transfers: [
@@ -844,7 +844,7 @@ describe('parseTx', () => {
         confirmations: txMempool.confirmations,
         data: {
           method: 'removeLiquidityETH',
-          parser: 'uniV2',
+          parser: TxParser.UniV2,
         },
         status: Status.Pending,
         transfers: [
@@ -1096,7 +1096,7 @@ describe('parseTx', () => {
         confirmations: tx.confirmations,
         data: {
           method: 'approve',
-          parser: 'yearn',
+          parser: TxParser.Yearn,
         },
         status: Status.Confirmed,
         fee: {
@@ -1124,7 +1124,7 @@ describe('parseTx', () => {
         confirmations: tx.confirmations,
         data: {
           method: 'deposit',
-          parser: 'yearn',
+          parser: TxParser.Yearn,
         },
         status: Status.Confirmed,
         fee: {
@@ -1171,7 +1171,7 @@ describe('parseTx', () => {
         confirmations: tx.confirmations,
         data: {
           method: 'withdraw',
-          parser: 'yearn',
+          parser: TxParser.Yearn,
         },
         status: Status.Confirmed,
         fee: {

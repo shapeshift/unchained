@@ -6,6 +6,7 @@ import { SHAPE_SHIFT_ROUTER_CONTRACT } from './constants'
 import { getSigHash } from './utils'
 import shapeShiftRouter from './abi/shapeShiftRouter'
 import yearnVault from './abi/yearnVault'
+import { TxParser } from '../../types'
 
 interface ParserArgs {
   network: Network
@@ -63,7 +64,7 @@ export class Parser implements SubParser {
     return {
       data: {
         method: decoded?.name,
-        parser: 'yearn',
+        parser: TxParser.Yearn,
       },
     }
   }
