@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/ethereum-api",
-  "version": "6.1.1",
+  "version": "6.6.0",
   "license": "MIT",
   "private": true,
   "files": [
@@ -12,14 +12,14 @@
     "generate": "tsoa spec-and-routes"
   },
   "dependencies": {
-    "@shapeshiftoss/blockbook": "^6.1.1",
-    "@shapeshiftoss/common-api": "^6.1.1",
-    "@shapeshiftoss/ethereum-ingester": "^6.1.1",
+    "@shapeshiftoss/blockbook": "^6.6.0",
+    "@shapeshiftoss/common-api": "^6.6.0",
+    "@shapeshiftoss/ethereum-ingester": "^6.6.0",
     "@shapeshiftoss/logger": "^1.0.0",
     "cors": "^2.8.5",
     "ethers": "^5.5.3",
     "express": "^4.17.1",
-    "swagger-ui-express": "^4.1.5",
+    "swagger-ui-express": "^4.3.0",
     "tsoa": "^3.4.0"
   },
   "devDependencies": {

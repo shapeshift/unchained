@@ -1,8 +1,56 @@
 /* unable to import models from a module with tsoa */
-import { Account } from '../../../common/api/src'
+import { Account, Tx, TxHistory } from '../../../common/api/src'
 
 /**
- * Contains bitcoin specific transaction info as returned from the node
+ * Contains info about a Bitcoin transaction input
+ */
+export interface Vin {
+  txid: string
+  vout: string
+  sequence?: number
+  coinbase?: string
+  scriptSig: {
+    asm?: string
+    hex?: string
+  }
+  addresses: Array<string>
+}
+
+/**
+ * Contains info about a Bitcoin transaction output
+ */
+export interface Vout {
+  value: string | number
+  n: number
+  scriptPubKey: {
+    asm?: string
+    hex?: string
+    type?: string
+    addresses: Array<string>
+  }
+}
+
+/**
+ * Contains info about a Bitcoin transaction
+ */
+export interface BitcoinTx extends Tx {
+  vin: Array<Vin>
+  vout: Array<Vout>
+  confirmations: number
+  value: string
+  fee: string
+  hex: string
+}
+
+/**
+ * Contains info about Bitcoin transaction history
+ */
+export interface BitcoinTxHistory extends TxHistory {
+  txs: Array<BitcoinTx>
+}
+
+/**
+ * Contains Bitcoin specific transaction info as returned from the node
  */
 export interface BitcoinTxSpecific {
   txid: string
@@ -62,7 +110,7 @@ export interface BitcoinAddress {
 }
 
 /**
- * Contains additional bitcoin specific account info
+ * Contains additional Bitcoin specific account info
  */
 export interface BitcoinAccount extends Account {
   /**

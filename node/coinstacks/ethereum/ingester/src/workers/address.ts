@@ -1,6 +1,6 @@
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Message, Worker } from '@shapeshiftoss/common-ingester'
-import { ethereum, SequencedTx } from '@shapeshiftoss/unchained-client'
+import { ethereum } from '@shapeshiftoss/unchained-client'
 import { logger } from '../logger'
 import { ETHSyncTx } from '../types'
 
@@ -19,7 +19,7 @@ const parser = new ethereum.TransactionParser({ rpcUrl: RPC_URL, network: NETWOR
 
 const msgLogger = logger.child({ namespace: ['workers', 'address'], fn: 'onMessage' })
 const onMessage = (worker: Worker) => async (message: Message) => {
-  const { address, txid, internalTxs, client_id, sequence, total }: ETHSyncTx = message.getContent()
+  const { address, txid, internalTxs, client_id }: ETHSyncTx = message.getContent()
   const retryKey = `${client_id}:${address}:${txid}`
 
   try {
@@ -28,7 +28,7 @@ const onMessage = (worker: Worker) => async (message: Message) => {
 
     const parsedTx = await parser.parse(tx, address, internalTxs)
 
-    worker.sendMessage(new Message({ ...parsedTx, sequence, total } as SequencedTx), client_id)
+    worker.sendMessage(new Message(parsedTx), client_id)
     worker.ackMessage(message, retryKey)
 
     msgLogger.debug({ address, txid, client_id }, 'Transaction published')

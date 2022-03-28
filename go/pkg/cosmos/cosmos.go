@@ -13,9 +13,11 @@ import (
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	authztypes "github.com/cosmos/cosmos-sdk/x/authz"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	ibccoretypes "github.com/cosmos/ibc-go/v3/modules/core/types"
@@ -33,14 +35,16 @@ var logger = log.WithoutFields()
 
 // Config for cosmos
 type Config struct {
-	APIKey           string
-	Bech32AddrPrefix string
-	Bech32PkPrefix   string
-	Encoding         *params.EncodingConfig
-	GRPCURL          string
-	LCDURL           string
-	RPCURL           string
-	WSURL            string
+	APIKey            string
+	Bech32AddrPrefix  string
+	Bech32ValPrefix   string
+	Bech32PkPrefix    string
+	Bech32PkValPrefix string
+	Encoding          *params.EncodingConfig
+	GRPCURL           string
+	LCDURL            string
+	RPCURL            string
+	WSURL             string
 }
 
 // HTTPClient allows communicating over http
@@ -48,13 +52,14 @@ type HTTPClient struct {
 	ctx      context.Context
 	encoding *params.EncodingConfig
 
-	cosmos           *resty.Client
-	tendermint       *resty.Client
+	cosmos     *resty.Client
+	tendermint *resty.Client
 }
 
 // NewHTTPClient configures and creates an HTTPClient
 func NewHTTPClient(conf Config) (*HTTPClient, error) {
 	sdk.GetConfig().SetBech32PrefixForAccount(conf.Bech32AddrPrefix, conf.Bech32PkPrefix)
+	sdk.GetConfig().SetBech32PrefixForValidator(conf.Bech32ValPrefix, conf.Bech32PkValPrefix)
 
 	lcdURL, err := url.Parse(conf.LCDURL)
 	if err != nil {
@@ -72,10 +77,10 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 	tendermint := resty.New().SetScheme(rpcURL.Scheme).SetBaseURL(rpcURL.Host).SetHeaders(headers)
 
 	c := &HTTPClient{
-		ctx:              context.Background(),
-		encoding:         conf.Encoding,
-		cosmos:           cosmos,
-		tendermint:       tendermint,
+		ctx:        context.Background(),
+		encoding:   conf.Encoding,
+		cosmos:     cosmos,
+		tendermint: tendermint,
 	}
 
 	return c, nil
@@ -91,6 +96,7 @@ type GRPCClient struct {
 	auth         authtypes.QueryClient
 	bank         banktypes.QueryClient
 	distribution distributiontypes.QueryClient
+	mint         minttypes.QueryClient
 	staking      stakingtypes.QueryClient
 	tx           txtypes.ServiceClient
 }
@@ -116,12 +122,13 @@ func NewGRPCClient(conf Config) (*GRPCClient, error) {
 		return nil, errors.Wrapf(err, "unable to connect to: %s", grpcURL)
 	}
 
+	abci := abcitypes.NewABCIApplicationClient(grpcConn)
 	auth := authtypes.NewQueryClient(grpcConn)
 	bank := banktypes.NewQueryClient(grpcConn)
 	distribution := distributiontypes.NewQueryClient(grpcConn)
+	mint := minttypes.NewQueryClient(grpcConn)
 	staking := stakingtypes.NewQueryClient(grpcConn)
 	tx := txtypes.NewServiceClient(grpcConn)
-	abci := abcitypes.NewABCIApplicationClient(grpcConn)
 
 	c := &GRPCClient{
 		ctx:          ctx,
@@ -131,6 +138,7 @@ func NewGRPCClient(conf Config) (*GRPCClient, error) {
 		auth:         auth,
 		bank:         bank,
 		distribution: distribution,
+		mint:         mint,
 		staking:      staking,
 		tx:           tx,
 	}
@@ -148,6 +156,7 @@ func NewEncoding(registerInterfaces ...func(r codectypes.InterfaceRegistry)) *pa
 	registry := codectypes.NewInterfaceRegistry()
 
 	// register base protobuf types
+	authztypes.RegisterInterfaces(registry)
 	banktypes.RegisterInterfaces(registry)
 	distributiontypes.RegisterInterfaces(registry)
 	govtypes.RegisterInterfaces(registry)
@@ -174,6 +183,14 @@ func NewEncoding(registerInterfaces ...func(r codectypes.InterfaceRegistry)) *pa
 
 func IsValidAddress(address string) bool {
 	if _, err := sdk.AccAddressFromBech32(address); err != nil {
+		return false
+	}
+
+	return true
+}
+
+func IsValidValidatorAddress(address string) bool {
+	if _, err := sdk.ValAddressFromBech32(address); err != nil {
 		return false
 	}
 

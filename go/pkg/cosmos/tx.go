@@ -10,6 +10,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
+	authztypes "github.com/cosmos/cosmos-sdk/x/authz"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
@@ -156,6 +157,7 @@ func Messages(msgs []sdk.Msg) []Message {
 		case *banktypes.MsgSend:
 			message := Message{
 				Addresses: []string{v.FromAddress, v.ToAddress},
+				Origin:    v.FromAddress,
 				From:      v.FromAddress,
 				To:        v.ToAddress,
 				Type:      v.Type(),
@@ -165,6 +167,7 @@ func Messages(msgs []sdk.Msg) []Message {
 		case *stakingtypes.MsgDelegate:
 			message := Message{
 				Addresses: []string{v.DelegatorAddress, v.ValidatorAddress},
+				Origin:    v.DelegatorAddress,
 				From:      v.DelegatorAddress,
 				To:        v.ValidatorAddress,
 				Type:      v.Type(),
@@ -174,6 +177,7 @@ func Messages(msgs []sdk.Msg) []Message {
 		case *stakingtypes.MsgUndelegate:
 			message := Message{
 				Addresses: []string{v.DelegatorAddress, v.ValidatorAddress},
+				Origin:    v.DelegatorAddress,
 				From:      v.ValidatorAddress,
 				To:        v.DelegatorAddress,
 				Type:      v.Type(),
@@ -183,6 +187,7 @@ func Messages(msgs []sdk.Msg) []Message {
 		case *stakingtypes.MsgBeginRedelegate:
 			message := Message{
 				Addresses: []string{v.DelegatorAddress, v.ValidatorSrcAddress, v.ValidatorDstAddress},
+				Origin:    v.DelegatorAddress,
 				From:      v.ValidatorSrcAddress,
 				To:        v.ValidatorDstAddress,
 				Type:      v.Type(),
@@ -192,6 +197,7 @@ func Messages(msgs []sdk.Msg) []Message {
 		case *distributiontypes.MsgWithdrawDelegatorReward:
 			message := Message{
 				Addresses: []string{v.DelegatorAddress, v.ValidatorAddress},
+				Origin:    v.DelegatorAddress,
 				From:      v.ValidatorAddress,
 				To:        v.DelegatorAddress,
 				Type:      v.Type(),
@@ -200,12 +206,16 @@ func Messages(msgs []sdk.Msg) []Message {
 		case *ibctransfertypes.MsgTransfer:
 			message := Message{
 				Addresses: []string{v.Sender, v.Receiver},
+				Origin:    v.Sender,
 				From:      v.Sender,
 				To:        v.Receiver,
 				Type:      v.Type(),
 				Value:     coinToValue(&v.Token),
 			}
 			messages = append(messages, message)
+		// known message types that we currently do not support, but do not want to throw errors for
+		case *authztypes.MsgExec, *authztypes.MsgGrant:
+			continue
 		}
 	}
 

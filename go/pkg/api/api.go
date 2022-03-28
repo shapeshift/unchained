@@ -97,9 +97,9 @@ type BaseTx struct {
 	TxID      string  `json:"txid"`
 	BlockHash *string `json:"blockHash,omitempty"`
 	// example: 1000000
-	BlockHeight *string `json:"blockHeight,omitempty"`
+	BlockHeight *int `json:"blockHeight,omitempty"`
 	// example: 1643052655037
-	Timestamp *string `json:"timestamp,omitempty"`
+	Timestamp *int `json:"timestamp,omitempty"`
 }
 
 type TxHistory interface {
@@ -132,7 +132,7 @@ type TxBody struct {
 	RawTx string `json:"rawTx"`
 }
 
-// swagger:parameters GetAccount
+// swagger:parameters GetAccount GetValidator
 type PubkeyParam struct {
 	// Account address or xpub
 	// in: path

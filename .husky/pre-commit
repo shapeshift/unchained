@@ -1,4 +1,7 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-cd node && yarn pretty-quick --staged
+# have to use yarn instead of npx because of npx's weird behavior
+cd node
+yarn lint-staged
+yarn lint-staged --cwd ../go
