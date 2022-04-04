@@ -78,7 +78,12 @@ func (c *HTTPClient) GetBlock(height *int) (*Block, error) {
 
 	r, err := req.Get("/block")
 
-	logger.Infof("resty response: %d %s", r.StatusCode(), r.Body()[:2000])
+	body := r.Body()
+
+	if len(body) > 2000 {
+		body = body[:2000]
+	}
+	logger.Infof("resty response: %d %s", r.StatusCode(), body)
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get block: %d", height)
