@@ -28,6 +28,8 @@ func (h *Handler) StartWebsocket() error {
 
 		txid := fmt.Sprintf("%X", sha256.Sum256(tx.Tx))
 
+		logger.Info("StartWebsocket TxHandler txid %s", txid)
+
 		block, err := h.blockService.GetBlock(int(tx.Height))
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to handle tx: %s", txid)
