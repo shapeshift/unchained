@@ -41,7 +41,7 @@ func (s *BlockService) WriteBlock(block *Block, latest bool) {
 }
 
 func (s *BlockService) GetBlock(height int) (*Block, error) {
-	logger.Info("GetBlock %d", height)
+	logger.Infof("GetBlock %d", height)
 	s.m.RLock()
 	block, ok := s.Blocks[height]
 	s.m.RUnlock()
@@ -63,7 +63,7 @@ func (s *BlockService) GetBlock(height int) (*Block, error) {
 }
 
 func (c *HTTPClient) GetBlock(height *int) (*Block, error) {
-	logger.Info("GetBlock() %s", height)
+	logger.Infof("GetBlock() %s", height)
 	var res *BlockResponse
 	var resErr *struct {
 		RPCErrorResponse
@@ -78,7 +78,15 @@ func (c *HTTPClient) GetBlock(height *int) (*Block, error) {
 	}
 	logger.Info("GetBlock() 3")
 
-	_, err := req.Get("/block")
+	r, err := req.Get("/block")
+
+	body := r.Body()
+
+	if len(body) > 2000 {
+		body = body[:2000]
+	}
+	logger.Infof("resty response: %d %s", r.StatusCode(), body)
+
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get block: %d", height)
 	}
