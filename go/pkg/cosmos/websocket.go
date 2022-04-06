@@ -15,7 +15,7 @@ import (
 	"github.com/tendermint/tendermint/types"
 )
 
-type TxHandlerFunc = func(tx types.EventDataTx) (interface{}, []string, error)
+type TxHandlerFunc = func(tx types.EventDataTx, registry websocket.Registry) (interface{}, []string, error)
 
 type WSClient struct {
 	*websocket.Registry
@@ -125,7 +125,7 @@ func (ws *WSClient) listen() {
 }
 
 func (ws *WSClient) handleTx(tx types.EventDataTx) {
-	data, addrs, err := ws.txHandler(tx)
+	data, addrs, err := ws.txHandler(tx, *ws.Registry)
 	if err != nil {
 		logger.Error(err)
 		return
