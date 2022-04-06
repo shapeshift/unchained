@@ -70,6 +70,8 @@ func (c *HTTPClient) GetBlock(height *int) (*Block, error) {
 	if height != nil {
 		req.SetQueryParams(map[string]string{"height": strconv.Itoa(*height)})
 	}
+	
+	_, err := req.Get("/block")
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get block: %d", height)
