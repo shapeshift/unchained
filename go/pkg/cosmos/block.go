@@ -65,14 +65,14 @@ func (c *HTTPClient) GetBlock(height *int) (*Block, error) {
 		RPCErrorResponse
 		Message string `json:"message"`
 	}
-
 	req := c.tendermint.R().SetResult(&res).SetError(&resErr)
 
 	if height != nil {
 		req.SetQueryParams(map[string]string{"height": strconv.Itoa(*height)})
 	}
-
+	
 	_, err := req.Get("/block")
+
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get block: %d", height)
 	}
@@ -83,6 +83,16 @@ func (c *HTTPClient) GetBlock(height *int) (*Block, error) {
 		}
 
 		return nil, errors.Errorf("failed to get block: %d: %s", height, resErr.Error.Data)
+	}
+
+	if res == nil {
+		return nil, errors.Errorf("res is nil for height: %d", height)
+	}
+	if res.Result == nil {
+		return nil, errors.Errorf("res.Result is nil for height: %d", height)
+	}
+	if res.Result.Block == nil {
+		return nil, errors.Errorf("res.Result.Block is nil for height: %d", height)
 	}
 
 	timestamp, err := time.Parse(time.RFC3339, res.Result.Block.Header.Time)
