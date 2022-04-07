@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
+	"github.com/shapeshift/unchained/pkg/websocket"
 	"github.com/tendermint/tendermint/types"
 )
 
@@ -20,13 +21,25 @@ type Handler struct {
 }
 
 func (h *Handler) StartWebsocket() error {
-	h.wsClient.TxHandler(func(tx types.EventDataTx) (interface{}, []string, error) {
+	h.wsClient.TxHandler(func(tx types.EventDataTx, registry websocket.Registry) (interface{}, []string, error) {
 		cosmosTx, signingTx, err := cosmos.DecodeTx(h.wsClient.EncodingConfig(), tx.Tx)
+
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to decode tx: %v", tx.Tx)
 		}
 
 		txid := fmt.Sprintf("%X", sha256.Sum256(tx.Tx))
+
+		Messages := cosmos.Messages(cosmosTx.GetMsgs())
+
+		if len(Messages) > 0 {
+			// Dont bother getting blocks for or creating transactions that arent in the registry
+			origin := Messages[0].Origin
+			to := Messages[0].To
+			if !registry.HasRegisteredAddress(registry.GetRegisteredAddresses(), origin) && !registry.HasRegisteredAddress(registry.GetRegisteredAddresses(), to) {
+				return nil, nil, errors.Errorf("skipping tx for unregistered address: %s", txid)
+			}
+		}
 
 		block, err := h.blockService.GetBlock(int(tx.Height))
 		if err != nil {
@@ -47,7 +60,7 @@ func (h *Handler) StartWebsocket() error {
 			GasUsed:       strconv.Itoa(int(tx.Result.GasUsed)),
 			Index:         int(tx.Index),
 			Memo:          signingTx.GetMemo(),
-			Messages:      cosmos.Messages(cosmosTx.GetMsgs()),
+			Messages:      Messages,
 		}
 
 		seen := make(map[string]bool)
