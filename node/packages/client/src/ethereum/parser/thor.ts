@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import { Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
-import { Dex, TradeType } from '../../types'
+import { Dex, TradeType, TxParser } from '../../types'
 import { Network, SubParser, TxSpecific } from '../types'
 import THOR_ABI from './abi/thor'
 import { getSigHash, txInteractsWithContract } from './utils'
@@ -67,7 +67,7 @@ export class Parser implements SubParser {
 
     const data = {
       method: decoded.name,
-      parser: 'thor',
+      parser: TxParser.Thor,
     }
 
     const [type] = result.memo.split(':')

@@ -1,5 +1,5 @@
 import { Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
-import { Dex, TradeType } from '../../types'
+import { Dex, TradeType, TxParser } from '../../types'
 import { TxSpecific, SubParser } from '../types'
 import { txInteractsWithContract } from './utils'
 import { ZRX_PROXY_CONTRACT } from './constants'
@@ -16,7 +16,7 @@ export class Parser implements SubParser {
 
     const data = {
       method: undefined, // TODO - add zrx ABI and decode
-      parser: 'zrx',
+      parser: TxParser.ZRX,
     }
 
     return {
