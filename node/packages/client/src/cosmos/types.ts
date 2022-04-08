@@ -1,6 +1,6 @@
 import { StandardTx, StandardTxMetadata } from '../types'
 
-export interface TxMetadata extends StandardTxMetadata {
+export interface TxMetadata extends Omit<StandardTxMetadata, 'parser'> {
   parser: 'cosmos'
   delegator?: string
   sourceValidator?: string
