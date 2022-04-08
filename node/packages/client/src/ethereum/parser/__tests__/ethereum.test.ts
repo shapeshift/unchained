@@ -1220,7 +1220,7 @@ describe('parseTx', () => {
         confirmations: tx.confirmations,
         data: {
           method: 'deposit',
-          parser: 'yearn',
+          parser: TxParser.Yearn,
         },
         status: Status.Confirmed,
         fee: {
