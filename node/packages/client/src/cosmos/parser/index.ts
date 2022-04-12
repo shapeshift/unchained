@@ -4,7 +4,7 @@ import { Status, TransferType } from '../../types'
 import { aggregateTransfer } from '../../utils'
 import { Tx as CosmosTx } from '../index'
 import { ParsedTx } from '../types'
-import { metaData } from './utils'
+import { getIbcMsgFromEvents, getVirtualMsgFromEvents, metaData } from './utils'
 
 export interface TransactionParserArgs {
   chainId: CAIP2
@@ -37,7 +37,7 @@ export class TransactionParser {
       txid: tx.txid,
     }
 
-    const msg = tx.messages[0]
+    const msg = tx.messages[0] ?? getVirtualMsgFromEvents(tx.events)
     const events = tx.events[0]
 
     if (!msg) return parsedTx

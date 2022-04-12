@@ -7,6 +7,7 @@ import reward from './mockData/reward'
 import redelegate from './mockData/redelegate'
 import standard from './mockData/standard'
 import transfer from './mockData/transfer'
+import ibc_receive from './mockData/ibc_receive'
 
 const txParser = new TransactionParser({ chainId: 'cosmos:cosmoshub-4' })
 
@@ -241,6 +242,28 @@ describe('parseTx', () => {
 
     const actual = await txParser.parse(tx, address)
 
+    expect(expected).toEqual(actual)
+  })
+
+  it.only('should be able to parse an ibc receive tx', async () => {
+    const { tx } = ibc_receive
+    const address = 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e'
+
+    const expected: ParsedTx = {
+      address: 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e',
+      blockHash: '16C1E10CBF15AA0E2C147AA8473B691B0F1AE1800DC990A088E7643668A05BA2',
+      blockHeight: 9636880,
+      blockTime: 1646429517,
+      caip2: 'cosmos:cosmoshub-4',
+      confirmations: 231594,
+      status: Status.Confirmed,
+      transfers: [],
+      txid: 'D78AB26809244FD2E9D65120285624CB61BCB5B9FBC2164DAC379C2CC7A78DE8',
+    }
+
+    const actual = await txParser.parse(tx, address)
+
+    console.log('actual is', actual)
     expect(expected).toEqual(actual)
   })
 })
