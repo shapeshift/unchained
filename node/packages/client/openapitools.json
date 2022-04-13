@@ -34,6 +34,16 @@
           "supportsES6": "true",
           "useSingleRequestParameter": true
         }
+      },
+      "osmosis": {
+        "inputSpec": "../../../go/coinstacks/osmosis/api/swagger.json",
+        "generatorName": "typescript-axios",
+        "output": "#{cwd}/src/generated/osmosis",
+        "reservedWordsMappings": { "in": "in" },
+        "additionalProperties": {
+          "supportsES6": "true",
+          "useSingleRequestParameter": true
+        }
       }
     }
   }
