@@ -50,6 +50,7 @@ export enum TransferType {
 
 export enum TxParser {
   Cosmos = 'cosmos',
+  Osmosis = 'osmosis',
   Yearn = 'yearn',
   UniV2 = 'uniV2',
   ZRX = 'zrx',

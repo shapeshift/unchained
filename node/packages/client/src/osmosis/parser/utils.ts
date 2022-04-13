@@ -1,5 +1,5 @@
 import { TxMetadata } from '../types'
-import { Event, Message } from '../../generated/cosmos'
+import { Event, Message } from '../../generated/osmosis'
 import { Logger } from '@shapeshiftoss/logger'
 
 const logger = new Logger({
@@ -63,5 +63,5 @@ const getRewardValue = (msg: Message, events: Array<Event>): string => {
     return '0'
   }
 
-  return valueUnparsed.slice(0, valueUnparsed.length - 'uatom'.length)
+  return valueUnparsed.slice(0, valueUnparsed.length - 'uosmo'.length)
 }
