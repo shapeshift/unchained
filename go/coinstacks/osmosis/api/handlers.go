@@ -3,6 +3,7 @@ package api
 import (
 	"crypto/sha256"
 	"fmt"
+	"math/big"
 	"strconv"
 
 	"github.com/pkg/errors"
@@ -176,4 +177,36 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 
 func (h *Handler) SendTx(hex string) (string, error) {
 	return h.httpClient.BroadcastTx(hex)
+}
+
+func (h *Handler) EstimateGas(rawTx string) (string, error) {
+	return h.httpClient.GetEstimateGas(rawTx)
+}
+
+func (h *Handler) GetValidators() ([]cosmos.Validator, error) {
+	info, err := h.GetInfo()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get info")
+	}
+
+	apr, _, err := new(big.Float).Parse(info.(Info).APR, 10)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse apr: %s", apr)
+	}
+
+	return h.httpClient.GetValidators(apr)
+}
+
+func (h *Handler) GetValidator(address string) (*cosmos.Validator, error) {
+	info, err := h.GetInfo()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get info")
+	}
+
+	apr, _, err := new(big.Float).Parse(info.(Info).APR, 10)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse apr: %s", apr)
+	}
+
+	return h.httpClient.GetValidator(address, apr)
 }
