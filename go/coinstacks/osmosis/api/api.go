@@ -1,8 +1,7 @@
-// Package classification Osmosis Unchained API
+// Package classification Cosmos Unchained API
 //
-// Provides access to osmosis chain data
+// Provides access to cosmos chain data
 //
-// Version: 6.1.1
 // License: MIT http://opensource.org/licenses/MIT
 //
 // Consumes:
@@ -59,12 +58,13 @@ type API struct {
 	server  *http.Server
 }
 
-func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, swaggerPath string) *API {
+func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, swaggerPath string) *API {
 	r := mux.NewRouter()
 
 	a := &API{
 		handler: &Handler{
 			httpClient:   httpClient,
+			grpcClient:   grpcClient,
 			wsClient:     wsClient,
 			blockService: blockService,
 		},
@@ -142,6 +142,7 @@ func (a *API) Shutdown() {
 	ctx, cancel := context.WithTimeout(context.Background(), GRACEFUL_SHUTDOWN)
 	defer cancel()
 
+	a.handler.grpcClient.Close()
 	a.handler.wsClient.Stop()
 	if err := a.server.Shutdown(ctx); err != nil {
 		logger.Errorf("error shutting down server: %+v", err)
@@ -197,14 +198,10 @@ func (a *API) Info(w http.ResponseWriter, r *http.Request) {
 // responses:
 //   200: Account
 //   400: BadRequestError
-//   422: ValidationError
 //   500: InternalServerError
 func (a *API) Account(w http.ResponseWriter, r *http.Request) {
-	pubkey, ok := mux.Vars(r)["pubkey"]
-	if !ok || pubkey == "" {
-		api.HandleError(w, http.StatusBadRequest, "pubkey required")
-		return
-	}
+	// pubkey validated by ValidatePubkey middleware
+	pubkey := mux.Vars(r)["pubkey"]
 
 	account, err := a.handler.GetAccount(pubkey)
 	if err != nil {
@@ -222,14 +219,10 @@ func (a *API) Account(w http.ResponseWriter, r *http.Request) {
 // responses:
 //   200: TxHistory
 //   400: BadRequestError
-//   422: ValidationError
 //   500: InternalServerError
 func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
-	pubkey, ok := mux.Vars(r)["pubkey"]
-	if !ok || pubkey == "" {
-		api.HandleError(w, http.StatusBadRequest, "pubkey required")
-		return
-	}
+	// pubkey validated by ValidatePubkey middleware
+	pubkey := mux.Vars(r)["pubkey"]
 
 	cursor := r.URL.Query().Get("cursor")
 
@@ -270,7 +263,6 @@ func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 // responses:
 //   200: TransactionHash
 //   400: BadRequestError
-//   422: ValidationError
 //   500: InternalServerError
 func (a *API) SendTx(w http.ResponseWriter, r *http.Request) {
 	body := &api.TxBody{}
