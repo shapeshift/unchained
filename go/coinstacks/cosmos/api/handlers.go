@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"math/big"
 	"strconv"
-	"sync"
 
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/shapeshift/unchained/pkg/websocket"
 	"github.com/tendermint/tendermint/types"
+	"golang.org/x/sync/errgroup"
 )
 
 type Handler struct {
@@ -91,57 +91,45 @@ func (h *Handler) StartWebsocket() error {
 	return nil
 }
 
-func (h *Handler) GetRawAprData() (string, string, string, string, error) {
-	var anyError error
+func (h *Handler) GetAprData() (string, string, string, string, error) {
 
 	var totalSupply string
 	var annualProvisions string
 	var communityTax string
 	var bondedTokens string
-	var wg sync.WaitGroup
+	g := new(errgroup.Group)
 
-	wg.Add(4)
-	go func() {
+	g.Go(func() error {
 		var err error
 		totalSupply, err = h.httpClient.GetTotalSupply("uatom")
-		if err != nil {
-			anyError = err
-		}
-		wg.Done()
-	}()
-	go func() {
+		return err
+	})
+	g.Go(func() error {
 		var err error
 		annualProvisions, err = h.httpClient.GetAnnualProvisions()
-		if err != nil {
-			anyError = err
-		}
-		wg.Done()
+		return err
 
-	}()
-	go func() {
+	})
+	g.Go(func() error {
 		var err error
 		communityTax, err = h.httpClient.GetCommunityTax()
-		if err != nil {
-			anyError = err
-		}
-		wg.Done()
+		return err
 
-	}()
-	go func() {
+	})
+	g.Go(func() error {
 		var err error
 		bondedTokens, err = h.httpClient.GetBondedTokens()
-		if err != nil {
-			anyError = err
-		}
-		wg.Done()
+		return err
 
-	}()
-	wg.Wait()
-	return totalSupply, annualProvisions, communityTax, bondedTokens, anyError
+	})
+
+	err := g.Wait()
+
+	return totalSupply, annualProvisions, communityTax, bondedTokens, err
 }
 
 func (h *Handler) GetInfo() (api.Info, error) {
-	totalSupply, annualProvisions, communityTax, bondedTokens, err := h.GetRawAprData()
+	totalSupply, annualProvisions, communityTax, bondedTokens, err := h.GetAprData()
 	if err != nil {
 		return nil, err
 	}
@@ -186,12 +174,9 @@ func (h *Handler) GetInfo() (api.Info, error) {
 	return info, nil
 }
 
-func (h *Handler) GetRawAccountData(pubkey string, denom string, apr *big.Float) (*cosmos.Account, *cosmos.Balance, []cosmos.Delegation, []cosmos.Redelegation, []cosmos.Unbonding, []cosmos.Reward, error) {
+func (h *Handler) GetAccountData(pubkey string, denom string, apr *big.Float) (*cosmos.Account, *cosmos.Balance, []cosmos.Delegation, []cosmos.Redelegation, []cosmos.Unbonding, []cosmos.Reward, error) {
 
-	var anyError error
-
-	var wg sync.WaitGroup
-	wg.Add(6)
+	g := new(errgroup.Group)
 
 	var account *cosmos.Account
 	var balance *cosmos.Balance
@@ -200,58 +185,40 @@ func (h *Handler) GetRawAccountData(pubkey string, denom string, apr *big.Float)
 	var unbondings []cosmos.Unbonding
 	var rewards []cosmos.Reward
 
-	go func() {
+	g.Go(func() error {
 		var err error
 		account, err = h.httpClient.GetAccount(pubkey)
-		if err != nil {
-			anyError = err
-		}
-		wg.Done()
-	}()
-	go func() {
+		return err
+	})
+	g.Go(func() error {
 		var err error
 		balance, err = h.httpClient.GetBalance(pubkey, denom)
-		if err != nil {
-			anyError = err
-		}
-		wg.Done()
-	}()
-	go func() {
+		return err
+	})
+	g.Go(func() error {
 		var err error
 		delegations, err = h.httpClient.GetDelegations(pubkey, apr)
-		if err != nil {
-			anyError = err
-		}
-		wg.Done()
-	}()
-	go func() {
+		return err
+	})
+	g.Go(func() error {
 		var err error
 		redelegations, err = h.httpClient.GetRedelegations(pubkey, apr)
-		if err != nil {
-			anyError = err
-		}
-		wg.Done()
-	}()
-	go func() {
+		return err
+	})
+	g.Go(func() error {
 		var err error
 		unbondings, err = h.httpClient.GetUnbondings(pubkey, denom, apr)
-		if err != nil {
-			anyError = err
-		}
-		wg.Done()
-	}()
-	go func() {
+		return err
+	})
+	g.Go(func() error {
 		var err error
 		rewards, err = h.httpClient.GetRewards(pubkey, apr)
-		if err != nil {
-			anyError = err
-		}
-		wg.Done()
-	}()
+		return err
+	})
 
-	wg.Wait()
+	err := g.Wait()
 
-	return account, balance, delegations, redelegations, unbondings, rewards, anyError
+	return account, balance, delegations, redelegations, unbondings, rewards, err
 }
 
 func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
@@ -265,7 +232,7 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 		return nil, errors.Wrapf(err, "failed to parse apr: %s", apr)
 	}
 
-	account, balance, delegations, redelegations, unbondings, rewards, err := h.GetRawAccountData(pubkey, "uatom", apr)
+	account, balance, delegations, redelegations, unbondings, rewards, err := h.GetAccountData(pubkey, "uatom", apr)
 	if err != nil {
 		return nil, err
 	}
