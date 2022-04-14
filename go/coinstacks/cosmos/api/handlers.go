@@ -177,9 +177,9 @@ func (h *Handler) GetInfo() (api.Info, error) {
 			Network: "mainnet",
 		},
 		TotalSupply:      totalSupply,
-		BondedTokens:     annualProvisions,
-		AnnualProvisions: communityTax,
-		CommunityTax:     bondedTokens,
+		BondedTokens:     bondedTokens,
+		AnnualProvisions: annualProvisions,
+		CommunityTax:     communityTax,
 		APR:              apr.String(),
 	}
 
