@@ -2,7 +2,7 @@ import { caip19, AssetNamespace } from '@shapeshiftoss/caip'
 import { ChainTypes } from '@shapeshiftoss/types'
 import { Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { ethers } from 'ethers'
-import { Transfer, TransferType } from '../../types'
+import { Transfer, TransferType, TxParser } from '../../types'
 import { Network, SubParser, TxSpecific } from '../types'
 import UNIV2_ABI from './abi/uniV2'
 import ERC20_ABI from './abi/erc20'
@@ -46,7 +46,7 @@ export class Parser implements SubParser {
     return {
       transfers,
       data: {
-        parser: 'uniV2',
+        parser: TxParser.UniV2,
         method: decoded.name,
       },
     }

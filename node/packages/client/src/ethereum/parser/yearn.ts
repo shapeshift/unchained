@@ -6,6 +6,7 @@ import { SHAPE_SHIFT_ROUTER_CONTRACT } from './constants'
 import { getSigHash } from './utils'
 import shapeShiftRouter from './abi/shapeShiftRouter'
 import yearnVault from './abi/yearnVault'
+import { TxParser } from '../../types'
 
 interface ParserArgs {
   network: Network
@@ -20,10 +21,17 @@ export class Parser implements SubParser {
   shapeShiftInterface = new ethers.utils.Interface(shapeShiftRouter)
   yearnInterface = new ethers.utils.Interface(yearnVault)
 
-  approvalSigHash = this.yearnInterface.getSighash('approve')
-  // TODO - work out how to use shapeShiftInterface.getSighash('deposit(address,address,uint256,uint256)')
-  depositSigHash = '0x20e8c565'
-  withdrawSigHash = '0x00f714ce'
+  supportedYearnFunctions = {
+    yearnApprovalSigHash: this.yearnInterface.getSighash('approve'),
+    yearnDepositSigHash: '0xd0e30db0',
+    yearnDepositWithAmountSigHash: '0xb6b55f25',
+    yearnDepositWithAmountAndRecipientSigHash: '0x6e553f65',
+    yearnWithdrawSigHash: '0x00f714ce',
+  }
+
+  supportedShapeShiftFunctions = {
+    shapeShiftDepositSigHash: '0x20e8c565',
+  }
 
   constructor(args: ParserArgs) {
     this.provider = args.provider
@@ -36,6 +44,8 @@ export class Parser implements SubParser {
   }
 
   async parse(tx: BlockbookTx): Promise<TxSpecific | undefined> {
+    const { yearnApprovalSigHash, yearnWithdrawSigHash } = this.supportedYearnFunctions
+    const { shapeShiftDepositSigHash } = this.supportedShapeShiftFunctions
     const data = tx.ethereumSpecific?.data
     if (!data) return
 
@@ -51,10 +61,10 @@ export class Parser implements SubParser {
       this.yearnTokenVaultAddresses = vaults?.map((vault) => vault.address)
     }
 
-    if (txSigHash === this.approvalSigHash && decoded?.args._spender !== SHAPE_SHIFT_ROUTER_CONTRACT) return
-    if (txSigHash === this.depositSigHash && receiveAddress !== SHAPE_SHIFT_ROUTER_CONTRACT) return
+    if (txSigHash === yearnApprovalSigHash && decoded?.args._spender !== SHAPE_SHIFT_ROUTER_CONTRACT) return
+    if (txSigHash === shapeShiftDepositSigHash && receiveAddress !== SHAPE_SHIFT_ROUTER_CONTRACT) return
     if (
-      txSigHash === this.withdrawSigHash &&
+      txSigHash === yearnWithdrawSigHash &&
       receiveAddress &&
       !this.yearnTokenVaultAddresses?.includes(receiveAddress)
     )
@@ -63,22 +73,15 @@ export class Parser implements SubParser {
     return {
       data: {
         method: decoded?.name,
-        parser: 'yearn',
+        parser: TxParser.Yearn,
       },
     }
   }
 
   getAbiInterface(txSigHash: string | undefined): ethers.utils.Interface | undefined {
-    return (() => {
-      switch (txSigHash) {
-        case this.approvalSigHash:
-        case this.withdrawSigHash:
-          return this.yearnInterface
-        case this.depositSigHash:
-          return this.shapeShiftInterface
-        default:
-          return undefined
-      }
-    })()
+    if (Object.values(this.supportedYearnFunctions).some((abi) => abi === txSigHash)) return this.yearnInterface
+    if (Object.values(this.supportedShapeShiftFunctions).some((abi) => abi === txSigHash))
+      return this.shapeShiftInterface
+    return undefined
   }
 }
