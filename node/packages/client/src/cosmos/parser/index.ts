@@ -1,10 +1,9 @@
 import { BigNumber } from 'bignumber.js'
 import { caip2, caip19, AssetNamespace, AssetReference, CAIP2, CAIP19 } from '@shapeshiftoss/caip'
 import { Status, TransferType } from '../../types'
-import { aggregateTransfer } from '../../utils'
 import { Tx as CosmosTx } from '../index'
 import { ParsedTx } from '../types'
-import { getVirtualMsgFromEvents, metaData } from './utils'
+import { valuesFromMsgEvents } from './utils'
 
 export interface TransactionParserArgs {
   chainId: CAIP2
@@ -37,24 +36,17 @@ export class TransactionParser {
       txid: tx.txid,
     }
 
-    console.log('tx is', tx)
-    const msg = tx.messages[0] ?? getVirtualMsgFromEvents(tx.events)
-    const events = tx.events[0]
+    // For simplicity and to limit scope we assume 1 message per transaction
+    // This works ok enough for transactions we generate but way may want to improve in the future
+    const { from, to, data, value, origin } = valuesFromMsgEvents(tx.messages[0], tx.events, this.assetId)
 
-    const from = msg.from ?? ''
-    const to = msg.to ?? ''
-    const value = new BigNumber(msg.value?.amount || parsedTx.data?.value || 0)
+    parsedTx.data = data
 
-    if (!msg) return parsedTx
-
-    parsedTx.data = metaData(msg, events, this.assetId)
-
-    console.log('parsedTx.data', parsedTx.data)
-    if (from === address) {
+    if (from === address || to === address) {
       if (value.gt(0)) {
         parsedTx.transfers = [
           {
-            type: TransferType.Send,
+            type: from === address ? TransferType.Send : TransferType.Receive,
             caip19: this.assetId,
             from,
             to,
@@ -65,21 +57,8 @@ export class TransactionParser {
       }
     }
 
-    if (to === address) {
-      if (value.gt(0)) {
-        parsedTx.transfers = aggregateTransfer(
-          parsedTx.transfers,
-          TransferType.Receive,
-          this.assetId,
-          from,
-          to,
-          value.toString(10)
-        )
-      }
-    }
-
     // We use origin for fees because some txs have a different from and origin addresses
-    if (msg.origin === address) {
+    if (origin === address) {
       // network fee
       const fees = new BigNumber(tx.fee.amount)
       if (fees.gt(0)) {
