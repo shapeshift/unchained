@@ -245,7 +245,7 @@ describe('parseTx', () => {
     expect(expected).toEqual(actual)
   })
 
-  it.only('should be able to parse an ibc receive tx', async () => {
+  it.skip('should be able to parse an ibc receive tx', async () => {
     const { tx } = ibc_receive
     const address = 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e'
 

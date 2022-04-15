@@ -4,7 +4,7 @@ import { Status, TransferType } from '../../types'
 import { aggregateTransfer } from '../../utils'
 import { Tx as CosmosTx } from '../index'
 import { ParsedTx } from '../types'
-import { getIbcMsgFromEvents, getVirtualMsgFromEvents, metaData } from './utils'
+import { getVirtualMsgFromEvents, metaData } from './utils'
 
 export interface TransactionParserArgs {
   chainId: CAIP2
@@ -37,36 +37,42 @@ export class TransactionParser {
       txid: tx.txid,
     }
 
+    console.log('tx is', tx)
     const msg = tx.messages[0] ?? getVirtualMsgFromEvents(tx.events)
     const events = tx.events[0]
+
+    const from = msg.from ?? ''
+    const to = msg.to ?? ''
+    const value = new BigNumber(msg.value?.amount || parsedTx.data?.value || 0)
 
     if (!msg) return parsedTx
 
     parsedTx.data = metaData(msg, events, this.assetId)
 
-    // fall back on metaData value if it isn't found in the message (ie. withdraw_delegator_reward)
-    const value = new BigNumber(msg.value?.amount || parsedTx.data?.value || 0)
-    if (msg.from === address) {
+    console.log('parsedTx.data', parsedTx.data)
+    if (from === address) {
       if (value.gt(0)) {
-        parsedTx.transfers = aggregateTransfer(
-          parsedTx.transfers,
-          TransferType.Send,
-          this.assetId,
-          msg.from ?? '',
-          msg.to ?? '',
-          value.toString(10)
-        )
+        parsedTx.transfers = [
+          {
+            type: TransferType.Send,
+            caip19: this.assetId,
+            from,
+            to,
+            totalValue: value.toString(10),
+            components: [{ value: value.toString(10) }],
+          },
+        ]
       }
     }
 
-    if (msg.to === address) {
+    if (to === address) {
       if (value.gt(0)) {
         parsedTx.transfers = aggregateTransfer(
           parsedTx.transfers,
           TransferType.Receive,
           this.assetId,
-          msg.from ?? '',
-          msg.to ?? '',
+          from,
+          to,
           value.toString(10)
         )
       }
