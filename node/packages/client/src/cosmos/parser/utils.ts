@@ -15,7 +15,6 @@ export const valuesFromMsgEvents = (
   caip19: string
 ): { from: string; to: string; value: BigNumber; data: TxMetadata | undefined; origin: string } => {
   const virtualMsg = virtualMessageFromEvents(msg, events)
-  console.log('virtualMsg', virtualMsg)
   const data = metaData(virtualMsg, events, caip19)
   const from = virtualMsg?.from ?? ''
   const to = virtualMsg?.to ?? ''
