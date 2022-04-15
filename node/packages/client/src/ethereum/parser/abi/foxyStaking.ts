@@ -1,6 +1,6 @@
-import { AbiItem } from 'web3-utils'
+import { JsonFragment } from '@ethersproject/abi/lib/fragments'
 
-const foxyStakingAbi: AbiItem[] = [
+const foxyStakingAbi: Array<JsonFragment> = [
   {
     inputs: [
       {
