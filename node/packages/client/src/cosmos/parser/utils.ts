@@ -71,30 +71,6 @@ const metaData = (msg: Message | undefined, caip19: string): TxMetadata | undefi
   }
 }
 
-const getRewardValue = (msg: Message, events: { [key: string]: Event[] }): string => {
-  const rewardEvent = events[0]?.find((event) => event.type === 'withdraw_rewards')
-
-  if (!rewardEvent) {
-    logger.warn('withdraw_rewards event not found')
-    return '0'
-  }
-
-  const valueUnparsed = rewardEvent?.attributes?.find((attribute) => attribute.key === 'amount')?.value
-  const validator = rewardEvent?.attributes?.find((attribute) => attribute.key === 'validator')?.value
-
-  if (msg.from !== validator) {
-    logger.warn('withdraw_rewards validator does not match')
-    return '0'
-  }
-
-  if (!valueUnparsed) {
-    logger.warn('withdraw_rewards value not found')
-    return '0'
-  }
-
-  return valueUnparsed.slice(0, valueUnparsed.length - 'uatom'.length)
-}
-
 const virtualMessageFromEvents = (msg: Message, events: { [key: string]: Event[] }): Message | undefined => {
   // ibc send tx indicated by events
   const ibcSendEventData = events[0]?.find((event) => event.type === 'send_packet')
