@@ -97,15 +97,15 @@ const getRewardValue = (msg: Message, events: { [key: string]: Event[] }): strin
 
 const virtualMessageFromEvents = (msg: Message, events: { [key: string]: Event[] }): Message | undefined => {
   // ibc send tx indicated by events
-  const sendPacket = events[0]?.find((event) => event.type === 'send_packet')
+  const ibcSendEventData = events[0]?.find((event) => event.type === 'send_packet')
   // ibc receive tx indicated by events
-  const recvPacket = events[1]?.find((event) => event.type === 'recv_packet')
+  const ibcRecvEventData = events[1]?.find((event) => event.type === 'recv_packet')
   // get rewards tx indicted by events
-  const rewardEvent = events[0]?.find((event) => event.type === 'withdraw_rewards')
+  const rewardEventData = events[0]?.find((event) => event.type === 'withdraw_rewards')
 
-  if (sendPacket) {
+  if (ibcSendEventData) {
     const parsedPacketData = JSON.parse(
-      sendPacket?.attributes.find((attribute) => attribute.key === 'packet_data')?.value ?? '{}'
+      ibcSendEventData?.attributes.find((attribute) => attribute.key === 'packet_data')?.value ?? '{}'
     )
 
     return {
@@ -115,9 +115,9 @@ const virtualMessageFromEvents = (msg: Message, events: { [key: string]: Event[]
       to: parsedPacketData.receiver,
       origin: parsedPacketData.sender,
     }
-  } else if (recvPacket) {
+  } else if (ibcRecvEventData) {
     const parsedPacketData = JSON.parse(
-      recvPacket?.attributes.find((attribute) => attribute.key === 'packet_data')?.value ?? '{}'
+      ibcRecvEventData?.attributes.find((attribute) => attribute.key === 'packet_data')?.value ?? '{}'
     )
 
     return {
@@ -127,8 +127,8 @@ const virtualMessageFromEvents = (msg: Message, events: { [key: string]: Event[]
       to: parsedPacketData.receiver,
       origin: parsedPacketData.sender,
     }
-  } else if (rewardEvent) {
-    const valueUnparsed = rewardEvent?.attributes?.find((attribute) => attribute.key === 'amount')?.value
+  } else if (rewardEventData) {
+    const valueUnparsed = rewardEventData?.attributes?.find((attribute) => attribute.key === 'amount')?.value
     const valueParsed = valueUnparsed?.slice(0, valueUnparsed.length - 'uatom'.length)
     return {
       type: 'withdraw_delegator_reward',
