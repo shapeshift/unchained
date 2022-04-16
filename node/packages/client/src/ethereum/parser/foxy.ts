@@ -16,7 +16,9 @@ export class Parser implements SubParser {
 
   constructor() {
     this.abiInterface = new ethers.utils.Interface(FOXY_STAKING_ABI)
-    ;(this.stakeSigHash = this.abiInterface.getSighash('stake')),
+    // Hard coded staking sigHash because there is two different stake methods
+    // in the foxy staking contract. This gives us the ability to parser the correct one.
+    ;(this.stakeSigHash = '0x7acb7757'),
       (this.unstakeSigHash = this.abiInterface.getSighash('unstake')),
       (this.instantUnstakeSigHash = this.abiInterface.getSighash('instantUnstake')),
       (this.claimWithdrawSigHash = this.abiInterface.getSighash('claimWithdraw'))
