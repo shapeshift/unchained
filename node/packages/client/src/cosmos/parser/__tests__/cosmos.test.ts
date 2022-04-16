@@ -6,7 +6,6 @@ import undelegate from './mockData/undelegate'
 import reward from './mockData/reward'
 import redelegate from './mockData/redelegate'
 import standard from './mockData/standard'
-import transfer from './mockData/transfer'
 import ibc_receive from './mockData/ibc_receive'
 import ibc_send from './mockData/ibc_send'
 
