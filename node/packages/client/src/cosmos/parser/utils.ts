@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { TxMetadata } from '../types'
 import { Event, Message } from '../../generated/cosmos'
 import { Logger } from '@shapeshiftoss/logger'
@@ -15,7 +14,7 @@ export const valuesFromMsgEvents = (
   caip19: string
 ): { from: string; to: string; value: BigNumber; data: TxMetadata | undefined; origin: string } => {
   const virtualMsg = virtualMessageFromEvents(msg, events)
-  const data = metaData(virtualMsg, events, caip19)
+  const data = metaData(virtualMsg, caip19)
   const from = virtualMsg?.from ?? ''
   const to = virtualMsg?.to ?? ''
   const origin = virtualMsg?.origin ?? ''
@@ -23,11 +22,7 @@ export const valuesFromMsgEvents = (
   return { from, to, value, data, origin }
 }
 
-const metaData = (
-  msg: Message | undefined,
-  events: { [key: string]: Event[] },
-  caip19: string
-): TxMetadata | undefined => {
+const metaData = (msg: Message | undefined, caip19: string): TxMetadata | undefined => {
   if (!msg) return
   switch (msg.type) {
     case 'delegate':
@@ -54,18 +49,10 @@ const metaData = (
         parser: 'cosmos',
         method: msg.type,
         destinationValidator: msg.to,
-        value: getRewardValue(msg, events) ?? '0',
+        value: msg?.value?.amount,
         caip19: caip19,
       }
     case 'ibc_send':
-      return {
-        parser: 'cosmos',
-        method: msg.type,
-        ibcDestination: msg.to,
-        ibcSource: msg.from,
-        caip19: caip19,
-        value: msg?.value?.amount,
-      }
     case 'ibc_receive':
       return {
         parser: 'cosmos',
@@ -113,34 +100,45 @@ const virtualMessageFromEvents = (msg: Message, events: { [key: string]: Event[]
   const sendPacket = events[0]?.find((event) => event.type === 'send_packet')
   // ibc receive tx indicated by events
   const recvPacket = events[1]?.find((event) => event.type === 'recv_packet')
-
-  if (!sendPacket && !recvPacket) return msg
+  // get rewards tx indicted by events
+  const rewardEvent = events[0]?.find((event) => event.type === 'withdraw_rewards')
 
   if (sendPacket) {
-    const packetData = sendPacket?.attributes.find((attribute) => attribute.key === 'packet_data')?.value
-    const parsedPacketData = JSON.parse(packetData ?? '{}')
+    const parsedPacketData = JSON.parse(
+      sendPacket?.attributes.find((attribute) => attribute.key === 'packet_data')?.value ?? '{}'
+    )
 
-    const ibcSendMessage: Message = {
+    return {
       type: 'ibc_send',
       value: { amount: parsedPacketData.amount, denom: parsedPacketData.amount },
       from: parsedPacketData.sender,
       to: parsedPacketData.receiver,
       origin: parsedPacketData.sender,
     }
-    return ibcSendMessage
   } else if (recvPacket) {
-    const packetData = recvPacket?.attributes.find((attribute) => attribute.key === 'packet_data')?.value
-    const parsedPacketData = JSON.parse(packetData ?? '{}')
+    const parsedPacketData = JSON.parse(
+      recvPacket?.attributes.find((attribute) => attribute.key === 'packet_data')?.value ?? '{}'
+    )
 
-    const ibcRecvMessage: Message = {
+    return {
       type: 'ibc_receive',
       value: { amount: parsedPacketData.amount, denom: parsedPacketData.amount },
       from: parsedPacketData.sender,
       to: parsedPacketData.receiver,
       origin: parsedPacketData.sender,
     }
-    return ibcRecvMessage
+  } else if (rewardEvent) {
+    const valueUnparsed = rewardEvent?.attributes?.find((attribute) => attribute.key === 'amount')?.value
+    const valueParsed = valueUnparsed?.slice(0, valueUnparsed.length - 'uatom'.length)
+    return {
+      type: 'withdraw_delegator_reward',
+      value: { amount: valueParsed ?? '', denom: 'uatom' },
+      from: msg.from,
+      to: msg.to,
+      origin: msg.origin,
+    }
+  } else {
+    console.warn(`cant create virtual message from events ${events}`)
+    return msg
   }
-  console.warn(`cant create virtual message from events ${events}`)
-  return
 }
