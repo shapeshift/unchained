@@ -1,6 +1,6 @@
 import { JsonFragment } from '@ethersproject/abi/lib/fragments'
 
-const foxyStakingAbi: Array<JsonFragment> = [
+const foxyStaking: Array<JsonFragment> = [
   {
     inputs: [
       {
@@ -718,4 +718,4 @@ const foxyStakingAbi: Array<JsonFragment> = [
   },
 ]
 
-export default foxyStakingAbi
+export default foxyStaking

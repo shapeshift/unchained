@@ -17,11 +17,11 @@ export class Parser implements SubParser {
   constructor() {
     this.abiInterface = new ethers.utils.Interface(FOXY_STAKING_ABI)
     // Hard coded staking sigHash because there is two different stake methods
-    // in the foxy staking contract. This gives us the ability to parser the correct one.
-    ;(this.stakeSigHash = '0x7acb7757'),
-      (this.unstakeSigHash = this.abiInterface.getSighash('unstake')),
-      (this.instantUnstakeSigHash = this.abiInterface.getSighash('instantUnstake')),
-      (this.claimWithdrawSigHash = this.abiInterface.getSighash('claimWithdraw'))
+    // in the foxy staking contract. This gives us the ability to parse the correct one.
+    this.stakeSigHash = '0x7acb7757'
+    this.unstakeSigHash = this.abiInterface.getSighash('unstake')
+    this.instantUnstakeSigHash = this.abiInterface.getSighash('instantUnstake')
+    this.claimWithdrawSigHash = this.abiInterface.getSighash('claimWithdraw')
   }
 
   async parse(tx: BlockbookTx): Promise<TxSpecific | undefined> {
@@ -30,7 +30,7 @@ export class Parser implements SubParser {
     if (!txData) return
 
     const txSigHash = getSigHash(txData)
-    const abiInterface = this.getAbiInterface(txSigHash)
+    const abiInterface = this.abiInterfaceSupportsSigHash(txSigHash)
     if (!abiInterface) return
 
     const decoded = abiInterface.parseTransaction({ data: txData })
@@ -62,7 +62,7 @@ export class Parser implements SubParser {
     return [this.stakeSigHash, this.unstakeSigHash, this.instantUnstakeSigHash, this.claimWithdrawSigHash]
   }
 
-  getAbiInterface(txSigHash: string | undefined): ethers.utils.Interface | undefined {
+  abiInterfaceSupportsSigHash(txSigHash: string | undefined): ethers.utils.Interface | undefined {
     if (this.supportedFoxyFunctions().some((abi) => abi === txSigHash)) return this.abiInterface
     return undefined
   }
