@@ -54,6 +54,7 @@ export enum TxParser {
   UniV2 = 'uniV2',
   ZRX = 'zrx',
   Thor = 'thor',
+  Foxy = 'foxy',
 }
 
 export interface StandardTxMetadata {
