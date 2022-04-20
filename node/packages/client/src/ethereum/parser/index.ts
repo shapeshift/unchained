@@ -11,6 +11,7 @@ import * as thor from './thor'
 import * as uniV2 from './uniV2'
 import * as zrx from './zrx'
 import * as yearn from './yearn'
+import * as foxy from './foxy'
 
 export interface TransactionParserArgs {
   network?: Network
@@ -24,6 +25,7 @@ export class TransactionParser {
   private readonly uniV2: uniV2.Parser
   private readonly zrx: zrx.Parser
   private readonly yearn: yearn.Parser
+  private readonly foxy: foxy.Parser
   private readonly parsers: Array<SubParser>
 
   constructor(args: TransactionParserArgs) {
@@ -35,8 +37,9 @@ export class TransactionParser {
     this.uniV2 = new uniV2.Parser({ network: this.network, provider })
     this.zrx = new zrx.Parser()
     this.yearn = new yearn.Parser({ provider, network: this.network })
+    this.foxy = new foxy.Parser()
 
-    this.parsers = [this.zrx, this.thor, this.uniV2, this.yearn]
+    this.parsers = [this.zrx, this.thor, this.uniV2, this.yearn, this.foxy]
   }
 
   // return any addresses that can be detected
