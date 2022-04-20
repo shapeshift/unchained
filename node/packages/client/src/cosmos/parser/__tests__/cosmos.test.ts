@@ -6,7 +6,8 @@ import undelegate from './mockData/undelegate'
 import reward from './mockData/reward'
 import redelegate from './mockData/redelegate'
 import standard from './mockData/standard'
-import transfer from './mockData/transfer'
+import ibc_receive from './mockData/ibc_receive'
+import ibc_send from './mockData/ibc_send'
 
 const txParser = new TransactionParser({ chainId: 'cosmos:cosmoshub-4' })
 
@@ -102,6 +103,7 @@ describe('parseTx', () => {
         method: 'delegate',
         delegator: 'cosmos179k2lz70rxvjrvvr65cynw9x5c8v3kftg46v05',
         destinationValidator: 'cosmosvaloper1lzhlnpahvznwfv4jmay2tgaha5kmz5qxerarrl',
+        value: `1920000`,
       },
       fee: { caip19: 'cosmos:cosmoshub-4/slip44:118', value: '6250' },
     }
@@ -147,6 +149,7 @@ describe('parseTx', () => {
         method: 'begin_unbonding',
         delegator: 'cosmosvaloper1sjllsnramtg3ewxqwwrwjxfgc4n4ef9u2lcnj0',
         destinationValidator: 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e',
+        value: `200000`,
       },
     }
 
@@ -174,6 +177,8 @@ describe('parseTx', () => {
         sourceValidator: 'cosmosvaloper1sjllsnramtg3ewxqwwrwjxfgc4n4ef9u2lcnj0',
         delegator: 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e',
         destinationValidator: 'cosmosvaloper156gqf9837u7d4c4678yt3rl4ls9c5vuursrrzf',
+        caip19: 'cosmos:cosmoshub-4/slip44:118',
+        value: `500000`,
       },
       fee: {
         caip19: 'cosmos:cosmoshub-4/slip44:118',
@@ -223,24 +228,87 @@ describe('parseTx', () => {
     expect(expected).toEqual(actual)
   })
 
-  it('should be able to minimally parse an ibc transfer tx', async () => {
-    const { tx } = transfer
+  it('should be able to parse an ibc send tx', async () => {
+    const { tx } = ibc_send
     const address = 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e'
 
     const expected: ParsedTx = {
       address: 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e',
-      blockHash: '16C1E10CBF15AA0E2C147AA8473B691B0F1AE1800DC990A088E7643668A05BA2',
-      blockHeight: 9636880,
-      blockTime: 1646429517,
+      blockHash: 'C09E8EA1D6CD85AE8CFC2CF90B5D02EF79742167F0A161580077D44149616C65',
+      blockHeight: 8418140,
+      blockTime: 1637387732,
       caip2: 'cosmos:cosmoshub-4',
-      confirmations: 231594,
+      confirmations: 1632185,
       status: Status.Confirmed,
-      transfers: [],
-      txid: 'D78AB26809244FD2E9D65120285624CB61BCB5B9FBC2164DAC379C2CC7A78DE8',
+      transfers: [
+        {
+          type: TransferType.Send,
+          caip19: 'cosmos:cosmoshub-4/slip44:118',
+          from: 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e',
+          to: 'osmo1fx4jwv3aalxqwmrpymn34l582lnehr3eg40jnt',
+          totalValue: '108444',
+          components: [
+            {
+              value: '108444',
+            },
+          ],
+        },
+      ],
+      txid: '51D1916A963DDDC01A507D3323A27D59C88C9EFC0F1666E0FA4F326C451CE4C4',
+      data: {
+        parser: 'cosmos',
+        method: 'ibc_send',
+        ibcDestination: 'osmo1fx4jwv3aalxqwmrpymn34l582lnehr3eg40jnt',
+        ibcSource: 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e',
+        caip19: 'cosmos:cosmoshub-4/slip44:118',
+        value: '108444',
+      },
     }
 
     const actual = await txParser.parse(tx, address)
 
     expect(expected).toEqual(actual)
   })
+})
+
+it('should be able to parse an ibc receive tx', async () => {
+  const { tx } = ibc_receive
+  const address = 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e'
+
+  const expected: ParsedTx = {
+    address: 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e',
+    blockHash: '16C1E10CBF15AA0E2C147AA8473B691B0F1AE1800DC990A088E7643668A05BA2',
+    blockHeight: 9636880,
+    blockTime: 1646429517,
+    caip2: 'cosmos:cosmoshub-4',
+    confirmations: 231594,
+    status: Status.Confirmed,
+    transfers: [
+      {
+        type: TransferType.Receive,
+        caip19: 'cosmos:cosmoshub-4/slip44:118',
+        from: 'osmo1fx4jwv3aalxqwmrpymn34l582lnehr3eg40jnt',
+        to: 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e',
+        totalValue: '3230396',
+        components: [
+          {
+            value: '3230396',
+          },
+        ],
+      },
+    ],
+    txid: 'D78AB26809244FD2E9D65120285624CB61BCB5B9FBC2164DAC379C2CC7A78DE8',
+    data: {
+      parser: 'cosmos',
+      method: 'ibc_receive',
+      ibcDestination: 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e',
+      ibcSource: 'osmo1fx4jwv3aalxqwmrpymn34l582lnehr3eg40jnt',
+      caip19: 'cosmos:cosmoshub-4/slip44:118',
+      value: '3230396',
+    },
+  }
+
+  const actual = await txParser.parse(tx, address)
+
+  expect(expected).toEqual(actual)
 })
