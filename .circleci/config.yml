@@ -30,9 +30,9 @@ aliases:
     pulumi-stack: public
     pulumi-dir: coinstacks/bitcoin/pulumi
     broker-url: bitcoin-rabbitmq-svc.unchained.svc.cluster.local:5672
-    mongo-cpu-limit: 500m
+    mongo-cpu-limit: "1"
     mongo-cpu-request: 500m
-    mongo-memory-limit: 512Mi
+    mongo-memory-limit: 2Gi
     mongo-replicas: 3
     mongo-storage-size: 5Gi
     mongo-url: mongodb://bitcoin-mongodb-0.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017,bitcoin-mongodb-1.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017,bitcoin-mongodb-2.bitcoin-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
@@ -63,7 +63,7 @@ aliases:
     ingester-replicas: 2
     ingester-max-replicas: 4
     ingester-cpu-threshold: 20
-    ingester-cpu-limit: 500m
+    ingester-cpu-limit: "1"
     ingester-cpu-request: 250m
     ingester-memory-limit: 3Gi
     rpc-url: http://user:password@bitcoin-indexer-svc.unchained.svc.cluster.local:8332
@@ -99,9 +99,9 @@ aliases:
     pulumi-stack: public
     pulumi-dir: coinstacks/ethereum/pulumi
     broker-url: ethereum-rabbitmq-svc.unchained.svc.cluster.local:5672
-    mongo-cpu-limit: 500m
+    mongo-cpu-limit: "1"
     mongo-cpu-request: 500m
-    mongo-memory-limit: 512Mi
+    mongo-memory-limit: 2Gi
     mongo-replicas: 3
     mongo-storage-size: 5Gi
     mongo-url: mongodb://ethereum-mongodb-0.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-1.ethereum-mongodb-headless.unchained.svc.cluster.local:27017,ethereum-mongodb-2.ethereum-mongodb-headless.unchained.svc.cluster.local:27017/?replicaSet=rs0
@@ -132,7 +132,7 @@ aliases:
     ingester-replicas: 2
     ingester-max-replicas: 4
     ingester-cpu-threshold: 20
-    ingester-cpu-limit: 500m
+    ingester-cpu-limit: "1"
     ingester-cpu-request: 250m
     ingester-memory-limit: 3Gi
     rpc-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8332
