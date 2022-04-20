@@ -11,6 +11,7 @@ import (
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/shapeshift/unchained/pkg/websocket"
 	"github.com/tendermint/tendermint/types"
+	"golang.org/x/sync/errgroup"
 )
 
 type Handler struct {
@@ -55,7 +56,7 @@ func (h *Handler) StartWebsocket() error {
 			},
 			Confirmations: 1,
 			Events:        cosmos.Events(tx.Result.Log),
-			Fee:           cosmos.Fee(signingTx, txid, "uatom"),
+			Fee:           cosmos.Fee(signingTx, txid, "uosmo"),
 			GasWanted:     strconv.Itoa(int(tx.Result.GasWanted)),
 			GasUsed:       strconv.Itoa(int(tx.Result.GasUsed)),
 			Index:         int(tx.Index),
@@ -91,12 +92,10 @@ func (h *Handler) StartWebsocket() error {
 }
 
 func (h *Handler) GetInfo() (api.Info, error) {
-	logger.Infof("FUCK1")
-	totalSupply, err := h.httpClient.GetTotalSupply("uatom")
+	totalSupply, err := h.httpClient.GetTotalSupply("uosmo")
 	if err != nil {
 		return nil, err
 	}
-	logger.Infof("FUCK2")
 
 	annualProvisions, err := h.httpClient.GetAnnualProvisions()
 	if err != nil {
@@ -107,19 +106,15 @@ func (h *Handler) GetInfo() (api.Info, error) {
 		annualProvisions = "1"
 	}
 
-	logger.Infof("FUCK3")
-
 	communityTax, err := h.httpClient.GetCommunityTax()
 	if err != nil {
 		return nil, err
 	}
-	logger.Infof("FUCK4")
 
 	bondedTokens, err := h.httpClient.GetBondedTokens()
 	if err != nil {
 		return nil, err
 	}
-	logger.Infof("FUCK5")
 
 	// bTotalSupply, _, err := new(big.Float).Parse(totalSupply, 10)
 	// if err != nil {
@@ -164,6 +159,53 @@ func (h *Handler) GetInfo() (api.Info, error) {
 	return info, nil
 }
 
+func (h *Handler) GetAccountData(pubkey string, denom string, apr *big.Float) (*cosmos.Account, *cosmos.Balance, []cosmos.Delegation, []cosmos.Redelegation, []cosmos.Unbonding, []cosmos.Reward, error) {
+
+	g := new(errgroup.Group)
+
+	var account *cosmos.Account
+	var balance *cosmos.Balance
+	var delegations []cosmos.Delegation
+	var redelegations []cosmos.Redelegation
+	var unbondings []cosmos.Unbonding
+	var rewards []cosmos.Reward
+
+	g.Go(func() error {
+		var err error
+		account, err = h.httpClient.GetAccount(pubkey)
+		return err
+	})
+	g.Go(func() error {
+		var err error
+		balance, err = h.httpClient.GetBalance(pubkey, denom)
+		return err
+	})
+	g.Go(func() error {
+		var err error
+		delegations, err = h.httpClient.GetDelegations(pubkey, apr)
+		return err
+	})
+	g.Go(func() error {
+		var err error
+		redelegations, err = h.httpClient.GetRedelegations(pubkey, apr)
+		return err
+	})
+	g.Go(func() error {
+		var err error
+		unbondings, err = h.httpClient.GetUnbondings(pubkey, denom, apr)
+		return err
+	})
+	g.Go(func() error {
+		var err error
+		rewards, err = h.httpClient.GetRewards(pubkey, apr)
+		return err
+	})
+
+	err := g.Wait()
+
+	return account, balance, delegations, redelegations, unbondings, rewards, err
+}
+
 func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 	info, err := h.GetInfo()
 	if err != nil {
@@ -175,32 +217,7 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 		return nil, errors.Wrapf(err, "failed to parse apr: %s", apr)
 	}
 
-	account, err := h.httpClient.GetAccount(pubkey)
-	if err != nil {
-		return nil, err
-	}
-
-	balance, err := h.httpClient.GetBalance(pubkey, "uatom")
-	if err != nil {
-		return nil, err
-	}
-
-	delegations, err := h.httpClient.GetDelegations(pubkey, apr)
-	if err != nil {
-		return nil, err
-	}
-
-	redelegations, err := h.httpClient.GetRedelegations(pubkey, apr)
-	if err != nil {
-		return nil, err
-	}
-
-	unbondings, err := h.httpClient.GetUnbondings(pubkey, "uatom", apr)
-	if err != nil {
-		return nil, err
-	}
-
-	rewards, err := h.httpClient.GetRewards(pubkey, apr)
+	account, balance, delegations, redelegations, unbondings, rewards, err := h.GetAccountData(pubkey, "uosmo", apr)
 	if err != nil {
 		return nil, err
 	}
@@ -250,7 +267,7 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 			},
 			Confirmations: h.blockService.Latest.Height - height + 1,
 			Events:        cosmos.Events(t.TendermintTx.TxResult.Log),
-			Fee:           cosmos.Fee(t.SigningTx, *t.TendermintTx.Hash, "uatom"),
+			Fee:           cosmos.Fee(t.SigningTx, *t.TendermintTx.Hash, "uosmo"),
 			GasWanted:     t.TendermintTx.TxResult.GasWanted,
 			GasUsed:       t.TendermintTx.TxResult.GasUsed,
 			Index:         int(t.TendermintTx.GetIndex()),
