@@ -16,6 +16,7 @@ require (
 	github.com/spf13/viper v1.10.1
 	github.com/tendermint/liquidity v1.5.0
 	github.com/tendermint/tendermint v0.34.15
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/grpc v1.45.0
 )
 

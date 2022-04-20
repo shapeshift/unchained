@@ -7,6 +7,8 @@ export interface TxMetadata extends Omit<StandardTxMetadata, 'parser'> {
   destinationValidator?: string
   caip19?: string
   value?: string
+  ibcDestination?: string
+  ibcSource?: string
 }
 
 export interface ParsedTx extends StandardTx {
