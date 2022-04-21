@@ -12,6 +12,8 @@ const ethers = {
           return 18
         case '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c':
           return 18
+        case '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2':
+          return 18
         default:
           throw new Error(`no decimals mock for address: ${address}`)
       }
@@ -22,6 +24,8 @@ const ethers = {
           return 'FOX'
         case '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c':
           return 'Uniswap V2'
+        case '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2':
+          return 'Wrapped Ether'
         default:
           throw new Error(`no decimals mock for address: ${address}`)
       }
@@ -32,6 +36,8 @@ const ethers = {
           return 'FOX'
         case '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c':
           return 'UNI-V2'
+        case '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2':
+          return 'WETH'
         default:
           throw new Error(`no decimals mock for address: ${address}`)
       }
