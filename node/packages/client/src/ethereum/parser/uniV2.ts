@@ -7,7 +7,7 @@ import { Network, SubParser, TxSpecific } from '../types'
 import UNIV2_ABI from './abi/uniV2'
 import ERC20_ABI from './abi/erc20'
 import { getSigHash, toNetworkType, txInteractsWithContract } from './utils'
-import { UNI_V2_ROUTER_CONTRACT } from './constants'
+import { UNI_V2_ROUTER_CONTRACT, WETH_CONTRACT_MAINNET, WETH_CONTRACT_ROPSTEN } from './constants'
 
 export interface ParserArgs {
   network: Network
@@ -30,8 +30,8 @@ export class Parser implements SubParser {
     this.addLiquidityEthSigHash = this.abiInterface.getSighash('addLiquidityETH')
     this.removeLiquidityEthSigHash = this.abiInterface.getSighash('removeLiquidityETH')
     this.wethContract = {
-      mainnet: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
-      ropsten: '0xc778417E063141139Fce010982780140Aa0cD5Ab',
+      mainnet: WETH_CONTRACT_MAINNET,
+      ropsten: WETH_CONTRACT_ROPSTEN,
     }[this.network]
   }
 
