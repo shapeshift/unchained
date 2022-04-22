@@ -71,16 +71,15 @@ export class Parser implements SubParser {
       case yearnApprovalSigHash:
         if (decoded?.args._spender !== SHAPE_SHIFT_ROUTER_CONTRACT) return
         break
-      case yearnWithdrawSigHash:
-        if (receiveAddress && !this.yearnTokenVaultAddresses?.includes(receiveAddress)) return
-        break
       case shapeShiftDepositSigHash:
         // here receiveAddress should be the address of the shapeShiftRouter contract
         if (receiveAddress && receiveAddress !== SHAPE_SHIFT_ROUTER_CONTRACT) return
         break
+      case yearnWithdrawSigHash:
       case yearnDepositSigHash:
       case yearnDepositWithAmountSigHash:
       case yearnDepositWithAmountAndRecipientSigHash:
+        if (receiveAddress && !this.yearnTokenVaultAddresses?.includes(receiveAddress)) return
         break
       default:
         return
