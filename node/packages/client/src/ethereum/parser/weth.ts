@@ -44,6 +44,7 @@ export class Parser implements SubParser {
 
     const contract = new ethers.Contract(this.wethContract, ERC20_ABI, this.provider)
     const sendAddress = tx.vin[0].addresses?.[0] ?? ''
+    const receiveAddress = tx.vout?.[0].addresses?.[0] ?? ''
     const decimals = await contract.decimals()
     const name = await contract.name()
     const symbol = await contract.symbol()
@@ -51,6 +52,7 @@ export class Parser implements SubParser {
     const transfers = (() => {
       switch (getSigHash(txData)) {
         case this.depositSigHash: {
+          if (receiveAddress !== this.wethContract) return undefined
           const value = tx.value
           return [
             {
@@ -75,6 +77,7 @@ export class Parser implements SubParser {
           ]
         }
         case this.withdrawalSigHash: {
+          if (receiveAddress !== this.wethContract) return undefined
           const result = this.abiInterface.decodeFunctionData(this.withdrawalSigHash, txData)
           const value = result.wad.toString()
           return [
