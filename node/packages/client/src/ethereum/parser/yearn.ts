@@ -61,14 +61,19 @@ export class Parser implements SubParser {
       this.yearnTokenVaultAddresses = vaults?.map((vault) => vault.address)
     }
 
-    if (txSigHash === yearnApprovalSigHash && decoded?.args._spender !== SHAPE_SHIFT_ROUTER_CONTRACT) return
-    if (txSigHash === shapeShiftDepositSigHash && receiveAddress !== SHAPE_SHIFT_ROUTER_CONTRACT) return
-    if (
-      txSigHash === yearnWithdrawSigHash &&
-      receiveAddress &&
-      !this.yearnTokenVaultAddresses?.includes(receiveAddress)
-    )
-      return
+    switch (txSigHash) {
+      case yearnApprovalSigHash:
+        if (decoded?.args._spender !== SHAPE_SHIFT_ROUTER_CONTRACT) return
+        break
+      case yearnWithdrawSigHash:
+        if (receiveAddress !== SHAPE_SHIFT_ROUTER_CONTRACT) return
+        break
+      case shapeShiftDepositSigHash:
+        if (receiveAddress && !this.yearnTokenVaultAddresses?.includes(receiveAddress)) return
+        break
+      default:
+        return
+    }
 
     return {
       data: {
