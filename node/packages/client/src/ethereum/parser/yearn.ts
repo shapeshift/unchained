@@ -44,7 +44,13 @@ export class Parser implements SubParser {
   }
 
   async parse(tx: BlockbookTx): Promise<TxSpecific | undefined> {
-    const { yearnApprovalSigHash, yearnWithdrawSigHash } = this.supportedYearnFunctions
+    const {
+      yearnApprovalSigHash,
+      yearnWithdrawSigHash,
+      yearnDepositSigHash,
+      yearnDepositWithAmountSigHash,
+      yearnDepositWithAmountAndRecipientSigHash,
+    } = this.supportedYearnFunctions
     const { shapeShiftDepositSigHash } = this.supportedShapeShiftFunctions
     const data = tx.ethereumSpecific?.data
     if (!data) return
@@ -66,10 +72,15 @@ export class Parser implements SubParser {
         if (decoded?.args._spender !== SHAPE_SHIFT_ROUTER_CONTRACT) return
         break
       case yearnWithdrawSigHash:
-        if (receiveAddress !== SHAPE_SHIFT_ROUTER_CONTRACT) return
+        if (receiveAddress && !this.yearnTokenVaultAddresses?.includes(receiveAddress)) return
         break
       case shapeShiftDepositSigHash:
-        if (receiveAddress && !this.yearnTokenVaultAddresses?.includes(receiveAddress)) return
+        // here receiveAddress should be the address of the shapeShiftRouter contract
+        if (receiveAddress && receiveAddress !== SHAPE_SHIFT_ROUTER_CONTRACT) return
+        break
+      case yearnDepositSigHash:
+      case yearnDepositWithAmountSigHash:
+      case yearnDepositWithAmountAndRecipientSigHash:
         break
       default:
         return
