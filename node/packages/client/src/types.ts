@@ -55,6 +55,7 @@ export enum TxParser {
   ZRX = 'zrx',
   Thor = 'thor',
   Foxy = 'foxy',
+  WETH = 'weth',
 }
 
 export interface StandardTxMetadata {

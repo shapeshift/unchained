@@ -23,6 +23,9 @@ import yearnDeposit from './mockData/yearnDeposit'
 import yearnApproval from './mockData/yearnApproval'
 import yearnWithdrawal from './mockData/yearnWithdrawal'
 import yearnDepositShapeShiftRouter from './mockData/yearnDepositShapeShiftRouter'
+import wethDeposit from './mockData/wethDeposit'
+import wethDeposit2 from './mockData/wethDeposit2'
+import wethWithdrawal from './mockData/wethWithdrawal'
 import {
   bondToken,
   foxToken,
@@ -1250,6 +1253,179 @@ describe('parseTx', () => {
       }
 
       const actual = await txParser.parse(tx, address)
+      expect(expected).toEqual(actual)
+    })
+  })
+
+  describe('weth', () => {
+    it('should be able to parse deposit', async () => {
+      const { tx } = wethDeposit
+      const address = '0x2d801972327b0f11422d9cc14a3d00b07ae0cceb'
+      const contractAddress = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+
+      const standardTransfer = {
+        caip19: 'eip155:1/slip44:60',
+        components: [{ value: '30000000000000000' }],
+        from: address,
+        to: contractAddress,
+        token: undefined,
+        totalValue: '30000000000000000',
+        type: TransferType.Send,
+      }
+
+      const expected: Tx = {
+        txid: tx.txid,
+        blockHeight: tx.blockHeight,
+        blockTime: tx.blockTime,
+        blockHash: tx.blockHash,
+        address: address,
+        caip2: 'eip155:1',
+        confirmations: tx.confirmations,
+        data: {
+          method: 'deposit',
+          parser: TxParser.WETH,
+        },
+        status: Status.Confirmed,
+        fee: {
+          value: '2161335000000000',
+          caip19: 'eip155:1/slip44:60',
+        },
+        trade: undefined,
+        transfers: [
+          {
+            type: TransferType.Receive,
+            to: address,
+            from: contractAddress,
+            caip19: 'eip155:1/erc20:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+            totalValue: '30000000000000000',
+            components: [{ value: '30000000000000000' }],
+            token: {
+              contract: contractAddress,
+              decimals: 18,
+              name: 'Wrapped Ether',
+              symbol: 'WETH',
+            },
+          },
+          standardTransfer,
+        ],
+      }
+
+      const actual = await txParser.parse(tx, address)
+
+      expect(expected).toEqual(actual)
+    })
+
+    it('should be able to parse deposit 2', async () => {
+      const { tx } = wethDeposit2
+      const address = '0xE7F92E3d5FDe63C90A917e25854826873497ef3D'
+      const contractAddress = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+
+      const standardTransfer = {
+        caip19: 'eip155:1/slip44:60',
+        components: [{ value: '3264000000000000' }],
+        from: address,
+        to: contractAddress,
+        token: undefined,
+        totalValue: '3264000000000000',
+        type: TransferType.Send,
+      }
+
+      const expected: Tx = {
+        txid: tx.txid,
+        blockHeight: tx.blockHeight,
+        blockTime: tx.blockTime,
+        blockHash: tx.blockHash,
+        address: address,
+        caip2: 'eip155:1',
+        confirmations: tx.confirmations,
+        data: {
+          method: 'deposit',
+          parser: TxParser.WETH,
+        },
+        status: Status.Confirmed,
+        fee: {
+          value: '1087028000000000',
+          caip19: 'eip155:1/slip44:60',
+        },
+        trade: undefined,
+        transfers: [
+          {
+            type: TransferType.Receive,
+            to: address,
+            from: contractAddress,
+            caip19: 'eip155:1/erc20:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+            totalValue: '3264000000000000',
+            components: [{ value: '3264000000000000' }],
+            token: {
+              contract: contractAddress,
+              decimals: 18,
+              name: 'Wrapped Ether',
+              symbol: 'WETH',
+            },
+          },
+          standardTransfer,
+        ],
+      }
+
+      const actual = await txParser.parse(tx, address)
+
+      expect(expected).toEqual(actual)
+    })
+
+    it('should be able to parse withdrawal', async () => {
+      const { tx, internalTxs } = wethWithdrawal
+      const address = '0xa6F15FB2cc5dC96c2EBA18c101AD3fAD27F74839'
+      const contractAddress = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+
+      const internalTransfer = {
+        caip19: 'eip155:1/slip44:60',
+        components: [{ value: '100000000000000000' }],
+        from: contractAddress,
+        to: address,
+        token: undefined,
+        totalValue: '100000000000000000',
+        type: TransferType.Receive,
+      }
+
+      const expected: Tx = {
+        txid: tx.txid,
+        blockHeight: tx.blockHeight,
+        blockTime: tx.blockTime,
+        blockHash: tx.blockHash,
+        address: address,
+        caip2: 'eip155:1',
+        confirmations: tx.confirmations,
+        data: {
+          method: 'withdraw',
+          parser: TxParser.WETH,
+        },
+        status: Status.Confirmed,
+        fee: {
+          value: '1482223000000000',
+          caip19: 'eip155:1/slip44:60',
+        },
+        trade: undefined,
+        transfers: [
+          {
+            type: TransferType.Send,
+            to: contractAddress,
+            from: address,
+            caip19: 'eip155:1/erc20:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+            totalValue: '100000000000000000',
+            components: [{ value: '100000000000000000' }],
+            token: {
+              contract: contractAddress,
+              decimals: 18,
+              name: 'Wrapped Ether',
+              symbol: 'WETH',
+            },
+          },
+          internalTransfer,
+        ],
+      }
+
+      const actual = await txParser.parse(tx, address, internalTxs)
+
       expect(expected).toEqual(actual)
     })
   })
