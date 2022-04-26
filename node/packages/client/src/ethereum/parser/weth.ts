@@ -56,7 +56,7 @@ export class Parser implements SubParser {
           const value = tx.value
           return [
             {
-              type: TransferType.Send,
+              type: TransferType.Receive,
               from: this.wethContract,
               to: sendAddress,
               caip19: caip19.toCAIP19({
@@ -82,7 +82,7 @@ export class Parser implements SubParser {
           const value = result.wad.toString()
           return [
             {
-              type: TransferType.Receive,
+              type: TransferType.Send,
               from: sendAddress,
               to: this.wethContract,
               caip19: caip19.toCAIP19({

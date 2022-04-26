@@ -1293,7 +1293,7 @@ describe('parseTx', () => {
         trade: undefined,
         transfers: [
           {
-            type: TransferType.Send,
+            type: TransferType.Receive,
             to: address,
             from: contractAddress,
             caip19: 'eip155:1/erc20:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
@@ -1350,7 +1350,7 @@ describe('parseTx', () => {
         trade: undefined,
         transfers: [
           {
-            type: TransferType.Send,
+            type: TransferType.Receive,
             to: address,
             from: contractAddress,
             caip19: 'eip155:1/erc20:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
@@ -1407,7 +1407,7 @@ describe('parseTx', () => {
         trade: undefined,
         transfers: [
           {
-            type: TransferType.Receive,
+            type: TransferType.Send,
             to: contractAddress,
             from: address,
             caip19: 'eip155:1/erc20:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
