@@ -57,8 +57,8 @@ export class Parser implements SubParser {
           return [
             {
               type: TransferType.Send,
-              from: sendAddress,
-              to: this.wethContract,
+              from: this.wethContract,
+              to: sendAddress,
               caip19: caip19.toCAIP19({
                 chain: ChainTypes.Ethereum,
                 network: toNetworkType(this.network),
@@ -83,8 +83,8 @@ export class Parser implements SubParser {
           return [
             {
               type: TransferType.Receive,
-              from: this.wethContract,
-              to: sendAddress,
+              from: sendAddress,
+              to: this.wethContract,
               caip19: caip19.toCAIP19({
                 chain: ChainTypes.Ethereum,
                 network: toNetworkType(this.network),

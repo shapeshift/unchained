@@ -1294,8 +1294,8 @@ describe('parseTx', () => {
         transfers: [
           {
             type: TransferType.Send,
-            to: contractAddress,
-            from: address,
+            to: address,
+            from: contractAddress,
             caip19: 'eip155:1/erc20:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
             totalValue: '30000000000000000',
             components: [{ value: '30000000000000000' }],
@@ -1351,8 +1351,8 @@ describe('parseTx', () => {
         transfers: [
           {
             type: TransferType.Send,
-            to: contractAddress,
-            from: address,
+            to: address,
+            from: contractAddress,
             caip19: 'eip155:1/erc20:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
             totalValue: '3264000000000000',
             components: [{ value: '3264000000000000' }],
@@ -1373,9 +1373,19 @@ describe('parseTx', () => {
     })
 
     it('should be able to parse withdrawal', async () => {
-      const { tx } = wethWithdrawal
-      const address = '0x2d801972327b0f11422d9cc14a3d00b07ae0cceb'
+      const { tx, internalTxs } = wethWithdrawal
+      const address = '0xa6F15FB2cc5dC96c2EBA18c101AD3fAD27F74839'
       const contractAddress = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+
+      const internalTransfer = {
+        caip19: 'eip155:1/slip44:60',
+        components: [{ value: '100000000000000000' }],
+        from: contractAddress,
+        to: address,
+        token: undefined,
+        totalValue: '100000000000000000',
+        type: TransferType.Receive,
+      }
 
       const expected: Tx = {
         txid: tx.txid,
@@ -1398,8 +1408,8 @@ describe('parseTx', () => {
         transfers: [
           {
             type: TransferType.Receive,
-            to: address,
-            from: contractAddress,
+            to: contractAddress,
+            from: address,
             caip19: 'eip155:1/erc20:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
             totalValue: '100000000000000000',
             components: [{ value: '100000000000000000' }],
@@ -1410,10 +1420,11 @@ describe('parseTx', () => {
               symbol: 'WETH',
             },
           },
+          internalTransfer,
         ],
       }
 
-      const actual = await txParser.parse(tx, address)
+      const actual = await txParser.parse(tx, address, internalTxs)
 
       expect(expected).toEqual(actual)
     })
