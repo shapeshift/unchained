@@ -1,4 +1,4 @@
-import { caip19, AssetNamespace } from '@shapeshiftoss/caip'
+import { toCAIP19, AssetNamespace } from '@shapeshiftoss/caip'
 import { ChainTypes } from '@shapeshiftoss/types'
 import { Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { ethers } from 'ethers'
@@ -81,7 +81,7 @@ export class Parser implements SubParser {
             type: TransferType.Send,
             from: sendAddress,
             to: lpTokenAddress,
-            caip19: caip19.toCAIP19({
+            caip19: toCAIP19({
               chain: ChainTypes.Ethereum,
               network: toNetworkType(this.network),
               assetNamespace: AssetNamespace.ERC20,
@@ -109,7 +109,7 @@ export class Parser implements SubParser {
             type: TransferType.Send,
             from: sendAddress,
             to: lpTokenAddress,
-            caip19: caip19.toCAIP19({
+            caip19: toCAIP19({
               chain: ChainTypes.Ethereum,
               network: toNetworkType(this.network),
               assetNamespace: AssetNamespace.ERC20,

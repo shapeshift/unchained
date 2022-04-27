@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js'
 import { ethers } from 'ethers'
 import { Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
-import { caip19, caip2, AssetNamespace, AssetReference } from '@shapeshiftoss/caip'
+import { toCAIP19, toCAIP2, AssetNamespace, AssetReference } from '@shapeshiftoss/caip'
 import { ChainTypes } from '@shapeshiftoss/types'
 import { Status, Token, TransferType } from '../../types'
 import { aggregateTransfer, findAsyncSequential } from '../../utils'
@@ -69,7 +69,7 @@ export class TransactionParser {
       blockHash: tx.blockHash,
       blockHeight: tx.blockHeight,
       blockTime: tx.blockTime,
-      caip2: caip2.toCAIP2({ chain: ChainTypes.Ethereum, network: toNetworkType(this.network) }),
+      caip2: toCAIP2({ chain: ChainTypes.Ethereum, network: toNetworkType(this.network) }),
       confirmations: tx.confirmations,
       status: TransactionParser.getStatus(tx),
       trade: contractParserResult?.trade,
@@ -97,7 +97,7 @@ export class TransactionParser {
     address: string,
     internalTxs?: Array<InternalTx>
   ) {
-    const caip19Ethereum = caip19.toCAIP19({
+    const caip19Ethereum = toCAIP19({
       chain: ChainTypes.Ethereum,
       network: toNetworkType(this.network),
       assetNamespace: AssetNamespace.Slip44,
@@ -157,7 +157,7 @@ export class TransactionParser {
       }
 
       const transferArgs = [
-        caip19.toCAIP19({
+        toCAIP19({
           chain: ChainTypes.Ethereum,
           network: toNetworkType(this.network),
           assetNamespace: AssetNamespace.ERC20,
@@ -182,7 +182,7 @@ export class TransactionParser {
 
     internalTxs?.forEach((internalTx) => {
       const transferArgs = [
-        caip19.toCAIP19({
+        toCAIP19({
           chain: ChainTypes.Ethereum,
           network: toNetworkType(this.network),
           assetNamespace: AssetNamespace.Slip44,
