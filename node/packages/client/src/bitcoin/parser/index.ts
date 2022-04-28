@@ -40,7 +40,7 @@ export class TransactionParser {
     }
 
     tx.vin.forEach((vin) => {
-      if (vin.isAddress === true && vin.addresses?.includes(address)) {
+      if (vin.isAddress && vin.addresses?.includes(address)) {
         // send amount
         const sendValue = new BigNumber(vin.value ?? 0)
         if (sendValue.gt(0)) {
@@ -63,7 +63,7 @@ export class TransactionParser {
     })
 
     tx.vout.forEach((vout) => {
-      if (vout.isAddress === true && vout.addresses?.includes(address)) {
+      if (vout.isAddress && vout.addresses?.includes(address)) {
         // receive amount
         const receiveValue = new BigNumber(vout.value ?? 0)
         if (receiveValue.gt(0)) {
