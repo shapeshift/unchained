@@ -70,6 +70,7 @@ export class TransactionParser {
       blockHeight: tx.blockHeight,
       blockTime: tx.blockTime,
       caip2: caip2.toCAIP2({ chain: ChainTypes.Ethereum, network: toNetworkType(this.network) }),
+      chainId: caip2.toCAIP2({ chain: ChainTypes.Ethereum, network: toNetworkType(this.network) }),
       confirmations: tx.confirmations,
       status: TransactionParser.getStatus(tx),
       trade: contractParserResult?.trade,
@@ -123,7 +124,7 @@ export class TransactionParser {
       // network fee
       const fees = new BigNumber(tx.fees ?? 0)
       if (fees.gt(0)) {
-        parsedTx.fee = { caip19: caip19Ethereum, value: fees.toString(10) }
+        parsedTx.fee = { caip19: caip19Ethereum, assetId: caip19Ethereum, value: fees.toString(10) }
       }
     }
 

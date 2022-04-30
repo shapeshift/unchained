@@ -30,6 +30,7 @@ export class TransactionParser {
       blockHeight: tx.blockHeight ?? -1,
       blockTime: tx.timestamp ?? Math.floor(Date.now() / 1000),
       caip2: this.chainId,
+      chainId: this.chainId,
       confirmations: tx.confirmations,
       status: tx.confirmations > 0 ? Status.Confirmed : Status.Pending, // TODO: handle failed case
       transfers: [],
@@ -48,6 +49,7 @@ export class TransactionParser {
           {
             type: from === address ? TransferType.Send : TransferType.Receive,
             caip19: this.assetId,
+            assetId: this.assetId,
             from,
             to,
             totalValue: value.toString(10),
@@ -62,7 +64,7 @@ export class TransactionParser {
       // network fee
       const fees = new BigNumber(tx.fee.amount)
       if (fees.gt(0)) {
-        parsedTx.fee = { caip19: this.assetId, value: fees.toString(10) }
+        parsedTx.fee = { caip19: this.assetId, assetId: this.assetId, value: fees.toString(10) }
       }
     }
 

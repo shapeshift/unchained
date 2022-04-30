@@ -87,6 +87,12 @@ export class Parser implements SubParser {
               assetNamespace: AssetNamespace.ERC20,
               assetReference: tokenAddress,
             }),
+            assetId: caip19.toCAIP19({
+              chain: ChainTypes.Ethereum,
+              network: toNetworkType(this.network),
+              assetNamespace: AssetNamespace.ERC20,
+              assetReference: tokenAddress,
+            }),
             totalValue: value,
             components: [{ value }],
             token: { contract: tokenAddress, decimals, name, symbol },
@@ -110,6 +116,12 @@ export class Parser implements SubParser {
             from: sendAddress,
             to: lpTokenAddress,
             caip19: caip19.toCAIP19({
+              chain: ChainTypes.Ethereum,
+              network: toNetworkType(this.network),
+              assetNamespace: AssetNamespace.ERC20,
+              assetReference: lpTokenAddress,
+            }),
+            assetId: caip19.toCAIP19({
               chain: ChainTypes.Ethereum,
               network: toNetworkType(this.network),
               assetNamespace: AssetNamespace.ERC20,

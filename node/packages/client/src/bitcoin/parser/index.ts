@@ -33,6 +33,7 @@ export class TransactionParser {
       blockHeight: tx.blockHeight,
       blockTime: tx.blockTime,
       caip2: caip2.toCAIP2({ chain: ChainTypes.Bitcoin, network: toNetworkType(this.network) }),
+      chainId: caip2.toCAIP2({ chain: ChainTypes.Bitcoin, network: toNetworkType(this.network) }),
       confirmations: tx.confirmations,
       status: tx.confirmations > 0 ? Status.Confirmed : Status.Pending,
       transfers: [],
@@ -57,7 +58,7 @@ export class TransactionParser {
         // network fee
         const fees = new BigNumber(tx.fees ?? 0)
         if (fees.gt(0)) {
-          parsedTx.fee = { caip19: caip19Bitcoin, value: fees.toString(10) }
+          parsedTx.fee = { caip19: caip19Bitcoin, assetId: caip19Bitcoin, value: fees.toString(10) }
         }
       }
     })
