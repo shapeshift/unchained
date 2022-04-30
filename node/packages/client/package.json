@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@shapeshiftoss/blockbook": "^6.10.0",
-    "@shapeshiftoss/caip": "^2.0.0",
+    "@shapeshiftoss/caip": "^2.2.1",
     "@shapeshiftoss/logger": "^1.0.0",
     "@shapeshiftoss/types": "^2.0.0",
     "@yfi/sdk": "^1.0.30",
