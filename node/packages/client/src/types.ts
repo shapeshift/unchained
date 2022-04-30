@@ -4,7 +4,11 @@ export enum Dex {
 }
 
 export interface Fee {
+  /**
+   * @deprecated use 'assetId' instead
+   */
   caip19: string
+  assetId: string
   value: string
 }
 
@@ -36,7 +40,11 @@ export enum TradeType {
 export interface Transfer {
   from: string
   to: string
+  /**
+   * @deprecated use 'assetId' instead
+   */
   caip19: string
+  assetId: string
   type: TransferType
   totalValue: string
   components: Array<{ value: string }>
@@ -70,7 +78,11 @@ export interface StandardTx {
   blockHash?: string
   blockHeight: number
   blockTime: number
+  /**
+   * @deprecated use 'chainId' instead
+   */
   caip2: string
+  chainId: string
   confirmations: number
   fee?: Fee
   status: Status
