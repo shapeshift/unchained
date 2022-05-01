@@ -115,6 +115,13 @@ func (h *Handler) GetInfo() (api.Info, error) {
 	if err != nil {
 		return nil, err
 	}
+	logger.Infof("FUCKER WAT")
+
+	mintParams, err := h.httpClient.GetMintParams()
+	if err != nil {
+		return nil, err
+	} 
+	logger.Infof("mintParams: %s",mintParams)
 
 	// bTotalSupply, _, err := new(big.Float).Parse(totalSupply, 10)
 	// if err != nil {

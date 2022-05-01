@@ -35,6 +35,17 @@ func (c *HTTPClient) GetValidator(addr string, apr *big.Float) (*Validator, erro
 	return httpValidator(res.Validator, apr), nil
 }
 
+func (c *HTTPClient) GetPool(addr string, apr *big.Float) (*Validator, error) {
+	var res QueryValidatorResponse
+
+	_, err := c.cosmos.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/staking/v1beta1/pool"))
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get validators")
+	}
+
+	return httpValidator(res.Validator, apr), nil
+}
+
 func httpValidator(validator ValidatorResponse, apr *big.Float) *Validator {
 	unbonding := ValidatorUnbonding{
 		Height:    validator.UnbondingHeight,

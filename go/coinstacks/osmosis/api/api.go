@@ -1,6 +1,6 @@
-// Package classification Cosmos Unchained API
+// Package classification Osmosis Unchained API
 //
-// Provides access to cosmos chain data
+// Provides access to Osmosis chain data
 //
 // License: MIT http://opensource.org/licenses/MIT
 //

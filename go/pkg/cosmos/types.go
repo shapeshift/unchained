@@ -5,6 +5,28 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 )
 
+// Mint Param
+type DistributionProportions struct {
+	staking       string
+	pool_incentives string
+	developer_rewards      string
+	community_pool      string
+}
+
+// Mint Param
+type MintParams struct {
+	mint_denom       string
+	genesis_epoch_provisions string
+	epoch_identifier      string
+	distribution_proportions DistributionProportions
+}
+
+
+// Mint Params
+type MintParamsResponse struct {
+	params       MintParams
+}
+
 // Account info common return payload
 type Account struct {
 	Address       string
