@@ -5,6 +5,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 )
 
+//epoc provision
+// Mint Params
+type EpochProvisionResponse struct {
+	epoch_provisions string
+}
+
+
 // Mint Param
 type DistributionProportions struct {
 	staking       string

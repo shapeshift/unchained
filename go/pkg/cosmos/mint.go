@@ -6,15 +6,13 @@ import (
 )
 
 
-func (c *HTTPClient) GetMintParams() (string, error) {
+func (c *HTTPClient) GetStakingDistrobutions() (string, error) {
 	var res struct {
-		MintParamsResponse struct {
-			MintParams struct {
-				DistributionProportions struct {
-					Staking string `json:"staking"`
-				} `json:"distribution_proportions"`
-			} `json:"params"`
-		} 
+		MintParams struct {
+			DistributionProportions struct {
+				Staking string `json:"staking"`
+			} `json:"distribution_proportions"`
+		} `json:"params"`
 	}
 
 	_, err := c.cosmos.R().SetResult(&res).Get(fmt.Sprintf("/osmosis/mint/v1beta1/params"))
@@ -22,23 +20,20 @@ func (c *HTTPClient) GetMintParams() (string, error) {
 		return "0", errors.Wrapf(err, "failed to get mint params")
 	}
 	logger.Infof("res: %+v",res)
-	logger.Infof("MintParamsResponse: %+v",res.MintParamsResponse)
+	logger.Infof("MintParamsResponse: %+v",res)
 
-	return res.MintParamsResponse.MintParams.DistributionProportions.Staking, nil
+	return res.MintParams.DistributionProportions.Staking, nil
 }
 
-func (c *HTTPClient) GetEpochProvisions(denom string) (string, error) {
+func (c *HTTPClient) GetEpochProvisions() (string, error) {
 	var res struct {
-		Amount struct {
-			Amount string `json:"amount"`
-			Denom  string `json:"denom"`
-		} `json:"amount"`
+		EpochProvisions string `json:"epoch_provisions"`
 	}
-
 	_, err := c.cosmos.R().SetResult(&res).Get(fmt.Sprintf("/osmosis/mint/v1beta1/epoch_provisions"))
 	if err != nil {
-		return "0", errors.Wrapf(err, "failed to get total supply of: %s", denom)
+		return "0", errors.Wrapf(err, "failed to GetEpochProvisions")
 	}
+	logger.Infof("res: %+v",res)
 
-	return res.Amount.Amount, nil
+	return res.EpochProvisions, nil
 }

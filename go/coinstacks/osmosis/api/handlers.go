@@ -92,10 +92,6 @@ func (h *Handler) StartWebsocket() error {
 }
 
 func (h *Handler) GetInfo() (api.Info, error) {
-	totalSupply, err := h.httpClient.GetTotalSupply("uosmo")
-	if err != nil {
-		return nil, err
-	}
 
 	annualProvisions, err := h.httpClient.GetAnnualProvisions()
 	if err != nil {
@@ -115,13 +111,68 @@ func (h *Handler) GetInfo() (api.Info, error) {
 	if err != nil {
 		return nil, err
 	}
-	logger.Infof("FUCKER WAT")
-
-	mintParams, err := h.httpClient.GetMintParams()
+	bondedTokensFloat, err := strconv.ParseFloat(bondedTokens, 64)
+	if err != nil {	return nil, err }  
+	
+	stakingsDistributions, err := h.httpClient.GetStakingDistrobutions()
 	if err != nil {
 		return nil, err
 	} 
-	logger.Infof("mintParams: %s",mintParams)
+	logger.Infof("FINAL: stakingsDistributions: %s",stakingsDistributions)
+	
+	//epoch duration
+
+	
+	epochProvision, err := h.httpClient.GetEpochProvisions()
+	if err != nil {
+		return nil, err
+	} 
+	logger.Infof("FINAL: epochProvision: %s",epochProvision)
+
+	epochProvisionFloat, err := strconv.ParseFloat(epochProvision, 64)
+	if err != nil {
+		return nil, err
+	} 
+	stakingsDistributionsFloat, err := strconv.ParseFloat(stakingsDistributions, 64)
+	if err != nil {
+		return nil, err
+	} 
+
+	logger.Infof("FINAL: epochProvisionInt: %i",epochProvisionFloat)
+	logger.Infof("FINAL: stakingsDistributionsInt: %i",stakingsDistributionsFloat)
+
+	//mintingEpochProvision = epochProvision * stakingsDistributions
+	mintingEpochProvision := epochProvisionFloat * stakingsDistributionsFloat
+	logger.Infof("FINAL: mintingEpochProvision: %i",mintingEpochProvision)
+
+
+	//static
+	totalSupply := "1000000000"
+	totalSupplyfloat, err := strconv.ParseFloat(totalSupply, 64)
+	if err != nil {	return nil, err }  
+
+	epochDuration :="86400"
+	epochDurationFloat, err := strconv.ParseFloat(epochDuration, 64)
+	if err != nil {	return nil, err } 
+	logger.Infof("FINAL: epochDuration: %s",epochDuration)
+
+	//yearMintingProvision = mintingEpochProvision * ((365 * 24 * 3600) / durationSeconds)
+	yearMintingProvision := mintingEpochProvision * ((365 * 24 * 3600) / epochDurationFloat)
+	logger.Infof("FINAL: yearMintingProvision: %s",yearMintingProvision)
+
+	//ratio = bondedToken / totalSupply
+	ratio := bondedTokensFloat / totalSupplyfloat
+	logger.Infof("FINAL: ratio: %s",ratio)
+
+	//inflation = yearMintingProvision / totalSupply
+	inflation := yearMintingProvision / totalSupplyfloat
+	logger.Infof("FINAL: inflation: %s",inflation)
+
+	//apr = inflation / ratio
+	apr := inflation / ratio
+	logger.Infof("FINAL: apr: %s",apr)
+
+	aprString := fmt.Sprintf("%f", apr)
 
 	// bTotalSupply, _, err := new(big.Float).Parse(totalSupply, 10)
 	// if err != nil {
@@ -160,7 +211,7 @@ func (h *Handler) GetInfo() (api.Info, error) {
 		BondedTokens:     bondedTokens,
 		AnnualProvisions: annualProvisions,
 		CommunityTax:     communityTax,
-		APR:              "0.15",
+		APR:              aprString,
 	}
 
 	return info, nil
