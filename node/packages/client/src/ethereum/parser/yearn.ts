@@ -22,15 +22,15 @@ export class Parser implements SubParser {
   yearnInterface = new ethers.utils.Interface(yearnVault)
 
   supportedYearnFunctions = {
-    yearnApprovalSigHash: this.yearnInterface.getSighash('approve'),
-    yearnDepositSigHash: '0xd0e30db0',
-    yearnDepositWithAmountSigHash: '0xb6b55f25',
-    yearnDepositWithAmountAndRecipientSigHash: '0x6e553f65',
-    yearnWithdrawSigHash: '0x00f714ce',
+    approveSigHash: this.yearnInterface.getSighash('approve'),
+    depositSigHash: this.yearnInterface.getSighash('deposit()'),
+    depositAmountSigHash: this.yearnInterface.getSighash('deposit(uint256)'),
+    depositAmountAndRecipientSigHash: this.yearnInterface.getSighash('deposit(uint256,address)'),
+    withdrawSigHash: this.yearnInterface.getSighash('withdraw(uint256,address)'),
   }
 
   supportedShapeShiftFunctions = {
-    shapeShiftDepositSigHash: '0x20e8c565',
+    depositSigHash: this.shapeShiftInterface.getSighash('deposit(address,address,uint256,uint256)'),
   }
 
   constructor(args: ParserArgs) {
@@ -44,40 +44,32 @@ export class Parser implements SubParser {
   }
 
   async parse(tx: BlockbookTx): Promise<TxSpecific | undefined> {
-    const {
-      yearnApprovalSigHash,
-      yearnWithdrawSigHash,
-      yearnDepositSigHash,
-      yearnDepositWithAmountSigHash,
-      yearnDepositWithAmountAndRecipientSigHash,
-    } = this.supportedYearnFunctions
-    const { shapeShiftDepositSigHash } = this.supportedShapeShiftFunctions
-    const data = tx.ethereumSpecific?.data
-    if (!data) return
+    if (!tx.ethereumSpecific?.data) return
 
-    const txSigHash = getSigHash(data)
+    const txSigHash = getSigHash(tx.ethereumSpecific.data)
+
     const abiInterface = this.getAbiInterface(txSigHash)
     if (!abiInterface) return
-
-    const decoded = abiInterface.parseTransaction({ data })
-    const receiveAddress = tx.vout?.[0].addresses?.[0]
 
     if (!this.yearnTokenVaultAddresses) {
       const vaults = await this.yearnSdk?.vaults.get()
       this.yearnTokenVaultAddresses = vaults?.map((vault) => vault.address)
     }
 
+    const decoded = abiInterface.parseTransaction({ data: tx.ethereumSpecific.data })
+    const receiveAddress = tx.vout?.[0].addresses?.[0]
+
     switch (txSigHash) {
-      case yearnApprovalSigHash:
+      case this.supportedYearnFunctions.approveSigHash:
         if (decoded?.args._spender !== SHAPE_SHIFT_ROUTER_CONTRACT) return
         break
-      case shapeShiftDepositSigHash:
+      case this.supportedShapeShiftFunctions.depositSigHash:
         if (receiveAddress !== SHAPE_SHIFT_ROUTER_CONTRACT) return
         break
-      case yearnWithdrawSigHash:
-      case yearnDepositSigHash:
-      case yearnDepositWithAmountSigHash:
-      case yearnDepositWithAmountAndRecipientSigHash:
+      case this.supportedYearnFunctions.withdrawSigHash:
+      case this.supportedYearnFunctions.depositSigHash:
+      case this.supportedYearnFunctions.depositAmountSigHash:
+      case this.supportedYearnFunctions.depositAmountAndRecipientSigHash:
         if (receiveAddress && !this.yearnTokenVaultAddresses?.includes(receiveAddress)) return
         break
       default:
@@ -86,7 +78,7 @@ export class Parser implements SubParser {
 
     return {
       data: {
-        method: decoded?.name,
+        method: decoded.name,
         parser: TxParser.Yearn,
       },
     }
