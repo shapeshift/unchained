@@ -23,12 +23,17 @@ import yearnDeposit from './mockData/yearnDeposit'
 import yearnApproval from './mockData/yearnApproval'
 import yearnWithdrawal from './mockData/yearnWithdrawal'
 import yearnDepositShapeShiftRouter from './mockData/yearnDepositShapeShiftRouter'
+import foxyStake from './mockData/foxyStake'
+import foxyUnstake from './mockData/foxyUnstake'
+import foxyInstantUnstake from './mockData/foxyInstantUnstake'
+import foxyClaimWithdraw from './mockData/foxyClaimWithdraw'
 import wethDeposit from './mockData/wethDeposit'
 import wethDeposit2 from './mockData/wethDeposit2'
 import wethWithdrawal from './mockData/wethWithdrawal'
 import {
   bondToken,
   foxToken,
+  foxyToken,
   kishuToken,
   linkToken,
   linkYearnVault,
@@ -40,7 +45,7 @@ import {
   usdtToken,
   yvUsdcToken,
 } from './mockData/tokens'
-import { SHAPE_SHIFT_ROUTER_CONTRACT } from '../constants'
+import { SHAPE_SHIFT_ROUTER_CONTRACT, FOXY_STAKING_CONTRACT } from '../constants'
 
 const txParser = new TransactionParser({ rpcUrl: '' })
 
@@ -1313,6 +1318,195 @@ describe('parseTx', () => {
       const actual = await txParser.parse(tx, address)
 
       expect(expected).toEqual(actual)
+    })
+
+    describe.only('foxy', () => {
+      it('should be able to parse stake', async () => {
+        const { tx } = foxyStake
+        const address = '0xCBa38513451bCE398A87F9950a154034Cad59cE9'
+
+        const expected: Tx = {
+          txid: tx.txid,
+          blockHeight: tx.blockHeight,
+          blockTime: tx.blockTime,
+          blockHash: tx.blockHash,
+          address: address,
+          caip2: 'eip155:1',
+          confirmations: tx.confirmations,
+          data: {
+            method: 'stake',
+            parser: TxParser.Foxy,
+          },
+          status: Status.Confirmed,
+          fee: {
+            value: '8343629232016788',
+            caip19: 'eip155:1/slip44:60',
+          },
+          trade: undefined,
+          transfers: [
+            {
+              type: TransferType.Send,
+              to: FOXY_STAKING_CONTRACT,
+              from: address,
+              caip19: 'eip155:1/erc20:0xc770eefad204b5180df6a14ee197d99d808ee52d',
+              totalValue: '109548875260073394762',
+              components: [{ value: '109548875260073394762' }],
+              token: foxToken,
+            },
+            {
+              type: TransferType.Receive,
+              to: address,
+              from: FOXY_STAKING_CONTRACT,
+              caip19: 'eip155:1/erc20:0xdc49108ce5c57bc3408c3a5e95f3d864ec386ed3',
+              totalValue: '109548875260073394762',
+              components: [{ value: '109548875260073394762' }],
+              token: foxyToken,
+            },
+          ],
+        }
+
+        const actual = await txParser.parse(tx, address)
+
+        expect(expected).toEqual(actual)
+      })
+
+      it('should be able to parse unstake', async () => {
+        const { tx } = foxyUnstake
+        const address = '0x557C61Ec8F7A675BE03EFe11962430ac8Cff4229'
+
+        const expected: Tx = {
+          txid: tx.txid,
+          blockHeight: tx.blockHeight,
+          blockTime: tx.blockTime,
+          blockHash: tx.blockHash,
+          address: address,
+          caip2: 'eip155:1',
+          confirmations: tx.confirmations,
+          data: {
+            method: 'unstake',
+            parser: TxParser.Foxy,
+          },
+          status: Status.Confirmed,
+          fee: {
+            value: '7586577934107040',
+            caip19: 'eip155:1/slip44:60',
+          },
+          trade: undefined,
+          transfers: [
+            {
+              type: TransferType.Send,
+              to: FOXY_STAKING_CONTRACT,
+              from: address,
+              caip19: 'eip155:1/erc20:0xdc49108ce5c57bc3408c3a5e95f3d864ec386ed3',
+              totalValue: '24292579090466512304',
+              components: [{ value: '24292579090466512304' }],
+              token: foxyToken,
+            },
+            {
+              type: TransferType.Receive,
+              to: address,
+              from: FOXY_STAKING_CONTRACT,
+              caip19: 'eip155:1/erc20:0xc770eefad204b5180df6a14ee197d99d808ee52d',
+              totalValue: '22438383781076552673',
+              components: [{ value: '22438383781076552673' }],
+              token: foxToken,
+            },
+          ],
+        }
+
+        const actual = await txParser.parse(tx, address)
+
+        expect(expected).toEqual(actual)
+      })
+
+      it('should be able to parse instant unstake', async () => {
+        const { tx } = foxyInstantUnstake
+        const address = '0x1f41A6429D2035035253859f6edBd6438Ecf5d39'
+
+        const expected: Tx = {
+          txid: tx.txid,
+          blockHeight: tx.blockHeight,
+          blockTime: tx.blockTime,
+          blockHash: tx.blockHash,
+          address: address,
+          caip2: 'eip155:1',
+          confirmations: tx.confirmations,
+          data: {
+            method: 'instantUnstake',
+            parser: TxParser.Foxy,
+          },
+          status: Status.Confirmed,
+          fee: {
+            value: '10348720598973963',
+            caip19: 'eip155:1/slip44:60',
+          },
+          trade: undefined,
+          transfers: [
+            {
+              type: TransferType.Send,
+              to: FOXY_STAKING_CONTRACT,
+              from: address,
+              caip19: 'eip155:1/erc20:0xdc49108ce5c57bc3408c3a5e95f3d864ec386ed3',
+              totalValue: '9885337259647255313',
+              components: [{ value: '9885337259647255313' }],
+              token: foxyToken,
+            },
+            {
+              type: TransferType.Receive,
+              to: address,
+              from: '0x8EC637Fe2800940C7959f9BAd4fE69e41225CD39',
+              caip19: 'eip155:1/erc20:0xc770eefad204b5180df6a14ee197d99d808ee52d',
+              totalValue: '9638203828156073931',
+              components: [{ value: '9638203828156073931' }],
+              token: foxToken,
+            },
+          ],
+        }
+
+        const actual = await txParser.parse(tx, address)
+
+        expect(expected).toEqual(actual)
+      })
+
+      it('should be able to parse claim withdraw', async () => {
+        const { tx } = foxyClaimWithdraw
+        const address = '0x55FB947880EE0660C90bC2055748aD70956FbE3c'
+
+        const expected: Tx = {
+          txid: tx.txid,
+          blockHeight: tx.blockHeight,
+          blockTime: tx.blockTime,
+          blockHash: tx.blockHash,
+          address: address,
+          caip2: 'eip155:1',
+          confirmations: tx.confirmations,
+          data: {
+            method: 'claimWithdraw',
+            parser: TxParser.Foxy,
+          },
+          status: Status.Confirmed,
+          fee: {
+            value: '4735850597827293',
+            caip19: 'eip155:1/slip44:60',
+          },
+          trade: undefined,
+          transfers: [
+            {
+              type: TransferType.Receive,
+              to: address,
+              from: FOXY_STAKING_CONTRACT,
+              caip19: 'eip155:1/erc20:0xc770eefad204b5180df6a14ee197d99d808ee52d',
+              totalValue: '1200000000000000000000',
+              components: [{ value: '1200000000000000000000' }],
+              token: foxToken,
+            },
+          ],
+        }
+
+        const actual = await txParser.parse(tx, address)
+
+        expect(expected).toEqual(actual)
+      })
     })
 
     it('should be able to parse deposit 2', async () => {
