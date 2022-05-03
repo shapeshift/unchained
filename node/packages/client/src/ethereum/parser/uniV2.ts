@@ -57,7 +57,7 @@ export class Parser implements SubParser {
     const lpTokenAddress = Parser.pairFor(tokenAddress, this.wethContract)
 
     const transfers = await (async () => {
-      switch (getSigHash(tx.ethereumSpecific?.data)) {
+      switch (getSigHash(txData)) {
         case this.supportedFunctions.addLiquidityEthSigHash: {
           const contract = new ethers.Contract(tokenAddress, ERC20_ABI, this.provider)
           const decimals = await contract.decimals()
