@@ -2167,10 +2167,10 @@
   resolved "https://registry.yarnpkg.com/@pulumi/query/-/query-0.3.0.tgz#f496608e86a18c3dd31b6c533408e2441c29071d"
   integrity sha512-xfo+yLRM2zVjVEA4p23IjQWzyWl1ZhWOGobsBqRpIarzLvwNH/RAGaoehdxlhx4X92302DrpdIFgTICMN4P38w==
 
-"@shapeshiftoss/caip@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@shapeshiftoss/caip/-/caip-2.0.0.tgz#6aba7a86eb0cb27576ae6d62dd9257e3d754d8a1"
-  integrity sha512-R3KpNrJFF4hibcZpBD81ANKJWmj5HuvYtVg59UVccUYWU3eNn5SNYkl+zukDvSnXcewwzJ0ukpcKHeSictpe6A==
+"@shapeshiftoss/caip@^2.2.1":
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/@shapeshiftoss/caip/-/caip-2.2.1.tgz#1c0fd53c479b60d5178ec4f14b3805f79b3215cd"
+  integrity sha512-AT7gjU3qM3t2mKyG36b0uAH4mSebl1hD9OjgjOPu4noBzukfFmxhcdBI9K7F4/PZdK+JIrZ/HhEQhtcraF6LaA==
 
 "@shapeshiftoss/cluster-launcher@0.7.2":
   version "0.7.2"
