@@ -25,8 +25,10 @@ describe('parseTx', () => {
       status: Status.Confirmed,
       address: address,
       caip2: 'cosmos:cosmoshub-4',
+      chainId: 'cosmos:cosmoshub-4',
       fee: {
         caip19: 'cosmos:cosmoshub-4/slip44:118',
+        assetId: 'cosmos:cosmoshub-4/slip44:118',
         value: '2500',
       },
       transfers: [
@@ -35,6 +37,7 @@ describe('parseTx', () => {
           from: address,
           to: 'cosmos14e25lpsedq863vgweqg4m9n0z28c203kfdlzmz',
           caip19: 'cosmos:cosmoshub-4/slip44:118',
+          assetId: 'cosmos:cosmoshub-4/slip44:118',
           totalValue: '2002965',
           components: [{ value: '2002965' }],
         },
@@ -59,12 +62,14 @@ describe('parseTx', () => {
       status: Status.Confirmed,
       address: address,
       caip2: 'cosmos:cosmoshub-4',
+      chainId: 'cosmos:cosmoshub-4',
       transfers: [
         {
           type: TransferType.Receive,
           from: 'cosmos1t5u0jfg3ljsjrh2m9e47d4ny2hea7eehxrzdgd',
           to: address,
           caip19: 'cosmos:cosmoshub-4/slip44:118',
+          assetId: 'cosmos:cosmoshub-4/slip44:118',
           totalValue: '2002965',
           components: [{ value: '2002965' }],
         },
@@ -85,12 +90,14 @@ describe('parseTx', () => {
       blockHeight: 9636923,
       blockTime: 1645207449,
       caip2: 'cosmos:cosmoshub-4',
+      chainId: 'cosmos:cosmoshub-4',
       confirmations: 358801,
       status: Status.Confirmed,
       transfers: [
         {
           type: TransferType.Send,
           caip19: 'cosmos:cosmoshub-4/slip44:118',
+          assetId: 'cosmos:cosmoshub-4/slip44:118',
           from: 'cosmos179k2lz70rxvjrvvr65cynw9x5c8v3kftg46v05',
           to: 'cosmosvaloper1lzhlnpahvznwfv4jmay2tgaha5kmz5qxerarrl',
           totalValue: '1920000',
@@ -105,7 +112,7 @@ describe('parseTx', () => {
         destinationValidator: 'cosmosvaloper1lzhlnpahvznwfv4jmay2tgaha5kmz5qxerarrl',
         value: `1920000`,
       },
-      fee: { caip19: 'cosmos:cosmoshub-4/slip44:118', value: '6250' },
+      fee: { caip19: 'cosmos:cosmoshub-4/slip44:118', assetId: 'cosmos:cosmoshub-4/slip44:118', value: '6250' },
     }
 
     const actual = await txParser.parse(tx, address)
@@ -122,15 +129,18 @@ describe('parseTx', () => {
       blockHeight: 9636932,
       blockTime: 1646429915,
       caip2: 'cosmos:cosmoshub-4',
+      chainId: 'cosmos:cosmoshub-4',
       confirmations: 229191,
       status: Status.Confirmed,
       fee: {
         caip19: 'cosmos:cosmoshub-4/slip44:118',
+        assetId: 'cosmos:cosmoshub-4/slip44:118',
         value: '6250',
       },
       transfers: [
         {
           caip19: 'cosmos:cosmoshub-4/slip44:118',
+          assetId: 'cosmos:cosmoshub-4/slip44:118',
           components: [
             {
               value: '200000',
@@ -167,6 +177,7 @@ describe('parseTx', () => {
       blockHeight: 9636911,
       blockTime: 1646429755,
       caip2: 'cosmos:cosmoshub-4',
+      chainId: 'cosmos:cosmoshub-4',
       confirmations: 229341,
       status: Status.Confirmed,
       transfers: [],
@@ -178,10 +189,12 @@ describe('parseTx', () => {
         delegator: 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e',
         destinationValidator: 'cosmosvaloper156gqf9837u7d4c4678yt3rl4ls9c5vuursrrzf',
         caip19: 'cosmos:cosmoshub-4/slip44:118',
+        assetId: 'cosmos:cosmoshub-4/slip44:118',
         value: `500000`,
       },
       fee: {
         caip19: 'cosmos:cosmoshub-4/slip44:118',
+        assetId: 'cosmos:cosmoshub-4/slip44:118',
         value: '6250',
       },
     }
@@ -200,12 +213,14 @@ describe('parseTx', () => {
       blockHeight: 9636957,
       blockTime: 1646430088,
       caip2: 'cosmos:cosmoshub-4',
+      chainId: 'cosmos:cosmoshub-4',
       confirmations: 229401,
       status: Status.Confirmed,
       transfers: [
         {
           type: TransferType.Receive,
           caip19: 'cosmos:cosmoshub-4/slip44:118',
+          assetId: 'cosmos:cosmoshub-4/slip44:118',
           from: 'cosmosvaloper1hdrlqvyjfy5sdrseecjrutyws9khtxxaux62l7',
           to: 'cosmos179k2lz70rxvjrvvr65cynw9x5c8v3kftg46v05',
           totalValue: '39447',
@@ -219,8 +234,9 @@ describe('parseTx', () => {
         destinationValidator: 'cosmos179k2lz70rxvjrvvr65cynw9x5c8v3kftg46v05',
         value: '39447',
         caip19: 'cosmos:cosmoshub-4/slip44:118',
+        assetId: 'cosmos:cosmoshub-4/slip44:118',
       },
-      fee: { caip19: 'cosmos:cosmoshub-4/slip44:118', value: '7000' },
+      fee: { caip19: 'cosmos:cosmoshub-4/slip44:118', assetId: 'cosmos:cosmoshub-4/slip44:118', value: '7000' },
     }
 
     const actual = await txParser.parse(tx, address)
@@ -238,12 +254,14 @@ describe('parseTx', () => {
       blockHeight: 8418140,
       blockTime: 1637387732,
       caip2: 'cosmos:cosmoshub-4',
+      chainId: 'cosmos:cosmoshub-4',
       confirmations: 1632185,
       status: Status.Confirmed,
       transfers: [
         {
           type: TransferType.Send,
           caip19: 'cosmos:cosmoshub-4/slip44:118',
+          assetId: 'cosmos:cosmoshub-4/slip44:118',
           from: 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e',
           to: 'osmo1fx4jwv3aalxqwmrpymn34l582lnehr3eg40jnt',
           totalValue: '108444',
@@ -261,6 +279,7 @@ describe('parseTx', () => {
         ibcDestination: 'osmo1fx4jwv3aalxqwmrpymn34l582lnehr3eg40jnt',
         ibcSource: 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e',
         caip19: 'cosmos:cosmoshub-4/slip44:118',
+        assetId: 'cosmos:cosmoshub-4/slip44:118',
         value: '108444',
       },
     }
@@ -281,12 +300,14 @@ it('should be able to parse an ibc receive tx', async () => {
     blockHeight: 9636880,
     blockTime: 1646429517,
     caip2: 'cosmos:cosmoshub-4',
+    chainId: 'cosmos:cosmoshub-4',
     confirmations: 231594,
     status: Status.Confirmed,
     transfers: [
       {
         type: TransferType.Receive,
         caip19: 'cosmos:cosmoshub-4/slip44:118',
+        assetId: 'cosmos:cosmoshub-4/slip44:118',
         from: 'osmo1fx4jwv3aalxqwmrpymn34l582lnehr3eg40jnt',
         to: 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e',
         totalValue: '3230396',
@@ -304,6 +325,7 @@ it('should be able to parse an ibc receive tx', async () => {
       ibcDestination: 'cosmos1fx4jwv3aalxqwmrpymn34l582lnehr3eqwuz9e',
       ibcSource: 'osmo1fx4jwv3aalxqwmrpymn34l582lnehr3eg40jnt',
       caip19: 'cosmos:cosmoshub-4/slip44:118',
+      assetId: 'cosmos:cosmoshub-4/slip44:118',
       value: '3230396',
     },
   }

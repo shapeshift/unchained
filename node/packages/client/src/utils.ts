@@ -18,7 +18,7 @@ export async function findAsyncSequential<T, U>(
 export function aggregateTransfer(
   transfers: Array<Transfer>,
   type: TransferType,
-  caip19: string,
+  assetId: string,
   from: string,
   to: string,
   value: string,
@@ -26,7 +26,7 @@ export function aggregateTransfer(
 ): Array<Transfer> {
   if (!new BigNumber(value).gt(0)) return transfers
 
-  const index = transfers?.findIndex((t) => t.type === type && t.caip19 === caip19 && t.from === from && t.to === to)
+  const index = transfers?.findIndex((t) => t.type === type && t.assetId === assetId && t.from === from && t.to === to)
   const transfer = transfers?.[index]
 
   if (transfer) {
@@ -34,7 +34,10 @@ export function aggregateTransfer(
     transfer.components.push({ value: value })
     transfers[index] = transfer
   } else {
-    transfers = [...transfers, { type, caip19, from, to, totalValue: value, components: [{ value: value }], token }]
+    transfers = [
+      ...transfers,
+      { type, caip19: assetId, assetId, from, to, totalValue: value, components: [{ value: value }], token },
+    ]
   }
 
   return transfers
