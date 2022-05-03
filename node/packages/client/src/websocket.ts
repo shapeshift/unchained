@@ -125,7 +125,7 @@ export class Client<T> {
     }
 
     // wait for the connection to open
-    await new Promise((resolve) => {
+    const openConnection = new Promise((resolve) => {
       ws.onopen = () => {
         // start heartbeat
         this.onOpen('txs', resolve)
@@ -143,6 +143,12 @@ export class Client<T> {
         ws.send(JSON.stringify(payload))
       }
     })
+
+    const connectionTimeout = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('timeout while trying to connect')), 5000)
+    })
+
+    await Promise.race([openConnection, connectionTimeout])
   }
 
   /**
