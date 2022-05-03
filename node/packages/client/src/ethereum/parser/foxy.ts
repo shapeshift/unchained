@@ -7,7 +7,7 @@ import { FOXY_STAKING_CONTRACT } from './constants'
 import FOXY_STAKING_ABI from './abi/foxyStaking'
 
 export class Parser implements SubParser {
-  abiInterface = new ethers.utils.Interface(FOXY_STAKING_ABI)
+  readonly abiInterface = new ethers.utils.Interface(FOXY_STAKING_ABI)
 
   readonly supportedFunctions = {
     stakeSigHash: this.abiInterface.getSighash('stake(uint256,address)'),
@@ -17,28 +17,25 @@ export class Parser implements SubParser {
   }
 
   async parse(tx: BlockbookTx): Promise<TxSpecific | undefined> {
-    if (!txInteractsWithContract(tx, FOXY_STAKING_CONTRACT)) return
-    if (!tx.ethereumSpecific?.data) return
+    const txData = tx.ethereumSpecific?.data
 
-    const txSigHash = getSigHash(tx.ethereumSpecific.data)
+    if (!txInteractsWithContract(tx, FOXY_STAKING_CONTRACT)) return
+    if (!txData) return
+
+    const txSigHash = getSigHash(txData)
 
     if (!Object.values(this.supportedFunctions).some((hash) => hash === txSigHash)) return
 
-    const decoded = this.abiInterface.parseTransaction({ data: tx.ethereumSpecific.data })
+    const decoded = this.abiInterface.parseTransaction({ data: txData })
 
-    switch (txSigHash) {
-      case this.supportedFunctions.stakeSigHash:
-      case this.supportedFunctions.unstakeSigHash:
-      case this.supportedFunctions.instantUnstakeSigHash:
-      case this.supportedFunctions.claimWithdrawSigHash:
-        return {
-          data: {
-            method: decoded.name,
-            parser: TxParser.Foxy,
-          },
-        }
-      default:
-        return
+    // failed to decode input data
+    if (!decoded) return
+
+    return {
+      data: {
+        method: decoded.name,
+        parser: TxParser.Foxy,
+      },
     }
   }
 }

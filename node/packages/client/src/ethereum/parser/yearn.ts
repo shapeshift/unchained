@@ -16,12 +16,12 @@ interface ParserArgs {
 export class Parser implements SubParser {
   provider: ethers.providers.JsonRpcProvider
   yearnSdk: Yearn<ChainId> | undefined
-
   yearnTokenVaultAddresses: string[] | undefined
-  shapeShiftInterface = new ethers.utils.Interface(shapeShiftRouter)
-  yearnInterface = new ethers.utils.Interface(yearnVault)
 
-  supportedYearnFunctions = {
+  readonly shapeShiftInterface = new ethers.utils.Interface(shapeShiftRouter)
+  readonly yearnInterface = new ethers.utils.Interface(yearnVault)
+
+  readonly supportedYearnFunctions = {
     approveSigHash: this.yearnInterface.getSighash('approve'),
     depositSigHash: this.yearnInterface.getSighash('deposit()'),
     depositAmountSigHash: this.yearnInterface.getSighash('deposit(uint256)'),
@@ -29,7 +29,7 @@ export class Parser implements SubParser {
     withdrawSigHash: this.yearnInterface.getSighash('withdraw(uint256,address)'),
   }
 
-  supportedShapeShiftFunctions = {
+  readonly supportedShapeShiftFunctions = {
     depositSigHash: this.shapeShiftInterface.getSighash('deposit(address,address,uint256,uint256)'),
   }
 
@@ -44,9 +44,11 @@ export class Parser implements SubParser {
   }
 
   async parse(tx: BlockbookTx): Promise<TxSpecific | undefined> {
-    if (!tx.ethereumSpecific?.data) return
+    const txData = tx.ethereumSpecific?.data
 
-    const txSigHash = getSigHash(tx.ethereumSpecific.data)
+    if (!txData) return
+
+    const txSigHash = getSigHash(txData)
 
     const abiInterface = this.getAbiInterface(txSigHash)
     if (!abiInterface) return
@@ -56,7 +58,11 @@ export class Parser implements SubParser {
       this.yearnTokenVaultAddresses = vaults?.map((vault) => vault.address)
     }
 
-    const decoded = abiInterface.parseTransaction({ data: tx.ethereumSpecific.data })
+    const decoded = abiInterface.parseTransaction({ data: txData })
+
+    // failed to decode input data
+    if (!decoded) return
+
     const receiveAddress = tx.vout?.[0].addresses?.[0]
 
     switch (txSigHash) {
