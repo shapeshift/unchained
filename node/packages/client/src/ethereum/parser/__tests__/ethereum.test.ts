@@ -56,6 +56,7 @@ describe('parseTx', () => {
 
       const standardTransfer = {
         caip19: 'eip155:1/slip44:60',
+        assetId: 'eip155:1/slip44:60',
         components: [{ value: '1201235000000000000' }],
         from: '0x79fE68B3e4Bc2B91a4C8dfFb5317C7B8813d8Ae7',
         to: '0x76DA1578aC163CA7ca4143B7dEAa428e85Db3042',
@@ -71,6 +72,7 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: undefined,
         status: Status.Confirmed,
@@ -94,6 +96,7 @@ describe('parseTx', () => {
       }
       const sellTransfer = {
         caip19: 'eip155:1/slip44:60',
+        assetId: 'eip155:1/slip44:60',
         components: [{ value: '295040000000000000' }],
         from: '0xCeb660E7623E8f8312B3379Df747c35f2217b595',
         to: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
@@ -108,6 +111,7 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
           method: 'deposit',
@@ -116,6 +120,7 @@ describe('parseTx', () => {
         status: Status.Confirmed,
         fee: {
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
           value: '1700235000000000',
         },
         transfers: [sellTransfer],
@@ -137,6 +142,7 @@ describe('parseTx', () => {
       }
       const sellTransfer = {
         caip19: 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+        assetId: 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
         components: [{ value: '16598881497' }],
         from: '0x5a8C5afbCC1A58cCbe17542957b587F46828B38E',
         to: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
@@ -152,6 +158,7 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
           method: 'deposit',
@@ -160,6 +167,7 @@ describe('parseTx', () => {
         status: Status.Confirmed,
         fee: {
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
           value: '4700280000000000',
         },
         transfers: [sellTransfer],
@@ -181,6 +189,7 @@ describe('parseTx', () => {
       }
       const buyTransfer = {
         caip19: 'eip155:1/slip44:60',
+        assetId: 'eip155:1/slip44:60',
         components: [{ value: '1579727090000000000' }],
         from: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
         to: '0x5a8C5afbCC1A58cCbe17542957b587F46828B38E',
@@ -196,6 +205,7 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
           method: 'transferOut',
@@ -221,6 +231,7 @@ describe('parseTx', () => {
       }
       const buyTransfer = {
         caip19: 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+        assetId: 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
         components: [{ value: '47596471640' }],
         from: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
         to: '0x5a8C5afbCC1A58cCbe17542957b587F46828B38E',
@@ -236,6 +247,7 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
           method: 'transferOut',
@@ -261,6 +273,7 @@ describe('parseTx', () => {
       }
       const buyTransfer = {
         caip19: 'eip155:1/slip44:60',
+        assetId: 'eip155:1/slip44:60',
         components: [{ value: '6412730000000000' }],
         from: '0xC145990E84155416144C532E31f89B840Ca8c2cE',
         to: '0xfc0Cc6E85dFf3D75e3985e0CB83B090cfD498dd1',
@@ -276,6 +289,7 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
           method: 'transferOut',
@@ -302,6 +316,7 @@ describe('parseTx', () => {
       }
       const buyTransfer = {
         caip19: 'eip155:1/slip44:60',
+        assetId: 'eip155:1/slip44:60',
         components: [
           {
             value: '541566754246167133',
@@ -316,6 +331,7 @@ describe('parseTx', () => {
 
       const sellTransfer = {
         caip19: 'eip155:1/erc20:0xc7283b66eb1eb5fb86327f08e1b5816b0720212b',
+        assetId: 'eip155:1/erc20:0xc7283b66eb1eb5fb86327f08e1b5816b0720212b',
         components: [
           {
             value: '1000000000000000000000',
@@ -335,6 +351,7 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
           method: undefined,
@@ -344,6 +361,7 @@ describe('parseTx', () => {
         fee: {
           value: '8308480000000000',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         transfers: [sellTransfer, buyTransfer],
         trade,
@@ -364,6 +382,7 @@ describe('parseTx', () => {
 
       const buyTransfer = {
         caip19: 'eip155:1/erc20:0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0',
+        assetId: 'eip155:1/erc20:0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0',
         components: [
           {
             value: '50000000000000000000000',
@@ -378,6 +397,7 @@ describe('parseTx', () => {
 
       const sellTransfer = {
         caip19: 'eip155:1/slip44:60',
+        assetId: 'eip155:1/slip44:60',
         components: [
           {
             value: '10000000000000000000',
@@ -397,6 +417,7 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
           method: undefined,
@@ -406,6 +427,7 @@ describe('parseTx', () => {
         fee: {
           value: '19815285000000000',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         transfers: [sellTransfer, buyTransfer],
         trade,
@@ -429,6 +451,7 @@ describe('parseTx', () => {
         from: '0xF82d8Ec196Fb0D56c6B82a8B1870F09502A49F88',
         to: '0xb8b19c048296E086DaF69F54d48dE2Da444dB047',
         caip19: 'eip155:1/erc20:0xa2b4c0af19cc16a6cfacce81f192b024d625817d',
+        assetId: 'eip155:1/erc20:0xa2b4c0af19cc16a6cfacce81f192b024d625817d',
         totalValue: '9248567698016204727450',
         components: [{ value: '9248567698016204727450' }],
         token: kishuToken,
@@ -439,6 +462,7 @@ describe('parseTx', () => {
         from: '0xb8b19c048296E086DaF69F54d48dE2Da444dB047',
         to: '0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852',
         caip19: 'eip155:1/erc20:0xdac17f958d2ee523a2206206994597c13d831ec7',
+        assetId: 'eip155:1/erc20:0xdac17f958d2ee523a2206206994597c13d831ec7',
         totalValue: '45000000000',
         components: [{ value: '45000000000' }],
         token: usdtToken,
@@ -451,6 +475,7 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
           method: undefined,
@@ -460,6 +485,7 @@ describe('parseTx', () => {
         fee: {
           value: '78183644000000000',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         transfers: [sellTransfer, buyTransfer],
         trade,
@@ -483,6 +509,7 @@ describe('parseTx', () => {
         from: '0xEBFb684dD2b01E698ca6c14F10e4f289934a54D6',
         to: address,
         caip19: 'eip155:1/erc20:0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
+        assetId: 'eip155:1/erc20:0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
         totalValue: '56639587020747520629',
         components: [{ value: '56639587020747520629' }],
         token: uniToken,
@@ -493,6 +520,7 @@ describe('parseTx', () => {
         from: '0xd3d2E2692501A5c9Ca623199D38826e513033a17',
         to: address,
         caip19: 'eip155:1/erc20:0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
+        assetId: 'eip155:1/erc20:0x1f9840a85d5af5bf1d1762f925bdaddc4201f984',
         totalValue: '47448670568188553620',
         components: [{ value: '47448670568188553620' }],
         token: uniToken,
@@ -503,6 +531,7 @@ describe('parseTx', () => {
         from: address,
         to: '0x6591c4BcD6D7A1eb4E537DA8B78676C1576Ba244',
         caip19: 'eip155:1/erc20:0x0391d2021f89dc339f60fff84546ea23e337750f',
+        assetId: 'eip155:1/erc20:0x0391d2021f89dc339f60fff84546ea23e337750f',
         totalValue: '53910224825217010944',
         components: [{ value: '53910224825217010944' }],
         token: bondToken,
@@ -513,6 +542,7 @@ describe('parseTx', () => {
         from: address,
         to: '0xB17B1342579e4bcE6B6e9A426092EA57d33843D9',
         caip19: 'eip155:1/erc20:0x0391d2021f89dc339f60fff84546ea23e337750f',
+        assetId: 'eip155:1/erc20:0x0391d2021f89dc339f60fff84546ea23e337750f',
         totalValue: '46089775174782989056',
         components: [{ value: '46089775174782989056' }],
         token: bondToken,
@@ -525,6 +555,7 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
           method: undefined,
@@ -534,6 +565,7 @@ describe('parseTx', () => {
         fee: {
           value: '18399681000000000',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         transfers: [sellTransfer1, buyTransfer1, sellTransfer2, buyTransfer2],
         trade,
@@ -556,6 +588,7 @@ describe('parseTx', () => {
         blockTime: txMempool.blockTime,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: txMempool.confirmations,
         data: undefined,
         status: Status.Pending,
@@ -565,6 +598,7 @@ describe('parseTx', () => {
             to: address,
             from: address,
             caip19: 'eip155:1/slip44:60',
+            assetId: 'eip155:1/slip44:60',
             totalValue: '503100000000000',
             components: [{ value: '503100000000000' }],
           },
@@ -573,6 +607,7 @@ describe('parseTx', () => {
             to: address,
             from: address,
             caip19: 'eip155:1/slip44:60',
+            assetId: 'eip155:1/slip44:60',
             totalValue: '503100000000000',
             components: [{ value: '503100000000000' }],
           },
@@ -595,12 +630,14 @@ describe('parseTx', () => {
         blockTime: tx.blockTime,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: undefined,
         status: Status.Confirmed,
         fee: {
           value: '399000000000000',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         transfers: [
           {
@@ -608,6 +645,7 @@ describe('parseTx', () => {
             from: address,
             to: address,
             caip19: 'eip155:1/slip44:60',
+            assetId: 'eip155:1/slip44:60',
             totalValue: '503100000000000',
             components: [{ value: '503100000000000' }],
           },
@@ -616,6 +654,7 @@ describe('parseTx', () => {
             from: address,
             to: address,
             caip19: 'eip155:1/slip44:60',
+            assetId: 'eip155:1/slip44:60',
             totalValue: '503100000000000',
             components: [{ value: '503100000000000' }],
           },
@@ -637,6 +676,7 @@ describe('parseTx', () => {
         blockTime: txMempool.blockTime,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: txMempool.confirmations,
         data: undefined,
         status: Status.Pending,
@@ -646,6 +686,7 @@ describe('parseTx', () => {
             from: address,
             to: address,
             caip19: 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+            assetId: 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
             totalValue: '1502080',
             components: [{ value: '1502080' }],
             token: usdcToken,
@@ -655,6 +696,7 @@ describe('parseTx', () => {
             from: address,
             to: address,
             caip19: 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+            assetId: 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
             totalValue: '1502080',
             components: [{ value: '1502080' }],
             token: usdcToken,
@@ -678,12 +720,14 @@ describe('parseTx', () => {
         blockTime: tx.blockTime,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: undefined,
         status: Status.Confirmed,
         fee: {
           value: '1011738000000000',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         transfers: [
           {
@@ -691,6 +735,7 @@ describe('parseTx', () => {
             from: address,
             to: address,
             caip19: 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+            assetId: 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
             totalValue: '1502080',
             components: [{ value: '1502080' }],
             token: usdcToken,
@@ -700,6 +745,7 @@ describe('parseTx', () => {
             from: address,
             to: address,
             caip19: 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+            assetId: 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
             totalValue: '1502080',
             components: [{ value: '1502080' }],
             token: usdcToken,
@@ -725,12 +771,14 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: undefined,
         status: Status.Confirmed,
         fee: {
           value: '1447243200000000',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         transfers: [],
       }
@@ -750,6 +798,7 @@ describe('parseTx', () => {
         blockTime: txMempool.blockTime,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: txMempool.confirmations,
         data: {
           method: 'addLiquidityETH',
@@ -762,6 +811,7 @@ describe('parseTx', () => {
             from: '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C',
             to: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
             caip19: 'eip155:1/erc20:0xc770eefad204b5180df6a14ee197d99d808ee52d',
+            assetId: 'eip155:1/erc20:0xc770eefad204b5180df6a14ee197d99d808ee52d',
             totalValue: '100000000000000000000',
             components: [{ value: '100000000000000000000' }],
             token: {
@@ -776,6 +826,7 @@ describe('parseTx', () => {
             from: '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C',
             to: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D',
             caip19: 'eip155:1/slip44:60',
+            assetId: 'eip155:1/slip44:60',
             totalValue: '42673718176645189',
             components: [{ value: '42673718176645189' }],
           },
@@ -798,12 +849,14 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: undefined,
         status: Status.Confirmed,
         fee: {
           value: '26926494400000000',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         transfers: [
           {
@@ -811,6 +864,7 @@ describe('parseTx', () => {
             from: '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C',
             to: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D',
             caip19: 'eip155:1/slip44:60',
+            assetId: 'eip155:1/slip44:60',
             totalValue: '42673718176645189',
             components: [{ value: '42673718176645189' }],
           },
@@ -819,6 +873,7 @@ describe('parseTx', () => {
             from: '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C',
             to: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
             caip19: 'eip155:1/erc20:0xc770eefad204b5180df6a14ee197d99d808ee52d',
+            assetId: 'eip155:1/erc20:0xc770eefad204b5180df6a14ee197d99d808ee52d',
             totalValue: '100000000000000000000',
             components: [{ value: '100000000000000000000' }],
             token: foxToken,
@@ -828,6 +883,7 @@ describe('parseTx', () => {
             from: '0x0000000000000000000000000000000000000000',
             to: '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C',
             caip19: 'eip155:1/erc20:0x470e8de2ebaef52014a47cb5e6af86884947f08c',
+            assetId: 'eip155:1/erc20:0x470e8de2ebaef52014a47cb5e6af86884947f08c',
             totalValue: '1888842410762840601',
             components: [{ value: '1888842410762840601' }],
             token: uniV2Token,
@@ -850,6 +906,7 @@ describe('parseTx', () => {
         blockTime: txMempool.blockTime,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: txMempool.confirmations,
         data: {
           method: 'removeLiquidityETH',
@@ -862,6 +919,7 @@ describe('parseTx', () => {
             from: '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C',
             to: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
             caip19: 'eip155:1/erc20:0x470e8de2ebaef52014a47cb5e6af86884947f08c',
+            assetId: 'eip155:1/erc20:0x470e8de2ebaef52014a47cb5e6af86884947f08c',
             totalValue: '298717642142382954',
             components: [{ value: '298717642142382954' }],
             token: uniV2Token,
@@ -885,12 +943,14 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: undefined,
         status: Status.Confirmed,
         fee: {
           value: '4082585000000000',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         transfers: [
           {
@@ -898,6 +958,7 @@ describe('parseTx', () => {
             from: '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C',
             to: '0x470e8de2eBaef52014A47Cb5E6aF86884947F08c',
             caip19: 'eip155:1/erc20:0x470e8de2ebaef52014a47cb5e6af86884947f08c',
+            assetId: 'eip155:1/erc20:0x470e8de2ebaef52014a47cb5e6af86884947f08c',
             totalValue: '298717642142382954',
             components: [{ value: '298717642142382954' }],
             token: uniV2Token,
@@ -907,6 +968,7 @@ describe('parseTx', () => {
             from: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D',
             to: '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C',
             caip19: 'eip155:1/erc20:0xc770eefad204b5180df6a14ee197d99d808ee52d',
+            assetId: 'eip155:1/erc20:0xc770eefad204b5180df6a14ee197d99d808ee52d',
             totalValue: '15785079906515930982',
             components: [{ value: '15785079906515930982' }],
             token: foxToken,
@@ -916,6 +978,7 @@ describe('parseTx', () => {
             from: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D',
             to: '0x6bF198c2B5c8E48Af4e876bc2173175b89b1DA0C',
             caip19: 'eip155:1/slip44:60',
+            assetId: 'eip155:1/slip44:60',
             totalValue: '6761476182340434',
             components: [{ value: '6761476182340434' }],
           },
@@ -940,12 +1003,14 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: undefined,
         status: Status.Confirmed,
         fee: {
           value: '2559843000000000',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         transfers: [
           {
@@ -953,6 +1018,7 @@ describe('parseTx', () => {
             from: '0x02FfdC5bfAbe5c66BE067ff79231585082CA5fe2',
             to: address,
             caip19: 'eip155:1/erc20:0xc770eefad204b5180df6a14ee197d99d808ee52d',
+            assetId: 'eip155:1/erc20:0xc770eefad204b5180df6a14ee197d99d808ee52d',
             totalValue: '1500000000000000000000',
             components: [{ value: '1500000000000000000000' }],
             token: foxToken,
@@ -976,6 +1042,7 @@ describe('parseTx', () => {
         blockTime: txMempool.blockTime,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: txMempool.confirmations,
         data: undefined,
         status: Status.Pending,
@@ -998,12 +1065,14 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: undefined,
         status: Status.Confirmed,
         fee: {
           value: '4650509500000000',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         transfers: [
           {
@@ -1011,6 +1080,7 @@ describe('parseTx', () => {
             from: address,
             to: '0xDd80E21669A664Bce83E3AD9a0d74f8Dad5D9E72',
             caip19: 'eip155:1/erc20:0x470e8de2ebaef52014a47cb5e6af86884947f08c',
+            assetId: 'eip155:1/erc20:0x470e8de2ebaef52014a47cb5e6af86884947f08c',
             totalValue: '99572547380794318',
             components: [{ value: '99572547380794318' }],
             token: uniV2Token,
@@ -1033,6 +1103,7 @@ describe('parseTx', () => {
         blockTime: txMempool.blockTime,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: txMempool.confirmations,
         data: undefined,
         status: Status.Pending,
@@ -1055,12 +1126,14 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: undefined,
         status: Status.Confirmed,
         fee: {
           value: '6136186875000000',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         transfers: [
           {
@@ -1068,6 +1141,7 @@ describe('parseTx', () => {
             from: '0xDd80E21669A664Bce83E3AD9a0d74f8Dad5D9E72',
             to: address,
             caip19: 'eip155:1/erc20:0x470e8de2ebaef52014a47cb5e6af86884947f08c',
+            assetId: 'eip155:1/erc20:0x470e8de2ebaef52014a47cb5e6af86884947f08c',
             totalValue: '531053586030903030',
             components: [{ value: '531053586030903030' }],
             token: uniV2Token,
@@ -1077,6 +1151,7 @@ describe('parseTx', () => {
             from: '0xDd80E21669A664Bce83E3AD9a0d74f8Dad5D9E72',
             to: address,
             caip19: 'eip155:1/erc20:0xc770eefad204b5180df6a14ee197d99d808ee52d',
+            assetId: 'eip155:1/erc20:0xc770eefad204b5180df6a14ee197d99d808ee52d',
             totalValue: '317669338073988',
             components: [{ value: '317669338073988' }],
             token: foxToken,
@@ -1102,6 +1177,7 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
           method: 'approve',
@@ -1111,6 +1187,7 @@ describe('parseTx', () => {
         fee: {
           value: '4519526097650998',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         transfers: [],
       }
@@ -1130,6 +1207,7 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
           method: 'deposit',
@@ -1139,6 +1217,7 @@ describe('parseTx', () => {
         fee: {
           value: '18139009291874667',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         transfers: [
           {
@@ -1146,6 +1225,7 @@ describe('parseTx', () => {
             from: address,
             to: SHAPE_SHIFT_ROUTER_CONTRACT,
             caip19: 'eip155:1/erc20:0x514910771af9ca656af840dff83e8264ecf986ca',
+            assetId: 'eip155:1/erc20:0x514910771af9ca656af840dff83e8264ecf986ca',
             totalValue: '999961394864662132',
             components: [{ value: '999961394864662132' }],
             token: linkToken,
@@ -1155,6 +1235,7 @@ describe('parseTx', () => {
             from: '0x0000000000000000000000000000000000000000',
             to: address,
             caip19: 'eip155:1/erc20:0x671a912c10bba0cfa74cfc2d6fba9ba1ed9530b2',
+            assetId: 'eip155:1/erc20:0x671a912c10bba0cfa74cfc2d6fba9ba1ed9530b2',
             totalValue: '987002304279657611',
             components: [{ value: '987002304279657611' }],
             token: linkYearnVault,
@@ -1177,6 +1258,7 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
           method: 'withdraw',
@@ -1186,6 +1268,7 @@ describe('parseTx', () => {
         fee: {
           value: '19460274119661600',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         transfers: [
           {
@@ -1193,6 +1276,7 @@ describe('parseTx', () => {
             from: address,
             to: '0x0000000000000000000000000000000000000000',
             caip19: 'eip155:1/erc20:0x671a912c10bba0cfa74cfc2d6fba9ba1ed9530b2',
+            assetId: 'eip155:1/erc20:0x671a912c10bba0cfa74cfc2d6fba9ba1ed9530b2',
             totalValue: '493501152139828806',
             components: [{ value: '493501152139828806' }],
             token: linkYearnVault,
@@ -1202,6 +1286,7 @@ describe('parseTx', () => {
             from: '0x671a912C10bba0CFA74Cfc2d6Fba9BA1ed9530B2',
             to: address,
             caip19: 'eip155:1/erc20:0x514910771af9ca656af840dff83e8264ecf986ca',
+            assetId: 'eip155:1/erc20:0x514910771af9ca656af840dff83e8264ecf986ca',
             totalValue: '500482168225493862',
             components: [{ value: '500482168225493862' }],
             token: linkToken,
@@ -1224,6 +1309,7 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
           method: 'deposit',
@@ -1233,6 +1319,7 @@ describe('parseTx', () => {
         fee: {
           value: '9099683709794574',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         transfers: [
           {
@@ -1240,6 +1327,7 @@ describe('parseTx', () => {
             to: address,
             from: '0x0000000000000000000000000000000000000000',
             caip19: 'eip155:1/erc20:0x5f18c75abdae578b483e5f43f12a39cf75b973a9',
+            assetId: 'eip155:1/erc20:0x5f18c75abdae578b483e5f43f12a39cf75b973a9',
             totalValue: '9178352',
             components: [{ value: '9178352' }],
             token: yvUsdcToken,
@@ -1249,6 +1337,7 @@ describe('parseTx', () => {
             to: '0x5f18C75AbDAe578b483E5F43f12a39cF75b973a9',
             from: address,
             caip19: 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+            assetId: 'eip155:1/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
             totalValue: '10000000',
             components: [{ value: '10000000' }],
             token: usdcToken,
@@ -1273,6 +1362,7 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
           method: 'stake',
@@ -1282,6 +1372,7 @@ describe('parseTx', () => {
         fee: {
           value: '8343629232016788',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         trade: undefined,
         transfers: [
@@ -1290,6 +1381,7 @@ describe('parseTx', () => {
             to: FOXY_STAKING_CONTRACT,
             from: address,
             caip19: 'eip155:1/erc20:0xc770eefad204b5180df6a14ee197d99d808ee52d',
+            assetId: 'eip155:1/erc20:0xc770eefad204b5180df6a14ee197d99d808ee52d',
             totalValue: '109548875260073394762',
             components: [{ value: '109548875260073394762' }],
             token: foxToken,
@@ -1299,6 +1391,7 @@ describe('parseTx', () => {
             to: address,
             from: FOXY_STAKING_CONTRACT,
             caip19: 'eip155:1/erc20:0xdc49108ce5c57bc3408c3a5e95f3d864ec386ed3',
+            assetId: 'eip155:1/erc20:0xdc49108ce5c57bc3408c3a5e95f3d864ec386ed3',
             totalValue: '109548875260073394762',
             components: [{ value: '109548875260073394762' }],
             token: foxyToken,
@@ -1322,6 +1415,7 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
           method: 'unstake',
@@ -1331,6 +1425,7 @@ describe('parseTx', () => {
         fee: {
           value: '7586577934107040',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         trade: undefined,
         transfers: [
@@ -1339,6 +1434,7 @@ describe('parseTx', () => {
             to: FOXY_STAKING_CONTRACT,
             from: address,
             caip19: 'eip155:1/erc20:0xdc49108ce5c57bc3408c3a5e95f3d864ec386ed3',
+            assetId: 'eip155:1/erc20:0xdc49108ce5c57bc3408c3a5e95f3d864ec386ed3',
             totalValue: '24292579090466512304',
             components: [{ value: '24292579090466512304' }],
             token: foxyToken,
@@ -1348,6 +1444,7 @@ describe('parseTx', () => {
             to: address,
             from: FOXY_STAKING_CONTRACT,
             caip19: 'eip155:1/erc20:0xc770eefad204b5180df6a14ee197d99d808ee52d',
+            assetId: 'eip155:1/erc20:0xc770eefad204b5180df6a14ee197d99d808ee52d',
             totalValue: '22438383781076552673',
             components: [{ value: '22438383781076552673' }],
             token: foxToken,
@@ -1371,6 +1468,7 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
           method: 'instantUnstake',
@@ -1380,6 +1478,7 @@ describe('parseTx', () => {
         fee: {
           value: '10348720598973963',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         trade: undefined,
         transfers: [
@@ -1388,6 +1487,7 @@ describe('parseTx', () => {
             to: FOXY_STAKING_CONTRACT,
             from: address,
             caip19: 'eip155:1/erc20:0xdc49108ce5c57bc3408c3a5e95f3d864ec386ed3',
+            assetId: 'eip155:1/erc20:0xdc49108ce5c57bc3408c3a5e95f3d864ec386ed3',
             totalValue: '9885337259647255313',
             components: [{ value: '9885337259647255313' }],
             token: foxyToken,
@@ -1397,6 +1497,7 @@ describe('parseTx', () => {
             to: address,
             from: '0x8EC637Fe2800940C7959f9BAd4fE69e41225CD39',
             caip19: 'eip155:1/erc20:0xc770eefad204b5180df6a14ee197d99d808ee52d',
+            assetId: 'eip155:1/erc20:0xc770eefad204b5180df6a14ee197d99d808ee52d',
             totalValue: '9638203828156073931',
             components: [{ value: '9638203828156073931' }],
             token: foxToken,
@@ -1420,6 +1521,7 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
           method: 'claimWithdraw',
@@ -1429,6 +1531,7 @@ describe('parseTx', () => {
         fee: {
           value: '4735850597827293',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         trade: undefined,
         transfers: [
@@ -1437,6 +1540,7 @@ describe('parseTx', () => {
             to: address,
             from: FOXY_STAKING_CONTRACT,
             caip19: 'eip155:1/erc20:0xc770eefad204b5180df6a14ee197d99d808ee52d',
+            assetId: 'eip155:1/erc20:0xc770eefad204b5180df6a14ee197d99d808ee52d',
             totalValue: '1200000000000000000000',
             components: [{ value: '1200000000000000000000' }],
             token: foxToken,
@@ -1458,6 +1562,7 @@ describe('parseTx', () => {
 
       const standardTransfer = {
         caip19: 'eip155:1/slip44:60',
+        assetId: 'eip155:1/slip44:60',
         components: [{ value: '30000000000000000' }],
         from: address,
         to: contractAddress,
@@ -1473,6 +1578,7 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
           method: 'deposit',
@@ -1482,6 +1588,7 @@ describe('parseTx', () => {
         fee: {
           value: '2161335000000000',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         trade: undefined,
         transfers: [
@@ -1490,6 +1597,7 @@ describe('parseTx', () => {
             to: address,
             from: contractAddress,
             caip19: 'eip155:1/erc20:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+            assetId: 'eip155:1/erc20:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
             totalValue: '30000000000000000',
             components: [{ value: '30000000000000000' }],
             token: {
@@ -1515,6 +1623,7 @@ describe('parseTx', () => {
 
       const standardTransfer = {
         caip19: 'eip155:1/slip44:60',
+        assetId: 'eip155:1/slip44:60',
         components: [{ value: '3264000000000000' }],
         from: address,
         to: contractAddress,
@@ -1530,6 +1639,7 @@ describe('parseTx', () => {
         blockHash: tx2.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx2.confirmations,
         data: {
           method: 'deposit',
@@ -1539,6 +1649,7 @@ describe('parseTx', () => {
         fee: {
           value: '1087028000000000',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         trade: undefined,
         transfers: [
@@ -1547,6 +1658,7 @@ describe('parseTx', () => {
             to: address,
             from: contractAddress,
             caip19: 'eip155:1/erc20:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+            assetId: 'eip155:1/erc20:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
             totalValue: '3264000000000000',
             components: [{ value: '3264000000000000' }],
             token: {
@@ -1572,6 +1684,7 @@ describe('parseTx', () => {
 
       const internalTransfer = {
         caip19: 'eip155:1/slip44:60',
+        assetId: 'eip155:1/slip44:60',
         components: [{ value: '100000000000000000' }],
         from: contractAddress,
         to: address,
@@ -1587,6 +1700,7 @@ describe('parseTx', () => {
         blockHash: tx.blockHash,
         address: address,
         caip2: 'eip155:1',
+        chainId: 'eip155:1',
         confirmations: tx.confirmations,
         data: {
           method: 'withdraw',
@@ -1596,6 +1710,7 @@ describe('parseTx', () => {
         fee: {
           value: '1482223000000000',
           caip19: 'eip155:1/slip44:60',
+          assetId: 'eip155:1/slip44:60',
         },
         trade: undefined,
         transfers: [
@@ -1604,6 +1719,7 @@ describe('parseTx', () => {
             to: contractAddress,
             from: address,
             caip19: 'eip155:1/erc20:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+            assetId: 'eip155:1/erc20:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
             totalValue: '100000000000000000',
             components: [{ value: '100000000000000000' }],
             token: {

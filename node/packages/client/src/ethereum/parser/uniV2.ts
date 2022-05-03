@@ -65,17 +65,20 @@ export class Parser implements SubParser {
           const symbol = await contract.symbol()
           const value = decoded.args.amountTokenDesired.toString()
 
+          const assetId = caip19.toCAIP19({
+            chain: ChainTypes.Ethereum,
+            network: toNetworkType(this.network),
+            assetNamespace: AssetNamespace.ERC20,
+            assetReference: tokenAddress,
+          })
+
           return [
             {
               type: TransferType.Send,
               from: sendAddress,
               to: lpTokenAddress,
-              caip19: caip19.toCAIP19({
-                chain: ChainTypes.Ethereum,
-                network: toNetworkType(this.network),
-                assetNamespace: AssetNamespace.ERC20,
-                assetReference: tokenAddress,
-              }),
+              caip19: assetId,
+              assetId: assetId,
               totalValue: value,
               components: [{ value }],
               token: { contract: tokenAddress, decimals, name, symbol },
@@ -89,17 +92,20 @@ export class Parser implements SubParser {
           const symbol = await contract.symbol()
           const value = decoded.args.liquidity.toString()
 
+          const assetId = caip19.toCAIP19({
+            chain: ChainTypes.Ethereum,
+            network: toNetworkType(this.network),
+            assetNamespace: AssetNamespace.ERC20,
+            assetReference: lpTokenAddress,
+          })
+
           return [
             {
               type: TransferType.Send,
               from: sendAddress,
               to: lpTokenAddress,
-              caip19: caip19.toCAIP19({
-                chain: ChainTypes.Ethereum,
-                network: toNetworkType(this.network),
-                assetNamespace: AssetNamespace.ERC20,
-                assetReference: lpTokenAddress,
-              }),
+              caip19: assetId,
+              assetId: assetId,
               totalValue: value,
               components: [{ value }],
               token: { contract: lpTokenAddress, decimals, name, symbol },
