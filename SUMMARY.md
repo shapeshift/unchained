@@ -20,6 +20,7 @@
 
 ## Miscellaneous
 
+- [Release Process](docs/releaseProcess.md)
 - [Bootstrap from EBS Volume](docs/volumes.md)
 - [Remote Deployment](docs/self-hosting/remote-deployment)
 - [Tooling](docs/tooling.md)
