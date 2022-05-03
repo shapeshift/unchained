@@ -42,6 +42,7 @@
     git push origin release-vX.X.X
     ```
 - Review, merge, and ensure successful deploy to public environment in CircleCI
+- The release deployment require manual approval once the pulumi previews are checked for accuracy
 
 ## 3) Unify
 - Checkout main
