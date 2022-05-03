@@ -145,7 +145,7 @@ export class TransactionParser {
 
     tx.tokenTransfers?.forEach((transfer) => {
       // FTX Token (FTT) name and symbol was set backwards on the ERC20 contract
-      if (transfer.token == '0x50D1c9771902476076eCFc8B2A83Ad6b9355a4c9') {
+      if (transfer.token === '0x50D1c9771902476076eCFc8B2A83Ad6b9355a4c9') {
         transfer.name = transfer.symbol
         transfer.symbol = transfer.name
       }

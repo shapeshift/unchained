@@ -71,8 +71,6 @@ export interface StandardTxMetadata {
   parser: TxParser
 }
 
-export type TxMetadata = StandardTxMetadata
-
 export interface StandardTx {
   address: string
   blockHash?: string
