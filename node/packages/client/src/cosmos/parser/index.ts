@@ -42,19 +42,30 @@ export class TransactionParser {
 
     parsedTx.data = data
 
-    if (from === address || to === address) {
-      if (value.gt(0)) {
-        parsedTx.transfers = [
-          {
-            type: from === address ? TransferType.Send : TransferType.Receive,
-            caip19: this.assetId,
-            from,
-            to,
-            totalValue: value.toString(10),
-            components: [{ value: value.toString(10) }],
-          },
-        ]
-      }
+    if (from === address && value.gt(0)) {
+      parsedTx.transfers = [
+        {
+          type: TransferType.Send,
+          caip19: this.assetId,
+          from,
+          to,
+          totalValue: value.toString(10),
+          components: [{ value: value.toString(10) }],
+        },
+      ]
+    }
+
+    if (to === address && value.gt(0)) {
+      parsedTx.transfers = [
+        {
+          type: TransferType.Receive,
+          caip19: this.assetId,
+          from,
+          to,
+          totalValue: value.toString(10),
+          components: [{ value: value.toString(10) }],
+        },
+      ]
     }
 
     // We use origin for fees because some txs have a different from and origin addresses
