@@ -22,5 +22,5 @@
 
 - [Release Process](docs/releaseProcess.md)
 - [Bootstrap from EBS Volume](docs/volumes.md)
-- [Remote Deployment](docs/self-hosting/remote-deployment)
+- [Remote Deployment](docs/self-hosting/remote-deployment.md)
 - [Tooling](docs/tooling.md)
