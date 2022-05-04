@@ -1,12 +1,33 @@
 import WebSocket from 'ws'
 import { v4 } from 'uuid'
 import { Connection, Exchange, Message, Queue } from 'amqp-ts'
-import { RegistryMessage } from '@shapeshiftoss/common-ingester'
 import { Logger } from '@shapeshiftoss/logger'
 
 const BROKER_URI = process.env.BROKER_URI as string
 
 if (!BROKER_URI) throw new Error('BROKER_URI env var not set')
+
+/** TO BE REMOVED WITH REMOVAL OF INGESTER */
+export interface RegistryMessage {
+  action: string
+  client_id: string
+  ingester_meta?: Record<
+    string,
+    {
+      block?: number
+      syncing?: {
+        key?: string
+        startTime: number
+        endTime: number
+      }
+    }
+  >
+  registration: {
+    addresses?: string[]
+    pubkey?: string
+  }
+}
+/** END OF REMOVAL */
 
 export interface RequestPayload {
   subscriptionId: string
