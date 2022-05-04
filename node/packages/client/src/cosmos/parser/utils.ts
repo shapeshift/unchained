@@ -24,6 +24,7 @@ export const valuesFromMsgEvents = (
 
 const metaData = (msg: Message | undefined, assetId: string): TxMetadata | undefined => {
   if (!msg) return
+
   switch (msg.type) {
     case 'delegate':
     case 'begin_unbonding':
@@ -116,8 +117,12 @@ const virtualMessageFromEvents = (msg: Message, events: { [key: string]: Event[]
       to: msg.to,
       origin: msg.origin,
     }
-  } else {
-    console.warn(`cant create virtual message from events ${events}`)
-    return msg
   }
+
+  // no virtual message handled, but also no transaction message
+  if (!msg) {
+    console.warn(`no transaction message found and unable to create virtual message from events: ${events}`)
+  }
+
+  return msg
 }

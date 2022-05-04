@@ -48,7 +48,7 @@ export class TransactionParser {
   // return any addresses that can be detected
   getInternalAddress(inputData: string): string | undefined {
     switch (getSigHash(inputData)) {
-      case this.thor.transferOutSigHash:
+      case this.thor.supportedFunctions.transferOutSigHash:
         return this.thor.getInternalAddress(inputData)
       case SENDMULTISIG_SIG_HASH:
         return getInternalMultisigAddress(inputData)

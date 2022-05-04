@@ -14,18 +14,15 @@ export interface ParserArgs {
 }
 
 export class Parser implements SubParser {
-  abiInterface: ethers.utils.Interface
-
-  readonly depositSigHash: string
-  readonly transferOutSigHash: string
   readonly routerContract: string
+  readonly abiInterface = new ethers.utils.Interface(THOR_ABI)
+
+  readonly supportedFunctions = {
+    depositSigHash: this.abiInterface.getSighash('deposit'),
+    transferOutSigHash: this.abiInterface.getSighash('transferOut'),
+  }
 
   constructor(args: ParserArgs) {
-    this.abiInterface = new ethers.utils.Interface(THOR_ABI)
-
-    this.depositSigHash = this.abiInterface.getSighash('deposit')
-    this.transferOutSigHash = this.abiInterface.getSighash('transferOut')
-
     // TODO: Router contract can change, use /inbound_addresses endpoint to determine current router contract
     this.routerContract = {
       mainnet: THOR_ROUTER_CONTRACT_MAINNET,
@@ -35,9 +32,9 @@ export class Parser implements SubParser {
 
   // detect address associated with transferOut internal transaction
   getInternalAddress(inputData: string): string | undefined {
-    if (getSigHash(inputData) !== this.transferOutSigHash) return
+    if (getSigHash(inputData) !== this.supportedFunctions.transferOutSigHash) return
 
-    const result = this.abiInterface.decodeFunctionData(this.transferOutSigHash, inputData)
+    const result = this.abiInterface.decodeFunctionData(this.supportedFunctions.transferOutSigHash, inputData)
 
     const [type] = result.memo.split(':')
     if (type !== 'OUT' || type !== 'REFUND') return
@@ -47,40 +44,35 @@ export class Parser implements SubParser {
 
   async parse(tx: BlockbookTx): Promise<TxSpecific | undefined> {
     const txData = tx.ethereumSpecific?.data
+
     if (!txInteractsWithContract(tx, this.routerContract)) return
     if (!txData) return
 
+    const txSigHash = getSigHash(txData)
+
+    if (!Object.values(this.supportedFunctions).some((hash) => hash === txSigHash)) return
+
     const decoded = this.abiInterface.parseTransaction({ data: txData })
 
-    const result = (() => {
-      switch (getSigHash(txData)) {
-        case this.depositSigHash:
-        case this.transferOutSigHash:
-          return decoded.args
-        default:
-          return undefined
-      }
-    })()
-
-    // We didn't recognise the sigHash - exit
-    if (!result) return
+    // failed to decode input data
+    if (!decoded) return
 
     const data = {
       method: decoded.name,
       parser: TxParser.Thor,
     }
 
-    const [type] = result.memo.split(':')
+    const [type] = decoded.args.memo.split(':')
 
     if (SWAP_TYPES.includes(type) || type === 'OUT') {
-      return { trade: { dexName: Dex.Thor, type: TradeType.Trade, memo: result.memo }, data }
+      return { trade: { dexName: Dex.Thor, type: TradeType.Trade, memo: decoded.args.memo }, data }
     }
 
     if (type === 'REFUND') {
-      return { trade: { dexName: Dex.Thor, type: TradeType.Refund, memo: result.memo }, data }
+      return { trade: { dexName: Dex.Thor, type: TradeType.Refund, memo: decoded.args.memo }, data }
     }
 
-    // We encountered a case we thought we'd support, but don't - exit
+    // memo type not supported
     return
   }
 }

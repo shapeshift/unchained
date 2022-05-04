@@ -91,134 +91,30 @@ func (h *Handler) StartWebsocket() error {
 	return nil
 }
 
-func (h *Handler) GetAprData() (string, string, string, string, error) {
-
-	var totalSupply string
-	var annualProvisions string
-	var communityTax string
-	var bondedTokens string
-	g := new(errgroup.Group)
-
-	g.Go(func() error {
-		var err error
-		totalSupply, err = h.httpClient.GetTotalSupply("uatom")
-		return err
-	})
-	g.Go(func() error {
-		var err error
-		annualProvisions, err = h.httpClient.GetAnnualProvisions()
-		return err
-
-	})
-	g.Go(func() error {
-		var err error
-		communityTax, err = h.httpClient.GetCommunityTax()
-		return err
-
-	})
-	g.Go(func() error {
-		var err error
-		bondedTokens, err = h.httpClient.GetBondedTokens()
-		return err
-
-	})
-
-	err := g.Wait()
-
-	return totalSupply, annualProvisions, communityTax, bondedTokens, err
-}
-
 func (h *Handler) GetInfo() (api.Info, error) {
-	totalSupply, annualProvisions, communityTax, bondedTokens, err := h.GetAprData()
-	if err != nil {
-		return nil, err
-	}
-
-	bTotalSupply, _, err := new(big.Float).Parse(totalSupply, 10)
-	if err != nil {
-		return nil, err
-	}
-
-	bAnnualProvisions, _, err := new(big.Float).Parse(annualProvisions, 10)
-	if err != nil {
-		return nil, err
-	}
-
-	bCommunityTax, _, err := new(big.Float).Parse(communityTax, 10)
-	if err != nil {
-		return nil, err
-	}
-
-	bBondedTokens, _, err := new(big.Float).Parse(bondedTokens, 10)
+	aprData, err := h.getAPRData()
 	if err != nil {
 		return nil, err
 	}
 
 	// stakingAPR = [Inflation * (1-Community Tax)] / Bonded Tokens Ratio
-	bInflationRate := new(big.Float).Quo(bAnnualProvisions, bTotalSupply)
-	bBondedTokenRatio := new(big.Float).Quo(bBondedTokens, bTotalSupply)
-	bRewardRate := new(big.Float).Mul(bInflationRate, (new(big.Float).Sub(big.NewFloat(1), bCommunityTax)))
+	bInflationRate := new(big.Float).Quo(aprData.bAnnualProvisions, aprData.bTotalSupply)
+	bBondedTokenRatio := new(big.Float).Quo(aprData.bBondedTokens, aprData.bTotalSupply)
+	bRewardRate := new(big.Float).Mul(bInflationRate, (new(big.Float).Sub(big.NewFloat(1), aprData.bCommunityTax)))
 	apr := new(big.Float).Quo(bRewardRate, bBondedTokenRatio)
 
 	info := Info{
 		BaseInfo: api.BaseInfo{
 			Network: "mainnet",
 		},
-		TotalSupply:      totalSupply,
-		BondedTokens:     bondedTokens,
-		AnnualProvisions: annualProvisions,
-		CommunityTax:     communityTax,
+		TotalSupply:      aprData.totalSupply,
+		BondedTokens:     aprData.bondedTokens,
+		AnnualProvisions: aprData.annualProvisions,
+		CommunityTax:     aprData.communityTax,
 		APR:              apr.String(),
 	}
 
 	return info, nil
-}
-
-func (h *Handler) GetAccountData(pubkey string, denom string, apr *big.Float) (*cosmos.Account, *cosmos.Balance, []cosmos.Delegation, []cosmos.Redelegation, []cosmos.Unbonding, []cosmos.Reward, error) {
-
-	g := new(errgroup.Group)
-
-	var account *cosmos.Account
-	var balance *cosmos.Balance
-	var delegations []cosmos.Delegation
-	var redelegations []cosmos.Redelegation
-	var unbondings []cosmos.Unbonding
-	var rewards []cosmos.Reward
-
-	g.Go(func() error {
-		var err error
-		account, err = h.httpClient.GetAccount(pubkey)
-		return err
-	})
-	g.Go(func() error {
-		var err error
-		balance, err = h.httpClient.GetBalance(pubkey, denom)
-		return err
-	})
-	g.Go(func() error {
-		var err error
-		delegations, err = h.httpClient.GetDelegations(pubkey, apr)
-		return err
-	})
-	g.Go(func() error {
-		var err error
-		redelegations, err = h.httpClient.GetRedelegations(pubkey, apr)
-		return err
-	})
-	g.Go(func() error {
-		var err error
-		unbondings, err = h.httpClient.GetUnbondings(pubkey, denom, apr)
-		return err
-	})
-	g.Go(func() error {
-		var err error
-		rewards, err = h.httpClient.GetRewards(pubkey, apr)
-		return err
-	})
-
-	err := g.Wait()
-
-	return account, balance, delegations, redelegations, unbondings, rewards, err
 }
 
 func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
@@ -232,24 +128,24 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 		return nil, errors.Wrapf(err, "failed to parse apr: %s", apr)
 	}
 
-	account, balance, delegations, redelegations, unbondings, rewards, err := h.GetAccountData(pubkey, "uatom", apr)
+	accountData, err := h.getAccountData(pubkey, "uatom", apr)
 	if err != nil {
 		return nil, err
 	}
 
 	a := &Account{
 		BaseAccount: api.BaseAccount{
-			Balance:            balance.Amount,
+			Balance:            accountData.Balance.Amount,
 			UnconfirmedBalance: "0",
-			Pubkey:             account.Address,
+			Pubkey:             accountData.Account.Address,
 		},
-		AccountNumber: int(account.AccountNumber),
-		Sequence:      int(account.Sequence),
-		Assets:        balance.Assets,
-		Delegations:   delegations,
-		Redelegations: redelegations,
-		Unbondings:    unbondings,
-		Rewards:       rewards,
+		AccountNumber: int(accountData.Account.AccountNumber),
+		Sequence:      int(accountData.Account.Sequence),
+		Assets:        accountData.Balance.Assets,
+		Delegations:   accountData.Delegations,
+		Redelegations: accountData.Redelegations,
+		Unbondings:    accountData.Unbondings,
+		Rewards:       accountData.Rewards,
 	}
 
 	return a, nil
@@ -340,4 +236,116 @@ func (h *Handler) GetValidator(address string) (*cosmos.Validator, error) {
 	}
 
 	return h.httpClient.GetValidator(address, apr)
+}
+
+func (h *Handler) getAPRData() (*APRData, error) {
+	aprData := &APRData{}
+
+	g := new(errgroup.Group)
+
+	g.Go(func() error {
+		totalSupply, err := h.httpClient.GetTotalSupply("uatom")
+		if err != nil {
+			return err
+		}
+
+		bTotalSupply, _, err := new(big.Float).Parse(totalSupply, 10)
+
+		aprData.totalSupply = totalSupply
+		aprData.bTotalSupply = bTotalSupply
+
+		return err
+	})
+
+	g.Go(func() error {
+		annualProvisions, err := h.httpClient.GetAnnualProvisions()
+		if err != nil {
+			return err
+		}
+
+		bAnnualProvisions, _, err := new(big.Float).Parse(annualProvisions, 10)
+
+		aprData.annualProvisions = annualProvisions
+		aprData.bAnnualProvisions = bAnnualProvisions
+
+		return err
+	})
+
+	g.Go(func() error {
+		communityTax, err := h.httpClient.GetCommunityTax()
+		if err != nil {
+			return err
+		}
+
+		bCommunityTax, _, err := new(big.Float).Parse(communityTax, 10)
+
+		aprData.communityTax = communityTax
+		aprData.bCommunityTax = bCommunityTax
+
+		return err
+	})
+
+	g.Go(func() error {
+		bondedTokens, err := h.httpClient.GetBondedTokens()
+		if err != nil {
+			return err
+		}
+
+		bBondedTokens, _, err := new(big.Float).Parse(bondedTokens, 10)
+
+		aprData.bondedTokens = bondedTokens
+		aprData.bBondedTokens = bBondedTokens
+
+		return err
+	})
+
+	err := g.Wait()
+
+	return aprData, err
+}
+
+func (h *Handler) getAccountData(pubkey string, denom string, apr *big.Float) (*AccountData, error) {
+	accountData := &AccountData{}
+
+	g := new(errgroup.Group)
+
+	g.Go(func() error {
+		account, err := h.httpClient.GetAccount(pubkey)
+		accountData.Account = account
+		return err
+	})
+
+	g.Go(func() error {
+		balance, err := h.httpClient.GetBalance(pubkey, denom)
+		accountData.Balance = balance
+		return err
+	})
+
+	g.Go(func() error {
+		delegations, err := h.httpClient.GetDelegations(pubkey, apr)
+		accountData.Delegations = delegations
+		return err
+	})
+
+	g.Go(func() error {
+		redelegations, err := h.httpClient.GetRedelegations(pubkey, apr)
+		accountData.Redelegations = redelegations
+		return err
+	})
+
+	g.Go(func() error {
+		unbondings, err := h.httpClient.GetUnbondings(pubkey, denom, apr)
+		accountData.Unbondings = unbondings
+		return err
+	})
+
+	g.Go(func() error {
+		rewards, err := h.httpClient.GetRewards(pubkey, apr)
+		accountData.Rewards = rewards
+		return err
+	})
+
+	err := g.Wait()
+
+	return accountData, err
 }
