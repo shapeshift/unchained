@@ -16,68 +16,66 @@ interface ParserArgs {
 export class Parser implements SubParser {
   provider: ethers.providers.JsonRpcProvider
   yearnSdk: Yearn<ChainId> | undefined
-
   yearnTokenVaultAddresses: string[] | undefined
-  shapeShiftInterface = new ethers.utils.Interface(shapeShiftRouter)
-  yearnInterface = new ethers.utils.Interface(yearnVault)
 
-  supportedYearnFunctions = {
-    yearnApprovalSigHash: this.yearnInterface.getSighash('approve'),
-    yearnDepositSigHash: '0xd0e30db0',
-    yearnDepositWithAmountSigHash: '0xb6b55f25',
-    yearnDepositWithAmountAndRecipientSigHash: '0x6e553f65',
-    yearnWithdrawSigHash: '0x00f714ce',
+  readonly shapeShiftInterface = new ethers.utils.Interface(shapeShiftRouter)
+  readonly yearnInterface = new ethers.utils.Interface(yearnVault)
+
+  readonly supportedYearnFunctions = {
+    approveSigHash: this.yearnInterface.getSighash('approve'),
+    depositSigHash: this.yearnInterface.getSighash('deposit()'),
+    depositAmountSigHash: this.yearnInterface.getSighash('deposit(uint256)'),
+    depositAmountAndRecipientSigHash: this.yearnInterface.getSighash('deposit(uint256,address)'),
+    withdrawSigHash: this.yearnInterface.getSighash('withdraw(uint256,address)'),
   }
 
-  supportedShapeShiftFunctions = {
-    shapeShiftDepositSigHash: '0x20e8c565',
+  readonly supportedShapeShiftFunctions = {
+    depositSigHash: this.shapeShiftInterface.getSighash('deposit(address,address,uint256,uint256)'),
   }
 
   constructor(args: ParserArgs) {
     this.provider = args.provider
 
     // The only Yearn-supported chain we currently support is mainnet
-    if (args.network == 'mainnet') {
+    if (args.network === 'mainnet') {
       // 1 for EthMain (@yfi/sdk/dist/chain.d.ts)
       this.yearnSdk = new Yearn(1, { provider: this.provider, disableAllowlist: true })
     }
   }
 
   async parse(tx: BlockbookTx): Promise<TxSpecific | undefined> {
-    const {
-      yearnApprovalSigHash,
-      yearnWithdrawSigHash,
-      yearnDepositSigHash,
-      yearnDepositWithAmountSigHash,
-      yearnDepositWithAmountAndRecipientSigHash,
-    } = this.supportedYearnFunctions
-    const { shapeShiftDepositSigHash } = this.supportedShapeShiftFunctions
-    const data = tx.ethereumSpecific?.data
-    if (!data) return
+    const txData = tx.ethereumSpecific?.data
 
-    const txSigHash = getSigHash(data)
+    if (!txData) return
+
+    const txSigHash = getSigHash(txData)
+
     const abiInterface = this.getAbiInterface(txSigHash)
     if (!abiInterface) return
-
-    const decoded = abiInterface.parseTransaction({ data })
-    const receiveAddress = tx.vout?.[0].addresses?.[0]
 
     if (!this.yearnTokenVaultAddresses) {
       const vaults = await this.yearnSdk?.vaults.get()
       this.yearnTokenVaultAddresses = vaults?.map((vault) => vault.address)
     }
 
+    const decoded = abiInterface.parseTransaction({ data: txData })
+
+    // failed to decode input data
+    if (!decoded) return
+
+    const receiveAddress = tx.vout?.[0].addresses?.[0]
+
     switch (txSigHash) {
-      case yearnApprovalSigHash:
+      case this.supportedYearnFunctions.approveSigHash:
         if (decoded?.args._spender !== SHAPE_SHIFT_ROUTER_CONTRACT) return
         break
-      case shapeShiftDepositSigHash:
+      case this.supportedShapeShiftFunctions.depositSigHash:
         if (receiveAddress !== SHAPE_SHIFT_ROUTER_CONTRACT) return
         break
-      case yearnWithdrawSigHash:
-      case yearnDepositSigHash:
-      case yearnDepositWithAmountSigHash:
-      case yearnDepositWithAmountAndRecipientSigHash:
+      case this.supportedYearnFunctions.withdrawSigHash:
+      case this.supportedYearnFunctions.depositSigHash:
+      case this.supportedYearnFunctions.depositAmountSigHash:
+      case this.supportedYearnFunctions.depositAmountAndRecipientSigHash:
         if (receiveAddress && !this.yearnTokenVaultAddresses?.includes(receiveAddress)) return
         break
       default:
@@ -86,7 +84,7 @@ export class Parser implements SubParser {
 
     return {
       data: {
-        method: decoded?.name,
+        method: decoded.name,
         parser: TxParser.Yearn,
       },
     }

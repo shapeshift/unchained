@@ -1,6 +1,8 @@
 package api
 
 import (
+	"math/big"
+
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 )
@@ -85,4 +87,24 @@ type TxHistory struct {
 	api.BaseTxHistory
 	// required: true
 	Txs []Tx `json:"txs"`
+}
+
+type AccountData struct {
+	Account       *cosmos.Account
+	Balance       *cosmos.Balance
+	Delegations   []cosmos.Delegation
+	Redelegations []cosmos.Redelegation
+	Unbondings    []cosmos.Unbonding
+	Rewards       []cosmos.Reward
+}
+
+type APRData struct {
+	totalSupply       string
+	annualProvisions  string
+	communityTax      string
+	bondedTokens      string
+	bAnnualProvisions *big.Float
+	bTotalSupply      *big.Float
+	bCommunityTax     *big.Float
+	bBondedTokens     *big.Float
 }

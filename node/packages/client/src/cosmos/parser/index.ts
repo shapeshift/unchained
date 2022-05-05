@@ -1,17 +1,17 @@
 import { BigNumber } from 'bignumber.js'
-import { caip2, caip19, AssetNamespace, AssetReference, CAIP2, CAIP19 } from '@shapeshiftoss/caip'
+import { caip2, caip19, AssetNamespace, AssetReference, ChainId, AssetId } from '@shapeshiftoss/caip'
 import { Status, TransferType } from '../../types'
 import { Tx as CosmosTx } from '../index'
 import { ParsedTx } from '../types'
 import { valuesFromMsgEvents } from './utils'
 
 export interface TransactionParserArgs {
-  chainId: CAIP2
+  chainId: ChainId
 }
 
 export class TransactionParser {
-  chainId: CAIP2
-  assetId: CAIP19
+  chainId: ChainId
+  assetId: AssetId
 
   constructor(args: TransactionParserArgs) {
     this.chainId = args.chainId
@@ -30,6 +30,7 @@ export class TransactionParser {
       blockHeight: tx.blockHeight ?? -1,
       blockTime: tx.timestamp ?? Math.floor(Date.now() / 1000),
       caip2: this.chainId,
+      chainId: this.chainId,
       confirmations: tx.confirmations,
       status: tx.confirmations > 0 ? Status.Confirmed : Status.Pending, // TODO: handle failed case
       transfers: [],
@@ -42,19 +43,32 @@ export class TransactionParser {
 
     parsedTx.data = data
 
-    if (from === address || to === address) {
-      if (value.gt(0)) {
-        parsedTx.transfers = [
-          {
-            type: from === address ? TransferType.Send : TransferType.Receive,
-            caip19: this.assetId,
-            from,
-            to,
-            totalValue: value.toString(10),
-            components: [{ value: value.toString(10) }],
-          },
-        ]
-      }
+    if (from === address && value.gt(0)) {
+      parsedTx.transfers = [
+        {
+          type: TransferType.Send,
+          caip19: this.assetId,
+          assetId: this.assetId,
+          from,
+          to,
+          totalValue: value.toString(10),
+          components: [{ value: value.toString(10) }],
+        },
+      ]
+    }
+
+    if (to === address && value.gt(0)) {
+      parsedTx.transfers = [
+        {
+          type: TransferType.Receive,
+          caip19: this.assetId,
+          assetId: this.assetId,
+          from,
+          to,
+          totalValue: value.toString(10),
+          components: [{ value: value.toString(10) }],
+        },
+      ]
     }
 
     // We use origin for fees because some txs have a different from and origin addresses
@@ -62,7 +76,7 @@ export class TransactionParser {
       // network fee
       const fees = new BigNumber(tx.fee.amount)
       if (fees.gt(0)) {
-        parsedTx.fee = { caip19: this.assetId, value: fees.toString(10) }
+        parsedTx.fee = { caip19: this.assetId, assetId: this.assetId, value: fees.toString(10) }
       }
     }
 

@@ -7,39 +7,29 @@ import { FOXY_STAKING_CONTRACT } from './constants'
 import FOXY_STAKING_ABI from './abi/foxyStaking'
 
 export class Parser implements SubParser {
-  abiInterface: ethers.utils.Interface = new ethers.utils.Interface(FOXY_STAKING_ABI)
-  // Hard coded staking sigHash because there is two different stake methods
-  // in the foxy staking contract. This gives us the ability to parse the correct one.
-  readonly stakeSigHash: string = '0x7acb7757'
-  readonly unstakeSigHash: string = this.abiInterface.getSighash('unstake')
-  readonly instantUnstakeSigHash: string = this.abiInterface.getSighash('instantUnstake')
-  readonly claimWithdrawSigHash: string = this.abiInterface.getSighash('claimWithdraw')
+  readonly abiInterface = new ethers.utils.Interface(FOXY_STAKING_ABI)
+
+  readonly supportedFunctions = {
+    stakeSigHash: this.abiInterface.getSighash('stake(uint256,address)'),
+    unstakeSigHash: this.abiInterface.getSighash('unstake'),
+    instantUnstakeSigHash: this.abiInterface.getSighash('instantUnstake'),
+    claimWithdrawSigHash: this.abiInterface.getSighash('claimWithdraw'),
+  }
 
   async parse(tx: BlockbookTx): Promise<TxSpecific | undefined> {
-    if (!txInteractsWithContract(tx, FOXY_STAKING_CONTRACT)) return
     const txData = tx.ethereumSpecific?.data
+
+    if (!txInteractsWithContract(tx, FOXY_STAKING_CONTRACT)) return
     if (!txData) return
 
     const txSigHash = getSigHash(txData)
-    const abiInterface = this.abiInterfaceSupportsSigHash(txSigHash)
-    if (!abiInterface) return
 
-    const decoded = abiInterface.parseTransaction({ data: txData })
+    if (!Object.values(this.supportedFunctions).some((hash) => hash === txSigHash)) return
 
-    const result = (() => {
-      switch (getSigHash(txData)) {
-        case this.stakeSigHash:
-        case this.unstakeSigHash:
-        case this.instantUnstakeSigHash:
-        case this.claimWithdrawSigHash:
-          return decoded.args
-        default:
-          return undefined
-      }
-    })()
+    const decoded = this.abiInterface.parseTransaction({ data: txData })
 
-    // We didn't recognise the sigHash - exit
-    if (!result) return
+    // failed to decode input data
+    if (!decoded) return
 
     return {
       data: {
@@ -47,14 +37,5 @@ export class Parser implements SubParser {
         parser: TxParser.Foxy,
       },
     }
-  }
-
-  supportedFoxyFunctions() {
-    return [this.stakeSigHash, this.unstakeSigHash, this.instantUnstakeSigHash, this.claimWithdrawSigHash]
-  }
-
-  abiInterfaceSupportsSigHash(txSigHash: string | undefined): ethers.utils.Interface | undefined {
-    if (this.supportedFoxyFunctions().some((abi) => abi === txSigHash)) return this.abiInterface
-    return undefined
   }
 }

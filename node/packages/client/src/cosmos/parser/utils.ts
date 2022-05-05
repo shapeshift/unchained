@@ -11,10 +11,10 @@ const logger = new Logger({
 export const valuesFromMsgEvents = (
   msg: Message,
   events: { [key: string]: Event[] },
-  caip19: string
+  assetId: string
 ): { from: string; to: string; value: BigNumber; data: TxMetadata | undefined; origin: string } => {
   const virtualMsg = virtualMessageFromEvents(msg, events)
-  const data = metaData(virtualMsg, caip19)
+  const data = metaData(virtualMsg, assetId)
   const from = virtualMsg?.from ?? ''
   const to = virtualMsg?.to ?? ''
   const origin = virtualMsg?.origin ?? ''
@@ -22,8 +22,9 @@ export const valuesFromMsgEvents = (
   return { from, to, value, data, origin }
 }
 
-const metaData = (msg: Message | undefined, caip19: string): TxMetadata | undefined => {
+const metaData = (msg: Message | undefined, assetId: string): TxMetadata | undefined => {
   if (!msg) return
+
   switch (msg.type) {
     case 'delegate':
     case 'begin_unbonding':
@@ -42,7 +43,8 @@ const metaData = (msg: Message | undefined, caip19: string): TxMetadata | undefi
         delegator: msg.origin,
         destinationValidator: msg.to,
         value: msg?.value?.amount,
-        caip19: caip19,
+        caip19: assetId,
+        assetId: assetId,
       }
     case 'withdraw_delegator_reward':
       return {
@@ -50,7 +52,8 @@ const metaData = (msg: Message | undefined, caip19: string): TxMetadata | undefi
         method: msg.type,
         destinationValidator: msg.to,
         value: msg?.value?.amount,
-        caip19: caip19,
+        caip19: assetId,
+        assetId: assetId,
       }
     case 'ibc_send':
     case 'ibc_receive':
@@ -59,7 +62,8 @@ const metaData = (msg: Message | undefined, caip19: string): TxMetadata | undefi
         method: msg.type,
         ibcDestination: msg.to,
         ibcSource: msg.from,
-        caip19: caip19,
+        caip19: assetId,
+        assetId: assetId,
         value: msg?.value?.amount,
       }
     // known message types with no applicable metadata
@@ -113,8 +117,12 @@ const virtualMessageFromEvents = (msg: Message, events: { [key: string]: Event[]
       to: msg.to,
       origin: msg.origin,
     }
-  } else {
-    console.warn(`cant create virtual message from events ${events}`)
-    return msg
   }
+
+  // no virtual message handled, but also no transaction message
+  if (!msg) {
+    console.warn(`no transaction message found and unable to create virtual message from events: ${events}`)
+  }
+
+  return msg
 }

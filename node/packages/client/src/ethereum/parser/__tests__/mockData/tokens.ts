@@ -12,6 +12,13 @@ export const foxToken = {
   symbol: 'FOX',
 }
 
+export const foxyToken = {
+  contract: '0xDc49108ce5C57bc3408c3A5E95F3d864eC386Ed3',
+  decimals: 18,
+  name: 'FOX Yieldy',
+  symbol: 'FOXy',
+}
+
 export const usdcToken = {
   contract: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
   decimals: 6,

@@ -33,6 +33,7 @@ export class TransactionParser {
       blockHeight: tx.blockHeight,
       blockTime: tx.blockTime,
       caip2: caip2.toCAIP2({ chain: ChainTypes.Bitcoin, network: toNetworkType(this.network) }),
+      chainId: caip2.toCAIP2({ chain: ChainTypes.Bitcoin, network: toNetworkType(this.network) }),
       confirmations: tx.confirmations,
       status: tx.confirmations > 0 ? Status.Confirmed : Status.Pending,
       transfers: [],
@@ -40,7 +41,7 @@ export class TransactionParser {
     }
 
     tx.vin.forEach((vin) => {
-      if (vin.isAddress === true && vin.addresses?.includes(address)) {
+      if (vin.isAddress && vin.addresses?.includes(address)) {
         // send amount
         const sendValue = new BigNumber(vin.value ?? 0)
         if (sendValue.gt(0)) {
@@ -57,13 +58,13 @@ export class TransactionParser {
         // network fee
         const fees = new BigNumber(tx.fees ?? 0)
         if (fees.gt(0)) {
-          parsedTx.fee = { caip19: caip19Bitcoin, value: fees.toString(10) }
+          parsedTx.fee = { caip19: caip19Bitcoin, assetId: caip19Bitcoin, value: fees.toString(10) }
         }
       }
     })
 
     tx.vout.forEach((vout) => {
-      if (vout.isAddress === true && vout.addresses?.includes(address)) {
+      if (vout.isAddress && vout.addresses?.includes(address)) {
         // receive amount
         const receiveValue = new BigNumber(vout.value ?? 0)
         if (receiveValue.gt(0)) {
