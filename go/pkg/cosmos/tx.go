@@ -8,6 +8,7 @@ import (
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	authztypes "github.com/cosmos/cosmos-sdk/x/authz"
@@ -82,7 +83,8 @@ func (c *HTTPClient) BroadcastTx(rawTx string) (string, error) {
 	}
 
 	if res.TxResponse.Code != 0 {
-		return "", errors.New(res.TxResponse.RawLog)
+		message := fmt.Sprintf("failed to broadcast transaction: codespace: %s, code: %d, description", res.TxResponse.Codespace, res.TxResponse.Code)
+		return "", errortypes.ABCIError(res.TxResponse.Codespace, res.TxResponse.Code, message)
 	}
 
 	return res.TxResponse.TxHash, nil
