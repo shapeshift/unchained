@@ -2,7 +2,7 @@ import { config as getEnv, parse } from 'dotenv'
 import { existsSync, readFileSync } from 'fs'
 import { join } from 'path'
 import * as k8s from '@pulumi/kubernetes'
-import { deployApi } from '../../../pulumi'
+import { deployApi } from '../../../pulumi/src'
 import { getConfig } from './config'
 
 type Outputs = Record<string, any>

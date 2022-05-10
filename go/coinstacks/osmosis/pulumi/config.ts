@@ -1,5 +1,5 @@
 import * as pulumi from '@pulumi/pulumi'
-import { Config as BaseConfig, Cluster, Dockerhub } from '../../../pulumi'
+import { Config as BaseConfig, Cluster, Dockerhub } from '../../../pulumi/src'
 
 const SUPPORTED_NETWORKS = ['mainnet']
 
