@@ -98,11 +98,7 @@ func (h *Handler) GetInfo() (api.Info, error) {
 		BaseInfo: api.BaseInfo{
 			Network: "mainnet",
 		},
-		TotalSupply:      "0",
-		BondedTokens:     "0",
-		AnnualProvisions: "0",
-		CommunityTax:     "0",
-		APR:              "0",
+		APR: "0",
 	}
 
 	return info, nil
