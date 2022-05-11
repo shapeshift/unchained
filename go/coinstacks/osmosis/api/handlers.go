@@ -32,7 +32,7 @@ func (h *Handler) StartWebsocket() error {
 
 		txid := fmt.Sprintf("%X", sha256.Sum256(tx.Tx))
 
-		Messages := cosmos.Messages(cosmosTx.GetMsgs())
+		Messages := osmosis.Messages(cosmosTx.GetMsgs())
 
 		if len(Messages) > 0 {
 			// Dont bother getting blocks for or creating transactions that arent in the registry
