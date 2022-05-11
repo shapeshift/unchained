@@ -10,6 +10,9 @@ import (
 type Info struct {
 	// swagger:allOf
 	api.BaseInfo
+	// required: true
+	// example: 0.1541068456
+	APR string `json:"apr"`
 }
 
 // Contains info about account details for an address or xpub
@@ -25,6 +28,14 @@ type Account struct {
 	Sequence int `json:"sequence"`
 	// required: true
 	Assets []cosmos.Value `json:"assets"`
+	// required: true
+	Delegations []cosmos.Delegation `json:"delegations"`
+	// required: true
+	Redelegations []cosmos.Redelegation `json:"redelegations"`
+	// required: true
+	Unbondings []cosmos.Unbonding `json:"unbondings"`
+	// required: true
+	Rewards []cosmos.Reward `json:"rewards"`
 }
 
 // Contains info about a transaction
@@ -62,4 +73,13 @@ type TxHistory struct {
 	api.BaseTxHistory
 	// required: true
 	Txs []Tx `json:"txs"`
+}
+
+type AccountData struct {
+	Account       *cosmos.Account
+	Balance       *cosmos.Balance
+	Delegations   []cosmos.Delegation
+	Redelegations []cosmos.Redelegation
+	Unbondings    []cosmos.Unbonding
+	Rewards       []cosmos.Reward
 }
