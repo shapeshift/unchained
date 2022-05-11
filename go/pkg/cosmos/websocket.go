@@ -42,13 +42,6 @@ func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- 
 		return nil, errors.Wrapf(err, "failed to create websocket client")
 	}
 
-	tendermint.MaxReconnectAttempts(10)(client)
-	tendermint.OnReconnect(func() {
-		logger.Info("OnReconnect triggered: resubscribing")
-		_ = client.Subscribe(context.Background(), types.EventQueryTx.String())
-		_ = client.Subscribe(context.Background(), types.EventQueryNewBlockHeader.String())
-	})(client)
-
 	// use default dialer
 	client.Dialer = net.Dial
 
@@ -60,6 +53,14 @@ func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- 
 		errChan:      errChan,
 		unhandledTxs: make(map[int][]types.EventDataTx),
 	}
+
+	tendermint.MaxReconnectAttempts(10)(client)
+	tendermint.OnReconnect(func() {
+		logger.Info("OnReconnect triggered: resubscribing")
+		ws.unhandledTxs = make(map[int][]types.EventDataTx)
+		_ = client.Subscribe(context.Background(), types.EventQueryTx.String())
+		_ = client.Subscribe(context.Background(), types.EventQueryNewBlockHeader.String())
+	})(client)
 
 	return ws, nil
 }
