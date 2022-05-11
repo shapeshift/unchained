@@ -10,9 +10,9 @@ import (
 type Info struct {
 	// swagger:allOf
 	api.BaseInfo
-	APR string `json:"apr"`
 	// required: true
-	// example: 29255184955917.174457731278996910
+	// example: 0.1541068456
+	APR string `json:"apr"`
 }
 
 // Contains info about account details for an address or xpub
