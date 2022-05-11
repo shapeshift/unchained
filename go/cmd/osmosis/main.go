@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/shapeshift/unchained/coinstacks/cosmos/api"
+	"github.com/shapeshift/unchained/coinstacks/osmosis/api"
 	"github.com/shapeshift/unchained/internal/config"
 	"github.com/shapeshift/unchained/internal/log"
 	"github.com/shapeshift/unchained/pkg/cosmos"
@@ -16,7 +16,7 @@ var (
 	logger = log.WithoutFields()
 
 	envPath     = flag.String("env", "", "path to env file (default: use os env)")
-	swaggerPath = flag.String("swagger", "coinstacks/cosmos/api/swagger.json", "path to swagger spec")
+	swaggerPath = flag.String("swagger", "coinstacks/osmosis/api/swagger.json", "path to swagger spec")
 )
 
 // Config for running application

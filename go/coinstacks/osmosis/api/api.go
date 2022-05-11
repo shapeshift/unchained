@@ -87,7 +87,7 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient 
 	r.HandleFunc("/", a.Root).Methods("GET")
 
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		api.HandleResponse(w, http.StatusOK, map[string]string{"status": "up", "coinstack": "cosmos", "connections": strconv.Itoa(a.manager.ConnectionCount())})
+		api.HandleResponse(w, http.StatusOK, map[string]string{"status": "up", "coinstack": "osmosis", "connections": strconv.Itoa(a.manager.ConnectionCount())})
 	}).Methods("GET")
 
 	r.HandleFunc("/swagger", func(w http.ResponseWriter, r *http.Request) {
