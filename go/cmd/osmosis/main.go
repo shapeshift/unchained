@@ -6,6 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	gammtypes "github.com/osmosis-labs/osmosis/v6/x/gamm/types"
+	lockuptypes "github.com/osmosis-labs/osmosis/v6/x/lockup/types"
 	"github.com/shapeshift/unchained/coinstacks/osmosis/api"
 	"github.com/shapeshift/unchained/internal/config"
 	"github.com/shapeshift/unchained/internal/log"
@@ -46,7 +48,7 @@ func main() {
 		}
 	}
 
-	encoding := cosmos.NewEncoding()
+	encoding := cosmos.NewEncoding(gammtypes.RegisterInterfaces, lockuptypes.RegisterInterfaces)
 
 	cfg := cosmos.Config{
 		APIKey:            conf.APIKey,
