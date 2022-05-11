@@ -191,6 +191,33 @@ aliases:
     api-cpu-threshold: 30
     api-memory-limit: 1Gi
 
+  - &osmosis
+    coinstack: osmosis
+    pulumi-stack: public
+    pulumi-dir: coinstacks/osmosis/pulumi
+    lcd-url: https://osmosis-1--lcd--archive.datahub.figment.io
+    rpc-url: https://osmosis-1--rpc--archive.datahub.figment.io
+    ws-url: wss://osmosis-1--rpc--archive.datahub.figment.io
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 6
+    api-cpu-limit: 500m
+    api-cpu-request: 500m
+    api-cpu-threshold: 30
+    api-memory-limit: 2Gi
+
+  - &osmosis-dev
+    <<: *osmosis
+    environment: dev
+    pulumi-stack: public-dev
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 3
+    api-cpu-limit: 300m
+    api-cpu-request: 300m
+    api-cpu-threshold: 30
+    api-memory-limit: 1Gi
+
 commands:
   setup-runtime:
     description: setup runtime environment
@@ -616,6 +643,7 @@ jobs:
         type: string
       grpc-url:
         type: string
+        default: ""
       rpc-url:
         type: string
       ws-url:
@@ -775,6 +803,15 @@ workflows:
           requires:
             - deploy dependencies (shapeshift)
           <<: *cosmos-dev
+          <<: *only-develop
+
+      - deploy-coinstack-go:
+          name: deploy osmosis develop (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: up -f --yes
+          requires:
+            - deploy dependencies (shapeshift)
+          <<: *osmosis-dev
           <<: *only-develop
 
   deploy-monitoring:
