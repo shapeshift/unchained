@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/pkg/errors"
+	"github.com/shapeshift/unchained/coinstacks/osmosis"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/shapeshift/unchained/pkg/websocket"
@@ -173,7 +174,7 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 			GasUsed:       t.TendermintTx.TxResult.GasUsed,
 			Index:         int(t.TendermintTx.GetIndex()),
 			Memo:          t.SigningTx.GetMemo(),
-			Messages:      cosmos.Messages(t.CosmosTx.GetMsgs()),
+			Messages:      osmosis.Messages(t.CosmosTx.GetMsgs()),
 		}
 
 		txs = append(txs, tx)
