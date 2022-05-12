@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"sync"
 
 	"github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/pkg/errors"
@@ -15,15 +16,17 @@ import (
 	"github.com/tendermint/tendermint/types"
 )
 
-type TxHandlerFunc = func(tx types.EventDataTx, registry websocket.Registry) (interface{}, []string, error)
+type TxHandlerFunc = func(tx types.EventDataTx, block *Block) (interface{}, []string, error)
 
 type WSClient struct {
 	*websocket.Registry
+	blockService *BlockService
 	client       *tendermint.WSClient
 	encoding     *params.EncodingConfig
-	txHandler    TxHandlerFunc
-	blockService *BlockService
 	errChan      chan<- error
+	m            sync.RWMutex
+	txHandler    TxHandlerFunc
+	unhandledTxs map[int][]types.EventDataTx
 }
 
 func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- error) (*WSClient, error) {
@@ -39,23 +42,25 @@ func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- 
 		return nil, errors.Wrapf(err, "failed to create websocket client")
 	}
 
-	tendermint.MaxReconnectAttempts(10)(client)
-	tendermint.OnReconnect(func() {
-		logger.Info("OnReconnect triggered: resubscribing")
-		_ = client.Subscribe(context.Background(), types.EventQueryTx.String())
-		_ = client.Subscribe(context.Background(), types.EventQueryNewBlockHeader.String())
-	})(client)
-
 	// use default dialer
 	client.Dialer = net.Dial
 
 	ws := &WSClient{
 		Registry:     websocket.NewRegistry(),
-		encoding:     conf.Encoding,
-		client:       client,
 		blockService: blockService,
+		client:       client,
+		encoding:     conf.Encoding,
 		errChan:      errChan,
+		unhandledTxs: make(map[int][]types.EventDataTx),
 	}
+
+	tendermint.MaxReconnectAttempts(10)(client)
+	tendermint.OnReconnect(func() {
+		logger.Info("OnReconnect triggered: resubscribing")
+		ws.unhandledTxs = make(map[int][]types.EventDataTx)
+		_ = client.Subscribe(context.Background(), types.EventQueryTx.String())
+		_ = client.Subscribe(context.Background(), types.EventQueryNewBlockHeader.String())
+	})(client)
 
 	return ws, nil
 }
@@ -125,7 +130,16 @@ func (ws *WSClient) listen() {
 }
 
 func (ws *WSClient) handleTx(tx types.EventDataTx) {
-	data, addrs, err := ws.txHandler(tx, *ws.Registry)
+	// queue up any transactions detected before block details are available
+	block, ok := ws.blockService.Blocks[int(tx.Height)]
+	if !ok {
+		ws.m.Lock()
+		ws.unhandledTxs[int(tx.Height)] = append(ws.unhandledTxs[int(tx.Height)], tx)
+		ws.m.Unlock()
+		return
+	}
+
+	data, addrs, err := ws.txHandler(tx, block)
 	if err != nil {
 		logger.Error(err)
 		return
@@ -142,4 +156,10 @@ func (ws *WSClient) handleNewBlockHeader(block types.EventDataNewBlockHeader) {
 	}
 
 	ws.blockService.WriteBlock(b, true)
+
+	// process any unhandled transactions
+	for _, tx := range ws.unhandledTxs[b.Height] {
+		go ws.handleTx(tx)
+	}
+	delete(ws.unhandledTxs, b.Height)
 }

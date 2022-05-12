@@ -25,7 +25,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/internal/log"
 	liquiditytypes "github.com/tendermint/liquidity/x/liquidity/types"
-	abcitypes "github.com/tendermint/tendermint/abci/types"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
@@ -92,7 +91,6 @@ type GRPCClient struct {
 	encoding *params.EncodingConfig
 	grpcConn *grpc.ClientConn
 
-	abci         abcitypes.ABCIApplicationClient
 	auth         authtypes.QueryClient
 	bank         banktypes.QueryClient
 	distribution distributiontypes.QueryClient
@@ -122,7 +120,6 @@ func NewGRPCClient(conf Config) (*GRPCClient, error) {
 		return nil, errors.Wrapf(err, "unable to connect to: %s", grpcURL)
 	}
 
-	abci := abcitypes.NewABCIApplicationClient(grpcConn)
 	auth := authtypes.NewQueryClient(grpcConn)
 	bank := banktypes.NewQueryClient(grpcConn)
 	distribution := distributiontypes.NewQueryClient(grpcConn)
@@ -134,7 +131,6 @@ func NewGRPCClient(conf Config) (*GRPCClient, error) {
 		ctx:          ctx,
 		grpcConn:     grpcConn,
 		encoding:     conf.Encoding,
-		abci:         abci,
 		auth:         auth,
 		bank:         bank,
 		distribution: distribution,
