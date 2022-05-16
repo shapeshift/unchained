@@ -91,3 +91,23 @@ func (r *Registry) Publish(addrs []string, data interface{}) {
 		}
 	}
 }
+
+func (r *Registry) GetRegisteredAddresses() (addrs []string) {
+
+	i := 0
+	keys := make([]string, len(r.addresses))
+	for k := range r.addresses {
+		keys[i] = k
+		i++
+	}
+	return keys
+}
+func (r *Registry) HasRegisteredAddress(s []string, str string) bool {
+	registeredAddresses := r.GetRegisteredAddresses()
+	for _, v := range registeredAddresses {
+		if v == str {
+			return true
+		}
+	}
+	return false
+}

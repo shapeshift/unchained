@@ -2,7 +2,6 @@
 //
 // Provides access to cosmos chain data
 //
-// Version: 6.1.1
 // License: MIT http://opensource.org/licenses/MIT
 //
 // Consumes:
@@ -109,6 +108,10 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient 
 	v1Gas := v1.PathPrefix("/gas").Subrouter()
 	v1Gas.HandleFunc("/estimate", a.EstimateGas).Methods("POST")
 
+	v1Validators := v1.PathPrefix("/validators").Subrouter()
+	v1Validators.HandleFunc("", a.GetValidators).Methods("GET")
+	v1Validators.HandleFunc("/{pubkey}", a.GetValidator).Methods("GET")
+
 	// docs redirect paths
 	r.HandleFunc("/docs", docsRedirect).Methods("GET")
 
@@ -195,14 +198,10 @@ func (a *API) Info(w http.ResponseWriter, r *http.Request) {
 // responses:
 //   200: Account
 //   400: BadRequestError
-//   422: ValidationError
 //   500: InternalServerError
 func (a *API) Account(w http.ResponseWriter, r *http.Request) {
-	pubkey, ok := mux.Vars(r)["pubkey"]
-	if !ok || pubkey == "" {
-		api.HandleError(w, http.StatusBadRequest, "pubkey required")
-		return
-	}
+	// pubkey validated by ValidatePubkey middleware
+	pubkey := mux.Vars(r)["pubkey"]
 
 	account, err := a.handler.GetAccount(pubkey)
 	if err != nil {
@@ -220,14 +219,10 @@ func (a *API) Account(w http.ResponseWriter, r *http.Request) {
 // responses:
 //   200: TxHistory
 //   400: BadRequestError
-//   422: ValidationError
 //   500: InternalServerError
 func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
-	pubkey, ok := mux.Vars(r)["pubkey"]
-	if !ok || pubkey == "" {
-		api.HandleError(w, http.StatusBadRequest, "pubkey required")
-		return
-	}
+	// pubkey validated by ValidatePubkey middleware
+	pubkey := mux.Vars(r)["pubkey"]
 
 	cursor := r.URL.Query().Get("cursor")
 
@@ -268,7 +263,6 @@ func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 // responses:
 //   200: TransactionHash
 //   400: BadRequestError
-//   422: ValidationError
 //   500: InternalServerError
 func (a *API) SendTx(w http.ResponseWriter, r *http.Request) {
 	body := &api.TxBody{}
@@ -295,7 +289,6 @@ func (a *API) SendTx(w http.ResponseWriter, r *http.Request) {
 // responses:
 //   200: GasAmount
 //   400: BadRequestError
-//   422: ValidationError
 //   500: InternalServerError
 func (a *API) EstimateGas(w http.ResponseWriter, r *http.Request) {
 	body := &api.TxBody{}
@@ -313,4 +306,53 @@ func (a *API) EstimateGas(w http.ResponseWriter, r *http.Request) {
 	}
 
 	api.HandleResponse(w, http.StatusOK, estimatedGas)
+}
+
+// swagger:route Get /api/v1/validators v1 GetValidators
+//
+// Get the list of current validators
+//
+// responses:
+//   200: Validators
+//   500: InternalServerError
+func (a *API) GetValidators(w http.ResponseWriter, r *http.Request) {
+	validators, err := a.handler.GetValidators()
+	if err != nil {
+		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	v := cosmos.Validators{
+		Validators: validators,
+	}
+
+	api.HandleResponse(w, http.StatusOK, v)
+}
+
+// swagger:route Get /api/v1/validators/{pubkey} v1 GetValidator
+//
+// Get a specific validator
+//
+// responses:
+//   200: Validator
+//   500: InternalServerError
+func (a *API) GetValidator(w http.ResponseWriter, r *http.Request) {
+	pubkey, ok := mux.Vars(r)["pubkey"]
+	if !ok || pubkey == "" {
+		api.HandleError(w, http.StatusBadRequest, "pubkey required")
+		return
+	}
+
+	if !cosmos.IsValidValidatorAddress(pubkey) {
+		api.HandleError(w, http.StatusBadRequest, fmt.Sprintf("invalid pubkey: %s", pubkey))
+		return
+	}
+
+	validator, err := a.handler.GetValidator(pubkey)
+	if err != nil {
+		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	api.HandleResponse(w, http.StatusOK, validator)
 }

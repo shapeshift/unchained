@@ -1,15 +1,15 @@
 {
-  "name": "@shapeshiftoss/blockbook-pulumi",
-  "version": "6.11.0",
+  "name": "@shapeshiftoss/osmosis-pulumi",
   "license": "MIT",
   "private": true,
-  "main": "index.ts",
   "scripts": {
-    "build": "tsc",
     "clean": "rm -rf dist node_modules"
   },
   "dependencies": {
+    "@pulumi/kubernetes": "^3.16.0",
     "@types/folder-hash": "^4.0.0",
-    "folder-hash": "^4.0.0"
+    "dotenv": "^16.0.0",
+    "folder-hash": "^4.0.0",
+    "path": "^0.12.7"
   }
 }
