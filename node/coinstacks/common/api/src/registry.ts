@@ -1,91 +1,104 @@
-import WebSocket from 'ws'
+import { ConnectionHandler } from './websocket'
+
+type FormatAddressFunc = (address: string) => string
+type TransactionHandlerFunc<T = any, T2 = any> = (tx: T) => { addresses: Array<string>; tx: T2 }
 
 export class Registry {
   private clients: Record<string, Map<string, void>>
-  private addresses: Record<string, Record<string, () => void>>
+  private addresses: Record<string, Map<string, ConnectionHandler>>
+
+  private formatAddressFunc: FormatAddressFunc = (address: string) => address.toLowerCase()
+  private transactionHandlerFunc?: TransactionHandlerFunc
 
   constructor() {
     this.clients = {}
     this.addresses = {}
   }
 
-  subscribe(clientId: string, addresses: Array<string>) {
-    console.log('client', this.clients.clientId)
-    if (!this.clients[clientId]) {
-      this.clients[clientId] = new Map<string, void>()
-    }
-
-    addresses.forEach((address) => {
-      this.clients[clientId].set(address)
-      this.addresses[address] = {
-        [clientId]: () => {
-          console.log('winning')
-        },
-      }
-    })
-
-    console.log(this.clients)
-    console.log(this.clients[clientId])
-    console.log(this.addresses)
-    console.log(this.addresses['123'])
-    console.log(this.addresses['123'][clientId]())
+  private toId(clientId: string, subscriptionId: string): string {
+    return `${clientId}:${subscriptionId}`
   }
 
-  unsubscribe(clientId: string, addresses: Array<string>) {
-    if (!this.clients[clientId]) {
-      console.log('client not registered')
-      return
-    }
-    //	unregister := func(clientID string, addr string) {
-    //		// unregister address from client
-    //		delete(r.clients[clientID], addr)
-    //
-    //		// unregister client from address
-    //		delete(r.addresses[addr], clientID)
-    //
-    //		// delete address from registry if no clients are registered anymore
-    //		if len(r.addresses[addr]) == 0 {
-    //			delete(r.addresses, addr)
-    //		}
-    //	}
-    //
-    //	if len(addrs) == 0 {
-    //		for addr := range r.clients[clientID] {
-    //			unregister(clientID, addr)
-    //		}
-    //
-    //		delete(r.clients, clientID)
-    //	} else {
-    //		for _, addr := range addrs {
-    //			unregister(clientID, addr)
-    //		}
-    //	}
+  private fromId(id: string): { clientId: string; subscriptionId: string } {
+    const [clientId, subscriptionId] = id.split(':')
+    return { clientId, subscriptionId }
+  }
 
-    const unregister = (clientId: string, address: string) => {
+  formatAddress(func: FormatAddressFunc): Registry {
+    this.formatAddressFunc = func
+    return this
+  }
+
+  transactionHandler<T, T2>(func: TransactionHandlerFunc<T, T2>): Registry {
+    this.transactionHandlerFunc = func
+    return this
+  }
+
+  subscribe(clientId: string, subscriptionId: string, connection: ConnectionHandler, addresses: Array<string>) {
+    const id = this.toId(clientId, subscriptionId)
+
+    if (!this.clients[id]) this.clients[id] = new Map<string, void>()
+
+    addresses.forEach((address) => {
+      address = this.formatAddressFunc(address)
+
+      if (!this.addresses[address]) this.addresses[address] = new Map<string, ConnectionHandler>()
+
+      this.clients[id].set(address)
+      this.addresses[address].set(id, connection)
+    })
+  }
+
+  unsubscribe(clientId: string, subscriptionId: string, addresses: Array<string>) {
+    const id = this.toId(clientId, subscriptionId)
+
+    if (!this.clients[id]) return
+
+    const unregister = (id: string, address: string) => {
+      address = this.formatAddressFunc(address)
+
       // unregister address from client
-      this.clients[clientId].delete(address)
+      this.clients[id].delete(address)
 
-      // unregister client from address
-      delete this.addresses[address][clientId]
+      // delete client from registery if no addresses are registered anymore
+      if (!this.clients[id].size) delete this.clients[id]
 
-      // delete address from registery if no clients are registered anymore
-      if (!this.addresses.length) delete this.addresses[address]
+      if (this.addresses[address]) {
+        // unregister client from address
+        this.addresses[address].delete(id)
+
+        // delete address from registery if no clients are registered anymore
+        if (!this.addresses[address].size) delete this.addresses[address]
+      }
     }
 
     if (!addresses.length) {
-      for (const address of this.clients[clientId].keys()) {
-        unregister(clientId, address)
+      for (const address of this.clients[id].keys()) {
+        unregister(id, address)
       }
 
-      delete this.clients[clientId]
+      delete this.clients[id]
     } else {
-      for (const address of this.clients[clientId].keys()) {
-        unregister(clientId, address)
+      for (const address of addresses) {
+        unregister(id, address)
       }
     }
   }
 
-  handleMessage(msg: WebSocket.MessageEvent): void {
-    if (!msg) return
+  handleMessage(msg: any): void {
+    if (!this.transactionHandlerFunc) return
+
+    const { addresses, tx } = this.transactionHandlerFunc(msg)
+
+    addresses.forEach((address) => {
+      address = this.formatAddressFunc(address)
+
+      if (!this.addresses[address]) return
+
+      for (const [id, connection] of this.addresses[address].entries()) {
+        const { subscriptionId } = this.fromId(id)
+        connection.publish(subscriptionId, address, tx)
+      }
+    })
   }
 }

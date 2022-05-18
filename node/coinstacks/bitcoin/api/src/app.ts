@@ -4,10 +4,14 @@ import { join } from 'path'
 import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
 import { Logger } from '@shapeshiftoss/logger'
-import { middleware, ConnectionHandler } from '@shapeshiftoss/common-api'
+import { middleware, ConnectionHandler, Registry } from '@shapeshiftoss/common-api'
+import { WebsocketClient } from '@shapeshiftoss/blockbook'
 import { RegisterRoutes } from './routes'
 
-const port = process.env.PORT ?? 3000
+const PORT = process.env.PORT ?? 3000
+const INDEXER_WS_URL = process.env.INDEXER_WS_URL
+
+if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 
 const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'bitcoin', 'api'],
@@ -43,8 +47,12 @@ app.get('/', async (_, res) => {
 app.use(middleware.errorHandler)
 app.use(middleware.notFoundHandler)
 
-const server = app.listen(port, () => logger.info('Server started'))
-
+// TODO: format address (bech32 addresses = toLowerCase, non bech32 addresses = assume checksum and don't format)
+const registry = new Registry()
+const server = app.listen(PORT, () => logger.info('Server started'))
 const wsServer = new Server({ server })
 
-wsServer.on('connection', (connection) => ConnectionHandler.start(connection))
+wsServer.on('connection', (connection) => ConnectionHandler.start(connection, registry))
+
+const wsClient = new WebsocketClient(INDEXER_WS_URL)
+wsClient.onMessage(registry.handleMessage)

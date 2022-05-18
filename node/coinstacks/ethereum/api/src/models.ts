@@ -60,6 +60,16 @@ export interface EthereumTx extends Tx {
   status: number
   inputData?: string
   tokenTransfers?: Array<TokenTransfer>
+  internalTxs?: Array<InternalTx>
+}
+
+/**
+ * Contains info about an Ethereum internal transaction
+ */
+export interface InternalTx {
+  from: string
+  to: string
+  value: string
 }
 
 /**
