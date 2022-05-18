@@ -141,6 +141,7 @@ aliases:
     pulumi-dir: coinstacks/osmosis/pulumi
     lcd-url: https://osmosis-1--lcd--archive.datahub.figment.io
     rpc-url: https://osmosis-1--rpc--archive.datahub.figment.io
+    grpc-url: https://osmosis-1--grpc--archive.datahub.figment.io
     ws-url: wss://osmosis-1--rpc--archive.datahub.figment.io
     api-autoscaling: true
     api-replicas: 2
