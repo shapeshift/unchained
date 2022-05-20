@@ -16,7 +16,7 @@ if (!RPC_URL) throw new Error('RPC_URL env var not set')
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 const parser = new bitcoin.TransactionParser({
   rpcUrl: RPC_URL,
-  network: NETWORK as bitcoin.Network,
+  chainId: 'bip122:000000000019d6689c085ae165831e93',
 })
 
 const msgLogger = logger.child({ namespace: ['workers', 'address'], fn: 'onMessage' })
