@@ -2114,11 +2114,6 @@
   resolved "https://registry.yarnpkg.com/@pulumi/query/-/query-0.3.0.tgz#f496608e86a18c3dd31b6c533408e2441c29071d"
   integrity sha512-xfo+yLRM2zVjVEA4p23IjQWzyWl1ZhWOGobsBqRpIarzLvwNH/RAGaoehdxlhx4X92302DrpdIFgTICMN4P38w==
 
-"@shapeshiftoss/caip@^2.2.1":
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/@shapeshiftoss/caip/-/caip-2.2.1.tgz#1c0fd53c479b60d5178ec4f14b3805f79b3215cd"
-  integrity sha512-AT7gjU3qM3t2mKyG36b0uAH4mSebl1hD9OjgjOPu4noBzukfFmxhcdBI9K7F4/PZdK+JIrZ/HhEQhtcraF6LaA==
-
 "@shapeshiftoss/cluster-launcher@0.7.2":
   version "0.7.2"
   resolved "https://registry.yarnpkg.com/@shapeshiftoss/cluster-launcher/-/cluster-launcher-0.7.2.tgz#7ae468ce127b0e4bb4218fdff78135a3a061511f"
@@ -2135,20 +2130,12 @@
   resolved "https://registry.yarnpkg.com/@shapeshiftoss/logger/-/logger-1.0.1.tgz#fc9d9f68a626e526bd55053dbd56b14e4b63edf1"
   integrity sha512-xxAHoUozg1WtSI6XzaPAJDFJOkMkWIAWKUCadwIMXHYjxP9FPYWoOBcwftnb5B81gZyxT6FEScIduwNq2laH+Q==
 
-"@shapeshiftoss/types@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@shapeshiftoss/types/-/types-2.0.0.tgz#de64b40bc777551d83c0938a319ba805069caf10"
-  integrity sha512-1NOcxKikRX9T8JRu6d+cSvaWscrnVzqanOrDhPkCzDfjmqZQ5JgVR1dz7bTN6s83oZiRcM80zAIfX9lJ06cHTg==
-
-"@shapeshiftoss/unchained-client@^6.11.0":
-  version "6.11.0"
-  resolved "https://registry.yarnpkg.com/@shapeshiftoss/unchained-client/-/unchained-client-6.11.0.tgz#d369c11bea3eef41a8a0d6dd8343471b6918f782"
-  integrity sha512-XM7wBKqy+FFssviiDrOpCQ6kJ5Gm2wa3dUzH2OXrQVzeldwaRwsmMaUEPoZEeNCWKxJWYNEUUh0x6K27pmzyGQ==
+"@shapeshiftoss/unchained-client@^8.2.0":
+  version "8.2.0"
+  resolved "https://registry.yarnpkg.com/@shapeshiftoss/unchained-client/-/unchained-client-8.2.0.tgz#d2a9042575b4060facfd72e1c16a26c84cd523cf"
+  integrity sha512-PrxCwhniabRJltOY271/xPL8XQtBPFRAPrZWghRAxdcoi5pPZZ+2K3VqqCVl9BNltRgPwDRN5BMVnzDPzutMSg==
   dependencies:
     "@shapeshiftoss/blockbook" "^6.11.0"
-    "@shapeshiftoss/caip" "^2.2.1"
-    "@shapeshiftoss/logger" "^1.0.0"
-    "@shapeshiftoss/types" "^2.0.0"
     "@yfi/sdk" "^1.0.30"
     bignumber.js "^9.0.1"
     ethers "^5.5.3"
