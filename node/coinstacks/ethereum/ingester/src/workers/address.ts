@@ -15,7 +15,7 @@ if (!NETWORK) throw new Error('NETWORK env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
-const parser = new ethereum.TransactionParser({ rpcUrl: RPC_URL, network: NETWORK as ethereum.Network })
+const parser = new ethereum.TransactionParser({ rpcUrl: RPC_URL, chainId: 'eip155:1' })
 
 const msgLogger = logger.child({ namespace: ['workers', 'address'], fn: 'onMessage' })
 const onMessage = (worker: Worker) => async (message: Message) => {

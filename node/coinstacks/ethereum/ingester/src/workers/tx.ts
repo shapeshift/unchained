@@ -30,7 +30,7 @@ const SYNC_TIMEOUT = 1000 * 60 * 5
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 const registry = new RegistryService(MONGO_URL, MONGO_DBNAME, POOL_SIZE)
-const parser = new ethereum.TransactionParser({ rpcUrl: RPC_URL, network: NETWORK as ethereum.Network })
+const parser = new ethereum.TransactionParser({ rpcUrl: RPC_URL, chainId: 'eip155:1' })
 
 const moduleLogger = logger.child({ namespace: ['workers', 'tx'] })
 
