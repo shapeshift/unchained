@@ -5,29 +5,28 @@ import { Account, Tx, TxHistory } from '../../../common/api/src'
  * Contains info about a Bitcoin transaction input
  */
 export interface Vin {
-  txid: string
-  vout: string
+  txid?: string
+  vout?: string
   sequence?: number
   coinbase?: string
-  scriptSig: {
-    asm?: string
+  scriptSig?: {
     hex?: string
   }
-  addresses: Array<string>
+  addresses?: Array<string>
+  value?: string
 }
 
 /**
  * Contains info about a Bitcoin transaction output
  */
 export interface Vout {
-  value: string | number
+  value: string
   n: number
+  opReturn?: string
   scriptPubKey: {
-    asm?: string
     hex?: string
-    type?: string
-    addresses: Array<string>
   }
+  addresses?: Array<string>
 }
 
 /**

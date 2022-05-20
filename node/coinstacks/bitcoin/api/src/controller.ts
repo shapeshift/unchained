@@ -178,16 +178,16 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
             n: 0,
             scriptPubKey: {
               hex: 'a9140f7f0fc4f882ea62f32b06f0946f12b055ab91bf87',
-              addresses: ['336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU'],
             },
+            addresses: ['336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU'],
           },
           {
             value: '509834',
             n: 1,
             scriptPubKey: {
               hex: '76a9148c1ef82c52a7e80621c838008b2de791be3a307988ac',
-              addresses: ['1Dmthegfep7fXVqWAPmQ5rMmKcg58GjEF1'],
             },
+            addresses: ['1Dmthegfep7fXVqWAPmQ5rMmKcg58GjEF1'],
           },
         ],
       },

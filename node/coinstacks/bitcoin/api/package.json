@@ -15,6 +15,7 @@
     "@shapeshiftoss/blockbook": "^6.11.0",
     "@shapeshiftoss/common-api": "^6.11.0",
     "@shapeshiftoss/logger": "^1.0.0",
+    "bech32": "^2.0.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "swagger-ui-express": "^4.3.0",

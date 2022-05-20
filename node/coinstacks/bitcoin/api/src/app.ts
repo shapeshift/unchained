@@ -1,4 +1,5 @@
 import express, { json, urlencoded } from 'express'
+import { bech32 } from 'bech32'
 import cors from 'cors'
 import { join } from 'path'
 import { Server } from 'ws'
@@ -8,7 +9,7 @@ import { middleware, ConnectionHandler, Registry } from '@shapeshiftoss/common-a
 import { getAddresses, NewBlock, Tx as BlockbookTx, WebsocketClient } from '@shapeshiftoss/blockbook'
 import { RegisterRoutes } from './routes'
 import { BitcoinTx } from './models'
-import { handleTransaction } from './handlers'
+import { handleBlock, handleTransaction } from './handlers'
 
 const PORT = process.env.PORT ?? 3000
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -49,8 +50,12 @@ app.get('/', async (_, res) => {
 app.use(middleware.errorHandler)
 app.use(middleware.notFoundHandler)
 
-// TODO: format address (bech32 addresses = toLowerCase, non bech32 addresses = assume checksum and don't format)
 const registry = new Registry()
+  .formatAddress((address) => {
+    const decoded = bech32.decodeUnsafe(address.toLowerCase())
+    if (decoded?.prefix === 'bc') return address.toLowerCase()
+    return address
+  })
   .blockHandler<NewBlock, Array<BlockbookTx>>(async (block) => {
     const txs = await handleBlock(block.hash)
     return { txs }

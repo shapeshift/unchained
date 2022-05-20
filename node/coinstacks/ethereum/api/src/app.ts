@@ -12,10 +12,8 @@ import { EthereumTx } from './models'
 import { handleBlock, handleTransaction } from './handlers'
 
 const PORT = process.env.PORT ?? 3000
-const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
 
-if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 
 const app = express()
@@ -61,7 +59,7 @@ const registry = new Registry()
     return { addresses, tx }
   })
 
-const server = app.listen(PORT, () => logger.info({ port: PORT }, 'Server started'))
+const server = app.listen(PORT, () => logger.info('Server started'))
 const wsServer = new Server({ server })
 
 wsServer.on('connection', (connection) => ConnectionHandler.start(connection, registry))

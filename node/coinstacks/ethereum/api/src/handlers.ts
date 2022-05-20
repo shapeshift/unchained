@@ -53,10 +53,10 @@ export interface CallStack {
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 
-export const handleBlock = async (hash: string): Promise<any> => {
+export const handleBlock = async (hash: string): Promise<Array<BlockbookTx>> => {
   const request: RPCRequest = {
     jsonrpc: '2.0',
-    id: `getBlock${hash}`,
+    id: `eth_getBlockByHash-${hash}`,
     method: 'eth_getBlockByHash',
     params: [hash, false],
   }
@@ -68,22 +68,25 @@ export const handleBlock = async (hash: string): Promise<any> => {
 
   const block = data.result as NodeBlock
 
-  const txs = await Promise.all(block.transactions.map((hash) => blockbook.getTransaction(hash)))
+  // make best effort to fetch all transactions, but don't fail handling block if a single transaction fails
+  const txs = await Promise.allSettled(block.transactions.map((hash) => blockbook.getTransaction(hash)))
 
-  return txs
+  return (txs.filter((tx) => tx.status === 'fulfilled') as Array<PromiseFulfilledResult<BlockbookTx>>).map(
+    (tx) => tx.value
+  )
 }
 
 export const handleTransaction = async (tx: BlockbookTx): Promise<EthereumTx> => {
   if (!tx.ethereumSpecific) throw new Error(`invalid blockbook ethereum transaction: ${tx.txid}`)
 
   // allow transaction to be handled even if we fail to get internal transactions (some better than none)
-  const internalTxs = async () => {
+  const internalTxs = await (async () => {
     try {
       return await getInternalTransactions(tx.txid)
     } catch (err) {
       return undefined
     }
-  }
+  })()
 
   return {
     txid: tx.txid,
@@ -112,7 +115,7 @@ export const handleTransaction = async (tx: BlockbookTx): Promise<EthereumTx> =>
     })),
     ...(tx.ethereumSpecific.data &&
       tx.confirmations > 0 && {
-        internalTxs: await internalTxs(),
+        internalTxs: internalTxs,
       }),
   }
 }
