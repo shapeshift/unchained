@@ -14,6 +14,7 @@ import {
   BitcoinAddress,
   BitcoinAPI,
   BitcoinAccount,
+  BitcoinTx,
   BitcoinTxSpecific,
   BTCNetworkFee,
   BTCNetworkFees,
@@ -305,56 +306,122 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
    *
    * @example txid "feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580"
    *
-   * @returns {Promise<BitcoinTxSpecific>} transaction payload
+   * @returns {Promise<BitcoinTx>} transaction payload
    */
-  @Example<Array<BitcoinTxSpecific>>([
-    {
-      txid: 'feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580',
-      hash: 'feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580',
-      version: 1,
-      size: 225,
-      vsize: 225,
-      weight: 900,
-      locktime: 0,
-      vin: [
-        {
-          txid: 'e5e9a8bfd71bbf3c36da01cb513a26f094885849c29b41ef8400d9a4f9684156',
-          vout: 1,
-          scriptSig: {
-            asm:
-              '3044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9[ALL] 02eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35',
-            hex:
-              '473044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9012102eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35',
-          },
-          sequence: 4294967295,
+  @Example<BitcoinTx>({
+    txid: 'feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580',
+    blockHash: '0000000000000000000a468a69aedb50269f1dd48048bfa94c175465d5de2548',
+    blockHeight: 702033,
+    timestamp: 1632513682,
+    confirmations: 35181,
+    value: '92118',
+    fee: '22600',
+    hex:
+      '0100000001564168f9a4d90084ef419bc249588894f0263a51cb01da363cbf1bd7bfa8e9e5010000006a473044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9012102eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35ffffffff02d0070000000000001976a9149c9d21f47382762df3ad81391ee0964b28dd951788ac06600100000000001976a9147055de79bc47a9f91e4c488170da7666e900731288ac00000000',
+    vin: [
+      {
+        txid: 'e5e9a8bfd71bbf3c36da01cb513a26f094885849c29b41ef8400d9a4f9684156',
+        vout: '1',
+        sequence: 4294967295,
+        scriptSig: {
+          hex:
+            '473044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9012102eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35',
         },
-      ],
-      vout: [
-        {
-          value: '0.00002',
-          n: 0,
-          scriptPubKey: {
-            asm: 'OP_DUP OP_HASH160 9c9d21f47382762df3ad81391ee0964b28dd9517 OP_EQUALVERIFY OP_CHECKSIG',
-            hex: '76a9149c9d21f47382762df3ad81391ee0964b28dd951788ac',
-            reqSigs: 1,
-            type: 'pubkeyhash',
-            addresses: ['1FH6ehAd5ZFXCM1cLGzHxK1s4dGdq1JusM'],
-          },
+        addresses: ['1DJ3RrzKtDu8HRcxXuRBa4HqZfXGAY1R3B'],
+        value: '114718',
+      },
+    ],
+    vout: [
+      {
+        value: '2000',
+        n: 0,
+        scriptPubKey: {
+          hex: '76a9149c9d21f47382762df3ad81391ee0964b28dd951788ac',
         },
-      ],
-      hex:
-        '0100000001564168f9a4d90084ef419bc249588894f0263a51cb01da363cbf1bd7bfa8e9e5010000006a473044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9012102eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35ffffffff02d0070000000000001976a9149c9d21f47382762df3ad81391ee0964b28dd951788ac06600100000000001976a9147055de79bc47a9f91e4c488170da7666e900731288ac00000000',
-      blockhash: '0000000000000000000a468a69aedb50269f1dd48048bfa94c175465d5de2548',
-      confirmations: 498,
-      time: 1632513682,
-      blocktime: 1632513682,
-    },
-  ])
+        addresses: ['1FH6ehAd5ZFXCM1cLGzHxK1s4dGdq1JusM'],
+      },
+      {
+        value: '90118',
+        n: 1,
+        scriptPubKey: {
+          hex: '76a9147055de79bc47a9f91e4c488170da7666e900731288ac',
+        },
+        addresses: ['1BEyYmi9Vmv3UV6AN76RAfWpzXY23p7ikS'],
+      },
+    ],
+  })
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('transaction/{txid}')
-  async getTransaction(@Path() txid: string): Promise<BitcoinTxSpecific> {
+  async getTransaction(@Path() txid: string): Promise<BitcoinTx> {
+    try {
+      const data = await blockbook.getTransaction(txid)
+      return handleTransaction(data)
+    } catch (err) {
+      if (err.response) {
+        throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+      }
+
+      throw err
+    }
+  }
+
+  /**
+   * Get transaction specific data directly from the node
+   *
+   * @param {string} txid transaction hash
+   *
+   * @example txid "feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580"
+   *
+   * @returns {Promise<BitcoinTxSpecific>} transaction payload
+   */
+  @Example<BitcoinTxSpecific>({
+    txid: 'feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580',
+    hash: 'feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580',
+    version: 1,
+    size: 225,
+    vsize: 225,
+    weight: 900,
+    locktime: 0,
+    vin: [
+      {
+        txid: 'e5e9a8bfd71bbf3c36da01cb513a26f094885849c29b41ef8400d9a4f9684156',
+        vout: 1,
+        scriptSig: {
+          asm:
+            '3044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9[ALL] 02eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35',
+          hex:
+            '473044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9012102eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35',
+        },
+        sequence: 4294967295,
+      },
+    ],
+    vout: [
+      {
+        value: '0.00002',
+        n: 0,
+        scriptPubKey: {
+          asm: 'OP_DUP OP_HASH160 9c9d21f47382762df3ad81391ee0964b28dd9517 OP_EQUALVERIFY OP_CHECKSIG',
+          hex: '76a9149c9d21f47382762df3ad81391ee0964b28dd951788ac',
+          reqSigs: 1,
+          type: 'pubkeyhash',
+          addresses: ['1FH6ehAd5ZFXCM1cLGzHxK1s4dGdq1JusM'],
+        },
+      },
+    ],
+    hex:
+      '0100000001564168f9a4d90084ef419bc249588894f0263a51cb01da363cbf1bd7bfa8e9e5010000006a473044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9012102eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35ffffffff02d0070000000000001976a9149c9d21f47382762df3ad81391ee0964b28dd951788ac06600100000000001976a9147055de79bc47a9f91e4c488170da7666e900731288ac00000000',
+    blockhash: '0000000000000000000a468a69aedb50269f1dd48048bfa94c175465d5de2548',
+    confirmations: 498,
+    time: 1632513682,
+    blocktime: 1632513682,
+  })
+  @Response<BadRequestError>(400, 'Bad Request')
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Get('transaction/{txid}/raw')
+  async getRawTransaction(@Path() txid: string): Promise<BitcoinTxSpecific> {
     try {
       const data = await blockbook.getTransactionSpecific(txid)
       return data as BitcoinTxSpecific

@@ -143,14 +143,24 @@ export interface BitcoinAPI {
   getUtxos(pubkey: string): Promise<Array<Utxo>>
 
   /**
-   * Get transaction specific data directly from the node
+   * Get transaction details
+   *
+   * @param {string} txid transaction hash
+   *
+   * @returns {Promise<BitcoinTx>} transaction payload
+   */
+  // @Get('transaction/{txid}')
+  getTransaction(txid: string): Promise<BitcoinTx>
+
+  /**
+   * Get raw transaction details directly from the node
    *
    * @param {string} txid transaction hash
    *
    * @returns {Promise<BitcoinTxSpecific>} transaction payload
    */
-  // @Get('transaction/{txid}')
-  getTransaction(txid: string): Promise<BitcoinTxSpecific>
+  // @Get('transaction/{txid}/raw')
+  getRawTransaction(txid: string): Promise<BitcoinTxSpecific>
 
   /**
    * Get current network fee estimates from Blockbook
