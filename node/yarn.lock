@@ -2114,6 +2114,11 @@
   resolved "https://registry.yarnpkg.com/@pulumi/query/-/query-0.3.0.tgz#f496608e86a18c3dd31b6c533408e2441c29071d"
   integrity sha512-xfo+yLRM2zVjVEA4p23IjQWzyWl1ZhWOGobsBqRpIarzLvwNH/RAGaoehdxlhx4X92302DrpdIFgTICMN4P38w==
 
+"@shapeshiftoss/caip@^4.0.1":
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/@shapeshiftoss/caip/-/caip-4.0.1.tgz#e1afdfafd540769c2d9ee9c2236fbbf4136467f6"
+  integrity sha512-kwb2S3QUKLJ5lPhumi6FYm1x9/bhzjJqPVR4NvEqU6kQgE03Ovf4zVT6FWxWPqcqNGK6w4DJIsmvy2YBRmdCEQ==
+
 "@shapeshiftoss/cluster-launcher@0.7.2":
   version "0.7.2"
   resolved "https://registry.yarnpkg.com/@shapeshiftoss/cluster-launcher/-/cluster-launcher-0.7.2.tgz#7ae468ce127b0e4bb4218fdff78135a3a061511f"
@@ -2129,6 +2134,11 @@
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@shapeshiftoss/logger/-/logger-1.0.1.tgz#fc9d9f68a626e526bd55053dbd56b14e4b63edf1"
   integrity sha512-xxAHoUozg1WtSI6XzaPAJDFJOkMkWIAWKUCadwIMXHYjxP9FPYWoOBcwftnb5B81gZyxT6FEScIduwNq2laH+Q==
+
+"@shapeshiftoss/types@^4.2.0":
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/@shapeshiftoss/types/-/types-4.2.0.tgz#da58aaee1fedce6ec6a8ed579f5308192bf32bc1"
+  integrity sha512-euQTL7NRvzq6P6wYD8etc6hwLsQTtOERUhCS/F9vSCQ4RmZHdp3T1klw37u9xJR4R0KOYS0ryljZFvhCfVaVOg==
 
 "@shapeshiftoss/unchained-client@^8.2.0":
   version "8.2.0"
