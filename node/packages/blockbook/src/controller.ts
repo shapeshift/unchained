@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios'
+import axiosRetry from 'axios-retry'
 import { Controller, Example, Get, Path, Query, Route, Tags } from 'tsoa'
 import WebSocket from 'ws'
 import {
@@ -40,6 +41,7 @@ export class Blockbook extends Controller {
         'Content-Type': 'application/json',
       },
     })
+    axiosRetry(this.instance, { retries: 5, retryDelay: axiosRetry.exponentialDelay })
   }
 
   /**

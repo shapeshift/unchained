@@ -19,10 +19,8 @@ import {
   BTCNetworkFees,
   Utxo,
   BitcoinTxHistory,
-  BitcoinTx,
-  Vin,
-  Vout,
 } from './models'
+import { handleTransaction } from './handlers'
 
 const NETWORK = process.env.NETWORK
 const INDEXER_URL = process.env.INDEXER_URL
@@ -240,40 +238,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
       return {
         pubkey: pubkey,
         cursor: nextCursor,
-        txs:
-          data.transactions?.map<BitcoinTx>((tx) => ({
-            txid: tx.txid,
-            blockHash: tx.blockHash,
-            blockHeight: tx.blockHeight,
-            timestamp: tx.blockTime,
-            confirmations: tx.confirmations,
-            value: tx.value,
-            fee: tx.fees ?? '0',
-            hex: tx.hex ?? '',
-            vin:
-              tx.vin?.map<Vin>((vin) => ({
-                txid: vin.txid ?? '',
-                vout: vin.vout?.toString() ?? '',
-                sequence: vin.sequence,
-                coinbase: vin.coinbase,
-                scriptSig: {
-                  asm: vin.asm,
-                  hex: vin.hex,
-                },
-                addresses: vin.addresses ?? [],
-              })) ?? [],
-            vout:
-              tx.vout?.map<Vout>((vout) => ({
-                value: vout.value ?? 0,
-                n: vout.n,
-                scriptPubKey: {
-                  asm: vout.asm,
-                  hex: vout.hex,
-                  type: vout.type,
-                  addresses: vout.addresses ?? [],
-                },
-              })) ?? [],
-          })) ?? [],
+        txs: data.transactions?.map(handleTransaction) ?? [],
       }
     } catch (err) {
       if (err.response) {

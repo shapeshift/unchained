@@ -12,8 +12,9 @@ import {
   SendTxBody,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { EthereumAccount, EthereumAPI, EthereumTx, EthereumTxHistory, GasFees, TokenBalance } from './models'
+import { EthereumAccount, EthereumAPI, EthereumTxHistory, GasFees, TokenBalance } from './models'
 import { logger } from './logger'
+import { handleTransaction } from './handlers'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -187,41 +188,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
       return {
         pubkey: pubkey,
         cursor: nextCursor,
-        txs: (data.transactions ?? []).reduce<Array<EthereumTx>>((prev, tx) => {
-          if (!tx.ethereumSpecific) {
-            logger.warn(`ethereumSpecific data missing from txid: ${tx.txid}`)
-            return prev
-          }
-
-          prev.push({
-            txid: tx.txid,
-            blockHash: tx.blockHash,
-            blockHeight: tx.blockHeight,
-            timestamp: tx.blockTime,
-            status: tx.ethereumSpecific.status,
-            from: tx.vin[0].addresses?.[0] ?? '',
-            to: tx.vout[0].addresses?.[0] ?? '',
-            confirmations: tx.confirmations,
-            value: tx.value,
-            fee: tx.fees ?? '0',
-            gasLimit: tx.ethereumSpecific.gasLimit.toString(),
-            gasUsed: tx.ethereumSpecific.gasUsed?.toString(),
-            gasPrice: tx.ethereumSpecific.gasPrice.toString(),
-            inputData: tx.ethereumSpecific.data,
-            tokenTransfers: tx.tokenTransfers?.map((tt) => ({
-              contract: tt.token,
-              decimals: tt.decimals,
-              name: tt.name,
-              symbol: tt.symbol,
-              type: tt.type,
-              from: tt.from,
-              to: tt.to,
-              value: tt.value,
-            })),
-          })
-
-          return prev
-        }, []),
+        txs: await Promise.all(data.transactions?.map(handleTransaction) ?? []),
       }
     } catch (err) {
       if (err.response) {

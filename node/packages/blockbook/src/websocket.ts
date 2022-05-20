@@ -1,7 +1,7 @@
 import WebSocket from 'ws'
 import { Logger } from '@shapeshiftoss/logger'
 import { Tx } from './models'
-import { WebsocketRepsonse } from '.'
+import { NewBlock, WebsocketRepsonse } from '.'
 
 export interface Subscription {
   id: string
@@ -14,14 +14,17 @@ export interface Options {
   pingInterval?: number
 }
 
-type OnMessageFunc = (data: Tx) => void
+type TransactionHandler = (data: Tx) => Promise<void>
+type BlockHandler = (data: NewBlock) => Promise<void>
 
 export class WebsocketClient {
   private socket: WebSocket
   private url: string
   private pingTimeout?: NodeJS.Timeout
-  private onMessageFunc?: OnMessageFunc
   private retries = 0
+
+  private handleTransaction?: TransactionHandler
+  private handleBlock?: BlockHandler
 
   private readonly pingInterval: number
   private readonly retryAttempts = 5
@@ -59,31 +62,8 @@ export class WebsocketClient {
       this.logger.error({ code, reason, fn: 'ws.close' }, 'websocket closed')
       this.close(interval)
     }
-    this.socket.onmessage = async (message) => {
-      try {
-        const res: WebsocketRepsonse = JSON.parse(message.data.toString())
-
-        if (!res.data) return
-        if (!('txid' in res.data)) return
-
-        this.onMessageFunc && this.onMessageFunc(res.data)
-      } catch (err) {
-        this.logger.error(err, 'failed to process transaction')
-      }
-    }
-    this.socket.onopen = () => {
-      this.logger.debug({ fn: 'ws.onopen' }, 'websocket opened')
-      this.retries = 0
-      this.heartbeat()
-
-      const newTx: Subscription = {
-        id: 'newTx',
-        jsonrpc: '2.0',
-        method: 'subscribeNewTransaction',
-      }
-
-      this.socket.send(JSON.stringify(newTx))
-    }
+    this.socket.onopen = () => this.onOpen()
+    this.socket.onmessage = (msg) => this.onMessage(msg)
   }
 
   private close(interval: NodeJS.Timeout): void {
@@ -103,7 +83,56 @@ export class WebsocketClient {
     }, this.pingInterval + 1000)
   }
 
-  onMessage(func: OnMessageFunc): void {
-    this.onMessageFunc = func
+  private onOpen(): void {
+    this.logger.debug({ fn: 'ws.onopen' }, 'websocket opened')
+    this.retries = 0
+    this.heartbeat()
+
+    const newBlock: Subscription = {
+      id: 'newBlock',
+      jsonrpc: '2.0',
+      method: 'subscribeNewBlock',
+    }
+
+    const newTx: Subscription = {
+      id: 'newTx',
+      jsonrpc: '2.0',
+      method: 'subscribeNewTransaction',
+    }
+
+    this.socket.send(JSON.stringify(newBlock))
+    this.socket.send(JSON.stringify(newTx))
+  }
+
+  private async onMessage(message: WebSocket.MessageEvent): Promise<void> {
+    try {
+      const res: WebsocketRepsonse = JSON.parse(message.data.toString())
+
+      if (!res.data) return
+
+      if (res.id === 'newBlock' && 'hash' in res.data) {
+        if (this.handleBlock) {
+          await this.handleBlock(res.data)
+        }
+      }
+
+      if (res.id === 'newTx' && 'txid' in res.data) {
+        if (this.handleTransaction) {
+          await this.handleTransaction(res.data)
+        }
+      }
+    } catch (err) {
+      this.logger.error(err, 'failed to process transaction')
+    }
+  }
+
+  transactionHandler(handler: TransactionHandler): WebsocketClient {
+    this.handleTransaction = handler
+    return this
+  }
+
+  blockHandler(handler: BlockHandler): WebsocketClient {
+    this.handleBlock = handler
+    return this
   }
 }

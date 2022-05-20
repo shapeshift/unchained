@@ -1,14 +1,19 @@
+import { Logger } from '@shapeshiftoss/logger'
 import { ConnectionHandler } from './websocket'
 
 type FormatAddressFunc = (address: string) => string
-type TransactionHandlerFunc<T = any, T2 = any> = (tx: T) => { addresses: Array<string>; tx: T2 }
+type BlockHandler<T = any, T2 = any> = (block: T) => Promise<{ txs: T2 }>
+type TransactionHandler<T = any, T2 = any> = (tx: T) => Promise<{ addresses: Array<string>; tx: T2 }>
 
 export class Registry {
   private clients: Record<string, Map<string, void>>
   private addresses: Record<string, Map<string, ConnectionHandler>>
 
   private formatAddressFunc: FormatAddressFunc = (address: string) => address.toLowerCase()
-  private transactionHandlerFunc?: TransactionHandlerFunc
+  private handleBlock?: BlockHandler
+  private handleTransaction?: TransactionHandler
+
+  private logger = new Logger({ namespace: ['unchained', 'common', 'api', 'registry'], level: process.env.LOG_LEVEL })
 
   constructor() {
     this.clients = {}
@@ -29,8 +34,13 @@ export class Registry {
     return this
   }
 
-  transactionHandler<T, T2>(func: TransactionHandlerFunc<T, T2>): Registry {
-    this.transactionHandlerFunc = func
+  transactionHandler<T, T2>(func: TransactionHandler<T, T2>): Registry {
+    this.handleTransaction = func
+    return this
+  }
+
+  blockHandler<T, T2>(func: BlockHandler<T, T2>): Registry {
+    this.handleBlock = func
     return this
   }
 
@@ -85,20 +95,39 @@ export class Registry {
     }
   }
 
-  handleMessage(msg: any): void {
-    if (!this.transactionHandlerFunc) return
+  async onBlock(msg: unknown): Promise<void> {
+    if (!Object.keys(this.clients).length) return
+    if (!this.handleBlock) return
+    if (!this.handleTransaction) return
 
-    const { addresses, tx } = this.transactionHandlerFunc(msg)
+    try {
+      const { txs } = await this.handleBlock(msg)
 
-    addresses.forEach((address) => {
-      address = this.formatAddressFunc(address)
+      txs.forEach((tx: unknown) => this.onTransaction(tx))
+    } catch (err) {
+      this.logger.error(err, 'failed to handle block')
+    }
+  }
 
-      if (!this.addresses[address]) return
+  async onTransaction(msg: unknown): Promise<void> {
+    if (!Object.keys(this.clients).length) return
+    if (!this.handleTransaction) return
 
-      for (const [id, connection] of this.addresses[address].entries()) {
-        const { subscriptionId } = this.fromId(id)
-        connection.publish(subscriptionId, address, tx)
-      }
-    })
+    try {
+      const { addresses, tx } = await this.handleTransaction(msg)
+
+      addresses.forEach((address) => {
+        address = this.formatAddressFunc(address)
+
+        if (!this.addresses[address]) return
+
+        for (const [id, connection] of this.addresses[address].entries()) {
+          const { subscriptionId } = this.fromId(id)
+          connection.publish(subscriptionId, address, tx)
+        }
+      })
+    } catch (err) {
+      this.logger.error(err, 'failed to handle transaction')
+    }
   }
 }

@@ -71,7 +71,7 @@ export class ConnectionHandler {
       this.close(interval)
     }
     this.websocket.onclose = ({ code, reason }) => {
-      this.logger.error({ clientId: this.clientId, code, reason, fn: 'ws.close' }, 'websocket closed')
+      this.logger.debug({ clientId: this.clientId, code, reason, fn: 'ws.close' }, 'websocket closed')
       this.close(interval)
     }
     this.websocket.on('pong', () => this.heartbeat())
@@ -131,6 +131,7 @@ export class ConnectionHandler {
   }
 
   private close(interval: NodeJS.Timeout): void {
+    this.pingTimeout && clearTimeout(this.pingTimeout)
     clearInterval(interval)
 
     for (const subscriptionId of this.subscriptionIds.keys()) {
@@ -155,7 +156,7 @@ export class ConnectionHandler {
     this.registry.unsubscribe(this.clientId, subscriptionId, data?.addresses ?? [])
   }
 
-  publish(subscriptionId: string, address: string, data: any): void {
+  publish(subscriptionId: string, address: string, data: string): void {
     const message: MessageResponse = { address, data, subscriptionId }
     this.websocket.send(JSON.stringify(message))
   }

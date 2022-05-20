@@ -5,8 +5,10 @@ import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
 import { Logger } from '@shapeshiftoss/logger'
 import { middleware, ConnectionHandler, Registry } from '@shapeshiftoss/common-api'
-import { WebsocketClient } from '@shapeshiftoss/blockbook'
+import { getAddresses, NewBlock, Tx as BlockbookTx, WebsocketClient } from '@shapeshiftoss/blockbook'
 import { RegisterRoutes } from './routes'
+import { BitcoinTx } from './models'
+import { handleTransaction } from './handlers'
 
 const PORT = process.env.PORT ?? 3000
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -49,10 +51,21 @@ app.use(middleware.notFoundHandler)
 
 // TODO: format address (bech32 addresses = toLowerCase, non bech32 addresses = assume checksum and don't format)
 const registry = new Registry()
+  .blockHandler<NewBlock, Array<BlockbookTx>>(async (block) => {
+    const txs = await handleBlock(block.hash)
+    return { txs }
+  })
+  .transactionHandler<BlockbookTx, BitcoinTx>(async (blockbookTx) => {
+    const tx = handleTransaction(blockbookTx)
+    const addresses = getAddresses(blockbookTx)
+    return { addresses, tx }
+  })
+
 const server = app.listen(PORT, () => logger.info('Server started'))
 const wsServer = new Server({ server })
 
 wsServer.on('connection', (connection) => ConnectionHandler.start(connection, registry))
 
-const wsClient = new WebsocketClient(INDEXER_WS_URL)
-wsClient.onMessage(registry.handleMessage)
+new WebsocketClient(INDEXER_WS_URL)
+  .blockHandler(registry.onBlock.bind(registry))
+  .transactionHandler(registry.onTransaction.bind(registry))
