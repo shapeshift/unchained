@@ -671,7 +671,8 @@ jobs:
             echo 'export GRPC_URL=<< parameters.grpc-url >>' >> $BASH_ENV
             echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
             echo 'export WS_URL=<< parameters.ws-url >>' >> $BASH_ENV
-            if [ << parameters.coinstack >> = "osmosis" ]; then echo 'export API_KEY=$OSMOSIS_DATAHUB_API_KEY' >> $BASH_ENV else  echo 'export API_KEY=$<< parameters.organization >>_DATAHUB_API_KEY' >> $BASH_ENV fi
+            echo 'export API_KEY=$<< parameters.organization >>_DATAHUB_API_KEY' >> $BASH_ENV
+            [ << parameters.coinstack >> = "osmosis" ] && echo 'export API_KEY=$OSMOSIS_DATAHUB_API_KEY' >> $BASH_ENV
       - run:
           name: pulumi
           working_directory: go/<< parameters.pulumi-dir >>
