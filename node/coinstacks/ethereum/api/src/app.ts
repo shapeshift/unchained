@@ -9,7 +9,7 @@ import { Tx as BlockbookTx, WebsocketClient, getAddresses, NewBlock } from '@sha
 import { logger } from './logger'
 import { RegisterRoutes } from './routes'
 import { EthereumTx } from './models'
-import { handleBlock, handleTransaction } from './handlers'
+import { handleBlock, handleTransactionWithInternalTrace } from './handlers'
 
 const PORT = process.env.PORT ?? 3000
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -52,7 +52,7 @@ const registry = new Registry()
     return { txs }
   })
   .transactionHandler<BlockbookTx, EthereumTx>(async (blockbookTx) => {
-    const tx = await handleTransaction(blockbookTx)
+    const tx = await handleTransactionWithInternalTrace(blockbookTx)
     const internalAddresses = (tx.internalTxs ?? []).reduce<Array<string>>((prev, tx) => [...prev, tx.to, tx.from], [])
     const addresses = [...new Set([...getAddresses(blockbookTx), ...internalAddresses])]
 

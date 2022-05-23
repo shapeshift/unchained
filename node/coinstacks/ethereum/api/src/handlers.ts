@@ -5,51 +5,19 @@ import { ethers } from 'ethers'
 import { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { RPCRequest, RPCResponse } from '@shapeshiftoss/common-api'
 import { EthereumTx, InternalTx } from './models'
+import { NodeBlock, CallStack, EtherscanApiResponse, EtherscanInternalTx } from './types'
 
+const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
 const RPC_URL = process.env.RPC_URL
 
+if (!ETHERSCAN_API_KEY) throw new Error('ETHERSCAN_API_KEY env var not set')
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
 
 axiosRetry(axios, { retries: 5, retryDelay: axiosRetry.exponentialDelay })
-
-export interface NodeBlock {
-  difficulty: string
-  extraData: string
-  gasLimit: string
-  gasUsed: string
-  hash: string
-  logsBloom: string
-  miner: string
-  mixHash: string
-  nonce: string
-  number: string
-  parentHash: string
-  receiptsRoot: string
-  sha3Uncles: string
-  size: string
-  stateRoot: string
-  timestamp: string
-  totalDifficulty: string
-  transactions: Array<string>
-  transactionsRoot: string
-  uncles: Array<string>
-}
-
-export interface CallStack {
-  type: string
-  from: string
-  to: string
-  value?: string
-  gas: string
-  gasUsed: string
-  input: string
-  output: string
-  calls?: Array<CallStack>
-}
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 
@@ -76,17 +44,8 @@ export const handleBlock = async (hash: string): Promise<Array<BlockbookTx>> => 
   )
 }
 
-export const handleTransaction = async (tx: BlockbookTx): Promise<EthereumTx> => {
+export const handleTransaction = (tx: BlockbookTx): EthereumTx => {
   if (!tx.ethereumSpecific) throw new Error(`invalid blockbook ethereum transaction: ${tx.txid}`)
-
-  // allow transaction to be handled even if we fail to get internal transactions (some better than none)
-  const internalTxs = await (async () => {
-    try {
-      return await getInternalTransactions(tx.txid)
-    } catch (err) {
-      return undefined
-    }
-  })()
 
   return {
     txid: tx.txid,
@@ -113,14 +72,50 @@ export const handleTransaction = async (tx: BlockbookTx): Promise<EthereumTx> =>
       to: tt.to,
       value: tt.value,
     })),
-    ...(tx.ethereumSpecific.data &&
-      tx.confirmations > 0 && {
-        internalTxs: internalTxs,
-      }),
   }
 }
 
-export const getInternalTransactions = async (txid: string): Promise<Array<InternalTx> | undefined> => {
+export const handleTransactionWithInternalTrace = async (tx: BlockbookTx): Promise<EthereumTx> => {
+  const t = handleTransaction(tx)
+
+  // don't trace transaction if there is not input data that would potentially result in an internal transaction
+  if (!t.inputData) return t
+
+  // allow transaction to be handled even if we fail to get internal transactions (some better than none)
+  const internalTxs = await (async () => {
+    try {
+      return await getInternalTransactionsTrace(tx.txid)
+    } catch (err) {
+      return undefined
+    }
+  })()
+
+  t.internalTxs = internalTxs
+
+  return t
+}
+
+export const handleTransactionWithInternalEtherscan = async (tx: BlockbookTx): Promise<EthereumTx> => {
+  const t = handleTransaction(tx)
+
+  // don't trace transaction if there is not input data that would potentially result in an internal transaction
+  if (!t.inputData) return t
+
+  // allow transaction to be handled even if we fail to get internal transactions (some better than none)
+  const internalTxs = await (async () => {
+    try {
+      return await getInternalTransactionsEtherscan(tx.txid)
+    } catch (err) {
+      return undefined
+    }
+  })()
+
+  t.internalTxs = internalTxs
+
+  return t
+}
+
+export const getInternalTransactionsTrace = async (txid: string): Promise<Array<InternalTx> | undefined> => {
   const request: RPCRequest = {
     jsonrpc: '2.0',
     id: `traceTransaction${txid}`,
@@ -157,4 +152,32 @@ export const getInternalTransactions = async (txid: string): Promise<Array<Inter
   }
 
   return processCallStack(callStack.calls)
+}
+
+export const getInternalTransactionsEtherscan = async (txid: string): Promise<Array<InternalTx> | undefined> => {
+  const { data } = await axios.get<EtherscanApiResponse>(
+    `https://api.etherscan.io/api?module=account&action=txlistinternal&txhash=${txid}&apikey=${ETHERSCAN_API_KEY}`
+  )
+
+  if (data.status === '0') return []
+
+  return (data.result as Array<EtherscanInternalTx>).map((t) => ({
+    from: ethers.utils.getAddress(t.from),
+    to: ethers.utils.getAddress(t.to),
+    value: t.value,
+  }))
+}
+
+export const getInternalTransactionHistoryEtherscan = async (
+  address: string,
+  page: number,
+  pageSize: number
+): Promise<Array<EtherscanInternalTx> | undefined> => {
+  const { data } = await axios.get<EtherscanApiResponse>(
+    `https://api.etherscan.io/api?module=account&action=txlistinternal&address=${address}&page=${page}&offset=${pageSize}&sort=desc&apikey=${ETHERSCAN_API_KEY}`
+  )
+
+  if (data.status === '0') return []
+
+  return data.result as Array<EtherscanInternalTx>
 }

@@ -84,6 +84,16 @@ export interface EthereumTxHistory extends TxHistory {
  */
 export interface EthereumAPI {
   /**
+   * Get transaction details
+   *
+   * @param {string} txid transaction hash
+   *
+   * @returns {Promise<EthereumTx>} transaction payload
+   */
+  // @Get('tx/{txid}')
+  getTransaction(txid: string): Promise<EthereumTx>
+
+  /**
    * Get the estimated gas cost of a transaction
    *
    * @param {string} data input data

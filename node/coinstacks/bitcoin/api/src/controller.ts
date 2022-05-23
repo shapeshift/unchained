@@ -15,7 +15,7 @@ import {
   BitcoinAPI,
   BitcoinAccount,
   BitcoinTx,
-  BitcoinTxSpecific,
+  BitcoinRawTx,
   BTCNetworkFee,
   BTCNetworkFees,
   Utxo,
@@ -300,7 +300,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   }
 
   /**
-   * Get transaction specific data directly from the node
+   * Get transaction details
    *
    * @param {string} txid transaction hash
    *
@@ -353,7 +353,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('transaction/{txid}')
+  @Get('tx/{txid}')
   async getTransaction(@Path() txid: string): Promise<BitcoinTx> {
     try {
       const data = await blockbook.getTransaction(txid)
@@ -368,15 +368,15 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   }
 
   /**
-   * Get transaction specific data directly from the node
+   * Get raw transaction details directly from the node
    *
    * @param {string} txid transaction hash
    *
    * @example txid "feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580"
    *
-   * @returns {Promise<BitcoinTxSpecific>} transaction payload
+   * @returns {Promise<BitcoinRawTx>} transaction payload
    */
-  @Example<BitcoinTxSpecific>({
+  @Example<BitcoinRawTx>({
     txid: 'feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580',
     hash: 'feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580',
     version: 1,
@@ -420,11 +420,11 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('transaction/{txid}/raw')
-  async getRawTransaction(@Path() txid: string): Promise<BitcoinTxSpecific> {
+  @Get('tx/{txid}/raw')
+  async getRawTransaction(@Path() txid: string): Promise<BitcoinRawTx> {
     try {
       const data = await blockbook.getTransactionSpecific(txid)
-      return data as BitcoinTxSpecific
+      return data as BitcoinRawTx
     } catch (err) {
       if (err.response) {
         throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))

@@ -51,7 +51,7 @@ export interface BitcoinTxHistory extends TxHistory {
 /**
  * Contains Bitcoin specific transaction info as returned from the node
  */
-export interface BitcoinTxSpecific {
+export interface BitcoinRawTx {
   txid: string
   hash: string
   version: number
@@ -149,7 +149,7 @@ export interface BitcoinAPI {
    *
    * @returns {Promise<BitcoinTx>} transaction payload
    */
-  // @Get('transaction/{txid}')
+  // @Get('tx/{txid}')
   getTransaction(txid: string): Promise<BitcoinTx>
 
   /**
@@ -157,10 +157,10 @@ export interface BitcoinAPI {
    *
    * @param {string} txid transaction hash
    *
-   * @returns {Promise<BitcoinTxSpecific>} transaction payload
+   * @returns {Promise<BitcoinRawTx>} transaction payload
    */
-  // @Get('transaction/{txid}/raw')
-  getRawTransaction(txid: string): Promise<BitcoinTxSpecific>
+  // @Get('tx/{txid}/raw')
+  getRawTransaction(txid: string): Promise<BitcoinRawTx>
 
   /**
    * Get current network fee estimates from Blockbook

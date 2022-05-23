@@ -12,9 +12,13 @@ import {
   SendTxBody,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { EthereumAccount, EthereumAPI, EthereumTxHistory, GasFees, TokenBalance } from './models'
+import { EthereumAccount, EthereumAPI, EthereumTx, EthereumTxHistory, GasFees, TokenBalance } from './models'
 import { logger } from './logger'
-import { handleTransaction } from './handlers'
+import {
+  getInternalTransactionHistoryEtherscan,
+  handleTransaction,
+  handleTransactionWithInternalEtherscan,
+} from './handlers'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -188,8 +192,50 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
       return {
         pubkey: pubkey,
         cursor: nextCursor,
-        txs: await Promise.all(data.transactions?.map(handleTransaction) ?? []),
+        txs: data.transactions?.map(handleTransaction) ?? [],
       }
+    } catch (err) {
+      if (err.response) {
+        throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+      }
+
+      throw err
+    }
+  }
+
+  /**
+   * Get transaction details
+   *
+   * @param {string} txid transaction hash
+   *
+   * @example txid "0x8825fe8d60e1aa8d990f150bffe1196adcab36d0c4e98bac76c691719103b79d"
+   *
+   * @returns {Promise<BitcoinTx>} transaction payload
+   */
+  @Example<EthereumTx>({
+    txid: '0x8825fe8d60e1aa8d990f150bffe1196adcab36d0c4e98bac76c691719103b79d',
+    blockHash: '0x122f1e1b594b797d96c1777ce9cdb68ddb69d262ac7f2ddc345909aba4ebabd7',
+    blockHeight: 14813163,
+    timestamp: 1653078780,
+    status: 1,
+    from: '0xEA674fdDe714fd979de3EdF0F56AA9716B898ec8',
+    to: '0x275C7d416c1DBfafa53A861EEc6F0AD6138ca4dD',
+    confirmations: 21,
+    value: '49396718157429775',
+    fee: '603633477678000',
+    gasLimit: '250000',
+    gasUsed: '21000',
+    gasPrice: '28744451318',
+    inputData: '0x',
+  })
+  @Response<BadRequestError>(400, 'Bad Request')
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Get('tx/{txid}')
+  async getTransaction(@Path() txid: string): Promise<EthereumTx> {
+    try {
+      const data = await blockbook.getTransaction(txid)
+      return handleTransactionWithInternalEtherscan(data)
     } catch (err) {
       if (err.response) {
         throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))

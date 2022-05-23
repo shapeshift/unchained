@@ -87,8 +87,8 @@ export const handleTransaction = (tx: BlockbookTx): BitcoinTx => ({
     value: vout.value ?? '0',
     n: vout.n,
     ...(!vout.isAddress &&
-      vout.addresses &&
-      vout.addresses[0].includes('OP_RETURN') && {
+      vout.addresses?.length &&
+      vout.addresses[0]?.includes('OP_RETURN') && {
         opReturn: vout.addresses[0],
       }),
     scriptPubKey: {

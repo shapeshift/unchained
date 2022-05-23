@@ -70,8 +70,8 @@ export interface SendTxBody {
 export interface Tx {
   txid: string
   blockHash?: string
-  blockHeight?: number
-  timestamp?: number
+  blockHeight: number
+  timestamp: number
 }
 
 /**
