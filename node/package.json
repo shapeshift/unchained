@@ -17,7 +17,7 @@
     "format:fix": "prettier --write .",
     "lint": "eslint '*/**/*.{js,ts}' && yarn lint:ts",
     "lint:ts": "tsc --noEmit",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage",
     "version:major": "lerna version major --force-publish --no-push",
     "version:minor": "lerna version minor --force-publish --no-push",
