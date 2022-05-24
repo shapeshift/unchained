@@ -2,7 +2,9 @@ import { Logger } from '@shapeshiftoss/logger'
 import { ConnectionHandler } from './websocket'
 
 type FormatAddressFunc = (address: string) => string
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 type BlockHandler<T = any, T2 = any> = (block: T) => Promise<{ txs: T2 }>
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 type TransactionHandler<T = any, T2 = any> = (tx: T) => Promise<{ addresses: Array<string>; tx: T2 }>
 
 export class Registry {
