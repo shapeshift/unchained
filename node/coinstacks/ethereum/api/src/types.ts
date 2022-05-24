@@ -1,3 +1,11 @@
+export interface Cursor {
+  blockHeight?: number
+  blockbookPage: number
+  blockbookTxid?: string
+  etherscanPage: number
+  etherscanTxid?: string
+}
+
 export interface NodeBlock {
   difficulty: string
   extraData: string

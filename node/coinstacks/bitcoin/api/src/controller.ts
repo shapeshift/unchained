@@ -1,5 +1,6 @@
 import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import { Address, Blockbook, Xpub } from '@shapeshiftoss/blockbook'
+import { Cursor } from '@shapeshiftoss/common-api'
 import {
   ApiError,
   BadRequestError,
@@ -8,7 +9,6 @@ import {
   InternalServerError,
   SendTxBody,
   ValidationError,
-  Cursor,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
 import {
   BitcoinAddress,
@@ -208,14 +208,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
         try {
           if (!cursor) return { page: 1 }
 
-          const decodedCursor = JSON.parse(Buffer.from(cursor, 'base64').toString('binary'))
-
-          // Validate that the cursor contains a 'page' property that is a positive integer
-          if (!('page' in decodedCursor && Number.isInteger(decodedCursor.page) && decodedCursor.page >= 1)) {
-            throw 'invalid base64 cursor'
-          }
-
-          return decodedCursor
+          return JSON.parse(Buffer.from(cursor, 'base64').toString('binary'))
         } catch (err) {
           const e: BadRequestError = { error: `invalid base64 cursor: ${cursor}` }
           throw new ApiError('Bad Request', 422, JSON.stringify(e))

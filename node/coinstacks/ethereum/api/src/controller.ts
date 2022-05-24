@@ -6,7 +6,6 @@ import {
   ApiError,
   BadRequestError,
   BaseAPI,
-  Cursor,
   Info,
   InternalServerError,
   SendTxBody,
@@ -14,11 +13,8 @@ import {
 } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { EthereumAccount, EthereumAPI, EthereumTx, EthereumTxHistory, GasFees, TokenBalance } from './models'
 import { logger } from './logger'
-import {
-  getInternalTransactionHistoryEtherscan,
-  handleTransaction,
-  handleTransactionWithInternalEtherscan,
-} from './handlers'
+import { getBlockbookTxs, getInternalTxs, handleTransaction, handleTransactionWithInternalEtherscan } from './handlers'
+import { Cursor } from './types'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -128,7 +124,8 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
    */
   @Example<EthereumTxHistory>({
     pubkey: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
-    cursor: 'eyJwYWdlIjoyfQ==',
+    cursor:
+      'eyJibG9ja2Jvb2tQYWdlIjoxLCJldGhlcnNjYW5QYWdlIjoxLCJibG9ja2Jvb2tUeGlkIjoiMHhhZWU0MzJmODUzZmRjMTNhZDlmZjZjYWJlMmEzOTQwM2Q4N2RkZWUxODQyNDk2ODE4ZmNkODg3NDdmNjU2NmY5IiwiYmxvY2tIZWlnaHQiOjEzODUwMjEzfQ==',
     txs: [
       {
         txid: '0x8e3528c933483770a3c8377c2ee7e34f846908653168188fd0d90a20b295d002',
@@ -159,40 +156,88 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   ): Promise<EthereumTxHistory> {
     const curCursor = ((): Cursor => {
       try {
-        if (!cursor) return { page: 1 }
+        if (!cursor) return { blockbookPage: 1, etherscanPage: 1 }
 
-        const decodedCursor = JSON.parse(Buffer.from(cursor, 'base64').toString('binary'))
-
-        // Validate that the cursor contains a 'page' property that is a positive integer
-        if (!('page' in decodedCursor && Number.isInteger(decodedCursor.page) && decodedCursor.page >= 1)) {
-          throw 'invalid base64 cursor'
-        }
-
-        return decodedCursor
+        return JSON.parse(Buffer.from(cursor, 'base64').toString('binary'))
       } catch (err) {
-        if (err instanceof Error) {
-          logger.error(err, `failed to decode cursor: ${cursor}`)
-        }
-
         const e: BadRequestError = { error: `invalid base64 cursor: ${cursor}` }
         throw new ApiError('Bad Request', 422, JSON.stringify(e))
       }
     })()
 
     try {
-      const data = await blockbook.getAddress(pubkey, curCursor.page, pageSize, undefined, undefined, 'txs')
+      let { hasMore: hasMoreBlockbookTxs, blockbookTxs } = await getBlockbookTxs(pubkey, pageSize, curCursor)
+      let { hasMore: hasMoreInternalTxs, internalTxs } = await getInternalTxs(pubkey, pageSize, curCursor)
 
-      curCursor.page++
-
-      let nextCursor: string | undefined
-      if (curCursor.page <= (data.totalPages ?? 0)) {
-        nextCursor = Buffer.from(JSON.stringify(curCursor), 'binary').toString('base64')
+      if (!blockbookTxs.size && !internalTxs.size) {
+        return {
+          pubkey: pubkey,
+          txs: [],
+        }
       }
+
+      const txs: Array<EthereumTx> = []
+      for (let i = 0; i < pageSize; i++) {
+        if (!blockbookTxs.size && hasMoreBlockbookTxs) {
+          curCursor.blockbookPage++
+          ;({ hasMore: hasMoreBlockbookTxs, blockbookTxs } = await getBlockbookTxs(pubkey, pageSize, curCursor))
+        }
+
+        if (!internalTxs.size && hasMoreInternalTxs) {
+          curCursor.etherscanPage++
+          ;({ hasMore: hasMoreInternalTxs, internalTxs } = await getInternalTxs(pubkey, pageSize, curCursor))
+        }
+
+        if (!internalTxs.size && !blockbookTxs.size) break
+
+        const [internalTx] = internalTxs.values()
+        const [blockbookTx] = blockbookTxs.values()
+
+        if (blockbookTx?.blockHeight === -1) {
+          // process pending txs first, no associated internal txs
+          txs.push({ ...blockbookTx })
+          curCursor.blockbookTxid = blockbookTx.txid
+        } else if (blockbookTx && blockbookTx.blockHeight >= (internalTx?.blockHeight ?? -2)) {
+          // process transactions in descending order prioritizing confirmed, include associated internal txs
+          const hasInternal = internalTxs.has(blockbookTx.txid)
+
+          txs.push({ ...blockbookTx, internalTxs: internalTxs.get(blockbookTx.txid)?.txs })
+
+          blockbookTxs.delete(blockbookTx.txid)
+          curCursor.blockbookTxid = blockbookTx.txid
+
+          if (hasInternal) {
+            internalTxs.delete(blockbookTx.txid)
+            curCursor.etherscanTxid = blockbookTx.txid
+          }
+        } else {
+          // attempt to get matching blockbook tx or fetch if not found
+          // if fetch fails, treat internal tx as handled and remove from set
+          try {
+            const cTx =
+              blockbookTxs.get(internalTx.txid) ?? handleTransaction(await blockbook.getTransaction(internalTx.txid))
+
+            txs.push({ ...cTx, internalTxs: internalTx.txs })
+          } catch (err) {
+            logger.warn(err, `failed to get tx: ${internalTx.txid}`)
+          }
+
+          internalTxs.delete(internalTx.txid)
+          curCursor.etherscanTxid = internalTx.txid
+        }
+      }
+
+      curCursor.blockHeight = txs[txs.length - 1]?.blockHeight
+
+      const nextCursor = (() => {
+        if (!hasMoreBlockbookTxs && !hasMoreInternalTxs) return
+        return Buffer.from(JSON.stringify(curCursor), 'binary').toString('base64')
+      })()
 
       return {
         pubkey: pubkey,
         cursor: nextCursor,
-        txs: data.transactions?.map(handleTransaction) ?? [],
+        txs: txs,
       }
     } catch (err) {
       if (err.response) {

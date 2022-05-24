@@ -5,7 +5,7 @@ import { ethers } from 'ethers'
 import { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { RPCRequest, RPCResponse } from '@shapeshiftoss/common-api'
 import { EthereumTx, InternalTx } from './models'
-import { NodeBlock, CallStack, EtherscanApiResponse, EtherscanInternalTx } from './types'
+import { Cursor, NodeBlock, CallStack, EtherscanApiResponse, EtherscanInternalTx } from './types'
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
@@ -180,4 +180,124 @@ export const getInternalTransactionHistoryEtherscan = async (
   if (data.status === '0') return []
 
   return data.result as Array<EtherscanInternalTx>
+}
+
+type InternalTxs = Map<string, { blockHeight: number; txid: string; txs: Array<InternalTx> }>
+
+export const getInternalTxs = async (
+  address: string,
+  pageSize: number,
+  cursor: Cursor
+): Promise<{ hasMore: boolean; internalTxs: InternalTxs }> => {
+  const etherscanData = await getInternalTransactionHistoryEtherscan(address, cursor.etherscanPage, pageSize)
+
+  const data = new Map<string, { blockHeight: number; txid: string; txs: Array<InternalTx> }>()
+
+  if (!etherscanData?.length) return { hasMore: false, internalTxs: data }
+
+  let doneFiltering = false
+  const internalTxs = etherscanData.reduce((prev, tx) => {
+    if (!doneFiltering && cursor.blockHeight && cursor.etherscanTxid) {
+      // skip any transactions from blocks that we have already returned
+      if (Number(tx.blockNumber) > cursor.blockHeight) return prev
+
+      // skip any transaction that we have already returned within the same block
+      // this assumes transactions are ordered the same (by nonce) on every request
+      if (Number(tx.blockNumber) === cursor.blockHeight) {
+        if (cursor.etherscanTxid === tx.hash) {
+          doneFiltering = true
+        }
+        return prev
+      }
+    }
+
+    const iTx: InternalTx = {
+      from: tx.from,
+      to: tx.to,
+      value: tx.value,
+    }
+
+    prev.set(tx.hash, {
+      blockHeight: Number(tx.blockNumber),
+      txid: tx.hash,
+      txs: [...(prev.get(tx.hash)?.txs ?? []), iTx],
+    })
+    return prev
+  }, data)
+
+  // if no txs exist after filtering out already seen transactions, fetch the next page
+  if (!internalTxs.size) {
+    cursor.etherscanPage++
+    return getInternalTxs(address, pageSize, cursor)
+  }
+
+  return {
+    hasMore: etherscanData.length < pageSize ? false : true,
+    internalTxs,
+  }
+}
+
+type BlockbookTxs = Map<string, EthereumTx>
+
+export const getBlockbookTxs = async (
+  address: string,
+  pageSize: number,
+  cursor: Cursor
+): Promise<{ hasMore: boolean; blockbookTxs: BlockbookTxs }> => {
+  const blockbookData = await blockbook.getAddress(address, cursor.blockbookPage, pageSize, undefined, undefined, 'txs')
+
+  const data = new Map<string, EthereumTx>()
+
+  if (!blockbookData?.transactions?.length || cursor.blockbookPage > (blockbookData.totalPages ?? -1)) {
+    return { hasMore: false, blockbookTxs: data }
+  }
+
+  let doneFiltering = false
+  let pendingTxFound: BlockbookTx | undefined
+  const blockbookTxs = blockbookData.transactions.reduce((prev, tx) => {
+    if (!doneFiltering && cursor.blockHeight && cursor.blockbookTxid) {
+      // if the last pending tx is no longer pending, we can no longer determine confidently what we have already returned
+      // consider the tx found and process the remaining txs without additional filtering
+      if (cursor.blockHeight === -1 && !pendingTxFound) {
+        pendingTxFound = blockbookData.transactions?.find(
+          (tx) => tx.blockHeight === -1 && tx.txid === cursor.blockbookTxid
+        )
+
+        if (!pendingTxFound) {
+          prev.set(tx.txid, handleTransaction(tx))
+          doneFiltering = true
+          return prev
+        }
+      }
+
+      // skip any transactions from blocks that we have already returned (handle pending separately)
+      if (cursor.blockHeight >= 0 && tx.blockHeight > cursor.blockHeight) return prev
+
+      // skip any transaction that we have already returned within the same block
+      // this assumes transactions are ordered the same (by nonce) on every request
+      if (tx.blockHeight === cursor.blockHeight) {
+        if (cursor.blockbookTxid === tx.txid) {
+          doneFiltering = true
+        }
+
+        return prev
+      }
+
+      doneFiltering = true
+    }
+
+    prev.set(tx.txid, handleTransaction(tx))
+    return prev
+  }, data)
+
+  // if no txs exist after filtering out already seen transactions, fetch the next page
+  if (!blockbookTxs.size) {
+    cursor.blockbookPage++
+    return getBlockbookTxs(address, pageSize, cursor)
+  }
+
+  return {
+    hasMore: cursor.blockbookPage < (blockbookData.totalPages ?? -1) ? true : false,
+    blockbookTxs,
+  }
 }
