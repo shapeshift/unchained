@@ -97,7 +97,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
       }
 
       // list of all used addresses with additional derived addresses up to gap limit of 20, including any detected balances
-      const addresses = (data.tokens ?? []).map<BitcoinAddress>((token) => ({
+      const addresses = data.tokens?.map<BitcoinAddress>((token) => ({
         balance: token.balance ?? '0',
         pubkey: token.name,
       }))
