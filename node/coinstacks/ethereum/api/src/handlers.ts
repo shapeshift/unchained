@@ -78,8 +78,9 @@ export const handleTransaction = (tx: BlockbookTx): EthereumTx => {
 export const handleTransactionWithInternalTrace = async (tx: BlockbookTx): Promise<EthereumTx> => {
   const t = handleTransaction(tx)
 
+  // don't trace pending transactions as they have no committed state to trace
   // don't trace transaction if there is not input data that would potentially result in an internal transaction
-  if (!t.inputData) return t
+  if (t.confirmations === 0 || !t.inputData) return t
 
   // allow transaction to be handled even if we fail to get internal transactions (some better than none)
   const internalTxs = await (async () => {
@@ -212,8 +213,8 @@ export const getInternalTxs = async (
     }
 
     const iTx: InternalTx = {
-      from: tx.from,
-      to: tx.to,
+      from: ethers.utils.getAddress(tx.from),
+      to: ethers.utils.getAddress(tx.to),
       value: tx.value,
     }
 
