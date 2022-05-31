@@ -88,8 +88,6 @@ export class Registry {
       for (const address of this.clients[id].keys()) {
         unregister(id, address)
       }
-
-      delete this.clients[id]
     } else {
       for (const address of addresses) {
         unregister(id, address)

@@ -18,6 +18,9 @@ export interface WebsocketRepsonse {
   data: NewBlock | Tx | SubscriptionResponse
 }
 
+/**
+ * returns a unique set of all addresses found in the associated blockbook transaction
+ */
 export function getAddresses(tx: Tx): Array<string> {
   const addresses: Array<string> = []
 

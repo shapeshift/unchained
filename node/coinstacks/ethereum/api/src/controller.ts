@@ -13,7 +13,12 @@ import {
 } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { EthereumAccount, EthereumAPI, EthereumTx, EthereumTxHistory, GasFees, TokenBalance } from './models'
 import { logger } from './logger'
-import { getBlockbookTxs, getInternalTxs, handleTransaction, handleTransactionWithInternalEtherscan } from './handlers'
+import {
+  getBlockbookTxs,
+  getEtherscanInternalTxs,
+  handleTransaction,
+  handleTransactionWithInternalEtherscan,
+} from './handlers'
 import { Cursor } from './types'
 
 const INDEXER_URL = process.env.INDEXER_URL
@@ -167,7 +172,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
 
     try {
       let { hasMore: hasMoreBlockbookTxs, blockbookTxs } = await getBlockbookTxs(pubkey, pageSize, curCursor)
-      let { hasMore: hasMoreInternalTxs, internalTxs } = await getInternalTxs(pubkey, pageSize, curCursor)
+      let { hasMore: hasMoreInternalTxs, internalTxs } = await getEtherscanInternalTxs(pubkey, pageSize, curCursor)
 
       if (!blockbookTxs.size && !internalTxs.size) {
         return {
@@ -185,7 +190,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
 
         if (!internalTxs.size && hasMoreInternalTxs) {
           curCursor.etherscanPage++
-          ;({ hasMore: hasMoreInternalTxs, internalTxs } = await getInternalTxs(pubkey, pageSize, curCursor))
+          ;({ hasMore: hasMoreInternalTxs, internalTxs } = await getEtherscanInternalTxs(pubkey, pageSize, curCursor))
         }
 
         if (!internalTxs.size && !blockbookTxs.size) break
@@ -195,18 +200,19 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
 
         if (blockbookTx?.blockHeight === -1) {
           // process pending txs first, no associated internal txs
+
           txs.push({ ...blockbookTx })
           curCursor.blockbookTxid = blockbookTx.txid
         } else if (blockbookTx && blockbookTx.blockHeight >= (internalTx?.blockHeight ?? -2)) {
           // process transactions in descending order prioritizing confirmed, include associated internal txs
-          const hasInternal = internalTxs.has(blockbookTx.txid)
 
           txs.push({ ...blockbookTx, internalTxs: internalTxs.get(blockbookTx.txid)?.txs })
 
           blockbookTxs.delete(blockbookTx.txid)
           curCursor.blockbookTxid = blockbookTx.txid
 
-          if (hasInternal) {
+          // if there was a matching internal tx, delete it and track as last internal txid seen
+          if (internalTxs.has(blockbookTx.txid)) {
             internalTxs.delete(blockbookTx.txid)
             curCursor.etherscanTxid = blockbookTx.txid
           }
@@ -214,16 +220,22 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
           // attempt to get matching blockbook tx or fetch if not found
           // if fetch fails, treat internal tx as handled and remove from set
           try {
-            const cTx =
+            const blockbookTx =
               blockbookTxs.get(internalTx.txid) ?? handleTransaction(await blockbook.getTransaction(internalTx.txid))
 
-            txs.push({ ...cTx, internalTxs: internalTx.txs })
+            txs.push({ ...blockbookTx, internalTxs: internalTx.txs })
           } catch (err) {
             logger.warn(err, `failed to get tx: ${internalTx.txid}`)
           }
 
           internalTxs.delete(internalTx.txid)
           curCursor.etherscanTxid = internalTx.txid
+
+          // if there was a matching blockbook tx, delete it and track as last blockbook txid seen
+          if (blockbookTxs.has(internalTx.txid)) {
+            blockbookTxs.delete(internalTx.txid)
+            curCursor.blockbookTxid = internalTx.txid
+          }
         }
       }
 

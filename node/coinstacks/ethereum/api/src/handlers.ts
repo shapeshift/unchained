@@ -75,6 +75,11 @@ export const handleTransaction = (tx: BlockbookTx): EthereumTx => {
   }
 }
 
+/**
+ * format transaction and call debug_traceTransaction to extract internal transactions on newly confirmed transactions only.
+ *
+ * __not suitable for use on historical transactions when using a full node as the evm state is purged__
+ */
 export const handleTransactionWithInternalTrace = async (tx: BlockbookTx): Promise<EthereumTx> => {
   const t = handleTransaction(tx)
 
@@ -99,7 +104,7 @@ export const handleTransactionWithInternalTrace = async (tx: BlockbookTx): Promi
 export const handleTransactionWithInternalEtherscan = async (tx: BlockbookTx): Promise<EthereumTx> => {
   const t = handleTransaction(tx)
 
-  // don't trace transaction if there is not input data that would potentially result in an internal transaction
+  // don't query etherscan for internal transactions if there is no input data that would potentially result in an internal transaction
   if (!t.inputData) return t
 
   // allow transaction to be handled even if we fail to get internal transactions (some better than none)
@@ -185,7 +190,7 @@ export const getInternalTransactionHistoryEtherscan = async (
 
 type InternalTxs = Map<string, { blockHeight: number; txid: string; txs: Array<InternalTx> }>
 
-export const getInternalTxs = async (
+export const getEtherscanInternalTxs = async (
   address: string,
   pageSize: number,
   cursor: Cursor
@@ -203,7 +208,7 @@ export const getInternalTxs = async (
       if (Number(tx.blockNumber) > cursor.blockHeight) return prev
 
       // skip any transaction that we have already returned within the same block
-      // this assumes transactions are ordered the same (by nonce) on every request
+      // this assumes transactions are ordered in the same position within the block on every request
       if (Number(tx.blockNumber) === cursor.blockHeight) {
         if (cursor.etherscanTxid === tx.hash) {
           doneFiltering = true
@@ -229,7 +234,7 @@ export const getInternalTxs = async (
   // if no txs exist after filtering out already seen transactions, fetch the next page
   if (!internalTxs.size) {
     cursor.etherscanPage++
-    return getInternalTxs(address, pageSize, cursor)
+    return getEtherscanInternalTxs(address, pageSize, cursor)
   }
 
   return {
