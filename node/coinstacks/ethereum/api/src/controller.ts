@@ -159,6 +159,8 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
     @Query() cursor?: string,
     @Query() pageSize = 10
   ): Promise<EthereumTxHistory> {
+    if (pageSize <= 0) throw new ApiError('Bad Request', 422, 'page size must be greater than 0')
+
     const curCursor = ((): Cursor => {
       try {
         if (!cursor) return { blockbookPage: 1, etherscanPage: 1 }

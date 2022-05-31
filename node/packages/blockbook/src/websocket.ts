@@ -10,6 +10,11 @@ export interface Subscription {
   params?: Array<string>
 }
 
+export interface Args {
+  transactionHandler: TransactionHandler
+  blockHandler: BlockHandler
+}
+
 export interface Options {
   pingInterval?: number
 }
@@ -21,26 +26,29 @@ export class WebsocketClient {
   private socket: WebSocket
   private url: string
   private pingTimeout?: NodeJS.Timeout
+  private interval?: NodeJS.Timeout
   private retries = 0
 
-  private handleTransaction?: TransactionHandler
-  private handleBlock?: BlockHandler
+  private handleTransaction: TransactionHandler
+  private handleBlock: BlockHandler
 
   private readonly pingInterval: number
   private readonly retryAttempts = 5
 
   private logger = new Logger({ namespace: ['unchained', 'blockbook'], level: process.env.LOG_LEVEL })
 
-  constructor(url: string, opts?: Options) {
+  constructor(url: string, args: Args, opts?: Options) {
+    this.handleTransaction = args.transactionHandler
+    this.handleBlock = args.blockHandler
     this.pingInterval = opts?.pingInterval ?? 10000
     this.url = url
     this.socket = new WebSocket(this.url, { handshakeTimeout: 5000 })
 
-    this.new(true)
+    this.initialize(false)
   }
 
-  private new(init: boolean): void {
-    if (!init) {
+  private initialize(retry: boolean): void {
+    if (retry) {
       if (++this.retries >= this.retryAttempts) {
         throw new Error('failed to reconnect')
       }
@@ -48,35 +56,27 @@ export class WebsocketClient {
       this.socket = new WebSocket(this.url, { handshakeTimeout: 5000 })
     }
 
-    const interval = setInterval(() => {
-      this.socket.ping()
-    }, this.pingInterval)
-
     this.socket.on('ping', () => this.socket.pong())
     this.socket.on('pong', () => this.heartbeat())
     this.socket.onerror = (error) => {
-      // TODO: what kind of errors would we see and do we want to terminate and attempt reconnect?
       this.logger.error({ error, fn: 'ws.onerror' }, 'websocket error')
     }
     this.socket.onclose = ({ code, reason }) => {
       this.logger.error({ code, reason, fn: 'ws.close' }, 'websocket closed')
-      this.close(interval)
+      this.close()
     }
     this.socket.onopen = () => this.onOpen()
     this.socket.onmessage = (msg) => this.onMessage(msg)
   }
 
-  private close(interval: NodeJS.Timeout): void {
-    clearInterval(interval)
+  private close(): void {
+    this.interval && clearInterval(this.interval)
     // TODO: retry with backoff
-    this.new(false)
+    this.initialize(true)
   }
 
   private heartbeat(): void {
-    if (this.pingTimeout) {
-      clearTimeout(this.pingTimeout)
-    }
-
+    this.pingTimeout && clearTimeout(this.pingTimeout)
     this.pingTimeout = setTimeout(() => {
       this.logger.debug({ fn: 'pingTimeout' }, 'heartbeat failed')
       this.socket.terminate()
@@ -86,6 +86,9 @@ export class WebsocketClient {
   private onOpen(): void {
     this.logger.debug({ fn: 'ws.onopen' }, 'websocket opened')
     this.retries = 0
+    this.interval = setInterval(() => {
+      this.socket.ping()
+    }, this.pingInterval)
     this.heartbeat()
 
     const newBlock: Subscription = {
@@ -111,28 +114,14 @@ export class WebsocketClient {
       if (!res.data) return
 
       if (res.id === 'newBlock' && 'hash' in res.data) {
-        if (this.handleBlock) {
-          await this.handleBlock(res.data)
-        }
+        await this.handleBlock(res.data)
       }
 
       if (res.id === 'newTx' && 'txid' in res.data) {
-        if (this.handleTransaction) {
-          await this.handleTransaction(res.data)
-        }
+        await this.handleTransaction(res.data)
       }
     } catch (err) {
-      this.logger.error(err, 'failed to process transaction')
+      this.logger.error(err, `failed to handle message: ${JSON.stringify(message)}`)
     }
-  }
-
-  transactionHandler(handler: TransactionHandler): WebsocketClient {
-    this.handleTransaction = handler
-    return this
-  }
-
-  blockHandler(handler: BlockHandler): WebsocketClient {
-    this.handleBlock = handler
-    return this
   }
 }

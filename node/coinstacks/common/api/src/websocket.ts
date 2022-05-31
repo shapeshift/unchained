@@ -60,7 +60,6 @@ export class ConnectionHandler {
 
     const interval = setInterval(() => {
       this.websocket.ping()
-      this.websocket.send('ping') // browsers do not support ping/pong frame, send message instead
     }, this.pingInterval)
 
     this.heartbeat()

@@ -203,6 +203,8 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
     @Query() cursor?: string,
     @Query() pageSize = 10
   ): Promise<BitcoinTxHistory> {
+    if (pageSize <= 0) throw new ApiError('Bad Request', 422, 'page size must be greater than 0')
+
     try {
       const curCursor = ((): Cursor => {
         try {

@@ -76,6 +76,7 @@ const wsServer = new Server({ server })
 
 wsServer.on('connection', (connection) => ConnectionHandler.start(connection, registry))
 
-new WebsocketClient(INDEXER_WS_URL)
-  .blockHandler(registry.onBlock.bind(registry))
-  .transactionHandler(registry.onTransaction.bind(registry))
+new WebsocketClient(INDEXER_WS_URL, {
+  blockHandler: registry.onBlock.bind(registry),
+  transactionHandler: registry.onTransaction.bind(registry),
+})
