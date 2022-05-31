@@ -1,5 +1,6 @@
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
+import { bech32 } from 'bech32'
 import { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { RPCRequest, RPCResponse } from '@shapeshiftoss/common-api'
 import { BitcoinTx } from './models'
@@ -37,6 +38,12 @@ export interface NodeBlock {
 }
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
+
+export const formatAddress = (address: string): string => {
+  const decoded = bech32.decodeUnsafe(address.toLowerCase())
+  if (decoded?.prefix === 'bc') return address.toLowerCase()
+  return address
+}
 
 export const handleBlock = async (hash: string): Promise<Array<BlockbookTx>> => {
   const request: RPCRequest = {

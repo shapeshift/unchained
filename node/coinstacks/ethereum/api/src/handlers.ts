@@ -21,6 +21,8 @@ axiosRetry(axios, { retries: 5, retryDelay: axiosRetry.exponentialDelay })
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 
+export const formatAddress = (address: string): string => ethers.utils.getAddress(address)
+
 export const handleBlock = async (hash: string): Promise<Array<BlockbookTx>> => {
   const request: RPCRequest = {
     jsonrpc: '2.0',
@@ -145,8 +147,8 @@ export const getInternalTransactionsTrace = async (txid: string): Promise<Array<
 
       if (value.gt(0) && gas.gt(0)) {
         txs.push({
-          from: ethers.utils.getAddress(call.from),
-          to: ethers.utils.getAddress(call.to),
+          from: formatAddress(call.from),
+          to: formatAddress(call.to),
           value: value.toString(),
         })
       }
@@ -168,8 +170,8 @@ export const getInternalTransactionsEtherscan = async (txid: string): Promise<Ar
   if (data.status === '0') return []
 
   return (data.result as Array<EtherscanInternalTx>).map((t) => ({
-    from: ethers.utils.getAddress(t.from),
-    to: ethers.utils.getAddress(t.to),
+    from: formatAddress(t.from),
+    to: formatAddress(t.to),
     value: t.value,
   }))
 }
@@ -218,8 +220,8 @@ export const getEtherscanInternalTxs = async (
     }
 
     const iTx: InternalTx = {
-      from: ethers.utils.getAddress(tx.from),
-      to: ethers.utils.getAddress(tx.to),
+      from: formatAddress(tx.from),
+      to: formatAddress(tx.to),
       value: tx.value,
     }
 

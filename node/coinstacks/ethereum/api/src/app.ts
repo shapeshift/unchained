@@ -1,15 +1,21 @@
 import express, { json, urlencoded } from 'express'
 import cors from 'cors'
-import { ethers } from 'ethers'
 import { join } from 'path'
 import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
-import { middleware, ConnectionHandler, Registry } from '@shapeshiftoss/common-api'
+import {
+  middleware,
+  ConnectionHandler,
+  Registry,
+  AddressFormatter,
+  BlockHandler,
+  TransactionHandler,
+} from '@shapeshiftoss/common-api'
 import { Tx as BlockbookTx, WebsocketClient, getAddresses, NewBlock } from '@shapeshiftoss/blockbook'
 import { logger } from './logger'
 import { RegisterRoutes } from './routes'
 import { EthereumTx } from './models'
-import { handleBlock, handleTransactionWithInternalTrace } from './handlers'
+import { formatAddress, handleBlock, handleTransactionWithInternalTrace } from './handlers'
 
 const PORT = process.env.PORT ?? 3000
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -45,19 +51,22 @@ app.get('/', async (_, res) => {
 app.use(middleware.errorHandler)
 app.use(middleware.notFoundHandler)
 
-const registry = new Registry()
-  .formatAddress((address) => ethers.utils.getAddress(address))
-  .blockHandler<NewBlock, Array<BlockbookTx>>(async (block) => {
-    const txs = await handleBlock(block.hash)
-    return { txs }
-  })
-  .transactionHandler<BlockbookTx, EthereumTx>(async (blockbookTx) => {
-    const tx = await handleTransactionWithInternalTrace(blockbookTx)
-    const internalAddresses = (tx.internalTxs ?? []).reduce<Array<string>>((prev, tx) => [...prev, tx.to, tx.from], [])
-    const addresses = [...new Set([...getAddresses(blockbookTx), ...internalAddresses])]
+const addressFormatter: AddressFormatter = (address) => formatAddress(address)
 
-    return { addresses, tx }
-  })
+const blockHandler: BlockHandler<NewBlock, Array<BlockbookTx>> = async (block) => {
+  const txs = await handleBlock(block.hash)
+  return { txs }
+}
+
+const transactionHandler: TransactionHandler<BlockbookTx, EthereumTx> = async (blockbookTx) => {
+  const tx = await handleTransactionWithInternalTrace(blockbookTx)
+  const internalAddresses = (tx.internalTxs ?? []).reduce<Array<string>>((prev, tx) => [...prev, tx.to, tx.from], [])
+  const addresses = [...new Set([...getAddresses(blockbookTx), ...internalAddresses])]
+
+  return { addresses, tx }
+}
+
+const registry = new Registry({ addressFormatter, blockHandler, transactionHandler })
 
 const server = app.listen(PORT, () => logger.info('Server started'))
 const wsServer = new Server({ server })

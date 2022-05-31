@@ -1,25 +1,36 @@
 import { Logger } from '@shapeshiftoss/logger'
 import { ConnectionHandler } from './websocket'
 
-type FormatAddressFunc = (address: string) => string
+export type AddressFormatter = (address: string) => string
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-type BlockHandler<T = any, T2 = any> = (block: T) => Promise<{ txs: T2 }>
+export type BlockHandler<T = any, T2 = any> = (block: T) => Promise<{ txs: T2 }>
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-type TransactionHandler<T = any, T2 = any> = (tx: T) => Promise<{ addresses: Array<string>; tx: T2 }>
+export type TransactionHandler<T = any, T2 = any> = (tx: T) => Promise<{ addresses: Array<string>; tx: T2 }>
+
+export interface RegistryArgs {
+  addressFormatter?: AddressFormatter
+  blockHandler: BlockHandler
+  transactionHandler: TransactionHandler
+}
 
 export class Registry {
   private clients: Record<string, Map<string, void>>
   private addresses: Record<string, Map<string, ConnectionHandler>>
 
-  private formatAddressFunc: FormatAddressFunc = (address: string) => address.toLowerCase()
-  private handleBlock?: BlockHandler
-  private handleTransaction?: TransactionHandler
+  private handleBlock: BlockHandler
+  private handleTransaction: TransactionHandler
+  private formatAddress: AddressFormatter = (address: string) => address.toLowerCase()
 
   private logger = new Logger({ namespace: ['unchained', 'common', 'api', 'registry'], level: process.env.LOG_LEVEL })
 
-  constructor() {
+  constructor(args: RegistryArgs) {
     this.clients = {}
     this.addresses = {}
+
+    this.handleBlock = args.blockHandler
+    this.handleTransaction = args.transactionHandler
+
+    if (args.addressFormatter) this.formatAddress = args.addressFormatter
   }
 
   private toId(clientId: string, subscriptionId: string): string {
@@ -31,28 +42,13 @@ export class Registry {
     return { clientId, subscriptionId }
   }
 
-  formatAddress(func: FormatAddressFunc): Registry {
-    this.formatAddressFunc = func
-    return this
-  }
-
-  transactionHandler<T, T2>(func: TransactionHandler<T, T2>): Registry {
-    this.handleTransaction = func
-    return this
-  }
-
-  blockHandler<T, T2>(func: BlockHandler<T, T2>): Registry {
-    this.handleBlock = func
-    return this
-  }
-
   subscribe(clientId: string, subscriptionId: string, connection: ConnectionHandler, addresses: Array<string>) {
     const id = this.toId(clientId, subscriptionId)
 
     if (!this.clients[id]) this.clients[id] = new Map<string, void>()
 
     addresses.forEach((address) => {
-      address = this.formatAddressFunc(address)
+      address = this.formatAddress(address)
 
       if (!this.addresses[address]) this.addresses[address] = new Map<string, ConnectionHandler>()
 
@@ -67,7 +63,7 @@ export class Registry {
     if (!this.clients[id]) return
 
     const unregister = (id: string, address: string) => {
-      address = this.formatAddressFunc(address)
+      address = this.formatAddress(address)
 
       // unregister address from client
       this.clients[id].delete(address)
@@ -97,8 +93,6 @@ export class Registry {
 
   async onBlock(msg: unknown): Promise<void> {
     if (!Object.keys(this.clients).length) return
-    if (!this.handleBlock) return
-    if (!this.handleTransaction) return
 
     try {
       const { txs } = await this.handleBlock(msg)
@@ -111,13 +105,12 @@ export class Registry {
 
   async onTransaction(msg: unknown): Promise<void> {
     if (!Object.keys(this.clients).length) return
-    if (!this.handleTransaction) return
 
     try {
       const { addresses, tx } = await this.handleTransaction(msg)
 
       addresses.forEach((address) => {
-        address = this.formatAddressFunc(address)
+        address = this.formatAddress(address)
 
         if (!this.addresses[address]) return
 

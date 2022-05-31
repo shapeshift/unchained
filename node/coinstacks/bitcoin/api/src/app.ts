@@ -1,15 +1,21 @@
 import express, { json, urlencoded } from 'express'
-import { bech32 } from 'bech32'
 import cors from 'cors'
 import { join } from 'path'
 import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
 import { Logger } from '@shapeshiftoss/logger'
-import { middleware, ConnectionHandler, Registry } from '@shapeshiftoss/common-api'
+import {
+  middleware,
+  ConnectionHandler,
+  Registry,
+  AddressFormatter,
+  BlockHandler,
+  TransactionHandler,
+} from '@shapeshiftoss/common-api'
 import { getAddresses, NewBlock, Tx as BlockbookTx, WebsocketClient } from '@shapeshiftoss/blockbook'
 import { RegisterRoutes } from './routes'
 import { BitcoinTx } from './models'
-import { handleBlock, handleTransaction } from './handlers'
+import { formatAddress, handleBlock, handleTransaction } from './handlers'
 
 const PORT = process.env.PORT ?? 3000
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -50,21 +56,20 @@ app.get('/', async (_, res) => {
 app.use(middleware.errorHandler)
 app.use(middleware.notFoundHandler)
 
-const registry = new Registry()
-  .formatAddress((address) => {
-    const decoded = bech32.decodeUnsafe(address.toLowerCase())
-    if (decoded?.prefix === 'bc') return address.toLowerCase()
-    return address
-  })
-  .blockHandler<NewBlock, Array<BlockbookTx>>(async (block) => {
-    const txs = await handleBlock(block.hash)
-    return { txs }
-  })
-  .transactionHandler<BlockbookTx, BitcoinTx>(async (blockbookTx) => {
-    const tx = handleTransaction(blockbookTx)
-    const addresses = getAddresses(blockbookTx)
-    return { addresses, tx }
-  })
+const addressFormatter: AddressFormatter = (address) => formatAddress(address)
+
+const blockHandler: BlockHandler<NewBlock, Array<BlockbookTx>> = async (block) => {
+  const txs = await handleBlock(block.hash)
+  return { txs }
+}
+
+const transactionHandler: TransactionHandler<BlockbookTx, BitcoinTx> = async (blockbookTx) => {
+  const tx = handleTransaction(blockbookTx)
+  const addresses = getAddresses(blockbookTx)
+  return { addresses, tx }
+}
+
+const registry = new Registry({ addressFormatter, blockHandler, transactionHandler })
 
 const server = app.listen(PORT, () => logger.info('Server started'))
 const wsServer = new Server({ server })
