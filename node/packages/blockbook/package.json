@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "axios": "^0.26.0",
+    "axios-retry": "^3.2.5",
     "express": "^4.17.1",
     "swagger-ui-express": "^4.3.0",
     "tsoa": "^3.4.0",

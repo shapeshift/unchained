@@ -5,29 +5,28 @@ import { Account, Tx, TxHistory } from '../../../common/api/src'
  * Contains info about a Bitcoin transaction input
  */
 export interface Vin {
-  txid: string
-  vout: string
+  txid?: string
+  vout?: string
   sequence?: number
   coinbase?: string
-  scriptSig: {
-    asm?: string
+  scriptSig?: {
     hex?: string
   }
-  addresses: Array<string>
+  addresses?: Array<string>
+  value?: string
 }
 
 /**
  * Contains info about a Bitcoin transaction output
  */
 export interface Vout {
-  value: string | number
+  value: string
   n: number
+  opReturn?: string
   scriptPubKey: {
-    asm?: string
     hex?: string
-    type?: string
-    addresses: Array<string>
   }
+  addresses?: Array<string>
 }
 
 /**
@@ -52,7 +51,7 @@ export interface BitcoinTxHistory extends TxHistory {
 /**
  * Contains Bitcoin specific transaction info as returned from the node
  */
-export interface BitcoinTxSpecific {
+export interface BitcoinRawTx {
   txid: string
   hash: string
   version: number
@@ -144,14 +143,24 @@ export interface BitcoinAPI {
   getUtxos(pubkey: string): Promise<Array<Utxo>>
 
   /**
-   * Get transaction specific data directly from the node
+   * Get transaction details
    *
    * @param {string} txid transaction hash
    *
-   * @returns {Promise<BitcoinTxSpecific>} transaction payload
+   * @returns {Promise<BitcoinTx>} transaction payload
    */
-  // @Get('transaction/{txid}')
-  getTransaction(txid: string): Promise<BitcoinTxSpecific>
+  // @Get('tx/{txid}')
+  getTransaction(txid: string): Promise<BitcoinTx>
+
+  /**
+   * Get raw transaction details directly from the node
+   *
+   * @param {string} txid transaction hash
+   *
+   * @returns {Promise<BitcoinRawTx>} transaction payload
+   */
+  // @Get('tx/{txid}/raw')
+  getRawTransaction(txid: string): Promise<BitcoinRawTx>
 
   /**
    * Get current network fee estimates from Blockbook

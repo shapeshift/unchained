@@ -4,10 +4,23 @@ import { join } from 'path'
 import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
 import { Logger } from '@shapeshiftoss/logger'
-import { middleware, ConnectionHandler } from '@shapeshiftoss/common-api'
+import {
+  middleware,
+  ConnectionHandler,
+  Registry,
+  AddressFormatter,
+  BlockHandler,
+  TransactionHandler,
+} from '@shapeshiftoss/common-api'
+import { getAddresses, NewBlock, Tx as BlockbookTx, WebsocketClient } from '@shapeshiftoss/blockbook'
 import { RegisterRoutes } from './routes'
+import { BitcoinTx } from './models'
+import { formatAddress, handleBlock, handleTransaction } from './handlers'
 
-const port = process.env.PORT ?? 3000
+const PORT = process.env.PORT ?? 3000
+const INDEXER_WS_URL = process.env.INDEXER_WS_URL
+
+if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 
 const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'bitcoin', 'api'],
@@ -43,8 +56,27 @@ app.get('/', async (_, res) => {
 app.use(middleware.errorHandler)
 app.use(middleware.notFoundHandler)
 
-const server = app.listen(port, () => logger.info('Server started'))
+const addressFormatter: AddressFormatter = (address) => formatAddress(address)
 
+const blockHandler: BlockHandler<NewBlock, Array<BlockbookTx>> = async (block) => {
+  const txs = await handleBlock(block.hash)
+  return { txs }
+}
+
+const transactionHandler: TransactionHandler<BlockbookTx, BitcoinTx> = async (blockbookTx) => {
+  const tx = handleTransaction(blockbookTx)
+  const addresses = getAddresses(blockbookTx)
+  return { addresses, tx }
+}
+
+const registry = new Registry({ addressFormatter, blockHandler, transactionHandler })
+
+const server = app.listen(PORT, () => logger.info('Server started'))
 const wsServer = new Server({ server })
 
-wsServer.on('connection', (connection) => ConnectionHandler.start(connection))
+wsServer.on('connection', (connection) => ConnectionHandler.start(connection, registry))
+
+new WebsocketClient(INDEXER_WS_URL, {
+  blockHandler: registry.onBlock.bind(registry),
+  transactionHandler: registry.onTransaction.bind(registry),
+})

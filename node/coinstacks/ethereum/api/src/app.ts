@@ -3,11 +3,24 @@ import cors from 'cors'
 import { join } from 'path'
 import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
-import { middleware, ConnectionHandler } from '@shapeshiftoss/common-api'
+import {
+  middleware,
+  ConnectionHandler,
+  Registry,
+  AddressFormatter,
+  BlockHandler,
+  TransactionHandler,
+} from '@shapeshiftoss/common-api'
+import { Tx as BlockbookTx, WebsocketClient, getAddresses, NewBlock } from '@shapeshiftoss/blockbook'
 import { logger } from './logger'
 import { RegisterRoutes } from './routes'
+import { EthereumTx } from './models'
+import { formatAddress, handleBlock, handleTransactionWithInternalTrace } from './handlers'
 
-const port = process.env.PORT ?? 3000
+const PORT = process.env.PORT ?? 3000
+const INDEXER_WS_URL = process.env.INDEXER_WS_URL
+
+if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 
 const app = express()
 
@@ -38,8 +51,29 @@ app.get('/', async (_, res) => {
 app.use(middleware.errorHandler)
 app.use(middleware.notFoundHandler)
 
-const server = app.listen(port, () => logger.info({ port }, 'Server started'))
+const addressFormatter: AddressFormatter = (address) => formatAddress(address)
 
+const blockHandler: BlockHandler<NewBlock, Array<BlockbookTx>> = async (block) => {
+  const txs = await handleBlock(block.hash)
+  return { txs }
+}
+
+const transactionHandler: TransactionHandler<BlockbookTx, EthereumTx> = async (blockbookTx) => {
+  const tx = await handleTransactionWithInternalTrace(blockbookTx)
+  const internalAddresses = (tx.internalTxs ?? []).reduce<Array<string>>((prev, tx) => [...prev, tx.to, tx.from], [])
+  const addresses = [...new Set([...getAddresses(blockbookTx), ...internalAddresses])]
+
+  return { addresses, tx }
+}
+
+const registry = new Registry({ addressFormatter, blockHandler, transactionHandler })
+
+const server = app.listen(PORT, () => logger.info('Server started'))
 const wsServer = new Server({ server })
 
-wsServer.on('connection', (connection) => ConnectionHandler.start(connection))
+wsServer.on('connection', (connection) => ConnectionHandler.start(connection, registry))
+
+new WebsocketClient(INDEXER_WS_URL, {
+  blockHandler: registry.onBlock.bind(registry),
+  transactionHandler: registry.onTransaction.bind(registry),
+})

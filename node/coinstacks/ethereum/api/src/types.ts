@@ -1,7 +1,12 @@
-import { SyncTx } from '@shapeshiftoss/common-ingester'
-import { BlockDocument } from '@shapeshiftoss/common-mongo'
+export interface Cursor {
+  blockHeight?: number
+  blockbookPage: number
+  blockbookTxid?: string
+  etherscanPage: number
+  etherscanTxid?: string
+}
 
-export interface ETHBlock {
+export interface NodeBlock {
   difficulty: string
   extraData: string
   gasLimit: string
@@ -24,8 +29,16 @@ export interface ETHBlock {
   uncles: Array<string>
 }
 
-export interface ETHSyncTx extends SyncTx {
-  internalTxs?: Array<InternalTx>
+export interface CallStack {
+  type: string
+  from: string
+  to: string
+  value?: string
+  gas: string
+  gasUsed: string
+  input: string
+  output: string
+  calls?: Array<CallStack>
 }
 
 export interface EtherscanApiResponse {
@@ -34,7 +47,7 @@ export interface EtherscanApiResponse {
   result: unknown
 }
 
-export interface InternalTx {
+export interface EtherscanInternalTx {
   blockNumber: string
   timeStamp: string
   hash: string
@@ -51,12 +64,4 @@ export interface InternalTx {
   errCode: string
 }
 
-export type InternalTxHistory = Record<string, Array<InternalTx>>
-
-export interface ReorgResult {
-  dbBlock: BlockDocument
-  height: number
-  nodeBlock: ETHBlock
-}
-
-export type TxHistory = Array<string>
+export type InternalTxHistory = Record<string, Array<EtherscanInternalTx>>

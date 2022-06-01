@@ -60,6 +60,16 @@ export interface EthereumTx extends Tx {
   status: number
   inputData?: string
   tokenTransfers?: Array<TokenTransfer>
+  internalTxs?: Array<InternalTx>
+}
+
+/**
+ * Contains info about an Ethereum internal transaction
+ */
+export interface InternalTx {
+  from: string
+  to: string
+  value: string
 }
 
 /**
@@ -73,6 +83,16 @@ export interface EthereumTxHistory extends TxHistory {
  * EthereumAPI coin specific implementation
  */
 export interface EthereumAPI {
+  /**
+   * Get transaction details
+   *
+   * @param {string} txid transaction hash
+   *
+   * @returns {Promise<EthereumTx>} transaction payload
+   */
+  // @Get('tx/{txid}')
+  getTransaction(txid: string): Promise<EthereumTx>
+
   /**
    * Get the estimated gas cost of a transaction
    *
