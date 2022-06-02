@@ -181,7 +181,7 @@ export async function deployApi(
           entryPoints: ['web', 'websecure'],
           routes: [
             {
-              match: `Host(\`${domain}\`)` + extraMatch,
+              match: `Host(\`${domain}\`) || Host(\`alpha-api.${asset}.${additionalRootDomainName}\`)` + extraMatch,
               kind: 'Rule',
               services: [
                 {
