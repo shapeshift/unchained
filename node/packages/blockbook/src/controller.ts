@@ -41,7 +41,7 @@ export class Blockbook extends Controller {
         'Content-Type': 'application/json',
       },
     })
-    axiosRetry(this.instance, { retries: 5, retryDelay: axiosRetry.exponentialDelay })
+    axiosRetry(this.instance, { shouldResetTimeout: true, retries: 5, retryDelay: axiosRetry.exponentialDelay })
   }
 
   /**
