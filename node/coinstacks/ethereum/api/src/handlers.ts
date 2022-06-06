@@ -49,6 +49,8 @@ export const handleBlock = async (hash: string): Promise<Array<BlockbookTx>> => 
 export const handleTransaction = (tx: BlockbookTx): EthereumTx => {
   if (!tx.ethereumSpecific) throw new Error(`invalid blockbook ethereum transaction: ${tx.txid}`)
 
+  const inputData = tx.ethereumSpecific.data
+
   return {
     txid: tx.txid,
     blockHash: tx.blockHash,
@@ -63,7 +65,7 @@ export const handleTransaction = (tx: BlockbookTx): EthereumTx => {
     gasLimit: tx.ethereumSpecific.gasLimit.toString(),
     gasUsed: tx.ethereumSpecific.gasUsed?.toString() ?? '0',
     gasPrice: tx.ethereumSpecific.gasPrice.toString(),
-    inputData: tx.ethereumSpecific.data,
+    inputData: inputData && inputData !== '0x' && inputData !== '0x0' ? inputData : undefined,
     tokenTransfers: tx.tokenTransfers?.map((tt) => ({
       contract: tt.token,
       decimals: tt.decimals,

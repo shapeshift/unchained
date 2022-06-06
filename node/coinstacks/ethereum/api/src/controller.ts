@@ -241,6 +241,10 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
         }
       }
 
+      // if we processed through the whole set of transactions, increase the page number for next fetch
+      if (!blockbookTxs.size) curCursor.blockbookPage++
+      if (!internalTxs.size) curCursor.blockbookPage++
+
       curCursor.blockHeight = txs[txs.length - 1]?.blockHeight
 
       const nextCursor = (() => {
