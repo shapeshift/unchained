@@ -1,14 +1,15 @@
 {
-  "name": "@shapeshiftoss/unchained-pulumi",
-  "version": "7.0.0",
+  "name": "@shapeshiftoss/osmosis-pulumi",
   "license": "MIT",
   "private": true,
   "scripts": {
     "clean": "rm -rf dist node_modules"
   },
   "dependencies": {
-    "@shapeshiftoss/cluster-launcher": "0.8.0",
+    "@pulumi/kubernetes": "^3.16.0",
     "@types/folder-hash": "^4.0.0",
-    "folder-hash": "^4.0.0"
+    "dotenv": "^16.0.0",
+    "folder-hash": "^4.0.0",
+    "path": "^0.12.7"
   }
 }

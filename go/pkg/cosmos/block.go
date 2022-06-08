@@ -41,9 +41,7 @@ func (s *BlockService) WriteBlock(block *Block, latest bool) {
 }
 
 func (s *BlockService) GetBlock(height int) (*Block, error) {
-	s.m.RLock()
 	block, ok := s.Blocks[height]
-	s.m.RUnlock()
 
 	if ok {
 		return block, nil

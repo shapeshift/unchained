@@ -1,5 +1,6 @@
 import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import { Address, Blockbook, Xpub } from '@shapeshiftoss/blockbook'
+import { Cursor } from '@shapeshiftoss/common-api'
 import {
   ApiError,
   BadRequestError,
@@ -8,21 +9,19 @@ import {
   InternalServerError,
   SendTxBody,
   ValidationError,
-  Cursor,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
 import {
   BitcoinAddress,
   BitcoinAPI,
   BitcoinAccount,
-  BitcoinTxSpecific,
+  BitcoinTx,
+  BitcoinRawTx,
   BTCNetworkFee,
   BTCNetworkFees,
   Utxo,
   BitcoinTxHistory,
-  BitcoinTx,
-  Vin,
-  Vout,
 } from './models'
+import { handleTransaction } from './handlers'
 
 const NETWORK = process.env.NETWORK
 const INDEXER_URL = process.env.INDEXER_URL
@@ -98,7 +97,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
       }
 
       // list of all used addresses with additional derived addresses up to gap limit of 20, including any detected balances
-      const addresses = (data.tokens ?? []).map<BitcoinAddress>((token) => ({
+      const addresses = data.tokens?.map<BitcoinAddress>((token) => ({
         balance: token.balance ?? '0',
         pubkey: token.name,
       }))
@@ -180,16 +179,16 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
             n: 0,
             scriptPubKey: {
               hex: 'a9140f7f0fc4f882ea62f32b06f0946f12b055ab91bf87',
-              addresses: ['336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU'],
             },
+            addresses: ['336xGpGweq1wtY4kRTuA4w6d7yDkBU9czU'],
           },
           {
             value: '509834',
             n: 1,
             scriptPubKey: {
               hex: '76a9148c1ef82c52a7e80621c838008b2de791be3a307988ac',
-              addresses: ['1Dmthegfep7fXVqWAPmQ5rMmKcg58GjEF1'],
             },
+            addresses: ['1Dmthegfep7fXVqWAPmQ5rMmKcg58GjEF1'],
           },
         ],
       },
@@ -204,19 +203,14 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
     @Query() cursor?: string,
     @Query() pageSize = 10
   ): Promise<BitcoinTxHistory> {
+    if (pageSize <= 0) throw new ApiError('Bad Request', 422, 'page size must be greater than 0')
+
     try {
       const curCursor = ((): Cursor => {
         try {
           if (!cursor) return { page: 1 }
 
-          const decodedCursor = JSON.parse(Buffer.from(cursor, 'base64').toString('binary'))
-
-          // Validate that the cursor contains a 'page' property that is a positive integer
-          if (!('page' in decodedCursor && Number.isInteger(decodedCursor.page) && decodedCursor.page >= 1)) {
-            throw 'invalid base64 cursor'
-          }
-
-          return decodedCursor
+          return JSON.parse(Buffer.from(cursor, 'base64').toString('binary'))
         } catch (err) {
           const e: BadRequestError = { error: `invalid base64 cursor: ${cursor}` }
           throw new ApiError('Bad Request', 422, JSON.stringify(e))
@@ -240,40 +234,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
       return {
         pubkey: pubkey,
         cursor: nextCursor,
-        txs:
-          data.transactions?.map<BitcoinTx>((tx) => ({
-            txid: tx.txid,
-            blockHash: tx.blockHash,
-            blockHeight: tx.blockHeight,
-            timestamp: tx.blockTime,
-            confirmations: tx.confirmations,
-            value: tx.value,
-            fee: tx.fees ?? '0',
-            hex: tx.hex ?? '',
-            vin:
-              tx.vin?.map<Vin>((vin) => ({
-                txid: vin.txid ?? '',
-                vout: vin.vout?.toString() ?? '',
-                sequence: vin.sequence,
-                coinbase: vin.coinbase,
-                scriptSig: {
-                  asm: vin.asm,
-                  hex: vin.hex,
-                },
-                addresses: vin.addresses ?? [],
-              })) ?? [],
-            vout:
-              tx.vout?.map<Vout>((vout) => ({
-                value: vout.value ?? 0,
-                n: vout.n,
-                scriptPubKey: {
-                  asm: vout.asm,
-                  hex: vout.hex,
-                  type: vout.type,
-                  addresses: vout.addresses ?? [],
-                },
-              })) ?? [],
-          })) ?? [],
+        txs: data.transactions?.map(handleTransaction) ?? [],
       }
     } catch (err) {
       if (err.response) {
@@ -334,65 +295,131 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
   }
 
   /**
-   * Get transaction specific data directly from the node
+   * Get transaction details
    *
    * @param {string} txid transaction hash
    *
    * @example txid "feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580"
    *
-   * @returns {Promise<BitcoinTxSpecific>} transaction payload
+   * @returns {Promise<BitcoinTx>} transaction payload
    */
-  @Example<Array<BitcoinTxSpecific>>([
-    {
-      txid: 'feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580',
-      hash: 'feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580',
-      version: 1,
-      size: 225,
-      vsize: 225,
-      weight: 900,
-      locktime: 0,
-      vin: [
-        {
-          txid: 'e5e9a8bfd71bbf3c36da01cb513a26f094885849c29b41ef8400d9a4f9684156',
-          vout: 1,
-          scriptSig: {
-            asm:
-              '3044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9[ALL] 02eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35',
-            hex:
-              '473044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9012102eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35',
-          },
-          sequence: 4294967295,
+  @Example<BitcoinTx>({
+    txid: 'feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580',
+    blockHash: '0000000000000000000a468a69aedb50269f1dd48048bfa94c175465d5de2548',
+    blockHeight: 702033,
+    timestamp: 1632513682,
+    confirmations: 35181,
+    value: '92118',
+    fee: '22600',
+    hex:
+      '0100000001564168f9a4d90084ef419bc249588894f0263a51cb01da363cbf1bd7bfa8e9e5010000006a473044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9012102eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35ffffffff02d0070000000000001976a9149c9d21f47382762df3ad81391ee0964b28dd951788ac06600100000000001976a9147055de79bc47a9f91e4c488170da7666e900731288ac00000000',
+    vin: [
+      {
+        txid: 'e5e9a8bfd71bbf3c36da01cb513a26f094885849c29b41ef8400d9a4f9684156',
+        vout: '1',
+        sequence: 4294967295,
+        scriptSig: {
+          hex:
+            '473044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9012102eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35',
         },
-      ],
-      vout: [
-        {
-          value: '0.00002',
-          n: 0,
-          scriptPubKey: {
-            asm: 'OP_DUP OP_HASH160 9c9d21f47382762df3ad81391ee0964b28dd9517 OP_EQUALVERIFY OP_CHECKSIG',
-            hex: '76a9149c9d21f47382762df3ad81391ee0964b28dd951788ac',
-            reqSigs: 1,
-            type: 'pubkeyhash',
-            addresses: ['1FH6ehAd5ZFXCM1cLGzHxK1s4dGdq1JusM'],
-          },
+        addresses: ['1DJ3RrzKtDu8HRcxXuRBa4HqZfXGAY1R3B'],
+        value: '114718',
+      },
+    ],
+    vout: [
+      {
+        value: '2000',
+        n: 0,
+        scriptPubKey: {
+          hex: '76a9149c9d21f47382762df3ad81391ee0964b28dd951788ac',
         },
-      ],
-      hex:
-        '0100000001564168f9a4d90084ef419bc249588894f0263a51cb01da363cbf1bd7bfa8e9e5010000006a473044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9012102eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35ffffffff02d0070000000000001976a9149c9d21f47382762df3ad81391ee0964b28dd951788ac06600100000000001976a9147055de79bc47a9f91e4c488170da7666e900731288ac00000000',
-      blockhash: '0000000000000000000a468a69aedb50269f1dd48048bfa94c175465d5de2548',
-      confirmations: 498,
-      time: 1632513682,
-      blocktime: 1632513682,
-    },
-  ])
+        addresses: ['1FH6ehAd5ZFXCM1cLGzHxK1s4dGdq1JusM'],
+      },
+      {
+        value: '90118',
+        n: 1,
+        scriptPubKey: {
+          hex: '76a9147055de79bc47a9f91e4c488170da7666e900731288ac',
+        },
+        addresses: ['1BEyYmi9Vmv3UV6AN76RAfWpzXY23p7ikS'],
+      },
+    ],
+  })
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('transaction/{txid}')
-  async getTransaction(@Path() txid: string): Promise<BitcoinTxSpecific> {
+  @Get('tx/{txid}')
+  async getTransaction(@Path() txid: string): Promise<BitcoinTx> {
+    try {
+      const data = await blockbook.getTransaction(txid)
+      return handleTransaction(data)
+    } catch (err) {
+      if (err.response) {
+        throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
+      }
+
+      throw err
+    }
+  }
+
+  /**
+   * Get raw transaction details directly from the node
+   *
+   * @param {string} txid transaction hash
+   *
+   * @example txid "feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580"
+   *
+   * @returns {Promise<BitcoinRawTx>} transaction payload
+   */
+  @Example<BitcoinRawTx>({
+    txid: 'feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580',
+    hash: 'feab0ffe497740fcc8bcab9c5b12872c4302e629ee8ccc35ed4f6057fc7a4580',
+    version: 1,
+    size: 225,
+    vsize: 225,
+    weight: 900,
+    locktime: 0,
+    vin: [
+      {
+        txid: 'e5e9a8bfd71bbf3c36da01cb513a26f094885849c29b41ef8400d9a4f9684156',
+        vout: 1,
+        scriptSig: {
+          asm:
+            '3044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9[ALL] 02eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35',
+          hex:
+            '473044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9012102eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35',
+        },
+        sequence: 4294967295,
+      },
+    ],
+    vout: [
+      {
+        value: '0.00002',
+        n: 0,
+        scriptPubKey: {
+          asm: 'OP_DUP OP_HASH160 9c9d21f47382762df3ad81391ee0964b28dd9517 OP_EQUALVERIFY OP_CHECKSIG',
+          hex: '76a9149c9d21f47382762df3ad81391ee0964b28dd951788ac',
+          reqSigs: 1,
+          type: 'pubkeyhash',
+          addresses: ['1FH6ehAd5ZFXCM1cLGzHxK1s4dGdq1JusM'],
+        },
+      },
+    ],
+    hex:
+      '0100000001564168f9a4d90084ef419bc249588894f0263a51cb01da363cbf1bd7bfa8e9e5010000006a473044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9012102eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35ffffffff02d0070000000000001976a9149c9d21f47382762df3ad81391ee0964b28dd951788ac06600100000000001976a9147055de79bc47a9f91e4c488170da7666e900731288ac00000000',
+    blockhash: '0000000000000000000a468a69aedb50269f1dd48048bfa94c175465d5de2548',
+    confirmations: 498,
+    time: 1632513682,
+    blocktime: 1632513682,
+  })
+  @Response<BadRequestError>(400, 'Bad Request')
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Get('tx/{txid}/raw')
+  async getRawTransaction(@Path() txid: string): Promise<BitcoinRawTx> {
     try {
       const data = await blockbook.getTransactionSpecific(txid)
-      return data as BitcoinTxSpecific
+      return data as BitcoinRawTx
     } catch (err) {
       if (err.response) {
         throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))

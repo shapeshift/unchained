@@ -51,13 +51,6 @@ export interface Pagination {
 }
 
 /**
- * Contains info for the cursor used for pagination
- */
-export interface Cursor {
-  page: number
-}
-
-/**
  * Contains the serialized raw transaction hex
  */
 export interface SendTxBody {
@@ -70,8 +63,8 @@ export interface SendTxBody {
 export interface Tx {
   txid: string
   blockHash?: string
-  blockHeight?: number
-  timestamp?: number
+  blockHeight: number
+  timestamp: number
 }
 
 /**

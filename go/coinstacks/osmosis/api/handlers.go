@@ -3,50 +3,36 @@ package api
 import (
 	"crypto/sha256"
 	"fmt"
+	"math/big"
 	"strconv"
 
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/coinstacks/osmosis"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
-	"github.com/shapeshift/unchained/pkg/websocket"
 	"github.com/tendermint/tendermint/types"
+	"golang.org/x/sync/errgroup"
 )
 
 type Handler struct {
 	httpClient   *cosmos.HTTPClient
+	grpcClient   *cosmos.GRPCClient
 	wsClient     *cosmos.WSClient
 	blockService *cosmos.BlockService
 }
 
 func (h *Handler) StartWebsocket() error {
-	h.wsClient.TxHandler(func(tx types.EventDataTx, registry websocket.Registry) (interface{}, []string, error) {
-		cosmosTx, signingTx, err := cosmos.DecodeTx(h.wsClient.EncodingConfig(), tx.Tx)
+	h.wsClient.TxHandler(func(tx types.EventDataTx, block *cosmos.Block) (interface{}, []string, error) {
+		osmosisTx, signingTx, err := cosmos.DecodeTx(h.wsClient.EncodingConfig(), tx.Tx)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to decode tx: %v", tx.Tx)
 		}
 
 		txid := fmt.Sprintf("%X", sha256.Sum256(tx.Tx))
 
-		Messages := cosmos.Messages(cosmosTx.GetMsgs())
-
-		if len(Messages) > 0 {
-			// Dont bother getting blocks for or creating transactions that arent in the registry
-			origin := Messages[0].Origin
-			to := Messages[0].To
-			if !registry.HasRegisteredAddress(registry.GetRegisteredAddresses(), origin) && !registry.HasRegisteredAddress(registry.GetRegisteredAddresses(), to) {
-				return nil, nil, errors.Errorf("skipping tx for unregistered address: %s", txid)
-			}
-		}
-
-		block, err := h.blockService.GetBlock(int(tx.Height))
-		if err != nil {
-			return nil, nil, errors.Wrapf(err, "failed to handle tx: %s", txid)
-		}
-
 		t := Tx{
 			BaseTx: api.BaseTx{
-				TxID:        fmt.Sprintf("%X", sha256.Sum256(tx.Tx)),
+				TxID:        txid,
 				BlockHash:   &block.Hash,
 				BlockHeight: &block.Height,
 				Timestamp:   &block.Timestamp,
@@ -58,9 +44,10 @@ func (h *Handler) StartWebsocket() error {
 			GasUsed:       strconv.Itoa(int(tx.Result.GasUsed)),
 			Index:         int(tx.Index),
 			Memo:          signingTx.GetMemo(),
-			Messages:      osmosis.Messages(cosmosTx.GetMsgs()),
+			Messages:      osmosis.Messages(osmosisTx.GetMsgs()),
 		}
 
+		// TODO: check addresses based on events instead of messages
 		seen := make(map[string]bool)
 		addrs := []string{}
 		for _, m := range t.Messages {
@@ -88,39 +75,50 @@ func (h *Handler) StartWebsocket() error {
 	return nil
 }
 
+// TODO: add osmosis apr
 func (h *Handler) GetInfo() (api.Info, error) {
 	info := Info{
 		BaseInfo: api.BaseInfo{
 			Network: "mainnet",
 		},
+		APR: "0",
 	}
 
 	return info, nil
 }
 
 func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
-	accRes, err := h.httpClient.GetAccount(pubkey)
+	info, err := h.GetInfo()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get info")
+	}
+
+	apr, _, err := new(big.Float).Parse(info.(Info).APR, 10)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse apr: %s", apr)
+	}
+
+	accountData, err := h.getAccountData(pubkey, "uosmo", apr)
 	if err != nil {
 		return nil, err
 	}
 
-	balRes, err := h.httpClient.GetBalance(pubkey, "uosmo")
-	if err != nil {
-		return nil, err
-	}
-
-	account := &Account{
+	a := &Account{
 		BaseAccount: api.BaseAccount{
-			Balance:            balRes.Amount,
+			Balance:            accountData.Balance.Amount,
 			UnconfirmedBalance: "0",
-			Pubkey:             accRes.Address,
+			Pubkey:             accountData.Account.Address,
 		},
-		AccountNumber: int(accRes.AccountNumber),
-		Sequence:      int(accRes.Sequence),
-		Assets:        balRes.Assets,
+		AccountNumber: int(accountData.Account.AccountNumber),
+		Sequence:      int(accountData.Account.Sequence),
+		Assets:        accountData.Balance.Assets,
+		Delegations:   accountData.Delegations,
+		Redelegations: accountData.Redelegations,
+		Unbondings:    accountData.Unbondings,
+		Rewards:       accountData.Rewards,
 	}
 
-	return account, nil
+	return a, nil
 }
 
 func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
@@ -174,6 +172,84 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 	return txHistory, nil
 }
 
-func (h *Handler) SendTx(hex string) (string, error) {
-	return h.httpClient.BroadcastTx(hex)
+func (h *Handler) SendTx(rawTx string) (string, error) {
+	return h.httpClient.BroadcastTx(rawTx)
+}
+
+func (h *Handler) EstimateGas(rawTx string) (string, error) {
+	return h.httpClient.GetEstimateGas(rawTx)
+}
+
+func (h *Handler) GetValidators() ([]cosmos.Validator, error) {
+	info, err := h.GetInfo()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get info")
+	}
+
+	apr, _, err := new(big.Float).Parse(info.(Info).APR, 10)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse apr: %s", apr)
+	}
+
+	return h.httpClient.GetValidators(apr)
+}
+
+func (h *Handler) GetValidator(address string) (*cosmos.Validator, error) {
+	info, err := h.GetInfo()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get info")
+	}
+
+	apr, _, err := new(big.Float).Parse(info.(Info).APR, 10)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse apr: %s", apr)
+	}
+
+	return h.httpClient.GetValidator(address, apr)
+}
+
+func (h *Handler) getAccountData(pubkey string, denom string, apr *big.Float) (*AccountData, error) {
+	accountData := &AccountData{}
+
+	g := new(errgroup.Group)
+
+	g.Go(func() error {
+		account, err := h.httpClient.GetAccount(pubkey)
+		accountData.Account = account
+		return err
+	})
+
+	g.Go(func() error {
+		balance, err := h.httpClient.GetBalance(pubkey, denom)
+		accountData.Balance = balance
+		return err
+	})
+
+	g.Go(func() error {
+		delegations, err := h.httpClient.GetDelegations(pubkey, apr)
+		accountData.Delegations = delegations
+		return err
+	})
+
+	g.Go(func() error {
+		redelegations, err := h.httpClient.GetRedelegations(pubkey, apr)
+		accountData.Redelegations = redelegations
+		return err
+	})
+
+	g.Go(func() error {
+		unbondings, err := h.httpClient.GetUnbondings(pubkey, denom, apr)
+		accountData.Unbondings = unbondings
+		return err
+	})
+
+	g.Go(func() error {
+		rewards, err := h.httpClient.GetRewards(pubkey, apr)
+		accountData.Rewards = rewards
+		return err
+	})
+
+	err := g.Wait()
+
+	return accountData, err
 }

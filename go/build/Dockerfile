@@ -9,6 +9,7 @@ COPY ./static /app/static
 COPY ./internal /app/internal
 COPY ./cmd/${COINSTACK} /app/cmd/${COINSTACK}
 COPY ./pkg /app/pkg
+COPY ./coinstacks/${COINSTACK}/*.go /app/coinstacks/${COINSTACK}/
 COPY ./coinstacks/${COINSTACK}/api /app/coinstacks/${COINSTACK}/api
 
 WORKDIR /app/cmd/${COINSTACK}

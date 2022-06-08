@@ -1,5 +1,0 @@
-{
-  "watch": ["../../coinstacks/*/api/dist/**/swagger.json", "../../coinstacks/*/api/dist/**/websocket.js"],
-  "ext": "json",
-  "exec": "yarn build"
-}

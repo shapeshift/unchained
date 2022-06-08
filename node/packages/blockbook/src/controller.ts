@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios'
+import axiosRetry from 'axios-retry'
 import { Controller, Example, Get, Path, Query, Route, Tags } from 'tsoa'
 import WebSocket from 'ws'
 import {
@@ -28,7 +29,8 @@ export class Blockbook extends Controller {
       httpURL: 'https://indexer.ethereum.shapeshift.com',
       wsURL: 'wss://indexer.ethereum.shapeshift.com/websocket',
     },
-    timeout?: number
+    timeout?: number,
+    retries = 3
   ) {
     super()
     this.wsURL = args.wsURL
@@ -40,6 +42,7 @@ export class Blockbook extends Controller {
         'Content-Type': 'application/json',
       },
     })
+    axiosRetry(this.instance, { shouldResetTimeout: true, retries, retryDelay: axiosRetry.exponentialDelay })
   }
 
   /**

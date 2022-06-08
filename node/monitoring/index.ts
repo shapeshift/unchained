@@ -3,8 +3,6 @@ import { getConfig } from './config'
 import * as grafana from './grafana'
 import * as loki from './loki'
 import * as prometheus from './prometheus'
-import * as rabbitmqExporter from './rabbitmqExporter'
-import * as mongodbExporter from './mongodbExporter'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Outputs = Record<string, any>
@@ -54,13 +52,6 @@ export = async (): Promise<Outputs> => {
     },
     { provider }
   )
-
-  //Find a better way to identify assets in the cluster, fine for now
-  const assets = ['bitcoin', 'ethereum']
-  assets.map((asset) => {
-    new mongodbExporter.Deployment(`${name}-mongo`, { namespace: namespace, asset: asset }, { provider })
-    new rabbitmqExporter.Deployment(`${name}-rabbitmq`, { namespace: namespace, asset: asset }, { provider })
-  })
 
   return outputs
 }
