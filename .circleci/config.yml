@@ -58,12 +58,8 @@ aliases:
     indexer-url: http://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
     rpc-url: http://user:password@bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8332
-    api-autoscaling: true
-    api-replicas: 2
     api-max-replicas: 3
     api-cpu-limit: 300m
-    api-cpu-request: 250m
-    api-cpu-threshold: 30
     api-memory-limit: 1Gi
 
   - &ethereum
@@ -74,7 +70,7 @@ aliases:
     indexer-cpu-request: "2"
     indexer-memory-limit: 12Gi
     indexer-replicas: 2
-    indexer-storage-size: 300Gi
+    indexer-storage-size: 500Gi
     indexer-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-indexer-svc.unchained.svc.cluster.local:8001/websocket
     daemon-image: ethereum/client-go:v1.10.15
@@ -99,12 +95,8 @@ aliases:
     indexer-url: http://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
     rpc-url: http://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8332
-    api-autoscaling: true
-    api-replicas: 2
     api-max-replicas: 3
     api-cpu-limit: 300m
-    api-cpu-request: 20m
-    api-cpu-threshold: 30
     api-memory-limit: 1Gi
 
   - &cosmos
@@ -119,7 +111,7 @@ aliases:
     api-replicas: 2
     api-max-replicas: 6
     api-cpu-limit: 500m
-    api-cpu-request: 500m
+    api-cpu-request: 250m
     api-cpu-threshold: 30
     api-memory-limit: 2Gi
 
@@ -127,12 +119,8 @@ aliases:
     <<: *cosmos
     environment: dev
     pulumi-stack: public-dev
-    api-autoscaling: true
-    api-replicas: 2
     api-max-replicas: 3
     api-cpu-limit: 300m
-    api-cpu-request: 300m
-    api-cpu-threshold: 30
     api-memory-limit: 1Gi
 
   - &osmosis
@@ -147,7 +135,7 @@ aliases:
     api-replicas: 2
     api-max-replicas: 6
     api-cpu-limit: 500m
-    api-cpu-request: 500m
+    api-cpu-request: 250m
     api-cpu-threshold: 30
     api-memory-limit: 2Gi
 
@@ -155,12 +143,8 @@ aliases:
     <<: *osmosis
     environment: dev
     pulumi-stack: public-dev
-    api-autoscaling: true
-    api-replicas: 2
     api-max-replicas: 3
     api-cpu-limit: 300m
-    api-cpu-request: 300m
-    api-cpu-threshold: 30
     api-memory-limit: 1Gi
 
 commands:
