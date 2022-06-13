@@ -436,28 +436,40 @@ jobs:
         type: string
       daemon-image:
         type: string
+        default: ""
       daemon-cpu-limit:
         type: string
+        default: ""
       daemon-cpu-request:
         type: string
+        default: ""
       daemon-memory-limit:
         type: string
+        default: ""
       daemon-storage-size:
         type: string
+        default: ""
       api-autoscaling:
         type: boolean
+        default: false 
       api-cpu-threshold:
         type: integer
+        default: 0 
       api-max-replicas:
         type: integer
+        default: 0 
       api-cpu-limit:
         type: string
+        default: ""
       api-cpu-request:
         type: string
+        default: ""
       api-memory-limit:
         type: string
+        default: ""
       api-replicas:
         type: integer
+        default: 0 
     steps:
       - setup_remote_docker:
           version: 20.10.2
