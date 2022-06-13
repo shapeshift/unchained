@@ -1,0 +1,14 @@
+version: '3.6'
+
+services:
+  api:
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.avalanche-api.rule=Host(`api.avalanche.localhost`)'
+      - 'traefik.http.services.avalanche-api.loadbalancer.server.port=3000'
+    image: unchained-local
+    env_file: .env
+    working_dir: /app/coinstacks/avalanche/api
+    command: yarn nodemon
+    volumes:
+      - ../..:/app
