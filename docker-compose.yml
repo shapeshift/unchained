@@ -25,8 +25,9 @@ services:
       # Do not expose containers unless explicitly told so
       - "--providers.docker.exposedbydefault=false"
     networks:
-      - cosmos_default
+      - avalanche_default
       - bitcoin_default
+      - cosmos_default
       - ethereum_default
       - osmosis_default
     ports:
@@ -39,6 +40,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
 networks:
+  avalanche_default:
+    name: avalanche_default
   bitcoin_default:
     name: bitcoin_default
   cosmos_default:

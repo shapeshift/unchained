@@ -8,12 +8,14 @@ RUN apt-get update && \
     liblz4-dev graphviz && \
     apt-get clean
 
-ENV GOLANG_VERSION=go1.15.5.linux-amd64
+ENV GOLANG_VERSION=go1.17.1.linux-amd64
 ENV GOPATH=/go
 ENV PATH=$PATH:$GOPATH/bin
-ENV BLOCKBOOK_VERSION=master
-ENV BLOCKBOOK_URL=https://github.com/trezor/blockbook.git
-ENV ROCKSDB_VERSION=v6.13.3
+#ENV BLOCKBOOK_VERSION=master
+#ENV BLOCKBOOK_URL=https://github.com/trezor/blockbook.git
+ENV BLOCKBOOK_VERSION=avax
+ENV BLOCKBOOK_URL=https://github.com/kaladinlight/blockbook.git
+ENV ROCKSDB_VERSION=v6.22.1
 ENV CGO_CFLAGS="-I/opt/rocksdb/include"
 ENV CGO_LDFLAGS="-L/opt/rocksdb -lrocksdb -lstdc++ -lm -lz -lbz2 -lsnappy -llz4"
 
@@ -35,7 +37,7 @@ RUN git clone -b $BLOCKBOOK_VERSION --depth 1 $BLOCKBOOK_URL
 WORKDIR /blockbook
 
 # build blockbook binary
-RUN go build -ldflags="-s -w -X github.com/trezor/blockbook/common.version=${BLOCKBOOK_VERSION}"
+RUN go build -tags rocksdb_6_16 -ldflags="-s -w -X github.com/trezor/blockbook/common.version=${BLOCKBOOK_VERSION}"
 RUN mv blockbook /bin
 
 # copy in generate config script

@@ -10,8 +10,12 @@ fi
 
 coin=$1
 
+go env -w GO111MODULE=off
+
 # generate coin config
 go run build/templates/generate.go $coin
+
+go env -w GO111MODULE=auto
 
 # copy config to mounted volume
 mv build/pkg-defs/blockbook/blockchaincfg.json /out/config.json
