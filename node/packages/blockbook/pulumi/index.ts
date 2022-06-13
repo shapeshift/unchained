@@ -245,6 +245,40 @@ export async function deployIndexer(
     },
   }
 
+  const volumeClaimTemplates = [
+    {
+      metadata: {
+        name: 'data',
+      },
+      spec: {
+        accessModes: ['ReadWriteOnce'],
+        storageClassName: config.indexer.storageClass,
+        resources: {
+          requests: {
+            storage: config.indexer.storageSize,
+          },
+        },
+      },
+    },
+  ]
+
+  if (config.indexer.daemon) {
+    volumeClaimTemplates.push({
+      metadata: {
+        name: 'data-daemon',
+      },
+      spec: {
+        accessModes: ['ReadWriteOnce'],
+        storageClassName: config.indexer.daemon.storageClass,
+        resources: {
+          requests: {
+            storage: config.indexer.daemon.storageSize,
+          },
+        },
+      },
+    })
+  }
+
   new k8s.apps.v1.StatefulSet(
     `${name}-sts`,
     {
@@ -262,38 +296,7 @@ export async function deployIndexer(
           type: 'RollingUpdate',
         },
         template: podSpec,
-        volumeClaimTemplates: [
-          {
-            metadata: {
-              name: 'data',
-            },
-            spec: {
-              accessModes: ['ReadWriteOnce'],
-              storageClassName: config.indexer.storageClass,
-              resources: {
-                requests: {
-                  storage: config.indexer.storageSize,
-                },
-              },
-            },
-          },
-          {
-            ...(config.indexer.daemon && {
-              metadata: {
-                name: 'data-daemon',
-              },
-              spec: {
-                accessModes: ['ReadWriteOnce'],
-                storageClassName: config.indexer.daemon.storageClass,
-                resources: {
-                  requests: {
-                    storage: config.indexer.daemon.storageSize,
-                  },
-                },
-              },
-            }),
-          },
-        ],
+        volumeClaimTemplates,
       },
     },
     { provider }
