@@ -495,20 +495,20 @@ jobs:
             pulumi config set --path unchained:<< parameters.coinstack >>.api.autoscaling.enabled << parameters.api-autoscaling >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.autoscaling.cpuThreshold << parameters.api-cpu-threshold >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.autoscaling.maxReplicas << parameters.api-max-replicas >>
-            [ -n "<< parameters.environment >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.cpuLimit << parameters.api-cpu-limit >>
-            [ -n "<< parameters.environment >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.cpuRequest << parameters.api-cpu-request >>
-            [ -n "<< parameters.environment >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.memoryLimit << parameters.api-memory-limit >>
+            [ -n "<< parameters.api-cpu-limit >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.cpuLimit << parameters.api-cpu-limit >>
+            [ -n "<< parameters.api-cpu-request >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.cpuRequest << parameters.api-cpu-request >>
+            [ -n "<< parameters.api-memory-limit >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.memoryLimit << parameters.api-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.replicas << parameters.api-replicas >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.cpuLimit << parameters.indexer-cpu-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.cpuRequest << parameters.indexer-cpu-request >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.memoryLimit << parameters.indexer-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.replicas << parameters.indexer-replicas >>
             pulumi config set --path unchained:<< parameters.coinstack >>.indexer.storageSize << parameters.indexer-storage-size >>
-            [ -n "<< parameters.environment >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.image << parameters.daemon-image >>
-            [ -n "<< parameters.environment >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.cpuLimit << parameters.daemon-cpu-limit >>
-            [ -n "<< parameters.environment >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.cpuRequest << parameters.daemon-cpu-request >>
-            [ -n "<< parameters.environment >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.memoryLimit << parameters.daemon-memory-limit >>
-            [ -n "<< parameters.environment >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.storageSize << parameters.daemon-storage-size >>
+            [ -n "<< parameters.daemon-image >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.image << parameters.daemon-image >>
+            [ -n "<< parameters.daemon-cpu-limit >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.cpuLimit << parameters.daemon-cpu-limit >>
+            [ -n "<< parameters.daemon-cpu-request >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.cpuRequest << parameters.daemon-cpu-request >>
+            [ -n "<< parameters.daemon-memory-limit >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.memoryLimit << parameters.daemon-memory-limit >>
+            [ -n "<< parameters.daemon-storage-size >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.storageSize << parameters.daemon-storage-size >>
             pulumi << parameters.pulumi-command >> --suppress-outputs
 
   deploy-coinstack-go:
