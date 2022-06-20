@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from 'axios'
+import axios, { AxiosError, AxiosInstance } from 'axios'
 import axiosRetry from 'axios-retry'
 import { Controller, Example, Get, Path, Query, Route, Tags } from 'tsoa'
 import WebSocket from 'ws'
@@ -87,7 +87,11 @@ export class Blockbook extends Controller {
       const { data } = await this.instance.get<Info>(`api/v2`)
       return data
     } catch (err) {
-      throw new ApiError(err)
+      if (err instanceof AxiosError || err instanceof Error) {
+        throw new ApiError(err)
+      }
+
+      throw err
     }
   }
 
@@ -110,7 +114,11 @@ export class Blockbook extends Controller {
       const { data } = await this.instance.get<BlockIndex>(`api/v2/block-index/${height}`)
       return data
     } catch (err) {
-      throw new ApiError(err)
+      if (err instanceof AxiosError || err instanceof Error) {
+        throw new ApiError(err)
+      }
+
+      throw err
     }
   }
 
@@ -229,7 +237,11 @@ export class Blockbook extends Controller {
       const { data } = await this.instance.get<Tx>(`api/v2/tx/${txid}`)
       return data
     } catch (err) {
-      throw new ApiError(err)
+      if (err instanceof AxiosError || err instanceof Error) {
+        throw new ApiError(err)
+      }
+
+      throw err
     }
   }
 
@@ -244,7 +256,11 @@ export class Blockbook extends Controller {
       const { data } = await this.instance.get(`api/v2/tx-specific/${txid}`)
       return data
     } catch (err) {
-      throw new ApiError(err)
+      if (err instanceof AxiosError || err instanceof Error) {
+        throw new ApiError(err)
+      }
+
+      throw err
     }
   }
 
@@ -436,7 +452,12 @@ export class Blockbook extends Controller {
       })
       return data
     } catch (err) {
-      throw new ApiError(err)
+      if (err instanceof AxiosError || err instanceof Error) {
+        console.log('axios error')
+        throw new ApiError(err)
+      }
+
+      throw err
     }
   }
 
@@ -583,7 +604,11 @@ export class Blockbook extends Controller {
       })
       return data
     } catch (err) {
-      throw new ApiError(err)
+      if (err instanceof AxiosError || err instanceof Error) {
+        throw new ApiError(err)
+      }
+
+      throw err
     }
   }
 
@@ -634,7 +659,11 @@ export class Blockbook extends Controller {
       })
       return data
     } catch (err) {
-      throw new ApiError(err)
+      if (err instanceof AxiosError || err instanceof Error) {
+        throw new ApiError(err)
+      }
+
+      throw err
     }
   }
 
@@ -731,7 +760,11 @@ export class Blockbook extends Controller {
       })
       return data
     } catch (err) {
-      throw new ApiError(err)
+      if (err instanceof AxiosError || err instanceof Error) {
+        throw new ApiError(err)
+      }
+
+      throw err
     }
   }
 
@@ -752,7 +785,11 @@ export class Blockbook extends Controller {
       const { data } = await this.instance.get<SendTx>(`api/v2/sendtx/${hex}`)
       return data
     } catch (err) {
-      throw new ApiError(err)
+      if (err instanceof AxiosError || err instanceof Error) {
+        throw new ApiError(err)
+      }
+
+      throw err
     }
   }
 
@@ -812,7 +849,11 @@ export class Blockbook extends Controller {
       })
       return data
     } catch (err) {
-      throw new ApiError(err)
+      if (err instanceof AxiosError || err instanceof Error) {
+        throw new ApiError(err)
+      }
+
+      throw err
     }
   }
 

@@ -9,7 +9,7 @@
   "dependencies": {
     "@shapeshiftoss/blockbook-pulumi": "^7.0.0",
     "@shapeshiftoss/common-pulumi": "^7.0.0",
-    "@types/folder-hash": "^4.0.0",
-    "folder-hash": "^4.0.0"
+    "@types/folder-hash": "^4.0.1",
+    "folder-hash": "^4.0.2"
   }
 }

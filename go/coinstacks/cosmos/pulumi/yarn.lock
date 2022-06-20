@@ -67,10 +67,10 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha1-p3c2C1s5oaLlEG+OhY8v0tBgxXA=
 
-"@pulumi/kubernetes@^3.16.0":
-  version "3.16.0"
-  resolved "https://registry.yarnpkg.com/@pulumi/kubernetes/-/kubernetes-3.16.0.tgz#cb4d6957330e13c113a1838a2e98b80c08553c10"
-  integrity sha512-nQef0OXTgWIdPOsQQWHWlKPzj26TpHdU9gqgJXhaBvkQUj7jiD/S8w+4jNDFof7ykPZ3I0bd1ycQYVz/lCMVkQ==
+"@pulumi/kubernetes@3.19.3":
+  version "3.19.3"
+  resolved "https://registry.yarnpkg.com/@pulumi/kubernetes/-/kubernetes-3.19.3.tgz#17ec6594f7c0ea764a7b66ca8c67a5c263e7e89e"
+  integrity sha512-4JZSDgJwYulTIpLZaE1hPTIHi9pR96bvIBcBDtZsZWRHmDrEtV7+Kv6MyMIHNb0gLsNE70b0yHY1dCMVjDyOHA==
   dependencies:
     "@pulumi/pulumi" "^3.0.0"
     "@types/glob" "^5.0.35"
@@ -107,7 +107,7 @@
   resolved "https://registry.yarnpkg.com/@pulumi/query/-/query-0.3.0.tgz#f496608e86a18c3dd31b6c533408e2441c29071d"
   integrity sha512-xfo+yLRM2zVjVEA4p23IjQWzyWl1ZhWOGobsBqRpIarzLvwNH/RAGaoehdxlhx4X92302DrpdIFgTICMN4P38w==
 
-"@types/folder-hash@^4.0.0":
+"@types/folder-hash@^4.0.1":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@types/folder-hash/-/folder-hash-4.0.1.tgz#00ad87412d9b18b04c15f37e18a22ddd13e8f2e6"
   integrity sha512-HrIikWNP/7ubX+XB1awPxA+zTI8T3NXgb4g3BQnT4iAWbeZThsaAm+sg+xqO+eK6kPlpOLS6o29FaaWqb2THbA==
@@ -252,10 +252,10 @@ diff@^3.1.0:
   resolved "https://registry.yarnpkg.com/diff/-/diff-3.5.0.tgz#800c0dd1e0a8bfbc95835c202ad220fe317e5a12"
   integrity sha512-A46qtFgd+g7pDZinpnwiRJtxbC1hpgf0uzP3iG89scHk0AUC7A1TGxf5OiiOUv/JMZR8GOt8hL900hV0bOy5xA==
 
-dotenv@^16.0.0:
-  version "16.0.0"
-  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.0.0.tgz#c619001253be89ebb638d027b609c75c26e47411"
-  integrity sha512-qD9WU0MPM4SWLPJy/r2Be+2WgQj8plChsyrCNQzW/0WjvcJQiKQJ9mH3ZgB3fxbUUxgc/11ZJ0Fi5KiimWGz2Q==
+dotenv@^16.0.1:
+  version "16.0.1"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.0.1.tgz#8f8f9d94876c35dac989876a5d3a82a267fdce1d"
+  integrity sha512-1K6hR6wtk2FviQ4kEiSjFiH5rpzEVi8WW0x96aztHVMhEspNpc4DVOUTEHtEva5VThQ8IaBX1Pe4gSzpVVUsKQ==
 
 es-abstract@^1.19.1:
   version "1.19.1"
@@ -297,7 +297,7 @@ esprima@^4.0.0:
   resolved "https://registry.yarnpkg.com/esprima/-/esprima-4.0.1.tgz#13b04cdb3e6c5d19df91ab6987a8695619b0aa71"
   integrity sha512-eGuFFw7Upda+g4p+QHvnW0RyTX/SVeJBDM/gCtMARO0cLuT2HcEKnTPvhjV6aGeqrCB/sbNop0Kszm0jsaWU4A==
 
-folder-hash@^4.0.0:
+folder-hash@^4.0.2:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/folder-hash/-/folder-hash-4.0.2.tgz#facaef6d41d73759673838d385b2151d1a1bd362"
   integrity sha512-Iw9GCqdA+zHfDVvk90TSAV66jq0IwiZaPvPgUiW+DHRwnaPOeZomzlgutx9QclinsQGz/XcVIGlDEJbFhCV5wA==
