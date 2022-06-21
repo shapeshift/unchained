@@ -3,7 +3,7 @@ version: 2.1
 executors:
   pulumi:
     docker:
-      - image: pulumi/pulumi-nodejs:3.24.1
+      - image: pulumi/pulumi-nodejs:3.34.0
 
 aliases:
   - &only-feature

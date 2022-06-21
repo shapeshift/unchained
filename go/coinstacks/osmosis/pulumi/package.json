@@ -6,10 +6,10 @@
     "clean": "rm -rf dist node_modules"
   },
   "dependencies": {
-    "@pulumi/kubernetes": "^3.16.0",
-    "@types/folder-hash": "^4.0.0",
-    "dotenv": "^16.0.0",
-    "folder-hash": "^4.0.0",
+    "@pulumi/kubernetes": "3.19.3",
+    "@types/folder-hash": "^4.0.1",
+    "dotenv": "^16.0.1",
+    "folder-hash": "^4.0.2",
     "path": "^0.12.7"
   }
 }

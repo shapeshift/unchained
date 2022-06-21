@@ -123,8 +123,7 @@ export class Deployment extends k8s.helm.v3.Chart {
                     },
                     {
                       alert: 'KubernetesOutOfCapacity',
-                      expr:
-                        'sum by (node) ((kube_pod_status_phase{phase="Running"} == 1) + on(uid) group_left(node) (0 * kube_pod_info{pod_template_hash=""})) / sum by (node) (kube_node_status_allocatable{resource="pods"}) * 100 > 90',
+                      expr: 'sum by (node) ((kube_pod_status_phase{phase="Running"} == 1) + on(uid) group_left(node) (0 * kube_pod_info{pod_template_hash=""})) / sum by (node) (kube_node_status_allocatable{resource="pods"}) * 100 > 90',
                       for: '2m',
                       labels: {
                         severity: 'warning',
@@ -137,8 +136,7 @@ export class Deployment extends k8s.helm.v3.Chart {
                     },
                     {
                       alert: 'KubernetesContainerOomKiller',
-                      expr:
-                        '(kube_pod_container_status_restarts_total - kube_pod_container_status_restarts_total offset 10m >= 1) and ignoring (reason) min_over_time(kube_pod_container_status_last_terminated_reason{reason="OOMKilled"}[10m]) == 1',
+                      expr: '(kube_pod_container_status_restarts_total - kube_pod_container_status_restarts_total offset 10m >= 1) and ignoring (reason) min_over_time(kube_pod_container_status_last_terminated_reason{reason="OOMKilled"}[10m]) == 1',
                       for: '0m',
                       labels: {
                         severity: 'warning',
@@ -214,8 +212,7 @@ export class Deployment extends k8s.helm.v3.Chart {
                     },
                     {
                       alert: 'KubernetesPodNotHealthy',
-                      expr:
-                        'min_over_time(sum by (namespace, pod) (kube_pod_status_phase{phase=~"Pending|Unknown|Failed"})[15m:1m]) > 0',
+                      expr: 'min_over_time(sum by (namespace, pod) (kube_pod_status_phase{phase=~"Pending|Unknown|Failed"})[15m:1m]) > 0',
                       for: '0m',
                       labels: {
                         severity: 'critical',
@@ -241,8 +238,7 @@ export class Deployment extends k8s.helm.v3.Chart {
                     },
                     {
                       alert: 'KubernetesDaemonsetRolloutStuck',
-                      expr:
-                        'kube_daemonset_status_number_ready / kube_daemonset_status_desired_number_scheduled * 100 < 100 or kube_daemonset_status_desired_number_scheduled - kube_daemonset_status_current_number_scheduled > 0',
+                      expr: 'kube_daemonset_status_number_ready / kube_daemonset_status_desired_number_scheduled * 100 < 100 or kube_daemonset_status_desired_number_scheduled - kube_daemonset_status_current_number_scheduled > 0',
                       for: '10m',
                       labels: {
                         severity: 'warning',
@@ -255,8 +251,7 @@ export class Deployment extends k8s.helm.v3.Chart {
                     },
                     {
                       alert: 'KubernetesApiServerErrors',
-                      expr:
-                        'sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[1m])) / sum(rate(apiserver_request_total{job="apiserver"}[1m])) * 100 > 3',
+                      expr: 'sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[1m])) / sum(rate(apiserver_request_total{job="apiserver"}[1m])) * 100 > 3',
                       for: '2m',
                       labels: {
                         severity: 'critical',
@@ -269,8 +264,7 @@ export class Deployment extends k8s.helm.v3.Chart {
                     },
                     {
                       alert: 'KubernetesApiClientErrors',
-                      expr:
-                        '(sum(rate(rest_client_requests_total{code=~"(4|5).."}[1m])) by (instance, job) / sum(rate(rest_client_requests_total[1m])) by (instance, job)) * 100 > 1',
+                      expr: '(sum(rate(rest_client_requests_total{code=~"(4|5).."}[1m])) by (instance, job) / sum(rate(rest_client_requests_total[1m])) by (instance, job)) * 100 > 1',
                       for: '2m',
                       labels: {
                         severity: 'critical',
@@ -283,8 +277,7 @@ export class Deployment extends k8s.helm.v3.Chart {
                     },
                     {
                       alert: 'KubernetesApiServerLatency',
-                      expr:
-                        'histogram_quantile(0.99, sum(rate(apiserver_request_latencies_bucket{subresource!="log",verb!~"^(?:CONNECT|WATCHLIST|WATCH|PROXY)$"} [10m])) WITHOUT (instance, resource)) / 1e+06 > 1',
+                      expr: 'histogram_quantile(0.99, sum(rate(apiserver_request_latencies_bucket{subresource!="log",verb!~"^(?:CONNECT|WATCHLIST|WATCH|PROXY)$"} [10m])) WITHOUT (instance, resource)) / 1e+06 > 1',
                       for: '2m',
                       labels: {
                         severity: 'warning',

@@ -8,9 +8,9 @@
     "clean": "rm -rf node_modules"
   },
   "dependencies": {
-    "@types/folder-hash": "^4.0.0",
+    "@types/folder-hash": "^4.0.1",
     "@types/object-hash": "^2.2.1",
-    "folder-hash": "^4.0.0",
-    "object-hash": "^2.2.0"
+    "folder-hash": "^4.0.2",
+    "object-hash": "^3.0.0"
   }
 }

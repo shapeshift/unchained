@@ -1,7 +1,7 @@
 import { ethers } from 'ethers'
 import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import { TransactionRequest } from '@ethersproject/abstract-provider'
-import { Blockbook } from '@shapeshiftoss/blockbook'
+import { ApiError as BlockbookApiError, Blockbook } from '@shapeshiftoss/blockbook'
 import {
   ApiError,
   BadRequestError,
@@ -33,6 +33,18 @@ if (!RPC_URL) throw new Error('RPC_URL env var not set')
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
+
+const handleError = (err: unknown): ApiError => {
+  if (err instanceof BlockbookApiError) {
+    return new ApiError(err.response?.statusText ?? 'Internal Server Error', err.response?.status ?? 500, err.message)
+  }
+
+  if (err instanceof Error) {
+    return new ApiError('Internal Server Error', 500, err.message)
+  }
+
+  return new ApiError('Internal Server Error', 500, 'unknown error')
+}
 
 @Route('api/v1')
 @Tags('v1')
@@ -108,11 +120,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
         tokens,
       }
     } catch (err) {
-      if (err.response) {
-        throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
-      }
-
-      throw err
+      throw handleError(err)
     }
   }
 
@@ -258,11 +266,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
         txs: txs,
       }
     } catch (err) {
-      if (err.response) {
-        throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
-      }
-
-      throw err
+      throw handleError(err)
     }
   }
 
@@ -300,11 +304,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
       const data = await blockbook.getTransaction(txid)
       return handleTransactionWithInternalEtherscan(data)
     } catch (err) {
-      if (err.response) {
-        throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
-      }
-
-      throw err
+      throw handleError(err)
     }
   }
 
@@ -395,11 +395,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
       const { result } = await blockbook.sendTransaction(body.hex)
       return result
     } catch (err) {
-      if (err.response) {
-        throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
-      }
-
-      throw err
+      throw handleError(err)
     }
   }
 }

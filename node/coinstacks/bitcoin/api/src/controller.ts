@@ -1,5 +1,5 @@
 import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
-import { Address, Blockbook, Xpub } from '@shapeshiftoss/blockbook'
+import { Address, ApiError as BlockbookApiError, Blockbook, Xpub } from '@shapeshiftoss/blockbook'
 import { Cursor } from '@shapeshiftoss/common-api'
 import {
   ApiError,
@@ -35,6 +35,18 @@ const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 
 const isXpub = (pubkey: string): boolean => {
   return pubkey.startsWith('xpub') || pubkey.startsWith('ypub') || pubkey.startsWith('zpub')
+}
+
+const handleError = (err: unknown): ApiError => {
+  if (err instanceof BlockbookApiError) {
+    return new ApiError(err.response?.statusText ?? 'Internal Server Error', err.response?.status ?? 500, err.message)
+  }
+
+  if (err instanceof Error) {
+    return new ApiError('Internal Server Error', 500, err.message)
+  }
+
+  return new ApiError('Internal Server Error', 500, 'unknown error')
 }
 
 @Route('api/v1')
@@ -127,11 +139,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
         nextChangeAddressIndex: nextAddressIndexes[1] ?? 0,
       }
     } catch (err) {
-      if (err.response) {
-        throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
-      }
-
-      throw err
+      throw handleError(err)
     }
   }
 
@@ -159,16 +167,14 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
         confirmations: 81971,
         value: '510611',
         fee: '224',
-        hex:
-          '020000000158c53ac5b9e1b56b571c9530dc214af7be2efae45974a337d24e555d77d57b16010000006a47304402200e13f2e48612bfe1b8d69f59dfcfc288f3f896a248aac7d70b1dcc2e860e2f70022057487d594e247d6980b330e767c9e2b3e99dc975481999bb0307b5dc96c3923b012102174a52f766c3c174adbcaf1677818e04879cb8f27153d7a44775b050e11a44e0feffffff02090300000000000017a9140f7f0fc4f882ea62f32b06f0946f12b055ab91bf878ac70700000000001976a9148c1ef82c52a7e80621c838008b2de791be3a307988ac98d80900',
+        hex: '020000000158c53ac5b9e1b56b571c9530dc214af7be2efae45974a337d24e555d77d57b16010000006a47304402200e13f2e48612bfe1b8d69f59dfcfc288f3f896a248aac7d70b1dcc2e860e2f70022057487d594e247d6980b330e767c9e2b3e99dc975481999bb0307b5dc96c3923b012102174a52f766c3c174adbcaf1677818e04879cb8f27153d7a44775b050e11a44e0feffffff02090300000000000017a9140f7f0fc4f882ea62f32b06f0946f12b055ab91bf878ac70700000000001976a9148c1ef82c52a7e80621c838008b2de791be3a307988ac98d80900',
         vin: [
           {
             txid: '167bd5775d554ed237a37459e4fa2ebef74a21dc30951c576bb5e1b9c53ac558',
             vout: '1',
             sequence: 4294967294,
             scriptSig: {
-              hex:
-                '47304402200e13f2e48612bfe1b8d69f59dfcfc288f3f896a248aac7d70b1dcc2e860e2f70022057487d594e247d6980b330e767c9e2b3e99dc975481999bb0307b5dc96c3923b012102174a52f766c3c174adbcaf1677818e04879cb8f27153d7a44775b050e11a44e0',
+              hex: '47304402200e13f2e48612bfe1b8d69f59dfcfc288f3f896a248aac7d70b1dcc2e860e2f70022057487d594e247d6980b330e767c9e2b3e99dc975481999bb0307b5dc96c3923b012102174a52f766c3c174adbcaf1677818e04879cb8f27153d7a44775b050e11a44e0',
             },
             addresses: ['1Dmthegfep7fXVqWAPmQ5rMmKcg58GjEF1'],
           },
@@ -237,11 +243,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
         txs: data.transactions?.map(handleTransaction) ?? [],
       }
     } catch (err) {
-      if (err.response) {
-        throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
-      }
-
-      throw err
+      throw handleError(err)
     }
   }
 
@@ -286,11 +288,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
       const data = await blockbook.getUtxo(pubkey)
       return data
     } catch (err) {
-      if (err.response) {
-        throw new ApiError(err.response, err.response.status, JSON.stringify(err.response.data))
-      }
-
-      throw err
+      throw handleError(err)
     }
   }
 
@@ -311,16 +309,14 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
     confirmations: 35181,
     value: '92118',
     fee: '22600',
-    hex:
-      '0100000001564168f9a4d90084ef419bc249588894f0263a51cb01da363cbf1bd7bfa8e9e5010000006a473044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9012102eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35ffffffff02d0070000000000001976a9149c9d21f47382762df3ad81391ee0964b28dd951788ac06600100000000001976a9147055de79bc47a9f91e4c488170da7666e900731288ac00000000',
+    hex: '0100000001564168f9a4d90084ef419bc249588894f0263a51cb01da363cbf1bd7bfa8e9e5010000006a473044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9012102eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35ffffffff02d0070000000000001976a9149c9d21f47382762df3ad81391ee0964b28dd951788ac06600100000000001976a9147055de79bc47a9f91e4c488170da7666e900731288ac00000000',
     vin: [
       {
         txid: 'e5e9a8bfd71bbf3c36da01cb513a26f094885849c29b41ef8400d9a4f9684156',
         vout: '1',
         sequence: 4294967295,
         scriptSig: {
-          hex:
-            '473044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9012102eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35',
+          hex: '473044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9012102eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35',
         },
         addresses: ['1DJ3RrzKtDu8HRcxXuRBa4HqZfXGAY1R3B'],
         value: '114718',
@@ -354,11 +350,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
       const data = await blockbook.getTransaction(txid)
       return handleTransaction(data)
     } catch (err) {
-      if (err.response) {
-        throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
-      }
-
-      throw err
+      throw handleError(err)
     }
   }
 
@@ -384,10 +376,8 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
         txid: 'e5e9a8bfd71bbf3c36da01cb513a26f094885849c29b41ef8400d9a4f9684156',
         vout: 1,
         scriptSig: {
-          asm:
-            '3044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9[ALL] 02eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35',
-          hex:
-            '473044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9012102eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35',
+          asm: '3044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9[ALL] 02eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35',
+          hex: '473044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9012102eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35',
         },
         sequence: 4294967295,
       },
@@ -405,8 +395,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
         },
       },
     ],
-    hex:
-      '0100000001564168f9a4d90084ef419bc249588894f0263a51cb01da363cbf1bd7bfa8e9e5010000006a473044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9012102eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35ffffffff02d0070000000000001976a9149c9d21f47382762df3ad81391ee0964b28dd951788ac06600100000000001976a9147055de79bc47a9f91e4c488170da7666e900731288ac00000000',
+    hex: '0100000001564168f9a4d90084ef419bc249588894f0263a51cb01da363cbf1bd7bfa8e9e5010000006a473044022058b1ed5ed5aceeb078c684a146794ec56e3e043f5341774e684003a4c0c4a9f602204424e9fa2fc99051d55685f19746849120bdce9e19608a3f0503373823804eb9012102eeda6fd963f4a0a0044637ff4c8ba9275e056d745782b44736f04623ff3eca35ffffffff02d0070000000000001976a9149c9d21f47382762df3ad81391ee0964b28dd951788ac06600100000000001976a9147055de79bc47a9f91e4c488170da7666e900731288ac00000000',
     blockhash: '0000000000000000000a468a69aedb50269f1dd48048bfa94c175465d5de2548',
     confirmations: 498,
     time: 1632513682,
@@ -421,11 +410,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
       const data = await blockbook.getTransactionSpecific(txid)
       return data as BitcoinRawTx
     } catch (err) {
-      if (err.response) {
-        throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
-      }
-
-      throw err
+      throw handleError(err)
     }
   }
 
@@ -450,11 +435,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
       const { result } = await blockbook.sendTransaction(body.hex)
       return result
     } catch (err) {
-      if (err.response) {
-        throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
-      }
-
-      throw err
+      throw handleError(err)
     }
   }
 
@@ -483,11 +464,7 @@ export class Bitcoin extends Controller implements BaseAPI, BitcoinAPI {
         return { ...prev, [key]: networkFee }
       }, {})
     } catch (err) {
-      if (err.response) {
-        throw new ApiError(err.response.statusText, err.response.status, JSON.stringify(err.response.data))
-      }
-
-      throw err
+      throw handleError(err)
     }
   }
 }

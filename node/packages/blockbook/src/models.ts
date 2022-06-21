@@ -1,13 +1,18 @@
-import { AxiosError } from 'axios'
+import axios, { AxiosError } from 'axios'
 
 /**
  * Generic api error for handling failed requests
  */
-export class ApiError extends Error {
-  constructor(err: AxiosError) {
-    super(`${err.message}${err.response ? `: ${JSON.stringify(err.response.data.error)}` : ''}`)
+export class ApiError extends AxiosError {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  constructor(err: AxiosError<any> | Error) {
+    if (axios.isAxiosError(err)) {
+      super(err.response?.data?.error ?? JSON.stringify(err.response?.data) ?? err.message)
+    } else {
+      super(err.message)
+    }
 
-    Object.assign(this, err)
+    Object.assign(this, err, { message: this.message })
   }
 }
 

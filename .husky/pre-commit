@@ -3,5 +3,5 @@
 
 # have to use yarn instead of npx because of npx's weird behavior
 cd node
-yarn lint-staged
-yarn lint-staged --cwd ../go
+FORCE_COLOR=1 yarn lint-staged --allow-empty
+FORCE_COLOR=1 yarn lint-staged --allow-empty --cwd ../go
