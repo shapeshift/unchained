@@ -233,29 +233,3 @@ type Value struct {
 	// example: udenom
 	Denom string `json:"denom"`
 }
-
-// Info about epoch provisions for osmosis
-type EpochProvisionResponse struct {
-	epoch_provisions string
-}
-
-// Info about osmosis distribution proportions for staking
-type DistributionProportions struct {
-	staking           string
-	pool_incentives   string
-	developer_rewards string
-	community_pool    string
-}
-
-// Info about osmosis mint params for staking
-type MintParams struct {
-	mint_denom               string
-	genesis_epoch_provisions string
-	epoch_identifier         string
-	distribution_proportions DistributionProportions
-}
-
-// Info about osmosis mint params response for staking
-type MintParamsResponse struct {
-	params MintParams
-}

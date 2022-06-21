@@ -1,8 +1,6 @@
 package cosmos
 
 import (
-	"fmt"
-
 	"github.com/pkg/errors"
 )
 
@@ -14,7 +12,7 @@ func (c *HTTPClient) GetOsmosisEpochs(denom string) (string, error) {
 		} `json:"amount"`
 	}
 
-	_, err := c.cosmos.R().SetResult(&res).Get(fmt.Sprintf("/osmosis/epochs/v1beta1/epochs"))
+	_, err := c.cosmos.R().SetResult(&res).Get("/osmosis/epochs/v1beta1/epochs")
 	if err != nil {
 		return "0", errors.Wrapf(err, "failed to get total supply of: %s", denom)
 	}
