@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *HTTPClient) GetStakingDistrobutions() (string, error) {
+func (c *HTTPClient) GetStakingDistributions() (string, error) {
 	var res struct {
 		MintParams struct {
 			DistributionProportions struct {
