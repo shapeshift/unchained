@@ -79,6 +79,9 @@ func (h *Handler) StartWebsocket() error {
 func (h *Handler) GetInfo() (api.Info, error) {
 
 	bondedTokens, err := h.httpClient.GetBondedTokens()
+	if err != nil {
+		return nil, err
+	}
 
 	bondedTokensFloat, err := strconv.ParseFloat(bondedTokens, 64)
 	if err != nil {
