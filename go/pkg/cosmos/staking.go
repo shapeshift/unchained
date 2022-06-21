@@ -121,3 +121,14 @@ func grpcValidator(validator types.Validator, apr *big.Float) *Validator {
 		Commission:  commission,
 	}
 }
+
+func (c *HTTPClient) GetPool(addr string, apr *big.Float) (*Validator, error) {
+	var res QueryValidatorResponse
+
+	_, err := c.cosmos.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/staking/v1beta1/pool"))
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get pool")
+	}
+
+	return httpValidator(res.Validator, apr), nil
+}
