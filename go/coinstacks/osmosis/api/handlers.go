@@ -75,7 +75,6 @@ func (h *Handler) StartWebsocket() error {
 	return nil
 }
 
-// TODO: add osmosis apr
 func (h *Handler) GetInfo() (api.Info, error) {
 
 	bondedTokens, err := h.httpClient.GetBondedTokens()

@@ -17,8 +17,6 @@ func (c *HTTPClient) GetStakingDistributions() (string, error) {
 	if err != nil {
 		return "0", errors.Wrapf(err, "failed to get mint params")
 	}
-	logger.Infof("res: %+v", res)
-	logger.Infof("MintParamsResponse: %+v", res)
 
 	return res.MintParams.DistributionProportions.Staking, nil
 }
@@ -31,7 +29,6 @@ func (c *HTTPClient) GetEpochProvisions() (string, error) {
 	if err != nil {
 		return "0", errors.Wrapf(err, "failed to GetEpochProvisions")
 	}
-	logger.Infof("res: %+v", res)
 
 	return res.EpochProvisions, nil
 }
