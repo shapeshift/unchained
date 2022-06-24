@@ -4,11 +4,11 @@ services:
   api:
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.bitcoin-api.rule=Host(`api.bitcoin.localhost`)'
-      - 'traefik.http.services.bitcoin-api.loadbalancer.server.port=3000'
+      - 'traefik.http.routers.dogecoin-api.rule=Host(`api.dogecoin.localhost`)'
+      - 'traefik.http.services.dogecoin-api.loadbalancer.server.port=3000'
     image: unchained-local
     env_file: .env
-    working_dir: /app/coinstacks/bitcoin/api
+    working_dir: /app/coinstacks/dogecoin/api
     command: yarn nodemon
     volumes:
       - ../..:/app

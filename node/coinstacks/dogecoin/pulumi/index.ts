@@ -15,7 +15,7 @@ export = async (): Promise<Outputs> => {
   const { cluster } = config
 
   const name = 'unchained'
-  const asset = config.network !== 'mainnet' ? `bitcoin-${config.network}` : 'bitcoin'
+  const asset = config.network !== 'mainnet' ? `dogecoin-${config.network}` : 'dogecoin'
   const outputs: Outputs = {}
 
   let provider: k8s.Provider
@@ -29,7 +29,7 @@ export = async (): Promise<Outputs> => {
     getEnv({ path: join(__dirname, '../.env') })
   } else if (config.isLocal) {
     throw new Error(
-      'you must run `cp sample.env .env` from the bitcoin coinstack directory and fill out any empty values.'
+      'you must run `cp sample.env .env` from the dogecoin coinstack directory and fill out any empty values.'
     )
   }
 

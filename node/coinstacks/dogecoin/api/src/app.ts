@@ -23,7 +23,7 @@ const INDEXER_WS_URL = process.env.INDEXER_WS_URL
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 
 const logger = new Logger({
-  namespace: ['unchained', 'coinstacks', 'bitcoin', 'api'],
+  namespace: ['unchained', 'coinstacks', 'dogecoin', 'api'],
   level: process.env.LOG_LEVEL,
 })
 
@@ -33,11 +33,13 @@ app.use(json())
 app.use(urlencoded({ extended: true }))
 app.use(cors())
 
-app.get('/health', async (_, res) => res.json({ status: 'up', network: 'bitcoin', connections: wsServer.clients.size }))
+app.get('/health', async (_, res) =>
+  res.json({ status: 'up', network: 'dogecoin', connections: wsServer.clients.size })
+)
 
 const options = {
   customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'ShapeShift Bitcoin API Docs',
+  customSiteTitle: 'ShapeShift dogecoin API Docs',
   customfavIcon: '/public/favi-blue.png',
   swaggerUrl: '/swagger.json',
 }

@@ -2,7 +2,7 @@ IMAGE = blockbook
 PACKAGER = $(shell id -u):$(shell id -g)
 
 gen-config:
-	- docker run --rm -t -e PACKAGER=$(PACKAGER) -v "$(CURDIR):/out" $(IMAGE) ./generate-config.sh bitcoin
+	- docker run --rm -t -e PACKAGER=$(PACKAGER) -v "$(CURDIR):/out" $(IMAGE) ./generate-config.sh dogecoin
 
 run:
 	- mkdir -p db

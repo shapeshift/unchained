@@ -25,7 +25,7 @@ export interface BitcoinConfig {
 export const getConfig = async (): Promise<BitcoinConfig> => {
   let config: Config
   try {
-    config = new pulumi.Config('unchained').requireObject<Config>('bitcoin')
+    config = new pulumi.Config('unchained').requireObject<Config>('dogecoin')
   } catch (e) {
     throw new pulumi.RunError(
       `Could not find required configuration file. \n\tDid you copy the Pulumi.sample.yaml file to Pulumi.${pulumi.getStack()}.yaml and update the necessary configuration?`

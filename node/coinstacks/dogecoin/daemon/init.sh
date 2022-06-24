@@ -3,7 +3,7 @@
 set -e
 
 start_coin() {
-  bitcoind \
+  dogecoind \
     -rpcuser=user \
     -rpcpassword=password \
     -rpcallowip=0.0.0.0/0 \
