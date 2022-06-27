@@ -193,6 +193,7 @@ aliases:
     api-cpu-threshold: 30
     api-memory-limit: 2Gi
     rpc-url: http://user:password@dogecoin-indexer-svc.unchained.svc.cluster.local:8332
+    api: false
 
   - &dogecoin-dev
     <<: *dogecoin
