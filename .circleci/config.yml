@@ -876,30 +876,30 @@ workflows:
           <<: *only-main
 
       ####### DOGECOIN
-      - deploy-coinstack-node:
-          name: preview dogecoin (shapeshift)
-          organization: SHAPESHIFT
-          pulumi-command: preview
-          requires:
-            - validate dependencies (shapeshift)
-          <<: *dogecoin
-          <<: *only-main
+      # - deploy-coinstack-node:
+      #     name: preview dogecoin (shapeshift)
+      #     organization: SHAPESHIFT
+      #     pulumi-command: preview
+      #     requires:
+      #       - validate dependencies (shapeshift)
+      #     <<: *dogecoin
+      #     <<: *only-main
 
-      - approve-coinstack:
-          name: approve dogecoin coinstack (shapeshift)
-          type: approval
-          requires:
-            - preview dogecoin (shapeshift)
-          <<: *only-main
+      # - approve-coinstack:
+      #     name: approve dogecoin coinstack (shapeshift)
+      #     type: approval
+      #     requires:
+      #       - preview dogecoin (shapeshift)
+      #     <<: *only-main
 
-      - deploy-coinstack-node:
-          name: deploy dogecoin (shapeshift)
-          organization: SHAPESHIFT
-          pulumi-command: up -f --yes
-          requires:
-            - approve dogecoin coinstack (shapeshift)
-          <<: *dogecoin
-          <<: *only-main
+      # - deploy-coinstack-node:
+      #     name: deploy dogecoin (shapeshift)
+      #     organization: SHAPESHIFT
+      #     pulumi-command: up -f --yes
+      #     requires:
+      #       - approve dogecoin coinstack (shapeshift)
+      #     <<: *dogecoin
+      #     <<: *only-main
 
       ####### ETHEREUM
       - deploy-coinstack-node:
