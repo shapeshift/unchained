@@ -3,8 +3,8 @@
 TOLERANCE=1
 
 BLOCKHEIGHT_LOCAL=$(curl -s -H 'content-type: application/json' -u user:password  -d '{ "jsonrpc": "1.0", "id": "getinfo", "method": "getblockchaininfo", "params": [] }' http://localhost:8332 | jq .result.blocks)
-BLOCKHEIGHT_REMOTE_SOURCE_1=$(curl -s https://sochain.com/api/v2/get_info/btc | jq .data.blocks)
-BLOCKHEIGHT_REMOTE_SOURCE_2=$(curl -s https://api.blockcypher.com/v1/btc/main | jq .height)
+BLOCKHEIGHT_REMOTE_SOURCE_1=$(curl -s https://sochain.com/api/v2/get_info/doge | jq .data.blocks)
+BLOCKHEIGHT_REMOTE_SOURCE_2=$(curl -s https://api.blockcypher.com/v1/doge/main | jq .height)
 
 ARRAY=($BLOCKHEIGHT_REMOTE_SOURCE_1 $BLOCKHEIGHT_REMOTE_SOURCE_2)
 BLOCKHEIGHT_BEST=${ARRAY[0]}
