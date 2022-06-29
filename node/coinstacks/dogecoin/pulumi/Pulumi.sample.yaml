@@ -39,6 +39,6 @@ config:
     #  daemon:
     #    cpuLimit: '2'
     #    cpuRequest: '2'
-    #    image: 'ruimarinho/bitcoin-core:0.21.1'
+    #    image: 'greenbigfrog/dogecoin:1.14.5'
     #    memoryLimit: '24Gi'
     #    storageSize: '1500Gi'
