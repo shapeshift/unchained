@@ -169,6 +169,44 @@ aliases:
     indexer-url: http://avalanche-indexer-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://avalanche-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
 
+  - &dogecoin
+    coinstack: dogecoin
+    pulumi-stack: public
+    pulumi-dir: coinstacks/dogecoin/pulumi
+    indexer-cpu-limit: "4"
+    indexer-cpu-request: "2"
+    indexer-memory-limit: 24Gi
+    indexer-replicas: 2
+    indexer-storage-size: 250Gi
+    indexer-url: http://dogecoin-indexer-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://dogecoin-indexer-svc.unchained.svc.cluster.local:8001/websocket
+    daemon-image: greenbigfrog/dogecoin:1.14.5
+    daemon-cpu-limit: "2"
+    daemon-cpu-request: "1"
+    daemon-memory-limit: 12Gi
+    daemon-storage-size: 250Gi
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 6
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
+    api-cpu-threshold: 30
+    api-memory-limit: 2Gi
+    rpc-url: http://user:password@dogecoin-indexer-svc.unchained.svc.cluster.local:8332
+    api: false
+
+  - &dogecoin-dev
+    <<: *dogecoin
+    environment: dev
+    pulumi-stack: public-dev
+    indexer-replicas: 1
+    indexer-url: http://dogecoin-indexer-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://dogecoin-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
+    rpc-url: http://user:password@dogecoin-indexer-svc.unchained-dev.svc.cluster.local:8332
+    api-max-replicas: 3
+    api-cpu-limit: 300m
+    api-memory-limit: 1Gi
+
 commands:
   setup-runtime:
     description: setup runtime environment
@@ -691,6 +729,15 @@ workflows:
           <<: *only-develop
 
       - deploy-coinstack-node:
+          name: deploy dogecoin develop (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: up -f --yes
+          requires:
+            - deploy dependencies (shapeshift)
+          <<: *dogecoin-dev
+          <<: *only-develop
+
+      - deploy-coinstack-node:
           name: deploy ethereum develop (shapeshift)
           organization: SHAPESHIFT
           pulumi-command: up -f --yes
@@ -827,6 +874,32 @@ workflows:
             - approve bitcoin coinstack (shapeshift)
           <<: *bitcoin
           <<: *only-main
+
+      ####### DOGECOIN
+      # - deploy-coinstack-node:
+      #     name: preview dogecoin (shapeshift)
+      #     organization: SHAPESHIFT
+      #     pulumi-command: preview
+      #     requires:
+      #       - validate dependencies (shapeshift)
+      #     <<: *dogecoin
+      #     <<: *only-main
+
+      # - approve-coinstack:
+      #     name: approve dogecoin coinstack (shapeshift)
+      #     type: approval
+      #     requires:
+      #       - preview dogecoin (shapeshift)
+      #     <<: *only-main
+
+      # - deploy-coinstack-node:
+      #     name: deploy dogecoin (shapeshift)
+      #     organization: SHAPESHIFT
+      #     pulumi-command: up -f --yes
+      #     requires:
+      #       - approve dogecoin coinstack (shapeshift)
+      #     <<: *dogecoin
+      #     <<: *only-main
 
       ####### ETHEREUM
       - deploy-coinstack-node:
