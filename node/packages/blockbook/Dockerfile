@@ -24,8 +24,6 @@ RUN cd /opt && wget https://dl.google.com/go/$GOLANG_VERSION.tar.gz && \
     tar xf $GOLANG_VERSION.tar.gz
 RUN ln -s /opt/go/bin/go /usr/bin/go
 RUN mkdir -p $GOPATH
-RUN echo -n "GO version: " && go version
-RUN echo -n "GOPATH: " && echo $GOPATH
 
 # install rocksdb
 RUN cd /opt && git clone -b $ROCKSDB_VERSION --depth 1 https://github.com/facebook/rocksdb.git
