@@ -171,7 +171,7 @@ aliases:
     <<: *avalanche
     environment: dev
     pulumi-stack: public-dev
-    indexer-replicas: 1
+    indexer-replicas: 2
     indexer-url: http://avalanche-indexer-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://avalanche-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-max-replicas: 3
