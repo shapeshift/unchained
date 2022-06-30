@@ -4,6 +4,7 @@ set -e
 
 start_coin() {
   dogecoind \
+    -port=22556 \
     -rpcuser=user \
     -rpcpassword=password \
     -rpcallowip=0.0.0.0/0 \
@@ -17,6 +18,7 @@ start_coin() {
     -zmqpubhashtx=tcp://127.0.0.1:28332 \
     -zmqpubhashblock=tcp://127.0.0.1:28332 \
     -rpcworkqueue=1100 \
+    -rpcport=8332 \
     -maxmempool=2000 \
     -dbcache=4000 &
   PID="$!"
