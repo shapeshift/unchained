@@ -166,7 +166,7 @@ export const getInternalTransactionsTrace = async (txid: string): Promise<Array<
 
 export const getInternalTransactionsEtherscan = async (txid: string): Promise<Array<InternalTx> | undefined> => {
   const { data } = await axios.get<EtherscanApiResponse>(
-    `https://api.etherscan.io/api?module=account&action=txlistinternal&txhash=${txid}&apikey=${ETHERSCAN_API_KEY}`
+    `https://api.snowtrace.io/api?module=account&action=txlistinternal&txhash=${txid}&apikey=${ETHERSCAN_API_KEY}`
   )
 
   if (data.status === '0') return []
@@ -184,7 +184,7 @@ export const getInternalTransactionHistoryEtherscan = async (
   pageSize: number
 ): Promise<Array<EtherscanInternalTx> | undefined> => {
   const { data } = await axios.get<EtherscanApiResponse>(
-    `https://api.etherscan.io/api?module=account&action=txlistinternal&address=${address}&page=${page}&offset=${pageSize}&sort=desc&apikey=${ETHERSCAN_API_KEY}`
+    `https://api.snowtrace.io/api?module=account&action=txlistinternal&address=${address}&page=${page}&offset=${pageSize}&sort=desc&apikey=${ETHERSCAN_API_KEY}`
   )
 
   if (data.status === '0') return []
