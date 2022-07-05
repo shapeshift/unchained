@@ -126,61 +126,31 @@ func (h *Handler) getAPRData() (*APRData, error) {
 }
 
 func (h *Handler) GetInfo() (api.Info, error) {
-	logger.Info("fuck1")
 	aprData, err := h.getAPRData()
-	if err != nil {
-		return nil, err
-	}
-	logger.Info("fuck2")
 
-	bondedTokensFloat, err := strconv.ParseFloat(aprData.bondedTokens, 64)
-	if err != nil {
-		return nil, err
-	}
-	logger.Info("fuck3")
-
-	epochProvisionFloat, err := strconv.ParseFloat(aprData.epochProvisions, 64)
-	if err != nil {
-		return nil, err
-	}
-	logger.Info("fuck4")
-	stakingDistributionsFloat, err := strconv.ParseFloat(aprData.stakingDistributions, 64)
-
-	if err != nil {
-		return nil, err
-	}
-	logger.Info("fuck5")
-
-	mintingEpochProvision := epochProvisionFloat * stakingDistributionsFloat
-
-	//static
-	totalSupply := "1000000000"
-	totalSupplyfloat, err := strconv.ParseFloat(totalSupply, 64)
+	totalSupply, _, err := new(big.Float).Parse("1000000000", 10)
 	if err != nil {
 		return nil, err
 	}
 
-	epochDuration := "86400"
-	epochDurationFloat, err := strconv.ParseFloat(epochDuration, 64)
+	yearDays, _, err := new(big.Float).Parse("365", 10)
 	if err != nil {
 		return nil, err
 	}
 
-	yearMintingProvision := mintingEpochProvision * ((365 * 24 * 3600) / epochDurationFloat)
+	yearMintingProvision := new(big.Float).Mul(new(big.Float).Mul(aprData.bEpochProvisions, aprData.bStakingDistributions), yearDays)
 
-	ratio := bondedTokensFloat / totalSupplyfloat
+	inflation := new(big.Float).Quo(yearMintingProvision, totalSupply)
 
-	inflation := yearMintingProvision / totalSupplyfloat
+	ratio := new(big.Float).Quo(aprData.bBondedTokens, totalSupply)
 
-	apr := inflation / ratio
-
-	aprString := fmt.Sprintf("%f", apr)
+	apr := new(big.Float).Quo(inflation, ratio)
 
 	info := Info{
 		BaseInfo: api.BaseInfo{
 			Network: "mainnet",
 		},
-		APR: aprString,
+		APR: fmt.Sprintf("%f", apr),
 	}
 
 	return info, nil

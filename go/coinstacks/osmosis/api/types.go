@@ -93,4 +93,6 @@ type APRData struct {
 	bStakingDistributions *big.Float
 	epochProvisions       string
 	bEpochProvisions      *big.Float
+	totalSupply           string
+	bTotalSupply          *big.Float
 }
