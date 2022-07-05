@@ -11,7 +11,7 @@ import {
   SendTxBody,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { EthereumAccount, EthereumAPI, EthereumTx, EthereumTxHistory, GasFees, TokenBalance } from './models'
+import { AvalancheAccount, AvalancheAPI, AvalancheTx, AvalancheTxHistory, GasFees, TokenBalance } from './models'
 import { logger } from './logger'
 import {
   getBlockbookTxs,
@@ -48,7 +48,7 @@ const handleError = (err: unknown): ApiError => {
 
 @Route('api/v1')
 @Tags('v1')
-export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
+export class Avalanche extends Controller implements BaseAPI, AvalancheAPI {
   /**
    * Get information about the running coinstack
    *
@@ -69,11 +69,11 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
    *
    * @param {string} pubkey account address
    *
-   * @returns {Promise<EthereumAccount>} account details
+   * @returns {Promise<AvalancheAccount>} account details
    *
    * @example pubkey "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
    */
-  @Example<EthereumAccount>({
+  @Example<AvalancheAccount>({
     balance: '284809805024198107',
     unconfirmedBalance: '0',
     nonce: 1,
@@ -93,7 +93,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}')
-  async getAccount(@Path() pubkey: string): Promise<EthereumAccount> {
+  async getAccount(@Path() pubkey: string): Promise<AvalancheAccount> {
     try {
       const data = await blockbook.getAddress(pubkey, undefined, undefined, undefined, undefined, 'tokenBalances')
 
@@ -135,7 +135,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
    *
    * @example pubkey "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
    */
-  @Example<EthereumTxHistory>({
+  @Example<AvalancheTxHistory>({
     pubkey: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
     cursor:
       'eyJibG9ja2Jvb2tQYWdlIjoxLCJldGhlcnNjYW5QYWdlIjoxLCJibG9ja2Jvb2tUeGlkIjoiMHhhZWU0MzJmODUzZmRjMTNhZDlmZjZjYWJlMmEzOTQwM2Q4N2RkZWUxODQyNDk2ODE4ZmNkODg3NDdmNjU2NmY5IiwiYmxvY2tIZWlnaHQiOjEzODUwMjEzfQ==',
@@ -166,7 +166,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
     @Path() pubkey: string,
     @Query() cursor?: string,
     @Query() pageSize = 10
-  ): Promise<EthereumTxHistory> {
+  ): Promise<AvalancheTxHistory> {
     if (pageSize <= 0) throw new ApiError('Bad Request', 422, 'page size must be greater than 0')
 
     const curCursor = ((): Cursor => {
@@ -191,7 +191,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
         }
       }
 
-      const txs: Array<EthereumTx> = []
+      const txs: Array<AvalancheTx> = []
       for (let i = 0; i < pageSize; i++) {
         if (!blockbookTxs.size && hasMoreBlockbookTxs) {
           curCursor.blockbookPage++
@@ -279,7 +279,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
    *
    * @returns {Promise<BitcoinTx>} transaction payload
    */
-  @Example<EthereumTx>({
+  @Example<AvalancheTx>({
     txid: '0x8825fe8d60e1aa8d990f150bffe1196adcab36d0c4e98bac76c691719103b79d',
     blockHash: '0x122f1e1b594b797d96c1777ce9cdb68ddb69d262ac7f2ddc345909aba4ebabd7',
     blockHeight: 14813163,
@@ -299,7 +299,7 @@ export class Ethereum extends Controller implements BaseAPI, EthereumAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('tx/{txid}')
-  async getTransaction(@Path() txid: string): Promise<EthereumTx> {
+  async getTransaction(@Path() txid: string): Promise<AvalancheTx> {
     try {
       const data = await blockbook.getTransaction(txid)
       return handleTransactionWithInternalEtherscan(data)
