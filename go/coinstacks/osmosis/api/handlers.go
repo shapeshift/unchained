@@ -127,6 +127,9 @@ func (h *Handler) getAPRData() (*APRData, error) {
 
 func (h *Handler) GetInfo() (api.Info, error) {
 	aprData, err := h.getAPRData()
+	if err != nil {
+		return nil, err
+	}
 
 	totalSupply, _, err := new(big.Float).Parse("1000000000", 10)
 	if err != nil {
