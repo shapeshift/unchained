@@ -75,39 +75,83 @@ func (h *Handler) StartWebsocket() error {
 	return nil
 }
 
+func (h *Handler) getAPRData() (*APRData, error) {
+	aprData := &APRData{}
+
+	g := new(errgroup.Group)
+
+	g.Go(func() error {
+		bondedTokens, err := h.httpClient.GetBondedTokens()
+		if err != nil {
+			return err
+		}
+
+		bBondedTokens, _, err := new(big.Float).Parse(bondedTokens, 10)
+
+		aprData.bondedTokens = bondedTokens
+		aprData.bBondedTokens = bBondedTokens
+
+		return err
+	})
+	g.Go(func() error {
+		epochProvisions, err := h.httpClient.GetEpochProvisions()
+		if err != nil {
+			return err
+		}
+
+		bEpochProvisions, _, err := new(big.Float).Parse(epochProvisions, 10)
+
+		aprData.epochProvisions = epochProvisions
+		aprData.bEpochProvisions = bEpochProvisions
+
+		return err
+	})
+	g.Go(func() error {
+		stakingDistributions, err := h.httpClient.GetStakingDistributions()
+		if err != nil {
+			return err
+		}
+
+		bStakingDistributions, _, err := new(big.Float).Parse(stakingDistributions, 10)
+
+		aprData.stakingDistributions = stakingDistributions
+		aprData.bStakingDistributions = bStakingDistributions
+
+		return err
+	})
+
+	err := g.Wait()
+
+	return aprData, err
+}
+
 func (h *Handler) GetInfo() (api.Info, error) {
-
-	bondedTokens, err := h.httpClient.GetBondedTokens()
+	logger.Info("fuck1")
+	aprData, err := h.getAPRData()
 	if err != nil {
 		return nil, err
 	}
+	logger.Info("fuck2")
 
-	bondedTokensFloat, err := strconv.ParseFloat(bondedTokens, 64)
+	bondedTokensFloat, err := strconv.ParseFloat(aprData.bondedTokens, 64)
 	if err != nil {
 		return nil, err
 	}
+	logger.Info("fuck3")
 
-	stakingsDistributions, err := h.httpClient.GetStakingDistributions()
+	epochProvisionFloat, err := strconv.ParseFloat(aprData.epochProvisions, 64)
 	if err != nil {
 		return nil, err
 	}
-
-	epochProvision, err := h.httpClient.GetEpochProvisions()
-	if err != nil {
-		return nil, err
-	}
-
-	epochProvisionFloat, err := strconv.ParseFloat(epochProvision, 64)
-	if err != nil {
-		return nil, err
-	}
-	stakingsDistributionsFloat, err := strconv.ParseFloat(stakingsDistributions, 64)
+	logger.Info("fuck4")
+	stakingDistributionsFloat, err := strconv.ParseFloat(aprData.stakingDistributions, 64)
 
 	if err != nil {
 		return nil, err
 	}
+	logger.Info("fuck5")
 
-	mintingEpochProvision := epochProvisionFloat * stakingsDistributionsFloat
+	mintingEpochProvision := epochProvisionFloat * stakingDistributionsFloat
 
 	//static
 	totalSupply := "1000000000"

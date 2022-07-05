@@ -1,6 +1,8 @@
 package api
 
 import (
+	"math/big"
+
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 )
@@ -82,4 +84,13 @@ type AccountData struct {
 	Redelegations []cosmos.Redelegation
 	Unbondings    []cosmos.Unbonding
 	Rewards       []cosmos.Reward
+}
+
+type APRData struct {
+	bondedTokens          string
+	bBondedTokens         *big.Float
+	stakingDistributions  string
+	bStakingDistributions *big.Float
+	epochProvisions       string
+	bEpochProvisions      *big.Float
 }
