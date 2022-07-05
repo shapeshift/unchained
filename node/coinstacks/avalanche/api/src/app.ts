@@ -14,7 +14,7 @@ import {
 import { Tx as BlockbookTx, WebsocketClient, getAddresses, NewBlock } from '@shapeshiftoss/blockbook'
 import { logger } from './logger'
 import { RegisterRoutes } from './routes'
-import { EthereumTx } from './models'
+import { AvalancheTx } from './models'
 import { formatAddress, handleBlock, handleTransactionWithInternalTrace } from './handlers'
 
 const PORT = process.env.PORT ?? 3000
@@ -58,7 +58,7 @@ const blockHandler: BlockHandler<NewBlock, Array<BlockbookTx>> = async (block) =
   return { txs }
 }
 
-const transactionHandler: TransactionHandler<BlockbookTx, EthereumTx> = async (blockbookTx) => {
+const transactionHandler: TransactionHandler<BlockbookTx, AvalancheTx> = async (blockbookTx) => {
   const tx = await handleTransactionWithInternalTrace(blockbookTx)
   const internalAddresses = (tx.internalTxs ?? []).reduce<Array<string>>((prev, tx) => [...prev, tx.to, tx.from], [])
   const addresses = [...new Set([...getAddresses(blockbookTx), ...internalAddresses])]

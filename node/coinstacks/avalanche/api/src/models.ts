@@ -38,17 +38,17 @@ export interface TokenTransfer extends Token {
 }
 
 /**
- * Contains additional ethereum specific info
+ * Contains additional Avalanche specific info
  */
-export interface EthereumAccount extends Account {
+export interface AvalancheAccount extends Account {
   nonce: number
   tokens: Array<TokenBalance>
 }
 
 /**
- * Contains info about an Ethereum transaction
+ * Contains info about an Avalanche transaction
  */
-export interface EthereumTx extends Tx {
+export interface AvalancheTx extends Tx {
   from: string
   to: string
   confirmations: number
@@ -64,7 +64,7 @@ export interface EthereumTx extends Tx {
 }
 
 /**
- * Contains info about an Ethereum internal transaction
+ * Contains info about an Avalanche internal transaction
  */
 export interface InternalTx {
   from: string
@@ -73,25 +73,25 @@ export interface InternalTx {
 }
 
 /**
- * Contains info about Ethereum transaction history
+ * Contains info about Avalanche transaction history
  */
-export interface EthereumTxHistory extends TxHistory {
-  txs: Array<EthereumTx>
+export interface AvalancheTxHistory extends TxHistory {
+  txs: Array<AvalancheTx>
 }
 
 /**
- * EthereumAPI coin specific implementation
+ * AvalancheAPI coin specific implementation
  */
-export interface EthereumAPI {
+export interface AvalancheAPI {
   /**
    * Get transaction details
    *
    * @param {string} txid transaction hash
    *
-   * @returns {Promise<EthereumTx>} transaction payload
+   * @returns {Promise<AvalancheTx>} transaction payload
    */
   // @Get('tx/{txid}')
-  getTransaction(txid: string): Promise<EthereumTx>
+  getTransaction(txid: string): Promise<AvalancheTx>
 
   /**
    * Get the estimated gas cost of a transaction
