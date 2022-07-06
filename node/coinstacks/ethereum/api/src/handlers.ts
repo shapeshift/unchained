@@ -47,7 +47,7 @@ export const handleBlock = async (hash: string): Promise<Array<BlockbookTx>> => 
 }
 
 export const handleTransaction = (tx: BlockbookTx): EthereumTx => {
-  if (!tx.ethereumSpecific) throw new Error(`invalid blockbook ethereum transaction: ${tx.txid}`)
+  if (!tx.ethereumSpecific) throw new Error(`invalid blockbook evm transaction: ${tx.txid}`)
 
   const inputData = tx.ethereumSpecific.data
 

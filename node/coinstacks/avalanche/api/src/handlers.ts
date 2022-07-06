@@ -4,7 +4,7 @@ import BigNumber from 'bignumber.js'
 import { ethers } from 'ethers'
 import { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { RPCRequest, RPCResponse } from '@shapeshiftoss/common-api'
-import { EthereumTx, InternalTx } from './models'
+import { AvalancheTx, InternalTx } from './models'
 import { Cursor, NodeBlock, CallStack, EtherscanApiResponse, EtherscanInternalTx } from './types'
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
@@ -46,8 +46,8 @@ export const handleBlock = async (hash: string): Promise<Array<BlockbookTx>> => 
   )
 }
 
-export const handleTransaction = (tx: BlockbookTx): EthereumTx => {
-  if (!tx.ethereumSpecific) throw new Error(`invalid blockbook ethereum transaction: ${tx.txid}`)
+export const handleTransaction = (tx: BlockbookTx): AvalancheTx => {
+  if (!tx.ethereumSpecific) throw new Error(`invalid blockbook evm transaction: ${tx.txid}`)
 
   const inputData = tx.ethereumSpecific.data
 
@@ -84,7 +84,7 @@ export const handleTransaction = (tx: BlockbookTx): EthereumTx => {
  *
  * __not suitable for use on historical transactions when using a full node as the evm state is purged__
  */
-export const handleTransactionWithInternalTrace = async (tx: BlockbookTx): Promise<EthereumTx> => {
+export const handleTransactionWithInternalTrace = async (tx: BlockbookTx): Promise<AvalancheTx> => {
   const t = handleTransaction(tx)
 
   // don't trace pending transactions as they have no committed state to trace
@@ -105,7 +105,7 @@ export const handleTransactionWithInternalTrace = async (tx: BlockbookTx): Promi
   return t
 }
 
-export const handleTransactionWithInternalEtherscan = async (tx: BlockbookTx): Promise<EthereumTx> => {
+export const handleTransactionWithInternalEtherscan = async (tx: BlockbookTx): Promise<AvalancheTx> => {
   const t = handleTransaction(tx)
 
   // don't query etherscan for internal transactions if there is no input data that would potentially result in an internal transaction
@@ -247,7 +247,7 @@ export const getEtherscanInternalTxs = async (
   }
 }
 
-type BlockbookTxs = Map<string, EthereumTx>
+type BlockbookTxs = Map<string, AvalancheTx>
 
 export const getBlockbookTxs = async (
   address: string,
@@ -256,7 +256,7 @@ export const getBlockbookTxs = async (
 ): Promise<{ hasMore: boolean; blockbookTxs: BlockbookTxs }> => {
   const blockbookData = await blockbook.getAddress(address, cursor.blockbookPage, pageSize, undefined, undefined, 'txs')
 
-  const data = new Map<string, EthereumTx>()
+  const data = new Map<string, AvalancheTx>()
 
   if (!blockbookData?.transactions?.length || cursor.blockbookPage > (blockbookData.totalPages ?? -1)) {
     return { hasMore: false, blockbookTxs: data }
