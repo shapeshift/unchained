@@ -75,13 +75,85 @@ func (h *Handler) StartWebsocket() error {
 	return nil
 }
 
-// TODO: add osmosis apr
+func (h *Handler) getAPRData() (*APRData, error) {
+	aprData := &APRData{}
+
+	g := new(errgroup.Group)
+
+	g.Go(func() error {
+		bondedTokens, err := h.httpClient.GetBondedTokens()
+		if err != nil {
+			return err
+		}
+
+		bBondedTokens, _, err := new(big.Float).Parse(bondedTokens, 10)
+
+		aprData.bondedTokens = bondedTokens
+		aprData.bBondedTokens = bBondedTokens
+
+		return err
+	})
+	g.Go(func() error {
+		epochProvisions, err := h.httpClient.GetEpochProvisions()
+		if err != nil {
+			return err
+		}
+
+		bEpochProvisions, _, err := new(big.Float).Parse(epochProvisions, 10)
+
+		aprData.epochProvisions = epochProvisions
+		aprData.bEpochProvisions = bEpochProvisions
+
+		return err
+	})
+	g.Go(func() error {
+		stakingDistributions, err := h.httpClient.GetStakingDistributions()
+		if err != nil {
+			return err
+		}
+
+		bStakingDistributions, _, err := new(big.Float).Parse(stakingDistributions, 10)
+
+		aprData.stakingDistributions = stakingDistributions
+		aprData.bStakingDistributions = bStakingDistributions
+
+		return err
+	})
+
+	err := g.Wait()
+
+	return aprData, err
+}
+
 func (h *Handler) GetInfo() (api.Info, error) {
+	aprData, err := h.getAPRData()
+	if err != nil {
+		return nil, err
+	}
+
+	totalSupply, _, err := new(big.Float).Parse("1000000000", 10)
+	if err != nil {
+		return nil, err
+	}
+
+	yearDays, _, err := new(big.Float).Parse("365", 10)
+	if err != nil {
+		return nil, err
+	}
+
+	yearMintingProvision := new(big.Float).Mul(new(big.Float).Mul(aprData.bEpochProvisions, aprData.bStakingDistributions), yearDays)
+
+	inflation := new(big.Float).Quo(yearMintingProvision, totalSupply)
+
+	ratio := new(big.Float).Quo(aprData.bBondedTokens, totalSupply)
+
+	apr := new(big.Float).Quo(inflation, ratio)
+
 	info := Info{
 		BaseInfo: api.BaseInfo{
 			Network: "mainnet",
 		},
-		APR: "0",
+		APR: apr.String(),
 	}
 
 	return info, nil
