@@ -153,7 +153,7 @@ func (h *Handler) GetInfo() (api.Info, error) {
 		BaseInfo: api.BaseInfo{
 			Network: "mainnet",
 		},
-		APR: fmt.Sprintf("%f", apr),
+		APR: apr.String(),
 	}
 
 	return info, nil
