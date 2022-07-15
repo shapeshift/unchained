@@ -216,6 +216,44 @@ aliases:
     api-cpu-limit: 300m
     api-memory-limit: 1Gi
 
+  - &litecoin
+    coinstack: litecoin
+    pulumi-stack: public
+    pulumi-dir: coinstacks/litecoin/pulumi
+    indexer-cpu-limit: "4"
+    indexer-cpu-request: "2"
+    indexer-memory-limit: 24Gi
+    indexer-replicas: 2
+    indexer-storage-size: 250Gi
+    indexer-url: http://litecoin-indexer-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://litecoin-indexer-svc.unchained.svc.cluster.local:8001/websocket
+    daemon-image: greenbigfrog/litecoin:1.14.5
+    daemon-cpu-limit: "2"
+    daemon-cpu-request: "1"
+    daemon-memory-limit: 12Gi
+    daemon-storage-size: 250Gi
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 6
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
+    api-cpu-threshold: 30
+    api-memory-limit: 2Gi
+    rpc-url: http://user:password@litecoin-indexer-svc.unchained.svc.cluster.local:8332
+    api: false
+
+  - &litecoin-dev
+    <<: *litecoin
+    environment: dev
+    pulumi-stack: public-dev
+    indexer-replicas: 1
+    indexer-url: http://litecoin-indexer-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://litecoin-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
+    rpc-url: http://user:password@litecoin-indexer-svc.unchained-dev.svc.cluster.local:8332
+    api-max-replicas: 3
+    api-cpu-limit: 300m
+    api-memory-limit: 1Gi
+
 commands:
   setup-runtime:
     description: setup runtime environment
@@ -744,6 +782,15 @@ workflows:
           requires:
             - deploy dependencies (shapeshift)
           <<: *dogecoin-dev
+          <<: *only-develop
+
+      - deploy-coinstack-node:
+          name: deploy litecoin develop (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: up -f --yes
+          requires:
+            - deploy dependencies (shapeshift)
+          <<: *litecoin-dev
           <<: *only-develop
 
       - deploy-coinstack-node:

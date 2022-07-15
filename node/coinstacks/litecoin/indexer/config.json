@@ -1,0 +1,23 @@
+{
+  "fiat_rates": "coingecko",
+  "fiat_rates_params": "{\"url\": \"https://api.coingecko.com/api/v3\", \"coin\": \"litecoin\", \"periodSeconds\": 60}",
+  "coin_name": "Litecoin",
+  "coin_shortcut": "LTC",
+  "coin_label": "Litecoin",
+  "rpc_url": "http://localhost:8332",
+  "rpc_user": "user",
+  "rpc_pass": "password",
+  "rpc_timeout": 25,
+  "parse": true,
+  "message_queue_binding": "tcp://localhost:28332",
+  "subversion": "",
+  "address_format": "",
+  "xpub_magic": 27108450,
+  "xpub_magic_segwit_p2sh": 28471030,
+  "xpub_magic_segwit_native": 78792518,
+  "slip44": 2,
+
+  "mempool_workers": 8,
+  "mempool_sub_workers": 2,
+  "block_addresses_to_keep": 300
+}
