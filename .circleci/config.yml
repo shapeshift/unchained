@@ -227,7 +227,7 @@ aliases:
     indexer-storage-size: 250Gi
     indexer-url: http://litecoin-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://litecoin-indexer-svc.unchained.svc.cluster.local:8001/websocket
-    daemon-image: uphold/litecoin:0.18.1
+    daemon-image: uphold/litecoin-core:0.18.1
     daemon-cpu-limit: "2"
     daemon-cpu-request: "1"
     daemon-memory-limit: 12Gi
