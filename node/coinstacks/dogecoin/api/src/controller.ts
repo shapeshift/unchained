@@ -34,7 +34,7 @@ if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 
 const isXpub = (pubkey: string): boolean => {
-  return pubkey.startsWith('xpub') || pubkey.startsWith('ypub') || pubkey.startsWith('zpub')
+  return pubkey.startsWith('dgub')
 }
 
 const handleError = (err: unknown): ApiError => {
