@@ -8,6 +8,7 @@ start_coin() {
     -rpcpassword=password \
     -rpcallowip=0.0.0.0/0 \
     -rpcbind=0.0.0.0 \
+    -rpcport=8332 \
     -datadir=/data \
     -printtoconsole=1 \
     -server=1 \
