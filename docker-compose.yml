@@ -27,8 +27,10 @@ services:
     networks:
       - avalanche_default
       - bitcoin_default
+      - bitcoincash_default
       - cosmos_default
       - ethereum_default
+      - litecoin_default
       - osmosis_default
     ports:
       # The HTTP port
@@ -44,9 +46,13 @@ networks:
     name: avalanche_default
   bitcoin_default:
     name: bitcoin_default
+  bitcoincash_default:
+    name: bitcoincash_default
   cosmos_default:
     name: cosmos_default
   ethereum_default:
     name: ethereum_default
+  litecoin_default:
+    name: litecoin_default
   osmosis_default:
     name: osmosis_default
