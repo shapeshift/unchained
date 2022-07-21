@@ -6,7 +6,7 @@ import { TransactionRequest } from '@ethersproject/abstract-provider'
 import { ApiError as BlockbookApiError, Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
 import { ApiError, BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
-import { Account, EvmAPI, TokenBalance, Tx, TxHistory, GasFees, InternalTx } from './models'
+import { Account, API, TokenBalance, Tx, TxHistory, GasFees, InternalTx } from './models'
 import { Cursor, NodeBlock, CallStack, ExplorerApiResponse, ExplorerInternalTx } from './types'
 
 axiosRetry(axios, { retries: 5, retryDelay: axiosRetry.exponentialDelay })
@@ -34,7 +34,7 @@ export interface BaseControllerArgs {
   rpcUrl: string
 }
 
-export class EvmService implements Omit<BaseAPI, 'getInfo'>, EvmAPI {
+export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   private readonly blockbook: Blockbook
   private readonly explorerApiKey?: string
   private readonly explorerApiUrl: string

@@ -6,6 +6,8 @@ export * from './websocket'
 export * from './registry'
 export * from './types'
 
+export * as evm from './evm'
+
 /**
  * Generic api error for handling failed requests
  */

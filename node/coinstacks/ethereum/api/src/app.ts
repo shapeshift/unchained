@@ -4,6 +4,7 @@ import { join } from 'path'
 import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
 import {
+  evm,
   middleware,
   ConnectionHandler,
   Registry,
@@ -12,15 +13,19 @@ import {
   TransactionHandler,
 } from '@shapeshiftoss/common-api'
 import { Tx as BlockbookTx, WebsocketClient, getAddresses, NewBlock } from '@shapeshiftoss/blockbook'
-import { logger } from './logger'
+import { Logger } from '@shapeshiftoss/logger'
+import { service } from './controller'
 import { RegisterRoutes } from './routes'
-import { EthereumTx } from './models'
-import { formatAddress, handleBlock, handleTransactionWithInternalTrace } from './handlers'
 
 const PORT = process.env.PORT ?? 3000
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
 
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
+
+export const logger = new Logger({
+  namespace: ['unchained', 'coinstacks', 'ethereum', 'api'],
+  level: process.env.LOG_LEVEL,
+})
 
 const app = express()
 
@@ -51,15 +56,15 @@ app.get('/', async (_, res) => {
 app.use(middleware.errorHandler)
 app.use(middleware.notFoundHandler)
 
-const addressFormatter: AddressFormatter = (address) => formatAddress(address)
+const addressFormatter: AddressFormatter = (address) => evm.formatAddress(address)
 
 const blockHandler: BlockHandler<NewBlock, Array<BlockbookTx>> = async (block) => {
-  const txs = await handleBlock(block.hash)
+  const txs = await service.handleBlock(block.hash)
   return { txs }
 }
 
-const transactionHandler: TransactionHandler<BlockbookTx, EthereumTx> = async (blockbookTx) => {
-  const tx = await handleTransactionWithInternalTrace(blockbookTx)
+const transactionHandler: TransactionHandler<BlockbookTx, evm.Tx> = async (blockbookTx) => {
+  const tx = await service.handleTransactionWithInternalTrace(blockbookTx)
   const internalAddresses = (tx.internalTxs ?? []).reduce<Array<string>>((prev, tx) => [...prev, tx.to, tx.from], [])
   const addresses = [...new Set([...getAddresses(blockbookTx), ...internalAddresses])]
 

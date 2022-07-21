@@ -79,7 +79,7 @@ export type TxHistory = BaseTxHistory<Tx>
 /**
  * EvmAPI coin specific implementation
  */
-export interface EvmAPI {
+export interface API {
   /**
    * Get transaction details
    *

@@ -1,6 +1,7 @@
 import { ethers } from 'ethers'
 import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import { Blockbook } from '@shapeshiftoss/blockbook'
+import { Logger } from '@shapeshiftoss/logger'
 import {
   BadRequestError,
   BaseAPI,
@@ -9,9 +10,7 @@ import {
   SendTxBody,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { logger } from './logger'
-import { EvmService } from './evm/service'
-import { Account, EvmAPI, GasFees, Tx, TxHistory } from './evm/models'
+import { API, Account, GasFees, Service, Tx, TxHistory } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -23,10 +22,15 @@ if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 if (!NETWORK) throw new Error('NETWORK env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
 
+export const logger = new Logger({
+  namespace: ['unchained', 'coinstacks', 'avalanche', 'api'],
+  level: process.env.LOG_LEVEL,
+})
+
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
 
-export const evmService = new EvmService({
+export const service = new Service({
   blockbook,
   explorerApiUrl: 'https://api.snowtrace.io/api',
   provider,
@@ -36,7 +40,7 @@ export const evmService = new EvmService({
 
 @Route('api/v1')
 @Tags('v1')
-export class Avalanche extends Controller implements BaseAPI, EvmAPI {
+export class Avalanche extends Controller implements BaseAPI, API {
   /**
    * Get information about the running coinstack
    *
@@ -59,20 +63,20 @@ export class Avalanche extends Controller implements BaseAPI, EvmAPI {
    *
    * @returns {Promise<Account>} account details
    *
-   * @example pubkey "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
+   * @example pubkey "0x9D1170D30944F2E30664Be502aC57F6096fB5366"
    */
   @Example<Account>({
-    balance: '284809805024198107',
+    balance: '183750000000000',
     unconfirmedBalance: '0',
-    nonce: 1,
-    pubkey: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
+    nonce: 322,
+    pubkey: '0x9D1170D30944F2E30664Be502aC57F6096fB5366',
     tokens: [
       {
         balance: '1337',
-        contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
+        contract: '0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB',
         decimals: 18,
-        name: 'FOX',
-        symbol: 'FOX',
+        name: 'Wrapped Ether',
+        symbol: 'WETH.e',
         type: 'ERC20',
       },
     ],
@@ -82,7 +86,7 @@ export class Avalanche extends Controller implements BaseAPI, EvmAPI {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}')
   async getAccount(@Path() pubkey: string): Promise<Account> {
-    return evmService.getAccount(pubkey)
+    return service.getAccount(pubkey)
   }
 
   /**
@@ -94,28 +98,27 @@ export class Avalanche extends Controller implements BaseAPI, EvmAPI {
    *
    * @returns {Promise<TxHistory>} transaction history
    *
-   * @example pubkey "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
+   * @example pubkey "0x9D1170D30944F2E30664Be502aC57F6096fB5366"
    */
   @Example<TxHistory>({
-    pubkey: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
+    pubkey: '0x9D1170D30944F2E30664Be502aC57F6096fB5366',
     cursor:
-      'eyJibG9ja2Jvb2tQYWdlIjoxLCJldGhlcnNjYW5QYWdlIjoxLCJibG9ja2Jvb2tUeGlkIjoiMHhhZWU0MzJmODUzZmRjMTNhZDlmZjZjYWJlMmEzOTQwM2Q4N2RkZWUxODQyNDk2ODE4ZmNkODg3NDdmNjU2NmY5IiwiYmxvY2tIZWlnaHQiOjEzODUwMjEzfQ==',
+      'eyJibG9ja2Jvb2tQYWdlIjoyLCJleHBsb3JlclBhZ2UiOjEsImJsb2NrYm9va1R4aWQiOiIweDE0YTZlYTA4MWRhYWI1OWI1ZGQ3YTE3NjQ4YTAwNGU5Y2EzNzdhNWVkMmE5N2E4NGUyYWQ4MDVkZjJlMjUzM2QiLCJibG9ja0hlaWdodCI6MTc1MTIxNjR9',
     txs: [
       {
-        txid: '0x8e3528c933483770a3c8377c2ee7e34f846908653168188fd0d90a20b295d002',
-        blockHash: '0x94228c1b7052720846e2d7b9f36de30acf45d9a06ec483bd4433c5c38c8673a8',
-        blockHeight: 12267105,
-        timestamp: 1618788849,
+        txid: '0x14a6ea081daab59b5dd7a17648a004e9ca377a5ed2a97a84e2ad805df2e2533d',
+        blockHash: '0x748fff248d4a033c28cb6cc45b78ad7f471ac4d958971570e3e3afe4e0f84c1f',
+        blockHeight: 17512164,
+        timestamp: 1658197214,
         status: 1,
-        from: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
-        to: '0x642F4Bda144C63f6DC47EE0fDfbac0a193e2eDb7',
-        confirmations: 2088440,
-        value: '737092621690531649',
-        fee: '3180000000009000',
+        from: '0xa3682Fe8fD73B90A7564585A436EC2D2AEb612eE',
+        to: '0x9D1170D30944F2E30664Be502aC57F6096fB5366',
+        confirmations: 119004,
+        value: '410000000000000000',
+        fee: '525000000000000',
         gasLimit: '21000',
         gasUsed: '21000',
-        gasPrice: '151428571429',
-        inputData: '0x',
+        gasPrice: '25000000000',
       },
     ],
   })
@@ -124,7 +127,7 @@ export class Avalanche extends Controller implements BaseAPI, EvmAPI {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}/txs')
   async getTxHistory(@Path() pubkey: string, @Query() cursor?: string, @Query() pageSize = 10): Promise<TxHistory> {
-    return evmService.getTxHistory(pubkey, cursor, pageSize)
+    return service.getTxHistory(pubkey, cursor, pageSize)
   }
 
   /**
@@ -132,32 +135,31 @@ export class Avalanche extends Controller implements BaseAPI, EvmAPI {
    *
    * @param {string} txid transaction hash
    *
-   * @example txid "0x8825fe8d60e1aa8d990f150bffe1196adcab36d0c4e98bac76c691719103b79d"
+   * @example txid "0x14a6ea081daab59b5dd7a17648a004e9ca377a5ed2a97a84e2ad805df2e2533d"
    *
-   * @returns {Promise<BitcoinTx>} transaction payload
+   * @returns {Promise<Tx>} transaction payload
    */
   @Example<Tx>({
-    txid: '0x8825fe8d60e1aa8d990f150bffe1196adcab36d0c4e98bac76c691719103b79d',
-    blockHash: '0x122f1e1b594b797d96c1777ce9cdb68ddb69d262ac7f2ddc345909aba4ebabd7',
-    blockHeight: 14813163,
-    timestamp: 1653078780,
+    txid: '0x14a6ea081daab59b5dd7a17648a004e9ca377a5ed2a97a84e2ad805df2e2533d',
+    blockHash: '0x748fff248d4a033c28cb6cc45b78ad7f471ac4d958971570e3e3afe4e0f84c1f',
+    blockHeight: 17512164,
+    timestamp: 1658197214,
     status: 1,
-    from: '0xEA674fdDe714fd979de3EdF0F56AA9716B898ec8',
-    to: '0x275C7d416c1DBfafa53A861EEc6F0AD6138ca4dD',
-    confirmations: 21,
-    value: '49396718157429775',
-    fee: '603633477678000',
-    gasLimit: '250000',
+    from: '0xa3682Fe8fD73B90A7564585A436EC2D2AEb612eE',
+    to: '0x9D1170D30944F2E30664Be502aC57F6096fB5366',
+    confirmations: 119004,
+    value: '410000000000000000',
+    fee: '525000000000000',
+    gasLimit: '21000',
     gasUsed: '21000',
-    gasPrice: '28744451318',
-    inputData: '0x',
+    gasPrice: '25000000000',
   })
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('tx/{txid}')
   async getTransaction(@Path() txid: string): Promise<Tx> {
-    return evmService.getTransaction(txid)
+    return service.getTransaction(txid)
   }
 
   /**
@@ -172,10 +174,10 @@ export class Avalanche extends Controller implements BaseAPI, EvmAPI {
    *
    * @example data "0x"
    * @example from "0x0000000000000000000000000000000000000000"
-   * @example to "0x642F4Bda144C63f6DC47EE0fDfbac0a193e2eDb7"
-   * @example value "123"
+   * @example to "0x9D1170D30944F2E30664Be502aC57F6096fB5366"
+   * @example value "1337"
    */
-  @Example<string>('26540')
+  @Example<string>('21000')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/estimate')
@@ -185,7 +187,7 @@ export class Avalanche extends Controller implements BaseAPI, EvmAPI {
     @Query() to: string,
     @Query() value: string
   ): Promise<string> {
-    return evmService.estimateGas(data, from, to, value)
+    return service.estimateGas(data, from, to, value)
   }
 
   /**
@@ -197,18 +199,18 @@ export class Avalanche extends Controller implements BaseAPI, EvmAPI {
    * @returns {Promise<GasFees>} current fees specified in wei
    */
   @Example<GasFees>({
-    gasPrice: '172301756423',
-    maxFeePerGas: '342603512846',
-    maxPriorityFeePerGas: '1000000000',
+    gasPrice: '25000000000',
+    maxFeePerGas: '51500000000',
+    maxPriorityFeePerGas: '1500000000',
   })
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
   async getGasFees(): Promise<GasFees> {
-    return evmService.getGasFees()
+    return service.getGasFees()
   }
 
   /**
-   * Sends raw transaction to be broadcast to the node.
+   * Broadcast signed raw transaction
    *
    * @param {SendTxBody} body serialized raw transaction hex
    *
@@ -224,6 +226,6 @@ export class Avalanche extends Controller implements BaseAPI, EvmAPI {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Post('send/')
   async sendTx(@Body() body: SendTxBody): Promise<string> {
-    return evmService.sendTx(body)
+    return service.sendTx(body)
   }
 }
