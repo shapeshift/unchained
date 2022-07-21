@@ -37,7 +37,7 @@ export interface TokenTransfer extends Token {
 }
 
 /**
- * Contains additional Avalanche specific info
+ * Contains info about an EVM account
  */
 export interface Account extends BaseAccount {
   nonce: number
@@ -45,7 +45,7 @@ export interface Account extends BaseAccount {
 }
 
 /**
- * Contains info about an Avalanche transaction
+ * Contains info about an EVM transaction
  */
 export interface Tx extends BaseTx {
   from: string
@@ -63,7 +63,7 @@ export interface Tx extends BaseTx {
 }
 
 /**
- * Contains info about an Avalanche internal transaction
+ * Contains info about an EVM internal transaction
  */
 export interface InternalTx {
   from: string
@@ -72,12 +72,12 @@ export interface InternalTx {
 }
 
 /**
- * Contains info about Avalanche transaction history
+ * Contains info about EVM transaction history
  */
 export type TxHistory = BaseTxHistory<Tx>
 
 /**
- * EvmAPI coin specific implementation
+ * Extended EVM specific functionality
  */
 export interface API {
   /**
@@ -85,7 +85,7 @@ export interface API {
    *
    * @param {string} txid transaction hash
    *
-   * @returns {Promise<AvalancheTx>} transaction payload
+   * @returns {Promise<Tx>} transaction payload
    */
   // @Get('tx/{txid}')
   getTransaction(txid: string): Promise<Tx>
