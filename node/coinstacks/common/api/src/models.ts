@@ -28,7 +28,7 @@ export interface InternalServerError {
 }
 
 /**
- * Contains info about base account details for an address or xpub
+ * Contains base account details for an address or xpub
  */
 export interface BaseAccount {
   balance: string
@@ -37,7 +37,7 @@ export interface BaseAccount {
 }
 
 /**
- * Contains info about the running coinstack
+ * Contains base info about the running coinstack
  */
 export interface BaseInfo {
   network: string
@@ -58,7 +58,7 @@ export interface SendTxBody {
 }
 
 /**
- * Contains info about base transaction details
+ * Contains base transaction details
  */
 export interface BaseTx {
   txid: string
