@@ -28,9 +28,9 @@ export interface InternalServerError {
 }
 
 /**
- * Contains info about account details for an address or xpub
+ * Contains info about base account details for an address or xpub
  */
-export interface Account {
+export interface BaseAccount {
   balance: string
   unconfirmedBalance: string
   pubkey: string
@@ -39,7 +39,7 @@ export interface Account {
 /**
  * Contains info about the running coinstack
  */
-export interface Info {
+export interface BaseInfo {
   network: string
 }
 
@@ -58,9 +58,9 @@ export interface SendTxBody {
 }
 
 /**
- * Contains info about a transaction
+ * Contains info about base transaction details
  */
-export interface Tx {
+export interface BaseTx {
   txid: string
   blockHash?: string
   blockHeight: number
@@ -68,9 +68,9 @@ export interface Tx {
 }
 
 /**
- * Contains paginated transaction history
+ * Contains paginated base transaction history details
  */
-export interface TxHistory extends Pagination {
+export interface BaseTxHistory<T = BaseTx> extends Pagination {
   pubkey: string
-  txs: Array<Tx>
+  txs: Array<T>
 }

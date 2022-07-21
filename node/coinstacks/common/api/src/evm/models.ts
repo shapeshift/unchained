@@ -1,5 +1,4 @@
-/* unable to import models from a module with tsoa */
-import { BaseAccount, BaseTx, BaseTxHistory } from '../../../common/api/src'
+import { BaseAccount, BaseTx, BaseTxHistory } from '../models' // unable to import models from a module with tsoa
 
 /**
  * Contains info about current recommended fees to use in a transaction
@@ -38,17 +37,17 @@ export interface TokenTransfer extends Token {
 }
 
 /**
- * Contains additional ethereum specific info
+ * Contains additional Avalanche specific info
  */
-export interface EthereumAccount extends BaseAccount {
+export interface Account extends BaseAccount {
   nonce: number
   tokens: Array<TokenBalance>
 }
 
 /**
- * Contains info about an Ethereum transaction
+ * Contains info about an Avalanche transaction
  */
-export interface EthereumTx extends BaseTx {
+export interface Tx extends BaseTx {
   from: string
   to: string
   confirmations: number
@@ -64,7 +63,7 @@ export interface EthereumTx extends BaseTx {
 }
 
 /**
- * Contains info about an Ethereum internal transaction
+ * Contains info about an Avalanche internal transaction
  */
 export interface InternalTx {
   from: string
@@ -73,25 +72,23 @@ export interface InternalTx {
 }
 
 /**
- * Contains info about Ethereum transaction history
+ * Contains info about Avalanche transaction history
  */
-export interface EthereumTxHistory extends BaseTxHistory {
-  txs: Array<EthereumTx>
-}
+export type TxHistory = BaseTxHistory<Tx>
 
 /**
- * EthereumAPI coin specific implementation
+ * EvmAPI coin specific implementation
  */
-export interface EthereumAPI {
+export interface EvmAPI {
   /**
    * Get transaction details
    *
    * @param {string} txid transaction hash
    *
-   * @returns {Promise<EthereumTx>} transaction payload
+   * @returns {Promise<AvalancheTx>} transaction payload
    */
   // @Get('tx/{txid}')
-  getTransaction(txid: string): Promise<EthereumTx>
+  getTransaction(txid: string): Promise<Tx>
 
   /**
    * Get the estimated gas cost of a transaction

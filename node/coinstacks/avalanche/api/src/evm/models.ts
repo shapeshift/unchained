@@ -1,5 +1,4 @@
-/* unable to import models from a module with tsoa */
-import { Account, Tx, TxHistory } from '../../../common/api/src'
+import { BaseAccount, BaseTx, BaseTxHistory } from '../../../../common/api/src' // unable to import models from a module with tsoa
 
 /**
  * Contains info about current recommended fees to use in a transaction
@@ -40,7 +39,7 @@ export interface TokenTransfer extends Token {
 /**
  * Contains additional Avalanche specific info
  */
-export interface AvalancheAccount extends Account {
+export interface Account extends BaseAccount {
   nonce: number
   tokens: Array<TokenBalance>
 }
@@ -48,7 +47,7 @@ export interface AvalancheAccount extends Account {
 /**
  * Contains info about an Avalanche transaction
  */
-export interface AvalancheTx extends Tx {
+export interface Tx extends BaseTx {
   from: string
   to: string
   confirmations: number
@@ -75,14 +74,12 @@ export interface InternalTx {
 /**
  * Contains info about Avalanche transaction history
  */
-export interface AvalancheTxHistory extends TxHistory {
-  txs: Array<AvalancheTx>
-}
+export type TxHistory = BaseTxHistory<Tx>
 
 /**
- * AvalancheAPI coin specific implementation
+ * EvmAPI coin specific implementation
  */
-export interface AvalancheAPI {
+export interface EvmAPI {
   /**
    * Get transaction details
    *
@@ -91,7 +88,7 @@ export interface AvalancheAPI {
    * @returns {Promise<AvalancheTx>} transaction payload
    */
   // @Get('tx/{txid}')
-  getTransaction(txid: string): Promise<AvalancheTx>
+  getTransaction(txid: string): Promise<Tx>
 
   /**
    * Get the estimated gas cost of a transaction

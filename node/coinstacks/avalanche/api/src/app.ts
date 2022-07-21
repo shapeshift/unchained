@@ -12,10 +12,11 @@ import {
   TransactionHandler,
 } from '@shapeshiftoss/common-api'
 import { Tx as BlockbookTx, WebsocketClient, getAddresses, NewBlock } from '@shapeshiftoss/blockbook'
+import { Tx } from './evm/models'
+import { formatAddress } from './evm/service'
+import { evmService } from './controller'
 import { logger } from './logger'
 import { RegisterRoutes } from './routes'
-import { AvalancheTx } from './models'
-import { formatAddress, handleBlock, handleTransactionWithInternalTrace } from './handlers'
 
 const PORT = process.env.PORT ?? 3000
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -54,12 +55,12 @@ app.use(middleware.notFoundHandler)
 const addressFormatter: AddressFormatter = (address) => formatAddress(address)
 
 const blockHandler: BlockHandler<NewBlock, Array<BlockbookTx>> = async (block) => {
-  const txs = await handleBlock(block.hash)
+  const txs = await evmService.handleBlock(block.hash)
   return { txs }
 }
 
-const transactionHandler: TransactionHandler<BlockbookTx, AvalancheTx> = async (blockbookTx) => {
-  const tx = await handleTransactionWithInternalTrace(blockbookTx)
+const transactionHandler: TransactionHandler<BlockbookTx, Tx> = async (blockbookTx) => {
+  const tx = await evmService.handleTransactionWithInternalTrace(blockbookTx)
   const internalAddresses = (tx.internalTxs ?? []).reduce<Array<string>>((prev, tx) => [...prev, tx.to, tx.from], [])
   const addresses = [...new Set([...getAddresses(blockbookTx), ...internalAddresses])]
 
