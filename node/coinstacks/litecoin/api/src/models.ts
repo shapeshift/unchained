@@ -44,9 +44,7 @@ export interface LitecoinTx extends BaseTx {
 /**
  * Contains info about Litecoin transaction history
  */
-export interface LitecoinTxHistory extends BaseTxHistory {
-  txs: Array<LitecoinTx>
-}
+export type LitecoinTxHistory = BaseTxHistory<LitecoinTx>
 
 /**
  * Contains Litecoin specific transaction info as returned from the node

@@ -44,9 +44,7 @@ export interface BitcoinCashTx extends BaseTx {
 /**
  * Contains info about BitcoinCash transaction history
  */
-export interface BitcoinCashTxHistory extends BaseTxHistory {
-  txs: Array<BitcoinCashTx>
-}
+export type BitcoinCashTxHistory = BaseTxHistory<BitcoinCashTx>
 
 /**
  * Contains BitcoinCash specific transaction info as returned from the node
