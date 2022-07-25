@@ -1,10 +1,12 @@
-import { Account, Info, SendTxBody, TxHistory } from './models'
+import { BaseAccount, BaseInfo, SendTxBody, BaseTxHistory } from './models'
 
 export * from './models'
 export * as middleware from './middleware'
 export * from './websocket'
 export * from './registry'
 export * from './types'
+
+export * as evm from './evm'
 
 /**
  * Generic api error for handling failed requests
@@ -33,20 +35,20 @@ export interface BaseAPI {
   /**
    * Get information about the running coinstack
    *
-   * @returns {Promise<Info>} coinstack info
+   * @returns {Promise<BaseInfo>} coinstack info
    */
   // @Get('info/')
-  getInfo(): Promise<Info>
+  getInfo(): Promise<BaseInfo>
 
   /**
    * Get account details by address or xpub
    *
    * @param {string} pubkey account address or xpub
    *
-   * @returns {Promise<Account>} account details
+   * @returns {Promise<BaseAccount>} account details
    */
   // @Get('account/{pubkey}')
-  getAccount(pubkey: string): Promise<Account>
+  getAccount(pubkey: string): Promise<BaseAccount>
 
   /**
    * Get transaction history by address or xpub
@@ -55,10 +57,10 @@ export interface BaseAPI {
    * @param {string} [cursor] the cursor returned in previous query
    * @param {number} [pageSize] page size
    *
-   * @returns {Promise<TxHistory>} transaction history
+   * @returns {Promise<BaseTxHistory>} transaction history
    */
   // @Get('account/{pubkey}/txs')
-  getTxHistory(pubkey: string, cursor?: string, pageSize?: number): Promise<TxHistory>
+  getTxHistory(pubkey: string, cursor?: string, pageSize?: number): Promise<BaseTxHistory>
 
   /**
    * Sends raw transaction to be broadcast to the node.

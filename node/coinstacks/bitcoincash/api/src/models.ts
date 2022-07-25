@@ -1,5 +1,5 @@
 /* unable to import models from a module with tsoa */
-import { Account, Tx, TxHistory } from '../../../common/api/src'
+import { BaseAccount, BaseTx, BaseTxHistory } from '../../../common/api/src'
 
 /**
  * Contains info about a transaction input
@@ -32,7 +32,7 @@ export interface Vout {
 /**
  * Contains info about a BitcoinCash transaction
  */
-export interface BitcoinCashTx extends Tx {
+export interface BitcoinCashTx extends BaseTx {
   vin: Array<Vin>
   vout: Array<Vout>
   confirmations: number
@@ -44,9 +44,7 @@ export interface BitcoinCashTx extends Tx {
 /**
  * Contains info about BitcoinCash transaction history
  */
-export interface BitcoinCashTxHistory extends TxHistory {
-  txs: Array<BitcoinCashTx>
-}
+export type BitcoinCashTxHistory = BaseTxHistory<BitcoinCashTx>
 
 /**
  * Contains BitcoinCash specific transaction info as returned from the node
@@ -111,7 +109,7 @@ export interface BitcoinCashAddress {
 /**
  * Contains additional BitcoinCash specific account info
  */
-export interface BitcoinCashAccount extends Account {
+export interface BitcoinCashAccount extends BaseAccount {
   /**
    * List of associated addresses for an xpub
    */

@@ -1,25 +1,16 @@
 import { ethers } from 'ethers'
 import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
-import { TransactionRequest } from '@ethersproject/abstract-provider'
-import { ApiError as BlockbookApiError, Blockbook } from '@shapeshiftoss/blockbook'
+import { Blockbook } from '@shapeshiftoss/blockbook'
+import { Logger } from '@shapeshiftoss/logger'
 import {
-  ApiError,
   BadRequestError,
   BaseAPI,
-  Info,
+  BaseInfo,
   InternalServerError,
   SendTxBody,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { AvalancheAccount, AvalancheAPI, AvalancheTx, AvalancheTxHistory, GasFees, TokenBalance } from './models'
-import { logger } from './logger'
-import {
-  getBlockbookTxs,
-  getEtherscanInternalTxs,
-  handleTransaction,
-  handleTransactionWithInternalEtherscan,
-} from './handlers'
-import { Cursor } from './types'
+import { API, Account, GasFees, Service, Tx, TxHistory } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -31,34 +22,35 @@ if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 if (!NETWORK) throw new Error('NETWORK env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
 
+export const logger = new Logger({
+  namespace: ['unchained', 'coinstacks', 'avalanche', 'api'],
+  level: process.env.LOG_LEVEL,
+})
+
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
 
-const handleError = (err: unknown): ApiError => {
-  if (err instanceof BlockbookApiError) {
-    return new ApiError(err.response?.statusText ?? 'Internal Server Error', err.response?.status ?? 500, err.message)
-  }
-
-  if (err instanceof Error) {
-    return new ApiError('Internal Server Error', 500, err.message)
-  }
-
-  return new ApiError('Internal Server Error', 500, 'unknown error')
-}
+export const service = new Service({
+  blockbook,
+  explorerApiUrl: 'https://api.snowtrace.io/api',
+  provider,
+  logger,
+  rpcUrl: RPC_URL,
+})
 
 @Route('api/v1')
 @Tags('v1')
-export class Avalanche extends Controller implements BaseAPI, AvalancheAPI {
+export class Avalanche extends Controller implements BaseAPI, API {
   /**
    * Get information about the running coinstack
    *
-   * @returns {Promise<Info>} coinstack info
+   * @returns {Promise<BaseInfo>} coinstack info
    */
-  @Example<Info>({
+  @Example<BaseInfo>({
     network: 'mainnet',
   })
   @Get('info/')
-  async getInfo(): Promise<Info> {
+  async getInfo(): Promise<BaseInfo> {
     return {
       network: NETWORK as string,
     }
@@ -69,22 +61,22 @@ export class Avalanche extends Controller implements BaseAPI, AvalancheAPI {
    *
    * @param {string} pubkey account address
    *
-   * @returns {Promise<AvalancheAccount>} account details
+   * @returns {Promise<Account>} account details
    *
-   * @example pubkey "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
+   * @example pubkey "0x9D1170D30944F2E30664Be502aC57F6096fB5366"
    */
-  @Example<AvalancheAccount>({
-    balance: '284809805024198107',
+  @Example<Account>({
+    balance: '183750000000000',
     unconfirmedBalance: '0',
-    nonce: 1,
-    pubkey: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
+    nonce: 322,
+    pubkey: '0x9D1170D30944F2E30664Be502aC57F6096fB5366',
     tokens: [
       {
         balance: '1337',
-        contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
+        contract: '0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB',
         decimals: 18,
-        name: 'FOX',
-        symbol: 'FOX',
+        name: 'Wrapped Ether',
+        symbol: 'WETH.e',
         type: 'ERC20',
       },
     ],
@@ -93,35 +85,8 @@ export class Avalanche extends Controller implements BaseAPI, AvalancheAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}')
-  async getAccount(@Path() pubkey: string): Promise<AvalancheAccount> {
-    try {
-      const data = await blockbook.getAddress(pubkey, undefined, undefined, undefined, undefined, 'tokenBalances')
-
-      const tokens = (data.tokens ?? []).reduce<Array<TokenBalance>>((prev, token) => {
-        if (token.balance && token.contract && token.decimals && token.symbol) {
-          prev.push({
-            balance: token.balance,
-            contract: token.contract,
-            decimals: token.decimals,
-            name: token.name,
-            symbol: token.symbol,
-            type: token.type,
-          })
-        }
-
-        return prev
-      }, [])
-
-      return {
-        balance: data.balance,
-        unconfirmedBalance: data.unconfirmedBalance,
-        nonce: Number(data.nonce ?? 0),
-        pubkey: data.address,
-        tokens,
-      }
-    } catch (err) {
-      throw handleError(err)
-    }
+  async getAccount(@Path() pubkey: string): Promise<Account> {
+    return service.getAccount(pubkey)
   }
 
   /**
@@ -133,28 +98,27 @@ export class Avalanche extends Controller implements BaseAPI, AvalancheAPI {
    *
    * @returns {Promise<TxHistory>} transaction history
    *
-   * @example pubkey "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
+   * @example pubkey "0x9D1170D30944F2E30664Be502aC57F6096fB5366"
    */
-  @Example<AvalancheTxHistory>({
-    pubkey: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
+  @Example<TxHistory>({
+    pubkey: '0x9D1170D30944F2E30664Be502aC57F6096fB5366',
     cursor:
-      'eyJibG9ja2Jvb2tQYWdlIjoxLCJldGhlcnNjYW5QYWdlIjoxLCJibG9ja2Jvb2tUeGlkIjoiMHhhZWU0MzJmODUzZmRjMTNhZDlmZjZjYWJlMmEzOTQwM2Q4N2RkZWUxODQyNDk2ODE4ZmNkODg3NDdmNjU2NmY5IiwiYmxvY2tIZWlnaHQiOjEzODUwMjEzfQ==',
+      'eyJibG9ja2Jvb2tQYWdlIjoyLCJleHBsb3JlclBhZ2UiOjEsImJsb2NrYm9va1R4aWQiOiIweDE0YTZlYTA4MWRhYWI1OWI1ZGQ3YTE3NjQ4YTAwNGU5Y2EzNzdhNWVkMmE5N2E4NGUyYWQ4MDVkZjJlMjUzM2QiLCJibG9ja0hlaWdodCI6MTc1MTIxNjR9',
     txs: [
       {
-        txid: '0x8e3528c933483770a3c8377c2ee7e34f846908653168188fd0d90a20b295d002',
-        blockHash: '0x94228c1b7052720846e2d7b9f36de30acf45d9a06ec483bd4433c5c38c8673a8',
-        blockHeight: 12267105,
-        timestamp: 1618788849,
+        txid: '0x14a6ea081daab59b5dd7a17648a004e9ca377a5ed2a97a84e2ad805df2e2533d',
+        blockHash: '0x748fff248d4a033c28cb6cc45b78ad7f471ac4d958971570e3e3afe4e0f84c1f',
+        blockHeight: 17512164,
+        timestamp: 1658197214,
         status: 1,
-        from: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
-        to: '0x642F4Bda144C63f6DC47EE0fDfbac0a193e2eDb7',
-        confirmations: 2088440,
-        value: '737092621690531649',
-        fee: '3180000000009000',
+        from: '0xa3682Fe8fD73B90A7564585A436EC2D2AEb612eE',
+        to: '0x9D1170D30944F2E30664Be502aC57F6096fB5366',
+        confirmations: 119004,
+        value: '410000000000000000',
+        fee: '525000000000000',
         gasLimit: '21000',
         gasUsed: '21000',
-        gasPrice: '151428571429',
-        inputData: '0x',
+        gasPrice: '25000000000',
       },
     ],
   })
@@ -162,112 +126,8 @@ export class Avalanche extends Controller implements BaseAPI, AvalancheAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}/txs')
-  async getTxHistory(
-    @Path() pubkey: string,
-    @Query() cursor?: string,
-    @Query() pageSize = 10
-  ): Promise<AvalancheTxHistory> {
-    if (pageSize <= 0) throw new ApiError('Bad Request', 422, 'page size must be greater than 0')
-
-    const curCursor = ((): Cursor => {
-      try {
-        if (!cursor) return { blockbookPage: 1, etherscanPage: 1 }
-
-        return JSON.parse(Buffer.from(cursor, 'base64').toString('binary'))
-      } catch (err) {
-        const e: BadRequestError = { error: `invalid base64 cursor: ${cursor}` }
-        throw new ApiError('Bad Request', 422, JSON.stringify(e))
-      }
-    })()
-
-    try {
-      let { hasMore: hasMoreBlockbookTxs, blockbookTxs } = await getBlockbookTxs(pubkey, pageSize, curCursor)
-      let { hasMore: hasMoreInternalTxs, internalTxs } = await getEtherscanInternalTxs(pubkey, pageSize, curCursor)
-
-      if (!blockbookTxs.size && !internalTxs.size) {
-        return {
-          pubkey: pubkey,
-          txs: [],
-        }
-      }
-
-      const txs: Array<AvalancheTx> = []
-      for (let i = 0; i < pageSize; i++) {
-        if (!blockbookTxs.size && hasMoreBlockbookTxs) {
-          curCursor.blockbookPage++
-          ;({ hasMore: hasMoreBlockbookTxs, blockbookTxs } = await getBlockbookTxs(pubkey, pageSize, curCursor))
-        }
-
-        if (!internalTxs.size && hasMoreInternalTxs) {
-          curCursor.etherscanPage++
-          ;({ hasMore: hasMoreInternalTxs, internalTxs } = await getEtherscanInternalTxs(pubkey, pageSize, curCursor))
-        }
-
-        if (!internalTxs.size && !blockbookTxs.size) break
-
-        const [internalTx] = internalTxs.values()
-        const [blockbookTx] = blockbookTxs.values()
-
-        if (blockbookTx?.blockHeight === -1) {
-          // process pending txs first, no associated internal txs
-
-          txs.push({ ...blockbookTx })
-          curCursor.blockbookTxid = blockbookTx.txid
-        } else if (blockbookTx && blockbookTx.blockHeight >= (internalTx?.blockHeight ?? -2)) {
-          // process transactions in descending order prioritizing confirmed, include associated internal txs
-
-          txs.push({ ...blockbookTx, internalTxs: internalTxs.get(blockbookTx.txid)?.txs })
-
-          blockbookTxs.delete(blockbookTx.txid)
-          curCursor.blockbookTxid = blockbookTx.txid
-
-          // if there was a matching internal tx, delete it and track as last internal txid seen
-          if (internalTxs.has(blockbookTx.txid)) {
-            internalTxs.delete(blockbookTx.txid)
-            curCursor.etherscanTxid = blockbookTx.txid
-          }
-        } else {
-          // attempt to get matching blockbook tx or fetch if not found
-          // if fetch fails, treat internal tx as handled and remove from set
-          try {
-            const blockbookTx =
-              blockbookTxs.get(internalTx.txid) ?? handleTransaction(await blockbook.getTransaction(internalTx.txid))
-
-            txs.push({ ...blockbookTx, internalTxs: internalTx.txs })
-          } catch (err) {
-            logger.warn(err, `failed to get tx: ${internalTx.txid}`)
-          }
-
-          internalTxs.delete(internalTx.txid)
-          curCursor.etherscanTxid = internalTx.txid
-
-          // if there was a matching blockbook tx, delete it and track as last blockbook txid seen
-          if (blockbookTxs.has(internalTx.txid)) {
-            blockbookTxs.delete(internalTx.txid)
-            curCursor.blockbookTxid = internalTx.txid
-          }
-        }
-      }
-
-      // if we processed through the whole set of transactions, increase the page number for next fetch
-      if (!blockbookTxs.size) curCursor.blockbookPage++
-      if (!internalTxs.size) curCursor.blockbookPage++
-
-      curCursor.blockHeight = txs[txs.length - 1]?.blockHeight
-
-      const nextCursor = (() => {
-        if (!hasMoreBlockbookTxs && !hasMoreInternalTxs) return
-        return Buffer.from(JSON.stringify(curCursor), 'binary').toString('base64')
-      })()
-
-      return {
-        pubkey: pubkey,
-        cursor: nextCursor,
-        txs: txs,
-      }
-    } catch (err) {
-      throw handleError(err)
-    }
+  async getTxHistory(@Path() pubkey: string, @Query() cursor?: string, @Query() pageSize = 10): Promise<TxHistory> {
+    return service.getTxHistory(pubkey, cursor, pageSize)
   }
 
   /**
@@ -275,37 +135,31 @@ export class Avalanche extends Controller implements BaseAPI, AvalancheAPI {
    *
    * @param {string} txid transaction hash
    *
-   * @example txid "0x8825fe8d60e1aa8d990f150bffe1196adcab36d0c4e98bac76c691719103b79d"
+   * @example txid "0x14a6ea081daab59b5dd7a17648a004e9ca377a5ed2a97a84e2ad805df2e2533d"
    *
-   * @returns {Promise<BitcoinTx>} transaction payload
+   * @returns {Promise<Tx>} transaction payload
    */
-  @Example<AvalancheTx>({
-    txid: '0x8825fe8d60e1aa8d990f150bffe1196adcab36d0c4e98bac76c691719103b79d',
-    blockHash: '0x122f1e1b594b797d96c1777ce9cdb68ddb69d262ac7f2ddc345909aba4ebabd7',
-    blockHeight: 14813163,
-    timestamp: 1653078780,
+  @Example<Tx>({
+    txid: '0x14a6ea081daab59b5dd7a17648a004e9ca377a5ed2a97a84e2ad805df2e2533d',
+    blockHash: '0x748fff248d4a033c28cb6cc45b78ad7f471ac4d958971570e3e3afe4e0f84c1f',
+    blockHeight: 17512164,
+    timestamp: 1658197214,
     status: 1,
-    from: '0xEA674fdDe714fd979de3EdF0F56AA9716B898ec8',
-    to: '0x275C7d416c1DBfafa53A861EEc6F0AD6138ca4dD',
-    confirmations: 21,
-    value: '49396718157429775',
-    fee: '603633477678000',
-    gasLimit: '250000',
+    from: '0xa3682Fe8fD73B90A7564585A436EC2D2AEb612eE',
+    to: '0x9D1170D30944F2E30664Be502aC57F6096fB5366',
+    confirmations: 119004,
+    value: '410000000000000000',
+    fee: '525000000000000',
+    gasLimit: '21000',
     gasUsed: '21000',
-    gasPrice: '28744451318',
-    inputData: '0x',
+    gasPrice: '25000000000',
   })
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('tx/{txid}')
-  async getTransaction(@Path() txid: string): Promise<AvalancheTx> {
-    try {
-      const data = await blockbook.getTransaction(txid)
-      return handleTransactionWithInternalEtherscan(data)
-    } catch (err) {
-      throw handleError(err)
-    }
+  async getTransaction(@Path() txid: string): Promise<Tx> {
+    return service.getTransaction(txid)
   }
 
   /**
@@ -320,10 +174,10 @@ export class Avalanche extends Controller implements BaseAPI, AvalancheAPI {
    *
    * @example data "0x"
    * @example from "0x0000000000000000000000000000000000000000"
-   * @example to "0x642F4Bda144C63f6DC47EE0fDfbac0a193e2eDb7"
-   * @example value "123"
+   * @example to "0x9D1170D30944F2E30664Be502aC57F6096fB5366"
+   * @example value "1337"
    */
-  @Example<string>('26540')
+  @Example<string>('21000')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/estimate')
@@ -333,13 +187,7 @@ export class Avalanche extends Controller implements BaseAPI, AvalancheAPI {
     @Query() to: string,
     @Query() value: string
   ): Promise<string> {
-    try {
-      const tx: TransactionRequest = { data, from, to, value: ethers.utils.parseUnits(value, 'wei') }
-      const estimatedGas = await provider.estimateGas(tx)
-      return estimatedGas?.toString()
-    } catch (err) {
-      throw new ApiError('Internal Server Error', 500, JSON.stringify(err))
-    }
+    return service.estimateGas(data, from, to, value)
   }
 
   /**
@@ -351,31 +199,18 @@ export class Avalanche extends Controller implements BaseAPI, AvalancheAPI {
    * @returns {Promise<GasFees>} current fees specified in wei
    */
   @Example<GasFees>({
-    gasPrice: '172301756423',
-    maxFeePerGas: '342603512846',
-    maxPriorityFeePerGas: '1000000000',
+    gasPrice: '25000000000',
+    maxFeePerGas: '51500000000',
+    maxPriorityFeePerGas: '1500000000',
   })
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
   async getGasFees(): Promise<GasFees> {
-    try {
-      const feeData = await provider.getFeeData()
-      if (!feeData.gasPrice || !feeData.maxFeePerGas || !feeData.maxPriorityFeePerGas) {
-        throw { message: 'no fee data returned from node' }
-      }
-
-      return {
-        gasPrice: feeData.gasPrice.toString(),
-        maxFeePerGas: feeData.maxFeePerGas.toString(),
-        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas.toString(),
-      }
-    } catch (err) {
-      throw new ApiError('Internal Server Error', 500, JSON.stringify(err))
-    }
+    return service.getGasFees()
   }
 
   /**
-   * Sends raw transaction to be broadcast to the node.
+   * Broadcast signed raw transaction
    *
    * @param {SendTxBody} body serialized raw transaction hex
    *
@@ -391,11 +226,6 @@ export class Avalanche extends Controller implements BaseAPI, AvalancheAPI {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Post('send/')
   async sendTx(@Body() body: SendTxBody): Promise<string> {
-    try {
-      const { result } = await blockbook.sendTransaction(body.hex)
-      return result
-    } catch (err) {
-      throw handleError(err)
-    }
+    return service.sendTx(body)
   }
 }

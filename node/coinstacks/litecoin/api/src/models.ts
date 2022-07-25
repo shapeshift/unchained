@@ -1,5 +1,5 @@
 /* unable to import models from a module with tsoa */
-import { Account, Tx, TxHistory } from '../../../common/api/src'
+import { BaseAccount, BaseTx, BaseTxHistory } from '../../../common/api/src'
 
 /**
  * Contains info about a transaction input
@@ -32,7 +32,7 @@ export interface Vout {
 /**
  * Contains info about a Litecoin transaction
  */
-export interface LitecoinTx extends Tx {
+export interface LitecoinTx extends BaseTx {
   vin: Array<Vin>
   vout: Array<Vout>
   confirmations: number
@@ -44,9 +44,7 @@ export interface LitecoinTx extends Tx {
 /**
  * Contains info about Litecoin transaction history
  */
-export interface LitecoinTxHistory extends TxHistory {
-  txs: Array<LitecoinTx>
-}
+export type LitecoinTxHistory = BaseTxHistory<LitecoinTx>
 
 /**
  * Contains Litecoin specific transaction info as returned from the node
@@ -111,7 +109,7 @@ export interface LitecoinAddress {
 /**
  * Contains additional Litecoin specific account info
  */
-export interface LitecoinAccount extends Account {
+export interface LitecoinAccount extends BaseAccount {
   /**
    * List of associated addresses for an xpub
    */

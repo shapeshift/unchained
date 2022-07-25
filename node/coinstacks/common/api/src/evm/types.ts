@@ -2,8 +2,8 @@ export interface Cursor {
   blockHeight?: number
   blockbookPage: number
   blockbookTxid?: string
-  etherscanPage: number
-  etherscanTxid?: string
+  explorerPage: number
+  explorerTxid?: string
 }
 
 export interface NodeBlock {
@@ -41,13 +41,13 @@ export interface CallStack {
   calls?: Array<CallStack>
 }
 
-export interface EtherscanApiResponse {
+export interface ExplorerApiResponse<T> {
   status: string
   message: string
-  result: unknown
+  result: T
 }
 
-export interface EtherscanInternalTx {
+export interface ExplorerInternalTx {
   blockNumber: string
   timeStamp: string
   hash: string
@@ -63,5 +63,3 @@ export interface EtherscanInternalTx {
   isError: string
   errCode: string
 }
-
-export type InternalTxHistory = Record<string, Array<EtherscanInternalTx>>
