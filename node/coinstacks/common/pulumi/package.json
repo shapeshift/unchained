@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/common-pulumi",
-  "version": "7.2.0-alpha.0",
+  "version": "7.2.0",
   "license": "MIT",
   "private": true,
   "main": "src/index.ts",
