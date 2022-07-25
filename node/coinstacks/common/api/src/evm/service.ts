@@ -2,7 +2,6 @@ import axios from 'axios'
 import axiosRetry from 'axios-retry'
 import BigNumber from 'bignumber.js'
 import { ethers } from 'ethers'
-import { TransactionRequest } from '@ethersproject/abstract-provider'
 import { ApiError as BlockbookApiError, Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
 import { ApiError, BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
@@ -198,7 +197,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
   async estimateGas(data: string, from: string, to: string, value: string): Promise<string> {
     try {
-      const tx: TransactionRequest = { data, from, to, value: ethers.utils.parseUnits(value, 'wei') }
+      const tx: ethers.providers.TransactionRequest = { data, from, to, value: ethers.utils.parseUnits(value, 'wei') }
       const estimatedGas = await this.provider.estimateGas(tx)
       return estimatedGas?.toString()
     } catch (err) {

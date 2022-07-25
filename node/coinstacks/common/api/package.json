@@ -15,8 +15,11 @@
   },
   "dependencies": {
     "@shapeshiftoss/blockbook": "^7.2.0-alpha.0",
+    "@shapeshiftoss/logger": "^1.1.2",
+    "axios": "^0.27.2",
     "axios-retry": "^3.2.5",
     "bignumber.js": "^9.0.2",
+    "ethers": "^5.6.9",
     "tsoa": "^4.1.0",
     "uuid": "^8.3.2",
     "ws": "^8.8.0"
