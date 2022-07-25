@@ -5,7 +5,7 @@ import {
   ApiError,
   BadRequestError,
   BaseAPI,
-  Info,
+  BaseInfo,
   InternalServerError,
   SendTxBody,
   ValidationError,
@@ -55,13 +55,13 @@ export class Litecoin extends Controller implements BaseAPI, LitecoinAPI {
   /**
    * Get information about the running coinstack
    *
-   * @returns {Promise<Info>} coinstack info
+   * @returns {Promise<BaseInfo>} coinstack info
    */
-  @Example<Info>({
+  @Example<BaseInfo>({
     network: 'mainnet',
   })
   @Get('info/')
-  async getInfo(): Promise<Info> {
+  async getInfo(): Promise<BaseInfo> {
     return {
       network: NETWORK as string,
     }
