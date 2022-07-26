@@ -4,18 +4,11 @@ import { join } from 'path'
 import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
 import { Logger } from '@shapeshiftoss/logger'
-import {
-  middleware,
-  ConnectionHandler,
-  Registry,
-  AddressFormatter,
-  BlockHandler,
-  TransactionHandler,
-} from '@shapeshiftoss/common-api'
+import { middleware, ConnectionHandler, Registry, BlockHandler, TransactionHandler } from '@shapeshiftoss/common-api'
 import { getAddresses, NewBlock, Tx as BlockbookTx, WebsocketClient } from '@shapeshiftoss/blockbook'
+import { utxo } from '@shapeshiftoss/common-api'
+import { service } from './controller'
 import { RegisterRoutes } from './routes'
-import { BitcoinTx } from './models'
-import { formatAddress, handleBlock, handleTransaction } from './handlers'
 
 const PORT = process.env.PORT ?? 3000
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -39,7 +32,7 @@ app.get('/health', async (_, res) =>
 
 const options = {
   customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'ShapeShift dogecoin API Docs',
+  customSiteTitle: 'ShapeShift Dogecoin API Docs',
   customfavIcon: '/public/favi-blue.png',
   swaggerUrl: '/swagger.json',
 }
@@ -58,20 +51,18 @@ app.get('/', async (_, res) => {
 app.use(middleware.errorHandler)
 app.use(middleware.notFoundHandler)
 
-const addressFormatter: AddressFormatter = (address) => formatAddress(address)
-
 const blockHandler: BlockHandler<NewBlock, Array<BlockbookTx>> = async (block) => {
-  const txs = await handleBlock(block.hash)
+  const txs = await service.handleBlock(block.hash)
   return { txs }
 }
 
-const transactionHandler: TransactionHandler<BlockbookTx, BitcoinTx> = async (blockbookTx) => {
-  const tx = handleTransaction(blockbookTx)
+const transactionHandler: TransactionHandler<BlockbookTx, utxo.Tx> = async (blockbookTx) => {
+  const tx = service.handleTransaction(blockbookTx)
   const addresses = getAddresses(blockbookTx)
   return { addresses, tx }
 }
 
-const registry = new Registry({ addressFormatter, blockHandler, transactionHandler })
+const registry = new Registry({ blockHandler, transactionHandler })
 
 const server = app.listen(PORT, () => logger.info('Server started'))
 const wsServer = new Server({ server })

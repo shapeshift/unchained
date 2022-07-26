@@ -17,8 +17,7 @@ const isXpub = (pubkey: string): boolean => {
 }
 
 export const formatAddress = (address: string): string => {
-  const decoded = bech32.decodeUnsafe(address.toLowerCase())
-  if (decoded?.prefix === 'bc') return address.toLowerCase()
+  if (bech32.decodeUnsafe(address.toLowerCase())?.prefix === 'bc') return address.toLowerCase()
   return address
 }
 
