@@ -1,5 +1,6 @@
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Service } from '../../../common/api/src/utxo/service'
+import { UTXO } from '../../../common/api/src/utxo/controller'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -17,6 +18,5 @@ const isXpub = (pubkey: string): boolean => {
 
 export const service = new Service({ blockbook, rpcUrl: RPC_URL, isXpub })
 
-globalThis.service = service
-
-export { UTXO } from '../../../common/api/src/utxo/controller'
+// assign service to be used for all instances of UTXO
+UTXO.service = service

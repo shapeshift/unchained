@@ -13,7 +13,7 @@ import { NodeBlock } from './types'
 
 axiosRetry(axios, { retries: 5, retryDelay: axiosRetry.exponentialDelay })
 
-export const handleError = (err: unknown): ApiError => {
+const handleError = (err: unknown): ApiError => {
   if (err instanceof BlockbookApiError) {
     return new ApiError(err.response?.statusText ?? 'Internal Server Error', err.response?.status ?? 500, err.message)
   }

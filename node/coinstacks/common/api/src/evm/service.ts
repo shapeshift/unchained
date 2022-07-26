@@ -11,7 +11,7 @@ import { formatAddress } from './utils'
 
 axiosRetry(axios, { retries: 5, retryDelay: axiosRetry.exponentialDelay })
 
-export const handleError = (err: unknown): ApiError => {
+const handleError = (err: unknown): ApiError => {
   if (err instanceof BlockbookApiError) {
     return new ApiError(err.response?.statusText ?? 'Internal Server Error', err.response?.status ?? 500, err.message)
   }
@@ -23,7 +23,7 @@ export const handleError = (err: unknown): ApiError => {
   return new ApiError('Internal Server Error', 500, 'unknown error')
 }
 
-export interface BaseControllerArgs {
+export interface ServiceArgs {
   blockbook: Blockbook
   explorerApiKey?: string
   explorerApiUrl: string
@@ -40,7 +40,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   private readonly provider: ethers.providers.JsonRpcProvider
   private readonly rpcUrl: string
 
-  constructor(args: BaseControllerArgs) {
+  constructor(args: ServiceArgs) {
     this.blockbook = args.blockbook
     this.explorerApiKey = args.explorerApiKey
     this.explorerApiUrl = args.explorerApiUrl

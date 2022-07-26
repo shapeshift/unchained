@@ -3,11 +3,6 @@ import { BadRequestError, BaseAPI, BaseInfo, InternalServerError, SendTxBody, Va
 import { API, Account, Tx, RawTx, NetworkFees, Utxo, TxHistory } from './models'
 import { Service } from './service'
 
-declare global {
-  // eslint-disable-next-line no-var
-  var service: Service
-}
-
 const NETWORK = process.env.NETWORK
 
 if (!NETWORK) throw new Error('NETWORK env var not set')
@@ -15,6 +10,8 @@ if (!NETWORK) throw new Error('NETWORK env var not set')
 @Route('api/v1')
 @Tags('v1')
 export class UTXO extends Controller implements BaseAPI, API {
+  static service: Service
+
   /**
    * Get information about the running coinstack
    *
@@ -39,7 +36,7 @@ export class UTXO extends Controller implements BaseAPI, API {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}')
   async getAccount(@Path() pubkey: string): Promise<Account> {
-    return globalThis.service.getAccount(pubkey)
+    return UTXO.service.getAccount(pubkey)
   }
 
   /**
@@ -56,7 +53,7 @@ export class UTXO extends Controller implements BaseAPI, API {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}/txs')
   async getTxHistory(@Path() pubkey: string, @Query() cursor?: string, @Query() pageSize = 10): Promise<TxHistory> {
-    return globalThis.service.getTxHistory(pubkey, cursor, pageSize)
+    return UTXO.service.getTxHistory(pubkey, cursor, pageSize)
   }
 
   /**
@@ -71,7 +68,7 @@ export class UTXO extends Controller implements BaseAPI, API {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}/utxos')
   async getUtxos(@Path() pubkey: string): Promise<Array<Utxo>> {
-    return globalThis.service.getUtxos(pubkey)
+    return UTXO.service.getUtxos(pubkey)
   }
 
   /**
@@ -86,7 +83,7 @@ export class UTXO extends Controller implements BaseAPI, API {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('tx/{txid}')
   async getTransaction(@Path() txid: string): Promise<Tx> {
-    return globalThis.service.getTransaction(txid)
+    return UTXO.service.getTransaction(txid)
   }
 
   /**
@@ -101,7 +98,7 @@ export class UTXO extends Controller implements BaseAPI, API {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('tx/{txid}/raw')
   async getRawTransaction(@Path() txid: string): Promise<RawTx> {
-    return globalThis.service.getRawTransaction(txid)
+    return UTXO.service.getRawTransaction(txid)
   }
 
   /**
@@ -116,7 +113,7 @@ export class UTXO extends Controller implements BaseAPI, API {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Post('send/')
   async sendTx(@Body() body: SendTxBody): Promise<string> {
-    return globalThis.service.sendTx(body)
+    return UTXO.service.sendTx(body)
   }
 
   /**
@@ -128,6 +125,6 @@ export class UTXO extends Controller implements BaseAPI, API {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/fees')
   async getNetworkFees(): Promise<NetworkFees> {
-    return globalThis.service.getNetworkFees()
+    return UTXO.service.getNetworkFees()
   }
 }
