@@ -9,5 +9,5 @@
   "routes": {
     "routesDir": "src"
   },
-  "ignore": ["**/node_modules/**", "**/dist/**", "**/utxo/**"]
+  "ignore": ["**/node_modules/**", "**/dist/**"]
 }

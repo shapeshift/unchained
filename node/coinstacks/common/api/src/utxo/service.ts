@@ -1,12 +1,6 @@
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
-import {
-  Address as BlockbookAddress,
-  ApiError as BlockbookApiError,
-  Blockbook,
-  Tx as BlockbookTx,
-  Xpub,
-} from '@shapeshiftoss/blockbook'
+import { ApiError as BlockbookApiError, Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { ApiError, BadRequestError, BaseAPI, Cursor, RPCRequest, RPCResponse, SendTxBody } from '../'
 import { Account, Address, API, NetworkFee, NetworkFees, RawTx, Tx, TxHistory, Utxo } from './models'
 import { NodeBlock } from './types'
@@ -40,26 +34,18 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   constructor(args: ServiceArgs) {
     this.blockbook = args.blockbook
     this.rpcUrl = args.rpcUrl
-
     this.isXpub = args.isXpub
   }
 
   async getAccount(pubkey: string): Promise<Account> {
     try {
-      let data: BlockbookAddress | Xpub
-      if (this.isXpub(pubkey)) {
-        data = await this.blockbook.getXpub(
-          pubkey,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          'tokenBalances',
-          'derived'
-        )
-      } else {
-        data = await this.blockbook.getAddress(pubkey, undefined, undefined, undefined, undefined, 'basic')
-      }
+      const data = await (() => {
+        if (this.isXpub(pubkey)) {
+          return this.blockbook.getXpub(pubkey, undefined, undefined, undefined, undefined, 'tokenBalances', 'derived')
+        }
+
+        return this.blockbook.getAddress(pubkey, undefined, undefined, undefined, undefined, 'basic')
+      })()
 
       // list of all used addresses with additional derived addresses up to gap limit of 20, including any detected balances
       const addresses = data.tokens?.map<Address>((token) => ({
@@ -111,12 +97,13 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
         }
       })()
 
-      let data: BlockbookAddress | Xpub
-      if (this.isXpub(pubkey)) {
-        data = await this.blockbook.getXpub(pubkey, curCursor.page, pageSize, undefined, undefined, 'txs')
-      } else {
-        data = await this.blockbook.getAddress(pubkey, curCursor.page, pageSize, undefined, undefined, 'txs')
-      }
+      const data = await (() => {
+        if (this.isXpub(pubkey)) {
+          return this.blockbook.getXpub(pubkey, curCursor.page, pageSize, undefined, undefined, 'txs')
+        }
+
+        return this.blockbook.getAddress(pubkey, curCursor.page, pageSize, undefined, undefined, 'txs')
+      })()
 
       curCursor.page++
 
