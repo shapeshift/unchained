@@ -7,6 +7,7 @@ export * from './registry'
 export * from './types'
 
 export * as evm from './evm'
+export * as utxo from './utxo'
 
 /**
  * Generic api error for handling failed requests

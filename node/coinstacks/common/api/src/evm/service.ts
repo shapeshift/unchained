@@ -7,10 +7,9 @@ import { Logger } from '@shapeshiftoss/logger'
 import { ApiError, BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
 import { Account, API, TokenBalance, Tx, TxHistory, GasFees, InternalTx } from './models'
 import { Cursor, NodeBlock, CallStack, ExplorerApiResponse, ExplorerInternalTx } from './types'
+import { formatAddress } from './utils'
 
 axiosRetry(axios, { retries: 5, retryDelay: axiosRetry.exponentialDelay })
-
-export const formatAddress = (address: string): string => ethers.utils.getAddress(address)
 
 export const handleError = (err: unknown): ApiError => {
   if (err instanceof BlockbookApiError) {

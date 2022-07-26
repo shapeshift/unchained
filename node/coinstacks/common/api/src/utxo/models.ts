@@ -1,8 +1,7 @@
-/* unable to import models from a module with tsoa */
-import { BaseAccount, BaseTx, BaseTxHistory } from '../../../common/api/src'
+import { BaseAccount, BaseTx, BaseTxHistory } from '../models' // unable to import models from a module with tsoa
 
 /**
- * Contains info about a Bitcoin transaction input
+ * Contains info about a transaction input
  */
 export interface Vin {
   txid?: string
@@ -17,7 +16,7 @@ export interface Vin {
 }
 
 /**
- * Contains info about a Bitcoin transaction output
+ * Contains info about a transaction output
  */
 export interface Vout {
   value: string
@@ -30,9 +29,9 @@ export interface Vout {
 }
 
 /**
- * Contains info about a Bitcoin transaction
+ * Contains info about a transaction
  */
-export interface BitcoinTx extends BaseTx {
+export interface Tx extends BaseTx {
   vin: Array<Vin>
   vout: Array<Vout>
   confirmations: number
@@ -42,14 +41,14 @@ export interface BitcoinTx extends BaseTx {
 }
 
 /**
- * Contains info about Bitcoin transaction history
+ * Contains info about transaction history
  */
-export type BitcoinTxHistory = BaseTxHistory<BitcoinTx>
+export type TxHistory = BaseTxHistory<Tx>
 
 /**
- * Contains Bitcoin specific transaction info as returned from the node
+ * Contains info about a transaction as returned from the node
  */
-export interface BitcoinRawTx {
+export interface RawTx {
   txid: string
   hash: string
   version: number
@@ -101,19 +100,22 @@ export interface Utxo {
   coinbase?: boolean
 }
 
-export interface BitcoinAddress {
+/**
+ * Contains info about an address associated with an xpub
+ */
+export interface Address {
   balance: string
   pubkey: string
 }
 
 /**
- * Contains additional Bitcoin specific account info
+ * Contains info about an address or xpub account
  */
-export interface BitcoinAccount extends BaseAccount {
+export interface Account extends BaseAccount {
   /**
    * List of associated addresses for an xpub
    */
-  addresses?: Array<BitcoinAddress>
+  addresses?: Array<Address>
 
   /**
    * The next unused receive address index for an xpub (change index 0)
@@ -127,13 +129,30 @@ export interface BitcoinAccount extends BaseAccount {
 }
 
 /**
- * BitcoinAPI coin specific implementation
+ * Contains info about the network fee
  */
-export interface BitcoinAPI {
+export type NetworkFee = {
+  blocksUntilConfirmation: number
+  satsPerKiloByte: number
+}
+
+/**
+ * Contains info about current recommended network fees
+ */
+export interface NetworkFees {
+  fast?: NetworkFee
+  average?: NetworkFee
+  slow?: NetworkFee
+}
+
+/**
+ * Extended coin specific functionality
+ */
+export interface API {
   /**
-   * Get all unspent transaction outputs for a pubkey
+   * Get all unspent transaction outputs for an address or xpub
    *
-   * @param pubkey account pubkey
+   * @param {string} pubkey account address or xpub
    *
    * @returns {Promise<Array<Utxo>>} account utxos
    */
@@ -145,43 +164,26 @@ export interface BitcoinAPI {
    *
    * @param {string} txid transaction hash
    *
-   * @returns {Promise<BitcoinTx>} transaction payload
+   * @returns {Promise<Tx>} transaction payload
    */
   // @Get('tx/{txid}')
-  getTransaction(txid: string): Promise<BitcoinTx>
+  getTransaction(txid: string): Promise<Tx>
 
   /**
    * Get raw transaction details directly from the node
    *
    * @param {string} txid transaction hash
    *
-   * @returns {Promise<BitcoinRawTx>} transaction payload
+   * @returns {Promise<RawTx>} transaction payload
    */
   // @Get('tx/{txid}/raw')
-  getRawTransaction(txid: string): Promise<BitcoinRawTx>
+  getRawTransaction(txid: string): Promise<RawTx>
 
   /**
-   * Get current network fee estimates from Blockbook
+   * Get current recommended network fees to use in a transaction
    *
-   * @returns {Promise<BTCNetworkFees>} network fee estimates
+   * @returns {Promise<NetworkFees>} current network fees
    */
-  getNetworkFees(): Promise<BTCNetworkFees>
-}
-
-/**
- * Information about BTC network fee at a specific confirmation speed
- */
-export type BTCNetworkFee = {
-  blocksUntilConfirmation: number
-  satsPerKiloByte: number
-}
-
-/**
- * Gets current network fee estimates for 'fast', 'average', and 'slow' tx confirmation times
- */
-//@Get('/fees')
-export interface BTCNetworkFees {
-  fast?: BTCNetworkFee
-  average?: BTCNetworkFee
-  slow?: BTCNetworkFee
+  //@Get('/fees')
+  getNetworkFees(): Promise<NetworkFees>
 }
