@@ -192,9 +192,9 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     // make best effort to fetch all transactions, but don't fail handling block if a single transaction fails
     const txs = await Promise.allSettled(block.tx.map((hash) => this.blockbook.getTransaction(hash)))
 
-    return (txs.filter((tx) => tx.status === 'fulfilled') as Array<PromiseFulfilledResult<BlockbookTx>>).map(
-      (tx) => tx.value
-    )
+    return txs
+      .filter((tx): tx is PromiseFulfilledResult<BlockbookTx> => tx.status === 'fulfilled')
+      .map((tx) => tx.value)
   }
 
   handleTransaction(tx: BlockbookTx): Tx {

@@ -101,7 +101,7 @@ export interface Utxo {
 }
 
 /**
- * Contains info about an address associated with an xpub
+ * Contains info about an address associated with an extended public key
  */
 export interface Address {
   balance: string
@@ -109,21 +109,21 @@ export interface Address {
 }
 
 /**
- * Contains info about an address or xpub account
+ * Contains info about an address or extended public key account
  */
 export interface Account extends BaseAccount {
   /**
-   * List of associated addresses for an xpub
+   * List of associated addresses for an extended public key
    */
   addresses?: Array<Address>
 
   /**
-   * The next unused receive address index for an xpub (change index 0)
+   * The next unused receive address index for an extended public key (change index 0)
    */
   nextReceiveAddressIndex?: number
 
   /**
-   * The next unused change address index for an xpub (change index 1)
+   * The next unused change address index for an extended public key (change index 1)
    */
   nextChangeAddressIndex?: number
 }
@@ -150,9 +150,9 @@ export interface NetworkFees {
  */
 export interface API {
   /**
-   * Get all unspent transaction outputs for an address or xpub
+   * Get all unspent transaction outputs for an address or extended public key
    *
-   * @param {string} pubkey account address or xpub
+   * @param {string} pubkey account address or extended public key
    *
    * @returns {Promise<Array<Utxo>>} account utxos
    */

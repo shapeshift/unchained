@@ -25,9 +25,9 @@ export class UTXO extends Controller implements BaseAPI, API {
   }
 
   /**
-   * Get account details by address or xpub
+   * Get account details by address or extended public key
    *
-   * @param {string} pubkey account address or xpub
+   * @param {string} pubkey account address or extended public key
    *
    * @returns {Promise<Account>} account details
    */
@@ -40,9 +40,9 @@ export class UTXO extends Controller implements BaseAPI, API {
   }
 
   /**
-   * Get transaction history by address or xpub
+   * Get transaction history by address or extended public key
    *
-   * @param {string} pubkey account address or xpub
+   * @param {string} pubkey account address or extended public key
    * @param {string} [cursor] the cursor returned in previous query (base64 encoded json object with a 'page' property)
    * @param {number} [pageSize] page size (10 by default)
    *
@@ -57,9 +57,9 @@ export class UTXO extends Controller implements BaseAPI, API {
   }
 
   /**
-   * Get all unspent transaction outputs for an address or xpub
+   * Get all unspent transaction outputs for an address or extended public key
    *
-   * @param {string} pubkey account address or xpub
+   * @param {string} pubkey account address or extended public key
    *
    * @returns {Promise<Array<Utxo>>} account utxos
    */
