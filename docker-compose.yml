@@ -29,6 +29,7 @@ services:
       - bitcoin_default
       - bitcoincash_default
       - cosmos_default
+      - dogecoin_default
       - ethereum_default
       - litecoin_default
       - osmosis_default
@@ -50,6 +51,8 @@ networks:
     name: bitcoincash_default
   cosmos_default:
     name: cosmos_default
+  dogecoin_default:
+    name: dogecoin_default
   ethereum_default:
     name: ethereum_default
   litecoin_default:

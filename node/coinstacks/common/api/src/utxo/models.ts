@@ -1,5 +1,4 @@
-/* unable to import models from a module with tsoa */
-import { BaseAccount, BaseTx, BaseTxHistory } from '../../../common/api/src'
+import { BaseAccount, BaseTx, BaseTxHistory } from '../models' // unable to import models from a module with tsoa
 
 /**
  * Contains info about a transaction input
@@ -30,9 +29,9 @@ export interface Vout {
 }
 
 /**
- * Contains info about a Litecoin transaction
+ * Contains info about a transaction
  */
-export interface LitecoinTx extends BaseTx {
+export interface Tx extends BaseTx {
   vin: Array<Vin>
   vout: Array<Vout>
   confirmations: number
@@ -42,14 +41,14 @@ export interface LitecoinTx extends BaseTx {
 }
 
 /**
- * Contains info about Litecoin transaction history
+ * Contains info about transaction history
  */
-export type LitecoinTxHistory = BaseTxHistory<LitecoinTx>
+export type TxHistory = BaseTxHistory<Tx>
 
 /**
- * Contains Litecoin specific transaction info as returned from the node
+ * Contains info about a transaction as returned from the node
  */
-export interface LitecoinRawTx {
+export interface RawTx {
   txid: string
   hash: string
   version: number
@@ -101,33 +100,36 @@ export interface Utxo {
   coinbase?: boolean
 }
 
-export interface LitecoinAddress {
+/**
+ * Contains info about an address associated with an extended public key
+ */
+export interface Address {
   balance: string
   pubkey: string
 }
 
 /**
- * Contains additional Litecoin specific account info
+ * Contains info about an address or extended public key account
  */
-export interface LitecoinAccount extends BaseAccount {
+export interface Account extends BaseAccount {
   /**
-   * List of associated addresses for an xpub
+   * List of associated addresses for an extended public key
    */
-  addresses?: Array<LitecoinAddress>
+  addresses?: Array<Address>
 
   /**
-   * The next unused receive address index for an xpub (change index 0)
+   * The next unused receive address index for an extended public key (change index 0)
    */
   nextReceiveAddressIndex?: number
 
   /**
-   * The next unused change address index for an xpub (change index 1)
+   * The next unused change address index for an extended public key (change index 1)
    */
   nextChangeAddressIndex?: number
 }
 
 /**
- * Contains network fee info
+ * Contains info about the network fee
  */
 export type NetworkFee = {
   blocksUntilConfirmation: number
@@ -135,7 +137,7 @@ export type NetworkFee = {
 }
 
 /**
- * Gets current network fee estimates
+ * Contains info about current recommended network fees
  */
 export interface NetworkFees {
   fast?: NetworkFee
@@ -144,13 +146,13 @@ export interface NetworkFees {
 }
 
 /**
- * LitecoinAPI coin specific implementation
+ * Extended coin specific functionality
  */
-export interface LitecoinAPI {
+export interface API {
   /**
-   * Get all unspent transaction outputs for a pubkey
+   * Get all unspent transaction outputs for an address or extended public key
    *
-   * @param pubkey account pubkey
+   * @param {string} pubkey account address or extended public key
    *
    * @returns {Promise<Array<Utxo>>} account utxos
    */
@@ -162,26 +164,26 @@ export interface LitecoinAPI {
    *
    * @param {string} txid transaction hash
    *
-   * @returns {Promise<LitecoinTx>} transaction payload
+   * @returns {Promise<Tx>} transaction payload
    */
   // @Get('tx/{txid}')
-  getTransaction(txid: string): Promise<LitecoinTx>
+  getTransaction(txid: string): Promise<Tx>
 
   /**
    * Get raw transaction details directly from the node
    *
    * @param {string} txid transaction hash
    *
-   * @returns {Promise<LitecoinRawTx>} transaction payload
+   * @returns {Promise<RawTx>} transaction payload
    */
   // @Get('tx/{txid}/raw')
-  getRawTransaction(txid: string): Promise<LitecoinRawTx>
+  getRawTransaction(txid: string): Promise<RawTx>
 
   /**
-   * Get current network fees
+   * Get current recommended network fees to use in a transaction
    *
-   * @returns {Promise<NetworkFees>} network fees
+   * @returns {Promise<NetworkFees>} current network fees
    */
-  // @Get('fees')
+  //@Get('/fees')
   getNetworkFees(): Promise<NetworkFees>
 }

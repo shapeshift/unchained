@@ -10,7 +10,8 @@ import {
   SendTxBody,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { API, Account, GasFees, Service, Tx, TxHistory } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
+import { API, Account, GasFees, Tx, TxHistory } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
+import { Service } from '../../../common/api/src/evm/service'
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL

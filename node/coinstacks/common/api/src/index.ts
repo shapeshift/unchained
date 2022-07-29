@@ -7,6 +7,7 @@ export * from './registry'
 export * from './types'
 
 export * as evm from './evm'
+export * as utxo from './utxo'
 
 /**
  * Generic api error for handling failed requests
@@ -41,9 +42,9 @@ export interface BaseAPI {
   getInfo(): Promise<BaseInfo>
 
   /**
-   * Get account details by address or xpub
+   * Get account details by address or extended public key
    *
-   * @param {string} pubkey account address or xpub
+   * @param {string} pubkey account address or extended public key
    *
    * @returns {Promise<BaseAccount>} account details
    */
@@ -51,9 +52,9 @@ export interface BaseAPI {
   getAccount(pubkey: string): Promise<BaseAccount>
 
   /**
-   * Get transaction history by address or xpub
+   * Get transaction history by address or extended public key
    *
-   * @param {string} pubkey account address or xpub
+   * @param {string} pubkey account address or extended public key
    * @param {string} [cursor] the cursor returned in previous query
    * @param {number} [pageSize] page size
    *
