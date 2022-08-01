@@ -1001,6 +1001,32 @@ workflows:
           <<: *dogecoin
           <<: *only-main
 
+      ####### LITECOIN
+      - deploy-coinstack-node:
+          name: preview litecoin (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: preview
+          requires:
+            - validate dependencies (shapeshift)
+          <<: *litecoin
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve litecoin coinstack (shapeshift)
+          type: approval
+          requires:
+            - preview litecoin (shapeshift)
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy litecoin (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: up -f --yes
+          requires:
+            - approve litecoin coinstack (shapeshift)
+          <<: *litecoin
+          <<: *only-main
+
       ####### ETHEREUM
       - deploy-coinstack-node:
           name: preview ethereum (shapeshift)
@@ -1025,6 +1051,32 @@ workflows:
           requires:
             - approve ethereum coinstack (shapeshift)
           <<: *ethereum
+          <<: *only-main
+
+      ####### AVALANCHE
+      - deploy-coinstack-node:
+          name: preview avalanche (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: preview
+          requires:
+            - validate dependencies (shapeshift)
+          <<: *avalanche
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve avalanche coinstack (shapeshift)
+          type: approval
+          requires:
+            - preview avalanche (shapeshift)
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy avalanche (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: up -f --yes
+          requires:
+            - approve avalanche coinstack (shapeshift)
+          <<: *avalanche
           <<: *only-main
 
       ####### COSMOS
