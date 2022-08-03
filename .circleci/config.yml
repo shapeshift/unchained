@@ -975,6 +975,32 @@ workflows:
           <<: *bitcoin
           <<: *only-main
 
+      ####### BITCOINCASH
+      - deploy-coinstack-node:
+          name: preview bitcoincash (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: preview
+          requires:
+            - validate dependencies (shapeshift)
+          <<: *bitcoincash
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve bitcoincash coinstack (shapeshift)
+          type: approval
+          requires:
+            - preview bitcoincash (shapeshift)
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy bitcoincash (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: up -f --yes
+          requires:
+            - approve bitcoincash coinstack (shapeshift)
+          <<: *bitcoincash
+          <<: *only-main
+
       ####### DOGECOIN
       - deploy-coinstack-node:
           name: preview dogecoin (shapeshift)
@@ -1114,7 +1140,7 @@ workflows:
             - lint and test project (persist to workspace)
           <<: *only-main
 
-      - approve-shapeshift:
+      - approve-taxistake:
           name: approve dependencies (taxistake)
           type: approval
           requires:
@@ -1155,6 +1181,84 @@ workflows:
           <<: *bitcoin
           <<: *only-main
 
+      ####### BITCOINCASH
+      - deploy-coinstack-node:
+          name: preview bitcoincash (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies (taxistake)
+          <<: *bitcoincash
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve bitcoincash coinstack (taxistake)
+          type: approval
+          requires:
+            - preview bitcoincash (taxistake)
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy bitcoincash (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve bitcoincash coinstack (taxistake)
+          <<: *bitcoincash
+          <<: *only-main
+
+      ####### DOGECOIN
+      - deploy-coinstack-node:
+          name: preview dogecoin (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies (taxistake)
+          <<: *dogecoin
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve dogecoin coinstack (taxistake)
+          type: approval
+          requires:
+            - preview dogecoin (taxistake)
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy dogecoin (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve dogecoin coinstack (taxistake)
+          <<: *dogecoin
+          <<: *only-main
+
+      ####### LITECOIN
+      - deploy-coinstack-node:
+          name: preview litecoin (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies (taxistake)
+          <<: *litecoin
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve litecoin coinstack (taxistake)
+          type: approval
+          requires:
+            - preview litecoin (taxistake)
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy litecoin (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve litecoin coinstack (taxistake)
+          <<: *litecoin
+          <<: *only-main
+
       ####### ETHEREUM
       - deploy-coinstack-node:
           name: preview ethereum (taxistake)
@@ -1179,6 +1283,32 @@ workflows:
           requires:
             - approve ethereum coinstack (taxistake)
           <<: *ethereum
+          <<: *only-main
+
+      ####### AVALANCHE
+      - deploy-coinstack-node:
+          name: preview avalanche (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies (taxistake)
+          <<: *avalanche
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve avalanche coinstack (taxistake)
+          type: approval
+          requires:
+            - preview avalanche (taxistake)
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy avalanche (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve avalanche coinstack (taxistake)
+          <<: *avalanche
           <<: *only-main
 
       ####### COSMOS
