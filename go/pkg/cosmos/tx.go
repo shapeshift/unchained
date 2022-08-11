@@ -90,6 +90,43 @@ func (c *HTTPClient) BroadcastTx(rawTx string) (string, error) {
 	return res.TxResponse.TxHash, nil
 }
 
+// special case for osmo
+func (c *HTTPClient) BroadcastOsmoTx(rawTx string) (string, error) {
+	txBytes, err := base64.StdEncoding.DecodeString(rawTx)
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to decode rawTx: %s", rawTx)
+	}
+
+	var res struct {
+		TxResponse struct {
+			Height    int64               `json:"height,string"`
+			TxHash    string              `json:"txhash"`
+			Codespace string              `json:"codespace"`
+			Code      uint32              `json:"code"`
+			Data      string              `json:"data"`
+			RawLog    string              `json:"raw_log"`
+			Logs      sdk.ABCIMessageLogs `json:"logs"`
+			Tx        *codectypes.Any     `json:"tx"`
+			Info      string              `json:"info"`
+			GasWanted int64               `json:"gas_wanted,string"`
+			GasUsed   int64               `json:"gas_used,string"`
+			Timestamp string              `json:"timestamp"`
+		} `json:"tx_response"`
+	}
+
+	_, err = c.keplr.R().SetBody(&txtypes.BroadcastTxRequest{TxBytes: txBytes, Mode: txtypes.BroadcastMode_BROADCAST_MODE_SYNC}).SetResult(&res).Post("/cosmos/tx/v1beta1/txs")
+	if err != nil {
+		return "", errors.Wrap(err, "failed to broadcast transaction")
+	}
+
+	if res.TxResponse.Code != 0 {
+		message := fmt.Sprintf("failed to broadcast transaction: codespace: %s, code: %d, description", res.TxResponse.Codespace, res.TxResponse.Code)
+		return "", errortypes.ABCIError(res.TxResponse.Codespace, res.TxResponse.Code, message)
+	}
+
+	return res.TxResponse.TxHash, nil
+}
+
 func (c *GRPCClient) BroadcastTx(rawTx string) (string, error) {
 	txBytes, err := base64.StdEncoding.DecodeString(rawTx)
 	if err != nil {
