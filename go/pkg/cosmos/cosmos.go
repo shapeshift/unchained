@@ -76,7 +76,7 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 
 	keplrURL, err := url.Parse(conf.KEPLRURL)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse RPCURL: %s", conf.RPCURL)
+		return nil, errors.Wrapf(err, "failed to parse keplrURL: %s", conf.KEPLRURL)
 	}
 
 	// untyped resty http clients
