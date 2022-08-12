@@ -1,5 +1,5 @@
 import * as pulumi from '@pulumi/pulumi'
-import { Config as BaseConfig, Cluster, Dockerhub } from '../../../pulumi/src'
+import { Config as BaseConfig, Dockerhub } from '.'
 
 const SUPPORTED_NETWORKS = ['mainnet']
 
@@ -9,15 +9,16 @@ export interface Config {
   namespace: string
 }
 
-export const getConfig = async (): Promise<Config> => {
-  let config: BaseConfig
-  try {
-    config = new pulumi.Config('unchained').requireObject<BaseConfig>('osmosis')
-  } catch (e) {
-    throw new pulumi.RunError(
-      `Could not find required configuration file. \n\tDid you copy the Pulumi.sample.yaml file to Pulumi.${pulumi.getStack()}.yaml and update the necessary configuration?`
-    )
-  }
+export const getConfig = async (coinstack: string): Promise<Config> => {
+  console.log(pulumi.getStack())
+
+  const config = (() => {
+    try {
+      return new pulumi.Config('unchained').requireObject<BaseConfig>(coinstack)
+    } catch (e) {
+      throw new pulumi.RunError('Could not find required configuration file')
+    }
+  })()
 
   const stackReference = new pulumi.StackReference(config.stack)
   const kubeconfig = (await stackReference.getOutputValue('kubeconfig')) as string
@@ -31,8 +32,6 @@ export const getConfig = async (): Promise<Config> => {
     )
   }
 
-  config.isLocal = (await stackReference.getOutputValue('isLocal')) as boolean
-  config.cluster = (await stackReference.getOutputValue('cluster')) as Cluster
   config.dockerhub = (await stackReference.getOutputValue('dockerhub')) as Dockerhub
   config.rootDomainName = (await stackReference.getOutputValue('rootDomainName')) as string
 
@@ -54,6 +53,17 @@ export const getConfig = async (): Promise<Config> => {
     if (config.api.cpuLimit === undefined) missingRequiredConfig.push('api.cpuLimit')
     if (config.api.memoryLimit === undefined) missingRequiredConfig.push('api.memoryLimit')
     if (config.api.replicas === undefined) missingRequiredConfig.push('api.replicas')
+  }
+
+  if (config.statefulService) {
+    if (config.statefulService.replicas === undefined) missingRequiredConfig.push('statefulService.replicas')
+
+    if (config.statefulService.daemon) {
+      if (config.statefulService.daemon.cpuLimit === undefined) missingRequiredConfig.push('statefulService.daemon.cpuLimit')
+      if (config.statefulService.daemon.image === undefined) missingRequiredConfig.push('statefulService.daemon.image')
+      if (config.statefulService.daemon.memoryLimit === undefined) missingRequiredConfig.push('statefulService.daemon.memoryLimit')
+      if (config.statefulService.daemon.storageSize === undefined) missingRequiredConfig.push('statefulService.daemon.storageSize')
+    }
   }
 
   if (missingRequiredConfig.length) {
