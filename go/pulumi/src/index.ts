@@ -3,7 +3,6 @@ import { ApiConfig } from './api'
 
 export * from './config'
 export * from './api'
-export * from './daemon'
 export * from './docker'
 export * from './statefulService'
 
@@ -35,6 +34,8 @@ export interface Config extends BaseConfig {
   statefulService?: {
     replicas: number
     daemon?: ServiceConfig
+    midgard?: ServiceConfig
+    timescaledb?: ServiceConfig
   }
 }
 

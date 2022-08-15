@@ -1,5 +1,105 @@
 import * as k8s from '@pulumi/kubernetes'
-import { Config, Service } from '.'
+import { readFileSync } from 'fs'
+import { Config, Service, ServiceConfig } from '.'
+
+export interface ServiceArgs {
+  asset: string
+  config: ServiceConfig
+  name: string
+  ports: Record<string, number>
+  env: Record<string, string>
+  dataDir?: string
+}
+
+export function createService(args: ServiceArgs): Service {
+  const name = `${args.asset}-${args.name}`
+  const ports = Object.entries(args.ports).map(([name, port]) => ({ name, port }))
+  const env = Object.entries(args.env).map(([name, value]) => ({ name, value }))
+
+  const configMapData = {
+    [`${args.name}-init.sh`]: readFileSync(`../${args.name}/init.sh`).toString(),
+    [`${args.name}-readiness.sh`]: readFileSync(`../${args.name}/readiness.sh`).toString(),
+  }
+
+  const containers = [
+    {
+      name,
+      image: args.config.image,
+      command: ['/init.sh'],
+      env,
+      resources: {
+        limits: {
+          cpu: args.config.cpuLimit,
+          memory: args.config.memoryLimit,
+        },
+        ...(args.config.cpuRequest && {
+          requests: {
+            cpu: args.config.cpuRequest,
+          },
+        }),
+      },
+      ports: ports.map(({ port: containerPort, name }) => ({ containerPort, name})),
+      securityContext: { runAsUser: 0 },
+      volumeMounts: [
+        {
+          name: `data-${args.name}`,
+          mountPath: args.dataDir ?? '/data',
+        },
+        {
+          name: 'config-map',
+          mountPath: '/init.sh',
+          subPath: `${args.name}-init.sh`,
+        },
+      ],
+    },
+    {
+      name: `${name}-monitor`,
+      image: 'shapeshiftdao/unchained-probe:1.0.0',
+      readinessProbe: {
+        exec: {
+          command: ['/readiness.sh'],
+        },
+        initialDelaySeconds: 30,
+        periodSeconds: 10,
+      },
+      volumeMounts: [
+        {
+          name: 'config-map',
+          mountPath: '/readiness.sh',
+          subPath: `${args.name}-readiness.sh`,
+        },
+        {
+          name: 'dshm',
+          mountPath: '/dev/shm'
+        }
+      ],
+    },
+  ]
+
+  const volumeClaimTemplates = [
+    {
+      metadata: {
+        name: `data-${args.name}`,
+      },
+      spec: {
+        accessModes: ['ReadWriteOnce'],
+        storageClassName: 'gp2',
+        resources: {
+          requests: {
+            storage: args.config.storageSize,
+          },
+        },
+      },
+    },
+  ]
+
+  return {
+    configMapData,
+    containers,
+    ports,
+    volumeClaimTemplates,
+  }
+}
 
 export async function deployStatefulService(
   app: string,
@@ -62,6 +162,13 @@ export async function deployStatefulService(
             defaultMode: 0o755,
           },
         },
+        {
+          name: 'dshm',
+          emptyDir: {
+            medium: 'Memory',
+            sizeLimit: '1Gi'
+          }
+        }
       ],
       terminationGracePeriodSeconds: 120,
     },
