@@ -1,5 +1,5 @@
 #!/bin/sh
 
-pg_isready -U midgard
+nc -z localhost 5432
 
-exit echo $?
+exit $(echo $?)

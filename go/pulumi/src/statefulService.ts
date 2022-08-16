@@ -9,6 +9,7 @@ export interface ServiceArgs {
   ports: Record<string, number>
   env: Record<string, string>
   dataDir?: string
+  volumeMounts?: Array<k8s.types.input.core.v1.VolumeMount>
 }
 
 export function createService(args: ServiceArgs): Service {
@@ -38,8 +39,7 @@ export function createService(args: ServiceArgs): Service {
           },
         }),
       },
-      ports: ports.map(({ port: containerPort, name }) => ({ containerPort, name})),
-      securityContext: { runAsUser: 0 },
+      ports: ports.map(({ port: containerPort, name }) => ({ containerPort, name })),
       volumeMounts: [
         {
           name: `data-${args.name}`,
@@ -50,30 +50,27 @@ export function createService(args: ServiceArgs): Service {
           mountPath: '/init.sh',
           subPath: `${args.name}-init.sh`,
         },
+        ...(args.volumeMounts ?? [])
       ],
     },
-    {
-      name: `${name}-monitor`,
-      image: 'shapeshiftdao/unchained-probe:1.0.0',
-      readinessProbe: {
-        exec: {
-          command: ['/readiness.sh'],
-        },
-        initialDelaySeconds: 30,
-        periodSeconds: 10,
-      },
-      volumeMounts: [
-        {
-          name: 'config-map',
-          mountPath: '/readiness.sh',
-          subPath: `${args.name}-readiness.sh`,
-        },
-        {
-          name: 'dshm',
-          mountPath: '/dev/shm'
-        }
-      ],
-    },
+    //{
+    //  name: `${name}-monitor`,
+    //  image: 'shapeshiftdao/unchained-probe:1.0.0',
+    //  readinessProbe: {
+    //    exec: {
+    //      command: ['/readiness.sh'],
+    //    },
+    //    initialDelaySeconds: 30,
+    //    periodSeconds: 10,
+    //  },
+    //  volumeMounts: [
+    //    {
+    //      name: 'config-map',
+    //      mountPath: '/readiness.sh',
+    //      subPath: `${args.name}-readiness.sh`,
+    //    },
+    //  ],
+    //},
   ]
 
   const volumeClaimTemplates = [
@@ -107,16 +104,17 @@ export async function deployStatefulService(
   provider: k8s.Provider,
   namespace: string,
   config: Pick<Config, 'rootDomainName' | 'environment' | 'statefulService'>,
-  services: Record<string, Service>
+  services: Record<string, Service>,
+  volumes?: Array<k8s.types.input.core.v1.Volume>
 ): Promise<void> {
   if (!config.statefulService) return
   if (!Object.keys(services).length) return
 
   const labels = { app, asset }
-  const ports = Object.values(services).reduce<Array<k8s.types.input.core.v1.ServicePort>>((prev, {ports}) => [...prev, ...ports], [])
-  const configMapData = Object.values(services).reduce<Record<string, string>>((prev, {configMapData}) => ({ ...prev, ...configMapData }), {})
-  const containers = Object.values(services).reduce<Array<k8s.types.input.core.v1.Container>>((prev, {containers}) => prev.concat(...containers), [])
-  const volumeClaimTemplates = Object.values(services).reduce<Array<k8s.types.input.core.v1.PersistentVolumeClaim>>((prev, {volumeClaimTemplates}) => prev.concat(...volumeClaimTemplates), [])
+  const ports = Object.values(services).reduce<Array<k8s.types.input.core.v1.ServicePort>>((prev, { ports }) => [...prev, ...ports], [])
+  const configMapData = Object.values(services).reduce<Record<string, string>>((prev, { configMapData }) => ({ ...prev, ...configMapData }), {})
+  const containers = Object.values(services).reduce<Array<k8s.types.input.core.v1.Container>>((prev, { containers }) => prev.concat(...containers), [])
+  const volumeClaimTemplates = Object.values(services).reduce<Array<k8s.types.input.core.v1.PersistentVolumeClaim>>((prev, { volumeClaimTemplates }) => prev.concat(...volumeClaimTemplates), [])
 
   const svc = new k8s.core.v1.Service(
     `${asset}-svc`,
@@ -162,13 +160,7 @@ export async function deployStatefulService(
             defaultMode: 0o755,
           },
         },
-        {
-          name: 'dshm',
-          emptyDir: {
-            medium: 'Memory',
-            sizeLimit: '1Gi'
-          }
-        }
+        ...(volumes ?? [])
       ],
       terminationGracePeriodSeconds: 120,
     },
@@ -256,7 +248,7 @@ export async function deployStatefulService(
         },
         spec: {
           entryPoints: ['web', 'websecure'],
-          routes: Object.entries(services).map(([service, {ports }]) => (
+          routes: Object.entries(services).map(([service, { ports }]) => (
             {
               match: `Host(\`${domain(`${service}`)}\`)` + extraMatch(`${service}`),
               kind: 'Rule',
@@ -286,7 +278,7 @@ export async function deployStatefulService(
           labels: labels,
         },
         spec: {
-          rules: Object.keys(services).map(service =>({ host: domain(service)})),
+          rules: Object.keys(services).map(service => ({ host: domain(service) })),
         },
       },
       { provider }

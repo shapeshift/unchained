@@ -42,10 +42,10 @@ export = async (): Promise<Outputs> => {
       services.daemon = createService({
         asset,
         config: config.statefulService.daemon,
-        dataDir: '/root', // default home path for thornode docker image
-        env: {'CHAIN_ID': `thorchain-${config.network}-v1`, 'NET': config.network},
+        dataDir: '/root',
+        env: { 'CHAIN_ID': `thorchain-${config.network}-v1`, 'NET': config.network },
         name: 'daemon',
-        ports: {'daemon-api': 1317, 'daemon-rpc': 27147}
+        ports: { 'daemon-api': 1317, 'daemon-rpc': 27147 }
       })
     }
 
@@ -61,11 +61,28 @@ export = async (): Promise<Outputs> => {
           'PGDATA': '/var/lib/postgresql/data/pgdata'
         },
         name: 'timescaledb',
-        ports: {'postgres': 5432}
+        ports: { 'postgres': 5432 },
+        volumeMounts: [{ name: 'dshm', mountPath: '/dev/shm' }]
       })
     }
 
-    await deployStatefulService(name, asset, provider, namespace, config, services)
+    if (config.statefulService.midgard) {
+      services.midgard = createService({
+        asset,
+        config: config.statefulService.midgard,
+        dataDir: '/blockstore',
+        env: {
+          'MIDGARD_BLOCKSTORE_LOCAL': '/blockstore',
+          'MIDGARD_BLOCKSTORE_REMOTE': 'https://storage.googleapis.com/public-snapshots-ninerealms/midgard-blockstore/mainnet/v2/'
+        },
+        name: 'midgard',
+        ports: { 'midgard': 8080 }
+      })
+    }
+
+    const volumes = [{ name: 'dshm', emptyDir: { medium: 'Memory', sizeLimit: '1Gi' } }]
+
+    await deployStatefulService(name, asset, provider, namespace, config, services, volumes)
   }
 
   return outputs
