@@ -2,11 +2,16 @@ import * as k8s from '@pulumi/kubernetes'
 import { readFileSync } from 'fs'
 import { Config, Service, ServiceConfig } from '.'
 
+interface Port {
+  port: number
+  pathPrefix?: string
+}
+
 export interface ServiceArgs {
   asset: string
   config: ServiceConfig
   name: string
-  ports: Record<string, number>
+  ports: Record<string, Port>
   env: Record<string, string>
   dataDir?: string
   volumeMounts?: Array<k8s.types.input.core.v1.VolumeMount>
@@ -14,7 +19,7 @@ export interface ServiceArgs {
 
 export function createService(args: ServiceArgs): Service {
   const name = `${args.asset}-${args.name}`
-  const ports = Object.entries(args.ports).map(([name, port]) => ({ name, port }))
+  const ports = Object.entries(args.ports).map(([name, { port, pathPrefix }]) => ({ name, port, pathPrefix }))
   const env = Object.entries(args.env).map(([name, value]) => ({ name, value }))
 
   const configMapData = {
@@ -111,7 +116,7 @@ export async function deployStatefulService(
   if (!Object.keys(services).length) return
 
   const labels = { app, asset }
-  const ports = Object.values(services).reduce<Array<k8s.types.input.core.v1.ServicePort>>((prev, { ports }) => [...prev, ...ports], [])
+  const ports = Object.values(services).reduce<Array<k8s.types.input.core.v1.ServicePort>>((prev, { ports }) => [...prev, ...ports.map(({ name, port }) => ({ name, port }))], [])
   const configMapData = Object.values(services).reduce<Record<string, string>>((prev, { configMapData }) => ({ ...prev, ...configMapData }), {})
   const containers = Object.values(services).reduce<Array<k8s.types.input.core.v1.Container>>((prev, { containers }) => prev.concat(...containers), [])
   const volumeClaimTemplates = Object.values(services).reduce<Array<k8s.types.input.core.v1.PersistentVolumeClaim>>((prev, { volumeClaimTemplates }) => prev.concat(...volumeClaimTemplates), [])
@@ -234,8 +239,10 @@ export async function deployStatefulService(
       return config.environment ? `${config.environment}-${baseDomain}` : baseDomain
     }
 
-    const extraMatch = (service: string) =>
+    const additionalHostMatch = (service: string) =>
       additionalRootDomainName ? ` || Host(\`${additionalDomain(service)}\`)` : ''
+
+    const additionalPathPrefixMatch = (prefix?: string) => prefix ? ` && PathPrefix(\`${prefix}\`)` : ''
 
     new k8s.apiextensions.CustomResource(
       `${asset}-ingressroute`,
@@ -248,19 +255,19 @@ export async function deployStatefulService(
         },
         spec: {
           entryPoints: ['web', 'websecure'],
-          routes: Object.entries(services).map(([service, { ports }]) => (
+          routes: Object.entries(services).map(([service, { ports }]) => ports.map(({ port, pathPrefix }) => (
             {
-              match: `Host(\`${domain(`${service}`)}\`)` + extraMatch(`${service}`),
+              match: `Host(\`${domain(`${service}`)}\`)` + additionalHostMatch(`${service}`) + additionalPathPrefixMatch(pathPrefix),
               kind: 'Rule',
               services: [
                 {
                   kind: 'Service',
                   name: svc.metadata.name,
-                  port: ports[0].port,
+                  port: port,
                   namespace: svc.metadata.namespace,
                 },
               ],
-            })),
+            }))).flat(),
           tls: {
             secretName: secretName,
             domains: Object.keys(services).map(service => ({ main: domain(service) })),

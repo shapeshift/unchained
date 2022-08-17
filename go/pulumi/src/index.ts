@@ -33,9 +33,7 @@ export interface Config extends BaseConfig {
   api?: ApiConfig
   statefulService?: {
     replicas: number
-    daemon?: ServiceConfig
-    midgard?: ServiceConfig
-    timescaledb?: ServiceConfig
+    services: Array<ServiceConfig>
   }
 }
 
@@ -44,11 +42,12 @@ export interface ServiceConfig {
   cpuRequest?: string
   image: string
   memoryLimit: string
+  name: string
   storageSize: string
 }
 
 export interface Service {
-  ports: Array<k8s.types.input.core.v1.ServicePort>
+  ports: Array<k8s.types.input.core.v1.ServicePort & { pathPrefix?: string }>
   configMapData: Record<string, string>
   containers: Array<k8s.types.input.core.v1.Container>
   volumeClaimTemplates: Array<k8s.types.input.core.v1.PersistentVolumeClaim>

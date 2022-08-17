@@ -36,49 +36,51 @@ export = async (): Promise<Outputs> => {
   //await deployApi(name, asset, provider, namespace, config)
 
   if (config.statefulService) {
-    const services: Record<string, Service> = {}
+    const services = config.statefulService.services.reduce<Record<string, Service>>((prev, service) => {
+      if (service.name === 'daemon') {
+        prev.daemon = createService({
+          asset,
+          config: service,
+          dataDir: '/root',
+          env: { 'CHAIN_ID': `thorchain-${config.network}-v1`, 'NET': config.network },
+          name: 'daemon',
+          ports: { 'daemon-api': { port: 1317, pathPrefix: '/thorchain' }, 'daemon-rpc': { port: 27147 } }
+        })
+      }
 
-    if (config.statefulService.daemon) {
-      services.daemon = createService({
-        asset,
-        config: config.statefulService.daemon,
-        dataDir: '/root',
-        env: { 'CHAIN_ID': `thorchain-${config.network}-v1`, 'NET': config.network },
-        name: 'daemon',
-        ports: { 'daemon-api': 1317, 'daemon-rpc': 27147 }
-      })
-    }
+      if (service.name === 'midgard') {
+        prev.midgard = createService({
+          asset,
+          config: service,
+          dataDir: '/blockstore',
+          env: {
+            'MIDGARD_BLOCKSTORE_LOCAL': '/blockstore',
+            'MIDGARD_BLOCKSTORE_REMOTE': 'https://storage.googleapis.com/public-snapshots-ninerealms/midgard-blockstore/mainnet/v2/'
+          },
+          name: 'midgard',
+          ports: { 'midgard': { port: 8080 } }
+        })
+      }
 
-    if (config.statefulService.timescaledb) {
-      services.timescaledb = createService({
-        asset,
-        config: config.statefulService.timescaledb,
-        dataDir: '/var/lib/postgresql/data',
-        env: {
-          'POSTGRES_DB': 'midgard',
-          'POSTGRES_USER': 'midgard',
-          'POSTGRES_PASSWORD': 'password',
-          'PGDATA': '/var/lib/postgresql/data/pgdata'
-        },
-        name: 'timescaledb',
-        ports: { 'postgres': 5432 },
-        volumeMounts: [{ name: 'dshm', mountPath: '/dev/shm' }]
-      })
-    }
+      if (service.name === 'timescaledb') {
+        prev.timescaledb = createService({
+          asset,
+          config: service,
+          dataDir: '/var/lib/postgresql/data',
+          env: {
+            'POSTGRES_DB': 'midgard',
+            'POSTGRES_USER': 'midgard',
+            'POSTGRES_PASSWORD': 'password',
+            'PGDATA': '/var/lib/postgresql/data/pgdata'
+          },
+          name: 'timescaledb',
+          ports: { 'postgres': { port: 5432 } },
+          volumeMounts: [{ name: 'dshm', mountPath: '/dev/shm' }]
+        })
+      }
 
-    if (config.statefulService.midgard) {
-      services.midgard = createService({
-        asset,
-        config: config.statefulService.midgard,
-        dataDir: '/blockstore',
-        env: {
-          'MIDGARD_BLOCKSTORE_LOCAL': '/blockstore',
-          'MIDGARD_BLOCKSTORE_REMOTE': 'https://storage.googleapis.com/public-snapshots-ninerealms/midgard-blockstore/mainnet/v2/'
-        },
-        name: 'midgard',
-        ports: { 'midgard': 8080 }
-      })
-    }
+      return prev
+    }, {})
 
     const volumes = [{ name: 'dshm', emptyDir: { medium: 'Memory', sizeLimit: '1Gi' } }]
 
