@@ -58,24 +58,24 @@ export function createService(args: ServiceArgs): Service {
         ...(args.volumeMounts ?? [])
       ],
     },
-    //{
-    //  name: `${name}-monitor`,
-    //  image: 'shapeshiftdao/unchained-probe:1.0.0',
-    //  readinessProbe: {
-    //    exec: {
-    //      command: ['/readiness.sh'],
-    //    },
-    //    initialDelaySeconds: 30,
-    //    periodSeconds: 10,
-    //  },
-    //  volumeMounts: [
-    //    {
-    //      name: 'config-map',
-    //      mountPath: '/readiness.sh',
-    //      subPath: `${args.name}-readiness.sh`,
-    //    },
-    //  ],
-    //},
+    {
+      name: `${name}-monitor`,
+      image: 'shapeshiftdao/unchained-probe:1.0.0',
+      readinessProbe: {
+        exec: {
+          command: ['/readiness.sh'],
+        },
+        initialDelaySeconds: 30,
+        periodSeconds: 10,
+      },
+      volumeMounts: [
+        {
+          name: 'config-map',
+          mountPath: '/readiness.sh',
+          subPath: `${args.name}-readiness.sh`,
+        },
+      ],
+    },
   ]
 
   const volumeClaimTemplates = [

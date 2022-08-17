@@ -1,7 +1,7 @@
 import { parse } from 'dotenv'
 import { readFileSync } from 'fs'
 import * as k8s from '@pulumi/kubernetes'
-import { createService, deployStatefulService, getConfig, Service } from '../../../pulumi/src'
+import { createService, deployApi, deployStatefulService, getConfig, Service } from '../../../pulumi/src'
 
 type Outputs = Record<string, any>
 
@@ -33,7 +33,7 @@ export = async (): Promise<Outputs> => {
 
   new k8s.core.v1.Secret(asset, { metadata: { name: asset, namespace }, stringData }, { provider })
 
-  //await deployApi(name, asset, provider, namespace, config)
+  await deployApi(name, asset, provider, namespace, config)
 
   if (config.statefulService) {
     const services = config.statefulService.services.reduce<Record<string, Service>>((prev, service) => {
