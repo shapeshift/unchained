@@ -2,7 +2,6 @@
 //
 // Provides access to thorchain chain data
 //
-// Version: 6.1.1
 // License: MIT http://opensource.org/licenses/MIT
 //
 // Consumes:
@@ -190,14 +189,10 @@ func (a *API) Info(w http.ResponseWriter, r *http.Request) {
 // responses:
 //   200: Account
 //   400: BadRequestError
-//   422: ValidationError
 //   500: InternalServerError
 func (a *API) Account(w http.ResponseWriter, r *http.Request) {
-	pubkey, ok := mux.Vars(r)["pubkey"]
-	if !ok || pubkey == "" {
-		api.HandleError(w, http.StatusBadRequest, "pubkey required")
-		return
-	}
+	// pubkey validated by ValidatePubkey middleware
+	pubkey := mux.Vars(r)["pubkey"]
 
 	account, err := a.handler.GetAccount(pubkey)
 	if err != nil {
@@ -215,14 +210,10 @@ func (a *API) Account(w http.ResponseWriter, r *http.Request) {
 // responses:
 //   200: TxHistory
 //   400: BadRequestError
-//   422: ValidationError
 //   500: InternalServerError
 func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
-	pubkey, ok := mux.Vars(r)["pubkey"]
-	if !ok || pubkey == "" {
-		api.HandleError(w, http.StatusBadRequest, "pubkey required")
-		return
-	}
+	// pubkey validated by ValidatePubkey middleware
+	pubkey := mux.Vars(r)["pubkey"]
 
 	cursor := r.URL.Query().Get("cursor")
 
@@ -263,7 +254,6 @@ func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 // responses:
 //   200: TransactionHash
 //   400: BadRequestError
-//   422: ValidationError
 //   500: InternalServerError
 func (a *API) SendTx(w http.ResponseWriter, r *http.Request) {
 	body := &api.TxBody{}

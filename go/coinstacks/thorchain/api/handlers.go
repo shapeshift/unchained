@@ -21,7 +21,7 @@ func (h *Handler) StartWebsocket() error {
 	h.wsClient.TxHandler(func(tx types.EventDataTx, block *cosmos.Block) (interface{}, []string, error) {
 		thorTx, signingTx, err := cosmos.DecodeTx(h.wsClient.EncodingConfig(), tx.Tx)
 		if err != nil {
-			return nil, nil, errors.Wrapf(err, "failed to decode tx: %v", tx.Tx)
+			return nil, nil, errors.Wrapf(err, "failed to handle tx: %v", tx.Tx)
 		}
 
 		txid := fmt.Sprintf("%X", sha256.Sum256(tx.Tx))

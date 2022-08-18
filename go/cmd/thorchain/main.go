@@ -10,6 +10,8 @@ import (
 	"github.com/shapeshift/unchained/internal/config"
 	"github.com/shapeshift/unchained/internal/log"
 	"github.com/shapeshift/unchained/pkg/cosmos"
+
+	thortypes "gitlab.com/thorchain/thornode/x/thorchain/types"
 )
 
 var (
@@ -43,15 +45,17 @@ func main() {
 		}
 	}
 
-	encoding := cosmos.NewEncoding()
+	encoding := cosmos.NewEncoding(thortypes.RegisterInterfaces)
 
 	cfg := cosmos.Config{
-		Bech32AddrPrefix: "thor",
-		Bech32PkPrefix:   "thorpub",
-		Encoding:         encoding,
-		LCDURL:           conf.LCDURL,
-		RPCURL:           conf.RPCURL,
-		WSURL:            conf.WSURL,
+		Bech32AddrPrefix:  "thor",
+		Bech32PkPrefix:    "thorpub",
+		Bech32ValPrefix:   "thorv",
+		Bech32PkValPrefix: "thorvpub",
+		Encoding:          encoding,
+		LCDURL:            conf.LCDURL,
+		RPCURL:            conf.RPCURL,
+		WSURL:             conf.WSURL,
 	}
 
 	httpClient, err := cosmos.NewHTTPClient(cfg)
