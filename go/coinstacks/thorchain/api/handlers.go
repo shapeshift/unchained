@@ -43,22 +43,7 @@ func (h *Handler) StartWebsocket() error {
 			Messages:      cosmos.Messages(thorTx.GetMsgs()),
 		}
 
-		// TODO: check addresses based on events instead of messages
-		seen := make(map[string]bool)
-		addrs := []string{}
-		for _, m := range t.Messages {
-			if m.Addresses == nil {
-				continue
-			}
-
-			// unique set of addresses
-			for _, addr := range m.Addresses {
-				if _, ok := seen[addr]; !ok {
-					addrs = append(addrs, addr)
-					seen[addr] = true
-				}
-			}
-		}
+		addrs := cosmos.GetTxAddrs(t.Events, t.Messages)
 
 		return t, addrs, nil
 	})
