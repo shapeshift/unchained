@@ -187,17 +187,15 @@ func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 	api.HandleResponse(w, http.StatusOK, txHistory)
 }
 
-/*
-swagger:route POST /api/v1/send v1 SendTx
-
-Sends raw transaction to be broadcast to the node.
-
-responses:
-
-	200: TransactionHash
-	400: BadRequestError
-	500: InternalServerError
-*/
+// swagger:route POST /api/v1/send v1 SendTx
+//
+// Sends raw transaction to be broadcast to the node.
+//
+// responses:
+//
+//	200: TransactionHash
+//	400: BadRequestError
+//	500: InternalServerError
 func (a *API) SendTx(w http.ResponseWriter, r *http.Request) {
 	body := &api.TxBody{}
 
@@ -216,17 +214,15 @@ func (a *API) SendTx(w http.ResponseWriter, r *http.Request) {
 	api.HandleResponse(w, http.StatusOK, txHash)
 }
 
-/*
-swagger:route POST /api/v1/gas/estimate v1 EstimateGas
-
-Get the estimated gas cost for a transaction.
-
-responses:
-
-	200: TransactionHash
-	400: BadRequestError
-	500: InternalServerError
-*/
+// swagger:route POST /api/v1/gas/estimate v1 EstimateGas
+//
+// Get the estimated gas cost for a transaction.
+//
+// responses:
+//
+//	200: TransactionHash
+//	400: BadRequestError
+//	500: InternalServerError
 func (a *API) EstimateGas(w http.ResponseWriter, r *http.Request) {
 	body := &api.TxBody{}
 

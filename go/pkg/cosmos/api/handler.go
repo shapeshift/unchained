@@ -11,6 +11,7 @@ import (
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/shapeshift/unchained/pkg/websocket"
 	"github.com/tendermint/tendermint/types"
+	"golang.org/x/sync/errgroup"
 )
 
 type RouteHandler interface {
@@ -29,8 +30,10 @@ type RouteHandler interface {
 
 type Handler struct {
 	HTTPClient   *cosmos.HTTPClient
+	GRPCClient   *cosmos.GRPCClient
 	WSClient     *cosmos.WSClient
 	BlockService *cosmos.BlockService
+	Denom        string
 }
 
 func (h *Handler) NewWebsocketConnection(conn *ws.Conn, manager *websocket.Manager) {
@@ -56,7 +59,7 @@ func (h *Handler) StartWebsocket() error {
 			},
 			Confirmations: 1,
 			Events:        cosmos.Events(tx.Result.Log),
-			Fee:           cosmos.Fee(signingTx, txid, "rune"),
+			Fee:           cosmos.Fee(signingTx, txid, h.Denom),
 			GasWanted:     strconv.Itoa(int(tx.Result.GasWanted)),
 			GasUsed:       strconv.Itoa(int(tx.Result.GasUsed)),
 			Index:         int(tx.Index),
@@ -129,28 +132,39 @@ func (h *Handler) GetInfo() (api.Info, error) {
 }
 
 func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
-	accRes, err := h.HTTPClient.GetAccount(pubkey)
-	if err != nil {
-		return nil, err
-	}
+	account := Account{BaseAccount: api.BaseAccount{}}
 
-	balRes, err := h.HTTPClient.GetBalance(pubkey, "rune")
-	if err != nil {
-		return nil, err
-	}
+	g := new(errgroup.Group)
 
-	account := &Account{
-		BaseAccount: api.BaseAccount{
-			Balance:            balRes.Amount,
-			UnconfirmedBalance: "0",
-			Pubkey:             accRes.Address,
-		},
-		AccountNumber: int(accRes.AccountNumber),
-		Sequence:      int(accRes.Sequence),
-		Assets:        balRes.Assets,
-	}
+	g.Go(func() error {
+		a, err := h.HTTPClient.GetAccount(pubkey)
+		if err != nil {
+			return err
+		}
 
-	return account, nil
+		account.Pubkey = a.Address
+		account.AccountNumber = int(a.AccountNumber)
+		account.Sequence = int(a.Sequence)
+
+		return nil
+	})
+
+	g.Go(func() error {
+		b, err := h.HTTPClient.GetBalance(pubkey, h.Denom)
+		if err != nil {
+			return err
+		}
+
+		account.Balance = b.Amount
+		account.UnconfirmedBalance = "0"
+		account.Assets = b.Assets
+
+		return err
+	})
+
+	err := g.Wait()
+
+	return account, err
 }
 
 func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
@@ -180,7 +194,7 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 			},
 			Confirmations: h.BlockService.Latest.Height - height + 1,
 			Events:        cosmos.Events(t.TendermintTx.TxResult.Log),
-			Fee:           cosmos.Fee(t.SigningTx, *t.TendermintTx.Hash, "rune"),
+			Fee:           cosmos.Fee(t.SigningTx, *t.TendermintTx.Hash, h.Denom),
 			GasWanted:     t.TendermintTx.TxResult.GasWanted,
 			GasUsed:       t.TendermintTx.TxResult.GasUsed,
 			Index:         int(t.TendermintTx.GetIndex()),
