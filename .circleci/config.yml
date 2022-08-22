@@ -131,6 +131,7 @@ aliases:
     rpc-url: https://osmosis-1--rpc--archive.datahub.figment.io
     grpc-url: https://osmosis-1--grpc--archive.datahub.figment.io
     ws-url: wss://osmosis-1--rpc--archive.datahub.figment.io
+    keplr-url: https://lcd-osmosis.keplr.app
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -669,6 +670,9 @@ jobs:
         default: ""
       rpc-url:
         type: string
+      keplr-url:
+        type: string
+        default: ""
       ws-url:
         type: string
       api-autoscaling:
@@ -700,6 +704,7 @@ jobs:
             echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
             echo 'export WS_URL=<< parameters.ws-url >>' >> $BASH_ENV
             echo 'export API_KEY=$<< parameters.organization >>_DATAHUB_API_KEY' >> $BASH_ENV
+            echo 'export KEPLR_URL=<< parameters.keplr-url >>' >> $BASH_ENV
       - run:
           name: pulumi
           working_directory: go/<< parameters.pulumi-dir >>
