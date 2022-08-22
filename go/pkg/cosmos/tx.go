@@ -283,7 +283,6 @@ func DecodeTx(encoding params.EncodingConfig, rawTx interface{}) (sdk.Tx, signin
 }
 
 func GetTxAddrs(events EventsByMsgIndex, messages []Message) []string {
-
 	seen := make(map[string]bool)
 	addrs := []string{}
 
