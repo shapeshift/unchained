@@ -288,13 +288,13 @@ func GetTxAddrs(events EventsByMsgIndex, messages []Message) []string {
 	addrs := []string{}
 
 	// check events for addresses
-	for _, events := range events {
-		for _, event := range events {
-			if !(event.Type == "coin_spent" || event.Type == "coin_received") {
+	for _, es := range events {
+		for _, e := range es {
+			if !(e.Type == "coin_spent" || e.Type == "coin_received") {
 				continue
 			}
 
-			for _, attribute := range event.Attributes {
+			for _, attribute := range e.Attributes {
 				if !(attribute.Key == "spender" || attribute.Key == "receiver") {
 					continue
 				}
@@ -322,5 +322,6 @@ func GetTxAddrs(events EventsByMsgIndex, messages []Message) []string {
 			}
 		}
 	}
+
 	return addrs
 }
