@@ -106,6 +106,15 @@ func (ws *WSClient) EncodingConfig() params.EncodingConfig {
 func (ws *WSClient) listen() {
 	for r := range ws.client.ResponsesCh {
 		if r.Error != nil {
+			// resubscribe if subscription is cancelled by the server for reason: client is not pulling messages fast enough
+			// experimental rpc config available to help mitigate this issue: https://github.com/tendermint/tendermint/blob/main/config/config.go#L373
+			if r.Error.Code == -32000 {
+				_ = ws.client.UnsubscribeAll(context.Background())
+				_ = ws.client.Subscribe(context.Background(), types.EventQueryTx.String())
+				_ = ws.client.Subscribe(context.Background(), types.EventQueryNewBlockHeader.String())
+				continue
+			}
+
 			logger.Error(r.Error.Error())
 			continue
 		}

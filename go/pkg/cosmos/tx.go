@@ -238,7 +238,6 @@ func Fee(tx signing.Tx, txid string, defaultDenom string) Value {
 	fees := tx.GetFee()
 
 	if len(fees) == 0 {
-		logger.Warnf("txid: %s, no fees detected", txid)
 		fees = []sdk.Coin{{Denom: "uatom", Amount: sdk.NewInt(0)}}
 	} else if len(fees) > 1 {
 		logger.Warnf("txid: %s - multiple fees detected (defaulting to index 0): %+v", txid, fees)
