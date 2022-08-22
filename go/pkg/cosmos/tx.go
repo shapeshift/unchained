@@ -281,3 +281,42 @@ func DecodeTx(encoding params.EncodingConfig, rawTx interface{}) (sdk.Tx, signin
 
 	return tx, builder.GetTx(), nil
 }
+
+func GetTxAddrs(events EventsByMsgIndex, messages []Message) []string {
+
+	seen := make(map[string]bool)
+	addrs := []string{}
+
+	// check events for addresses
+	for _, subEvents := range events {
+		for _, subEvent := range subEvents {
+			if subEvent.Type == "coin_spent" || subEvent.Type == "coin_received" {
+				for _, attribute := range subEvent.Attributes {
+					if attribute.Key == "spender" || attribute.Key == "receiver" {
+						addr := attribute.Value
+						if _, ok := seen[addr]; !ok {
+							addrs = append(addrs, addr)
+							seen[addr] = true
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// check messages for addresses
+	for _, m := range messages {
+		if m.Addresses == nil {
+			continue
+		}
+
+		// unique set of addresses
+		for _, addr := range m.Addresses {
+			if _, ok := seen[addr]; !ok {
+				addrs = append(addrs, addr)
+				seen[addr] = true
+			}
+		}
+	}
+	return addrs
+}
