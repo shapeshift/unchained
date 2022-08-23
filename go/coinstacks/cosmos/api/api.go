@@ -1,6 +1,6 @@
 // Package classification Cosmos Unchained API
 //
-// # Provides access to cosmos chain data
+// Provides access to cosmos chain data.
 //
 // License: MIT http://opensource.org/licenses/MIT
 //
@@ -105,15 +105,11 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient 
 	v1Validators.HandleFunc("/{pubkey}", a.GetValidator).Methods("GET")
 
 	// docs redirect paths
-	r.HandleFunc("/docs", docsRedirect).Methods("GET")
+	r.HandleFunc("/docs", api.DocsRedirect).Methods("GET")
 
 	http.Handle("/", r)
 
 	return a
-}
-
-func docsRedirect(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "/docs/", http.StatusFound)
 }
 
 // swagger:route Get /api/v1/validators v1 GetValidators
