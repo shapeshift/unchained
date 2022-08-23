@@ -16,7 +16,7 @@ func ValidatePubkey(next http.Handler) http.Handler {
 			return
 		}
 
-		if !IsValidAddress(pubkey) {
+		if !(IsValidAddress(pubkey) || IsValidValidatorAddress(pubkey)) {
 			api.HandleError(w, http.StatusBadRequest, fmt.Sprintf("invalid pubkey: %s", pubkey))
 			return
 		}
