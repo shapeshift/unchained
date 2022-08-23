@@ -67,44 +67,7 @@ func (h *Handler) StartWebsocket() error {
 			Messages:      cosmos.Messages(decodedTx.GetMsgs()),
 		}
 
-		seen := make(map[string]bool)
-		addrs := []string{}
-
-		// extract addresses from events
-		for _, events := range t.Events {
-			for _, event := range events {
-				if !(event.Type == "coin_spent" || event.Type == "coin_received") {
-					continue
-				}
-
-				for _, attribute := range event.Attributes {
-					if !(attribute.Key == "spender" || attribute.Key == "receiver") {
-						continue
-					}
-
-					addr := attribute.Value
-					if _, ok := seen[addr]; !ok {
-						addrs = append(addrs, addr)
-						seen[addr] = true
-					}
-				}
-			}
-		}
-
-		// extract addresses from messages
-		for _, m := range t.Messages {
-			if m.Addresses == nil {
-				continue
-			}
-
-			// unique set of addresses
-			for _, addr := range m.Addresses {
-				if _, ok := seen[addr]; !ok {
-					addrs = append(addrs, addr)
-					seen[addr] = true
-				}
-			}
-		}
+		addrs := cosmos.GetTxAddrs(t.Events, t.Messages)
 
 		return t, addrs, nil
 	})
