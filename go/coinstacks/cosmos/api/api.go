@@ -143,16 +143,8 @@ func (a *API) GetValidators(w http.ResponseWriter, r *http.Request) {
 //	200: Validator
 //	500: InternalServerError
 func (a *API) GetValidator(w http.ResponseWriter, r *http.Request) {
-	pubkey, ok := mux.Vars(r)["pubkey"]
-	if !ok || pubkey == "" {
-		api.HandleError(w, http.StatusBadRequest, "pubkey required")
-		return
-	}
-
-	if !cosmos.IsValidValidatorAddress(pubkey) {
-		api.HandleError(w, http.StatusBadRequest, fmt.Sprintf("invalid pubkey: %s", pubkey))
-		return
-	}
+	// pubkey validated by ValidatePubkey middleware
+	pubkey := mux.Vars(r)["pubkey"]
 
 	validator, err := a.handler.GetValidator(pubkey)
 	if err != nil {

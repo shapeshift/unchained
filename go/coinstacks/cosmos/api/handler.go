@@ -15,12 +15,10 @@ type Handler struct {
 }
 
 func (h *Handler) GetInfo() (api.Info, error) {
-	infoI, err := h.Handler.GetInfo()
+	info, err := h.Handler.GetInfo()
 	if err != nil {
 		return nil, err
 	}
-
-	info := infoI.(cosmosapi.Info)
 
 	aprData, err := h.getAPRData()
 	if err != nil {
@@ -28,7 +26,7 @@ func (h *Handler) GetInfo() (api.Info, error) {
 	}
 
 	i := Info{
-		Info:             info,
+		Info:             info.(cosmosapi.Info),
 		TotalSupply:      aprData.totalSupply,
 		BondedTokens:     aprData.bondedTokens,
 		AnnualProvisions: aprData.annualProvisions,
@@ -40,12 +38,10 @@ func (h *Handler) GetInfo() (api.Info, error) {
 }
 
 func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
-	accountI, err := h.Handler.GetAccount(pubkey)
+	account, err := h.Handler.GetAccount(pubkey)
 	if err != nil {
 		return nil, err
 	}
-
-	account := accountI.(cosmosapi.Account)
 
 	stakingData, err := h.getStakingData(pubkey)
 	if err != nil {
@@ -53,7 +49,7 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 	}
 
 	a := &Account{
-		Account:       account,
+		Account:       account.(cosmosapi.Account),
 		Delegations:   stakingData.Delegations,
 		Redelegations: stakingData.Redelegations,
 		Unbondings:    stakingData.Unbondings,
@@ -162,7 +158,7 @@ func (h *Handler) getStakingData(pubkey string) (*StakingData, error) {
 		return nil, errors.Wrap(err, "failed to get apr data")
 	}
 
-	accountData := &StakingData{}
+	stakingData := &StakingData{}
 
 	g := new(errgroup.Group)
 
@@ -172,8 +168,7 @@ func (h *Handler) getStakingData(pubkey string) (*StakingData, error) {
 			return err
 		}
 
-		accountData.Delegations = delegations
-
+		stakingData.Delegations = delegations
 		return nil
 	})
 
@@ -183,8 +178,7 @@ func (h *Handler) getStakingData(pubkey string) (*StakingData, error) {
 			return err
 		}
 
-		accountData.Redelegations = redelegations
-
+		stakingData.Redelegations = redelegations
 		return nil
 	})
 
@@ -194,8 +188,7 @@ func (h *Handler) getStakingData(pubkey string) (*StakingData, error) {
 			return err
 		}
 
-		accountData.Unbondings = unbondings
-
+		stakingData.Unbondings = unbondings
 		return nil
 	})
 
@@ -205,12 +198,11 @@ func (h *Handler) getStakingData(pubkey string) (*StakingData, error) {
 			return err
 		}
 
-		accountData.Rewards = rewards
-
+		stakingData.Rewards = rewards
 		return nil
 	})
 
 	err = g.Wait()
 
-	return accountData, err
+	return stakingData, err
 }
