@@ -48,10 +48,6 @@ func New(handler RouteHandler, manager *websocket.Manager, server *http.Server) 
 	return a
 }
 
-func docsRedirect(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "/docs/", http.StatusFound)
-}
-
 func (a *API) Serve(errChan chan<- error) {
 	logger.Info("serving application")
 
@@ -83,7 +79,7 @@ func (a *API) Root(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	docsRedirect(w, r)
+	api.DocsRedirect(w, r)
 }
 
 // swagger:route GET / Websocket Websocket
