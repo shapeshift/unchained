@@ -22,6 +22,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
+	"github.com/shapeshift/unchained/coinstacks/osmosis"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	cosmosapi "github.com/shapeshift/unchained/pkg/cosmos/api"
@@ -42,17 +43,19 @@ type API struct {
 	handler *Handler
 }
 
-func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, swaggerPath string) *API {
+func New(httpClient *osmosis.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, swaggerPath string) *API {
 	r := mux.NewRouter()
 
 	handler := &Handler{
 		Handler: &cosmosapi.Handler{
-			HTTPClient:   httpClient,
+			HTTPClient:   httpClient.HTTPClient,
 			GRPCClient:   grpcClient,
 			WSClient:     wsClient,
 			BlockService: blockService,
 			Denom:        "uosmo",
+			GetMessages:  osmosis.Messages,
 		},
+		HTTPClient: httpClient,
 	}
 
 	manager := websocket.NewManager()
@@ -70,8 +73,9 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient 
 		handler: handler,
 	}
 
-	// compile check to ensure Handler implements BaseAPI
+	// compile check to ensure Handler implements necessary interfaces
 	var _ api.BaseAPI = handler
+	//var _ cosmosapi.APRCalculator = handler
 
 	r.Use(api.Scheme)
 	r.Use(api.Logger)

@@ -49,14 +49,10 @@ type Config struct {
 
 // HTTPClient allows communicating over http
 type HTTPClient struct {
-	ctx      context.Context
-	encoding *params.EncodingConfig
-
-	cosmos     *resty.Client
-	tendermint *resty.Client
-
-	// special case to allow us to broadcast 0 fee osmo tx
-	keplr *resty.Client
+	ctx        context.Context
+	encoding   *params.EncodingConfig
+	Cosmos     *resty.Client
+	Tendermint *resty.Client
 }
 
 // NewHTTPClient configures and creates an HTTPClient
@@ -74,23 +70,16 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 		return nil, errors.Wrapf(err, "failed to parse RPCURL: %s", conf.RPCURL)
 	}
 
-	keplrURL, err := url.Parse(conf.KEPLRURL)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse keplrURL: %s", conf.KEPLRURL)
-	}
-
 	// untyped resty http clients
 	headers := map[string]string{"Accept": "application/json", "Authorization": conf.APIKey}
 	cosmos := resty.New().SetScheme(lcdURL.Scheme).SetBaseURL(lcdURL.Host).SetHeaders(headers)
 	tendermint := resty.New().SetScheme(rpcURL.Scheme).SetBaseURL(rpcURL.Host).SetHeaders(headers)
-	keplr := resty.New().SetScheme(keplrURL.Scheme).SetBaseURL(keplrURL.Host).SetHeaders(headers)
 
 	c := &HTTPClient{
 		ctx:        context.Background(),
 		encoding:   conf.Encoding,
-		cosmos:     cosmos,
-		tendermint: tendermint,
-		keplr:      keplr,
+		Cosmos:     cosmos,
+		Tendermint: tendermint,
 	}
 
 	return c, nil

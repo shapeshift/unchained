@@ -3,7 +3,6 @@ package api
 import (
 	"math/big"
 
-	"github.com/shapeshift/unchained/pkg/cosmos"
 	cosmosapi "github.com/shapeshift/unchained/pkg/cosmos/api"
 )
 
@@ -17,35 +16,29 @@ type Info struct {
 	APR string `json:"apr"`
 }
 
-// Contains info about account details for an address or xpub
-// swagger:model Account
-type Account struct {
-	// swagger:allOf
-	cosmosapi.Account
-	// required: true
-	Delegations []cosmos.Delegation `json:"delegations"`
-	// required: true
-	Redelegations []cosmos.Redelegation `json:"redelegations"`
-	// required: true
-	Unbondings []cosmos.Unbonding `json:"unbondings"`
-	// required: true
-	Rewards []cosmos.Reward `json:"rewards"`
-}
-
-type StakingData struct {
-	Delegations   []cosmos.Delegation
-	Redelegations []cosmos.Redelegation
-	Unbondings    []cosmos.Unbonding
-	Rewards       []cosmos.Reward
-}
-
 type APRData struct {
 	bondedTokens          string
 	epochProvisions       string
-	rate                  string
 	stakingDistributions  string
 	bBondedTokens         *big.Float
 	bEpochProvisions      *big.Float
-	bRate                 *big.Float
 	bStakingDistributions *big.Float
+}
+
+func (a *APRData) calculate() *big.Float {
+	totalSupply, _, _ := new(big.Float).Parse("1000000000", 10)
+	yearDays, _, _ := new(big.Float).Parse("365", 10)
+	yearMintingProvision := new(big.Float).Mul(new(big.Float).Mul(a.bEpochProvisions, a.bStakingDistributions), yearDays)
+	inflation := new(big.Float).Quo(yearMintingProvision, totalSupply)
+	ratio := new(big.Float).Quo(a.bBondedTokens, totalSupply)
+
+	return new(big.Float).Quo(inflation, ratio)
+}
+
+func (a *APRData) Float() *big.Float {
+	return a.calculate()
+}
+
+func (a *APRData) String() string {
+	return a.calculate().String()
 }

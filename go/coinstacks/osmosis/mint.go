@@ -1,4 +1,4 @@
-package cosmos
+package osmosis
 
 import (
 	"github.com/pkg/errors"

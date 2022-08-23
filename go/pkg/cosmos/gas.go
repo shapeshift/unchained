@@ -17,7 +17,7 @@ func (c *HTTPClient) GetEstimateGas(rawTx string) (string, error) {
 	e := &ErrorResponse{}
 	res := &txtypes.SimulateResponse{}
 
-	_, err = c.cosmos.R().SetBody(txtypes.SimulateRequest{TxBytes: txBytes}).SetResult(res).SetError(e).Post("/cosmos/tx/v1beta1/simulate")
+	_, err = c.Cosmos.R().SetBody(txtypes.SimulateRequest{TxBytes: txBytes}).SetResult(res).SetError(e).Post("/cosmos/tx/v1beta1/simulate")
 	if err != nil {
 		return "", errors.Wrap(err, "failed to estimate gas")
 	}

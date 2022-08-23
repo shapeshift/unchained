@@ -25,7 +25,7 @@ func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (
 		ctx:        c.ctx,
 		cursor:     &Cursor{SendPage: 1, ReceivePage: 1},
 		pageSize:   pageSize,
-		tendermint: c.tendermint,
+		tendermint: c.Tendermint,
 		encoding:   c.encoding,
 	}
 
@@ -56,12 +56,7 @@ func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (
 }
 
 func (c *HTTPClient) BroadcastTx(rawTx string) (string, error) {
-	return Broadcast(c.cosmos, rawTx)
-}
-
-// special case for osmo
-func (c *HTTPClient) BroadcastOsmoTx(rawTx string) (string, error) {
-	return Broadcast(c.keplr, rawTx)
+	return Broadcast(c.Cosmos, rawTx)
 }
 
 func Broadcast(client *resty.Client, rawTx string) (string, error) {

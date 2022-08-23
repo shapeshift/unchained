@@ -8,14 +8,18 @@ import (
 	"github.com/pkg/errors"
 )
 
+type BlockFetcher interface {
+	GetBlock(height *int) (*Block, error)
+}
+
 type BlockService struct {
 	Latest     *Block
 	Blocks     map[int]*Block
 	m          sync.RWMutex
-	httpClient *HTTPClient
+	httpClient BlockFetcher
 }
 
-func NewBlockService(httpClient *HTTPClient) (*BlockService, error) {
+func NewBlockService(httpClient BlockFetcher) (*BlockService, error) {
 	s := &BlockService{
 		Blocks:     make(map[int]*Block),
 		httpClient: httpClient,
@@ -63,7 +67,7 @@ func (c *HTTPClient) GetBlock(height *int) (*Block, error) {
 		RPCErrorResponse
 		Message string `json:"message"`
 	}
-	req := c.tendermint.R().SetResult(&res).SetError(&resErr)
+	req := c.Tendermint.R().SetResult(&res).SetError(&resErr)
 
 	if height != nil {
 		req.SetQueryParams(map[string]string{"height": strconv.Itoa(*height)})

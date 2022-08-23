@@ -3,8 +3,10 @@ package api
 import (
 	"crypto/sha256"
 	"fmt"
+	"math/big"
 	"strconv"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	ws "github.com/gorilla/websocket"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/api"
@@ -28,13 +30,45 @@ type RouteHandler interface {
 	EstimateGas(rawTx string) (string, error)
 }
 
+type APRCalculator interface {
+	getAPRData() (interface {
+		Float() *big.Float
+		String() string
+	}, error)
+}
+
 type Handler struct {
+	//// coin specific interface implementations
+	//APRCalculator
+
+	// coin specific functions (defaults to cosmos implementation)
+	GetMessages func([]sdk.Msg) []cosmos.Message
+	getAPRData  func() (interface {
+		Float() *big.Float
+		String() string
+	}, error)
+
+	// common cosmossdk values
 	HTTPClient   *cosmos.HTTPClient
 	GRPCClient   *cosmos.GRPCClient
 	WSClient     *cosmos.WSClient
 	BlockService *cosmos.BlockService
 	Denom        string
 }
+
+//func NewHandler(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, denom string) *Handler {
+//	h := &Handler{
+//		HTTPClient:   httpClient,
+//		GRPCClient:   grpcClient,
+//		WSClient:     wsClient,
+//		BlockService: blockService,
+//		Denom:        denom,
+//	}
+//
+//	var _ APRCalculator = h
+//
+//	return h
+//}
 
 func (h *Handler) NewWebsocketConnection(conn *ws.Conn, manager *websocket.Manager) {
 	c := websocket.NewConnection(conn, h.WSClient, manager)
@@ -64,7 +98,7 @@ func (h *Handler) StartWebsocket() error {
 			GasUsed:       strconv.Itoa(int(tx.Result.GasUsed)),
 			Index:         int(tx.Index),
 			Memo:          signingTx.GetMemo(),
-			Messages:      cosmos.Messages(decodedTx.GetMsgs()),
+			Messages:      h.GetMessages(decodedTx.GetMsgs()),
 		}
 
 		addrs := cosmos.GetTxAddrs(t.Events, t.Messages)
@@ -95,7 +129,7 @@ func (h *Handler) GetInfo() (api.Info, error) {
 }
 
 func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
-	account := Account{BaseAccount: api.BaseAccount{}}
+	account := Account{}
 
 	g := new(errgroup.Group)
 
@@ -126,6 +160,13 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 	})
 
 	err := g.Wait()
+
+	staking, err := h.getStaking(pubkey)
+	if err != nil {
+		return nil, err
+	}
+
+	account.Staking = staking
 
 	return account, err
 }
@@ -187,4 +228,77 @@ func (h *Handler) SendTx(hex string) (string, error) {
 
 func (h Handler) EstimateGas(rawTx string) (string, error) {
 	return h.HTTPClient.GetEstimateGas(rawTx)
+}
+
+func (h *Handler) GetValidators() ([]cosmos.Validator, error) {
+	aprData, err := h.getAPRData()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get apr data")
+	}
+
+	return h.HTTPClient.GetValidators(aprData.Float())
+}
+
+func (h *Handler) GetValidator(address string) (*cosmos.Validator, error) {
+	aprData, err := h.getAPRData()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get apr data")
+	}
+
+	return h.HTTPClient.GetValidator(address, aprData.Float())
+}
+
+func (h *Handler) getStaking(pubkey string) (*Staking, error) {
+	aprData, err := h.getAPRData()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get apr data")
+	}
+
+	staking := &Staking{}
+
+	g := new(errgroup.Group)
+
+	g.Go(func() error {
+		delegations, err := h.HTTPClient.GetDelegations(pubkey, aprData.Float())
+		if err != nil {
+			return err
+		}
+
+		staking.Delegations = delegations
+		return nil
+	})
+
+	g.Go(func() error {
+		redelegations, err := h.HTTPClient.GetRedelegations(pubkey, aprData.Float())
+		if err != nil {
+			return err
+		}
+
+		staking.Redelegations = redelegations
+		return nil
+	})
+
+	g.Go(func() error {
+		unbondings, err := h.HTTPClient.GetUnbondings(pubkey, h.Denom, aprData.Float())
+		if err != nil {
+			return err
+		}
+
+		staking.Unbondings = unbondings
+		return nil
+	})
+
+	g.Go(func() error {
+		rewards, err := h.HTTPClient.GetRewards(pubkey, aprData.Float())
+		if err != nil {
+			return err
+		}
+
+		staking.Rewards = rewards
+		return nil
+	})
+
+	err = g.Wait()
+
+	return staking, err
 }
