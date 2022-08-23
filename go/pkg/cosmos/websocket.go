@@ -109,9 +109,21 @@ func (ws *WSClient) listen() {
 			// resubscribe if subscription is cancelled by the server for reason: client is not pulling messages fast enough
 			// experimental rpc config available to help mitigate this issue: https://github.com/tendermint/tendermint/blob/main/config/config.go#L373
 			if r.Error.Code == -32000 {
-				_ = ws.client.UnsubscribeAll(context.Background())
-				_ = ws.client.Subscribe(context.Background(), types.EventQueryTx.String())
-				_ = ws.client.Subscribe(context.Background(), types.EventQueryNewBlockHeader.String())
+				err := ws.client.UnsubscribeAll(context.Background())
+				if err != nil {
+					logger.Error(errors.Wrap(err, "failed to unsubscribe from all subscriptions"))
+				}
+
+				err = ws.client.Subscribe(context.Background(), types.EventQueryTx.String())
+				if err != nil {
+					logger.Error(errors.Wrap(err, "failed to subscribe to txs"))
+				}
+
+				err = ws.client.Subscribe(context.Background(), types.EventQueryNewBlockHeader.String())
+				if err != nil {
+					logger.Error(errors.Wrap(err, "failed to subscribe to newBlocks"))
+				}
+
 				continue
 			}
 
