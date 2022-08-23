@@ -36,3 +36,7 @@ func HandleError(w http.ResponseWriter, status int, message string) {
 		logger.Errorf("failed to encode response: %+v", err)
 	}
 }
+
+func DocsRedirect(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/docs/", http.StatusFound)
+}

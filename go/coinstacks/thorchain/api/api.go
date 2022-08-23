@@ -1,6 +1,6 @@
 // Package classification Thorchain Unchained API
 //
-// # Provides access to thorchain chain data
+// Provides access to thorchain chain data.
 //
 // License: MIT http://opensource.org/licenses/MIT
 //
@@ -48,6 +48,7 @@ func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService 
 		HTTPClient:   httpClient,
 		WSClient:     wsClient,
 		BlockService: blockService,
+		Denom:        "rune",
 	}
 
 	manager := websocket.NewManager()
@@ -95,13 +96,9 @@ func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService 
 	v1Gas.HandleFunc("/estimate", a.EstimateGas).Methods("POST")
 
 	// docs redirect paths
-	r.HandleFunc("/docs", docsRedirect).Methods("GET")
+	r.HandleFunc("/docs", api.DocsRedirect).Methods("GET")
 
 	http.Handle("/", r)
 
 	return a
-}
-
-func docsRedirect(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "/docs/", http.StatusFound)
 }
