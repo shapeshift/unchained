@@ -30,6 +30,7 @@ type RouteHandler interface {
 
 type Handler struct {
 	HTTPClient   *cosmos.HTTPClient
+	GRPCClient   *cosmos.GRPCClient
 	WSClient     *cosmos.WSClient
 	BlockService *cosmos.BlockService
 	Denom        string
