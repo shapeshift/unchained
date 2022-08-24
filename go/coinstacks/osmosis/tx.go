@@ -11,8 +11,8 @@ func (c *HTTPClient) BroadcastTx(rawTx string) (string, error) {
 	return cosmos.Broadcast(c.keplr, rawTx)
 }
 
-// Messages will parse any osmosis or cosmos-sdk message types
-func Messages(msgs []sdk.Msg) []cosmos.Message {
+// ParseMessages will parse any osmosis or cosmos-sdk message types
+func ParseMessages(msgs []sdk.Msg) []cosmos.Message {
 	messages := []cosmos.Message{}
 
 	coinToValue := func(c *sdk.Coin) cosmos.Value {
@@ -54,7 +54,7 @@ func Messages(msgs []sdk.Msg) []cosmos.Message {
 		}
 	}
 
-	messages = append(messages, cosmos.Messages(unhandledMsgs)...)
+	messages = append(messages, cosmos.ParseMessages(unhandledMsgs)...)
 
 	return messages
 }

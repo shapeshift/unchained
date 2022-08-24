@@ -1,11 +1,12 @@
 package api
 
 import (
-	"fmt"
 	"math/big"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/shapeshift/unchained/coinstacks/osmosis"
 	"github.com/shapeshift/unchained/pkg/api"
+	"github.com/shapeshift/unchained/pkg/cosmos"
 	cosmosapi "github.com/shapeshift/unchained/pkg/cosmos/api"
 	"golang.org/x/sync/errgroup"
 )
@@ -21,7 +22,7 @@ func (h *Handler) GetInfo() (api.Info, error) {
 		return nil, err
 	}
 
-	aprData, err := h.getAPRData()
+	aprData, err := h.GetAPRData()
 	if err != nil {
 		return nil, err
 	}
@@ -38,8 +39,11 @@ func (h *Handler) SendTx(hex string) (string, error) {
 	return h.HTTPClient.BroadcastTx(hex)
 }
 
-func (h *Handler) getAPRData() (*APRData, error) {
-	fmt.Println("getAPRData")
+func (h *Handler) ParseMessages(msgs []sdk.Msg) []cosmos.Message {
+	return osmosis.ParseMessages(msgs)
+}
+
+func (h *Handler) GetAPRData() (cosmosapi.APRData, error) {
 	aprData := &APRData{}
 
 	g := new(errgroup.Group)

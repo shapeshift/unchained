@@ -23,13 +23,13 @@ type TxState struct {
 
 // History stores state for multiple query sources to complete a paginated request
 type History struct {
-	ctx        context.Context
-	cursor     *Cursor
-	encoding   *params.EncodingConfig
-	pageSize   int
-	receive    *TxState
-	send       *TxState
-	tendermint *resty.Client
+	ctx      context.Context
+	cursor   *Cursor
+	encoding *params.EncodingConfig
+	pageSize int
+	receive  *TxState
+	send     *TxState
+	rpc      *resty.Client
 }
 
 func (h *History) doRequest(txState *TxState) (*TxSearchResponse, error) {
@@ -44,7 +44,7 @@ func (h *History) doRequest(txState *TxState) (*TxSearchResponse, error) {
 			"page":     strconv.Itoa(txState.page),
 		}
 
-		_, err := h.tendermint.R().SetResult(&res).SetError(&resErr).SetQueryParams(queryParams).Get("/tx_search")
+		_, err := h.rpc.R().SetResult(&res).SetError(&resErr).SetQueryParams(queryParams).Get("/tx_search")
 
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to do request")

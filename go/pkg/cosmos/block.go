@@ -67,7 +67,7 @@ func (c *HTTPClient) GetBlock(height *int) (*Block, error) {
 		RPCErrorResponse
 		Message string `json:"message"`
 	}
-	req := c.Tendermint.R().SetResult(&res).SetError(&resErr)
+	req := c.RPC.R().SetResult(&res).SetError(&resErr)
 
 	if height != nil {
 		req.SetQueryParams(map[string]string{"height": strconv.Itoa(*height)})

@@ -37,13 +37,13 @@ func (h *Handler) StartWebsocket() error {
 				Timestamp:   &block.Timestamp,
 			},
 			Confirmations: 1,
-			Events:        cosmos.Events(tx.Result.Log),
+			Events:        cosmos.ParseEvents(tx.Result.Log),
 			Fee:           cosmos.Fee(signingTx, txid, "uatom"),
 			GasWanted:     strconv.Itoa(int(tx.Result.GasWanted)),
 			GasUsed:       strconv.Itoa(int(tx.Result.GasUsed)),
 			Index:         int(tx.Index),
 			Memo:          signingTx.GetMemo(),
-			Messages:      cosmos.Messages(cosmosTx.GetMsgs()),
+			Messages:      cosmos.ParseMessages(cosmosTx.GetMsgs()),
 		}
 
 		addrs := cosmos.GetTxAddrs(t.Events, t.Messages)
@@ -145,13 +145,13 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 				Timestamp:   &block.Timestamp,
 			},
 			Confirmations: h.blockService.Latest.Height - height + 1,
-			Events:        cosmos.Events(t.TendermintTx.TxResult.Log),
+			Events:        cosmos.ParseEvents(t.TendermintTx.TxResult.Log),
 			Fee:           cosmos.Fee(t.SigningTx, *t.TendermintTx.Hash, "uatom"),
 			GasWanted:     t.TendermintTx.TxResult.GasWanted,
 			GasUsed:       t.TendermintTx.TxResult.GasUsed,
 			Index:         int(t.TendermintTx.GetIndex()),
 			Memo:          t.SigningTx.GetMemo(),
-			Messages:      cosmos.Messages(t.CosmosTx.GetMsgs()),
+			Messages:      cosmos.ParseMessages(t.CosmosTx.GetMsgs()),
 		}
 
 		txs = append(txs, tx)

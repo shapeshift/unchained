@@ -42,17 +42,16 @@ type Config struct {
 	Encoding          *params.EncodingConfig
 	GRPCURL           string
 	LCDURL            string
-	KEPLRURL          string
 	RPCURL            string
 	WSURL             string
 }
 
 // HTTPClient allows communicating over http
 type HTTPClient struct {
-	ctx        context.Context
-	encoding   *params.EncodingConfig
-	Cosmos     *resty.Client
-	Tendermint *resty.Client
+	ctx      context.Context
+	encoding *params.EncodingConfig
+	LCD      *resty.Client
+	RPC      *resty.Client
 }
 
 // NewHTTPClient configures and creates an HTTPClient
@@ -72,14 +71,14 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 
 	// untyped resty http clients
 	headers := map[string]string{"Accept": "application/json", "Authorization": conf.APIKey}
-	cosmos := resty.New().SetScheme(lcdURL.Scheme).SetBaseURL(lcdURL.Host).SetHeaders(headers)
-	tendermint := resty.New().SetScheme(rpcURL.Scheme).SetBaseURL(rpcURL.Host).SetHeaders(headers)
+	lcd := resty.New().SetScheme(lcdURL.Scheme).SetBaseURL(lcdURL.Host).SetHeaders(headers)
+	rpc := resty.New().SetScheme(rpcURL.Scheme).SetBaseURL(rpcURL.Host).SetHeaders(headers)
 
 	c := &HTTPClient{
-		ctx:        context.Background(),
-		encoding:   conf.Encoding,
-		Cosmos:     cosmos,
-		Tendermint: tendermint,
+		ctx:      context.Background(),
+		encoding: conf.Encoding,
+		LCD:      lcd,
+		RPC:      rpc,
 	}
 
 	return c, nil

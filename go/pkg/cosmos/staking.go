@@ -11,7 +11,7 @@ import (
 func (c *HTTPClient) GetValidators(apr *big.Float) ([]Validator, error) {
 	var res QueryValidatorsResponse
 
-	_, err := c.Cosmos.R().SetResult(&res).Get("/cosmos/staking/v1beta1/validators")
+	_, err := c.LCD.R().SetResult(&res).Get("/cosmos/staking/v1beta1/validators")
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get validators")
 	}
@@ -27,7 +27,7 @@ func (c *HTTPClient) GetValidators(apr *big.Float) ([]Validator, error) {
 func (c *HTTPClient) GetValidator(addr string, apr *big.Float) (*Validator, error) {
 	var res QueryValidatorResponse
 
-	_, err := c.Cosmos.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/staking/v1beta1/validators/%s", addr))
+	_, err := c.LCD.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/staking/v1beta1/validators/%s", addr))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get validators")
 	}
