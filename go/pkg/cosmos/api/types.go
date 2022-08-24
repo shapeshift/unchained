@@ -25,6 +25,8 @@ type Account struct {
 	Sequence int `json:"sequence"`
 	// required: true
 	Assets []cosmos.Value `json:"assets"`
+	// swagger:allOf
+	*Staking
 }
 
 // Contains info about a transaction
@@ -62,4 +64,17 @@ type TxHistory struct {
 	api.BaseTxHistory
 	// required: true
 	Txs []Tx `json:"txs"`
+}
+
+// Contains info about current staking state
+// swagger:model Staking
+type Staking struct {
+	// swagger:allOf
+	Delegations []cosmos.Delegation
+	// swagger:allOf
+	Redelegations []cosmos.Redelegation
+	// swagger:allOf
+	Unbondings []cosmos.Unbonding
+	// swagger:allOf
+	Rewards []cosmos.Reward
 }

@@ -22,11 +22,11 @@ import (
 
 func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (*TxHistory, error) {
 	history := &History{
-		ctx:        c.ctx,
-		cursor:     &Cursor{SendPage: 1, ReceivePage: 1},
-		pageSize:   pageSize,
-		tendermint: c.tendermint,
-		encoding:   c.encoding,
+		ctx:      c.ctx,
+		cursor:   &Cursor{SendPage: 1, ReceivePage: 1},
+		pageSize: pageSize,
+		rpc:      c.RPC,
+		encoding: c.encoding,
 	}
 
 	if cursor != "" {
@@ -56,12 +56,7 @@ func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (
 }
 
 func (c *HTTPClient) BroadcastTx(rawTx string) (string, error) {
-	return Broadcast(c.cosmos, rawTx)
-}
-
-// special case for osmo
-func (c *HTTPClient) BroadcastOsmoTx(rawTx string) (string, error) {
-	return Broadcast(c.keplr, rawTx)
+	return Broadcast(c.LCD, rawTx)
 }
 
 func Broadcast(client *resty.Client, rawTx string) (string, error) {
@@ -114,7 +109,7 @@ func (c *GRPCClient) BroadcastTx(rawTx string) (string, error) {
 	return res.TxResponse.TxHash, nil
 }
 
-func Events(log string) EventsByMsgIndex {
+func ParseEvents(log string) EventsByMsgIndex {
 	logs, err := sdk.ParseABCILogs(log)
 
 	events := make(EventsByMsgIndex)
@@ -154,7 +149,7 @@ func Events(log string) EventsByMsgIndex {
 	return events
 }
 
-func Messages(msgs []sdk.Msg) []Message {
+func ParseMessages(msgs []sdk.Msg) []Message {
 	messages := []Message{}
 
 	coinToValue := func(c *sdk.Coin) Value {

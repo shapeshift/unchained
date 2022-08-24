@@ -28,7 +28,7 @@ func (c *HTTPClient) GetAccount(address string) (*Account, error) {
 		} `json:"account"`
 	}
 
-	_, err := c.cosmos.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/auth/v1beta1/accounts/%s", address))
+	_, err := c.LCD.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/auth/v1beta1/accounts/%s", address))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get account")
 	}
@@ -48,7 +48,7 @@ func (c *HTTPClient) GetBalance(address string, baseDenom string) (*Balance, err
 		Pagination Pagination `json:"pagination"`
 	}
 
-	_, err := c.cosmos.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/bank/v1beta1/balances/%s", address))
+	_, err := c.LCD.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/bank/v1beta1/balances/%s", address))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get balances")
 	}
@@ -69,7 +69,7 @@ func (c *HTTPClient) GetDelegations(address string, apr *big.Float) ([]Delegatio
 		Pagination Pagination `json:"pagination"`
 	}
 
-	_, err := c.cosmos.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/staking/v1beta1/delegations/%s", address))
+	_, err := c.LCD.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/staking/v1beta1/delegations/%s", address))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get delegations")
 	}
@@ -119,7 +119,7 @@ func (c *HTTPClient) GetRedelegations(address string, apr *big.Float) ([]Redeleg
 		Pagination Pagination `json:"pagination"`
 	}
 
-	_, err := c.cosmos.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/staking/v1beta1/delegators/%s/redelegations", address))
+	_, err := c.LCD.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/staking/v1beta1/delegators/%s/redelegations", address))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get redelegations")
 	}
@@ -173,7 +173,7 @@ func (c *HTTPClient) GetUnbondings(address string, baseDenom string, apr *big.Fl
 		Pagination Pagination `json:"pagination"`
 	}
 
-	_, err := c.cosmos.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/staking/v1beta1/delegators/%s/unbonding_delegations", address))
+	_, err := c.LCD.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/staking/v1beta1/delegators/%s/unbonding_delegations", address))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get unbondings")
 	}
@@ -219,7 +219,7 @@ func (c *HTTPClient) GetRewards(address string, apr *big.Float) ([]Reward, error
 		} `json:"total"`
 	}
 
-	_, err := c.cosmos.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/distribution/v1beta1/delegators/%s/rewards", address))
+	_, err := c.LCD.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/distribution/v1beta1/delegators/%s/rewards", address))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get unbondings")
 	}
