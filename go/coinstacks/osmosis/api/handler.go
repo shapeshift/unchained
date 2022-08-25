@@ -16,6 +16,16 @@ type Handler struct {
 	HTTPClient *osmosis.HTTPClient
 }
 
+// Contains info about the running coinstack
+// swagger:model Info
+type Info struct {
+	// swagger:allOf
+	cosmos.Info
+	// required: true
+	// example: 0.1541068456
+	APR string `json:"apr"`
+}
+
 func (h *Handler) GetInfo() (api.Info, error) {
 	info, err := h.Handler.GetInfo()
 	if err != nil {
@@ -33,6 +43,15 @@ func (h *Handler) GetInfo() (api.Info, error) {
 	}
 
 	return i, nil
+}
+
+// Contains info about account details for an address or xpub
+// swagger:model Account
+type Account struct {
+	// swagger:allOf
+	cosmos.Account
+	// swagger:allOf
+	*cosmos.Staking
 }
 
 func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
@@ -98,6 +117,17 @@ func (h *Handler) GetValidator(address string) (*cosmos.Validator, error) {
 
 func (h *Handler) ParseMessages(msgs []sdk.Msg) []cosmos.Message {
 	return osmosis.ParseMessages(msgs)
+}
+
+type APRData struct {
+	bondedTokens          string
+	epochProvisions       string
+	rate                  string
+	stakingDistributions  string
+	bBondedTokens         *big.Float
+	bEpochProvisions      *big.Float
+	bRate                 *big.Float
+	bStakingDistributions *big.Float
 }
 
 func (h *Handler) getAPRData() (*APRData, error) {
