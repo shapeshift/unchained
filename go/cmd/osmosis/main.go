@@ -8,6 +8,7 @@ import (
 
 	gammtypes "github.com/osmosis-labs/osmosis/v6/x/gamm/types"
 	lockuptypes "github.com/osmosis-labs/osmosis/v6/x/lockup/types"
+	"github.com/shapeshift/unchained/coinstacks/osmosis"
 	"github.com/shapeshift/unchained/coinstacks/osmosis/api"
 	"github.com/shapeshift/unchained/internal/config"
 	"github.com/shapeshift/unchained/internal/log"
@@ -51,26 +52,28 @@ func main() {
 
 	encoding := cosmos.NewEncoding(gammtypes.RegisterInterfaces, lockuptypes.RegisterInterfaces)
 
-	cfg := cosmos.Config{
-		APIKey:            conf.APIKey,
-		Bech32AddrPrefix:  "osmo",
-		Bech32PkPrefix:    "osmopub",
-		Bech32ValPrefix:   "osmovaloper",
-		Bech32PkValPrefix: "osmovalpub",
-		Encoding:          encoding,
-		GRPCURL:           conf.GRPCURL,
-		LCDURL:            conf.LCDURL,
-		KEPLRURL:          conf.KEPLRURL,
-		RPCURL:            conf.RPCURL,
-		WSURL:             conf.WSURL,
+	cfg := osmosis.Config{
+		Config: cosmos.Config{
+			APIKey:            conf.APIKey,
+			Bech32AddrPrefix:  "osmo",
+			Bech32PkPrefix:    "osmopub",
+			Bech32ValPrefix:   "osmovaloper",
+			Bech32PkValPrefix: "osmovalpub",
+			Encoding:          encoding,
+			GRPCURL:           conf.GRPCURL,
+			LCDURL:            conf.LCDURL,
+			RPCURL:            conf.RPCURL,
+			WSURL:             conf.WSURL,
+		},
+		KEPLRURL: conf.KEPLRURL,
 	}
 
-	httpClient, err := cosmos.NewHTTPClient(cfg)
+	httpClient, err := osmosis.NewHTTPClient(cfg)
 	if err != nil {
 		logger.Panicf("failed to create new http client: %+v", err)
 	}
 
-	grpcClient, err := cosmos.NewGRPCClient(cfg)
+	grpcClient, err := cosmos.NewGRPCClient(cfg.Config)
 	if err != nil {
 		logger.Panicf("failed to create new grpc client: %+v", err)
 	}
@@ -80,7 +83,7 @@ func main() {
 		logger.Panicf("failed to create new block service: %+v", err)
 	}
 
-	wsClient, err := cosmos.NewWebsocketClient(cfg, blockService, errChan)
+	wsClient, err := cosmos.NewWebsocketClient(cfg.Config, blockService, errChan)
 	if err != nil {
 		logger.Panicf("failed to create new websocket client: %+v", err)
 	}

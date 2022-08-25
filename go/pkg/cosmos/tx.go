@@ -20,13 +20,13 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (*TxHistory, error) {
+func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (*TxHistoryResponse, error) {
 	history := &History{
-		ctx:        c.ctx,
-		cursor:     &Cursor{SendPage: 1, ReceivePage: 1},
-		pageSize:   pageSize,
-		tendermint: c.tendermint,
-		encoding:   c.encoding,
+		ctx:      c.ctx,
+		cursor:   &Cursor{SendPage: 1, ReceivePage: 1},
+		pageSize: pageSize,
+		rpc:      c.RPC,
+		encoding: c.encoding,
 	}
 
 	if cursor != "" {
@@ -56,12 +56,7 @@ func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (
 }
 
 func (c *HTTPClient) BroadcastTx(rawTx string) (string, error) {
-	return Broadcast(c.cosmos, rawTx)
-}
-
-// special case for osmo
-func (c *HTTPClient) BroadcastOsmoTx(rawTx string) (string, error) {
-	return Broadcast(c.keplr, rawTx)
+	return Broadcast(c.LCD, rawTx)
 }
 
 func Broadcast(client *resty.Client, rawTx string) (string, error) {
@@ -114,7 +109,7 @@ func (c *GRPCClient) BroadcastTx(rawTx string) (string, error) {
 	return res.TxResponse.TxHash, nil
 }
 
-func Events(log string) EventsByMsgIndex {
+func ParseEvents(log string) EventsByMsgIndex {
 	logs, err := sdk.ParseABCILogs(log)
 
 	events := make(EventsByMsgIndex)
@@ -154,7 +149,7 @@ func Events(log string) EventsByMsgIndex {
 	return events
 }
 
-func Messages(msgs []sdk.Msg) []Message {
+func ParseMessages(msgs []sdk.Msg) []Message {
 	messages := []Message{}
 
 	coinToValue := func(c *sdk.Coin) Value {
@@ -238,7 +233,6 @@ func Fee(tx signing.Tx, txid string, defaultDenom string) Value {
 	fees := tx.GetFee()
 
 	if len(fees) == 0 {
-		logger.Warnf("txid: %s, no fees detected", txid)
 		fees = []sdk.Coin{{Denom: "uatom", Amount: sdk.NewInt(0)}}
 	} else if len(fees) > 1 {
 		logger.Warnf("txid: %s - multiple fees detected (defaulting to index 0): %+v", txid, fees)
@@ -280,4 +274,47 @@ func DecodeTx(encoding params.EncodingConfig, rawTx interface{}) (sdk.Tx, signin
 	}
 
 	return tx, builder.GetTx(), nil
+}
+
+func GetTxAddrs(events EventsByMsgIndex, messages []Message) []string {
+	seen := make(map[string]bool)
+	addrs := []string{}
+
+	// check events for addresses
+	for _, es := range events {
+		for _, e := range es {
+			if !(e.Type == "coin_spent" || e.Type == "coin_received") {
+				continue
+			}
+
+			for _, attribute := range e.Attributes {
+				if !(attribute.Key == "spender" || attribute.Key == "receiver") {
+					continue
+				}
+
+				addr := attribute.Value
+				if _, ok := seen[addr]; !ok {
+					addrs = append(addrs, addr)
+					seen[addr] = true
+				}
+			}
+		}
+	}
+
+	// check messages for addresses
+	for _, m := range messages {
+		if m.Addresses == nil {
+			continue
+		}
+
+		// unique set of addresses
+		for _, addr := range m.Addresses {
+			if _, ok := seen[addr]; !ok {
+				addrs = append(addrs, addr)
+				seen[addr] = true
+			}
+		}
+	}
+
+	return addrs
 }

@@ -23,13 +23,13 @@ type TxState struct {
 
 // History stores state for multiple query sources to complete a paginated request
 type History struct {
-	ctx        context.Context
-	cursor     *Cursor
-	encoding   *params.EncodingConfig
-	pageSize   int
-	receive    *TxState
-	send       *TxState
-	tendermint *resty.Client
+	ctx      context.Context
+	cursor   *Cursor
+	encoding *params.EncodingConfig
+	pageSize int
+	receive  *TxState
+	send     *TxState
+	rpc      *resty.Client
 }
 
 func (h *History) doRequest(txState *TxState) (*TxSearchResponse, error) {
@@ -44,7 +44,7 @@ func (h *History) doRequest(txState *TxState) (*TxSearchResponse, error) {
 			"page":     strconv.Itoa(txState.page),
 		}
 
-		_, err := h.tendermint.R().SetResult(&res).SetError(&resErr).SetQueryParams(queryParams).Get("/tx_search")
+		_, err := h.rpc.R().SetResult(&res).SetError(&resErr).SetQueryParams(queryParams).Get("/tx_search")
 
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to do request")
@@ -118,7 +118,7 @@ func (h *History) filterByCursor(txs []TxSearchResponseResultTxs) ([]TxSearchRes
 	return filtered, nil
 }
 
-func (h *History) fetch() (*TxHistory, error) {
+func (h *History) fetch() (*TxHistoryResponse, error) {
 	res, err := h.doRequest(h.send)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get send tx history")
@@ -135,12 +135,12 @@ func (h *History) fetch() (*TxHistory, error) {
 
 	// no transaction history detected
 	if len(h.send.txs) == 0 && len(h.receive.txs) == 0 {
-		return &TxHistory{}, nil
+		return &TxHistoryResponse{}, nil
 	}
 
 	// splice together send and receive transactions in the correct order
 	// until we either run out of transactions to return, or fill a full page response.
-	txs := []Tx{}
+	txs := []DecodedTx{}
 	for len(txs) < h.pageSize {
 		// fetch more send transactions if we have run out and more are available
 		if len(h.send.txs) == 0 && h.send.hasMore {
@@ -189,7 +189,7 @@ func (h *History) fetch() (*TxHistory, error) {
 			continue
 		}
 
-		tx := Tx{
+		tx := DecodedTx{
 			TendermintTx: next,
 			CosmosTx:     cosmosTx,
 			SigningTx:    signingTx,
@@ -200,7 +200,7 @@ func (h *History) fetch() (*TxHistory, error) {
 
 	// no paginated data to return
 	if len(txs) == 0 {
-		return &TxHistory{}, nil
+		return &TxHistoryResponse{}, nil
 	}
 
 	lastTx := txs[len(txs)-1]
@@ -228,7 +228,7 @@ func (h *History) fetch() (*TxHistory, error) {
 		}
 	}
 
-	txHistory := &TxHistory{
+	txHistory := &TxHistoryResponse{
 		Txs:    txs,
 		Cursor: cursor,
 	}

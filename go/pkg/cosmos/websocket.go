@@ -16,7 +16,7 @@ import (
 	"github.com/tendermint/tendermint/types"
 )
 
-type TxHandlerFunc = func(tx types.EventDataTx, block *Block) (interface{}, []string, error)
+type TxHandlerFunc = func(tx types.EventDataTx, block *BlockResponse) (interface{}, []string, error)
 
 type WSClient struct {
 	*websocket.Registry
@@ -35,7 +35,10 @@ func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- 
 		return nil, errors.Wrapf(err, "failed to parse WSURL: %s", conf.WSURL)
 	}
 
-	path := fmt.Sprintf("/apikey/%s/websocket", conf.APIKey)
+	path := "/websocket"
+	if conf.APIKey != "" {
+		path = fmt.Sprintf("/apikey/%s/websocket", conf.APIKey)
+	}
 
 	client, err := tendermint.NewWS(wsURL.String(), path)
 	if err != nil {
@@ -103,6 +106,27 @@ func (ws *WSClient) EncodingConfig() params.EncodingConfig {
 func (ws *WSClient) listen() {
 	for r := range ws.client.ResponsesCh {
 		if r.Error != nil {
+			// resubscribe if subscription is cancelled by the server for reason: client is not pulling messages fast enough
+			// experimental rpc config available to help mitigate this issue: https://github.com/tendermint/tendermint/blob/main/config/config.go#L373
+			if r.Error.Code == -32000 {
+				err := ws.client.UnsubscribeAll(context.Background())
+				if err != nil {
+					logger.Error(errors.Wrap(err, "failed to unsubscribe from all subscriptions"))
+				}
+
+				err = ws.client.Subscribe(context.Background(), types.EventQueryTx.String())
+				if err != nil {
+					logger.Error(errors.Wrap(err, "failed to subscribe to txs"))
+				}
+
+				err = ws.client.Subscribe(context.Background(), types.EventQueryNewBlockHeader.String())
+				if err != nil {
+					logger.Error(errors.Wrap(err, "failed to subscribe to newBlocks"))
+				}
+
+				continue
+			}
+
 			logger.Error(r.Error.Error())
 			continue
 		}
@@ -149,7 +173,7 @@ func (ws *WSClient) handleTx(tx types.EventDataTx) {
 }
 
 func (ws *WSClient) handleNewBlockHeader(block types.EventDataNewBlockHeader) {
-	b := &Block{
+	b := &BlockResponse{
 		Height:    int(block.Header.Height),
 		Hash:      block.Header.Hash().String(),
 		Timestamp: int(block.Header.Time.Unix()),

@@ -33,6 +33,7 @@ services:
       - ethereum_default
       - litecoin_default
       - osmosis_default
+      - thorchain_default
     ports:
       # The HTTP port
       - "80:80"
@@ -59,3 +60,5 @@ networks:
     name: litecoin_default
   osmosis_default:
     name: osmosis_default
+  thorchain_default:
+    name: thorchain_default

@@ -1,56 +1,40 @@
 package osmosis
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	gammtypes "github.com/osmosis-labs/osmosis/v6/x/gamm/types"
-	lockuptypes "github.com/osmosis-labs/osmosis/v6/x/lockup/types"
+	"net/url"
+
+	"github.com/go-resty/resty/v2"
+	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 )
 
-// Messages will parse any osmosis or cosmos-sdk message types
-func Messages(msgs []sdk.Msg) []cosmos.Message {
-	messages := []cosmos.Message{}
+type Config struct {
+	cosmos.Config
+	KEPLRURL string
+}
 
-	coinToValue := func(c *sdk.Coin) cosmos.Value {
-		return cosmos.Value{
-			Amount: c.Amount.String(),
-			Denom:  c.Denom,
-		}
+type HTTPClient struct {
+	*cosmos.HTTPClient
+	keplr *resty.Client
+}
+
+func NewHTTPClient(conf Config) (*HTTPClient, error) {
+	httpClient, err := cosmos.NewHTTPClient(conf.Config)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create new cosmos http client")
 	}
 
-	unhandledMsgs := []sdk.Msg{}
-	for _, msg := range msgs {
-		switch v := msg.(type) {
-		case *lockuptypes.MsgLockTokens:
-			message := cosmos.Message{
-				Addresses: []string{v.Owner},
-				From:      v.Owner,
-				Type:      v.Type(),
-				Value:     coinToValue(&v.Coins[0]),
-			}
-			messages = append(messages, message)
-		case *gammtypes.MsgJoinPool:
-			message := cosmos.Message{
-				Addresses: []string{v.Sender},
-				From:      v.Sender,
-				Type:      v.Type(),
-				Value:     coinToValue(&v.TokenInMaxs[0]),
-			}
-			messages = append(messages, message)
-		case *gammtypes.MsgSwapExactAmountIn:
-			message := cosmos.Message{
-				Addresses: []string{v.Sender},
-				From:      v.Sender,
-				Type:      v.Type(),
-				Value:     coinToValue(&v.TokenIn),
-			}
-			messages = append(messages, message)
-		default:
-			unhandledMsgs = append(unhandledMsgs, msg)
-		}
+	keplrURL, err := url.Parse(conf.KEPLRURL)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse keplrURL: %s", conf.KEPLRURL)
 	}
 
-	messages = append(messages, cosmos.Messages(unhandledMsgs)...)
+	keplr := resty.New().SetScheme(keplrURL.Scheme).SetBaseURL(keplrURL.Host)
 
-	return messages
+	c := &HTTPClient{
+		HTTPClient: httpClient,
+		keplr:      keplr,
+	}
+
+	return c, nil
 }
