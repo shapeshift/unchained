@@ -290,6 +290,50 @@ aliases:
     api-cpu-limit: 300m
     api-memory-limit: 1Gi
 
+  - &thorchain
+    coinstack: thorchain
+    pulumi-stack: public
+    pulumi-dir: coinstacks/thorchain/pulumi
+    lcd-url: http://thorchain-svc.unchained.svc.cluster.local:1317
+    rpc-url: http://thorchain-svc.unchained.svc.cluster.local:27147
+    ws-url: ws://thorchain-svc.unchained.svc.cluster.local:27147
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 6
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
+    api-cpu-threshold: 30
+    api-memory-limit: 2Gi
+    stateful-service-replicas: 2
+    stateful-service-services: 3
+    service-name-1: daemon
+    service-image-1: registry.gitlab.com/thorchain/thornode:chaosnet-multichain-1.95.0
+    service-cpu-limit-1: "4"
+    service-memory-limit-1: 4Gi
+    service-storage-size-1: 2Ti
+    service-name-2: timescaledb
+    service-image-2: timescale/timescaledb:2.2.0-pg13
+    service-cpu-limit-2: "2"
+    service-memory-limit-2: 3Gi
+    service-storage-size-2: 200Gi
+    service-name-3: indexer
+    service-image-3: registry.gitlab.com/thorchain/midgard:2.9.1
+    service-cpu-limit-3: 500m
+    service-memory-limit-3: 512Mi
+    service-storage-size-3: 50Gi
+
+  - &thorchain-dev
+    <<: *thorchain
+    environment: dev
+    pulumi-stack: public-dev
+    lcd-url: http://thorchain-svc.unchained-dev.svc.cluster.local:1317
+    rpc-url: http://thorchain-svc.unchained-dev.svc.cluster.local:27147
+    ws-url: ws://thorchain-svc.unchained-dev.svc.cluster.local:27147
+    api-max-replicas: 3
+    api-cpu-limit: 300m
+    api-memory-limit: 1Gi
+    stateful-service-replicas: 1
+
 commands:
   setup-runtime:
     description: setup runtime environment
@@ -689,6 +733,57 @@ jobs:
         type: string
       api-replicas:
         type: integer
+      stateful-service-replicas:
+        type: number
+        default: 0
+      stateful-service-services:
+        type: number
+        default: 0
+      service-name-1:
+        type: string
+        default: ""
+      service-image-1:
+        type: string
+        default: ""
+      service-cpu-limit-1:
+        type: string
+        default: ""
+      service-memory-limit-1:
+        type: string
+        default: ""
+      service-storage-size-1:
+        type: string
+        default: ""
+      service-name-2:
+        type: string
+        default: ""
+      service-image-2:
+        type: string
+        default: ""
+      service-cpu-limit-2:
+        type: string
+        default: ""
+      service-memory-limit-2:
+        type: string
+        default: ""
+      service-storage-size-2:
+        type: string
+        default: ""
+      service-name-3:
+        type: string
+        default: ""
+      service-image-3:
+        type: string
+        default: ""
+      service-cpu-limit-3:
+        type: string
+        default: ""
+      service-memory-limit-3:
+        type: string
+        default: ""
+      service-storage-size-3:
+        type: string
+        default: ""
     steps:
       - setup_remote_docker:
           version: 20.10.2
@@ -721,6 +816,14 @@ jobs:
             pulumi config set --path unchained:<< parameters.coinstack >>.api.cpuRequest << parameters.api-cpu-request >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.memoryLimit << parameters.api-memory-limit >>
             pulumi config set --path unchained:<< parameters.coinstack >>.api.replicas << parameters.api-replicas >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.replicas << parameters.stateful-service-replicas >>
+            for i in {1..<< parameters.stateful-service-services >>}; do \
+              [ -n "<< parameters.service-name-$i >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[$i].name << parameters.service-name-$i >> \
+              [ -n "<< parameters.service-image-$i >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[$i].image << parameters.service-image-$i >> \
+              [ -n "<< parameters.service-cpu-limit-$i >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[$i].cpuLimit << parameters.service-cpu-limit-$i >> \
+              [ -n "<< parameters.service-memory-limit-$i >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[$i].memoryLimit << parameters.service-memory-limit-$i >> \
+              [ -n "<< parameters.service-storage-size-$i >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[$i].storageSize << parameters.service-storage-size-$i >> \
+            ; done
             pulumi << parameters.pulumi-command >> --suppress-outputs
 
   deploy-monitoring:
