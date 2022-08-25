@@ -3,14 +3,14 @@ package api
 import (
 	"math/big"
 
-	cosmosapi "github.com/shapeshift/unchained/pkg/cosmos/api"
+	"github.com/shapeshift/unchained/pkg/cosmos"
 )
 
 // Contains info about the running coinstack
 // swagger:model Info
 type Info struct {
 	// swagger:allOf
-	cosmosapi.Info
+	cosmos.Info
 	// required: true
 	// example: 0.1541068456
 	APR string `json:"apr"`
@@ -20,9 +20,9 @@ type Info struct {
 // swagger:model Account
 type Account struct {
 	// swagger:allOf
-	cosmosapi.Account
+	cosmos.Account
 	// swagger:allOf
-	*cosmosapi.Staking
+	*cosmos.Staking
 }
 
 type APRData struct {

@@ -14,7 +14,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *HTTPClient) GetAccount(address string) (*Account, error) {
+func (c *HTTPClient) GetAccount(address string) (*AccountResponse, error) {
 	var res struct {
 		Account struct {
 			Type    string `json:"@type"`
@@ -33,7 +33,7 @@ func (c *HTTPClient) GetAccount(address string) (*Account, error) {
 		return nil, errors.Wrap(err, "failed to get account")
 	}
 
-	a := &Account{
+	a := &AccountResponse{
 		Address:       res.Account.Address,
 		AccountNumber: res.Account.AccountNumber,
 		Sequence:      res.Account.Sequence,
@@ -42,7 +42,7 @@ func (c *HTTPClient) GetAccount(address string) (*Account, error) {
 	return a, nil
 }
 
-func (c *HTTPClient) GetBalance(address string, baseDenom string) (*Balance, error) {
+func (c *HTTPClient) GetBalance(address string, baseDenom string) (*BalanceResponse, error) {
 	var res struct {
 		Balances   sdk.Coins  `json:"balances"`
 		Pagination Pagination `json:"pagination"`
@@ -247,7 +247,7 @@ func (c *HTTPClient) GetRewards(address string, apr *big.Float) ([]Reward, error
 	return rewards, nil
 }
 
-func (c *GRPCClient) GetAccount(address string) (*Account, error) {
+func (c *GRPCClient) GetAccount(address string) (*AccountResponse, error) {
 	res, err := c.auth.Account(c.ctx, &authtypes.QueryAccountRequest{Address: address})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get account")
@@ -258,7 +258,7 @@ func (c *GRPCClient) GetAccount(address string) (*Account, error) {
 		return nil, errors.Wrap(err, "failed to unmarshal account")
 	}
 
-	a := &Account{
+	a := &AccountResponse{
 		Address:       account.Address,
 		AccountNumber: int(account.AccountNumber),
 		Sequence:      int(account.Sequence),
@@ -267,7 +267,7 @@ func (c *GRPCClient) GetAccount(address string) (*Account, error) {
 	return a, nil
 }
 
-func (c *GRPCClient) GetBalance(address string, baseDenom string) (*Balance, error) {
+func (c *GRPCClient) GetBalance(address string, baseDenom string) (*BalanceResponse, error) {
 	res, err := c.bank.AllBalances(c.ctx, &banktypes.QueryAllBalancesRequest{Address: address})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get balance")
@@ -407,7 +407,7 @@ func (c *GRPCClient) GetRewards(address string, apr *big.Float) ([]Reward, error
 	return rewards, nil
 }
 
-func balance(balances sdk.Coins, baseDenom string) (*Balance, error) {
+func balance(balances sdk.Coins, baseDenom string) (*BalanceResponse, error) {
 	balance := "0"
 	assets := []Value{}
 	for _, b := range balances {
@@ -418,7 +418,7 @@ func balance(balances sdk.Coins, baseDenom string) (*Balance, error) {
 		assets = append(assets, Value{Amount: b.Amount.String(), Denom: b.Denom})
 	}
 
-	b := &Balance{
+	b := &BalanceResponse{
 		Amount: balance,
 		Assets: assets,
 	}

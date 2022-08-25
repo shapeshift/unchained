@@ -9,19 +9,19 @@ import (
 )
 
 type BlockFetcher interface {
-	GetBlock(height *int) (*Block, error)
+	GetBlock(height *int) (*BlockResponse, error)
 }
 
 type BlockService struct {
-	Latest     *Block
-	Blocks     map[int]*Block
+	Latest     *BlockResponse
+	Blocks     map[int]*BlockResponse
 	m          sync.RWMutex
 	httpClient BlockFetcher
 }
 
 func NewBlockService(httpClient BlockFetcher) (*BlockService, error) {
 	s := &BlockService{
-		Blocks:     make(map[int]*Block),
+		Blocks:     make(map[int]*BlockResponse),
 		httpClient: httpClient,
 	}
 
@@ -35,7 +35,7 @@ func NewBlockService(httpClient BlockFetcher) (*BlockService, error) {
 	return s, nil
 }
 
-func (s *BlockService) WriteBlock(block *Block, latest bool) {
+func (s *BlockService) WriteBlock(block *BlockResponse, latest bool) {
 	s.m.Lock()
 	if latest {
 		s.Latest = block
@@ -44,7 +44,7 @@ func (s *BlockService) WriteBlock(block *Block, latest bool) {
 	s.m.Unlock()
 }
 
-func (s *BlockService) GetBlock(height int) (*Block, error) {
+func (s *BlockService) GetBlock(height int) (*BlockResponse, error) {
 	block, ok := s.Blocks[height]
 
 	if ok {
@@ -61,8 +61,8 @@ func (s *BlockService) GetBlock(height int) (*Block, error) {
 	return block, nil
 }
 
-func (c *HTTPClient) GetBlock(height *int) (*Block, error) {
-	var res *BlockResponse
+func (c *HTTPClient) GetBlock(height *int) (*BlockResponse, error) {
+	var res *TendermintBlockResponse
 	var resErr *struct {
 		RPCErrorResponse
 		Message string `json:"message"`
@@ -108,7 +108,7 @@ func (c *HTTPClient) GetBlock(height *int) (*Block, error) {
 		return nil, errors.Wrapf(err, "failed to convert block height: %s", res.Result.Block.Header.Height)
 	}
 
-	b := &Block{
+	b := &BlockResponse{
 		Height:    h,
 		Hash:      res.Result.BlockID.Hash,
 		Timestamp: int(timestamp.Unix()),

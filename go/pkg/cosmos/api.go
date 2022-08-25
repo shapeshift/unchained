@@ -1,4 +1,4 @@
-package api
+package cosmos
 
 import (
 	"context"
@@ -11,7 +11,6 @@ import (
 	"github.com/gorilla/mux"
 	ws "github.com/gorilla/websocket"
 	"github.com/pkg/errors"
-	"github.com/shapeshift/unchained/internal/log"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/websocket"
 )
@@ -22,7 +21,6 @@ const (
 )
 
 var (
-	logger   = log.WithoutFields()
 	upgrader = ws.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,

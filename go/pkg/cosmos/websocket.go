@@ -16,7 +16,7 @@ import (
 	"github.com/tendermint/tendermint/types"
 )
 
-type TxHandlerFunc = func(tx types.EventDataTx, block *Block) (interface{}, []string, error)
+type TxHandlerFunc = func(tx types.EventDataTx, block *BlockResponse) (interface{}, []string, error)
 
 type WSClient struct {
 	*websocket.Registry
@@ -173,7 +173,7 @@ func (ws *WSClient) handleTx(tx types.EventDataTx) {
 }
 
 func (ws *WSClient) handleNewBlockHeader(block types.EventDataNewBlockHeader) {
-	b := &Block{
+	b := &BlockResponse{
 		Height:    int(block.Header.Height),
 		Hash:      block.Header.Hash().String(),
 		Timestamp: int(block.Header.Time.Unix()),

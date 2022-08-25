@@ -25,7 +25,6 @@ import (
 	"github.com/shapeshift/unchained/internal/log"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
-	cosmosapi "github.com/shapeshift/unchained/pkg/cosmos/api"
 	"github.com/shapeshift/unchained/pkg/websocket"
 )
 
@@ -41,7 +40,7 @@ const (
 var logger = log.WithoutFields()
 
 type API struct {
-	*cosmosapi.API
+	*cosmos.API
 	handler *Handler
 }
 
@@ -49,7 +48,7 @@ func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService 
 	r := mux.NewRouter()
 
 	handler := &Handler{
-		Handler: &cosmosapi.Handler{
+		Handler: &cosmos.Handler{
 			HTTPClient:   httpClient,
 			WSClient:     wsClient,
 			BlockService: blockService,
@@ -68,13 +67,13 @@ func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService 
 	}
 
 	a := &API{
-		API:     cosmosapi.New(handler, manager, server),
+		API:     cosmos.New(handler, manager, server),
 		handler: handler,
 	}
 
 	// runtime check to ensure Handler implements CoinSpecific functionality
 	var _ api.BaseAPI = handler
-	var _ cosmosapi.CoinSpecificHandler = handler
+	var _ cosmos.CoinSpecificHandler = handler
 
 	// runtime check to ensure Handler implements CoinSpecificHandler
 	if err := handler.ValidateCoinSpecific(handler); err != nil {

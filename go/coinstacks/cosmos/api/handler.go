@@ -7,12 +7,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
-	cosmosapi "github.com/shapeshift/unchained/pkg/cosmos/api"
 	"golang.org/x/sync/errgroup"
 )
 
 type Handler struct {
-	*cosmosapi.Handler
+	*cosmos.Handler
 }
 
 func (h *Handler) GetInfo() (api.Info, error) {
@@ -27,7 +26,7 @@ func (h *Handler) GetInfo() (api.Info, error) {
 	}
 
 	i := Info{
-		Info:             info.(cosmosapi.Info),
+		Info:             info.(cosmos.Info),
 		TotalSupply:      aprData.totalSupply,
 		BondedTokens:     aprData.bondedTokens,
 		AnnualProvisions: aprData.annualProvisions,
@@ -54,7 +53,7 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 			return err
 		}
 
-		a.Account = account.(cosmosapi.Account)
+		a.Account = account.(cosmos.Account)
 
 		return nil
 	})

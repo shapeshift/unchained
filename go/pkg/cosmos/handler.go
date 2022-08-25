@@ -1,4 +1,4 @@
-package api
+package cosmos
 
 import (
 	"crypto/sha256"
@@ -11,7 +11,6 @@ import (
 	ws "github.com/gorilla/websocket"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/api"
-	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/shapeshift/unchained/pkg/websocket"
 	"github.com/tendermint/tendermint/types"
 	"golang.org/x/sync/errgroup"
@@ -32,18 +31,18 @@ type RouteHandler interface {
 }
 
 type CoinSpecificHandler interface {
-	ParseMessages([]sdk.Msg) []cosmos.Message
+	ParseMessages([]sdk.Msg) []Message
 }
 
 type Handler struct {
 	// coin specific handler methods
-	ParseMessages func([]sdk.Msg) []cosmos.Message
+	ParseMessages func([]sdk.Msg) []Message
 
 	// common cosmossdk values
-	HTTPClient   *cosmos.HTTPClient
-	GRPCClient   *cosmos.GRPCClient
-	WSClient     *cosmos.WSClient
-	BlockService *cosmos.BlockService
+	HTTPClient   *HTTPClient
+	GRPCClient   *GRPCClient
+	WSClient     *WSClient
+	BlockService *BlockService
 	Denom        string
 }
 
@@ -75,8 +74,8 @@ func (h *Handler) NewWebsocketConnection(conn *ws.Conn, manager *websocket.Manag
 }
 
 func (h *Handler) StartWebsocket() error {
-	h.WSClient.TxHandler(func(tx types.EventDataTx, block *cosmos.Block) (interface{}, []string, error) {
-		decodedTx, signingTx, err := cosmos.DecodeTx(h.WSClient.EncodingConfig(), tx.Tx)
+	h.WSClient.TxHandler(func(tx types.EventDataTx, block *BlockResponse) (interface{}, []string, error) {
+		decodedTx, signingTx, err := DecodeTx(h.WSClient.EncodingConfig(), tx.Tx)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to handle tx: %v", tx.Tx)
 		}
@@ -91,8 +90,8 @@ func (h *Handler) StartWebsocket() error {
 				Timestamp:   &block.Timestamp,
 			},
 			Confirmations: 1,
-			Events:        cosmos.ParseEvents(tx.Result.Log),
-			Fee:           cosmos.Fee(signingTx, txid, h.Denom),
+			Events:        ParseEvents(tx.Result.Log),
+			Fee:           Fee(signingTx, txid, h.Denom),
 			GasWanted:     strconv.Itoa(int(tx.Result.GasWanted)),
 			GasUsed:       strconv.Itoa(int(tx.Result.GasUsed)),
 			Index:         int(tx.Index),
@@ -100,7 +99,7 @@ func (h *Handler) StartWebsocket() error {
 			Messages:      h.ParseMessages(decodedTx.GetMsgs()),
 		}
 
-		addrs := cosmos.GetTxAddrs(t.Events, t.Messages)
+		addrs := GetTxAddrs(t.Events, t.Messages)
 
 		return t, addrs, nil
 	})
@@ -191,8 +190,8 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 				Timestamp:   &block.Timestamp,
 			},
 			Confirmations: h.BlockService.Latest.Height - height + 1,
-			Events:        cosmos.ParseEvents(t.TendermintTx.TxResult.Log),
-			Fee:           cosmos.Fee(t.SigningTx, *t.TendermintTx.Hash, h.Denom),
+			Events:        ParseEvents(t.TendermintTx.TxResult.Log),
+			Fee:           Fee(t.SigningTx, *t.TendermintTx.Hash, h.Denom),
 			GasWanted:     t.TendermintTx.TxResult.GasWanted,
 			GasUsed:       t.TendermintTx.TxResult.GasUsed,
 			Index:         int(t.TendermintTx.GetIndex()),

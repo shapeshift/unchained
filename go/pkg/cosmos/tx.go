@@ -20,7 +20,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (*TxHistory, error) {
+func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (*TxHistoryResponse, error) {
 	history := &History{
 		ctx:      c.ctx,
 		cursor:   &Cursor{SendPage: 1, ReceivePage: 1},

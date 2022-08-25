@@ -59,7 +59,7 @@ type BlockLastCommit struct {
 	Signatures []Commit `json:"signatures,omitempty"`
 }
 
-type BlockResponse struct {
+type TendermintBlockResponse struct {
 	Id      *int32         `json:"id,omitempty"`
 	Jsonrpc *string        `json:"jsonrpc,omitempty"`
 	Result  *BlockComplete `json:"result,omitempty"`
