@@ -113,6 +113,7 @@ export async function deployStatefulService(
   volumes?: Array<k8s.types.input.core.v1.Volume>
 ): Promise<void> {
   if (!config.statefulService) return
+  if (config.statefulService.replicas <= 0) return
   if (!Object.keys(services).length) return
 
   const labels = { app, asset }
