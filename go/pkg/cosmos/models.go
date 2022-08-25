@@ -1,15 +1,22 @@
 package cosmos
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth/signing"
+	"github.com/shapeshift/unchained/pkg/api"
 )
 
-// Account info common return payload
+// Contains info about account details for an address or xpub
+// swagger:model Account
 type Account struct {
-	Address       string
-	AccountNumber int
-	Sequence      int
+	// swagger:allOf
+	api.BaseAccount
+	// required: true
+	// example: 420
+	AccountNumber int `json:"accountNumber"`
+	// required: true
+	// example: 69
+	Sequence int `json:"sequence"`
+	// required: true
+	Assets []Value `json:"assets"`
 }
 
 // Contains info about a transaction log event key/val attribute
@@ -23,19 +30,6 @@ type Attribute struct {
 	Value string `json:"value"`
 }
 
-// Balance info common return payload
-type Balance struct {
-	Amount string  `json:"amount"`
-	Assets []Value `json:"assets"`
-}
-
-// Block info common return payload
-type Block struct {
-	Height    int
-	Hash      string
-	Timestamp int
-}
-
 // Contains info about a staking delegation
 // swagger:model Delegation
 type Delegation struct {
@@ -47,13 +41,6 @@ type Delegation struct {
 	// required: true
 	// example: 123456789
 	Balance Value `json:"balance"`
-}
-
-// ErrorResponse payload for an api request
-type ErrorResponse struct {
-	Code   int           `json:"code"`
-	Msg    string        `json:"message"`
-	Detail []interface{} `json:"detail"`
 }
 
 // Contains info about tx events keyed by message index
@@ -70,6 +57,13 @@ type Event struct {
 	Attributes []Attribute `json:"attributes"`
 }
 
+// Contains info about the running coinstack
+// swagger:model Info
+type Info struct {
+	// swagger:allOf
+	api.BaseInfo
+}
+
 // Contains info about a transaction message
 // swagger:model Message
 type Message struct {
@@ -81,12 +75,6 @@ type Message struct {
 	// example: /cosmos.bank.v1beta1.MsgSend
 	Type  string `json:"type"`
 	Value Value  `json:"value,omitempty"`
-}
-
-// Pagination info cosmos-sdk response
-type Pagination struct {
-	NextKey *[]byte `json:"next_key,omitempty"`
-	Total   uint64  `json:"total,string,omitempty"`
 }
 
 // Contains info about a staking redelegation
@@ -123,17 +111,54 @@ type Reward struct {
 	Rewards []Value `json:"rewards"`
 }
 
-// Tx info common return payload
-type Tx struct {
-	TendermintTx TxSearchResponseResultTxs
-	CosmosTx     sdk.Tx
-	SigningTx    signing.Tx
+// Contains info about current staking state
+// swagger:model Staking
+type Staking struct {
+	// swagger:allOf
+	Delegations []Delegation
+	// swagger:allOf
+	Redelegations []Redelegation
+	// swagger:allOf
+	Unbondings []Unbonding
+	// swagger:allOf
+	Rewards []Reward
 }
 
-// TxHistory info common return payload
+// Contains info about a transaction
+// swagger:model Tx
+type Tx struct {
+	// swagger:allOf
+	api.BaseTx
+	// required: true
+	Confirmations int `json:"confirmations"`
+	// required: true
+	Fee Value `json:"fee"`
+	// required: true
+	// example: 888
+	GasUsed string `json:"gasUsed"`
+	// required: true
+	// example: 999
+	GasWanted string `json:"gasWanted"`
+	// required: true
+	// example: 1
+	Index int    `json:"index"`
+	Memo  string `json:"memo,omitempty"`
+	// required: true
+	// 123456789
+	Value string `json:"value"`
+	// required: true
+	Messages []Message `json:"messages"`
+	// required: true
+	Events EventsByMsgIndex `json:"events"`
+}
+
+// Contains info about transaction history for an address or xpub
+// swagger:model TxHistory
 type TxHistory struct {
-	Cursor string
-	Txs    []Tx
+	// swagger:allOf
+	api.BaseTxHistory
+	// required: true
+	Txs []Tx `json:"txs"`
 }
 
 // Contains info about a staking unbonding

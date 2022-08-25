@@ -16,7 +16,7 @@ import (
 	"github.com/tendermint/tendermint/types"
 )
 
-type TxHandlerFunc = func(tx types.EventDataTx, block *Block) (interface{}, []string, error)
+type TxHandlerFunc = func(tx types.EventDataTx, block *BlockResponse) (interface{}, []string, error)
 
 type WSClient struct {
 	*websocket.Registry
@@ -35,7 +35,10 @@ func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- 
 		return nil, errors.Wrapf(err, "failed to parse WSURL: %s", conf.WSURL)
 	}
 
-	path := fmt.Sprintf("/apikey/%s/websocket", conf.APIKey)
+	path := "/websocket"
+	if conf.APIKey != "" {
+		path = fmt.Sprintf("/apikey/%s/websocket", conf.APIKey)
+	}
 
 	client, err := tendermint.NewWS(wsURL.String(), path)
 	if err != nil {
@@ -170,7 +173,7 @@ func (ws *WSClient) handleTx(tx types.EventDataTx) {
 }
 
 func (ws *WSClient) handleNewBlockHeader(block types.EventDataNewBlockHeader) {
-	b := &Block{
+	b := &BlockResponse{
 		Height:    int(block.Header.Height),
 		Hash:      block.Header.Hash().String(),
 		Timestamp: int(block.Header.Time.Unix()),
