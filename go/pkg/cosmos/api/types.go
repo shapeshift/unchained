@@ -25,8 +25,6 @@ type Account struct {
 	Sequence int `json:"sequence"`
 	// required: true
 	Assets []cosmos.Value `json:"assets"`
-	// swagger:allOf
-	*Staking
 }
 
 // Contains info about a transaction

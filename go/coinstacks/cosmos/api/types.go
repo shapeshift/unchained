@@ -3,7 +3,6 @@ package api
 import (
 	"math/big"
 
-	"github.com/shapeshift/unchained/pkg/cosmos"
 	cosmosapi "github.com/shapeshift/unchained/pkg/cosmos/api"
 )
 
@@ -34,21 +33,8 @@ type Info struct {
 type Account struct {
 	// swagger:allOf
 	cosmosapi.Account
-	// required: true
-	Delegations []cosmos.Delegation `json:"delegations"`
-	// required: true
-	Redelegations []cosmos.Redelegation `json:"redelegations"`
-	// required: true
-	Unbondings []cosmos.Unbonding `json:"unbondings"`
-	// required: true
-	Rewards []cosmos.Reward `json:"rewards"`
-}
-
-type StakingData struct {
-	Delegations   []cosmos.Delegation
-	Redelegations []cosmos.Redelegation
-	Unbondings    []cosmos.Unbonding
-	Rewards       []cosmos.Reward
+	// swagger:allOf
+	*cosmosapi.Staking
 }
 
 type APRData struct {

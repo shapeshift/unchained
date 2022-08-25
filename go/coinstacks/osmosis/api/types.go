@@ -16,29 +16,22 @@ type Info struct {
 	APR string `json:"apr"`
 }
 
+// Contains info about account details for an address or xpub
+// swagger:model Account
+type Account struct {
+	// swagger:allOf
+	cosmosapi.Account
+	// swagger:allOf
+	*cosmosapi.Staking
+}
+
 type APRData struct {
 	bondedTokens          string
 	epochProvisions       string
+	rate                  string
 	stakingDistributions  string
 	bBondedTokens         *big.Float
 	bEpochProvisions      *big.Float
+	bRate                 *big.Float
 	bStakingDistributions *big.Float
-}
-
-func (a *APRData) calculate() *big.Float {
-	totalSupply, _, _ := new(big.Float).Parse("1000000000", 10)
-	yearDays, _, _ := new(big.Float).Parse("365", 10)
-	yearMintingProvision := new(big.Float).Mul(new(big.Float).Mul(a.bEpochProvisions, a.bStakingDistributions), yearDays)
-	inflation := new(big.Float).Quo(yearMintingProvision, totalSupply)
-	ratio := new(big.Float).Quo(a.bBondedTokens, totalSupply)
-
-	return new(big.Float).Quo(inflation, ratio)
-}
-
-func (a *APRData) Float() *big.Float {
-	return a.calculate()
-}
-
-func (a *APRData) String() string {
-	return a.calculate().String()
 }

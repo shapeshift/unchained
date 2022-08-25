@@ -31,19 +31,12 @@ type RouteHandler interface {
 	EstimateGas(rawTx string) (string, error)
 }
 
-type APRData interface {
-	Float() *big.Float
-	String() string
-}
-
 type CoinSpecificHandler interface {
-	GetAPRData() (APRData, error)
 	ParseMessages([]sdk.Msg) []cosmos.Message
 }
 
 type Handler struct {
-	// coin specific handler functions
-	GetAPRData    func() (APRData, error)
+	// coin specific handler methods
 	ParseMessages func([]sdk.Msg) []cosmos.Message
 
 	// common cosmossdk values
@@ -54,9 +47,8 @@ type Handler struct {
 	Denom        string
 }
 
-// ValidateCoinSpecific performs runtime validation of a handler to:
-//   - ensure it fully implements the CoinSpecificHandler interface and any coin specific functions
-//   - assign any CoinSpecificHandler functions to the appropriate struct fields
+// ValidateCoinSpecific performs runtime validation of a handler to ensure it fully implements
+// the CoinSpecificHandler interface and assigns the functions to the appropriate struct method fields
 func (h *Handler) ValidateCoinSpecific(handler interface{}) error {
 	hV := reflect.ValueOf(h).Elem()
 	handlerV := reflect.ValueOf(handler)
@@ -170,13 +162,6 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 		return nil, err
 	}
 
-	staking, err := h.getStaking(pubkey)
-	if err != nil {
-		return nil, err
-	}
-
-	account.Staking = staking
-
 	return account, nil
 }
 
@@ -239,36 +224,13 @@ func (h Handler) EstimateGas(rawTx string) (string, error) {
 	return h.HTTPClient.GetEstimateGas(rawTx)
 }
 
-func (h *Handler) GetValidators() ([]cosmos.Validator, error) {
-	aprData, err := h.GetAPRData()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get apr data")
-	}
-
-	return h.HTTPClient.GetValidators(aprData.Float())
-}
-
-func (h *Handler) GetValidator(address string) (*cosmos.Validator, error) {
-	aprData, err := h.GetAPRData()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get apr data")
-	}
-
-	return h.HTTPClient.GetValidator(address, aprData.Float())
-}
-
-func (h *Handler) getStaking(pubkey string) (*Staking, error) {
-	aprData, err := h.GetAPRData()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get apr data")
-	}
-
+func (h *Handler) GetStaking(pubkey string, apr *big.Float) (*Staking, error) {
 	staking := &Staking{}
 
 	g := new(errgroup.Group)
 
 	g.Go(func() error {
-		delegations, err := h.HTTPClient.GetDelegations(pubkey, aprData.Float())
+		delegations, err := h.HTTPClient.GetDelegations(pubkey, apr)
 		if err != nil {
 			return err
 		}
@@ -278,7 +240,7 @@ func (h *Handler) getStaking(pubkey string) (*Staking, error) {
 	})
 
 	g.Go(func() error {
-		redelegations, err := h.HTTPClient.GetRedelegations(pubkey, aprData.Float())
+		redelegations, err := h.HTTPClient.GetRedelegations(pubkey, apr)
 		if err != nil {
 			return err
 		}
@@ -288,7 +250,7 @@ func (h *Handler) getStaking(pubkey string) (*Staking, error) {
 	})
 
 	g.Go(func() error {
-		unbondings, err := h.HTTPClient.GetUnbondings(pubkey, h.Denom, aprData.Float())
+		unbondings, err := h.HTTPClient.GetUnbondings(pubkey, h.Denom, apr)
 		if err != nil {
 			return err
 		}
@@ -298,7 +260,7 @@ func (h *Handler) getStaking(pubkey string) (*Staking, error) {
 	})
 
 	g.Go(func() error {
-		rewards, err := h.HTTPClient.GetRewards(pubkey, aprData.Float())
+		rewards, err := h.HTTPClient.GetRewards(pubkey, apr)
 		if err != nil {
 			return err
 		}
@@ -307,7 +269,9 @@ func (h *Handler) getStaking(pubkey string) (*Staking, error) {
 		return nil
 	})
 
-	err = g.Wait()
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
 
-	return staking, err
+	return staking, nil
 }

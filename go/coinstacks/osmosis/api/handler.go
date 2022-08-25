@@ -4,6 +4,7 @@ import (
 	"math/big"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/coinstacks/osmosis"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
@@ -22,28 +23,85 @@ func (h *Handler) GetInfo() (api.Info, error) {
 		return nil, err
 	}
 
-	aprData, err := h.GetAPRData()
+	aprData, err := h.getAPRData()
 	if err != nil {
 		return nil, err
 	}
 
 	i := Info{
 		Info: info.(cosmosapi.Info),
-		APR:  aprData.String(),
+		APR:  aprData.rate,
 	}
 
 	return i, nil
+}
+
+func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
+	a := Account{}
+
+	aprData, err := h.getAPRData()
+	if err != nil {
+		return nil, err
+	}
+
+	g := new(errgroup.Group)
+
+	g.Go(func() error {
+		account, err := h.Handler.GetAccount(pubkey)
+		if err != nil {
+			return err
+		}
+
+		a.Account = account.(cosmosapi.Account)
+
+		return nil
+	})
+
+	g.Go(func() error {
+		staking, err := h.Handler.GetStaking(pubkey, aprData.bRate)
+		if err != nil {
+			return err
+		}
+
+		a.Staking = staking
+
+		return nil
+	})
+
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
+
+	return a, nil
 }
 
 func (h *Handler) SendTx(hex string) (string, error) {
 	return h.HTTPClient.BroadcastTx(hex)
 }
 
+func (h *Handler) GetValidators() ([]cosmos.Validator, error) {
+	aprData, err := h.getAPRData()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get apr data")
+	}
+
+	return h.HTTPClient.GetValidators(aprData.bRate)
+}
+
+func (h *Handler) GetValidator(address string) (*cosmos.Validator, error) {
+	aprData, err := h.getAPRData()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get apr data")
+	}
+
+	return h.HTTPClient.GetValidator(address, aprData.bRate)
+}
+
 func (h *Handler) ParseMessages(msgs []sdk.Msg) []cosmos.Message {
 	return osmosis.ParseMessages(msgs)
 }
 
-func (h *Handler) GetAPRData() (cosmosapi.APRData, error) {
+func (h *Handler) getAPRData() (*APRData, error) {
 	aprData := &APRData{}
 
 	g := new(errgroup.Group)
@@ -90,7 +148,18 @@ func (h *Handler) GetAPRData() (cosmosapi.APRData, error) {
 		return err
 	})
 
-	err := g.Wait()
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
 
-	return aprData, err
+	totalSupply, _, _ := new(big.Float).Parse("1000000000", 10)
+	yearDays, _, _ := new(big.Float).Parse("365", 10)
+	yearMintingProvision := new(big.Float).Mul(new(big.Float).Mul(aprData.bEpochProvisions, aprData.bStakingDistributions), yearDays)
+	inflation := new(big.Float).Quo(yearMintingProvision, totalSupply)
+	ratio := new(big.Float).Quo(aprData.bBondedTokens, totalSupply)
+
+	aprData.bRate = new(big.Float).Quo(inflation, ratio)
+	aprData.rate = aprData.bRate.String()
+
+	return aprData, nil
 }

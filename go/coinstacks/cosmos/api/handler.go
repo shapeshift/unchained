@@ -3,6 +3,7 @@ package api
 import (
 	"math/big"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
@@ -22,7 +23,7 @@ func (h *Handler) GetInfo() (api.Info, error) {
 
 	aprData, err := h.getAPRData()
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get apr data")
+		return nil, err
 	}
 
 	i := Info{
@@ -38,22 +39,39 @@ func (h *Handler) GetInfo() (api.Info, error) {
 }
 
 func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
-	account, err := h.Handler.GetAccount(pubkey)
+	a := Account{}
+
+	aprData, err := h.getAPRData()
 	if err != nil {
 		return nil, err
 	}
 
-	stakingData, err := h.getStakingData(pubkey)
-	if err != nil {
-		return nil, err
-	}
+	g := new(errgroup.Group)
 
-	a := &Account{
-		Account:       account.(cosmosapi.Account),
-		Delegations:   stakingData.Delegations,
-		Redelegations: stakingData.Redelegations,
-		Unbondings:    stakingData.Unbondings,
-		Rewards:       stakingData.Rewards,
+	g.Go(func() error {
+		account, err := h.Handler.GetAccount(pubkey)
+		if err != nil {
+			return err
+		}
+
+		a.Account = account.(cosmosapi.Account)
+
+		return nil
+	})
+
+	g.Go(func() error {
+		staking, err := h.Handler.GetStaking(pubkey, aprData.bRate)
+		if err != nil {
+			return err
+		}
+
+		a.Staking = staking
+
+		return nil
+	})
+
+	if err := g.Wait(); err != nil {
+		return nil, err
 	}
 
 	return a, nil
@@ -75,6 +93,10 @@ func (h *Handler) GetValidator(address string) (*cosmos.Validator, error) {
 	}
 
 	return h.HTTPClient.GetValidator(address, aprData.bRate)
+}
+
+func (h *Handler) ParseMessages(msgs []sdk.Msg) []cosmos.Message {
+	return cosmos.ParseMessages(msgs)
 }
 
 func (h *Handler) getAPRData() (*APRData, error) {
@@ -138,71 +160,17 @@ func (h *Handler) getAPRData() (*APRData, error) {
 		return err
 	})
 
-	err := g.Wait()
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
 
 	// stakingAPR = [Inflation * (1-Community Tax)] / Bonded Tokens Ratio
 	bInflationRate := new(big.Float).Quo(aprData.bAnnualProvisions, aprData.bTotalSupply)
 	bBondedTokenRatio := new(big.Float).Quo(aprData.bBondedTokens, aprData.bTotalSupply)
 	bRewardRate := new(big.Float).Mul(bInflationRate, (new(big.Float).Sub(big.NewFloat(1), aprData.bCommunityTax)))
-	apr := new(big.Float).Quo(bRewardRate, bBondedTokenRatio)
 
-	aprData.rate = apr.String()
-	aprData.bRate = apr
+	aprData.bRate = new(big.Float).Quo(bRewardRate, bBondedTokenRatio)
+	aprData.rate = aprData.bRate.String()
 
-	return aprData, err
-}
-
-func (h *Handler) getStakingData(pubkey string) (*StakingData, error) {
-	aprData, err := h.getAPRData()
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get apr data")
-	}
-
-	stakingData := &StakingData{}
-
-	g := new(errgroup.Group)
-
-	g.Go(func() error {
-		delegations, err := h.HTTPClient.GetDelegations(pubkey, aprData.bRate)
-		if err != nil {
-			return err
-		}
-
-		stakingData.Delegations = delegations
-		return nil
-	})
-
-	g.Go(func() error {
-		redelegations, err := h.HTTPClient.GetRedelegations(pubkey, aprData.bRate)
-		if err != nil {
-			return err
-		}
-
-		stakingData.Redelegations = redelegations
-		return nil
-	})
-
-	g.Go(func() error {
-		unbondings, err := h.HTTPClient.GetUnbondings(pubkey, h.Denom, aprData.bRate)
-		if err != nil {
-			return err
-		}
-
-		stakingData.Unbondings = unbondings
-		return nil
-	})
-
-	g.Go(func() error {
-		rewards, err := h.HTTPClient.GetRewards(pubkey, aprData.bRate)
-		if err != nil {
-			return err
-		}
-
-		stakingData.Rewards = rewards
-		return nil
-	})
-
-	err = g.Wait()
-
-	return stakingData, err
+	return aprData, nil
 }

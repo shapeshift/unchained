@@ -22,6 +22,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
+	"github.com/shapeshift/unchained/internal/log"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	cosmosapi "github.com/shapeshift/unchained/pkg/cosmos/api"
@@ -36,6 +37,8 @@ const (
 	IDLE_TIMEOUT             = 60 * time.Second
 	MAX_PAGE_SIZE_TX_HISTORY = 100
 )
+
+var logger = log.WithoutFields()
 
 type API struct {
 	*cosmosapi.API
@@ -70,8 +73,14 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient 
 		handler: handler,
 	}
 
-	// compile check to ensure Handler implements BaseAPI
+	// compile check to ensure Handler implements necessary interfaces
 	var _ api.BaseAPI = handler
+	var _ cosmosapi.CoinSpecificHandler = handler
+
+	// runtime check to ensure Handler implements CoinSpecific functionality
+	if err := handler.ValidateCoinSpecific(handler); err != nil {
+		logger.Panicf("%+v", err)
+	}
 
 	r.Use(api.Scheme)
 	r.Use(api.Logger)
