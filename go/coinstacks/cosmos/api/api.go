@@ -109,6 +109,7 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient 
 	v1Gas.HandleFunc("/estimate", a.EstimateGas).Methods("POST")
 
 	v1Validators := v1.PathPrefix("/validators").Subrouter()
+	v1Validators.Use(cosmos.ValidateValidatorPubkey)
 	v1Validators.HandleFunc("", a.GetValidators).Methods("GET")
 	v1Validators.HandleFunc("/{pubkey}", a.GetValidator).Methods("GET")
 
