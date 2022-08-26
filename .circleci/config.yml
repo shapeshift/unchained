@@ -734,10 +734,10 @@ jobs:
       api-replicas:
         type: integer
       stateful-service-replicas:
-        type: number
+        type: integer
         default: 0
       stateful-service-services:
-        type: number
+        type: integer
         default: 0
       service-name-1:
         type: string
