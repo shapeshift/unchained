@@ -48,8 +48,8 @@ export = async (): Promise<Outputs> => {
         })
       }
 
-      if (service.name === 'midgard') {
-        prev.midgard = createService({
+      if (service.name === 'indexer') {
+        prev.indexer = createService({
           asset,
           config: service,
           dataDir: '/blockstore',
@@ -57,7 +57,7 @@ export = async (): Promise<Outputs> => {
             'MIDGARD_BLOCKSTORE_LOCAL': '/blockstore',
             'MIDGARD_BLOCKSTORE_REMOTE': 'https://storage.googleapis.com/public-snapshots-ninerealms/midgard-blockstore/mainnet/v2/'
           },
-          name: 'midgard',
+          name: 'indexer',
           ports: { 'midgard': { port: 8080 } }
         })
       }
