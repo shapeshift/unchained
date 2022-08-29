@@ -294,9 +294,9 @@ aliases:
     coinstack: thorchain
     pulumi-stack: public
     pulumi-dir: coinstacks/thorchain/pulumi
-    lcd-url: http://thorchain-svc.unchained.svc.cluster.local:1317
-    rpc-url: http://thorchain-svc.unchained.svc.cluster.local:27147
-    ws-url: ws://thorchain-svc.unchained.svc.cluster.local:27147
+    lcd-url: http://thorchain:password@thorchain-svc.unchained.svc.cluster.local:1317
+    rpc-url: http://thorchain:password@thorchain-svc.unchained.svc.cluster.local:27147
+    ws-url: ws://thorchain:password@thorchain-svc.unchained.svc.cluster.local:27147
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6

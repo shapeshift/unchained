@@ -1,10 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 
 TOLERANCE=2
 
-BLOCKHEIGHT_LOCAL=$(curl -s http://localhost:27147/status | jq .result.sync_info.latest_block_height)
-BLOCKHEIGHT_REMOTE_SOURCE_1=$(curl -s https://rpc.ninerealms.com/status | jq .result.sync_info.latest_block_height)
-BLOCKHEIGHT_REMOTE_SOURCE_2=$(curl -s https://rpc.thorchain.info/status | jq .result.sync_info.latest_block_height)
+BLOCKHEIGHT_LOCAL=$(curl -s http://localhost:27147/status | jq '.result.sync_info.latest_block_height | tonumber')
+BLOCKHEIGHT_REMOTE_SOURCE_1=$(curl -s https://rpc.ninerealms.com/status | jq '.result.sync_info.latest_block_height | tonumber')
+BLOCKHEIGHT_REMOTE_SOURCE_2=$(curl -s https://rpc.thorchain.info/status | jq '.result.sync_info.latest_block_height | tonumber')
 
 ARRAY=($BLOCKHEIGHT_REMOTE_SOURCE_1 $BLOCKHEIGHT_REMOTE_SOURCE_2)
 BLOCKHEIGHT_BEST=${ARRAY[0]}

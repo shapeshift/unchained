@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 nc -z localhost 5432
 
