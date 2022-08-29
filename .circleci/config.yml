@@ -1256,6 +1256,58 @@ workflows:
           <<: *cosmos
           <<: *only-main
 
+      ####### OSMOSIS
+      - deploy-coinstack-go:
+          name: preview osmosis (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: preview
+          requires:
+            - validate dependencies (shapeshift)
+          <<: *osmosis
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve osmosis coinstack (shapeshift)
+          type: approval
+          requires:
+            - preview osmosis (shapeshift)
+          <<: *only-main
+
+      - deploy-coinstack-go:
+          name: deploy osmosis (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: up -f --yes
+          requires:
+            - approve osmosis coinstack (shapeshift)
+          <<: *osmosis
+          <<: *only-main
+
+      ####### THORCHAIN
+      - deploy-coinstack-go:
+          name: preview thorchain (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: preview
+          requires:
+            - validate dependencies (shapeshift)
+          <<: *thorchain
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve thorchain coinstack (shapeshift)
+          type: approval
+          requires:
+            - preview thorchain (shapeshift)
+          <<: *only-main
+
+      - deploy-coinstack-go:
+          name: deploy thorchain (shapeshift)
+          organization: SHAPESHIFT
+          pulumi-command: up -f --yes
+          requires:
+            - approve thorchain coinstack (shapeshift)
+          <<: *thorchain
+          <<: *only-main
+
       ########## (TAXISTAKE) ##########
       - deploy-dependencies:
           name: preview dependencies (taxistake)
@@ -1460,4 +1512,56 @@ workflows:
           requires:
             - approve cosmos coinstack (taxistake)
           <<: *cosmos
+          <<: *only-main
+
+      ####### OSMOSIS
+      - deploy-coinstack-go:
+          name: preview osmosis (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - deploy dependencies (taxistake)
+          <<: *osmosis
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve osmosis coinstack (taxistake)
+          type: approval
+          requires:
+            - preview osmosis (taxistake)
+          <<: *only-main
+
+      - deploy-coinstack-go:
+          name: deploy osmosis (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve osmosis coinstack (taxistake)
+          <<: *osmosis
+          <<: *only-main
+
+      ####### THORCHAIN
+      - deploy-coinstack-go:
+          name: preview thorchain (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - deploy dependencies (taxistake)
+          <<: *thorchain
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve thorchain coinstack (taxistake)
+          type: approval
+          requires:
+            - preview thorchain (taxistake)
+          <<: *only-main
+
+      - deploy-coinstack-go:
+          name: deploy thorchain (taxistake)
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve thorchain coinstack (taxistake)
+          <<: *thorchain
           <<: *only-main
