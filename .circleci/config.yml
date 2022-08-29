@@ -297,6 +297,7 @@ aliases:
     lcd-url: http://thorchain:password@thorchain-svc.unchained.svc.cluster.local:1317
     rpc-url: http://thorchain:password@thorchain-svc.unchained.svc.cluster.local:27147
     ws-url: ws://thorchain:password@thorchain-svc.unchained.svc.cluster.local:27147
+    api: false
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
