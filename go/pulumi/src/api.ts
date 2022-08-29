@@ -3,7 +3,6 @@ import { parse } from 'dotenv'
 import { hashElement } from 'folder-hash'
 import objectHash from 'object-hash'
 import { readFileSync } from 'fs'
-import { join } from 'path'
 import * as k8s from '@pulumi/kubernetes'
 import { Input, Resource } from '@pulumi/pulumi'
 import { buildAndPushImage, Config, hasTag } from './index'
@@ -84,7 +83,7 @@ export async function deployApi(
   asset: string,
   provider: k8s.Provider,
   namespace: string,
-  config: Pick<Config, 'api' | 'dockerhub' | 'isLocal' | 'rootDomainName' | 'environment'>,
+  config: Pick<Config, 'api' | 'dockerhub' | 'rootDomainName' | 'environment'>,
   deployDependencies: Input<Array<Resource>> = []
 ): Promise<k8s.apps.v1.Deployment | undefined> {
   if (config.api === undefined) return
@@ -94,34 +93,31 @@ export async function deployApi(
   const [coinstack] = asset.split('-')
   const name = `${asset}-${tier}`
 
-  let imageName = 'golang:1.17.6-alpine' // local dev image
-  if (!config.isLocal) {
-    const repositoryName = `${app}-${coinstack}-${tier}`
-    const buildArgs = { BUILDKIT_INLINE_CACHE: '1', COINSTACK: coinstack }
-    const tag = await getHash(coinstack, buildArgs)
+  const repositoryName = `${app}-${coinstack}-${tier}`
+  const buildArgs = { BUILDKIT_INLINE_CACHE: '1', COINSTACK: coinstack }
+  const tag = await getHash(coinstack, buildArgs)
 
-    imageName = `shapeshiftdao/${repositoryName}:${tag}` // default public image
-    if (config.dockerhub) {
-      const image = `${config.dockerhub.username}/${repositoryName}`
+  let imageName = `shapeshiftdao/${repositoryName}:${tag}` // default public image
+  if (config.dockerhub) {
+    const image = `${config.dockerhub.username}/${repositoryName}`
 
-      imageName = `${image}:${tag}` // configured dockerhub image
+    imageName = `${image}:${tag}` // configured dockerhub image
 
-      if (!(await hasTag(image, tag))) {
-        await buildAndPushImage({
-          image,
-          context: `../../../../go`,
-          dockerFile: `../../../build/Dockerfile`,
-          auth: {
-            password: config.dockerhub.password,
-            username: config.dockerhub.username,
-            server: config.dockerhub.server,
-          },
-          buildArgs,
-          env: { DOCKER_BUILDKIT: '1' },
-          tags: [tag],
-          cacheFroms: [`${image}:${tag}`, `${image}:latest`],
-        })
-      }
+    if (!(await hasTag(image, tag))) {
+      await buildAndPushImage({
+        image,
+        context: `../../../../go`,
+        dockerFile: `../../../build/Dockerfile`,
+        auth: {
+          password: config.dockerhub.password,
+          username: config.dockerhub.username,
+          server: config.dockerhub.server,
+        },
+        buildArgs,
+        env: { DOCKER_BUILDKIT: '1' },
+        tags: [tag],
+        cacheFroms: [`${image}:${tag}`, `${image}:latest`],
+      })
     }
   }
 
@@ -135,15 +131,8 @@ export async function deployApi(
       },
       spec: {
         selector: labels,
-        ...(config.isLocal
-          ? {
-              ports: [{ port: 3000, protocol: 'TCP', name: 'http', nodePort: 31300 }],
-              type: 'NodePort',
-            }
-          : {
-              ports: [{ port: 3000, protocol: 'TCP', name: 'http' }],
-              type: 'ClusterIP',
-            }),
+        ports: [{ port: 3000, protocol: 'TCP', name: 'http' }],
+        type: 'ClusterIP',
       },
     },
     { provider, deleteBeforeReplace: true }
@@ -257,8 +246,7 @@ export async function deployApi(
           image: imageName,
           ports: [{ containerPort: 3000, name: 'http' }],
           env: [...secretEnvs],
-          command: config.isLocal ? ['sh', '-c', `go run cmd/${coinstack}/main.go`] : undefined,
-          args: !config.isLocal ? ['-swagger', 'swagger.json'] : undefined,
+          args: ['-swagger', 'swagger.json'],
           resources: {
             limits: {
               cpu: config.api.cpuLimit,
@@ -279,15 +267,8 @@ export async function deployApi(
             failureThreshold: 3,
             successThreshold: 1,
           },
-          ...(config.isLocal && {
-            volumeMounts: [{ name: 'app', mountPath: '/app' }],
-            workingDir: `/app`,
-          }),
         },
       ],
-      ...(config.isLocal && {
-        volumes: [{ name: 'app', hostPath: { path: join(__dirname, '../../../go') } }],
-      }),
     },
   }
 

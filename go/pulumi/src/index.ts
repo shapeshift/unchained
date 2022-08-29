@@ -1,7 +1,10 @@
+import * as k8s from '@pulumi/kubernetes'
 import { ApiConfig } from './api'
 
+export * from './config'
 export * from './api'
 export * from './docker'
+export * from './statefulService'
 
 export interface Dockerhub {
   username: string
@@ -9,15 +12,11 @@ export interface Dockerhub {
   server: string
 }
 
-export type Cluster = 'docker-desktop' | 'minikube' | 'eks'
-
 export interface BaseConfig {
   /**
    * This is used to create dockerhub repositories and push/pull images
    */
   dockerhub?: Dockerhub
-  cluster: Cluster
-  isLocal: boolean
   additionalEnvironments?: string[]
   /**
    * Creates ingress for public dns
@@ -32,4 +31,24 @@ export interface Config extends BaseConfig {
   network: string
   environment?: string
   api?: ApiConfig
+  statefulService?: {
+    replicas: number
+    services: Array<ServiceConfig>
+  }
+}
+
+export interface ServiceConfig {
+  cpuLimit: string
+  cpuRequest?: string
+  image: string
+  memoryLimit: string
+  name: string
+  storageSize: string
+}
+
+export interface Service {
+  ports: Array<k8s.types.input.core.v1.ServicePort & { pathPrefix?: string }>
+  configMapData: Record<string, string>
+  containers: Array<k8s.types.input.core.v1.Container>
+  volumeClaimTemplates: Array<k8s.types.input.core.v1.PersistentVolumeClaim>
 }

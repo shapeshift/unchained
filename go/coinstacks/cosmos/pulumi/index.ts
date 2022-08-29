@@ -1,35 +1,19 @@
-import { config as getEnv, parse } from 'dotenv'
-import { existsSync, readFileSync } from 'fs'
-import { join } from 'path'
+import { parse } from 'dotenv'
+import { readFileSync } from 'fs'
 import * as k8s from '@pulumi/kubernetes'
-import { deployApi } from '../../../pulumi'
-import { getConfig } from './config'
+import { deployApi, getConfig } from '../../../pulumi'
 
 type Outputs = Record<string, any>
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
-  const { kubeconfig, config, namespace } = await getConfig()
-  const { cluster } = config
+  const { kubeconfig, config, namespace } = await getConfig('cosmos')
 
   const name = 'unchained'
   const asset = config.network !== 'mainnet' ? `cosmos-${config.network}` : 'cosmos'
   const outputs: Outputs = {}
 
-  let provider: k8s.Provider
-  if (config.isLocal) {
-    provider = new k8s.Provider('kube-provider', { cluster, context: cluster })
-  } else {
-    provider = new k8s.Provider('kube-provider', { kubeconfig })
-  }
-
-  if (existsSync('../../../cmd/cosmos/.env')) {
-    getEnv({ path: join(__dirname, '../../../cmd/cosmos/.env') })
-  } else if (config.isLocal) {
-    throw new Error(
-      'you must run `cp sample.env .env` from the cmd/cosmos directory and fill out any empty values.'
-    )
-  }
+  const provider = new k8s.Provider('kube-provider', { kubeconfig })
 
   const missingKeys: Array<string> = []
   const stringData = Object.keys(parse(readFileSync('../../../cmd/cosmos/sample.env'))).reduce((prev, key) => {
