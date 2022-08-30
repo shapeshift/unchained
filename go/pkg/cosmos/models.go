@@ -114,13 +114,13 @@ type Reward struct {
 // Contains info about current staking state
 // swagger:model Staking
 type Staking struct {
-	// swagger:allOf
+	// required: true
 	Delegations []Delegation `json:"delegations"`
-	// swagger:allOf
+	// required: true
 	Redelegations []Redelegation `json:"redelegations"`
-	// swagger:allOf
+	// required: true
 	Unbondings []Unbonding `json:"unbondings"`
-	// swagger:allOf
+	// required: true
 	Rewards []Reward `json:"rewards"`
 }
 
