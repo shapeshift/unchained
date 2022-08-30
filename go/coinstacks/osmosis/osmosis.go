@@ -29,7 +29,7 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 		return nil, errors.Wrapf(err, "failed to parse keplrURL: %s", conf.KEPLRURL)
 	}
 
-	keplr := resty.New().SetScheme(keplrURL.Scheme).SetBaseURL(keplrURL.Host)
+	keplr := resty.New().SetBaseURL(keplrURL.String())
 
 	c := &HTTPClient{
 		HTTPClient: httpClient,
