@@ -309,7 +309,7 @@ aliases:
     service-image-1: registry.gitlab.com/thorchain/thornode:chaosnet-multichain-1.95.0
     service-cpu-limit-1: "4"
     service-memory-limit-1: 4Gi
-    service-storage-size-1: 1536Gi
+    service-storage-size-1: 2000Gi
     service-name-2: timescaledb
     service-image-2: timescale/timescaledb:2.2.0-pg13
     service-cpu-limit-2: "2"
