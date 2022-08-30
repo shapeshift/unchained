@@ -295,8 +295,8 @@ aliases:
     pulumi-stack: public
     pulumi-dir: coinstacks/thorchain/pulumi
     lcd-url: http://thorchain-svc.unchained.svc.cluster.local:1317
-    rpc-url: http://thorchain:password@thorchain-svc.unchained.svc.cluster.local:27147
-    ws-url: ws://thorchain:password@thorchain-svc.unchained.svc.cluster.local:27147
+    rpc-url: http://thorchain-svc.unchained.svc.cluster.local:27147
+    ws-url: ws://thorchain-svc.unchained.svc.cluster.local:27147
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -326,8 +326,8 @@ aliases:
     environment: dev
     pulumi-stack: public-dev
     lcd-url: http://thorchain-svc.unchained-dev.svc.cluster.local:1317
-    rpc-url: http://thorchain:password@thorchain-svc.unchained-dev.svc.cluster.local:27147
-    ws-url: ws://thorchain:password@thorchain-svc.unchained-dev.svc.cluster.local:27147
+    rpc-url: http://thorchain-svc.unchained-dev.svc.cluster.local:27147
+    ws-url: ws://thorchain-svc.unchained-dev.svc.cluster.local:27147
     api-max-replicas: 3
     api-cpu-limit: 300m
     api-memory-limit: 1Gi
