@@ -18,7 +18,7 @@ type TxState struct {
 	lastID  string
 	page    int
 	query   string
-	txs     []TxSearchResponseResultTxs
+	txs     []TendermintTx
 }
 
 // History stores state for multiple query sources to complete a paginated request
@@ -45,7 +45,6 @@ func (h *History) doRequest(txState *TxState) (*TxSearchResponse, error) {
 		}
 
 		_, err := h.rpc.R().SetResult(&res).SetError(&resErr).SetQueryParams(queryParams).Get("/tx_search")
-
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to do request")
 		}
@@ -86,8 +85,8 @@ func (h *History) doRequest(txState *TxState) (*TxSearchResponse, error) {
 }
 
 // filterByCursor will filter out any transactions that we have already returned to the client based on the state of the cursor
-func (h *History) filterByCursor(txs []TxSearchResponseResultTxs) ([]TxSearchResponseResultTxs, error) {
-	filtered := []TxSearchResponseResultTxs{}
+func (h *History) filterByCursor(txs []TendermintTx) ([]TendermintTx, error) {
+	filtered := []TendermintTx{}
 	for _, tx := range txs {
 		txHeight, err := strconv.Atoi(*tx.Height)
 		if err != nil {
@@ -140,7 +139,7 @@ func (h *History) fetch() (*TxHistoryResponse, error) {
 
 	// splice together send and receive transactions in the correct order
 	// until we either run out of transactions to return, or fill a full page response.
-	txs := []DecodedTx{}
+	txs := []*DecodedTx{}
 	for len(txs) < h.pageSize {
 		// fetch more send transactions if we have run out and more are available
 		if len(h.send.txs) == 0 && h.send.hasMore {
@@ -172,7 +171,7 @@ func (h *History) fetch() (*TxHistoryResponse, error) {
 		}
 
 		// find the next most recent transaction and remove from the txs set
-		var next TxSearchResponseResultTxs
+		var next TendermintTx
 		if sendHeight >= receiveHeight {
 			next = h.send.txs[0]
 			h.send.txs = h.send.txs[1:]
@@ -189,7 +188,7 @@ func (h *History) fetch() (*TxHistoryResponse, error) {
 			continue
 		}
 
-		tx := DecodedTx{
+		tx := &DecodedTx{
 			TendermintTx: next,
 			CosmosTx:     cosmosTx,
 			SigningTx:    signingTx,
@@ -254,7 +253,7 @@ func (h *History) fetchMore(txState *TxState) error {
 func (h *History) removeDuplicateTxs() {
 	seenTxs := make(map[string]bool)
 
-	sendTxs := []TxSearchResponseResultTxs{}
+	sendTxs := []TendermintTx{}
 	for _, tx := range h.send.txs {
 		if _, seen := seenTxs[*tx.Hash]; !seen {
 			seenTxs[*tx.Hash] = true
@@ -263,7 +262,7 @@ func (h *History) removeDuplicateTxs() {
 	}
 	h.send.txs = sendTxs
 
-	receiveTxs := []TxSearchResponseResultTxs{}
+	receiveTxs := []TendermintTx{}
 	for _, tx := range h.receive.txs {
 		if _, seen := seenTxs[*tx.Hash]; !seen {
 			seenTxs[*tx.Hash] = true
@@ -273,7 +272,7 @@ func (h *History) removeDuplicateTxs() {
 	h.receive.txs = receiveTxs
 }
 
-func getMostRecentHeight(txs []TxSearchResponseResultTxs) (int, error) {
+func getMostRecentHeight(txs []TendermintTx) (int, error) {
 	// TODO: test no txs case to ensure it falls through correctly
 	if len(txs) == 0 {
 		return -2, nil

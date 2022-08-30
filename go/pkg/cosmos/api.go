@@ -181,6 +181,31 @@ func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 	api.HandleResponse(w, http.StatusOK, txHistory)
 }
 
+// swagger:route GET /api/v1/tx/{txid} v1 GetTx
+//
+// # Get transaction details
+//
+// responses:
+//
+//	200: Tx
+//	400: BadRequestError
+//	500: InternalServerError
+func (a *API) Tx(w http.ResponseWriter, r *http.Request) {
+	txid, ok := mux.Vars(r)["txid"]
+	if !ok || txid == "" {
+		api.HandleError(w, http.StatusBadRequest, "txid required")
+		return
+	}
+
+	tx, err := a.handler.GetTx(txid)
+	if err != nil {
+		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	api.HandleResponse(w, http.StatusOK, tx)
+}
+
 // swagger:route POST /api/v1/send v1 SendTx
 //
 // Sends raw transaction to be broadcast to the node.

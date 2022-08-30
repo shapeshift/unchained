@@ -26,6 +26,7 @@ type RouteHandler interface {
 	GetInfo() (api.Info, error)
 	GetAccount(pubkey string) (api.Account, error)
 	GetTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error)
+	GetTx(txid string) (*Tx, error)
 	SendTx(hex string) (string, error)
 	EstimateGas(rawTx string) (string, error)
 }
@@ -172,34 +173,12 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 
 	txs := []Tx{}
 	for _, t := range res.Txs {
-		height, err := strconv.Atoi(*t.TendermintTx.Height)
+		tx, err := h.formatTx(t)
 		if err != nil {
-			return nil, errors.WithStack(err)
+			return nil, errors.Wrapf(err, "failed to format transaction: %s", *t.TendermintTx.Hash)
 		}
 
-		block, err := h.BlockService.GetBlock(height)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to get tx history")
-		}
-
-		tx := Tx{
-			BaseTx: api.BaseTx{
-				TxID:        *t.TendermintTx.Hash,
-				BlockHash:   &block.Hash,
-				BlockHeight: &block.Height,
-				Timestamp:   &block.Timestamp,
-			},
-			Confirmations: h.BlockService.Latest.Height - height + 1,
-			Events:        ParseEvents(t.TendermintTx.TxResult.Log),
-			Fee:           Fee(t.SigningTx, *t.TendermintTx.Hash, h.Denom),
-			GasWanted:     t.TendermintTx.TxResult.GasWanted,
-			GasUsed:       t.TendermintTx.TxResult.GasUsed,
-			Index:         int(t.TendermintTx.GetIndex()),
-			Memo:          t.SigningTx.GetMemo(),
-			Messages:      h.ParseMessages(t.CosmosTx.GetMsgs()),
-		}
-
-		txs = append(txs, tx)
+		txs = append(txs, *tx)
 	}
 
 	txHistory := TxHistory{
@@ -213,6 +192,20 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 	}
 
 	return txHistory, nil
+}
+
+func (h *Handler) GetTx(txid string) (*Tx, error) {
+	tx, err := h.HTTPClient.GetTx(txid)
+	if err != nil {
+		return nil, err
+	}
+
+	t, err := h.formatTx(tx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to format transaction: %s", *tx.TendermintTx.Hash)
+	}
+
+	return t, nil
 }
 
 func (h *Handler) SendTx(hex string) (string, error) {
@@ -273,4 +266,35 @@ func (h *Handler) GetStaking(pubkey string, apr *big.Float) (*Staking, error) {
 	}
 
 	return staking, nil
+}
+
+func (h *Handler) formatTx(tx *DecodedTx) (*Tx, error) {
+	height, err := strconv.Atoi(*tx.TendermintTx.Height)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	block, err := h.BlockService.GetBlock(height)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to get block: %d", height)
+	}
+
+	t := &Tx{
+		BaseTx: api.BaseTx{
+			TxID:        *tx.TendermintTx.Hash,
+			BlockHash:   &block.Hash,
+			BlockHeight: &block.Height,
+			Timestamp:   &block.Timestamp,
+		},
+		Confirmations: h.BlockService.Latest.Height - height + 1,
+		Events:        ParseEvents(tx.TendermintTx.TxResult.Log),
+		Fee:           Fee(tx.SigningTx, *tx.TendermintTx.Hash, h.Denom),
+		GasWanted:     tx.TendermintTx.TxResult.GasWanted,
+		GasUsed:       tx.TendermintTx.TxResult.GasUsed,
+		Index:         int(tx.TendermintTx.GetIndex()),
+		Memo:          tx.SigningTx.GetMemo(),
+		Messages:      h.ParseMessages(tx.CosmosTx.GetMsgs()),
+	}
+
+	return t, nil
 }

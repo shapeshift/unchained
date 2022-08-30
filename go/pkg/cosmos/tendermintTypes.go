@@ -22,10 +22,10 @@ type BlockData struct {
 
 type BlockHeader struct {
 	Version            BlockHeaderVersion `json:"version"`
-	ChainId            string             `json:"chain_id"`
+	ChainID            string             `json:"chain_id"`
 	Height             string             `json:"height"`
 	Time               string             `json:"time"`
-	LastBlockId        BlockID            `json:"last_block_id"`
+	LastBlockID        BlockID            `json:"last_block_id"`
 	LastCommitHash     string             `json:"last_commit_hash"`
 	DataHash           string             `json:"data_hash"`
 	ValidatorsHash     string             `json:"validators_hash"`
@@ -55,13 +55,13 @@ type BlockIDParts struct {
 type BlockLastCommit struct {
 	Height     *string  `json:"height,omitempty"`
 	Round      *int32   `json:"round,omitempty"`
-	BlockId    *BlockID `json:"block_id,omitempty"`
+	BlockID    *BlockID `json:"block_id,omitempty"`
 	Signatures []Commit `json:"signatures,omitempty"`
 }
 
 type TendermintBlockResponse struct {
-	Id      *int32         `json:"id,omitempty"`
-	Jsonrpc *string        `json:"jsonrpc,omitempty"`
+	ID      *int32         `json:"id,omitempty"`
+	JSONRPC *string        `json:"jsonrpc,omitempty"`
 	Result  *BlockComplete `json:"result,omitempty"`
 }
 
@@ -69,7 +69,7 @@ type Commit struct {
 	Type             int32   `json:"type"`
 	Height           string  `json:"height"`
 	Round            int32   `json:"round"`
-	BlockId          BlockID `json:"block_id"`
+	BlockID          BlockID `json:"block_id"`
 	Timestamp        string  `json:"timestamp"`
 	ValidatorAddress string  `json:"validator_address"`
 	ValidatorIndex   int32   `json:"validator_index"`
@@ -90,8 +90,8 @@ type PubKey struct {
 }
 
 type RPCErrorResponse struct {
-	Jsonrpc string   `json:"jsonrpc"`
-	Id      int32    `json:"id"`
+	JSONRPC string   `json:"jsonrpc"`
+	ID      int32    `json:"id"`
 	Error   RPCError `json:"error"`
 }
 
@@ -99,28 +99,34 @@ type RPCError struct {
 	Data string `json:"data"`
 }
 
+type TxResponse struct {
+	JSONRPC string       `json:"jsonrpc"`
+	ID      int32        `json:"id"`
+	Result  TendermintTx `json:"result"`
+}
+
 type TxSearchResponse struct {
-	Jsonrpc string                 `json:"jsonrpc"`
-	Id      int32                  `json:"id"`
+	JSONRPC string                 `json:"jsonrpc"`
+	ID      int32                  `json:"id"`
 	Result  TxSearchResponseResult `json:"result"`
 }
 
 type TxSearchResponseResult struct {
-	Txs        []TxSearchResponseResultTxs `json:"txs"`
-	TotalCount string                      `json:"total_count"`
+	Txs        []TendermintTx `json:"txs"`
+	TotalCount string         `json:"total_count"`
 }
 
-type TxSearchResponseResultTxs struct {
-	Hash     *string                         `json:"hash,omitempty"`
-	Height   *string                         `json:"height,omitempty"`
-	Index    *int32                          `json:"index,omitempty"`
-	TxResult *TxSearchResponseResultTxResult `json:"tx_result,omitempty"`
-	Tx       *string                         `json:"tx,omitempty"`
-	Proof    *TxSearchResponseResultProof    `json:"proof,omitempty"`
+type TendermintTx struct {
+	Hash     *string   `json:"hash,omitempty"`
+	Height   *string   `json:"height,omitempty"`
+	Index    *int32    `json:"index,omitempty"`
+	TxResult *TxResult `json:"tx_result,omitempty"`
+	Tx       *string   `json:"tx,omitempty"`
+	Proof    *TxProof  `json:"proof,omitempty"`
 }
 
 // GetIndex returns the Index field value if set, zero value otherwise.
-func (o *TxSearchResponseResultTxs) GetIndex() int32 {
+func (o *TendermintTx) GetIndex() int32 {
 	if o == nil || o.Index == nil {
 		var ret int32
 		return ret
@@ -128,20 +134,20 @@ func (o *TxSearchResponseResultTxs) GetIndex() int32 {
 	return *o.Index
 }
 
-type TxSearchResponseResultTxResult struct {
+type TxResult struct {
 	Log       string `json:"log"`
 	GasWanted string `json:"gas_wanted"`
 	GasUsed   string `json:"gas_used"`
 	Tags      Event  `json:"tags"`
 }
 
-type TxSearchResponseResultProof struct {
-	RootHash string                           `json:"RootHash"`
-	Data     string                           `json:"Data"`
-	Proof    TxSearchResponseResultProofProof `json:"Proof"`
+type TxProof struct {
+	RootHash string `json:"RootHash"`
+	Data     string `json:"Data"`
+	Proof    Proof  `json:"Proof"`
 }
 
-type TxSearchResponseResultProofProof struct {
+type Proof struct {
 	Total    string   `json:"total"`
 	Index    string   `json:"index"`
 	LeafHash string   `json:"leaf_hash"`

@@ -161,6 +161,14 @@ type TxHistory struct {
 	Txs []Tx `json:"txs"`
 }
 
+// swagger:parameters GetTx
+type TxParam struct {
+	// Transaction hash
+	// in: path
+	// required: true
+	TxID string `json:"txid"`
+}
+
 // Contains info about a staking unbonding
 // swagger:model Unbonding
 type Unbonding struct {

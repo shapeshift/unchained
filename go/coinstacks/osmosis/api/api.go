@@ -107,6 +107,9 @@ func New(httpClient *osmosis.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient
 	v1Account.HandleFunc("/{pubkey}", a.Account).Methods("GET")
 	v1Account.HandleFunc("/{pubkey}/txs", a.TxHistory).Methods("GET")
 
+	v1Transaction := v1.PathPrefix("/tx").Subrouter()
+	v1Transaction.HandleFunc("/{txid}", a.Tx).Methods("GET")
+
 	v1Gas := v1.PathPrefix("/gas").Subrouter()
 	v1Gas.HandleFunc("/estimate", a.EstimateGas).Methods("POST")
 

@@ -67,14 +67,13 @@ func (c *HTTPClient) GetBlock(height *int) (*BlockResponse, error) {
 		RPCErrorResponse
 		Message string `json:"message"`
 	}
-	req := c.RPC.R().SetResult(&res).SetError(&resErr)
 
+	hs := ""
 	if height != nil {
-		req.SetQueryParams(map[string]string{"height": strconv.Itoa(*height)})
+		hs = strconv.Itoa(*height)
 	}
 
-	_, err := req.Get("/block")
-
+	_, err := c.RPC.R().SetResult(&res).SetError(&resErr).SetQueryParam("height", hs).Get("/block")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get block: %d", height)
 	}

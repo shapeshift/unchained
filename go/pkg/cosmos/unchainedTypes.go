@@ -34,12 +34,12 @@ type Pagination struct {
 }
 
 type DecodedTx struct {
-	TendermintTx TxSearchResponseResultTxs
+	TendermintTx TendermintTx
 	CosmosTx     sdk.Tx
 	SigningTx    signing.Tx
 }
 
 type TxHistoryResponse struct {
 	Cursor string
-	Txs    []DecodedTx
+	Txs    []*DecodedTx
 }
