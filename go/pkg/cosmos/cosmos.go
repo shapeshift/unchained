@@ -71,8 +71,8 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 
 	// untyped resty http clients
 	headers := map[string]string{"Accept": "application/json", "Authorization": conf.APIKey}
-	lcd := resty.New().SetScheme(lcdURL.Scheme).SetBaseURL(lcdURL.Host).SetHeaders(headers)
-	rpc := resty.New().SetScheme(rpcURL.Scheme).SetBaseURL(rpcURL.Host).SetHeaders(headers)
+	lcd := resty.New().SetBaseURL(lcdURL.String()).SetHeaders(headers)
+	rpc := resty.New().SetBaseURL(rpcURL.String()).SetHeaders(headers)
 
 	c := &HTTPClient{
 		ctx:      context.Background(),

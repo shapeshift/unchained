@@ -4,7 +4,7 @@ import (
 	"github.com/shapeshift/unchained/pkg/api"
 )
 
-// Contains info about account details for an address or xpub
+// Contains common cosmossdk info about account details for an address or xpub
 // swagger:model CosmosSDKAccount
 type Account struct {
 	// swagger:allOf
@@ -57,7 +57,7 @@ type Event struct {
 	Attributes []Attribute `json:"attributes"`
 }
 
-// Contains info about the running coinstack
+// Contains common cosmossdk info about the running coinstack
 // swagger:model CosmosSDKInfo
 type Info struct {
 	// swagger:allOf
