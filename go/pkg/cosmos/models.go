@@ -5,7 +5,7 @@ import (
 )
 
 // Contains info about account details for an address or xpub
-// swagger:model Account
+// swagger:model CosmosSDKAccount
 type Account struct {
 	// swagger:allOf
 	api.BaseAccount
@@ -58,7 +58,7 @@ type Event struct {
 }
 
 // Contains info about the running coinstack
-// swagger:model Info
+// swagger:model CosmosSDKInfo
 type Info struct {
 	// swagger:allOf
 	api.BaseInfo
@@ -115,13 +115,13 @@ type Reward struct {
 // swagger:model Staking
 type Staking struct {
 	// swagger:allOf
-	Delegations []Delegation
+	Delegations []Delegation `json:"delegations"`
 	// swagger:allOf
-	Redelegations []Redelegation
+	Redelegations []Redelegation `json:"redelegations"`
 	// swagger:allOf
-	Unbondings []Unbonding
+	Unbondings []Unbonding `json:"unbondings"`
 	// swagger:allOf
-	Rewards []Reward
+	Rewards []Reward `json:"rewards"`
 }
 
 // Contains info about a transaction
