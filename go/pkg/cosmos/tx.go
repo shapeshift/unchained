@@ -55,6 +55,33 @@ func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (
 	return txHistory, nil
 }
 
+func (c *HTTPClient) GetTx(txid string) (*DecodedTx, error) {
+	var res *TxResponse
+	var resErr *RPCErrorResponse
+
+	_, err := c.RPC.R().SetResult(&res).SetError(&resErr).SetQueryParam("hash", txid).Get("/tx")
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to get tx: %s", txid)
+	}
+
+	if resErr != nil {
+		return nil, errors.Wrapf(errors.New(resErr.Error.Data), "failed to get tx: %s", txid)
+	}
+
+	cosmosTx, signingTx, err := DecodeTx(*c.encoding, *res.Result.Tx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to decode tx: %s", txid)
+	}
+
+	t := &DecodedTx{
+		TendermintTx: res.Result,
+		CosmosTx:     cosmosTx,
+		SigningTx:    signingTx,
+	}
+
+	return t, nil
+}
+
 func (c *HTTPClient) BroadcastTx(rawTx string) (string, error) {
 	return Broadcast(c.LCD, rawTx)
 }
