@@ -283,12 +283,30 @@ func GetTxAddrs(events EventsByMsgIndex, messages []Message) []string {
 	// check events for addresses
 	for _, es := range events {
 		for _, e := range es {
-			if !(e.Type == "coin_spent" || e.Type == "coin_received") {
+
+			// relevant atrributes (with addresses) for each Type:
+			// coin_spent = spender
+			// coin_received = receiver
+			// message = sender
+			// transfer = sender, recipient
+			// withdraw_rewards = validator
+			// fungible_token_packet = receiver
+			// unbond = validator
+
+			// irrelevant types (no addresses to parse):
+			// acknowledge_packet
+			// update_client
+
+			// TODO (deeper parsing required)
+			// write_acknowledgemenet = there are string addresses embedded within packet_data.value
+			// send_packet = there are string addresses embedded within packet_data.value
+			// recv_packet = there are string addresses embedded within packet_data.value
+			if !(e.Type == "coin_spent" || e.Type == "coin_received" || e.Type == "message" || e.Type == "transfer" || e.Type == "fungible_token_packet" || e.Type == "unbond" || e.Type == "acknowledge_packet" || e.Type == "withdraw_rewards" || e.Type == "recv_packet" || e.Type == "update_client") {
 				continue
 			}
 
 			for _, attribute := range e.Attributes {
-				if !(attribute.Key == "spender" || attribute.Key == "receiver") {
+				if !(attribute.Key == "spender" || attribute.Key == "receiver" || attribute.Key == "sender" || attribute.Key == "recipient" || attribute.Key == "validator") {
 					continue
 				}
 
