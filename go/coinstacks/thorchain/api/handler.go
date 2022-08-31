@@ -2,6 +2,7 @@ package api
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/shapeshift/unchained/coinstacks/thorchain"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 )
@@ -47,5 +48,5 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 }
 
 func (h *Handler) ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Message {
-	return cosmos.ParseMessages(msgs, events)
+	return thorchain.ParseMessages(msgs, events)
 }

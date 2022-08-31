@@ -12,7 +12,6 @@ import (
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
-	authztypes "github.com/cosmos/cosmos-sdk/x/authz"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
@@ -278,9 +277,6 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 				Value:     coinToValue(&coin),
 			}
 			messages = append(messages, message)
-		// known message types that we currently do not support, but do not want to throw errors for
-		case *authztypes.MsgExec, *authztypes.MsgGrant:
-			continue
 		}
 	}
 
