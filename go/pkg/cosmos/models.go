@@ -30,6 +30,10 @@ type Attribute struct {
 	Value string `json:"value"`
 }
 
+// Contains info about an attribute value keyed by attribute type
+// swagger:model AttributeByKey
+type ValueByAttribute map[string]string
+
 // Contains info about a staking delegation
 // swagger:model Delegation
 type Delegation struct {
@@ -43,9 +47,9 @@ type Delegation struct {
 	Balance Value `json:"balance"`
 }
 
-// Contains info about tx events keyed by message index
+// Contains info about transaction events keyed by message index
 // swagger:model EventsByMsgIndex
-type EventsByMsgIndex map[string][]Event
+type EventsByMsgIndex map[string]AttributesByEvent
 
 // Contains info about a transaction log event
 // swagger:model Event
@@ -56,6 +60,10 @@ type Event struct {
 	// required: true
 	Attributes []Attribute `json:"attributes"`
 }
+
+// Contains info about event attributes keyed by event type
+// swagger:model AttributesByEvent
+type AttributesByEvent map[string]ValueByAttribute
 
 // Contains common cosmossdk info about the running coinstack
 // swagger:model CosmosSDKInfo

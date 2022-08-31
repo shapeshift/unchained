@@ -46,6 +46,6 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 	return a, nil
 }
 
-func (h *Handler) ParseMessages(msgs []sdk.Msg) []cosmos.Message {
-	return cosmos.ParseMessages(msgs)
+func (h *Handler) ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Message {
+	return cosmos.ParseMessages(msgs, events)
 }
