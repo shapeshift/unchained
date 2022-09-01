@@ -73,7 +73,7 @@ aliases:
     indexer-storage-size: 500Gi
     indexer-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-indexer-svc.unchained.svc.cluster.local:8001/websocket
-    daemon-image: ethereum/client-go:v1.10.19
+    daemon-image: ethereum/client-go:v1.10.23
     daemon-cpu-limit: "4"
     daemon-cpu-request: "3"
     daemon-memory-limit: 32Gi
