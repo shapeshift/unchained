@@ -5,6 +5,7 @@ import { Config, Service, ServiceConfig } from '.'
 interface Port {
   port: number
   pathPrefix?: string
+  stripPathPrefix?: boolean
 }
 
 export interface ServiceArgs {
@@ -19,7 +20,7 @@ export interface ServiceArgs {
 
 export function createService(args: ServiceArgs): Service {
   const name = `${args.asset}-${args.name}`
-  const ports = Object.entries(args.ports).map(([name, { port, pathPrefix }]) => ({ name, port, pathPrefix }))
+  const ports = Object.entries(args.ports).map(([name, { port, pathPrefix, stripPathPrefix }]) => ({ name, port, pathPrefix, stripPathPrefix }))
   const env = Object.entries(args.env).map(([name, value]) => ({ name, value }))
 
   const configMapData = {
@@ -240,10 +241,37 @@ export async function deployStatefulService(
       return config.environment ? `${config.environment}-${baseDomain}` : baseDomain
     }
 
-    const additionalHostMatch = (service: string) =>
-      additionalRootDomainName ? ` || Host(\`${additionalDomain(service)}\`)` : ''
+    const match = (service: string, prefix?: string) => {
+      const pathPrefixMatch = prefix ? ` && PathPrefix(\`${prefix}\`)` : ''
+      const hostMatch = `(Host(\`${domain(`${service}`)}\`)${pathPrefixMatch})`
+      const additionalHostMatch = `(Host(\`${additionalDomain(`${service}`)}\`)${pathPrefixMatch})`
+      return additionalRootDomainName ? `${hostMatch} || ${additionalHostMatch}` : hostMatch
+    }
 
-    const additionalPathPrefixMatch = (prefix?: string) => prefix ? ` && PathPrefix(\`${prefix}\`)` : ''
+
+    const middleware = new k8s.apiextensions.CustomResource(
+      `${asset}-middleware`,
+      {
+        apiVersion: 'traefik.containo.us/v1alpha1',
+        kind: 'Middleware',
+        metadata: {
+          namespace: namespace,
+          labels: labels,
+        },
+        spec: {
+          stripPrefix: {
+            prefixes: Object.values(services).reduce<Array<string>>((prev, { ports }) => {
+              const prefixes = ports.reduce<Array<string>>((prev, { pathPrefix, stripPathPrefix }) => {
+                if (!pathPrefix || !stripPathPrefix) return prev
+                return [...prev, pathPrefix]
+              }, [])
+              return [...prev, ...prefixes]
+            }, [])
+          }
+        },
+      },
+      { provider }
+    )
 
     new k8s.apiextensions.CustomResource(
       `${asset}-ingressroute`,
@@ -258,8 +286,9 @@ export async function deployStatefulService(
           entryPoints: ['web', 'websecure'],
           routes: Object.entries(services).map(([service, { ports }]) => ports.map(({ port, pathPrefix }) => (
             {
-              match: `Host(\`${domain(`${service}`)}\`)` + additionalHostMatch(`${service}`) + additionalPathPrefixMatch(pathPrefix),
               kind: 'Rule',
+              match: match(service, pathPrefix),
+              middlewares: [{ name: middleware.metadata.name, namespace: svc.metadata.namespace }],
               services: [
                 {
                   kind: 'Service',

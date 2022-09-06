@@ -44,7 +44,10 @@ export = async (): Promise<Outputs> => {
           dataDir: '/root',
           env: { 'CHAIN_ID': `thorchain-${config.network}-v1`, 'NET': config.network },
           name: 'daemon',
-          ports: { 'daemon-api': { port: 1317, pathPrefix: '/thorchain' }, 'daemon-rpc': { port: 27147 } }
+          ports: {
+            'daemon-api': { port: 1317, pathPrefix: '/lcd', stripPathPrefix: true },
+            'daemon-rpc': { port: 27147, pathPrefix: '/rpc', stripPathPrefix: true }
+          }
         })
       }
 
