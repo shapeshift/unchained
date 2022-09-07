@@ -138,10 +138,9 @@ func (c *GRPCClient) BroadcastTx(rawTx string) (string, error) {
 }
 
 func ParseEvents(log string) EventsByMsgIndex {
-	logs, err := sdk.ParseABCILogs(log)
-
 	events := make(EventsByMsgIndex)
 
+	logs, err := sdk.ParseABCILogs(log)
 	if err != nil {
 		// transaction error logs are not in json format and will fail to parse
 		// return error event with the log message

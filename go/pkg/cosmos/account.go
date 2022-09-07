@@ -33,8 +33,13 @@ func (c *HTTPClient) GetAccount(address string) (*AccountResponse, error) {
 		return nil, errors.Wrap(err, "failed to get account")
 	}
 
+	addr := address
+	if res.Account.Address != "" {
+		addr = res.Account.Address
+	}
+
 	a := &AccountResponse{
-		Address:       res.Account.Address,
+		Address:       addr,
 		AccountNumber: res.Account.AccountNumber,
 		Sequence:      res.Account.Sequence,
 	}
