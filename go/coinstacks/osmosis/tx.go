@@ -12,7 +12,7 @@ func (c *HTTPClient) BroadcastTx(rawTx string) (string, error) {
 }
 
 // ParseMessages will parse any osmosis or cosmos-sdk message types
-func ParseMessages(msgs []sdk.Msg) []cosmos.Message {
+func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Message {
 	messages := []cosmos.Message{}
 
 	coinToValue := func(c *sdk.Coin) cosmos.Value {
@@ -44,6 +44,7 @@ func ParseMessages(msgs []sdk.Msg) []cosmos.Message {
 		case *gammtypes.MsgSwapExactAmountIn:
 			message := cosmos.Message{
 				Addresses: []string{v.Sender},
+				Origin:    v.Sender,
 				From:      v.Sender,
 				Type:      v.Type(),
 				Value:     coinToValue(&v.TokenIn),
@@ -54,7 +55,7 @@ func ParseMessages(msgs []sdk.Msg) []cosmos.Message {
 		}
 	}
 
-	messages = append(messages, cosmos.ParseMessages(unhandledMsgs)...)
+	messages = append(messages, cosmos.ParseMessages(unhandledMsgs, events)...)
 
 	return messages
 }

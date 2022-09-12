@@ -115,8 +115,8 @@ func (h *Handler) GetValidator(address string) (*cosmos.Validator, error) {
 	return h.HTTPClient.GetValidator(address, aprData.bRate)
 }
 
-func (h *Handler) ParseMessages(msgs []sdk.Msg) []cosmos.Message {
-	return osmosis.ParseMessages(msgs)
+func (h *Handler) ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Message {
+	return osmosis.ParseMessages(msgs, events)
 }
 
 type APRData struct {

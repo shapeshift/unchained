@@ -2,6 +2,7 @@ package cosmos
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -11,11 +12,11 @@ import (
 	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
-	authztypes "github.com/cosmos/cosmos-sdk/x/authz"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
+	ibcchanneltypes "github.com/cosmos/ibc-go/v3/modules/core/04-channel/types"
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
 )
@@ -137,46 +138,35 @@ func (c *GRPCClient) BroadcastTx(rawTx string) (string, error) {
 }
 
 func ParseEvents(log string) EventsByMsgIndex {
-	logs, err := sdk.ParseABCILogs(log)
-
 	events := make(EventsByMsgIndex)
 
+	logs, err := sdk.ParseABCILogs(log)
 	if err != nil {
 		// transaction error logs are not in json format and will fail to parse
 		// return error event with the log message
-		event := Event{
-			Type:       "error",
-			Attributes: []Attribute{{Key: "message", Value: log}},
-		}
-		// TODO Figure out how to better handle this error case
-		events["0"] = []Event{event}
+		// TODO: Figure out how to better handle this error case
+		events["0"] = AttributesByEvent{"error": ValueByAttribute{"message": log}}
 		return events
 	}
 
 	for _, l := range logs {
+		msgIndex := strconv.Itoa(int(l.GetMsgIndex()))
+		events[msgIndex] = make(AttributesByEvent)
+
 		for _, e := range l.GetEvents() {
-			attributes := []Attribute{}
+			attributes := make(ValueByAttribute)
 			for _, a := range e.Attributes {
-				attribute := Attribute{
-					Key:   a.Key,
-					Value: a.Value,
-				}
-				attributes = append(attributes, attribute)
+				attributes[a.Key] = a.Value
 			}
 
-			event := Event{
-				Type:       e.Type,
-				Attributes: attributes,
-			}
-			msgIndex := strconv.Itoa(int(l.GetMsgIndex()))
-			events[msgIndex] = append(events[msgIndex], event)
+			events[msgIndex][e.Type] = attributes
 		}
 	}
 
 	return events
 }
 
-func ParseMessages(msgs []sdk.Msg) []Message {
+func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 	messages := []Message{}
 
 	coinToValue := func(c *sdk.Coin) Value {
@@ -186,7 +176,7 @@ func ParseMessages(msgs []sdk.Msg) []Message {
 		}
 	}
 
-	for _, msg := range msgs {
+	for i, msg := range msgs {
 		switch v := msg.(type) {
 		case *banktypes.MsgSend:
 			message := Message{
@@ -229,12 +219,20 @@ func ParseMessages(msgs []sdk.Msg) []Message {
 			}
 			messages = append(messages, message)
 		case *distributiontypes.MsgWithdrawDelegatorReward:
+			amount := events[strconv.Itoa(i)]["withdraw_rewards"]["amount"]
+
+			coin, err := sdk.ParseCoinNormalized(amount)
+			if err != nil && amount != "" {
+				logger.Error(err)
+			}
+
 			message := Message{
 				Addresses: []string{v.DelegatorAddress, v.ValidatorAddress},
 				Origin:    v.DelegatorAddress,
 				From:      v.ValidatorAddress,
 				To:        v.DelegatorAddress,
 				Type:      v.Type(),
+				Value:     coinToValue(&coin),
 			}
 			messages = append(messages, message)
 		case *ibctransfertypes.MsgTransfer:
@@ -247,20 +245,48 @@ func ParseMessages(msgs []sdk.Msg) []Message {
 				Value:     coinToValue(&v.Token),
 			}
 			messages = append(messages, message)
-		// known message types that we currently do not support, but do not want to throw errors for
-		case *authztypes.MsgExec, *authztypes.MsgGrant:
-			continue
+		case *ibcchanneltypes.MsgRecvPacket:
+			type PacketData struct {
+				Amount   string `json:"amount"`
+				Denom    string `json:"denom"`
+				Receiver string `json:"receiver"`
+				Sender   string `json:"sender"`
+			}
+
+			d := &PacketData{}
+
+			err := json.Unmarshal(v.Packet.Data, &d)
+			if err != nil {
+				logger.Error(err)
+			}
+
+			amount := events[strconv.Itoa(i)]["transfer"]["amount"]
+
+			coin, err := sdk.ParseCoinNormalized(amount)
+			if err != nil {
+				logger.Error(err)
+			}
+
+			message := Message{
+				Addresses: []string{d.Sender, d.Receiver},
+				Origin:    d.Sender,
+				From:      d.Sender,
+				To:        d.Receiver,
+				Type:      "recv_packet",
+				Value:     coinToValue(&coin),
+			}
+			messages = append(messages, message)
 		}
 	}
 
 	return messages
 }
 
-func Fee(tx signing.Tx, txid string, defaultDenom string) Value {
+func Fee(tx signing.Tx, txid string, denom string) Value {
 	fees := tx.GetFee()
 
 	if len(fees) == 0 {
-		fees = []sdk.Coin{{Denom: "uatom", Amount: sdk.NewInt(0)}}
+		fees = []sdk.Coin{{Denom: denom, Amount: sdk.NewInt(0)}}
 	} else if len(fees) > 1 {
 		logger.Warnf("txid: %s - multiple fees detected (defaulting to index 0): %+v", txid, fees)
 	}
@@ -308,22 +334,17 @@ func GetTxAddrs(events EventsByMsgIndex, messages []Message) []string {
 	addrs := []string{}
 
 	// check events for addresses
-	for _, es := range events {
-		for _, e := range es {
-			if !(e.Type == "coin_spent" || e.Type == "coin_received") {
-				continue
-			}
-
-			for _, attribute := range e.Attributes {
-				if !(attribute.Key == "spender" || attribute.Key == "receiver") {
-					continue
+	for _, e := range events {
+		for _, attributes := range e {
+			for key, val := range attributes {
+				switch key {
+				case "spender", "sender", "receiver", "recipient", "validator":
+					if _, ok := seen[val]; !ok {
+						addrs = append(addrs, val)
+						seen[val] = true
+					}
 				}
 
-				addr := attribute.Value
-				if _, ok := seen[addr]; !ok {
-					addrs = append(addrs, addr)
-					seen[addr] = true
-				}
 			}
 		}
 	}

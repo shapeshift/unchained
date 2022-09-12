@@ -32,12 +32,12 @@ type RouteHandler interface {
 }
 
 type CoinSpecificHandler interface {
-	ParseMessages([]sdk.Msg) []Message
+	ParseMessages([]sdk.Msg, EventsByMsgIndex) []Message
 }
 
 type Handler struct {
 	// coin specific handler methods
-	ParseMessages func([]sdk.Msg) []Message
+	ParseMessages func([]sdk.Msg, EventsByMsgIndex) []Message
 
 	// common cosmossdk values
 	HTTPClient   *HTTPClient
@@ -82,22 +82,23 @@ func (h *Handler) StartWebsocket() error {
 		}
 
 		txid := fmt.Sprintf("%X", sha256.Sum256(tx.Tx))
+		events := ParseEvents(tx.Result.Log)
 
 		t := Tx{
 			BaseTx: api.BaseTx{
 				TxID:        txid,
 				BlockHash:   &block.Hash,
-				BlockHeight: &block.Height,
-				Timestamp:   &block.Timestamp,
+				BlockHeight: block.Height,
+				Timestamp:   block.Timestamp,
 			},
 			Confirmations: 1,
-			Events:        ParseEvents(tx.Result.Log),
+			Events:        events,
 			Fee:           Fee(signingTx, txid, h.Denom),
 			GasWanted:     strconv.Itoa(int(tx.Result.GasWanted)),
 			GasUsed:       strconv.Itoa(int(tx.Result.GasUsed)),
 			Index:         int(tx.Index),
 			Memo:          signingTx.GetMemo(),
-			Messages:      h.ParseMessages(decodedTx.GetMsgs()),
+			Messages:      h.ParseMessages(decodedTx.GetMsgs(), events),
 		}
 
 		addrs := GetTxAddrs(t.Events, t.Messages)
@@ -279,21 +280,23 @@ func (h *Handler) formatTx(tx *DecodedTx) (*Tx, error) {
 		return nil, errors.Wrapf(err, "failed to get block: %d", height)
 	}
 
+	events := ParseEvents(tx.TendermintTx.TxResult.Log)
+
 	t := &Tx{
 		BaseTx: api.BaseTx{
 			TxID:        *tx.TendermintTx.Hash,
 			BlockHash:   &block.Hash,
-			BlockHeight: &block.Height,
-			Timestamp:   &block.Timestamp,
+			BlockHeight: block.Height,
+			Timestamp:   block.Timestamp,
 		},
 		Confirmations: h.BlockService.Latest.Height - height + 1,
-		Events:        ParseEvents(tx.TendermintTx.TxResult.Log),
+		Events:        events,
 		Fee:           Fee(tx.SigningTx, *tx.TendermintTx.Hash, h.Denom),
 		GasWanted:     tx.TendermintTx.TxResult.GasWanted,
 		GasUsed:       tx.TendermintTx.TxResult.GasUsed,
 		Index:         int(tx.TendermintTx.GetIndex()),
 		Memo:          tx.SigningTx.GetMemo(),
-		Messages:      h.ParseMessages(tx.CosmosTx.GetMsgs()),
+		Messages:      h.ParseMessages(tx.CosmosTx.GetMsgs(), events),
 	}
 
 	return t, nil

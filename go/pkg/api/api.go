@@ -96,10 +96,12 @@ type BaseTx struct {
 	// required: true
 	TxID      string  `json:"txid"`
 	BlockHash *string `json:"blockHash,omitempty"`
+	// required: true
 	// example: 1000000
-	BlockHeight *int `json:"blockHeight,omitempty"`
+	BlockHeight int `json:"blockHeight"`
+	// required: true
 	// example: 1643052655037
-	Timestamp *int `json:"timestamp,omitempty"`
+	Timestamp int `json:"timestamp"`
 }
 
 type TxHistory interface {
