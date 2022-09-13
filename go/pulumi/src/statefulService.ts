@@ -15,6 +15,7 @@ export interface ServiceArgs {
   ports: Record<string, Port>
   env: Record<string, string>
   dataDir?: string
+  configMapData?: Record<string, string>
   volumeMounts?: Array<k8s.types.input.core.v1.VolumeMount>
 }
 
@@ -26,6 +27,7 @@ export function createService(args: ServiceArgs): Service {
   const configMapData = {
     [`${args.name}-init.sh`]: readFileSync(`../${args.name}/init.sh`).toString(),
     [`${args.name}-readiness.sh`]: readFileSync(`../${args.name}/readiness.sh`).toString(),
+    ...(args.configMapData ?? {})
   }
 
   const containers = [
