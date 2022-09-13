@@ -1,5 +1,4 @@
 # Project specific
-config.json
 swagger.json
 node_modules
 Pulumi.*.yaml
