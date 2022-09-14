@@ -4,6 +4,7 @@ import (
 	"math/big"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
@@ -127,6 +128,10 @@ func (h *Handler) GetValidator(address string) (*cosmos.Validator, error) {
 
 func (h *Handler) ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Message {
 	return cosmos.ParseMessages(msgs, events)
+}
+
+func (h *Handler) ParseFee(tx signing.Tx, txid string, denom string) cosmos.Value {
+	return cosmos.Fee(tx, txid, denom)
 }
 
 type APRData struct {

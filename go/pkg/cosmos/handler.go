@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	ws "github.com/gorilla/websocket"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/api"
@@ -33,11 +34,13 @@ type RouteHandler interface {
 
 type CoinSpecificHandler interface {
 	ParseMessages([]sdk.Msg, EventsByMsgIndex) []Message
+	ParseFee(tx signing.Tx, txid string, denom string) Value
 }
 
 type Handler struct {
 	// coin specific handler methods
 	ParseMessages func([]sdk.Msg, EventsByMsgIndex) []Message
+	ParseFee      func(tx signing.Tx, txid string, denom string) Value
 
 	// common cosmossdk values
 	HTTPClient   *HTTPClient
@@ -93,7 +96,7 @@ func (h *Handler) StartWebsocket() error {
 			},
 			Confirmations: 1,
 			Events:        events,
-			Fee:           Fee(signingTx, txid, h.Denom),
+			Fee:           h.ParseFee(signingTx, txid, h.Denom),
 			GasWanted:     strconv.Itoa(int(tx.Result.GasWanted)),
 			GasUsed:       strconv.Itoa(int(tx.Result.GasUsed)),
 			Index:         int(tx.Index),
@@ -291,7 +294,7 @@ func (h *Handler) formatTx(tx *DecodedTx) (*Tx, error) {
 		},
 		Confirmations: h.BlockService.Latest.Height - height + 1,
 		Events:        events,
-		Fee:           Fee(tx.SigningTx, *tx.TendermintTx.Hash, h.Denom),
+		Fee:           h.ParseFee(tx.SigningTx, *tx.TendermintTx.Hash, h.Denom),
 		GasWanted:     tx.TendermintTx.TxResult.GasWanted,
 		GasUsed:       tx.TendermintTx.TxResult.GasUsed,
 		Index:         int(tx.TendermintTx.GetIndex()),
