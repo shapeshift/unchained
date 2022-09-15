@@ -135,10 +135,25 @@ func (o *TendermintTx) GetIndex() int32 {
 }
 
 type TxResult struct {
-	Log       string `json:"log"`
-	GasWanted string `json:"gas_wanted"`
-	GasUsed   string `json:"gas_used"`
-	Tags      Event  `json:"tags"`
+	Code      int32     `json:"code,omitempty"`
+	Data      string    `json:"data,omitempty"`
+	Log       string    `json:"log,omitempty"`
+	Info      string    `json:"info,omitempty"`
+	GasWanted string    `json:"gas_wanted,omitempty"`
+	GasUsed   string    `json:"gas_used,omitempty"`
+	Events    []TxEvent `json:"events,omitempty"`
+	Codespace string    `json:"codespace,omitempty"`
+}
+
+type TxEvent struct {
+	Type       string           `json:"type,omitempty"`
+	Attributes []EventAttribute `json:"attributes,omitempty"`
+}
+
+type EventAttribute struct {
+	Key   string `json:"key,omitempty"`
+	Value string `json:"value,omitempty"`
+	Index bool   `json:"index,omitempty"`
 }
 
 type TxProof struct {

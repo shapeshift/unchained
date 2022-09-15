@@ -31,7 +31,7 @@ type Attribute struct {
 }
 
 // Contains info about an attribute value keyed by attribute type
-// swagger:model AttributeByKey
+// swagger:model ValueByAttribute
 type ValueByAttribute map[string]string
 
 // Contains info about a staking delegation

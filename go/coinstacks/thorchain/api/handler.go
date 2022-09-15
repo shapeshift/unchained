@@ -1,7 +1,10 @@
 package api
 
 import (
+	"math/big"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/shapeshift/unchained/coinstacks/thorchain"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
@@ -49,4 +52,17 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 
 func (h *Handler) ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Message {
 	return thorchain.ParseMessages(msgs, events)
+}
+
+func (h *Handler) ParseFee(tx signing.Tx, txid string, denom string) cosmos.Value {
+	fee := cosmos.Fee(tx, txid, denom)
+
+	i := new(big.Int)
+	i.SetString(fee.Amount, 10)
+
+	// add outbound fee automatically deducted from every transaction but not tracked as an actual tx fee
+	// TODO: query and cache value returned from the node at https://daemon.thorchain.shapeshift.com/lcd/thorchain/constants
+	fee.Amount = i.Add(i, big.NewInt(2000000)).String()
+
+	return fee
 }
