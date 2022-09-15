@@ -15,7 +15,7 @@ interface DaemonConfig {
 export interface IndexerConfig {
   cpuLimit: string
   cpuRequest?: string
-  daemon?: DaemonConfig
+  daemon?: DaemonConfig & { beacon?: DaemonConfig }
   memoryLimit: string
   replicas: number
   storageClass: 'gp2' | 'hostpath' | 'standard'
@@ -82,6 +82,10 @@ export async function deployIndexer(
         ...(config.indexer.daemon && {
           'init.sh': readFileSync('../daemon/init.sh').toString(),
           'daemon-readiness.sh': readFileSync('../daemon/readiness.sh').toString(),
+          ...(config.indexer.daemon.beacon && {
+            'jwt.hex': readFileSync('../daemon/jwt.hex').toString(),
+            'daemon-beacon-readiness.sh': readFileSync('../daemon/readiness-beacon.sh').toString(),
+          }),
         }),
       },
     },
@@ -190,7 +194,10 @@ export async function deployIndexer(
                     },
                   }),
                 },
-                ports: [{ containerPort: 8332, name: 'daemon-rpc' }],
+                ports: [
+                  { containerPort: 8332, name: 'daemon-rpc' },
+                  ...(config.indexer.daemon.beacon ? [{ containerPort: 8551, name: 'daemon-beacon' }] : []),
+                ],
                 securityContext: { runAsUser: 0 },
                 volumeMounts: [
                   {
@@ -202,26 +209,93 @@ export async function deployIndexer(
                     mountPath: '/init.sh',
                     subPath: 'init.sh',
                   },
+                  ...(config.indexer.daemon.beacon
+                    ? [
+                        {
+                          name: 'config-map',
+                          mountPath: '/jwt.hex',
+                          subPath: 'jwt.hex',
+                        },
+                      ]
+                    : []),
                 ],
               },
+              //{
+              //  name: `${asset}-daemon-monitor`,
+              //  image: 'shapeshiftdao/unchained-probe:1.0.0',
+              //  readinessProbe: {
+              //    exec: {
+              //      command: ['/readiness.sh'],
+              //    },
+              //    initialDelaySeconds: 30,
+              //    periodSeconds: 10,
+              //  },
+              //  volumeMounts: [
+              //    {
+              //      name: 'config-map',
+              //      mountPath: '/readiness.sh',
+              //      subPath: 'daemon-readiness.sh',
+              //    },
+              //  ],
+              //},
+            ]
+          : []),
+        ...(config.indexer.daemon?.beacon
+          ? [
               {
-                name: `${asset}-daemon-monitor`,
-                image: 'shapeshiftdao/unchained-probe:1.0.0',
-                readinessProbe: {
-                  exec: {
-                    command: ['/readiness.sh'],
+                name: `${asset}-daemon-beacon`,
+                image: config.indexer.daemon.beacon.image,
+                args: [
+                  '--datadir',
+                  '/data',
+                  '--execution-endpoint',
+                  'http://localhost:8551',
+                  '--jwt-secret',
+                  '/jwt.hex',
+                  '--accept-terms-of-use',
+                ],
+                resources: {
+                  limits: {
+                    cpu: config.indexer.daemon.beacon.cpuLimit,
+                    memory: config.indexer.daemon.beacon.memoryLimit,
                   },
-                  initialDelaySeconds: 30,
-                  periodSeconds: 10,
+                  ...(config.indexer.daemon.beacon.cpuRequest && {
+                    requests: {
+                      cpu: config.indexer.daemon.beacon.cpuRequest,
+                    },
+                  }),
                 },
+                securityContext: { runAsUser: 0 },
                 volumeMounts: [
                   {
+                    name: 'data-daemon-beacon',
+                    mountPath: '/data',
+                  },
+                  {
                     name: 'config-map',
-                    mountPath: '/readiness.sh',
-                    subPath: 'daemon-readiness.sh',
+                    mountPath: '/jwt.hex',
+                    subPath: 'jwt.hex',
                   },
                 ],
               },
+              //{
+              //  name: `${asset}-daemon-beacon-monitor`,
+              //  image: 'shapeshiftdao/unchained-probe:1.0.0',
+              //  readinessProbe: {
+              //    exec: {
+              //      command: ['/readiness-beacon.sh'],
+              //    },
+              //    initialDelaySeconds: 30,
+              //    periodSeconds: 10,
+              //  },
+              //  volumeMounts: [
+              //    {
+              //      name: 'config-map',
+              //      mountPath: '/readiness-beacon.sh',
+              //      subPath: 'daemon-beacon-readiness.sh',
+              //    },
+              //  ],
+              //},
             ]
           : []),
       ],
@@ -273,6 +347,23 @@ export async function deployIndexer(
         resources: {
           requests: {
             storage: config.indexer.daemon.storageSize,
+          },
+        },
+      },
+    })
+  }
+
+  if (config.indexer.daemon?.beacon) {
+    volumeClaimTemplates.push({
+      metadata: {
+        name: 'data-daemon-beacon',
+      },
+      spec: {
+        accessModes: ['ReadWriteOnce'],
+        storageClassName: config.indexer.daemon.beacon.storageClass,
+        resources: {
+          requests: {
+            storage: config.indexer.daemon.beacon.storageSize,
           },
         },
       },

@@ -82,6 +82,17 @@ export const getConfig = async (): Promise<EthereumConfig> => {
     if (!config.indexer.daemon.image) missingRequiredConfig.push('indexer.daemon.image')
     if (!config.indexer.daemon.memoryLimit) missingRequiredConfig.push('indexer.daemon.memoryLimit')
     if (!config.indexer.daemon.storageSize) missingRequiredConfig.push('indexer.daemon.storageSize')
+
+    if (!config.indexer.daemon.beacon) {
+      missingRequiredConfig.push('indexer.daemon.beacon')
+    } else {
+      config.indexer.daemon.beacon.storageClass = getStorageClassName(config.cluster)
+
+      if (!config.indexer.daemon.beacon.cpuLimit) missingRequiredConfig.push('indexer.daemon.beacon.cpuLimit')
+      if (!config.indexer.daemon.beacon.image) missingRequiredConfig.push('indexer.daemon.beacon.image')
+      if (!config.indexer.daemon.beacon.memoryLimit) missingRequiredConfig.push('indexer.daemon.beacon.memoryLimit')
+      if (!config.indexer.daemon.beacon.storageSize) missingRequiredConfig.push('indexer.daemon.beacon.storageSize')
+    }
   }
 
   if (missingRequiredConfig.length) {

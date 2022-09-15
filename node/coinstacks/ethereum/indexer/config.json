@@ -6,7 +6,7 @@
   "coin_name": "Ethereum",
   "coin_shortcut": "ETH",
   "coin_label": "Ethereum",
-  "rpc_url": "ws://localhost:8333",
+  "rpc_url": "wss://mainnet.infura.io/ws/v3/71acfee9f8544347a4676bd8affa26b8",
   "rpc_user": "",
   "rpc_pass": "",
   "rpc_timeout": 25,

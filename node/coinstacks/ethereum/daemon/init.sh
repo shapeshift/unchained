@@ -5,6 +5,7 @@ set -e
 start_coin_bg() {
   geth \
     --$NETWORK \
+    --authrpc.jwtsecret /jwt.hex \
     --syncmode full \
     --datadir /data \
     --cache 4096 \
@@ -12,7 +13,7 @@ start_coin_bg() {
     --http \
     --http.addr=0.0.0.0 \
     --http.port 8332 \
-    --http.api eth,net,web3,debug,txpool \
+    --http.api eth,net,web3,debug,txpool,engine \
     --http.vhosts '*' \
     --http.corsdomain '*' \
     --ws \
