@@ -78,6 +78,11 @@ aliases:
     daemon-cpu-request: "3"
     daemon-memory-limit: 32Gi
     daemon-storage-size: 2000Gi
+    daemon-beacon-image: gcr.io/prysmaticlabs/prysm/beacon-chain:stable
+    daemon-beacon-cpu-limit: "4"
+    daemon-beacon-cpu-request: "3"
+    daemon-beacon-memory-limit: 8Gi
+    daemon-beacon-storage-size: 500Gi
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -614,6 +619,21 @@ jobs:
       daemon-storage-size:
         type: string
         default: ""
+      daemon-beacon-image:
+        type: string
+        default: ""
+      daemon-beacon-cpu-limit:
+        type: string
+        default: ""
+      daemon-beacon-cpu-request:
+        type: string
+        default: ""
+      daemon-beacon-memory-limit:
+        type: string
+        default: ""
+      daemon-beacon-storage-size:
+        type: string
+        default: ""
       api:
         type: boolean
         default: true
@@ -677,6 +697,11 @@ jobs:
             [ -n "<< parameters.daemon-cpu-request >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.cpuRequest << parameters.daemon-cpu-request >>
             [ -n "<< parameters.daemon-memory-limit >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.memoryLimit << parameters.daemon-memory-limit >>
             [ -n "<< parameters.daemon-storage-size >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.storageSize << parameters.daemon-storage-size >>
+            [ -n "<< parameters.daemon-beacon-image >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.beacon.image << parameters.daemon-beacon-image >>
+            [ -n "<< parameters.daemon-beacon-cpu-limit >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.beacon.cpuLimit << parameters.daemon-beacon-cpu-limit >>
+            [ -n "<< parameters.daemon-beacon-cpu-request >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.beacon.cpuRequest << parameters.daemon-beacon-cpu-request >>
+            [ -n "<< parameters.daemon-beacon-memory-limit >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.beacon.memoryLimit << parameters.daemon-beacon-memory-limit >>
+            [ -n "<< parameters.daemon-beacon-storage-size >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.beacon.storageSize << parameters.daemon-beacon-storage-size >>
             pulumi << parameters.pulumi-command >> --suppress-outputs
 
   deploy-coinstack-go:
