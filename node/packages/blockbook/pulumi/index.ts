@@ -15,7 +15,7 @@ interface DaemonConfig {
 export interface IndexerConfig {
   cpuLimit: string
   cpuRequest?: string
-  daemon?: DaemonConfig & { beacon: DaemonConfig }
+  daemon?: DaemonConfig & { beacon?: DaemonConfig }
   memoryLimit: string
   replicas: number
   storageClass: 'gp2' | 'hostpath' | 'standard'
@@ -81,9 +81,11 @@ export async function deployIndexer(
         'readiness.sh': readFileSync('../../../packages/blockbook/scripts/readiness.sh').toString(),
         ...(config.indexer.daemon && {
           'init.sh': readFileSync('../daemon/init.sh').toString(),
-          'jwt.hex': readFileSync('../daemon/jwt.hex').toString(),
           'daemon-readiness.sh': readFileSync('../daemon/readiness.sh').toString(),
-          'daemon-beacon-readiness.sh': readFileSync('../daemon/readiness-beacon.sh').toString(),
+          ...(config.indexer.daemon.beacon && {
+            'jwt.hex': readFileSync('../daemon/jwt.hex').toString(),
+            'daemon-beacon-readiness.sh': readFileSync('../daemon/readiness-beacon.sh').toString(),
+          }),
         }),
       },
     },
@@ -194,7 +196,7 @@ export async function deployIndexer(
                 },
                 ports: [
                   { containerPort: 8332, name: 'daemon-rpc' },
-                  { containerPort: 8551, name: 'daemon-beacon' },
+                  ...(config.indexer.daemon.beacon ? [{ containerPort: 8551, name: 'daemon-beacon' }] : []),
                 ],
                 securityContext: { runAsUser: 0 },
                 volumeMounts: [
@@ -207,11 +209,15 @@ export async function deployIndexer(
                     mountPath: '/init.sh',
                     subPath: 'init.sh',
                   },
-                  {
-                    name: 'config-map',
-                    mountPath: '/jwt.hex',
-                    subPath: 'jwt.hex',
-                  },
+                  ...(config.indexer.daemon.beacon
+                    ? [
+                        {
+                          name: 'config-map',
+                          mountPath: '/jwt.hex',
+                          subPath: 'jwt.hex',
+                        },
+                      ]
+                    : []),
                 ],
               },
               //{
@@ -232,6 +238,10 @@ export async function deployIndexer(
               //    },
               //  ],
               //},
+            ]
+          : []),
+        ...(config.indexer.daemon?.beacon
+          ? [
               {
                 name: `${asset}-daemon-beacon`,
                 image: config.indexer.daemon.beacon.image,
@@ -327,36 +337,37 @@ export async function deployIndexer(
   ]
 
   if (config.indexer.daemon) {
-    volumeClaimTemplates.push(
-      {
-        metadata: {
-          name: 'data-daemon',
-        },
-        spec: {
-          accessModes: ['ReadWriteOnce'],
-          storageClassName: config.indexer.daemon.storageClass,
-          resources: {
-            requests: {
-              storage: config.indexer.daemon.storageSize,
-            },
+    volumeClaimTemplates.push({
+      metadata: {
+        name: 'data-daemon',
+      },
+      spec: {
+        accessModes: ['ReadWriteOnce'],
+        storageClassName: config.indexer.daemon.storageClass,
+        resources: {
+          requests: {
+            storage: config.indexer.daemon.storageSize,
           },
         },
       },
-      {
-        metadata: {
-          name: 'data-daemon-beacon',
-        },
-        spec: {
-          accessModes: ['ReadWriteOnce'],
-          storageClassName: config.indexer.daemon.beacon.storageClass,
-          resources: {
-            requests: {
-              storage: config.indexer.daemon.beacon.storageSize,
-            },
+    })
+  }
+
+  if (config.indexer.daemon?.beacon) {
+    volumeClaimTemplates.push({
+      metadata: {
+        name: 'data-daemon-beacon',
+      },
+      spec: {
+        accessModes: ['ReadWriteOnce'],
+        storageClassName: config.indexer.daemon.beacon.storageClass,
+        resources: {
+          requests: {
+            storage: config.indexer.daemon.beacon.storageSize,
           },
         },
-      }
-    )
+      },
+    })
   }
 
   new k8s.apps.v1.StatefulSet(
