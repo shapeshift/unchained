@@ -454,7 +454,9 @@ export async function deployIndexer(
           entryPoints: ['web', 'websecure'],
           routes: [
             {
-              match: `Host(\`${domain('indexer')}\`)` + extraMatch('indexer'),
+              match:
+                `Host(\`${domain('indexer')}\`) || Host(\`alpha-indexer.${asset}.${additionalRootDomainName}\`)` +
+                extraMatch('indexer'),
               kind: 'Rule',
               services: [
                 {
@@ -466,7 +468,9 @@ export async function deployIndexer(
               ],
             },
             {
-              match: `Host(\`${domain('daemon')}\`)` + extraMatch('daemon'),
+              match:
+                `Host(\`${domain('daemon')}\`) || Host(\`alpha-daemon.${asset}.${additionalRootDomainName}\`)` +
+                extraMatch('daemon'),
               kind: 'Rule',
               services: [
                 {

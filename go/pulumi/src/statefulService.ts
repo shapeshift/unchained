@@ -247,9 +247,9 @@ export async function deployStatefulService(
       const pathPrefixMatch = prefix ? ` && PathPrefix(\`${prefix}\`)` : ''
       const hostMatch = `(Host(\`${domain(`${service}`)}\`)${pathPrefixMatch})`
       const additionalHostMatch = `(Host(\`${additionalDomain(`${service}`)}\`)${pathPrefixMatch})`
-      return additionalRootDomainName ? `${hostMatch} || ${additionalHostMatch}` : hostMatch
+      const additionalAlphaHostMatch = `(Host(\`alpha-${additionalDomain(`${service}`)}\`)${pathPrefixMatch})`
+      return additionalRootDomainName ? `${hostMatch} || ${additionalHostMatch} || ${additionalAlphaHostMatch}` : hostMatch
     }
-
 
     const middleware = new k8s.apiextensions.CustomResource(
       `${asset}-middleware`,
