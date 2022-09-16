@@ -79,9 +79,9 @@ aliases:
     daemon-memory-limit: 32Gi
     daemon-storage-size: 2000Gi
     daemon-beacon-image: gcr.io/prysmaticlabs/prysm/beacon-chain:stable
-    daemon-beacon-cpu-limit: "4"
-    daemon-beacon-cpu-request: "3"
-    daemon-beacon-memory-limit: 8Gi
+    daemon-beacon-cpu-limit: "6"
+    daemon-beacon-cpu-request: "4"
+    daemon-beacon-memory-limit: 16Gi
     daemon-beacon-storage-size: 500Gi
     api-autoscaling: true
     api-replicas: 2
@@ -90,7 +90,7 @@ aliases:
     api-cpu-request: 250m
     api-cpu-threshold: 30
     api-memory-limit: 2Gi
-    rpc-url: https://mainnet.infura.io/v3/71acfee9f8544347a4676bd8affa26b8
+    rpc-url: https://mainnet.infura.io/v3/a0ef41a43d92442e9f624f5470da0d04
 
   - &ethereum-dev
     <<: *ethereum
