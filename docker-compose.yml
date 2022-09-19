@@ -34,6 +34,7 @@ services:
       - litecoin_default
       - osmosis_default
       - thorchain_default
+      - binance_default
     ports:
       # The HTTP port
       - "80:80"
@@ -62,3 +63,5 @@ networks:
     name: osmosis_default
   thorchain_default:
     name: thorchain_default
+  binance_default:
+    name: binance_default
