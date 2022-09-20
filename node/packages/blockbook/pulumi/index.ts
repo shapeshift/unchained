@@ -220,24 +220,24 @@ export async function deployIndexer(
                     : []),
                 ],
               },
-              //{
-              //  name: `${asset}-daemon-monitor`,
-              //  image: 'shapeshiftdao/unchained-probe:1.0.0',
-              //  readinessProbe: {
-              //    exec: {
-              //      command: ['/readiness.sh'],
-              //    },
-              //    initialDelaySeconds: 30,
-              //    periodSeconds: 10,
-              //  },
-              //  volumeMounts: [
-              //    {
-              //      name: 'config-map',
-              //      mountPath: '/readiness.sh',
-              //      subPath: 'daemon-readiness.sh',
-              //    },
-              //  ],
-              //},
+              {
+                name: `${asset}-daemon-monitor`,
+                image: 'shapeshiftdao/unchained-probe:1.0.0',
+                readinessProbe: {
+                  exec: {
+                    command: ['/readiness.sh'],
+                  },
+                  initialDelaySeconds: 30,
+                  periodSeconds: 10,
+                },
+                volumeMounts: [
+                  {
+                    name: 'config-map',
+                    mountPath: '/readiness.sh',
+                    subPath: 'daemon-readiness.sh',
+                  },
+                ],
+              },
             ]
           : []),
         ...(config.indexer.daemon?.beacon
@@ -278,24 +278,24 @@ export async function deployIndexer(
                   },
                 ],
               },
-              //{
-              //  name: `${asset}-daemon-beacon-monitor`,
-              //  image: 'shapeshiftdao/unchained-probe:1.0.0',
-              //  readinessProbe: {
-              //    exec: {
-              //      command: ['/readiness-beacon.sh'],
-              //    },
-              //    initialDelaySeconds: 30,
-              //    periodSeconds: 10,
-              //  },
-              //  volumeMounts: [
-              //    {
-              //      name: 'config-map',
-              //      mountPath: '/readiness-beacon.sh',
-              //      subPath: 'daemon-beacon-readiness.sh',
-              //    },
-              //  ],
-              //},
+              {
+                name: `${asset}-daemon-beacon-monitor`,
+                image: 'shapeshiftdao/unchained-probe:1.0.0',
+                readinessProbe: {
+                  exec: {
+                    command: ['/readiness-beacon.sh'],
+                  },
+                  initialDelaySeconds: 30,
+                  periodSeconds: 10,
+                },
+                volumeMounts: [
+                  {
+                    name: 'config-map',
+                    mountPath: '/readiness-beacon.sh',
+                    subPath: 'daemon-beacon-readiness.sh',
+                  },
+                ],
+              },
             ]
           : []),
       ],
