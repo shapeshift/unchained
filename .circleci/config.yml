@@ -90,7 +90,7 @@ aliases:
     api-cpu-request: 250m
     api-cpu-threshold: 30
     api-memory-limit: 2Gi
-    rpc-url: https://mainnet.infura.io/v3/a0ef41a43d92442e9f624f5470da0d04
+    rpc-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8332
 
   - &ethereum-dev
     <<: *ethereum
