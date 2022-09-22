@@ -88,10 +88,8 @@ func (h *Handler) StopWebsocket() {
 
 func (h *Handler) GetInfo() (api.Info, error) {
 	info := Info{
-		Info: cosmos.Info{
-			BaseInfo: api.BaseInfo{
-				Network: "mainnet",
-			},
+		Info: api.BaseInfo{
+			Network: "mainnet",
 		},
 	}
 
@@ -229,8 +227,6 @@ func ParseMessages(msgs []msgtypes.Msg) []cosmos.Message {
 			}
 
 			messages = append(messages, message)
-		default:
-			fmt.Printf("%T\n", v)
 		}
 	}
 

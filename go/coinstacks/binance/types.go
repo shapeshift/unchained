@@ -1,3 +1,5 @@
+// tendermint types are copies from: https://github.com/tendermint/tendermint/blob/v0.32.3/types
+
 package binance
 
 import (
@@ -5,11 +7,28 @@ import (
 
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto"
-	"github.com/tendermint/tendermint/crypto/merkle"
 	"github.com/tendermint/tendermint/libs/bytes"
 	"github.com/tendermint/tendermint/proto/tendermint/version"
 	"github.com/tendermint/tendermint/types"
 )
+
+type Block struct {
+	Header `json:"header"`
+}
+
+type BlockID struct {
+	Hash        bytes.HexBytes `json:"hash"`
+	PartsHeader PartSetHeader  `json:"parts"`
+}
+
+type PartSetHeader struct {
+	Total int            `json:"total"`
+	Hash  bytes.HexBytes `json:"hash"`
+}
+
+type BlockMeta struct {
+	BlockID BlockID `json:"block_id"`
+}
 
 type Header struct {
 	// basic block info
@@ -39,48 +58,6 @@ type Header struct {
 	ProposerAddress crypto.Address `json:"proposer_address"` // original proposer of the block
 }
 
-func (h *Header) Hash() bytes.HexBytes {
-	if h == nil || len(h.ValidatorsHash) == 0 {
-		return nil
-	}
-	return merkle.HashFromByteSlices([][]byte{
-		cdcEncode(h.Version),
-		cdcEncode(h.ChainID),
-		cdcEncode(h.Height),
-		cdcEncode(h.Time),
-		cdcEncode(h.NumTxs),
-		cdcEncode(h.TotalTxs),
-		cdcEncode(h.LastBlockID),
-		cdcEncode(h.LastCommitHash),
-		cdcEncode(h.DataHash),
-		cdcEncode(h.ValidatorsHash),
-		cdcEncode(h.NextValidatorsHash),
-		cdcEncode(h.ConsensusHash),
-		cdcEncode(h.AppHash),
-		cdcEncode(h.LastResultsHash),
-		cdcEncode(h.EvidenceHash),
-		cdcEncode(h.ProposerAddress),
-	})
-}
-
-type BlockID struct {
-	Hash        bytes.HexBytes `json:"hash"`
-	PartsHeader PartSetHeader  `json:"parts"`
-}
-
-type PartSetHeader struct {
-	Total int            `json:"total"`
-	Hash  bytes.HexBytes `json:"hash"`
-}
-
-type BlockMeta struct {
-	BlockID BlockID `json:"block_id"`
-}
-
-type Block struct {
-	Header `json:"header"`
-}
-
 type ResultBlock struct {
 	BlockMeta *BlockMeta `json:"block_meta"`
 	Block     `json:"block"`
@@ -93,6 +70,7 @@ type EventDataNewBlockHeader struct {
 	ResultEndBlock   abci.ResponseEndBlock   `json:"result_end_block"`
 }
 
+// ToEventDataNewBlockHeader converts a legacy EvenDataNewBlockHeader to current tendermint format
 func (e EventDataNewBlockHeader) ToEventDataNewBlockHeader() types.EventDataNewBlockHeader {
 	return types.EventDataNewBlockHeader{
 		Header: types.Header{

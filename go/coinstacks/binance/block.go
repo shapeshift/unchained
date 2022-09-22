@@ -27,7 +27,7 @@ func (c *HTTPClient) GetBlock(height *int) (*cosmos.BlockResponse, error) {
 	}
 
 	block := &ResultBlock{}
-	if err := c.GetEncoding().Amino.Amino.UnmarshalJSON(res.Result, block); err != nil {
+	if err := c.GetEncoding().Amino.UnmarshalJSON(res.Result, block); err != nil {
 		return nil, errors.Wrapf(err, "failed to decode block: %v", res.Result)
 	}
 

@@ -9,7 +9,7 @@ import (
 // swagger:model Info
 type Info struct {
 	// swagger:allOf
-	cosmos.Info
+	api.Info
 }
 
 // Contains info about account details for an address or xpub

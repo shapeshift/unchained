@@ -17,7 +17,8 @@ import (
 	"gitlab.com/thorchain/binance-sdk/client/rpc"
 )
 
-// WSClient wraps the binance-sdk WSClient to properly implement the WebsocketHandler interface
+// WSClient wraps the binance-sdk WSClient to properly implement the WebsocketHandler interface.
+// This also allows us to add missing reconnect logic.
 type WSClient struct {
 	*rpc.WSClient
 	maxReconnectAttempts int
@@ -42,6 +43,7 @@ func NewWebsocketClient(conf Config, blockService *cosmos.BlockService, errChan 
 	// use default dialer
 	client.Dialer = net.Dial
 
+	// custom amino unmarshaler to decode and convert to correct types
 	unmarshal := func(bz []byte, result *coretypes.ResultEvent) error {
 		err := conf.Encoding.Amino.UnmarshalJSON(bz, result)
 		if err != nil {

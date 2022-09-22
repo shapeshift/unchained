@@ -154,7 +154,7 @@ func (ws *WSClient) listen() {
 
 		result := &coretypes.ResultEvent{}
 		if err := ws.unmarshalResultEvent(r.Result, result); err != nil {
-			logger.Errorf("failed to unmarshal message result: %+v", err)
+			logger.Errorf("failed to unmarshal message result: %v\n", err)
 			continue
 		}
 
