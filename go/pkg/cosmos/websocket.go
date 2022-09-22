@@ -10,23 +10,47 @@ import (
 	"github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/websocket"
-	tendermintjson "github.com/tendermint/tendermint/libs/json"
+	tmjson "github.com/tendermint/tendermint/libs/json"
 	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 	tendermint "github.com/tendermint/tendermint/rpc/jsonrpc/client"
+	rpctypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 	"github.com/tendermint/tendermint/types"
 )
 
 type TxHandlerFunc = func(tx types.EventDataTx, block *BlockResponse) (interface{}, []string, error)
+type UnmarshalResultEvent = func([]byte, *coretypes.ResultEvent) error
+
+type WebsocketHandler interface {
+	Start() error
+	Stop() error
+	Subscribe(ctx context.Context, query string) error
+	UnsubscribeAll(ctx context.Context) error
+}
 
 type WSClient struct {
 	*websocket.Registry
-	blockService *BlockService
-	client       *tendermint.WSClient
-	encoding     *params.EncodingConfig
-	errChan      chan<- error
-	m            sync.RWMutex
-	txHandler    TxHandlerFunc
-	unhandledTxs map[int][]types.EventDataTx
+	blockService         *BlockService
+	client               WebsocketHandler
+	encoding             *params.EncodingConfig
+	errChan              chan<- error
+	m                    sync.RWMutex
+	responsesCh          chan rpctypes.RPCResponse
+	txHandler            TxHandlerFunc
+	unhandledTxs         map[int][]types.EventDataTx
+	unmarshalResultEvent UnmarshalResultEvent
+}
+
+func NewBaseWebsocketClient(blockService *BlockService, client WebsocketHandler, encoding *params.EncodingConfig, unmarshal UnmarshalResultEvent, responsesCh chan rpctypes.RPCResponse, errChan chan<- error) *WSClient {
+	return &WSClient{
+		Registry:             websocket.NewRegistry(),
+		blockService:         blockService,
+		client:               client,
+		encoding:             encoding,
+		errChan:              errChan,
+		responsesCh:          responsesCh,
+		unhandledTxs:         make(map[int][]types.EventDataTx),
+		unmarshalResultEvent: unmarshal,
+	}
 }
 
 func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- error) (*WSClient, error) {
@@ -48,14 +72,11 @@ func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- 
 	// use default dialer
 	client.Dialer = net.Dial
 
-	ws := &WSClient{
-		Registry:     websocket.NewRegistry(),
-		blockService: blockService,
-		client:       client,
-		encoding:     conf.Encoding,
-		errChan:      errChan,
-		unhandledTxs: make(map[int][]types.EventDataTx),
+	unmarshal := func(bz []byte, result *coretypes.ResultEvent) error {
+		return tmjson.Unmarshal(bz, result)
 	}
+
+	ws := NewBaseWebsocketClient(blockService, client, conf.Encoding, unmarshal, client.ResponsesCh, errChan)
 
 	tendermint.MaxReconnectAttempts(10)(client)
 	tendermint.OnReconnect(func() {
@@ -104,7 +125,7 @@ func (ws *WSClient) EncodingConfig() params.EncodingConfig {
 }
 
 func (ws *WSClient) listen() {
-	for r := range ws.client.ResponsesCh {
+	for r := range ws.responsesCh {
 		if r.Error != nil {
 			// resubscribe if subscription is cancelled by the server for reason: client is not pulling messages fast enough
 			// experimental rpc config available to help mitigate this issue: https://github.com/tendermint/tendermint/blob/main/config/config.go#L373
@@ -132,8 +153,8 @@ func (ws *WSClient) listen() {
 		}
 
 		result := &coretypes.ResultEvent{}
-		if err := tendermintjson.Unmarshal(r.Result, result); err != nil {
-			logger.Errorf("failed to unmarshal tx message: %v", err)
+		if err := ws.unmarshalResultEvent(r.Result, result); err != nil {
+			logger.Errorf("failed to unmarshal message result: %+v", err)
 			continue
 		}
 
@@ -144,7 +165,7 @@ func (ws *WSClient) listen() {
 			case types.EventDataNewBlockHeader:
 				go ws.handleNewBlockHeader(result.Data.(types.EventDataNewBlockHeader))
 			default:
-				fmt.Printf("unsupported result type: %T", result.Data)
+				fmt.Printf("unsupported result type: %T\n", result.Data)
 			}
 		}
 	}

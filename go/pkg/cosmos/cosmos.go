@@ -24,6 +24,7 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/internal/log"
+	"github.com/tendermint/go-amino"
 	liquiditytypes "github.com/tendermint/liquidity/x/liquidity/types"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -84,6 +85,10 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 	return c, nil
 }
 
+func (c *HTTPClient) GetEncoding() *params.EncodingConfig {
+	return c.encoding
+}
+
 // GRPCClient allows communicating over grpc
 type GRPCClient struct {
 	ctx      context.Context
@@ -141,13 +146,18 @@ func NewGRPCClient(conf Config) (*GRPCClient, error) {
 	return c, nil
 }
 
+func (c *GRPCClient) GetEncoding() *params.EncodingConfig {
+	return c.encoding
+}
+
 // Close any GRPCClient connections
 func (c *GRPCClient) Close() {
 	c.grpcConn.Close()
 }
 
 // NewEncoding registers all base protobuf types by default as well as any custom types passed in
-func NewEncoding(registerInterfaces ...func(r codectypes.InterfaceRegistry)) *params.EncodingConfig {
+func NewEncoding(registerFns ...interface{}) *params.EncodingConfig {
+	cdc := codec.NewLegacyAmino()
 	registry := codectypes.NewInterfaceRegistry()
 
 	// register base protobuf types
@@ -161,9 +171,17 @@ func NewEncoding(registerInterfaces ...func(r codectypes.InterfaceRegistry)) *pa
 	stakingtypes.RegisterInterfaces(registry)
 	stdtypes.RegisterInterfaces(registry)
 
-	// register custom protobuf types
-	for _, r := range registerInterfaces {
-		r(registry)
+	// register supported custom types
+	for _, fn := range registerFns {
+		if f, ok := fn.(func(codectypes.InterfaceRegistry)); ok {
+			f(registry)
+		}
+		if f, ok := fn.(func(*codec.LegacyAmino)); ok {
+			f(cdc)
+		}
+		if f, ok := fn.(func(*amino.Codec)); ok {
+			f(cdc.Amino)
+		}
 	}
 
 	marshaler := codec.NewProtoCodec(registry)
@@ -172,7 +190,7 @@ func NewEncoding(registerInterfaces ...func(r codectypes.InterfaceRegistry)) *pa
 		InterfaceRegistry: registry,
 		Marshaler:         marshaler,
 		TxConfig:          tx.NewTxConfig(marshaler, tx.DefaultSignModes),
-		Amino:             codec.NewLegacyAmino(),
+		Amino:             cdc,
 	}
 }
 

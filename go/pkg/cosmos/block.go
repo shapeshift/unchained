@@ -45,9 +45,7 @@ func (s *BlockService) WriteBlock(block *BlockResponse, latest bool) {
 }
 
 func (s *BlockService) GetBlock(height int) (*BlockResponse, error) {
-	block, ok := s.Blocks[height]
-
-	if ok {
+	if block, ok := s.Blocks[height]; ok {
 		return block, nil
 	}
 

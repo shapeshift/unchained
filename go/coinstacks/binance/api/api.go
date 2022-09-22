@@ -22,7 +22,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
-	"github.com/shapeshift/unchained/internal/log"
+	"github.com/shapeshift/unchained/coinstacks/binance"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/shapeshift/unchained/pkg/websocket"
@@ -37,23 +37,18 @@ const (
 	MAX_PAGE_SIZE_TX_HISTORY = 100
 )
 
-var logger = log.WithoutFields()
-
 type API struct {
 	*cosmos.API
 	handler *Handler
 }
 
-func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, swaggerPath string) *API {
+func New(httpClient *binance.HTTPClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, swaggerPath string) *API {
 	r := mux.NewRouter()
 
 	handler := &Handler{
-		Handler: &cosmos.Handler{
-			HTTPClient:   httpClient,
-			WSClient:     wsClient,
-			BlockService: blockService,
-			Denom:        "bnb",
-		},
+		HTTPClient:   httpClient,
+		WSClient:     wsClient,
+		BlockService: blockService,
 	}
 
 	manager := websocket.NewManager()
@@ -71,14 +66,8 @@ func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService 
 		handler: handler,
 	}
 
-	// runtime check to ensure Handler implements CoinSpecific functionality
+	// compile check to ensure Handler implements necessary interfaces
 	var _ api.BaseAPI = handler
-	var _ cosmos.CoinSpecificHandler = handler
-
-	// runtime check to ensure Handler implements CoinSpecificHandler
-	if err := handler.ValidateCoinSpecific(handler); err != nil {
-		logger.Panicf("%+v", err)
-	}
 
 	r.Use(api.Scheme)
 	r.Use(api.Logger)

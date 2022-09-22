@@ -6,21 +6,26 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/shapeshift/unchained/coinstacks/binance"
 	"github.com/shapeshift/unchained/coinstacks/binance/api"
 	"github.com/shapeshift/unchained/internal/config"
 	"github.com/shapeshift/unchained/internal/log"
 	"github.com/shapeshift/unchained/pkg/cosmos"
+
+	commontypes "gitlab.com/thorchain/binance-sdk/common/types"
+	txtypes "gitlab.com/thorchain/binance-sdk/types/tx"
 )
 
 var (
 	logger = log.WithoutFields()
 
 	envPath     = flag.String("env", "", "path to env file (default: use os env)")
-	swaggerPath = flag.String("swagger", "coinstacks/cosmos/api/swagger.json", "path to swagger spec")
+	swaggerPath = flag.String("swagger", "coinstacks/binance/api/swagger.json", "path to swagger spec")
 )
 
 // Config for running application
 type Config struct {
+	BCURL  string `mapstructure:"BC_URL"`
 	LCDURL string `mapstructure:"LCD_URL"`
 	RPCURL string `mapstructure:"RPC_URL"`
 	WSURL  string `mapstructure:"WS_URL"`
@@ -35,7 +40,7 @@ func main() {
 
 	conf := &Config{}
 	if *envPath == "" {
-		if err := config.LoadFromEnv(conf, "LCD_URL", "RPC_URL", "WS_URL"); err != nil {
+		if err := config.LoadFromEnv(conf, "BC_URL", "LCD_URL", "RPC_URL", "WS_URL"); err != nil {
 			logger.Panicf("failed to load config from env: %+v", err)
 		}
 	} else {
@@ -44,20 +49,23 @@ func main() {
 		}
 	}
 
-	encoding := cosmos.NewEncoding()
+	encoding := cosmos.NewEncoding(commontypes.RegisterWire, txtypes.RegisterCodec, binance.RegisterEventDatas)
 
-	cfg := cosmos.Config{
-		Bech32AddrPrefix:  "bnb",
-		Bech32PkPrefix:    "bnbp",
-		Bech32ValPrefix:   "bva",
-		Bech32PkValPrefix: "bvap",
-		Encoding:          encoding,
-		LCDURL:            conf.LCDURL,
-		RPCURL:            conf.RPCURL,
-		WSURL:             conf.WSURL,
+	cfg := binance.Config{
+		Config: cosmos.Config{
+			Bech32AddrPrefix:  "bnb",
+			Bech32PkPrefix:    "bnbp",
+			Bech32ValPrefix:   "bva",
+			Bech32PkValPrefix: "bvap",
+			Encoding:          encoding,
+			LCDURL:            conf.LCDURL,
+			RPCURL:            conf.RPCURL,
+			WSURL:             conf.WSURL,
+		},
+		BCURL: conf.BCURL,
 	}
 
-	httpClient, err := cosmos.NewHTTPClient(cfg)
+	httpClient, err := binance.NewHTTPClient(cfg)
 	if err != nil {
 		logger.Panicf("failed to create new http client: %+v", err)
 	}
@@ -67,7 +75,7 @@ func main() {
 		logger.Panicf("failed to create new block service: %+v", err)
 	}
 
-	wsClient, err := cosmos.NewWebsocketClient(cfg, blockService, errChan)
+	wsClient, err := binance.NewWebsocketClient(cfg, blockService, errChan)
 	if err != nil {
 		logger.Panicf("failed to create new websocket client: %+v", err)
 	}
