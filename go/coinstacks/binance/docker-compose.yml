@@ -11,7 +11,7 @@ services:
       - 'traefik.enable=true'
       - 'traefik.http.routers.binance-api.rule=Host(`api.binance.localhost`)'
       - 'traefik.http.services.binance-api.loadbalancer.server.port=3000'
-    command: ["-r", "(pkg|internal|binance)", "-R", "swagger", "--", "sh", "-c", "swagger generate spec -w coinstacks/binance -o coinstacks/binance/api/swagger.json -x protoc-gen-openapiv2 -m && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go run cmd/binance/main.go -env cmd/binance/.env"]
+    command: ["-r", "(pkg|internal|binance)", "-R", "swagger", "--", "sh", "-c", "swagger generate spec -w coinstacks/binance -o coinstacks/binance/api/swagger.json -x protoc-gen-openapiv2 -m && go run cmd/binance/main.go -env cmd/binance/.env"]
     working_dir: /app
     volumes:
       - ../..:/app
