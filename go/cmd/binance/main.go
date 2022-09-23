@@ -6,14 +6,13 @@ import (
 	"os/signal"
 	"syscall"
 
+	commontypes "github.com/shapeshift/bnb-chain-go-sdk/common/types"
+	txtypes "github.com/shapeshift/bnb-chain-go-sdk/types/tx"
 	"github.com/shapeshift/unchained/coinstacks/binance"
 	"github.com/shapeshift/unchained/coinstacks/binance/api"
 	"github.com/shapeshift/unchained/internal/config"
 	"github.com/shapeshift/unchained/internal/log"
 	"github.com/shapeshift/unchained/pkg/cosmos"
-
-	commontypes "gitlab.com/thorchain/binance-sdk/common/types"
-	txtypes "gitlab.com/thorchain/binance-sdk/types/tx"
 )
 
 var (
@@ -49,7 +48,7 @@ func main() {
 		}
 	}
 
-	encoding := cosmos.NewEncoding(commontypes.RegisterWire, txtypes.RegisterCodec, binance.RegisterEventDatas)
+	encoding := cosmos.NewEncoding(commontypes.RegisterWire, commontypes.RegisterEventDatas, txtypes.RegisterCodec)
 
 	cfg := binance.Config{
 		Config: cosmos.Config{

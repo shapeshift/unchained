@@ -7,8 +7,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/internal/log"
 	"github.com/shapeshift/unchained/pkg/cosmos"
-	"github.com/tendermint/go-amino"
-	"github.com/tendermint/tendermint/types"
 )
 
 var logger = log.WithoutFields()
@@ -42,10 +40,4 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 	}
 
 	return c, nil
-}
-
-func RegisterEventDatas(cdc *amino.Codec) {
-	cdc.RegisterInterface((*types.TMEventData)(nil), nil)
-	cdc.RegisterConcrete(EventDataNewBlockHeader{}, "tendermint/event/NewBlockHeader", nil)
-	cdc.RegisterConcrete(types.EventDataTx{}, "tendermint/event/Tx", nil)
 }

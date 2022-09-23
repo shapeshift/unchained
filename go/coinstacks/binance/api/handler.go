@@ -7,16 +7,16 @@ import (
 
 	ws "github.com/gorilla/websocket"
 	"github.com/pkg/errors"
+	"github.com/shapeshift/bnb-chain-go-sdk/client/rpc"
+	commontypes "github.com/shapeshift/bnb-chain-go-sdk/common/types"
+	msgtypes "github.com/shapeshift/bnb-chain-go-sdk/types/msg"
+	txtypes "github.com/shapeshift/bnb-chain-go-sdk/types/tx"
 	"github.com/shapeshift/unchained/coinstacks/binance"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/shapeshift/unchained/pkg/websocket"
 	rpctypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 	"github.com/tendermint/tendermint/types"
-	"gitlab.com/thorchain/binance-sdk/client/rpc"
-	bnbsdk "gitlab.com/thorchain/binance-sdk/common/types"
-	msgtypes "gitlab.com/thorchain/binance-sdk/types/msg"
-	txtypes "gitlab.com/thorchain/binance-sdk/types/tx"
 )
 
 type Handler struct {
@@ -34,7 +34,7 @@ func (h *Handler) StartWebsocket() error {
 	h.WSClient.TxHandler(func(tx types.EventDataTx, block *cosmos.BlockResponse) (interface{}, []string, error) {
 		pTx, err := rpc.ParseTx(h.HTTPClient.GetEncoding().Amino.Amino, tx.Tx)
 		if err != nil {
-			return nil, nil, errors.Wrapf(err, "failed to handle tx: %v", tx.Tx)
+			return nil, nil, errors.Wrapf(err, "failed to handle tx: %v, in block: %v", tx.Tx, block.Height)
 		}
 
 		txid := fmt.Sprintf("%X", sha256.Sum256(tx.Tx))
@@ -97,7 +97,7 @@ func (h *Handler) GetInfo() (api.Info, error) {
 }
 
 func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
-	res := bnbsdk.BalanceAccount{}
+	res := commontypes.BalanceAccount{}
 
 	_, err := h.HTTPClient.LCD.R().SetResult(&res).Get(fmt.Sprintf("/api/v1/account/%s", pubkey))
 	if err != nil {
@@ -202,7 +202,7 @@ func (h *Handler) GetTx(txid string) (api.Tx, error) {
 func ParseMessages(msgs []msgtypes.Msg) []cosmos.Message {
 	messages := []cosmos.Message{}
 
-	coinToValue := func(c bnbsdk.Coin) cosmos.Value {
+	coinToValue := func(c commontypes.Coin) cosmos.Value {
 		return cosmos.Value{
 			Amount: strconv.Itoa(int(c.Amount)),
 			Denom:  c.Denom,

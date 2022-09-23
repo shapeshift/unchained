@@ -34,13 +34,13 @@ type WSClient struct {
 	encoding             *params.EncodingConfig
 	errChan              chan<- error
 	m                    sync.RWMutex
-	responsesCh          chan rpctypes.RPCResponse
+	responsesCh          *chan rpctypes.RPCResponse // responsesCh is a pointer to the underlying websocket client responses channel to read from
 	txHandler            TxHandlerFunc
 	unhandledTxs         map[int][]types.EventDataTx
 	unmarshalResultEvent UnmarshalResultEvent
 }
 
-func NewBaseWebsocketClient(blockService *BlockService, client WebsocketHandler, encoding *params.EncodingConfig, unmarshal UnmarshalResultEvent, responsesCh chan rpctypes.RPCResponse, errChan chan<- error) *WSClient {
+func NewBaseWebsocketClient(blockService *BlockService, client WebsocketHandler, encoding *params.EncodingConfig, unmarshal UnmarshalResultEvent, responsesCh *chan rpctypes.RPCResponse, errChan chan<- error) *WSClient {
 	return &WSClient{
 		Registry:             websocket.NewRegistry(),
 		blockService:         blockService,
@@ -73,15 +73,27 @@ func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- 
 	client.Dialer = net.Dial
 
 	unmarshal := func(bz []byte, result *coretypes.ResultEvent) error {
-		return tmjson.Unmarshal(bz, result)
+		if err := tmjson.Unmarshal(bz, result); err != nil {
+			return err
+		}
+
+		switch v := result.Data.(type) {
+		case types.EventDataNewBlockHeader:
+			result.Data = &BlockResponse{
+				Height:    int(v.Header.Height),
+				Hash:      v.Header.Hash().String(),
+				Timestamp: int(v.Header.Time.Unix()),
+			}
+		}
+
+		return nil
 	}
 
-	ws := NewBaseWebsocketClient(blockService, client, conf.Encoding, unmarshal, client.ResponsesCh, errChan)
+	ws := NewBaseWebsocketClient(blockService, client, conf.Encoding, unmarshal, &client.ResponsesCh, errChan)
 
 	tendermint.MaxReconnectAttempts(10)(client)
 	tendermint.OnReconnect(func() {
 		logger.Info("OnReconnect triggered: resubscribing")
-		ws.unhandledTxs = make(map[int][]types.EventDataTx)
 		_ = client.Subscribe(context.Background(), types.EventQueryTx.String())
 		_ = client.Subscribe(context.Background(), types.EventQueryNewBlockHeader.String())
 	})(client)
@@ -125,7 +137,7 @@ func (ws *WSClient) EncodingConfig() params.EncodingConfig {
 }
 
 func (ws *WSClient) listen() {
-	for r := range ws.responsesCh {
+	for r := range *ws.responsesCh {
 		if r.Error != nil {
 			// resubscribe if subscription is cancelled by the server for reason: client is not pulling messages fast enough
 			// experimental rpc config available to help mitigate this issue: https://github.com/tendermint/tendermint/blob/main/config/config.go#L373
@@ -162,8 +174,8 @@ func (ws *WSClient) listen() {
 			switch result.Data.(type) {
 			case types.EventDataTx:
 				go ws.handleTx(result.Data.(types.EventDataTx))
-			case types.EventDataNewBlockHeader:
-				go ws.handleNewBlockHeader(result.Data.(types.EventDataNewBlockHeader))
+			case *BlockResponse:
+				go ws.handleNewBlockHeader(result.Data.(*BlockResponse))
 			default:
 				fmt.Printf("unsupported result type: %T\n", result.Data)
 			}
@@ -193,18 +205,13 @@ func (ws *WSClient) handleTx(tx types.EventDataTx) {
 	ws.Publish(addrs, data)
 }
 
-func (ws *WSClient) handleNewBlockHeader(block types.EventDataNewBlockHeader) {
-	b := &BlockResponse{
-		Height:    int(block.Header.Height),
-		Hash:      block.Header.Hash().String(),
-		Timestamp: int(block.Header.Time.Unix()),
-	}
-
-	ws.blockService.WriteBlock(b, true)
+func (ws *WSClient) handleNewBlockHeader(block *BlockResponse) {
+	ws.blockService.WriteBlock(block, true)
 
 	// process any unhandled transactions
-	for _, tx := range ws.unhandledTxs[b.Height] {
+	for _, tx := range ws.unhandledTxs[block.Height] {
 		go ws.handleTx(tx)
 	}
-	delete(ws.unhandledTxs, b.Height)
+
+	delete(ws.unhandledTxs, block.Height)
 }
