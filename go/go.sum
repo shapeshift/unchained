@@ -906,6 +906,8 @@ github.com/sasha-s/go-deadlock v0.2.1-0.20190427202633-1595213edefa/go.mod h1:F7
 github.com/sean-/seed v0.0.0-20170313163322-e2103e2c3529/go.mod h1:DxrIzT+xaE7yg65j358z/aeFdxmN0P9QXhEzd20vsDc=
 github.com/seccomp/libseccomp-golang v0.9.1/go.mod h1:GbW5+tmTXfcxTToHLXlScSlAvWlF4P2Ca7zGrPiEpWo=
 github.com/segmentio/fasthash v1.0.3/go.mod h1:waKX8l2N8yckOgmSsXJi7x1ZfdKZ4x7KRMzBtS3oedY=
+github.com/shapeshift/bnb-chain-go-sdk v1.0.0 h1:LlB5KTm+1/QDxDjCt+7J4oGIljLUXNTUjWzcRb9U8b0=
+github.com/shapeshift/bnb-chain-go-sdk v1.0.0/go.mod h1:+9O9/6Bu6F4NsOej3ENi53Mc53Nq0KlFFVk+LnjNPPY=
 github.com/shapeshift/bnb-chain-go-sdk v1.2.8 h1:jBoIuNfCf+So456MGJoVFfaaCXrxDDzMxDSG9U/sWis=
 github.com/shapeshift/bnb-chain-go-sdk v1.2.8/go.mod h1:+9O9/6Bu6F4NsOej3ENi53Mc53Nq0KlFFVk+LnjNPPY=
 github.com/shapeshift/bnb-chain-go-sdk v1.2.9 h1:z6M2URpbN89PuULHsSkcCqTO41jCobdpYbU/Pbw64Io=
