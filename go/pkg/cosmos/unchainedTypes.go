@@ -1,8 +1,7 @@
 package cosmos
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth/signing"
+	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
 type AccountResponse struct {
@@ -33,13 +32,7 @@ type Pagination struct {
 	Total   uint64  `json:"total,string,omitempty"`
 }
 
-type DecodedTx struct {
-	TendermintTx TendermintTx
-	CosmosTx     sdk.Tx
-	SigningTx    signing.Tx
-}
-
 type TxHistoryResponse struct {
 	Cursor string
-	Txs    []*DecodedTx
+	Txs    []*coretypes.ResultTx
 }

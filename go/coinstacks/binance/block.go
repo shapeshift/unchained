@@ -10,14 +10,13 @@ import (
 
 func (c *HTTPClient) GetBlock(height *int) (*cosmos.BlockResponse, error) {
 	var res *rpctypes.RPCResponse
-	var resErr *cosmos.RPCErrorResponse
 
 	hs := ""
 	if height != nil {
 		hs = strconv.Itoa(*height)
 	}
 
-	_, err := c.RPC.R().SetResult(&res).SetError(&resErr).SetQueryParam("height", hs).Get("/block")
+	_, err := c.RPC.R().SetResult(&res).SetQueryParam("height", hs).Get("/block")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get block: %s", hs)
 	}

@@ -13,6 +13,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/websocket"
+	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 	"github.com/tendermint/tendermint/types"
 	"golang.org/x/sync/errgroup"
 )
@@ -179,7 +180,7 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 	for _, t := range res.Txs {
 		tx, err := h.formatTx(t)
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed to format transaction: %s", *t.TendermintTx.Hash)
+			return nil, errors.Wrapf(err, "failed to format transaction: %s", t.Hash)
 		}
 
 		txs = append(txs, *tx)
@@ -206,7 +207,7 @@ func (h *Handler) GetTx(txid string) (api.Tx, error) {
 
 	t, err := h.formatTx(tx)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to format transaction: %s", *tx.TendermintTx.Hash)
+		return nil, errors.Wrapf(err, "failed to format transaction: %s", tx.Hash.String())
 	}
 
 	return t, nil
@@ -272,34 +273,36 @@ func (h *Handler) GetStaking(pubkey string, apr *big.Float) (*Staking, error) {
 	return staking, nil
 }
 
-func (h *Handler) formatTx(tx *DecodedTx) (*Tx, error) {
-	height, err := strconv.Atoi(*tx.TendermintTx.Height)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
+func (h *Handler) formatTx(tx *coretypes.ResultTx) (*Tx, error) {
+	height := int(tx.Height)
 
 	block, err := h.BlockService.GetBlock(height)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get block: %d", height)
 	}
 
-	events := ParseEvents(tx.TendermintTx.TxResult.Log)
+	cosmosTx, signingTx, err := DecodeTx(*h.HTTPClient.GetEncoding(), tx.Tx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to decode tx: %s", tx.Hash.String())
+	}
+
+	events := ParseEvents(tx.TxResult.Log)
 
 	t := &Tx{
 		BaseTx: api.BaseTx{
-			TxID:        *tx.TendermintTx.Hash,
+			TxID:        tx.Hash.String(),
 			BlockHash:   &block.Hash,
 			BlockHeight: block.Height,
 			Timestamp:   block.Timestamp,
 		},
 		Confirmations: h.BlockService.Latest.Height - height + 1,
 		Events:        events,
-		Fee:           h.ParseFee(tx.SigningTx, *tx.TendermintTx.Hash, h.Denom),
-		GasWanted:     tx.TendermintTx.TxResult.GasWanted,
-		GasUsed:       tx.TendermintTx.TxResult.GasUsed,
-		Index:         int(tx.TendermintTx.GetIndex()),
-		Memo:          tx.SigningTx.GetMemo(),
-		Messages:      h.ParseMessages(tx.CosmosTx.GetMsgs(), events),
+		Fee:           h.ParseFee(signingTx, tx.Hash.String(), h.Denom),
+		GasWanted:     strconv.Itoa(int(tx.TxResult.GasWanted)),
+		GasUsed:       strconv.Itoa(int(tx.TxResult.GasUsed)),
+		Index:         int(tx.Index),
+		Memo:          signingTx.GetMemo(),
+		Messages:      h.ParseMessages(cosmosTx.GetMsgs(), events),
 	}
 
 	return t, nil

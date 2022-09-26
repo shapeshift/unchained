@@ -15,6 +15,7 @@ import (
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/shapeshift/unchained/pkg/websocket"
+	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 	rpctypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 	"github.com/tendermint/tendermint/types"
 )
@@ -38,6 +39,8 @@ func (h *Handler) StartWebsocket() error {
 		}
 
 		txid := fmt.Sprintf("%X", sha256.Sum256(tx.Tx))
+
+		fmt.Println("tx received:", txid)
 
 		t := Tx{
 			BaseTx: api.BaseTx{
@@ -110,51 +113,46 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 	}
 
 	a := Account{
-		Account: cosmos.Account{
-			BaseAccount: api.BaseAccount{
-				Balance:            balances["BNB"],
-				UnconfirmedBalance: "0",
-				Pubkey:             res.Address,
-			},
-			AccountNumber: int(res.Number),
-			Sequence:      int(res.Sequence),
-			Assets:        []cosmos.Value{},
+		BaseAccount: api.BaseAccount{
+			Balance:            balances["BNB"],
+			UnconfirmedBalance: "0",
+			Pubkey:             res.Address,
 		},
+		AccountNumber: int(res.Number),
+		Sequence:      int(res.Sequence),
+		Assets:        []cosmos.Value{},
 	}
 
 	return a, nil
 }
 
 func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
-	//res := bnbsdk.BalanceAccount{}
+	res, err := h.HTTPClient.GetTxHistory(pubkey, cursor, pageSize)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to get tx history")
+	}
 
-	//_, err := h.HTTPClient.LCD.R().SetResult(&res).Get(fmt.Sprintf("/api/v1/account/%s", pubkey))
-	//if err != nil {
-	//	return nil, errors.Wrap(err, "failed to get account")
-	//}
+	txs := []Tx{}
+	for _, t := range res.Txs {
+		tx, err := h.formatTx(t)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to format transaction: %s", t.Hash)
+		}
 
-	//txs := []Tx{}
-	//for _, t := range res.Txs {
-	//	tx, err := h.formatTx(t)
-	//	if err != nil {
-	//		return nil, errors.Wrapf(err, "failed to format transaction: %s", *t.TendermintTx.Hash)
-	//	}
+		txs = append(txs, *tx)
+	}
 
-	//	txs = append(txs, *tx)
-	//}
+	txHistory := TxHistory{
+		BaseTxHistory: api.BaseTxHistory{
+			Pagination: api.Pagination{
+				Cursor: res.Cursor,
+			},
+			Pubkey: pubkey,
+		},
+		Txs: txs,
+	}
 
-	//txHistory := TxHistory{
-	//	BaseTxHistory: api.BaseTxHistory{
-	//		Pagination: api.Pagination{
-	//			Cursor: res.Cursor,
-	//		},
-	//		Pubkey: pubkey,
-	//	},
-	//	Txs: txs,
-	//}
-
-	//return txHistory, nil
-	return nil, nil
+	return txHistory, nil
 }
 
 func (h *Handler) GetTx(txid string) (api.Tx, error) {
@@ -165,38 +163,13 @@ func (h *Handler) GetTx(txid string) (api.Tx, error) {
 		return nil, errors.Wrapf(err, "failed to get tx: %s", txid)
 	}
 
-	tx := &rpc.ResultTx{}
+	tx := &coretypes.ResultTx{}
 	err = h.HTTPClient.GetEncoding().Amino.UnmarshalJSON(res.Result, tx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to decode tx: %v", res.Result)
 	}
 
-	pTx, err := rpc.ParseTx(h.HTTPClient.GetEncoding().Amino.Amino, tx.Tx)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse tx: %v", tx.Tx)
-	}
-
-	block, err := h.BlockService.GetBlock(int(tx.Height))
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get block: %d", tx.Height)
-	}
-
-	t := Tx{
-		BaseTx: api.BaseTx{
-			TxID:        tx.Hash.String(),
-			BlockHash:   &block.Hash,
-			BlockHeight: block.Height,
-			Timestamp:   block.Timestamp,
-		},
-		Confirmations: h.BlockService.Latest.Height - int(tx.Height) + 1,
-		GasUsed:       strconv.Itoa(int(tx.TxResult.GasUsed)),
-		GasWanted:     strconv.Itoa(int(tx.TxResult.GasWanted)),
-		Index:         int(tx.Index),
-		Memo:          pTx.(txtypes.StdTx).Memo,
-		Messages:      ParseMessages(pTx.GetMsgs()),
-	}
-
-	return t, nil
+	return h.formatTx(tx)
 }
 
 func ParseMessages(msgs []msgtypes.Msg) []cosmos.Message {
@@ -238,5 +211,35 @@ func (h *Handler) SendTx(hex string) (string, error) {
 }
 
 func (h Handler) EstimateGas(rawTx string) (string, error) {
-	return h.HTTPClient.GetEstimateGas(rawTx)
+	// no gas required for binance chain transactions
+	return "0", nil
+}
+
+func (h *Handler) formatTx(tx *coretypes.ResultTx) (*Tx, error) {
+	pTx, err := rpc.ParseTx(h.HTTPClient.GetEncoding().Amino.Amino, tx.Tx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse tx: %v", tx.Tx)
+	}
+
+	block, err := h.BlockService.GetBlock(int(tx.Height))
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to get block: %d", tx.Height)
+	}
+
+	t := &Tx{
+		BaseTx: api.BaseTx{
+			TxID:        tx.Hash.String(),
+			BlockHash:   &block.Hash,
+			BlockHeight: block.Height,
+			Timestamp:   block.Timestamp,
+		},
+		Confirmations: h.BlockService.Latest.Height - int(tx.Height) + 1,
+		GasUsed:       strconv.Itoa(int(tx.TxResult.GasUsed)),
+		GasWanted:     strconv.Itoa(int(tx.TxResult.GasWanted)),
+		Index:         int(tx.Index),
+		Memo:          pTx.(txtypes.StdTx).Memo,
+		Messages:      ParseMessages(pTx.GetMsgs()),
+	}
+
+	return t, nil
 }

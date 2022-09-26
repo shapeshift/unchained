@@ -3,9 +3,11 @@ package cosmos
 import (
 	"strconv"
 	"sync"
-	"time"
 
 	"github.com/pkg/errors"
+	tmjson "github.com/tendermint/tendermint/libs/json"
+	coretypes "github.com/tendermint/tendermint/rpc/core/types"
+	rpctypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
 type BlockFetcher interface {
@@ -60,55 +62,31 @@ func (s *BlockService) GetBlock(height int) (*BlockResponse, error) {
 }
 
 func (c *HTTPClient) GetBlock(height *int) (*BlockResponse, error) {
-	var res *TendermintBlockResponse
-	var resErr *struct {
-		RPCErrorResponse
-		Message string `json:"message"`
-	}
+	var res *rpctypes.RPCResponse
 
 	hs := ""
 	if height != nil {
 		hs = strconv.Itoa(*height)
 	}
 
-	_, err := c.RPC.R().SetResult(&res).SetError(&resErr).SetQueryParam("height", hs).Get("/block")
+	_, err := c.RPC.R().SetResult(&res).SetQueryParam("height", hs).Get("/block")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get block: %d", height)
 	}
 
-	if resErr != nil {
-		if resErr.Message != "" {
-			return nil, errors.Errorf("failed to get block: %d: %s", height, resErr.Message)
-		}
-
-		return nil, errors.Errorf("failed to get block: %d: %s", height, resErr.Error.Data)
+	if res.Error != nil {
+		return nil, errors.Errorf("failed to get block: %s: %s", hs, res.Error.Error())
 	}
 
-	if res == nil {
-		return nil, errors.Errorf("res is nil for height: %d", height)
-	}
-	if res.Result == nil {
-		return nil, errors.Errorf("res.Result is nil for height: %d", height)
-	}
-	if res.Result.Block == nil {
-		return nil, errors.Errorf("res.Result.Block is nil for height: %d", height)
-	}
-
-	timestamp, err := time.Parse(time.RFC3339, res.Result.Block.Header.Time)
-	if err != nil {
-		logger.Errorf("failed to parse timestamp: %s", res.Result.Block.Header.Time)
-		timestamp = time.Now()
-	}
-
-	h, err := strconv.Atoi(res.Result.Block.Header.Height)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to convert block height: %s", res.Result.Block.Header.Height)
+	block := &coretypes.ResultBlock{}
+	if err := tmjson.Unmarshal(res.Result, block); err != nil {
+		return nil, errors.Errorf("failed to unmarshal block result: %v: %s", res.Result, res.Error.Error())
 	}
 
 	b := &BlockResponse{
-		Height:    h,
-		Hash:      res.Result.BlockID.Hash,
-		Timestamp: int(timestamp.Unix()),
+		Height:    int(block.Block.Height),
+		Hash:      block.BlockID.Hash.String(),
+		Timestamp: int(block.Block.Time.Unix()),
 	}
 
 	return b, nil

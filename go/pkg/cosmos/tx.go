@@ -19,6 +19,10 @@ import (
 	ibcchanneltypes "github.com/cosmos/ibc-go/v3/modules/core/04-channel/types"
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
+	tmjson "github.com/tendermint/tendermint/libs/json"
+	coretypes "github.com/tendermint/tendermint/rpc/core/types"
+	rpctypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (*TxHistoryResponse, error) {
@@ -56,31 +60,24 @@ func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (
 	return txHistory, nil
 }
 
-func (c *HTTPClient) GetTx(txid string) (*DecodedTx, error) {
-	var res *TxResponse
-	var resErr *RPCErrorResponse
+func (c *HTTPClient) GetTx(txid string) (*coretypes.ResultTx, error) {
+	var res *rpctypes.RPCResponse
 
-	_, err := c.RPC.R().SetResult(&res).SetError(&resErr).SetQueryParam("hash", txid).Get("/tx")
+	_, err := c.RPC.R().SetResult(&res).SetQueryParam("hash", txid).Get("/tx")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get tx: %s", txid)
 	}
 
-	if resErr != nil {
-		return nil, errors.Wrapf(errors.New(resErr.Error.Data), "failed to get tx: %s", txid)
+	if res.Error != nil {
+		return nil, errors.Wrapf(errors.New(res.Error.Error()), "failed to get tx: %s", txid)
 	}
 
-	cosmosTx, signingTx, err := DecodeTx(*c.encoding, *res.Result.Tx)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to decode tx: %s", txid)
+	tx := &coretypes.ResultTx{}
+	if err := tmjson.Unmarshal(res.Result, tx); err != nil {
+		return nil, errors.Errorf("failed to unmarshal tx result: %v: %s", res.Result, res.Error.Error())
 	}
 
-	t := &DecodedTx{
-		TendermintTx: res.Result,
-		CosmosTx:     cosmosTx,
-		SigningTx:    signingTx,
-	}
-
-	return t, nil
+	return tx, nil
 }
 
 func (c *HTTPClient) BroadcastTx(rawTx string) (string, error) {
@@ -311,6 +308,8 @@ func DecodeTx(encoding params.EncodingConfig, rawTx interface{}) (sdk.Tx, signin
 			return nil, nil, errors.Wrapf(err, "error decoding transaction from base64")
 		}
 	case []byte:
+		txBytes = rawTx
+	case tmtypes.Tx:
 		txBytes = rawTx
 	default:
 		return nil, nil, errors.New("rawTx must be string or []byte")

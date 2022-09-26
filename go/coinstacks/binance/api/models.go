@@ -16,7 +16,15 @@ type Info struct {
 // swagger:model Account
 type Account struct {
 	// swagger:allOf
-	cosmos.Account
+	api.BaseAccount
+	// required: true
+	// example: 420
+	AccountNumber int `json:"accountNumber"`
+	// required: true
+	// example: 69
+	Sequence int `json:"sequence"`
+	// required: true
+	Assets []cosmos.Value `json:"assets"`
 }
 
 // Contains info about a transaction
