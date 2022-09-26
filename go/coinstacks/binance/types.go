@@ -7,11 +7,12 @@ import (
 )
 
 type Block struct {
-	commontypes.Header
+	commontypes.Header `json:"header"`
 }
 
 type BlockMeta struct {
-	BlockID commontypes.BlockID `json:"block_id"`
+	BlockID            commontypes.BlockID `json:"block_id"`
+	commontypes.Header `json:"header"`
 }
 
 type ResultBlock struct {
