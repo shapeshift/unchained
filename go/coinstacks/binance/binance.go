@@ -1,6 +1,7 @@
 package binance
 
 import (
+	"context"
 	"net/url"
 
 	"github.com/go-resty/resty/v2"
@@ -18,7 +19,8 @@ type Config struct {
 
 type HTTPClient struct {
 	*cosmos.HTTPClient
-	bc *resty.Client
+	ctx context.Context
+	bc  *resty.Client
 }
 
 func NewHTTPClient(conf Config) (*HTTPClient, error) {

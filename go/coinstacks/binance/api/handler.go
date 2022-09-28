@@ -9,14 +9,12 @@ import (
 	"github.com/pkg/errors"
 	"github.com/shapeshift/bnb-chain-go-sdk/client/rpc"
 	commontypes "github.com/shapeshift/bnb-chain-go-sdk/common/types"
-	msgtypes "github.com/shapeshift/bnb-chain-go-sdk/types/msg"
 	txtypes "github.com/shapeshift/bnb-chain-go-sdk/types/tx"
 	"github.com/shapeshift/unchained/coinstacks/binance"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/shapeshift/unchained/pkg/websocket"
 	coretypes "github.com/tendermint/tendermint/rpc/core/types"
-	rpctypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 	"github.com/tendermint/tendermint/types"
 )
 
@@ -54,7 +52,7 @@ func (h *Handler) StartWebsocket() error {
 			GasWanted:     strconv.Itoa(int(tx.Result.GasWanted)),
 			Index:         int(tx.Index),
 			Memo:          pTx.(txtypes.StdTx).Memo,
-			Messages:      ParseMessages(pTx.GetMsgs()),
+			Messages:      binance.ParseMessages(pTx.GetMsgs()),
 		}
 
 		seen := make(map[string]bool)
@@ -156,54 +154,17 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 }
 
 func (h *Handler) GetTx(txid string) (api.Tx, error) {
-	var res *rpctypes.RPCResponse
-
-	_, err := h.HTTPClient.RPC.R().SetResult(&res).SetQueryParam("hash", txid).Get("/tx")
+	tx, err := h.HTTPClient.GetTx(txid)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get tx: %s", txid)
+		return nil, err
 	}
 
-	tx := &coretypes.ResultTx{}
-	err = h.HTTPClient.GetEncoding().Amino.UnmarshalJSON(res.Result, tx)
+	t, err := h.formatTx(tx)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to decode tx: %v", res.Result)
+		return nil, errors.Wrapf(err, "failed to format transaction: %s", tx.Hash.String())
 	}
 
-	return h.formatTx(tx)
-}
-
-func ParseMessages(msgs []msgtypes.Msg) []cosmos.Message {
-	messages := []cosmos.Message{}
-
-	coinToValue := func(c commontypes.Coin) cosmos.Value {
-		return cosmos.Value{
-			Amount: strconv.Itoa(int(c.Amount)),
-			Denom:  c.Denom,
-		}
-	}
-
-	for _, msg := range msgs {
-		switch v := msg.(type) {
-		case msgtypes.SendMsg:
-			addresses := []string{}
-			for _, a := range v.GetInvolvedAddresses() {
-				addresses = append(addresses, a.String())
-			}
-
-			message := cosmos.Message{
-				Addresses: addresses,
-				Origin:    v.GetSigners()[0].String(),
-				From:      v.Inputs[0].Address.String(),
-				To:        v.Outputs[0].Address.String(),
-				Value:     coinToValue(v.Inputs[0].Coins[0]),
-				Type:      v.Type(),
-			}
-
-			messages = append(messages, message)
-		}
-	}
-
-	return messages
+	return t, nil
 }
 
 func (h *Handler) SendTx(hex string) (string, error) {
@@ -233,12 +194,14 @@ func (h *Handler) formatTx(tx *coretypes.ResultTx) (*Tx, error) {
 			BlockHeight: block.Height,
 			Timestamp:   block.Timestamp,
 		},
+		// TODO: reference fees from /api/v1/fees
+		Fee:           cosmos.Value{Amount: "0", Denom: "BNB"},
 		Confirmations: h.BlockService.Latest.Height - int(tx.Height) + 1,
 		GasUsed:       strconv.Itoa(int(tx.TxResult.GasUsed)),
 		GasWanted:     strconv.Itoa(int(tx.TxResult.GasWanted)),
 		Index:         int(tx.Index),
 		Memo:          pTx.(txtypes.StdTx).Memo,
-		Messages:      ParseMessages(pTx.GetMsgs()),
+		Messages:      binance.ParseMessages(pTx.GetMsgs()),
 	}
 
 	return t, nil
