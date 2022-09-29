@@ -1,7 +1,7 @@
 import { createHash } from 'crypto'
 import { hashElement } from 'folder-hash'
 
-const rootDir = `${__dirname}/../../../..`
+const rootDir = `${__dirname}/../../node`
 
 // creates a hash of the content included in the final build image (base)
 export const getBaseHash = async (): Promise<string> => {

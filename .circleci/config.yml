@@ -157,11 +157,6 @@ aliases:
     coinstack: avalanche
     pulumi-stack: public
     pulumi-dir: coinstacks/avalanche/pulumi
-    indexer-cpu-limit: "4"
-    indexer-cpu-request: "2"
-    indexer-memory-limit: 12Gi
-    indexer-replicas: 2
-    indexer-storage-size: 500Gi
     indexer-url: http://avalanche-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://avalanche-indexer-svc.unchained.svc.cluster.local:8001/websocket
     rpc-url: https://avalanche--mainnet--rpc.datahub.figment.io/apikey/14c056a2415b6e0d2b9f55985214f3f1/ext/bc/C/rpc
@@ -172,17 +167,24 @@ aliases:
     api-cpu-request: 250m
     api-cpu-threshold: 30
     api-memory-limit: 2Gi
+    stateful-service-replicas: 2
+    service-name-1: indexer
+    service-image-1: registry.gitlab.com/thorchain/midgard:2.9.4
+    service-cpu-limit-1: "4"
+    service-cpu-request-1: "2"
+    service-memory-limit-1: 12Gi
+    service-storage-size-1: 500Gi
 
   - &avalanche-dev
     <<: *avalanche
     environment: dev
     pulumi-stack: public-dev
-    indexer-replicas: 2
     indexer-url: http://avalanche-indexer-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://avalanche-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-max-replicas: 3
     api-cpu-limit: 300m
     api-memory-limit: 1Gi
+    stateful-service-replicas: 1
 
   - &dogecoin
     coinstack: dogecoin
@@ -377,6 +379,18 @@ commands:
           name: goswagger
           command: docker pull quay.io/goswagger/swagger:v0.29.0
 
+  unchained-precheck:
+    description: install dependencies
+    steps:
+      - run:
+          working_directory: pulumi
+          name: yarn install pulumi
+          command: yarn install --immutable
+      - run:
+          working_directory: monitoring
+          name: yarn install monitoring
+          command: yarn install --immutable
+
   unchained-precheck-node:
     description: install node dependencies, build, lint and test
     steps:
@@ -501,7 +515,7 @@ jobs:
           organization: <<parameters.organization>>
       - run:
           name: pulumi
-          working_directory: node/pulumi
+          working_directory: pulumi/cluster
           command: |
             pulumi stack select $<< parameters.organization >>_PULUMI_ORG/dependencies
             pulumi config set --path unchained:common.cluster eks
@@ -876,7 +890,7 @@ jobs:
           organization: <<parameters.organization>>
       - run:
           name: pulumi
-          working_directory: node/monitoring
+          working_directory: monitoring
           command: |
             pulumi stack select $<< parameters.organization >>_PULUMI_ORG/prod
             pulumi config set --path unchained:monitoring.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies
@@ -907,6 +921,7 @@ jobs:
     steps:
       - checkout
       - setup-runtime
+      - unchained-precheck
       - unchained-precheck-go
       - unchained-precheck-node
       - run:

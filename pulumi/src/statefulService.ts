@@ -13,20 +13,28 @@ export interface ServiceArgs {
   config: ServiceConfig
   name: string
   ports: Record<string, Port>
-  env: Record<string, string>
+  command?: Array<string>
+  env?: Record<string, string>
   dataDir?: string
   configMapData?: Record<string, string>
   volumeMounts?: Array<k8s.types.input.core.v1.VolumeMount>
+  readinessProbe?: k8s.types.input.core.v1.Probe
+  livenessProbe?: k8s.types.input.core.v1.Probe
 }
 
 export function createService(args: ServiceArgs): Service {
   const name = `${args.asset}-${args.name}`
   const ports = Object.entries(args.ports).map(([name, { port, pathPrefix, stripPathPrefix }]) => ({ name, port, pathPrefix, stripPathPrefix }))
-  const env = Object.entries(args.env).map(([name, value]) => ({ name, value }))
+  const env = Object.entries(args.env ?? []).map(([name, value]) => ({ name, value }))
+
+  const init = (() => { try { return readFileSync(`../${args.name}/init.sh`).toString() } catch (err) { return '' } })()
+  const liveness = (() => { try { return readFileSync(`../${args.name}/liveness.sh`).toString() } catch (err) { return '' } })()
+  const readiness = (() => { try { return readFileSync(`../${args.name}/readiness.sh`).toString() } catch (err) { return '' } })()
 
   const configMapData = {
-    [`${args.name}-init.sh`]: readFileSync(`../${args.name}/init.sh`).toString(),
-    [`${args.name}-readiness.sh`]: readFileSync(`../${args.name}/readiness.sh`).toString(),
+    [`${args.name}-init.sh`]: init,
+    [`${args.name}-liveness.sh`]: liveness,
+    [`${args.name}-readiness.sh`]: readiness,
     ...(args.configMapData ?? {})
   }
 
@@ -34,7 +42,7 @@ export function createService(args: ServiceArgs): Service {
     {
       name,
       image: args.config.image,
-      command: ['/init.sh'],
+      command: args.command ?? ['/init.sh'],
       env,
       resources: {
         limits: {
@@ -64,14 +72,32 @@ export function createService(args: ServiceArgs): Service {
     {
       name: `${name}-monitor`,
       image: 'shapeshiftdao/unchained-probe:1.0.0',
-      readinessProbe: {
-        exec: {
-          command: ['/readiness.sh'],
-        },
-        initialDelaySeconds: 30,
-        periodSeconds: 10,
-      },
+      ...(liveness && {
+        livenessProbe: {
+          exec: {
+            command: ['/liveness.sh'],
+          },
+          initialDelaySeconds: 30,
+          periodSeconds: 10,
+          ...args.livenessProbe
+        }
+      }),
+      ...(readiness && {
+        readinessProbe: {
+          exec: {
+            command: ['/readiness.sh'],
+          },
+          initialDelaySeconds: 30,
+          periodSeconds: 10,
+          ...args.readinessProbe
+        }
+      }),
       volumeMounts: [
+        {
+          name: 'config-map',
+          mountPath: '/liveness.sh',
+          subPath: `${args.name}-liveness.sh`,
+        },
         {
           name: 'config-map',
           mountPath: '/readiness.sh',

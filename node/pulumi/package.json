@@ -1,5 +1,5 @@
 {
-  "name": "@shapeshiftoss/unchained-pulumi",
+  "name": "@shapeshiftoss/common-pulumi",
   "version": "8.0.0",
   "license": "MIT",
   "private": true,
@@ -7,8 +7,11 @@
     "clean": "rm -rf dist node_modules"
   },
   "dependencies": {
-    "@shapeshiftoss/cluster-launcher": "0.8.2",
+    "@pulumi/kubernetes": "3.19.3",
     "@types/folder-hash": "^4.0.1",
-    "folder-hash": "^4.0.2"
+    "@types/object-hash": "^2.2.1",
+    "dotenv": "^16.0.1",
+    "folder-hash": "^4.0.2",
+    "object-hash": "^3.0.0"
   }
 }

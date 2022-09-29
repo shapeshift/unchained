@@ -10,8 +10,6 @@ export interface Config {
 }
 
 export const getConfig = async (coinstack: string): Promise<Config> => {
-  console.log(pulumi.getStack())
-
   const config = (() => {
     try {
       return new pulumi.Config('unchained').requireObject<BaseConfig>(coinstack)

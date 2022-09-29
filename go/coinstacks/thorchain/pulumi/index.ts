@@ -1,22 +1,22 @@
 import { parse } from 'dotenv'
 import { readFileSync } from 'fs'
 import * as k8s from '@pulumi/kubernetes'
-import { createService, deployApi, deployStatefulService, getConfig, Service } from '../../../pulumi/src'
+import { deployApi, createService, deployStatefulService, getConfig, Service } from '../../../../pulumi/src'
+import { api } from '../../../pulumi/src'
 
 type Outputs = Record<string, any>
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
-  const { kubeconfig, config, namespace } = await getConfig('thorchain')
-
   const name = 'unchained'
-  const asset = config.network !== 'mainnet' ? `thorchain-${config.network}` : 'thorchain'
+  const coinstack = 'thorchain'
+  const { kubeconfig, config, namespace } = await getConfig(coinstack)
+  const asset = config.network !== 'mainnet' ? `${coinstack}-${config.network}` : coinstack
+  const provider = new k8s.Provider('kube-provider', { kubeconfig })
   const outputs: Outputs = {}
 
-  const provider = new k8s.Provider('kube-provider', { kubeconfig })
-
   const missingKeys: Array<string> = []
-  const stringData = Object.keys(parse(readFileSync('../../../cmd/thorchain/sample.env'))).reduce((prev, key) => {
+  const stringData = Object.keys(parse(readFileSync(`../../../cmd/${coinstack}/sample.env`))).reduce((prev, key) => {
     const value = process.env[key]
 
     if (!value) {
@@ -33,7 +33,20 @@ export = async (): Promise<Outputs> => {
 
   new k8s.core.v1.Secret(asset, { metadata: { name: asset, namespace }, stringData }, { provider })
 
-  await deployApi(name, asset, provider, namespace, config)
+  await deployApi({
+    app: name, asset, buildAndPushImageArgs: {
+      context: `../../../../go`,
+      dockerFile: `../../../build/Dockerfile`,
+    },
+    config,
+    container: {
+      args: ['-swagger', 'swagger.json'],
+    },
+    getHash: api.getHash,
+    namespace,
+    provider,
+    secretEnvs: api.secretEnvs(coinstack, asset),
+  })
 
   if (config.statefulService) {
     const services = config.statefulService.services.reduce<Record<string, Service>>((prev, service) => {
@@ -42,7 +55,7 @@ export = async (): Promise<Outputs> => {
           asset,
           config: service,
           dataDir: '/root',
-          env: { 'CHAIN_ID': `thorchain-${config.network}-v1`, 'NET': config.network },
+          env: { 'CHAIN_ID': `${coinstack}-${config.network}-v1`, 'NET': config.network },
           name: 'daemon',
           ports: {
             'daemon-api': { port: 1317, pathPrefix: '/lcd', stripPathPrefix: true },
@@ -62,8 +75,8 @@ export = async (): Promise<Outputs> => {
           },
           name: 'indexer',
           ports: { 'midgard': { port: 8080 } },
-          configMapData: {'indexer-config.json': readFileSync('../indexer/config.json').toString()},
-          volumeMounts: [{name: 'config-map', 'mountPath': '/config.json', subPath: 'indexer-config.json'}]
+          configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
+          volumeMounts: [{ name: 'config-map', 'mountPath': '/config.json', subPath: 'indexer-config.json' }]
         })
       }
 
