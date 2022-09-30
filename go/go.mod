@@ -16,7 +16,7 @@ require (
 	github.com/spf13/viper v1.10.1
 	github.com/tendermint/liquidity v1.5.0
 	github.com/tendermint/tendermint v0.34.15
-	gitlab.com/thorchain/thornode v1.97.0
+	gitlab.com/thorchain/thornode v1.97.2
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/grpc v1.45.0
 )
@@ -52,7 +52,7 @@ require (
 	github.com/dvsekhvalnov/jose2go v0.0.0-20200901110807-248326c1351b // indirect
 	github.com/eager7/dogd v0.0.0-20200427085516-2caf59f59dbb // indirect
 	github.com/eager7/dogutil v0.0.0-20200427040807-200e961ba4b5 // indirect
-	github.com/ethereum/go-ethereum v1.10.21 // indirect
+	github.com/ethereum/go-ethereum v1.10.23 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/gcash/bchd v0.17.1 // indirect
 	github.com/gcash/bchutil v0.0.0-20201025062739-fc759989ee3e // indirect
@@ -131,6 +131,6 @@ replace (
 	github.com/99designs/keyring => github.com/cosmos/keyring v1.1.7-0.20210622111912-ef00f8ac3d76
 	github.com/binance-chain/tss-lib => gitlab.com/thorchain/tss/tss-lib v0.1.2
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
-	gitlab.com/thorchain/thornode => github.com/shapeshift/thornode v1.95.0
+	gitlab.com/thorchain/thornode => github.com/shapeshift/thornode v1.97.2
 	google.golang.org/grpc => google.golang.org/grpc v1.33.2
 )
