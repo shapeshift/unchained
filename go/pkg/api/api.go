@@ -86,8 +86,8 @@ type Pagination struct {
 type Tx interface {
 	txid() string
 	blockHash() *string
-	blockHeight() *string
-	timestamp() *string
+	blockHeight() int
+	timestamp() int
 }
 
 // Contains info about required base transaction details
@@ -102,6 +102,22 @@ type BaseTx struct {
 	// required: true
 	// example: 1643052655037
 	Timestamp int `json:"timestamp"`
+}
+
+func (b *BaseTx) txid() string {
+	return b.TxID
+}
+
+func (b *BaseTx) blockHash() *string {
+	return b.BlockHash
+}
+
+func (b *BaseTx) blockHeight() int {
+	return b.BlockHeight
+}
+
+func (b *BaseTx) timestamp() int {
+	return b.Timestamp
 }
 
 type TxHistory interface {
