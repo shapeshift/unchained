@@ -84,6 +84,10 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 	return c, nil
 }
 
+func (c *HTTPClient) GetEncoding() *params.EncodingConfig {
+	return c.encoding
+}
+
 // GRPCClient allows communicating over grpc
 type GRPCClient struct {
 	ctx      context.Context
