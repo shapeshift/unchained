@@ -3,13 +3,15 @@ package cosmos
 import (
 	"strconv"
 	"sync"
-	"time"
 
 	"github.com/pkg/errors"
+	tmjson "github.com/tendermint/tendermint/libs/json"
+	coretypes "github.com/tendermint/tendermint/rpc/core/types"
+	rpctypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
 type BlockFetcher interface {
-	GetBlock(height *int) (*BlockResponse, error)
+	GetBlock(height *int) (*coretypes.ResultBlock, error)
 }
 
 type BlockService struct {
@@ -25,9 +27,15 @@ func NewBlockService(httpClient BlockFetcher) (*BlockService, error) {
 		httpClient: httpClient,
 	}
 
-	block, err := s.httpClient.GetBlock(nil)
+	result, err := s.httpClient.GetBlock(nil)
 	if err != nil {
 		return nil, errors.WithStack(err)
+	}
+
+	block := &BlockResponse{
+		Height:    int(result.Block.Height),
+		Hash:      result.Block.Hash().String(),
+		Timestamp: int(result.Block.Time.Unix()),
 	}
 
 	s.WriteBlock(block, true)
@@ -45,15 +53,19 @@ func (s *BlockService) WriteBlock(block *BlockResponse, latest bool) {
 }
 
 func (s *BlockService) GetBlock(height int) (*BlockResponse, error) {
-	block, ok := s.Blocks[height]
-
-	if ok {
+	if block, ok := s.Blocks[height]; ok {
 		return block, nil
 	}
 
-	block, err := s.httpClient.GetBlock(&height)
+	result, err := s.httpClient.GetBlock(&height)
 	if err != nil {
 		return nil, errors.WithStack(err)
+	}
+
+	block := &BlockResponse{
+		Height:    int(result.Block.Height),
+		Hash:      result.Block.Hash().String(),
+		Timestamp: int(result.Block.Time.Unix()),
 	}
 
 	s.WriteBlock(block, false)
@@ -61,57 +73,70 @@ func (s *BlockService) GetBlock(height int) (*BlockResponse, error) {
 	return block, nil
 }
 
-func (c *HTTPClient) GetBlock(height *int) (*BlockResponse, error) {
-	var res *TendermintBlockResponse
-	var resErr *struct {
-		RPCErrorResponse
-		Message string `json:"message"`
-	}
+func (c *HTTPClient) GetBlock(height *int) (*coretypes.ResultBlock, error) {
+	res := &rpctypes.RPCResponse{}
 
 	hs := ""
 	if height != nil {
 		hs = strconv.Itoa(*height)
 	}
 
-	_, err := c.RPC.R().SetResult(&res).SetError(&resErr).SetQueryParam("height", hs).Get("/block")
+	_, err := c.RPC.R().SetResult(&res).SetQueryParam("height", hs).Get("/block")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get block: %d", height)
 	}
 
-	if resErr != nil {
-		if resErr.Message != "" {
-			return nil, errors.Errorf("failed to get block: %d: %s", height, resErr.Message)
-		}
-
-		return nil, errors.Errorf("failed to get block: %d: %s", height, resErr.Error.Data)
+	if res.Error != nil {
+		return nil, errors.Errorf("failed to get block: %s: %s", hs, res.Error.Error())
 	}
 
-	if res == nil {
-		return nil, errors.Errorf("res is nil for height: %d", height)
-	}
-	if res.Result == nil {
-		return nil, errors.Errorf("res.Result is nil for height: %d", height)
-	}
-	if res.Result.Block == nil {
-		return nil, errors.Errorf("res.Result.Block is nil for height: %d", height)
+	result := &coretypes.ResultBlock{}
+	if err := tmjson.Unmarshal(res.Result, result); err != nil {
+		return nil, errors.Errorf("failed to unmarshal block result: %v: %s", res.Result, res.Error.Error())
 	}
 
-	timestamp, err := time.Parse(time.RFC3339, res.Result.Block.Header.Time)
+	return result, nil
+}
+
+func (c *HTTPClient) BlockSearch(query string, page int, pageSize int) (*coretypes.ResultBlockSearch, error) {
+	var res *rpctypes.RPCResponse
+
+	queryParams := map[string]string{
+		"query":    query,
+		"page":     strconv.Itoa(page),
+		"per_page": strconv.Itoa(pageSize),
+		"order_by": "\"desc\"",
+	}
+
+	_, err := c.RPC.R().SetResult(&res).SetQueryParams(queryParams).Get("/block_search")
 	if err != nil {
-		logger.Errorf("failed to parse timestamp: %s", res.Result.Block.Header.Time)
-		timestamp = time.Now()
+		return nil, errors.Wrap(err, "failed to search blocks")
 	}
 
-	h, err := strconv.Atoi(res.Result.Block.Header.Height)
+	if res.Error != nil {
+		return nil, errors.Wrap(errors.New(res.Error.Error()), "failed to search blocks")
+	}
+
+	result := &coretypes.ResultBlockSearch{}
+	if err := tmjson.Unmarshal(res.Result, result); err != nil {
+		return nil, errors.Wrapf(err, "failed to unmarshal block search result: %v", res.Result)
+	}
+
+	return result, nil
+}
+
+func (c *HTTPClient) BlockResults(height int) (*coretypes.ResultBlockResults, error) {
+	var res *rpctypes.RPCResponse
+
+	_, err := c.RPC.R().SetResult(&res).SetQueryParam("height", strconv.Itoa(height)).Get("/block_results")
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to convert block height: %s", res.Result.Block.Header.Height)
+		return nil, errors.Wrapf(err, "failed to get block results for block: %v", height)
 	}
 
-	b := &BlockResponse{
-		Height:    h,
-		Hash:      res.Result.BlockID.Hash,
-		Timestamp: int(timestamp.Unix()),
+	result := &coretypes.ResultBlockResults{}
+	if err := tmjson.Unmarshal(res.Result, result); err != nil {
+		return nil, errors.Wrapf(err, "failed to unmarshal block result: %v", res.Result)
 	}
 
-	return b, nil
+	return result, nil
 }
