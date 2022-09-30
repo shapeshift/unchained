@@ -9,12 +9,12 @@ import (
 
 // Cursor stores state between paginated requests
 type Cursor struct {
-	BlockHeight int    `json:"blockHeight"`
-	TxIndex     *int32 `json:"txIndex"`
-	ReceiveTxID string `json:"receiveTxID"`
-	SendTxID    string `json:"sendTxID"`
-	SendPage    int    `json:"sendPage"`
-	ReceivePage int    `json:"receivePage"`
+	BlockHeight int     `json:"blockHeight"`
+	TxIndex     *uint32 `json:"txIndex"`
+	ReceiveTxID string  `json:"receiveTxID"`
+	SendTxID    string  `json:"sendTxID"`
+	SendPage    int     `json:"sendPage"`
+	ReceivePage int     `json:"receivePage"`
 }
 
 // encode Cursor struct as a base64 string
