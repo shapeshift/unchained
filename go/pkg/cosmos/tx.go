@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/simapp/params"
@@ -19,15 +20,17 @@ import (
 	ibcchanneltypes "github.com/cosmos/ibc-go/v3/modules/core/04-channel/types"
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
+	tmjson "github.com/tendermint/tendermint/libs/json"
+	coretypes "github.com/tendermint/tendermint/rpc/core/types"
+	rpctypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
+	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (*TxHistoryResponse, error) {
 	history := &History{
-		ctx:      c.ctx,
 		cursor:   &Cursor{SendPage: 1, ReceivePage: 1},
 		pageSize: pageSize,
-		rpc:      c.RPC,
-		encoding: c.encoding,
+		client:   c,
 	}
 
 	if cursor != "" {
@@ -56,31 +59,54 @@ func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (
 	return txHistory, nil
 }
 
-func (c *HTTPClient) GetTx(txid string) (*DecodedTx, error) {
-	var res *TxResponse
-	var resErr *RPCErrorResponse
+func (c *HTTPClient) GetTx(txid string) (*coretypes.ResultTx, error) {
+	res := &rpctypes.RPCResponse{}
 
-	_, err := c.RPC.R().SetResult(&res).SetError(&resErr).SetQueryParam("hash", txid).Get("/tx")
+	_, err := c.RPC.R().SetResult(&res).SetQueryParam("hash", txid).Get("/tx")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get tx: %s", txid)
 	}
 
-	if resErr != nil {
-		return nil, errors.Wrapf(errors.New(resErr.Error.Data), "failed to get tx: %s", txid)
+	if res.Error != nil {
+		return nil, errors.Wrapf(errors.New(res.Error.Error()), "failed to get tx: %s", txid)
 	}
 
-	cosmosTx, signingTx, err := DecodeTx(*c.encoding, *res.Result.Tx)
+	tx := &coretypes.ResultTx{}
+	if err := tmjson.Unmarshal(res.Result, tx); err != nil {
+		return nil, errors.Errorf("failed to unmarshal tx result: %v: %s", res.Result, res.Error.Error())
+	}
+
+	return tx, nil
+}
+
+func (c *HTTPClient) TxSearch(query string, page int, pageSize int) (*coretypes.ResultTxSearch, error) {
+	res := &rpctypes.RPCResponse{}
+
+	queryParams := map[string]string{
+		"query":    query,
+		"page":     strconv.Itoa(page),
+		"per_page": strconv.Itoa(pageSize),
+		"order_by": "\"desc\"",
+	}
+
+	_, err := c.RPC.R().SetResult(res).SetQueryParams(queryParams).Get("/tx_search")
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to decode tx: %s", txid)
+		return nil, errors.Wrap(err, "failed to search txs")
 	}
 
-	t := &DecodedTx{
-		TendermintTx: res.Result,
-		CosmosTx:     cosmosTx,
-		SigningTx:    signingTx,
+	if res.Error != nil {
+		if strings.Contains(res.Error.Data, "page should be within") {
+			return &coretypes.ResultTxSearch{Txs: []*coretypes.ResultTx{}, TotalCount: 0}, nil
+		}
+		return nil, errors.Wrap(errors.New(res.Error.Error()), "failed to search txs")
 	}
 
-	return t, nil
+	result := &coretypes.ResultTxSearch{}
+	if err := tmjson.Unmarshal(res.Result, result); err != nil {
+		return nil, errors.Wrapf(err, "failed to unmarshal tx search result: %v", res.Result)
+	}
+
+	return result, nil
 }
 
 func (c *HTTPClient) BroadcastTx(rawTx string) (string, error) {
@@ -311,6 +337,8 @@ func DecodeTx(encoding params.EncodingConfig, rawTx interface{}) (sdk.Tx, signin
 			return nil, nil, errors.Wrapf(err, "error decoding transaction from base64")
 		}
 	case []byte:
+		txBytes = rawTx
+	case tmtypes.Tx:
 		txBytes = rawTx
 	default:
 		return nil, nil, errors.New("rawTx must be string or []byte")
