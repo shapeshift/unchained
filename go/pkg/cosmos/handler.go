@@ -171,7 +171,20 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 }
 
 func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
-	res, err := h.HTTPClient.GetTxHistory(pubkey, cursor, pageSize)
+	defaultSources := map[string]*TxState{
+		"send": {
+			hasMore: true,
+			query:   fmt.Sprintf(`"message.sender='%s'"`, pubkey),
+			request: h.HTTPClient.TxSearch,
+		},
+		"receive": {
+			hasMore: true,
+			query:   fmt.Sprintf(`"transfer.recipient='%s'"`, pubkey),
+			request: h.HTTPClient.TxSearch,
+		},
+	}
+
+	res, err := h.HTTPClient.GetTxHistory(pubkey, cursor, pageSize, defaultSources)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get tx history")
 	}

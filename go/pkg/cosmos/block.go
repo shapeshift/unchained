@@ -81,7 +81,7 @@ func (c *HTTPClient) GetBlock(height *int) (*coretypes.ResultBlock, error) {
 		hs = strconv.Itoa(*height)
 	}
 
-	_, err := c.RPC.R().SetResult(&res).SetQueryParam("height", hs).Get("/block")
+	_, err := c.RPC.R().SetResult(&res).SetError(res).SetQueryParam("height", hs).Get("/block")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get block: %d", height)
 	}
@@ -99,7 +99,7 @@ func (c *HTTPClient) GetBlock(height *int) (*coretypes.ResultBlock, error) {
 }
 
 func (c *HTTPClient) BlockSearch(query string, page int, pageSize int) (*coretypes.ResultBlockSearch, error) {
-	var res *rpctypes.RPCResponse
+	res := &rpctypes.RPCResponse{}
 
 	queryParams := map[string]string{
 		"query":    query,
@@ -108,7 +108,7 @@ func (c *HTTPClient) BlockSearch(query string, page int, pageSize int) (*coretyp
 		"order_by": "\"desc\"",
 	}
 
-	_, err := c.RPC.R().SetResult(&res).SetQueryParams(queryParams).Get("/block_search")
+	_, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParams(queryParams).Get("/block_search")
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to search blocks")
 	}
@@ -126,9 +126,9 @@ func (c *HTTPClient) BlockSearch(query string, page int, pageSize int) (*coretyp
 }
 
 func (c *HTTPClient) BlockResults(height int) (*coretypes.ResultBlockResults, error) {
-	var res *rpctypes.RPCResponse
+	res := &rpctypes.RPCResponse{}
 
-	_, err := c.RPC.R().SetResult(&res).SetQueryParam("height", strconv.Itoa(height)).Get("/block_results")
+	_, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParam("height", strconv.Itoa(height)).Get("/block_results")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get block results for block: %v", height)
 	}

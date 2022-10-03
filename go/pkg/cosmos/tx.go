@@ -26,11 +26,18 @@ import (
 	tmtypes "github.com/tendermint/tendermint/types"
 )
 
-func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (*TxHistoryResponse, error) {
+func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int, sources map[string]*TxState) (*TxHistoryResponse, error) {
 	history := &History{
-		cursor:   &Cursor{SendPage: 1, ReceivePage: 1},
+		cursor:   &Cursor{State: make(map[string]*CursorState)},
 		pageSize: pageSize,
+		state:    make(map[string]*TxState),
 		client:   c,
+	}
+
+	// set initial source state
+	for source, s := range sources {
+		history.cursor.State[source] = &CursorState{Page: 1}
+		history.state[source] = s
 	}
 
 	if cursor != "" {
@@ -39,19 +46,12 @@ func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (
 		}
 	}
 
-	history.send = &TxState{
-		hasMore: true,
-		page:    history.cursor.SendPage,
-		query:   fmt.Sprintf(`"message.sender='%s'"`, address),
+	// update sources with current cursor state
+	for source, s := range sources {
+		s.page = history.cursor.State[source].Page
 	}
 
-	history.receive = &TxState{
-		hasMore: true,
-		page:    history.cursor.ReceivePage,
-		query:   fmt.Sprintf(`"transfer.recipient='%s'"`, address),
-	}
-
-	txHistory, err := history.fetch()
+	txHistory, err := history.get()
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get tx history for address: %s", address)
 	}
@@ -62,7 +62,7 @@ func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int) (
 func (c *HTTPClient) GetTx(txid string) (*coretypes.ResultTx, error) {
 	res := &rpctypes.RPCResponse{}
 
-	_, err := c.RPC.R().SetResult(&res).SetQueryParam("hash", txid).Get("/tx")
+	_, err := c.RPC.R().SetResult(&res).SetError(res).SetQueryParam("hash", txid).Get("/tx")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get tx: %s", txid)
 	}
@@ -89,7 +89,7 @@ func (c *HTTPClient) TxSearch(query string, page int, pageSize int) (*coretypes.
 		"order_by": "\"desc\"",
 	}
 
-	_, err := c.RPC.R().SetResult(res).SetQueryParams(queryParams).Get("/tx_search")
+	_, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParams(queryParams).Get("/tx_search")
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to search txs")
 	}

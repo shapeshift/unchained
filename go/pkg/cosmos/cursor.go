@@ -7,14 +7,16 @@ import (
 	"github.com/pkg/errors"
 )
 
+type CursorState struct {
+	TxID string `json:"txid"`
+	Page int    `json:"page"`
+}
+
 // Cursor stores state between paginated requests
 type Cursor struct {
-	BlockHeight int     `json:"blockHeight"`
-	TxIndex     *uint32 `json:"txIndex"`
-	ReceiveTxID string  `json:"receiveTxID"`
-	SendTxID    string  `json:"sendTxID"`
-	SendPage    int     `json:"sendPage"`
-	ReceivePage int     `json:"receivePage"`
+	BlockHeight int64                   `json:"blockHeight"`
+	TxIndex     *uint32                 `json:"txIndex"`
+	State       map[string]*CursorState `json:"state"`
 }
 
 // encode Cursor struct as a base64 string
