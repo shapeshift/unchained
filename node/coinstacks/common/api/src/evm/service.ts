@@ -126,6 +126,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
           // process pending txs first, no associated internal txs
 
           txs.push({ ...blockbookTx })
+          blockbookTxs.delete(blockbookTx.txid)
           curCursor.blockbookTxid = blockbookTx.txid
         } else if (blockbookTx && blockbookTx.blockHeight >= (internalTx?.blockHeight ?? -2)) {
           // process transactions in descending order prioritizing confirmed, include associated internal txs
