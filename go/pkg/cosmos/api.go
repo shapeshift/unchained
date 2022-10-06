@@ -72,7 +72,6 @@ func (a *API) Shutdown() {
 }
 
 func (a *API) Root(w http.ResponseWriter, r *http.Request) {
-	logger.Debugf("%+v\n", r)
 	if r.Header.Get("Upgrade") == "websocket" {
 		a.Websocket(w, r)
 		return
@@ -91,12 +90,9 @@ func (a *API) Root(w http.ResponseWriter, r *http.Request) {
 func (a *API) Websocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		logger.Errorf("failed to upgrade: %v", err)
 		api.HandleError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	logger.Debug("upgraded websocket connection")
 
 	a.handler.NewWebsocketConnection(conn, a.manager)
 }
