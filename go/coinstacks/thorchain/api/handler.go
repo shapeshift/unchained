@@ -11,7 +11,6 @@ import (
 	"github.com/shapeshift/unchained/coinstacks/thorchain"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
-	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
 type Handler struct {
@@ -55,44 +54,79 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 }
 
 func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
-	address := "thor1ycgzfpcz93qa0xc392xgk75lfee5vdc59hv3r8"
-	query := fmt.Sprintf(`"outbound.to='%s'"`, address)
-	page := 1
-	pageSize = 10
+	blockSearch := func(query string, page int, pageSize int) ([]cosmos.HistoryTx, error) {
+		// search for any blocks where pubkey was associated with an indexed block event
+		result, err := h.HTTPClient.BlockSearch(query, page, pageSize)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
 
-	// search for any blocks address was associated with an outbound swap event
-	result, err := h.HTTPClient.BlockSearch(query, page, pageSize)
+		txs := []cosmos.HistoryTx{}
+		for _, b := range result.Blocks {
+			// fetch block results for each block found so we can inspect the EndBlockEvents
+			blockResult, err := h.HTTPClient.BlockResults(int(b.Block.Height))
+			if err != nil {
+				return nil, errors.WithStack(err)
+			}
+
+			// parse block events so we can filter by address and attach the appropriate event to the ResultTx
+			events, typedEvents, err := thorchain.ParseBlockEvents(blockResult.EndBlockEvents)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to parse block events")
+			}
+
+			for i, event := range typedEvents {
+				// track all addresses associated with the event
+				addrs := make(map[string]struct{})
+				for _, addr := range cosmos.GetTxAddrs(events, thorchain.TypedEventsToMessages([]thorchain.TypedEvent{event})) {
+					addrs[addr] = struct{}{}
+				}
+
+				// skip any events that pubkey is not associated with
+				if _, ok := addrs[pubkey]; !ok {
+					continue
+				}
+
+				tx := &ResultTx{
+					Height:     b.Block.Height,
+					Event:      events[strconv.Itoa(i)],
+					TypedEvent: event,
+					formatTx:   h.formatTx,
+				}
+
+				switch v := event.(type) {
+				case *thorchain.EventOutbound:
+					tx.TxID = v.InTxID
+				default:
+					continue
+				}
+
+				txs = append(txs, tx)
+			}
+		}
+
+		return txs, nil
+	}
+
+	sources := cosmos.NewDefaultSources(h.HTTPClient, pubkey, h.Handler.FormatTx)
+	sources["swap"] = cosmos.NewTxState(true, fmt.Sprintf(`"outbound.to='%s'"`, pubkey), blockSearch)
+
+	res, err := h.HTTPClient.GetTxHistory(pubkey, cursor, pageSize, sources)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, errors.Wrapf(err, "failed to get tx history")
 	}
 
-	txs := []cosmos.Tx{}
-	for _, b := range result.Blocks {
-		// fetch block results for each block found so we can inspect the EndBlockEvents
-		blockResult, err := h.HTTPClient.BlockResults(int(b.Block.Height))
-		if err != nil {
-			return nil, errors.WithStack(err)
-		}
-
-		// synthesize transactions from the EndBlockEvents
-		t, err := h.formatTxsFromBlockResult(blockResult, address)
-		if err != nil {
-			return nil, errors.WithStack(err)
-		}
-
-		txs = append(txs, t...)
-	}
-
-	history := cosmos.TxHistory{
+	txHistory := cosmos.TxHistory{
 		BaseTxHistory: api.BaseTxHistory{
 			Pagination: api.Pagination{
-				Cursor: "",
+				Cursor: res.Cursor,
 			},
+			Pubkey: pubkey,
 		},
-		Txs: txs,
+		Txs: res.Txs,
 	}
 
-	return history, nil
+	return txHistory, nil
 }
 
 func (h *Handler) ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Message {
@@ -112,55 +146,33 @@ func (h *Handler) ParseFee(tx signing.Tx, txid string, denom string) cosmos.Valu
 	return fee
 }
 
-func (h *Handler) formatTxsFromBlockResult(blockResult *coretypes.ResultBlockResults, address string) ([]cosmos.Tx, error) {
-	height := int(blockResult.Height)
-
-	block, err := h.BlockService.GetBlock(height)
+// formatTx creates a synthetic transaction from a BlockEndEvent
+func (h *Handler) formatTx(tx *ResultTx) (*cosmos.Tx, error) {
+	block, err := h.BlockService.GetBlock(int(tx.Height))
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get block: %d", height)
+		return nil, errors.Wrapf(err, "failed to get block: %d", tx.Height)
 	}
 
-	events, typedEvents, err := thorchain.ParseBlockEvents(blockResult.EndBlockEvents)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse block events")
+	t := &cosmos.Tx{
+		BaseTx: api.BaseTx{
+			BlockHash:   &block.Hash,
+			BlockHeight: block.Height,
+			Timestamp:   block.Timestamp,
+		},
+		Index:         -1, // synthetic transactions don't have a real tx index
+		Fee:           cosmos.Value{Amount: "2000000", Denom: "rune"},
+		Confirmations: h.BlockService.Latest.Height - int(block.Height) + 1,
+		Events:        cosmos.EventsByMsgIndex{"0": tx.Event},
+		GasWanted:     "0",
+		GasUsed:       "0",
+		Messages:      thorchain.TypedEventsToMessages([]thorchain.TypedEvent{tx.TypedEvent}),
 	}
 
-	txs := []cosmos.Tx{}
-	for i, event := range typedEvents {
-		tx := cosmos.Tx{
-			BaseTx: api.BaseTx{
-				BlockHash:   &block.Hash,
-				BlockHeight: block.Height,
-				Timestamp:   block.Timestamp,
-			},
-			Fee:           cosmos.Value{Amount: "0", Denom: "rune"},
-			Confirmations: h.BlockService.Latest.Height - int(height) + 1,
-			Events:        cosmos.EventsByMsgIndex{"0": events[strconv.Itoa(i)]},
-			GasWanted:     "0",
-			GasUsed:       "0",
-			Messages:      thorchain.TypedEventsToMessages([]thorchain.TypedEvent{event}),
-		}
-
-		addrs := make(map[string]struct{})
-		for _, addr := range cosmos.GetTxAddrs(tx.Events, tx.Messages) {
-			addrs[addr] = struct{}{}
-		}
-
-		// do not create synthetic transaction for block events that aren't associated with the search address
-		if _, ok := addrs[address]; !ok {
-			continue
-		}
-
-		switch v := event.(type) {
-		case *thorchain.EventOutbound:
-			tx.BaseTx.TxID = v.InTxID
-			tx.Memo = v.Memo
-		default:
-			continue
-		}
-
-		txs = append(txs, tx)
+	switch v := tx.TypedEvent.(type) {
+	case *thorchain.EventOutbound:
+		t.BaseTx.TxID = v.InTxID
+		t.Memo = v.Memo
 	}
 
-	return txs, nil
+	return t, nil
 }

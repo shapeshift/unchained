@@ -86,7 +86,7 @@ func TypedEventsToMessages(events []TypedEvent) []cosmos.Message {
 				Origin:    v.FromAddress,
 				From:      v.FromAddress,
 				To:        v.ToAddress,
-				Type:      "outbound",
+				Type:      "swap",
 				Value:     coinToValue(v.Coin),
 			}
 			messages = append(messages, message)

@@ -1,8 +1,6 @@
 package cosmos
 
-import (
-	coretypes "github.com/tendermint/tendermint/rpc/core/types"
-)
+import coretypes "github.com/tendermint/tendermint/rpc/core/types"
 
 type AccountResponse struct {
 	Address       string
@@ -32,7 +30,35 @@ type Pagination struct {
 	Total   uint64  `json:"total,string,omitempty"`
 }
 
+type HistoryTx interface {
+	GetHeight() int64
+	GetIndex() int
+	GetTxID() string
+	FormatTx() (*Tx, error)
+}
+
+type ResultTx struct {
+	*coretypes.ResultTx
+	formatTx func(tx *coretypes.ResultTx) (*Tx, error)
+}
+
+func (r *ResultTx) GetHeight() int64 {
+	return r.Height
+}
+
+func (r *ResultTx) GetIndex() int {
+	return int(r.Index)
+}
+
+func (r *ResultTx) GetTxID() string {
+	return r.Hash.String()
+}
+
+func (r *ResultTx) FormatTx() (*Tx, error) {
+	return r.formatTx(r.ResultTx)
+}
+
 type TxHistoryResponse struct {
 	Cursor string
-	Txs    []*coretypes.ResultTx
+	Txs    []Tx
 }

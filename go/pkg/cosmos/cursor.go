@@ -15,7 +15,7 @@ type CursorState struct {
 // Cursor stores state between paginated requests
 type Cursor struct {
 	BlockHeight int64                   `json:"blockHeight"`
-	TxIndex     *uint32                 `json:"txIndex"`
+	TxIndex     *int                    `json:"txIndex"`
 	State       map[string]*CursorState `json:"state"`
 }
 

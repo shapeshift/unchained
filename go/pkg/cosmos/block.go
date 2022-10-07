@@ -2,6 +2,7 @@ package cosmos
 
 import (
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/pkg/errors"
@@ -114,6 +115,9 @@ func (c *HTTPClient) BlockSearch(query string, page int, pageSize int) (*coretyp
 	}
 
 	if res.Error != nil {
+		if strings.Contains(res.Error.Data, "page should be within") {
+			return &coretypes.ResultBlockSearch{Blocks: []*coretypes.ResultBlock{}, TotalCount: 0}, nil
+		}
 		return nil, errors.Wrap(errors.New(res.Error.Error()), "failed to search blocks")
 	}
 

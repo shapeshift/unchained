@@ -171,32 +171,11 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 }
 
 func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
-	defaultSources := map[string]*TxState{
-		"send": {
-			hasMore: true,
-			query:   fmt.Sprintf(`"message.sender='%s'"`, pubkey),
-			request: h.HTTPClient.TxSearch,
-		},
-		"receive": {
-			hasMore: true,
-			query:   fmt.Sprintf(`"transfer.recipient='%s'"`, pubkey),
-			request: h.HTTPClient.TxSearch,
-		},
-	}
+	sources := NewDefaultSources(h.HTTPClient, pubkey, h.FormatTx)
 
-	res, err := h.HTTPClient.GetTxHistory(pubkey, cursor, pageSize, defaultSources)
+	res, err := h.HTTPClient.GetTxHistory(pubkey, cursor, pageSize, sources)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get tx history")
-	}
-
-	txs := []Tx{}
-	for _, t := range res.Txs {
-		tx, err := h.formatTx(t)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to format transaction: %s", t.Hash)
-		}
-
-		txs = append(txs, *tx)
 	}
 
 	txHistory := TxHistory{
@@ -206,7 +185,7 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 			},
 			Pubkey: pubkey,
 		},
-		Txs: txs,
+		Txs: res.Txs,
 	}
 
 	return txHistory, nil
@@ -218,7 +197,7 @@ func (h *Handler) GetTx(txid string) (api.Tx, error) {
 		return nil, err
 	}
 
-	t, err := h.formatTx(tx)
+	t, err := h.FormatTx(tx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to format transaction: %s", tx.Hash)
 	}
@@ -286,7 +265,7 @@ func (h *Handler) GetStaking(pubkey string, apr *big.Float) (*Staking, error) {
 	return staking, nil
 }
 
-func (h *Handler) formatTx(tx *coretypes.ResultTx) (*Tx, error) {
+func (h *Handler) FormatTx(tx *coretypes.ResultTx) (*Tx, error) {
 	height := int(tx.Height)
 
 	block, err := h.BlockService.GetBlock(height)

@@ -1,6 +1,8 @@
 package thorchain
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	thorchaintypes "gitlab.com/thorchain/thornode/x/thorchain/types"
@@ -28,6 +30,18 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 				To:        v.ToAddress.String(),
 				Type:      v.Type(),
 				Value:     coinToValue(&v.Amount[0]),
+			}
+			messages = append(messages, message)
+		case *thorchaintypes.MsgDeposit:
+			message := cosmos.Message{
+				Addresses: []string{v.Signer.String()},
+				Origin:    v.Signer.String(),
+				From:      v.Signer.String(),
+				Type:      v.Type(),
+				Value: cosmos.Value{
+					Amount: v.Coins[0].Amount.String(),
+					Denom:  fmt.Sprintf("%s.%s", v.Coins[0].Asset.Chain, v.Coins[0].Asset.Symbol),
+				},
 			}
 			messages = append(messages, message)
 		default:
