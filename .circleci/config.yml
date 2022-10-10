@@ -36,7 +36,7 @@ aliases:
     indexer-storage-size: 500Gi
     indexer-url: http://bitcoin-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://bitcoin-indexer-svc.unchained.svc.cluster.local:8001/websocket
-    daemon-image: ruimarinho/bitcoin-core:0.21.0
+    daemon-image: ruimarinho/bitcoin-core:23.0
     daemon-cpu-limit: "2"
     daemon-cpu-request: "1"
     daemon-memory-limit: 12Gi
