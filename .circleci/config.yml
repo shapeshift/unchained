@@ -36,7 +36,7 @@ aliases:
     indexer-storage-size: 500Gi
     indexer-url: http://bitcoin-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://bitcoin-indexer-svc.unchained.svc.cluster.local:8001/websocket
-    daemon-image: ruimarinho/bitcoin-core:0.21.0
+    daemon-image: ruimarinho/bitcoin-core:23.0
     daemon-cpu-limit: "2"
     daemon-cpu-request: "1"
     daemon-memory-limit: 12Gi
@@ -515,14 +515,14 @@ jobs:
             pulumi config set --path unchained:common.eks.nodeGroups[0].name spot
             pulumi config set --path unchained:common.eks.nodeGroups[0].type SPOT
             pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 1
-            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 5
+            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 12
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[0] r5.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r5a.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r5b.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[3] r5n.4xlarge
             pulumi config set --path unchained:common.eks.traefik.autoscaling.enabled true
             pulumi config set --path unchained:common.eks.traefik.autoscaling.cpuThreshold 20
-            pulumi config set --path unchained:common.eks.traefik.autoscaling.maxReplicas 15
+            pulumi config set --path unchained:common.eks.traefik.autoscaling.maxReplicas 20
             pulumi config set --path unchained:common.eks.traefik.replicas 5
             pulumi config set --path unchained:common.eks.traefik.resources.cpu 300m
             pulumi config set --path unchained:common.eks.traefik.resources.memory 512Mi
@@ -1381,6 +1381,8 @@ workflows:
             - approve bitcoin coinstack (taxistake)
           <<: *bitcoin
           <<: *only-main
+          api-max-replicas: 12
+          indexer-replicas: 6
 
       ####### BITCOINCASH
       - deploy-coinstack-node:
@@ -1407,6 +1409,8 @@ workflows:
             - approve bitcoincash coinstack (taxistake)
           <<: *bitcoincash
           <<: *only-main
+          api-max-replicas: 12
+          indexer-replicas: 6
 
       ####### DOGECOIN
       - deploy-coinstack-node:
@@ -1433,6 +1437,8 @@ workflows:
             - approve dogecoin coinstack (taxistake)
           <<: *dogecoin
           <<: *only-main
+          api-max-replicas: 12
+          indexer-replicas: 6
 
       ####### LITECOIN
       - deploy-coinstack-node:
@@ -1459,6 +1465,8 @@ workflows:
             - approve litecoin coinstack (taxistake)
           <<: *litecoin
           <<: *only-main
+          api-max-replicas: 12
+          indexer-replicas: 6
 
       ####### ETHEREUM
       - deploy-coinstack-node:
@@ -1485,6 +1493,8 @@ workflows:
             - approve ethereum coinstack (taxistake)
           <<: *ethereum
           <<: *only-main
+          api-max-replicas: 12
+          indexer-replicas: 6
 
       ####### AVALANCHE
       - deploy-coinstack-node:
@@ -1511,6 +1521,8 @@ workflows:
             - approve avalanche coinstack (taxistake)
           <<: *avalanche
           <<: *only-main
+          api-max-replicas: 12
+          indexer-replicas: 6
 
       ####### COSMOS
       - deploy-coinstack-go:
@@ -1537,6 +1549,7 @@ workflows:
             - approve cosmos coinstack (taxistake)
           <<: *cosmos
           <<: *only-main
+          api-max-replicas: 12
 
       ####### OSMOSIS
       - deploy-coinstack-go:
@@ -1563,6 +1576,7 @@ workflows:
             - approve osmosis coinstack (taxistake)
           <<: *osmosis
           <<: *only-main
+          api-max-replicas: 12
 
       ####### THORCHAIN
       - deploy-coinstack-go:
@@ -1589,3 +1603,5 @@ workflows:
             - approve thorchain coinstack (taxistake)
           <<: *thorchain
           <<: *only-main
+          api-max-replicas: 12
+          stateful-service-replicas: 6
