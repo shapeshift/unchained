@@ -72,7 +72,7 @@ func (a *API) Shutdown() {
 }
 
 func (a *API) Root(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Scheme == "ws" || r.URL.Scheme == "wss" {
+	if r.Header.Get("Upgrade") == "websocket" {
 		a.Websocket(w, r)
 		return
 	}
