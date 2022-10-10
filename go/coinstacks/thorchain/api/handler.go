@@ -54,7 +54,21 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 }
 
 func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
-	blockSearch := func(query string, page int, pageSize int) ([]cosmos.HistoryTx, error) {
+	// attempt to find matching fee event for txid or use default fee as defined by https://daemon.thorchain.shapeshift.com/lcd/thorchain/constants
+	matchFee := func(txid string, events []thorchain.TypedEvent) cosmos.Value {
+		for _, e := range events {
+			switch v := e.(type) {
+			case *thorchain.EventFee:
+				if txid == v.TxID {
+					return thorchain.CoinToValue(v.Coins)
+				}
+			}
+		}
+
+		return cosmos.Value{Amount: "2000000", Denom: "rune"}
+	}
+
+	request := func(query string, page int, pageSize int) ([]cosmos.HistoryTx, error) {
 		// search for any blocks where pubkey was associated with an indexed block event
 		result, err := h.HTTPClient.BlockSearch(query, page, pageSize)
 		if err != nil {
@@ -97,6 +111,7 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 				switch v := event.(type) {
 				case *thorchain.EventOutbound:
 					tx.TxID = v.InTxID
+					tx.Fee = matchFee(v.InTxID, typedEvents)
 				default:
 					continue
 				}
@@ -109,7 +124,7 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 	}
 
 	sources := cosmos.NewDefaultSources(h.HTTPClient, pubkey, h.Handler.FormatTx)
-	sources["swap"] = cosmos.NewTxState(true, fmt.Sprintf(`"outbound.to='%s'"`, pubkey), blockSearch)
+	sources["swap"] = cosmos.NewTxState(true, fmt.Sprintf(`"outbound.to='%s'"`, pubkey), request)
 
 	res, err := h.HTTPClient.GetTxHistory(pubkey, cursor, pageSize, sources)
 	if err != nil {
@@ -160,7 +175,7 @@ func (h *Handler) formatTx(tx *ResultTx) (*cosmos.Tx, error) {
 			Timestamp:   block.Timestamp,
 		},
 		Index:         -1, // synthetic transactions don't have a real tx index
-		Fee:           cosmos.Value{Amount: "2000000", Denom: "rune"},
+		Fee:           tx.Fee,
 		Confirmations: h.BlockService.Latest.Height - int(block.Height) + 1,
 		Events:        cosmos.EventsByMsgIndex{"0": tx.Event},
 		GasWanted:     "0",

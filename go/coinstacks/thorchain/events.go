@@ -13,6 +13,13 @@ import (
 
 type TypedEvent interface{}
 
+type EventFee struct {
+	TxID       string `json:"tx_id"`
+	Coins      string `json:"coins"`
+	PoolDeduct string `json:"pool_deduct"`
+	SynthUnits string `json:"synth_units"`
+}
+
 type EventOutbound struct {
 	InTxID      string `json:"in_tx_id"`
 	ID          string `json:"id"`
@@ -23,6 +30,20 @@ type EventOutbound struct {
 	Memo        string `json:"memo"`
 }
 
+func CoinToValue(coin string) cosmos.Value {
+	coinParts := strings.Fields(coin)
+
+	denom, ok := assetToDenom[coinParts[1]]
+	if !ok {
+		denom = coinParts[1]
+	}
+
+	return cosmos.Value{
+		Amount: coinParts[0],
+		Denom:  denom,
+	}
+}
+
 func ParseBlockEvents(events []abci.Event) (cosmos.EventsByMsgIndex, []TypedEvent, error) {
 	idx := 0
 	typedEvents := []TypedEvent{}
@@ -31,6 +52,8 @@ func ParseBlockEvents(events []abci.Event) (cosmos.EventsByMsgIndex, []TypedEven
 	var typedEvent TypedEvent
 	for _, event := range events {
 		switch event.Type {
+		case "fee":
+			typedEvent = &EventFee{}
 		case "outbound":
 			typedEvent = &EventOutbound{}
 		default:
@@ -68,14 +91,6 @@ func ParseBlockEvents(events []abci.Event) (cosmos.EventsByMsgIndex, []TypedEven
 func TypedEventsToMessages(events []TypedEvent) []cosmos.Message {
 	messages := []cosmos.Message{}
 
-	coinToValue := func(coin string) cosmos.Value {
-		coinParts := strings.Fields(coin)
-		return cosmos.Value{
-			Amount: coinParts[0],
-			Denom:  coinParts[1],
-		}
-	}
-
 	for _, event := range events {
 		switch v := event.(type) {
 		case *EventOutbound:
@@ -85,7 +100,7 @@ func TypedEventsToMessages(events []TypedEvent) []cosmos.Message {
 				From:      v.FromAddress,
 				To:        v.ToAddress,
 				Type:      "swap",
-				Value:     coinToValue(v.Coin),
+				Value:     CoinToValue(v.Coin),
 			}
 			messages = append(messages, message)
 		}

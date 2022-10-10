@@ -5,10 +5,12 @@ import (
 	"github.com/shapeshift/unchained/pkg/cosmos"
 )
 
+// ResultTx represents a tx_search ResultTx created from block_result block events
 type ResultTx struct {
 	Height     int64
 	Index      int
 	TxID       string
+	Fee        cosmos.Value
 	Event      cosmos.AttributesByEvent
 	TypedEvent thorchain.TypedEvent
 	formatTx   func(tx *ResultTx) (*cosmos.Tx, error)
