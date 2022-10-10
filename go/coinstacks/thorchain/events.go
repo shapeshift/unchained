@@ -11,6 +11,8 @@ import (
 	tmjson "github.com/tendermint/tendermint/libs/json"
 )
 
+type TypedEvent interface{}
+
 type EventOutbound struct {
 	InTxID      string `json:"in_tx_id"`
 	ID          string `json:"id"`
@@ -21,22 +23,17 @@ type EventOutbound struct {
 	Memo        string `json:"memo"`
 }
 
-var registry = make(map[string]func() TypedEvent)
-
-func init() {
-	registry["outbound"] = func() TypedEvent { return &EventOutbound{} }
-}
-
-type TypedEvent interface{}
-
 func ParseBlockEvents(events []abci.Event) (cosmos.EventsByMsgIndex, []TypedEvent, error) {
 	idx := 0
 	typedEvents := []TypedEvent{}
 	eventsByMsgIndex := cosmos.EventsByMsgIndex{}
 
+	var typedEvent TypedEvent
 	for _, event := range events {
-		rt, ok := registry[event.Type]
-		if !ok {
+		switch event.Type {
+		case "outbound":
+			typedEvent = &EventOutbound{}
+		default:
 			continue
 		}
 
@@ -44,6 +41,8 @@ func ParseBlockEvents(events []abci.Event) (cosmos.EventsByMsgIndex, []TypedEven
 		attributes := make(cosmos.ValueByAttribute)
 		for _, a := range event.Attributes {
 			attributes[string(a.Key)] = string(a.Value)
+
+			// format attribute value as valid json string
 			attrMap[string(a.Key)] = json.RawMessage(fmt.Sprintf("\"%s\"", string(a.Value)))
 		}
 
@@ -52,7 +51,6 @@ func ParseBlockEvents(events []abci.Event) (cosmos.EventsByMsgIndex, []TypedEven
 			return nil, nil, err
 		}
 
-		typedEvent := rt()
 		if err := tmjson.Unmarshal(attrBytes, typedEvent); err != nil {
 			return nil, nil, err
 		}
