@@ -82,7 +82,7 @@ func (c *HTTPClient) GetBlock(height *int) (*coretypes.ResultBlock, error) {
 		hs = strconv.Itoa(*height)
 	}
 
-	_, err := c.RPC.R().SetResult(&res).SetError(res).SetQueryParam("height", hs).Get("/block")
+	_, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParam("height", hs).Get("/block")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get block: %d", height)
 	}
