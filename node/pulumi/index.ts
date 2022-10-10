@@ -63,21 +63,22 @@ export = async (): Promise<Outputs> => {
       const blockbookImage = `${config.dockerhub.username}/${name}-blockbook`
       const { hash: blockbookTag } = await hashElement(`../packages/blockbook/Dockerfile`, { encoding: 'hex' })
 
-      if (!(await hasTag(blockbookImage, blockbookTag))) {
-        await buildAndPushImage({
-          image: blockbookImage,
-          context: '../packages/blockbook',
-          auth: {
-            password: config.dockerhub.password,
-            username: config.dockerhub.username,
-            server: config.dockerhub.server,
-          },
-          buildArgs: { BUILDKIT_INLINE_CACHE: '1' },
-          env: { DOCKER_BUILDKIT: '1' },
-          tags: [blockbookTag],
-          cacheFroms: [`${blockbookImage}:${blockbookTag}`, `${blockbookImage}:latest`],
-        })
-      }
+      // NOTE: manual rebuild of same tag, remove after deploy
+      //if (!(await hasTag(blockbookImage, blockbookTag))) {
+      await buildAndPushImage({
+        image: blockbookImage,
+        context: '../packages/blockbook',
+        auth: {
+          password: config.dockerhub.password,
+          username: config.dockerhub.username,
+          server: config.dockerhub.server,
+        },
+        buildArgs: { BUILDKIT_INLINE_CACHE: '1' },
+        env: { DOCKER_BUILDKIT: '1' },
+        tags: [blockbookTag],
+        cacheFroms: [`${blockbookImage}:${blockbookTag}`, `${blockbookImage}:latest`],
+      })
+      //}
     }
   }
 

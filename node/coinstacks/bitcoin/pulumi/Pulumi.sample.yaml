@@ -39,6 +39,6 @@ config:
     #  daemon:
     #    cpuLimit: '2'
     #    cpuRequest: '2'
-    #    image: 'ruimarinho/bitcoin-core:0.21.1'
+    #    image: 'ruimarinho/bitcoin-core:23.0'
     #    memoryLimit: '24Gi'
     #    storageSize: '1500Gi'
