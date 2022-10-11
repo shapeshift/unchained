@@ -6,6 +6,11 @@ import (
 	thorchaintypes "gitlab.com/thorchain/thornode/x/thorchain/types"
 )
 
+// map thorchain assets to native tendermint denoms
+var assetToDenom = map[string]string{
+	"THOR.RUNE": "rune",
+}
+
 // ParseMessages will parse any thorchain or cosmos-sdk message types
 func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Message {
 	messages := []cosmos.Message{}
