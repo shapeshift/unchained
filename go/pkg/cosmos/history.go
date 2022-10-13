@@ -219,26 +219,7 @@ func (h *History) fetch(more bool) error {
 		return errors.WithStack(err)
 	}
 
-	h.removeDuplicateTxs()
-
 	return nil
-}
-
-func (h *History) removeDuplicateTxs() {
-	seenTxs := make(map[string]bool)
-
-	for _, s := range h.state {
-		txs := []HistoryTx{}
-
-		for _, tx := range s.txs {
-			if _, seen := seenTxs[tx.GetTxID()]; !seen {
-				seenTxs[tx.GetTxID()] = true
-				txs = append(txs, tx)
-			}
-		}
-
-		s.txs = txs
-	}
 }
 
 func (h *History) hasTxHistory() bool {
