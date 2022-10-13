@@ -1,8 +1,11 @@
 package thorchain
 
 import (
+	"strconv"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/shapeshift/unchained/pkg/cosmos"
+	"gitlab.com/thorchain/thornode/common"
 	thorchaintypes "gitlab.com/thorchain/thornode/x/thorchain/types"
 )
 
@@ -22,8 +25,20 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 		}
 	}
 
+	thorCoinToValue := func(c common.Coin) cosmos.Value {
+		denom, ok := assetToDenom[c.Asset.String()]
+		if !ok {
+			denom = c.Asset.String()
+		}
+
+		return cosmos.Value{
+			Amount: c.Amount.String(),
+			Denom:  denom,
+		}
+	}
+
 	unhandledMsgs := []sdk.Msg{}
-	for _, msg := range msgs {
+	for i, msg := range msgs {
 		switch v := msg.(type) {
 		case *thorchaintypes.MsgSend:
 			message := cosmos.Message{
@@ -33,6 +48,18 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 				To:        v.ToAddress.String(),
 				Type:      v.Type(),
 				Value:     coinToValue(&v.Amount[0]),
+			}
+			messages = append(messages, message)
+		case *thorchaintypes.MsgDeposit:
+			events[strconv.Itoa(i)]["message"]["memo"] = v.Memo // add memo value from message to events
+			to := events[strconv.Itoa(i)]["transfer"]["recipient"]
+			message := cosmos.Message{
+				Addresses: []string{v.Signer.String(), to},
+				Origin:    v.Signer.String(),
+				From:      v.Signer.String(),
+				To:        to,
+				Type:      v.Type(),
+				Value:     thorCoinToValue(v.Coins[0]),
 			}
 			messages = append(messages, message)
 		default:
