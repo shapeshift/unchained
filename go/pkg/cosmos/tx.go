@@ -196,6 +196,10 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 	messages := []Message{}
 
 	coinToValue := func(c *sdk.Coin) Value {
+		if c == nil {
+			return Value{}
+		}
+
 		return Value{
 			Amount: c.Amount.String(),
 			Denom:  c.Denom,
@@ -245,7 +249,10 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 			}
 			messages = append(messages, message)
 		case *distributiontypes.MsgWithdrawDelegatorReward:
-			amount := events[strconv.Itoa(i)]["withdraw_rewards"]["amount"]
+			var amount string
+			if _, ok := events["0"]["error"]; !ok {
+				amount = events[strconv.Itoa(i)]["withdraw_rewards"]["amount"]
+			}
 
 			coin, err := sdk.ParseCoinNormalized(amount)
 			if err != nil && amount != "" {
@@ -286,20 +293,13 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 				logger.Error(err)
 			}
 
-			amount := events[strconv.Itoa(i)]["transfer"]["amount"]
-
-			coin, err := sdk.ParseCoinNormalized(amount)
-			if err != nil {
-				logger.Error(err)
-			}
-
 			message := Message{
 				Addresses: []string{d.Sender, d.Receiver},
 				Origin:    d.Sender,
 				From:      d.Sender,
 				To:        d.Receiver,
 				Type:      "recv_packet",
-				Value:     coinToValue(&coin),
+				Value:     Value{Amount: d.Amount, Denom: d.Denom},
 			}
 			messages = append(messages, message)
 		}
