@@ -195,13 +195,6 @@ func ParseEvents(log string) EventsByMsgIndex {
 func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 	messages := []Message{}
 
-	coinToValue := func(c *sdk.Coin) Value {
-		return Value{
-			Amount: c.Amount.String(),
-			Denom:  c.Denom,
-		}
-	}
-
 	for i, msg := range msgs {
 		switch v := msg.(type) {
 		case *banktypes.MsgSend:
@@ -211,7 +204,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 				From:      v.FromAddress,
 				To:        v.ToAddress,
 				Type:      v.Type(),
-				Value:     coinToValue(&v.Amount[0]),
+				Value:     CoinToValue(&v.Amount[0]),
 			}
 			messages = append(messages, message)
 		case *stakingtypes.MsgDelegate:
@@ -221,7 +214,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 				From:      v.DelegatorAddress,
 				To:        v.ValidatorAddress,
 				Type:      v.Type(),
-				Value:     coinToValue(&v.Amount),
+				Value:     CoinToValue(&v.Amount),
 			}
 			messages = append(messages, message)
 		case *stakingtypes.MsgUndelegate:
@@ -231,7 +224,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 				From:      v.ValidatorAddress,
 				To:        v.DelegatorAddress,
 				Type:      v.Type(),
-				Value:     coinToValue(&v.Amount),
+				Value:     CoinToValue(&v.Amount),
 			}
 			messages = append(messages, message)
 		case *stakingtypes.MsgBeginRedelegate:
@@ -241,11 +234,14 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 				From:      v.ValidatorSrcAddress,
 				To:        v.ValidatorDstAddress,
 				Type:      v.Type(),
-				Value:     coinToValue(&v.Amount),
+				Value:     CoinToValue(&v.Amount),
 			}
 			messages = append(messages, message)
 		case *distributiontypes.MsgWithdrawDelegatorReward:
-			amount := events[strconv.Itoa(i)]["withdraw_rewards"]["amount"]
+			var amount string
+			if _, ok := events["0"]["error"]; !ok {
+				amount = events[strconv.Itoa(i)]["withdraw_rewards"]["amount"]
+			}
 
 			coin, err := sdk.ParseCoinNormalized(amount)
 			if err != nil && amount != "" {
@@ -258,7 +254,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 				From:      v.ValidatorAddress,
 				To:        v.DelegatorAddress,
 				Type:      v.Type(),
-				Value:     coinToValue(&coin),
+				Value:     CoinToValue(&coin),
 			}
 			messages = append(messages, message)
 		case *ibctransfertypes.MsgTransfer:
@@ -268,7 +264,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 				From:      v.Sender,
 				To:        v.Receiver,
 				Type:      v.Type(),
-				Value:     coinToValue(&v.Token),
+				Value:     CoinToValue(&v.Token),
 			}
 			messages = append(messages, message)
 		case *ibcchanneltypes.MsgRecvPacket:
@@ -286,20 +282,13 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 				logger.Error(err)
 			}
 
-			amount := events[strconv.Itoa(i)]["transfer"]["amount"]
-
-			coin, err := sdk.ParseCoinNormalized(amount)
-			if err != nil {
-				logger.Error(err)
-			}
-
 			message := Message{
 				Addresses: []string{d.Sender, d.Receiver},
 				Origin:    d.Sender,
 				From:      d.Sender,
 				To:        d.Receiver,
 				Type:      "recv_packet",
-				Value:     coinToValue(&coin),
+				Value:     Value{Amount: d.Amount, Denom: d.Denom},
 			}
 			messages = append(messages, message)
 		}

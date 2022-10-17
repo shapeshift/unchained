@@ -15,13 +15,6 @@ func (c *HTTPClient) BroadcastTx(rawTx string) (string, error) {
 func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Message {
 	messages := []cosmos.Message{}
 
-	coinToValue := func(c *sdk.Coin) cosmos.Value {
-		return cosmos.Value{
-			Amount: c.Amount.String(),
-			Denom:  c.Denom,
-		}
-	}
-
 	unhandledMsgs := []sdk.Msg{}
 	for _, msg := range msgs {
 		switch v := msg.(type) {
@@ -30,7 +23,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 				Addresses: []string{v.Owner},
 				From:      v.Owner,
 				Type:      v.Type(),
-				Value:     coinToValue(&v.Coins[0]),
+				Value:     cosmos.CoinToValue(&v.Coins[0]),
 			}
 			messages = append(messages, message)
 		case *gammtypes.MsgJoinPool:
@@ -38,7 +31,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 				Addresses: []string{v.Sender},
 				From:      v.Sender,
 				Type:      v.Type(),
-				Value:     coinToValue(&v.TokenInMaxs[0]),
+				Value:     cosmos.CoinToValue(&v.TokenInMaxs[0]),
 			}
 			messages = append(messages, message)
 		case *gammtypes.MsgSwapExactAmountIn:
@@ -47,7 +40,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 				Origin:    v.Sender,
 				From:      v.Sender,
 				Type:      v.Type(),
-				Value:     coinToValue(&v.TokenIn),
+				Value:     cosmos.CoinToValue(&v.TokenIn),
 			}
 			messages = append(messages, message)
 		default:

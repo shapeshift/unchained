@@ -126,17 +126,18 @@ func (h *History) filterByCursor(txs []HistoryTx) ([]HistoryTx, error) {
 }
 
 func (h *History) get() (*TxHistoryResponse, error) {
+	txs := []Tx{}
+
 	// fetch starting transaction history based on current state of the cursor
 	if err := h.fetch(false); err != nil {
 		return nil, errors.Wrap(err, "failed to get tx history")
 	}
 
 	if !h.hasTxHistory() {
-		return &TxHistoryResponse{}, nil
+		return &TxHistoryResponse{Txs: txs}, nil
 	}
 
 	// splice together transactions in the correct order until we either run out of transactions to return or fill a full page response.
-	txs := []Tx{}
 	for len(txs) < h.pageSize {
 		// fetch more transaction history if we have run out and more are available
 		if err := h.fetch(true); err != nil {
@@ -157,7 +158,7 @@ func (h *History) get() (*TxHistoryResponse, error) {
 
 	// no paginated data to return
 	if len(txs) == 0 {
-		return &TxHistoryResponse{}, nil
+		return &TxHistoryResponse{Txs: txs}, nil
 	}
 
 	lastTx := txs[len(txs)-1]
@@ -219,26 +220,7 @@ func (h *History) fetch(more bool) error {
 		return errors.WithStack(err)
 	}
 
-	h.removeDuplicateTxs()
-
 	return nil
-}
-
-func (h *History) removeDuplicateTxs() {
-	seenTxs := make(map[string]bool)
-
-	for _, s := range h.state {
-		txs := []HistoryTx{}
-
-		for _, tx := range s.txs {
-			if _, seen := seenTxs[tx.GetTxID()]; !seen {
-				seenTxs[tx.GetTxID()] = true
-				txs = append(txs, tx)
-			}
-		}
-
-		s.txs = txs
-	}
 }
 
 func (h *History) hasTxHistory() bool {

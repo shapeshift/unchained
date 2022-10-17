@@ -2,7 +2,6 @@ package thorchain
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -21,13 +20,13 @@ type EventFee struct {
 }
 
 type EventOutbound struct {
-	InTxID      string `json:"in_tx_id"`
-	ID          string `json:"id"`
-	Chain       string `json:"chain"`
-	FromAddress string `json:"from"`
-	ToAddress   string `json:"to"`
-	Coin        string `json:"coin"`
-	Memo        string `json:"memo"`
+	InTxID string `json:"in_tx_id"`
+	ID     string `json:"id"`
+	Chain  string `json:"chain"`
+	From   string `json:"from"`
+	To     string `json:"to"`
+	Coin   string `json:"coin"`
+	Memo   string `json:"memo"`
 }
 
 func CoinToValue(coin string) cosmos.Value {
@@ -66,7 +65,7 @@ func ParseBlockEvents(events []abci.Event) (cosmos.EventsByMsgIndex, []TypedEven
 			attributes[string(a.Key)] = string(a.Value)
 
 			// format attribute value as valid json string
-			attrMap[string(a.Key)] = json.RawMessage(fmt.Sprintf("\"%s\"", string(a.Value)))
+			attrMap[string(a.Key)] = json.RawMessage(strconv.Quote(string(a.Value)))
 		}
 
 		attrBytes, err := json.Marshal(attrMap)
@@ -95,11 +94,11 @@ func TypedEventsToMessages(events []TypedEvent) []cosmos.Message {
 		switch v := event.(type) {
 		case *EventOutbound:
 			message := cosmos.Message{
-				Addresses: []string{v.FromAddress, v.ToAddress},
-				Origin:    v.FromAddress,
-				From:      v.FromAddress,
-				To:        v.ToAddress,
-				Type:      "swap",
+				Addresses: []string{v.From, v.To},
+				Origin:    v.From,
+				From:      v.From,
+				To:        v.To,
+				Type:      "outbound",
 				Value:     CoinToValue(v.Coin),
 			}
 			messages = append(messages, message)
