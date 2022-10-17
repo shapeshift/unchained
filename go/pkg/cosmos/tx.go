@@ -282,13 +282,27 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 				logger.Error(err)
 			}
 
+			var amount string
+			if _, ok := events["0"]["error"]; !ok {
+				amount = events[strconv.Itoa(i)]["transfer"]["amount"]
+			}
+
+			value := func() Value {
+				coin, err := sdk.ParseCoinNormalized(amount)
+				if err != nil {
+					return Value{Amount: d.Amount, Denom: d.Denom}
+				}
+
+				return CoinToValue(&coin)
+			}()
+
 			message := Message{
 				Addresses: []string{d.Sender, d.Receiver},
 				Origin:    d.Sender,
 				From:      d.Sender,
 				To:        d.Receiver,
 				Type:      "recv_packet",
-				Value:     Value{Amount: d.Amount, Denom: d.Denom},
+				Value:     value,
 			}
 			messages = append(messages, message)
 		}
