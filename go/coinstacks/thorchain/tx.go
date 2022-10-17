@@ -13,7 +13,7 @@ import (
 func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Message {
 	messages := []cosmos.Message{}
 
-	thorCoinToValue := func(c common.Coin) cosmos.Value {
+	coinToValue := func(c common.Coin) cosmos.Value {
 		denom, ok := assetToDenom[c.Asset.String()]
 		if !ok {
 			denom = c.Asset.String()
@@ -51,7 +51,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 				From:      v.Signer.String(),
 				To:        to,
 				Type:      v.Type(),
-				Value:     thorCoinToValue(v.Coins[0]),
+				Value:     coinToValue(v.Coins[0]),
 			}
 			messages = append(messages, message)
 		default:
