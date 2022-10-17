@@ -180,6 +180,17 @@ func NewEncoding(registerInterfaces ...func(r codectypes.InterfaceRegistry)) *pa
 	}
 }
 
+func CoinToValue(c *sdk.Coin) Value {
+	if c == nil {
+		return Value{}
+	}
+
+	return Value{
+		Amount: c.Amount.String(),
+		Denom:  c.Denom,
+	}
+}
+
 func IsValidAddress(address string) bool {
 	if _, err := sdk.AccAddressFromBech32(address); err != nil {
 		return false

@@ -13,13 +13,6 @@ import (
 func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Message {
 	messages := []cosmos.Message{}
 
-	coinToValue := func(c *sdk.Coin) cosmos.Value {
-		return cosmos.Value{
-			Amount: c.Amount.String(),
-			Denom:  c.Denom,
-		}
-	}
-
 	thorCoinToValue := func(c common.Coin) cosmos.Value {
 		denom, ok := assetToDenom[c.Asset.String()]
 		if !ok {
@@ -42,7 +35,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 				From:      v.FromAddress.String(),
 				To:        v.ToAddress.String(),
 				Type:      v.Type(),
-				Value:     coinToValue(&v.Amount[0]),
+				Value:     cosmos.CoinToValue(&v.Amount[0]),
 			}
 			messages = append(messages, message)
 		case *thorchaintypes.MsgDeposit:
