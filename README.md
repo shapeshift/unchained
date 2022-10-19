@@ -71,6 +71,12 @@ Traefik routes requests based on host name. which includes the coinstack name. F
 
 #### Running
 
+- Install node dependencies
+
+  ```sh
+  cd node && yarn
+  ```
+
 - Start the reverse proxy and any common service (ex. hot reloading):
 
   ```sh
