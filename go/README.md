@@ -26,7 +26,7 @@
 
 - Install [Golang](https://go.dev/doc/install)
 
-make sure `GOPATH` is set in your shell environment
+  make sure `GOPATH` is set in your shell environment, since it's needed for `docker-compose` setup to work properly
 
 - Make coinstacks
 
