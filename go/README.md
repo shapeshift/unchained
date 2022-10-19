@@ -26,6 +26,8 @@
 
 - Install [Golang](https://go.dev/doc/install)
 
+make sure `GOPATH` is set in your shell environment
+
 - Make coinstacks
 
   ```sh
