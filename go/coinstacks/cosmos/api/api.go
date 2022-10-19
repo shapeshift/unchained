@@ -45,7 +45,7 @@ type API struct {
 }
 
 func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, swaggerPath string) *API {
-	r := mux.NewRouter()
+	router := mux.NewRouter()
 
 	handler := &Handler{
 		Handler: &cosmos.Handler{
@@ -64,10 +64,10 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient 
 		WriteTimeout: WRITE_TIMEOUT,
 		ReadTimeout:  READ_TIMEOUT,
 		IdleTimeout:  IDLE_TIMEOUT,
-		Handler:      cors.AllowAll().Handler(r),
+		Handler:      cors.AllowAll().Handler(router),
 	}
 
-	a := &API{
+	apiRef := &API{
 		API:     cosmos.New(handler, manager, server),
 		handler: handler,
 	}
@@ -81,47 +81,47 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient 
 		logger.Panicf("%+v", err)
 	}
 
-	r.Use(api.Scheme)
-	r.Use(api.Logger)
+	router.Use(api.Scheme)
+	router.Use(api.Logger)
 
-	r.HandleFunc("/", a.Root).Methods("GET")
+	router.HandleFunc("/", apiRef.Root).Methods("GET")
 
-	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		api.HandleResponse(w, http.StatusOK, map[string]string{"status": "up", "coinstack": "cosmos", "connections": strconv.Itoa(manager.ConnectionCount())})
 	}).Methods("GET")
 
-	r.HandleFunc("/swagger", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/swagger", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.FromSlash(swaggerPath))
 	}).Methods("GET")
 
-	r.PathPrefix("/docs/").Handler(http.StripPrefix("/docs/", http.FileServer(http.Dir("./static/swaggerui"))))
+	router.PathPrefix("/docs/").Handler(http.StripPrefix("/docs/", http.FileServer(http.Dir("./static/swaggerui"))))
 
-	v1 := r.PathPrefix("/api/v1").Subrouter()
-	v1.HandleFunc("/info", a.Info).Methods("GET")
-	v1.HandleFunc("/send", a.SendTx).Methods("POST")
+	v1 := router.PathPrefix("/api/v1").Subrouter()
+	v1.HandleFunc("/info", apiRef.Info).Methods("GET")
+	v1.HandleFunc("/send", apiRef.SendTx).Methods("POST")
 
 	v1Account := v1.PathPrefix("/account").Subrouter()
 	v1Account.Use(cosmos.ValidatePubkey)
-	v1Account.HandleFunc("/{pubkey}", a.Account).Methods("GET")
-	v1Account.HandleFunc("/{pubkey}/txs", a.TxHistory).Methods("GET")
+	v1Account.HandleFunc("/{pubkey}", apiRef.Account).Methods("GET")
+	v1Account.HandleFunc("/{pubkey}/txs", apiRef.TxHistory).Methods("GET")
 
 	v1Transaction := v1.PathPrefix("/tx").Subrouter()
-	v1Transaction.HandleFunc("/{txid}", a.Tx).Methods("GET")
+	v1Transaction.HandleFunc("/{txid}", apiRef.Tx).Methods("GET")
 
 	v1Gas := v1.PathPrefix("/gas").Subrouter()
-	v1Gas.HandleFunc("/estimate", a.EstimateGas).Methods("POST")
+	v1Gas.HandleFunc("/estimate", apiRef.EstimateGas).Methods("POST")
 
 	v1Validators := v1.PathPrefix("/validators").Subrouter()
-	v1Validators.Use(cosmos.ValidateValidatorPubkey)
-	v1Validators.HandleFunc("", a.GetValidators).Methods("GET")
-	v1Validators.HandleFunc("/{pubkey}", a.GetValidator).Methods("GET")
+	v1Validators.HandleFunc("", apiRef.GetValidators).Methods("GET")
+	v1Validators.HandleFunc("/{pubkey}", apiRef.GetValidator).Methods("GET")
+	v1Validators.HandleFunc("/{validatorAddr}/txs", apiRef.ValidatorTxHistory).Methods("GET")
 
 	// docs redirect paths
-	r.HandleFunc("/docs", api.DocsRedirect).Methods("GET")
+	router.HandleFunc("/docs", api.DocsRedirect).Methods("GET")
 
-	http.Handle("/", r)
+	http.Handle("/", router)
 
-	return a
+	return apiRef
 }
 
 // swagger:route Get /api/v1/validators v1 GetValidators

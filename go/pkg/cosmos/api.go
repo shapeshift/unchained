@@ -181,6 +181,22 @@ func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 	api.HandleResponse(w, http.StatusOK, txHistory)
 }
 
+// swagger:route GET /api/v1/validators/{validatorAddr}/txs v1 ValidatorTxHistory
+//
+// Get paginated transaction history for a validator.
+//
+// responses:
+//
+//	200: TxHistory
+//	400: BadRequestError
+//	500: InternalServerError
+func (a *API) ValidatorTxHistory(w http.ResponseWriter, r *http.Request) {
+
+	txHistory := ""
+
+	api.HandleResponse(w, http.StatusOK, txHistory)
+}
+
 // swagger:route GET /api/v1/tx/{txid} v1 GetTx
 //
 // # Get transaction details
