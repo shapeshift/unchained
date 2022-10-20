@@ -1381,8 +1381,6 @@ workflows:
             - approve bitcoin coinstack (taxistake)
           <<: *bitcoin
           <<: *only-main
-          api-max-replicas: 12
-          indexer-replicas: 6
 
       ####### BITCOINCASH
       - deploy-coinstack-node:
@@ -1409,8 +1407,6 @@ workflows:
             - approve bitcoincash coinstack (taxistake)
           <<: *bitcoincash
           <<: *only-main
-          api-max-replicas: 12
-          indexer-replicas: 6
 
       ####### DOGECOIN
       - deploy-coinstack-node:
@@ -1437,8 +1433,6 @@ workflows:
             - approve dogecoin coinstack (taxistake)
           <<: *dogecoin
           <<: *only-main
-          api-max-replicas: 12
-          indexer-replicas: 6
 
       ####### LITECOIN
       - deploy-coinstack-node:
@@ -1465,8 +1459,6 @@ workflows:
             - approve litecoin coinstack (taxistake)
           <<: *litecoin
           <<: *only-main
-          api-max-replicas: 12
-          indexer-replicas: 6
 
       ####### ETHEREUM
       - deploy-coinstack-node:
@@ -1493,8 +1485,6 @@ workflows:
             - approve ethereum coinstack (taxistake)
           <<: *ethereum
           <<: *only-main
-          api-max-replicas: 12
-          indexer-replicas: 6
 
       ####### AVALANCHE
       - deploy-coinstack-node:
@@ -1521,8 +1511,6 @@ workflows:
             - approve avalanche coinstack (taxistake)
           <<: *avalanche
           <<: *only-main
-          api-max-replicas: 12
-          indexer-replicas: 6
 
       ####### COSMOS
       - deploy-coinstack-go:
@@ -1549,7 +1537,6 @@ workflows:
             - approve cosmos coinstack (taxistake)
           <<: *cosmos
           <<: *only-main
-          api-max-replicas: 12
 
       ####### OSMOSIS
       - deploy-coinstack-go:
@@ -1576,7 +1563,6 @@ workflows:
             - approve osmosis coinstack (taxistake)
           <<: *osmosis
           <<: *only-main
-          api-max-replicas: 12
 
       ####### THORCHAIN
       - deploy-coinstack-go:
@@ -1603,5 +1589,3 @@ workflows:
             - approve thorchain coinstack (taxistake)
           <<: *thorchain
           <<: *only-main
-          api-max-replicas: 12
-          stateful-service-replicas: 6
