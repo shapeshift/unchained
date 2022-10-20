@@ -42,24 +42,26 @@ type MessageResponse struct {
 
 // Connection represents a single websocket connection on the unchained api server
 type Connection struct {
-	clientID string
-	conn     *websocket.Conn
-	doneChan chan interface{}
-	handler  Registrar
-	manager  *Manager
-	msgChan  chan []byte
-	ticker   *time.Ticker
+	clientID        string
+	conn            *websocket.Conn
+	doneChan        chan interface{}
+	handler         Registrar
+	manager         *Manager
+	msgChan         chan []byte
+	subscriptionIDs map[string]struct{}
+	ticker          *time.Ticker
 }
 
 // NewConnection defines the connection and registers it with the manager
 func NewConnection(conn *websocket.Conn, handler Registrar, manager *Manager) *Connection {
 	c := &Connection{
-		clientID: uuid.NewString(),
-		conn:     conn,
-		doneChan: make(chan interface{}),
-		handler:  handler,
-		manager:  manager,
-		msgChan:  make(chan []byte),
+		clientID:        uuid.NewString(),
+		conn:            conn,
+		doneChan:        make(chan interface{}),
+		handler:         handler,
+		manager:         manager,
+		msgChan:         make(chan []byte),
+		subscriptionIDs: make(map[string]struct{}),
 	}
 
 	c.manager.register <- c
@@ -116,9 +118,11 @@ func (c *Connection) Start() {
 	go c.cleanup()
 }
 
-// Stop the websocket connection by unregistering with the manager and unsubscribing the client.
+// Stop the websocket connection by unsubscribing all client subscriptions and unregistering the client from the manager.
 func (c *Connection) Stop() {
-	c.handler.Unsubscribe(c.clientID, nil, c.msgChan)
+	for subscriptionID := range c.subscriptionIDs {
+		c.handler.Unsubscribe(c.clientID, subscriptionID, nil, c.msgChan)
+	}
 
 	// ensure connection has not already been unregistered before unregistering.
 	if _, ok := c.manager.connections[c]; ok {
@@ -129,9 +133,7 @@ func (c *Connection) Stop() {
 func (c *Connection) cleanup() {
 	<-c.doneChan
 	c.ticker.Stop()
-	if err := c.conn.WriteMessage(websocket.CloseMessage, []byte{}); err != nil {
-		logger.Errorf("failed to write close message: %+v", err)
-	}
+	_ = c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 	c.conn.Close()
 	close(c.msgChan)
 }
@@ -158,9 +160,11 @@ func (c *Connection) read() {
 				logger.Errorf("failed to write pong message: %+v", err)
 			}
 		case "subscribe":
-			c.handler.Subscribe(c.clientID, r.Data.Addresses, c.msgChan)
+			c.subscriptionIDs[r.SubscriptionID] = struct{}{}
+			c.handler.Subscribe(c.clientID, r.SubscriptionID, r.Data.Addresses, c.msgChan)
 		case "unsubscribe":
-			c.handler.Unsubscribe(c.clientID, r.Data.Addresses, c.msgChan)
+			delete(c.subscriptionIDs, r.SubscriptionID)
+			c.handler.Unsubscribe(c.clientID, r.SubscriptionID, r.Data.Addresses, c.msgChan)
 		default:
 			c.writeError(fmt.Sprintf("%s method not implemented", r.Method), r.SubscriptionID)
 		}
