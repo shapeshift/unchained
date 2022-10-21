@@ -28,6 +28,7 @@ type RouteHandler interface {
 	GetInfo() (api.Info, error)
 	GetAccount(pubkey string) (api.Account, error)
 	GetTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error)
+	ValidatorTxHistory(validatorAddr string, cursor string, pageSize int) (api.TxHistory, error)
 	GetTx(txid string) (api.Tx, error)
 	SendTx(hex string) (string, error)
 	EstimateGas(rawTx string) (string, error)
@@ -189,6 +190,10 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 	}
 
 	return txHistory, nil
+}
+
+func (h *Handler) ValidatorTxHistory(validatorAddr string, cursor string, pageSize int) (api.TxHistory, error) {
+	return nil, nil
 }
 
 func (h *Handler) GetTx(txid string) (api.Tx, error) {

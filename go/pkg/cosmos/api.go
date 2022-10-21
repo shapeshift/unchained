@@ -80,6 +80,30 @@ func (a *API) Root(w http.ResponseWriter, r *http.Request) {
 	api.DocsRedirect(w, r)
 }
 
+func (a *API) validatePagingParams(w http.ResponseWriter, r *http.Request) (string, int) {
+	cursor := r.URL.Query().Get("cursor")
+
+	pageSizeQ := r.URL.Query().Get("pageSize")
+	if pageSizeQ == "" {
+		pageSizeQ = "10"
+	}
+
+	pageSize, err := strconv.Atoi(pageSizeQ)
+	if err != nil {
+		api.HandleError(w, http.StatusBadRequest, err.Error())
+	}
+
+	if pageSize > MAX_PAGE_SIZE_TX_HISTORY {
+		api.HandleError(w, http.StatusBadRequest, fmt.Sprintf("page size max is %d", MAX_PAGE_SIZE_TX_HISTORY))
+	}
+
+	if pageSize == 0 {
+		api.HandleError(w, http.StatusBadRequest, "page size cannot be 0")
+	}
+
+	return cursor, pageSize
+}
+
 // swagger:route GET / Websocket Websocket
 //
 // Subscribe to pending and confirmed transactions.
@@ -148,29 +172,7 @@ func (a *API) Account(w http.ResponseWriter, r *http.Request) {
 func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 	// pubkey validated by ValidatePubkey middleware
 	pubkey := mux.Vars(r)["pubkey"]
-
-	cursor := r.URL.Query().Get("cursor")
-
-	pageSizeQ := r.URL.Query().Get("pageSize")
-	if pageSizeQ == "" {
-		pageSizeQ = "10"
-	}
-
-	pageSize, err := strconv.Atoi(pageSizeQ)
-	if err != nil {
-		api.HandleError(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	if pageSize > MAX_PAGE_SIZE_TX_HISTORY {
-		api.HandleError(w, http.StatusBadRequest, fmt.Sprintf("page size max is %d", MAX_PAGE_SIZE_TX_HISTORY))
-		return
-	}
-
-	if pageSize == 0 {
-		api.HandleError(w, http.StatusBadRequest, "page size cannot be 0")
-		return
-	}
+	cursor, pageSize := a.validatePagingParams(w, r)
 
 	txHistory, err := a.handler.GetTxHistory(pubkey, cursor, pageSize)
 	if err != nil {
@@ -191,8 +193,15 @@ func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 //	400: BadRequestError
 //	500: InternalServerError
 func (a *API) ValidatorTxHistory(w http.ResponseWriter, r *http.Request) {
+	validatorAddr := mux.Vars(r)["validatorAddr"]
+	cursor, pageSize := a.validatePagingParams(w, r)
+	println(validatorAddr, cursor, pageSize)
+	txHistory, err := a.handler.ValidatorTxHistory(validatorAddr, cursor, pageSize)
 
-	txHistory := ""
+	if err != nil {
+		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 
 	api.HandleResponse(w, http.StatusOK, txHistory)
 }
