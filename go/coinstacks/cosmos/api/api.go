@@ -111,10 +111,13 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient 
 	v1Gas := v1.PathPrefix("/gas").Subrouter()
 	v1Gas.HandleFunc("/estimate", a.EstimateGas).Methods("POST")
 
+	v1ValidatorsRoot := v1.PathPrefix("/validators").Subrouter()
+	v1ValidatorsRoot.HandleFunc("", a.GetValidators).Methods("GET")
+
 	v1Validators := v1.PathPrefix("/validators").Subrouter()
-	v1Validators.HandleFunc("", a.GetValidators).Methods("GET")
+	v1Validators.Use(cosmos.ValidateValidatorPubkey)
 	v1Validators.HandleFunc("/{pubkey}", a.GetValidator).Methods("GET")
-	v1Validators.HandleFunc("/{validatorAddr}/txs", a.ValidatorTxHistory).Methods("GET")
+	v1Validators.HandleFunc("/{pubkey}/txs", a.ValidatorTxHistory).Methods("GET")
 
 	// docs redirect paths
 	r.HandleFunc("/docs", api.DocsRedirect).Methods("GET")
