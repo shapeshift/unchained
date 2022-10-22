@@ -183,7 +183,7 @@ func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 	api.HandleResponse(w, http.StatusOK, txHistory)
 }
 
-// swagger:route GET /api/v1/validators/{validatorAddr}/txs v1 ValidatorTxHistory
+// swagger:route GET /api/v1/validators/{pubkey}/txs v1 ValidatorTxHistory
 //
 // Get paginated transaction history for a validator.
 //
@@ -193,7 +193,7 @@ func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 //	400: BadRequestError
 //	500: InternalServerError
 func (a *API) ValidatorTxHistory(w http.ResponseWriter, r *http.Request) {
-	validatorAddr := mux.Vars(r)["validatorAddr"]
+	validatorAddr := mux.Vars(r)["pubkey"]
 	cursor, pageSize := a.validatePagingParams(w, r)
 	println(validatorAddr, cursor, pageSize)
 	txHistory, err := a.handler.ValidatorTxHistory(validatorAddr, cursor, pageSize)
