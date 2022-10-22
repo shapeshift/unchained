@@ -150,36 +150,17 @@ type TxBody struct {
 	RawTx string `json:"rawTx"`
 }
 
-// swagger:parameters GetAccount
+// swagger:parameters GetAccount GetValidator
 type PubkeyParam struct {
-	// Account public key
+	// Account address or xpub
 	// in: path
 	// required: true
 	Pubkey string `json:"pubkey"`
 }
 
-// swagger:parameters GetTxHistory
+// swagger:parameters GetTxHistory ValidatorTxHistory
 type PaginatedPubkeyParam struct {
 	PubkeyParam
-	// Pagination cursor from previous response or empty string for first page fetch
-	// in: query
-	Cursor string `json:"cursor"`
-	// Page size (default 10)
-	// in: query
-	PageSize int `json:"pageSize"`
-}
-
-// swagger:parameters GetValidator
-type ValidatorAddrParam struct {
-	// Validator address
-	// in: path
-	// required: true
-	Address string `json:"validatorAddr"`
-}
-
-// swagger:parameters ValidatorTxHistory
-type PaginatedAddressParam struct {
-	ValidatorAddrParam
 	// Pagination cursor from previous response or empty string for first page fetch
 	// in: query
 	Cursor string `json:"cursor"`

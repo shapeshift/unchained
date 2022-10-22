@@ -14,5 +14,10 @@ services:
     command: ["-r", "(pkg|internal|cosmos)", "-R", "swagger", "--", "sh", "-c", "swagger generate spec -w coinstacks/cosmos -o coinstacks/cosmos/api/swagger.json -x protoc-gen-openapiv2 -m && go run cmd/cosmos/main.go -env cmd/cosmos/.env"]
     working_dir: /app
     volumes:
-      - ../..:/app
+      - ../../go.mod:/app/go.mod
+      - ../../go.sum:/app/go.sum
+      - ../../cmd:/app/cmd
+      - ../../pkg:/app/pkg
+      - ../../internal:/app/internal
+      - ../../coinstacks/cosmos:/app/coinstacks/cosmos
       - $GOPATH/pkg/mod/cache:/go/pkg/mod/cache
