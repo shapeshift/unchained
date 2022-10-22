@@ -196,7 +196,7 @@ func (a *API) ValidatorTxHistory(w http.ResponseWriter, r *http.Request) {
 	validatorAddr := mux.Vars(r)["pubkey"]
 	cursor, pageSize := a.validatePagingParams(w, r)
 	println(validatorAddr, cursor, pageSize)
-	txHistory, err := a.handler.ValidatorTxHistory(validatorAddr, cursor, pageSize)
+	txHistory, err := a.handler.GetTxHistory(validatorAddr, cursor, pageSize)
 
 	if err != nil {
 		api.HandleError(w, http.StatusInternalServerError, err.Error())
