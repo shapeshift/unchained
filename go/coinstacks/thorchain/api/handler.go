@@ -20,8 +20,8 @@ type Handler struct {
 }
 
 func (h *Handler) StartWebsocket() error {
-	h.WSClient.EndBlockEventHandler(func(blockHeader types.Header, endBlockEvents []abci.Event, eventIndex int) (interface{}, []string, error) {
-		tx, err := h.getTxFromEndBlockEvents(blockHeader, endBlockEvents, eventIndex)
+	h.WSClient.EndBlockEventHandler(func(eventCache map[string]interface{}, blockHeader types.Header, endBlockEvents []abci.Event, eventIndex int) (interface{}, []string, error) {
+		tx, err := h.getTxFromEndBlockEvents(eventCache, blockHeader, endBlockEvents, eventIndex)
 		if err != nil {
 			return nil, nil, errors.Wrap(err, "failed to get txs from end block events")
 		}
@@ -30,9 +30,14 @@ func (h *Handler) StartWebsocket() error {
 			return nil, nil, nil
 		}
 
+		t, err := tx.formatTx(tx)
+		if err != nil {
+			return nil, nil, errors.Wrapf(err, "failed to format transaction: %s", tx.TxID)
+		}
+
 		addrs := cosmos.GetTxAddrs(tx.Events, tx.Messages)
 
-		return tx, addrs, nil
+		return t, addrs, nil
 	})
 
 	return h.Handler.StartWebsocket()
@@ -90,8 +95,10 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 				return nil, errors.WithStack(err)
 			}
 
+			eventCache := make(map[string]interface{})
+
 			for i := range blockResult.EndBlockEvents {
-				tx, err := h.getTxFromEndBlockEvents(b.Block.Header, blockResult.EndBlockEvents, i)
+				tx, err := h.getTxFromEndBlockEvents(eventCache, b.Block.Header, blockResult.EndBlockEvents, i)
 				if err != nil {
 					return nil, errors.Wrap(err, "failed to get tx from end block events")
 				}
@@ -156,7 +163,7 @@ func (h *Handler) ParseFee(tx signing.Tx, txid string, denom string) cosmos.Valu
 	return fee
 }
 
-func (h *Handler) getTxFromEndBlockEvents(blockHeader types.Header, endBlockEvents []abci.Event, eventIndex int) (*ResultTx, error) {
+func (h *Handler) getTxFromEndBlockEvents(eventCache map[string]interface{}, blockHeader types.Header, endBlockEvents []abci.Event, eventIndex int) (*ResultTx, error) {
 	// attempt to find matching fee event for txid or use default fee as defined by https://daemon.thorchain.shapeshift.com/lcd/thorchain/constants
 	matchFee := func(txid string, events []thorchain.TypedEvent) cosmos.Value {
 		for _, e := range events {
@@ -171,11 +178,19 @@ func (h *Handler) getTxFromEndBlockEvents(blockHeader types.Header, endBlockEven
 		return cosmos.Value{Amount: "2000000", Denom: h.Denom}
 	}
 
-	events, typedEvents, err := thorchain.ParseBlockEvents(endBlockEvents)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to parse block events")
+	// cache parsed block events for use in all subsequent event indices within the block
+	if eventCache["events"] == nil || eventCache["typedEvents"] == nil {
+		events, typedEvents, err := thorchain.ParseBlockEvents(endBlockEvents)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to parse block events")
+		}
+
+		eventCache["events"] = events
+		eventCache["typedEvents"] = typedEvents
 	}
 
+	events := eventCache["events"].(cosmos.EventsByMsgIndex)
+	typedEvents := eventCache["typedEvents"].([]thorchain.TypedEvent)
 	typedEvent := typedEvents[eventIndex]
 
 	tx := &ResultTx{

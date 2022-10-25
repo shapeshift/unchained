@@ -18,7 +18,7 @@ import (
 )
 
 type TxHandlerFunc = func(tx types.EventDataTx, block *BlockResponse) (interface{}, []string, error)
-type EndBlockEventHandlerFunc = func(blockHeader types.Header, endBlockEvents []abci.Event, eventIndex int) (interface{}, []string, error)
+type EndBlockEventHandlerFunc = func(eventCache map[string]interface{}, blockHeader types.Header, endBlockEvents []abci.Event, eventIndex int) (interface{}, []string, error)
 
 type WSClient struct {
 	*websocket.Registry
@@ -192,8 +192,10 @@ func (ws *WSClient) handleNewBlockHeader(block types.EventDataNewBlockHeader) {
 
 	if ws.endBlockEventHandler != nil {
 		go func(b types.EventDataNewBlockHeader) {
+			eventCache := make(map[string]interface{})
+
 			for i := range b.ResultEndBlock.Events {
-				data, addrs, err := ws.endBlockEventHandler(b.Header, b.ResultEndBlock.Events, i)
+				data, addrs, err := ws.endBlockEventHandler(eventCache, b.Header, b.ResultEndBlock.Events, i)
 				if err != nil {
 					logger.Error(err)
 					return
