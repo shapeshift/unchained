@@ -77,7 +77,7 @@ aliases:
     daemon-cpu-limit: "4"
     daemon-cpu-request: "3"
     daemon-memory-limit: 32Gi
-    daemon-storage-size: 2000Gi
+    daemon-storage-size: 2500Gi
     daemon-beacon-image: gcr.io/prysmaticlabs/prysm/beacon-chain:stable
     daemon-beacon-cpu-limit: "6"
     daemon-beacon-cpu-request: "4"
