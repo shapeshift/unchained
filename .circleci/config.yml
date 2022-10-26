@@ -73,7 +73,7 @@ aliases:
     indexer-storage-size: 500Gi
     indexer-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-indexer-svc.unchained.svc.cluster.local:8001/websocket
-    daemon-image: ethereum/client-go:v1.10.24
+    daemon-image: ethereum/client-go:v1.10.25
     daemon-cpu-limit: "4"
     daemon-cpu-request: "3"
     daemon-memory-limit: 32Gi
@@ -232,7 +232,7 @@ aliases:
     indexer-storage-size: 250Gi
     indexer-url: http://litecoin-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://litecoin-indexer-svc.unchained.svc.cluster.local:8001/websocket
-    daemon-image: uphold/litecoin-core:0.18.1
+    daemon-image: uphold/litecoin-core:0.21
     daemon-cpu-limit: "2"
     daemon-cpu-request: "1"
     daemon-memory-limit: 12Gi
