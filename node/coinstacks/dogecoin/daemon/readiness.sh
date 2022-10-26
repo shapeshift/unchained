@@ -12,7 +12,8 @@ if [[ $PEERS -le 0 ]]; then
   exit 1
 fi
 
-if [[ $HEADERS -gt $(( $BLOCKS + $TOLERANCE ))]]; then
+NOMINAL_BLOCKS=$(( $BLOCKS + $TOLERANCE ))
+if [[ $HEADERS -gt $NOMINAL_BLOCKS ]]; then
   echo "node is still syncing"
   exit 1
 fi
