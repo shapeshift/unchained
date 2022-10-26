@@ -44,12 +44,11 @@ func CoinToValue(coin string) cosmos.Value {
 }
 
 func ParseBlockEvents(events []abci.Event) (cosmos.EventsByMsgIndex, []TypedEvent, error) {
-	idx := 0
-	typedEvents := []TypedEvent{}
+	typedEvents := make([]TypedEvent, len(events))
 	eventsByMsgIndex := cosmos.EventsByMsgIndex{}
 
 	var typedEvent TypedEvent
-	for _, event := range events {
+	for i, event := range events {
 		switch event.Type {
 		case "fee":
 			typedEvent = &EventFee{}
@@ -77,11 +76,10 @@ func ParseBlockEvents(events []abci.Event) (cosmos.EventsByMsgIndex, []TypedEven
 			return nil, nil, err
 		}
 
-		msgIndex := strconv.Itoa(idx)
+		msgIndex := strconv.Itoa(i)
 		eventsByMsgIndex[msgIndex] = make(cosmos.AttributesByEvent)
 		eventsByMsgIndex[msgIndex][event.Type] = attributes
-		typedEvents = append(typedEvents, typedEvent)
-		idx++
+		typedEvents[i] = typedEvent
 	}
 
 	return eventsByMsgIndex, typedEvents, nil
