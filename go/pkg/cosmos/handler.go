@@ -28,6 +28,7 @@ type RouteHandler interface {
 	GetInfo() (api.Info, error)
 	GetAccount(pubkey string) (api.Account, error)
 	GetTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error)
+	GetValidatorTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error)
 	GetTx(txid string) (api.Tx, error)
 	SendTx(hex string) (string, error)
 	EstimateGas(rawTx string) (string, error)
@@ -171,9 +172,28 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 }
 
 func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
-	sources := NewDefaultSources(h.HTTPClient, pubkey, h.FormatTx)
+	sources := TxHistorySources(h.HTTPClient, pubkey, h.FormatTx)
 
-	println(sources)
+	res, err := h.HTTPClient.GetTxHistory(pubkey, cursor, pageSize, sources)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to get tx history")
+	}
+
+	txHistory := TxHistory{
+		BaseTxHistory: api.BaseTxHistory{
+			Pagination: api.Pagination{
+				Cursor: res.Cursor,
+			},
+			Pubkey: pubkey,
+		},
+		Txs: res.Txs,
+	}
+
+	return txHistory, nil
+}
+
+func (h *Handler) GetValidatorTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
+	sources := ValidatorHistorySources(h.HTTPClient, pubkey, h.FormatTx)
 
 	res, err := h.HTTPClient.GetTxHistory(pubkey, cursor, pageSize, sources)
 	if err != nil {

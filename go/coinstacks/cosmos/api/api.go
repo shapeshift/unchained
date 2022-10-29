@@ -117,7 +117,7 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient 
 	v1Validators := v1.PathPrefix("/validators").Subrouter()
 	v1Validators.Use(cosmos.ValidateValidatorPubkey)
 	v1Validators.HandleFunc("/{pubkey}", a.GetValidator).Methods("GET")
-	v1Validators.HandleFunc("/{pubkey}/txs", a.TxHistory).Methods("GET")
+	v1Validators.HandleFunc("/{pubkey}/txs", a.ValidatorTxHistory).Methods("GET")
 
 	// docs redirect paths
 	r.HandleFunc("/docs", api.DocsRedirect).Methods("GET")
