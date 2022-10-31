@@ -426,8 +426,8 @@ commands:
       - run:
           name: update openapi spec
           command: |
-            for file in $(git diff --name-only); do [[ $file == *"swagger.json" ]] && echo "adding $file"; git add $file; done
-            if [[ $(git diff --staged --name-only) ]]; then (echo "committing and pushing changes"; git commit -m "chore: update openapi spec"; git push origin $(git branch --show-current)); fi
+            for file in $(git diff --name-only); do [[ $file == *"swagger.json" ]] && git add $file; done
+            if [[ $(git diff --staged --name-only) ]]; then git commit -m "chore: update openapi spec"; git push origin $(git branch --show-current); fi
 
   pulumi-dependencies:
     description: set up pulumi dependencies
