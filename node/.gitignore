@@ -6,7 +6,6 @@ Pulumi.*.yaml
 !Pulumi.sample.yaml
 **/generated
 routes.ts
-swagger.json
 
 # Logs
 logs
