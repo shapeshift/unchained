@@ -8,7 +8,7 @@
   "swagger": "2.0",
   "info": {
     "description": "Provides access to cosmos chain data.",
-    "title": "Cosmos Unchained API Test",
+    "title": "Cosmos Unchained API",
     "license": {
       "name": "MIT",
       "url": "http://opensource.org/licenses/MIT"
