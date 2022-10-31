@@ -390,11 +390,11 @@ commands:
           command: yarn build
       - run:
           working_directory: node
-          name: lint
+          name: lint node
           command: yarn lint
       - run:
           working_directory: node
-          name: test
+          name: test node
           command: yarn test
 
   precheck-go:
@@ -414,7 +414,7 @@ commands:
           command: yarn install --immutable
       - run:
          working_directory: go
-         name: lint
+         name: lint go
          command: golangci-lint run
 
   postcheck:
@@ -906,7 +906,6 @@ jobs:
       - setup-runtime
       - precheck-go
       - precheck-node
-      - postcheck
 
   lint-and-test-persist:
     description: lint and test project (persist to workspace)
@@ -918,6 +917,7 @@ jobs:
       - setup-runtime
       - precheck-go
       - precheck-node
+      - postcheck
       - run:
           name: Remove devDependencies
           command: yarn --production --ignore-scripts --prefer-offline --silent --frozen-lockfile
