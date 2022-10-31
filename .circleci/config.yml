@@ -420,23 +420,14 @@ commands:
   postcheck:
     description: perform postcheck operations
     steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "e5:8a:56:6c:d5:ed:72:93:97:0b:65:8c:6a:f3:ca:98"
       - run:
           name: update openapi spec
           command: |
-            for file in $(git diff --name-only); do [[ $file == *"swagger.json" ]] && git add $file; done
-            [[ $(git diff --staged --name-only) ]] && git commit -m "chore: update openapi spec"
-            git push origin $(git branch --show-current)
-      - run:
-          name: build
-          command: yarn build
-      - run:
-          working_directory: node
-          name: lint
-          command: yarn lint
-      - run:
-          working_directory: node
-          name: test
-          command: yarn test
+            for file in $(git diff --name-only); do [[ $file == *"swagger.json" ]] && echo "adding $file"; git add $file; done
+            if [[ $(git diff --staged --name-only) ]]; then (echo "committing and pushing changes"; git commit -m "chore: update openapi spec"; git push origin $(git branch --show-current)); fi
 
   pulumi-dependencies:
     description: set up pulumi dependencies
