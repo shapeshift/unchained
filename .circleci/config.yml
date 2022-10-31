@@ -377,7 +377,7 @@ commands:
           name: goswagger
           command: docker pull quay.io/goswagger/swagger:v0.29.0
 
-  unchained-precheck-node:
+  precheck-node:
     description: install node dependencies, build, lint and test
     steps:
       - run:
@@ -390,14 +390,14 @@ commands:
           command: yarn build
       - run:
           working_directory: node
-          name: lint
+          name: lint node
           command: yarn lint
       - run:
           working_directory: node
-          name: test
+          name: test node
           command: yarn test
 
-  unchained-precheck-go:
+  precheck-go:
     description: install go dependencies, make, lint and test
     steps:
       - run:
@@ -414,12 +414,20 @@ commands:
           command: yarn install --immutable
       - run:
          working_directory: go
-         name: lint
+         name: lint go
          command: golangci-lint run
-      #- run:
-      #    working_directory: go
-      #    name: test
-      #    command: make test
+
+  postcheck:
+    description: perform postcheck operations
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "e5:8a:56:6c:d5:ed:72:93:97:0b:65:8c:6a:f3:ca:98"
+      - run:
+          name: update openapi spec
+          command: |
+            for file in $(git diff --name-only); do [[ $file == *"swagger.json" ]] && git add $file; done
+            if [[ $(git diff --staged --name-only) ]]; then git commit -m "chore: update openapi spec [skip ci]"; git push origin $(git branch --show-current); fi
 
   pulumi-dependencies:
     description: set up pulumi dependencies
@@ -896,8 +904,8 @@ jobs:
     steps:
       - checkout
       - setup-runtime
-      - unchained-precheck-go
-      - unchained-precheck-node
+      - precheck-go
+      - precheck-node
 
   lint-and-test-persist:
     description: lint and test project (persist to workspace)
@@ -907,8 +915,9 @@ jobs:
     steps:
       - checkout
       - setup-runtime
-      - unchained-precheck-go
-      - unchained-precheck-node
+      - precheck-go
+      - precheck-node
+      - postcheck
       - run:
           name: Remove devDependencies
           command: yarn --production --ignore-scripts --prefer-offline --silent --frozen-lockfile
