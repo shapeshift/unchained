@@ -177,7 +177,7 @@ aliases:
     <<: *avalanche
     environment: dev
     pulumi-stack: public-dev
-    indexer-replicas: 2
+    indexer-replicas: 1
     indexer-url: http://avalanche-indexer-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://avalanche-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-max-replicas: 3
@@ -313,17 +313,17 @@ aliases:
     service-name-1: daemon
     service-image-1: registry.gitlab.com/thorchain/thornode:chaosnet-multichain-1.98.1
     service-cpu-limit-1: "4"
-    service-memory-limit-1: 4Gi
+    service-memory-limit-1: 8Gi
     service-storage-size-1: 2000Gi
     service-name-2: timescaledb
     service-image-2: timescale/timescaledb:2.2.0-pg13
     service-cpu-limit-2: "2"
-    service-memory-limit-2: 3Gi
+    service-memory-limit-2: 4Gi
     service-storage-size-2: 200Gi
     service-name-3: indexer
     service-image-3: registry.gitlab.com/thorchain/midgard:2.9.4
     service-cpu-limit-3: 500m
-    service-memory-limit-3: 512Mi
+    service-memory-limit-3: 1Gi
     service-storage-size-3: 50Gi
 
   - &thorchain-dev
