@@ -24,23 +24,102 @@ aliases:
       branches:
         only:
           - main
+  
+  - &params
+    organization:
+      type: string
+    coinstack:
+      description: coinstack name
+      type: string
+    environment:
+      description: environment to deploy into. empty string ('') is our prod
+      type: string
+      default: ""
+    network:
+      type: string
+      default: mainnet
+    pulumi-stack:
+      description: pulumi stack to deploy to (public)
+      type: string
+    pulumi-dir:
+      description: path to pulumi directory
+      type: string
+    pulumi-command:
+      type: string
+      default: preview
+    api:
+      type: boolean
+      default: true
+    api-autoscaling:
+      type: boolean
+    api-cpu-threshold:
+      type: integer
+    api-max-replicas:
+      type: integer
+    api-cpu-limit:
+      type: string
+    api-cpu-request:
+      type: string
+    api-memory-limit:
+      type: string
+    api-replicas:
+      type: integer
+    stateful-service-replicas:
+      type: integer
+      default: 0
+    service-name-1:
+      type: string
+      default: ""
+    service-image-1:
+      type: string
+      default: ""
+    service-cpu-limit-1:
+      type: string
+      default: ""
+    service-memory-limit-1:
+      type: string
+      default: ""
+    service-storage-size-1:
+      type: string
+      default: ""
+    service-name-2:
+      type: string
+      default: ""
+    service-image-2:
+      type: string
+      default: ""
+    service-cpu-limit-2:
+      type: string
+      default: ""
+    service-memory-limit-2:
+      type: string
+      default: ""
+    service-storage-size-2:
+      type: string
+      default: ""
+    service-name-3:
+      type: string
+      default: ""
+    service-image-3:
+      type: string
+      default: ""
+    service-cpu-limit-3:
+      type: string
+      default: ""
+    service-memory-limit-3:
+      type: string
+      default: ""
+    service-storage-size-3:
+      type: string
+      default: ""
 
   - &bitcoin
     coinstack: bitcoin
     pulumi-stack: public
     pulumi-dir: coinstacks/bitcoin/pulumi
-    indexer-cpu-limit: "4"
-    indexer-cpu-request: "2"
-    indexer-memory-limit: 24Gi
-    indexer-replicas: 2
-    indexer-storage-size: 500Gi
+    rpc-url: http://user:password@bitcoin-indexer-svc.unchained.svc.cluster.local:8332
     indexer-url: http://bitcoin-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://bitcoin-indexer-svc.unchained.svc.cluster.local:8001/websocket
-    daemon-image: ruimarinho/bitcoin-core:23.0
-    daemon-cpu-limit: "2"
-    daemon-cpu-request: "1"
-    daemon-memory-limit: 12Gi
-    daemon-storage-size: 650Gi
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -48,41 +127,39 @@ aliases:
     api-cpu-request: 250m
     api-cpu-threshold: 30
     api-memory-limit: 2Gi
-    rpc-url: http://user:password@bitcoin-indexer-svc.unchained.svc.cluster.local:8332
+    stateful-service-replicas: 2
+    service-name-1: daemon
+    service-image-1: ruimarinho/bitcoin-core:23.0
+    service-cpu-limit-1: "2"
+    service-cpu-request-1: "1"
+    service-memory-limit-1: 12Gi
+    service-storage-size-1: 650Gi
+    service-name-2: indexer
+    service-image-2: docker.io/shapeshiftdao/unchained-blockbook:latest
+    service-cpu-limit-2: "4"
+    service-cpu-request-2: "2"
+    service-memory-limit-2: 24Gi
+    service-storage-size-2: 500Gi
 
   - &bitcoin-dev
     <<: *bitcoin
     environment: dev
     pulumi-stack: public-dev
-    indexer-replicas: 1
+    rpc-url: http://user:password@bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8332
     indexer-url: http://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
-    rpc-url: http://user:password@bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8332
     api-max-replicas: 3
     api-cpu-limit: 300m
     api-memory-limit: 1Gi
+    stateful-service-replicas: 1
 
   - &ethereum
     coinstack: ethereum
     pulumi-stack: public
     pulumi-dir: coinstacks/ethereum/pulumi
-    indexer-cpu-limit: "4"
-    indexer-cpu-request: "2"
-    indexer-memory-limit: 12Gi
-    indexer-replicas: 2
-    indexer-storage-size: 500Gi
+    rpc-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8332
     indexer-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-indexer-svc.unchained.svc.cluster.local:8001/websocket
-    daemon-image: ethereum/client-go:v1.10.25
-    daemon-cpu-limit: "4"
-    daemon-cpu-request: "3"
-    daemon-memory-limit: 32Gi
-    daemon-storage-size: 2500Gi
-    daemon-beacon-image: gcr.io/prysmaticlabs/prysm/beacon-chain:stable
-    daemon-beacon-cpu-limit: "6"
-    daemon-beacon-cpu-request: "4"
-    daemon-beacon-memory-limit: 16Gi
-    daemon-beacon-storage-size: 500Gi
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -90,19 +167,37 @@ aliases:
     api-cpu-request: 250m
     api-cpu-threshold: 30
     api-memory-limit: 2Gi
-    rpc-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8332
+    stateful-service-replicas: 2
+    service-name-1: daemon
+    service-image-1: ethereum/client-go:v1.10.25
+    service-cpu-limit-1: "4"
+    service-cpu-request-1: "3"
+    service-memory-limit-1: 32Gi
+    service-storage-size-1: 2500Gi
+    service-name-2: daemon-beacon
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:stable
+    service-cpu-limit-2: "6"
+    service-cpu-request-2: "4"
+    service-memory-limit-2: 16Gi
+    service-storage-size-2: 500Gi
+    service-name-3: indexer
+    service-image-3: docker.io/shapeshiftdao/unchained-blockbook:latest
+    service-cpu-limit-3: "4"
+    service-cpu-request-3: "2"
+    service-memory-limit-3: 12Gi
+    service-storage-size-3: 500Gi
 
   - &ethereum-dev
     <<: *ethereum
     environment: dev
     pulumi-stack: public-dev
-    indexer-replicas: 1
+    rpc-url: http://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8332
     indexer-url: http://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
-    rpc-url: http://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8332
     api-max-replicas: 3
     api-cpu-limit: 300m
     api-memory-limit: 1Gi
+    stateful-service-replicas: 1
 
   - &cosmos
     coinstack: cosmos
@@ -157,9 +252,9 @@ aliases:
     coinstack: avalanche
     pulumi-stack: public
     pulumi-dir: coinstacks/avalanche/pulumi
+    rpc-url: https://avalanche--mainnet--rpc.datahub.figment.io/apikey/14c056a2415b6e0d2b9f55985214f3f1/ext/bc/C/rpc
     indexer-url: http://avalanche-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://avalanche-indexer-svc.unchained.svc.cluster.local:8001/websocket
-    rpc-url: https://avalanche--mainnet--rpc.datahub.figment.io/apikey/14c056a2415b6e0d2b9f55985214f3f1/ext/bc/C/rpc
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -169,7 +264,7 @@ aliases:
     api-memory-limit: 2Gi
     stateful-service-replicas: 2
     service-name-1: indexer
-    service-image-1: registry.gitlab.com/thorchain/midgard:2.9.4
+    service-image-1: docker.io/shapeshiftdao/unchained-blockbook:latest
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 12Gi
@@ -179,7 +274,6 @@ aliases:
     <<: *avalanche
     environment: dev
     pulumi-stack: public-dev
-    indexer-replicas: 1
     indexer-url: http://avalanche-indexer-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://avalanche-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-max-replicas: 3
@@ -191,18 +285,9 @@ aliases:
     coinstack: dogecoin
     pulumi-stack: public
     pulumi-dir: coinstacks/dogecoin/pulumi
-    indexer-cpu-limit: "4"
-    indexer-cpu-request: "2"
-    indexer-memory-limit: 24Gi
-    indexer-replicas: 2
-    indexer-storage-size: 250Gi
+    rpc-url: http://user:password@dogecoin-indexer-svc.unchained.svc.cluster.local:8332
     indexer-url: http://dogecoin-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://dogecoin-indexer-svc.unchained.svc.cluster.local:8001/websocket
-    daemon-image: greenbigfrog/dogecoin:1.14.5
-    daemon-cpu-limit: "2"
-    daemon-cpu-request: "1"
-    daemon-memory-limit: 12Gi
-    daemon-storage-size: 250Gi
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -210,36 +295,39 @@ aliases:
     api-cpu-request: 250m
     api-cpu-threshold: 30
     api-memory-limit: 2Gi
-    rpc-url: http://user:password@dogecoin-indexer-svc.unchained.svc.cluster.local:8332
+    stateful-service-replicas: 2
+    service-name-1: daemon
+    service-image-1: greenbigfrog/dogecoin:1.14.5
+    service-cpu-limit-1: "2"
+    service-cpu-request-1: "1"
+    service-memory-limit-1: 12Gi
+    service-storage-size-1: 250Gi
+    service-name-2: indexer
+    service-image-2: docker.io/shapeshiftdao/unchained-blockbook:latest
+    service-cpu-limit-2: "4"
+    service-cpu-request-2: "2"
+    service-memory-limit-2: 24Gi
+    service-storage-size-2: 250Gi
 
   - &dogecoin-dev
     <<: *dogecoin
     environment: dev
     pulumi-stack: public-dev
-    indexer-replicas: 1
+    rpc-url: http://user:password@dogecoin-indexer-svc.unchained-dev.svc.cluster.local:8332
     indexer-url: http://dogecoin-indexer-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://dogecoin-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
-    rpc-url: http://user:password@dogecoin-indexer-svc.unchained-dev.svc.cluster.local:8332
     api-max-replicas: 3
     api-cpu-limit: 300m
     api-memory-limit: 1Gi
+    stateful-service-replicas: 1
 
   - &litecoin
     coinstack: litecoin
     pulumi-stack: public
     pulumi-dir: coinstacks/litecoin/pulumi
-    indexer-cpu-limit: "4"
-    indexer-cpu-request: "2"
-    indexer-memory-limit: 24Gi
-    indexer-replicas: 2
-    indexer-storage-size: 250Gi
+    rpc-url: http://user:password@litecoin-indexer-svc.unchained.svc.cluster.local:8332
     indexer-url: http://litecoin-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://litecoin-indexer-svc.unchained.svc.cluster.local:8001/websocket
-    daemon-image: uphold/litecoin-core:0.21
-    daemon-cpu-limit: "2"
-    daemon-cpu-request: "1"
-    daemon-memory-limit: 12Gi
-    daemon-storage-size: 250Gi
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -247,36 +335,39 @@ aliases:
     api-cpu-request: 250m
     api-cpu-threshold: 30
     api-memory-limit: 2Gi
-    rpc-url: http://user:password@litecoin-indexer-svc.unchained.svc.cluster.local:8332
+    stateful-service-replicas: 2
+    service-name-1: daemon
+    service-image-1: uphold/litecoin-core:0.21
+    service-cpu-limit-1: "2"
+    service-cpu-request-1: "1"
+    service-memory-limit-1: 12Gi
+    service-storage-size-1: 250Gi
+    service-name-2: indexer
+    service-image-2: docker.io/shapeshiftdao/unchained-blockbook:latest
+    service-cpu-limit-2: "4"
+    service-cpu-request-2: "2"
+    service-memory-limit-2: 24Gi
+    service-storage-size-2: 250Gi
 
   - &litecoin-dev
     <<: *litecoin
     environment: dev
     pulumi-stack: public-dev
-    indexer-replicas: 1
+    rpc-url: http://user:password@litecoin-indexer-svc.unchained-dev.svc.cluster.local:8332
     indexer-url: http://litecoin-indexer-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://litecoin-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
-    rpc-url: http://user:password@litecoin-indexer-svc.unchained-dev.svc.cluster.local:8332
     api-max-replicas: 3
     api-cpu-limit: 300m
     api-memory-limit: 1Gi
+    stateful-service-replicas: 1
 
   - &bitcoincash
     coinstack: bitcoincash
     pulumi-stack: public
     pulumi-dir: coinstacks/bitcoincash/pulumi
-    indexer-cpu-limit: "4"
-    indexer-cpu-request: "2"
-    indexer-memory-limit: 24Gi
-    indexer-replicas: 2
-    indexer-storage-size: 250Gi
+    rpc-url: http://user:password@bitcoincash-indexer-svc.unchained.svc.cluster.local:8332
     indexer-url: http://bitcoincash-indexer-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://bitcoincash-indexer-svc.unchained.svc.cluster.local:8001/websocket
-    daemon-image: zquestz/bitcoin-cash-node:24.1.0
-    daemon-cpu-limit: "2"
-    daemon-cpu-request: "1"
-    daemon-memory-limit: 12Gi
-    daemon-storage-size: 250Gi
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -284,19 +375,31 @@ aliases:
     api-cpu-request: 250m
     api-cpu-threshold: 30
     api-memory-limit: 2Gi
-    rpc-url: http://user:password@bitcoincash-indexer-svc.unchained.svc.cluster.local:8332
+    stateful-service-replicas: 2
+    service-name-1: daemon
+    service-image-1: zquestz/bitcoin-cash-node:24.1.0
+    service-cpu-limit-1: "2"
+    service-cpu-request-1: "1"
+    service-memory-limit-1: 12Gi
+    service-storage-size-1: 250Gi
+    service-name-2: indexer
+    service-image-2: docker.io/shapeshiftdao/unchained-blockbook:latest
+    service-cpu-limit-2: "4"
+    service-cpu-request-2: "2"
+    service-memory-limit-2: 24Gi
+    service-storage-size-2: 250Gi
 
   - &bitcoincash-dev
     <<: *bitcoincash
     environment: dev
     pulumi-stack: public-dev
-    indexer-replicas: 1
+    rpc-url: http://user:password@bitcoincash-indexer-svc.unchained-dev.svc.cluster.local:8332
     indexer-url: http://bitcoincash-indexer-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://bitcoincash-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
-    rpc-url: http://user:password@bitcoincash-indexer-svc.unchained-dev.svc.cluster.local:8332
     api-max-replicas: 3
     api-cpu-limit: 300m
     api-memory-limit: 1Gi
+    stateful-service-replicas: 1
 
   - &thorchain
     coinstack: thorchain
@@ -579,100 +682,14 @@ jobs:
     environment:
       DOCKER_BUILDKIT: 1
       LOG_LEVEL: debug
-      MIDGARD_URL: https://midgard.thorchain.info
-      MONGO_DBNAME: coinstack
     parameters:
-      organization:
-        type: string
-      coinstack:
-        description: coinstack name
-        type: string
-      environment:
-        description: environment to deploy into. empty string ('') is our prod
-        type: string
-        default: ""
-      network:
-        type: string
-        default: mainnet
-      pulumi-stack:
-        description: pulumi stack to deploy to (public)
-        type: string
-      pulumi-dir:
-        description: path to pulumi directory
-        type: string
-      pulumi-command:
-        type: string
-        default: preview
-      indexer-cpu-limit:
-        type: string
-      indexer-cpu-request:
-        type: string
-      indexer-memory-limit:
-        type: string
-      indexer-replicas:
-        type: integer
-      indexer-storage-size:
-        type: string
+      <<: *params
       indexer-url:
         type: string
       indexer-ws-url:
         type: string
       rpc-url:
         type: string
-      daemon-image:
-        type: string
-        default: ""
-      daemon-cpu-limit:
-        type: string
-        default: ""
-      daemon-cpu-request:
-        type: string
-        default: ""
-      daemon-memory-limit:
-        type: string
-        default: ""
-      daemon-storage-size:
-        type: string
-        default: ""
-      daemon-beacon-image:
-        type: string
-        default: ""
-      daemon-beacon-cpu-limit:
-        type: string
-        default: ""
-      daemon-beacon-cpu-request:
-        type: string
-        default: ""
-      daemon-beacon-memory-limit:
-        type: string
-        default: ""
-      daemon-beacon-storage-size:
-        type: string
-        default: ""
-      api:
-        type: boolean
-        default: true
-      api-autoscaling:
-        type: boolean
-        default: false 
-      api-cpu-threshold:
-        type: integer
-        default: 0 
-      api-max-replicas:
-        type: integer
-        default: 0 
-      api-cpu-limit:
-        type: string
-        default: ""
-      api-cpu-request:
-        type: string
-        default: ""
-      api-memory-limit:
-        type: string
-        default: ""
-      api-replicas:
-        type: integer
-        default: 0 
     steps:
       - setup_remote_docker:
           version: 20.10.2
@@ -698,25 +715,29 @@ jobs:
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.autoscaling.enabled << parameters.api-autoscaling >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.autoscaling.cpuThreshold << parameters.api-cpu-threshold >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.autoscaling.maxReplicas << parameters.api-max-replicas >>
-            [ "<< parameters.api >>" = true ] && [ -n "<< parameters.api-cpu-limit >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.cpuLimit << parameters.api-cpu-limit >>
-            [ "<< parameters.api >>" = true ] && [ -n "<< parameters.api-cpu-request >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.cpuRequest << parameters.api-cpu-request >>
-            [ "<< parameters.api >>" = true ] && [ -n "<< parameters.api-memory-limit >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.memoryLimit << parameters.api-memory-limit >>
+            [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.cpuLimit << parameters.api-cpu-limit >>
+            [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.cpuRequest << parameters.api-cpu-request >>
+            [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.memoryLimit << parameters.api-memory-limit >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.replicas << parameters.api-replicas >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.cpuLimit << parameters.indexer-cpu-limit >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.cpuRequest << parameters.indexer-cpu-request >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.memoryLimit << parameters.indexer-memory-limit >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.replicas << parameters.indexer-replicas >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.indexer.storageSize << parameters.indexer-storage-size >>
-            [ -n "<< parameters.daemon-image >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.image << parameters.daemon-image >>
-            [ -n "<< parameters.daemon-cpu-limit >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.cpuLimit << parameters.daemon-cpu-limit >>
-            [ -n "<< parameters.daemon-cpu-request >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.cpuRequest << parameters.daemon-cpu-request >>
-            [ -n "<< parameters.daemon-memory-limit >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.memoryLimit << parameters.daemon-memory-limit >>
-            [ -n "<< parameters.daemon-storage-size >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.storageSize << parameters.daemon-storage-size >>
-            [ -n "<< parameters.daemon-beacon-image >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.beacon.image << parameters.daemon-beacon-image >>
-            [ -n "<< parameters.daemon-beacon-cpu-limit >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.beacon.cpuLimit << parameters.daemon-beacon-cpu-limit >>
-            [ -n "<< parameters.daemon-beacon-cpu-request >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.beacon.cpuRequest << parameters.daemon-beacon-cpu-request >>
-            [ -n "<< parameters.daemon-beacon-memory-limit >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.beacon.memoryLimit << parameters.daemon-beacon-memory-limit >>
-            [ -n "<< parameters.daemon-beacon-storage-size >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.indexer.daemon.beacon.storageSize << parameters.daemon-beacon-storage-size >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.replicas << parameters.stateful-service-replicas >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-name-1 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[0].name << parameters.service-name-1 >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-image-1 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[0].image << parameters.service-image-1 >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-limit-1 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[0].cpuLimit << parameters.service-cpu-limit-1 >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-request-1 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[0].cpuRequest << parameters.service-cpu-request-1 >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-limit-1 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[0].memoryLimit << parameters.service-memory-limit-1 >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-size-1 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[0].storageSize << parameters.service-storage-size-1 >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-name-2 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[1].name << parameters.service-name-2 >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-image-2 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[1].image << parameters.service-image-2 >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-limit-2 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[1].cpuLimit << parameters.service-cpu-limit-2 >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-request-2 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[1].cpuRequest << parameters.service-cpu-request-2 >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-limit-2 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[1].memoryLimit << parameters.service-memory-limit-2 >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-size-2 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[1].storageSize << parameters.service-storage-size-2 >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-name-3 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[2].name << parameters.service-name-3 >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-image-3 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[2].image << parameters.service-image-3 >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-limit-3 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[2].cpuLimit << parameters.service-cpu-limit-3 >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-request-3 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[2].cpuRequest << parameters.service-cpu-request-3 >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-limit-3 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[2].memoryLimit << parameters.service-memory-limit-3 >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-size-3 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[2].storageSize << parameters.service-storage-size-3 >>
             pulumi << parameters.pulumi-command >> --suppress-outputs
 
   deploy-coinstack-go:
@@ -725,27 +746,7 @@ jobs:
     environment:
       DOCKER_BUILDKIT: 1
     parameters:
-      organization:
-        type: string
-      coinstack:
-        description: coinstack name
-        type: string
-      environment:
-        description: environment to deploy into. empty string ('') is our prod
-        type: string
-        default: ""
-      network:
-        type: string
-        default: mainnet
-      pulumi-stack:
-        description: pulumi stack to deploy to (public)
-        type: string
-      pulumi-dir:
-        description: path to pulumi directory
-        type: string
-      pulumi-command:
-        type: string
-        default: preview
+      <<: *params
       lcd-url:
         type: string
       grpc-url:
@@ -758,71 +759,6 @@ jobs:
         default: ""
       ws-url:
         type: string
-      api:
-        type: boolean
-        default: true
-      api-autoscaling:
-        type: boolean
-      api-cpu-threshold:
-        type: integer
-      api-max-replicas:
-        type: integer
-      api-cpu-limit:
-        type: string
-      api-cpu-request:
-        type: string
-      api-memory-limit:
-        type: string
-      api-replicas:
-        type: integer
-      stateful-service-replicas:
-        type: integer
-        default: 0
-      service-name-1:
-        type: string
-        default: ""
-      service-image-1:
-        type: string
-        default: ""
-      service-cpu-limit-1:
-        type: string
-        default: ""
-      service-memory-limit-1:
-        type: string
-        default: ""
-      service-storage-size-1:
-        type: string
-        default: ""
-      service-name-2:
-        type: string
-        default: ""
-      service-image-2:
-        type: string
-        default: ""
-      service-cpu-limit-2:
-        type: string
-        default: ""
-      service-memory-limit-2:
-        type: string
-        default: ""
-      service-storage-size-2:
-        type: string
-        default: ""
-      service-name-3:
-        type: string
-        default: ""
-      service-image-3:
-        type: string
-        default: ""
-      service-cpu-limit-3:
-        type: string
-        default: ""
-      service-memory-limit-3:
-        type: string
-        default: ""
-      service-storage-size-3:
-        type: string
-        default: ""
     steps:
       - setup_remote_docker:
           version: 20.10.2
@@ -855,20 +791,23 @@ jobs:
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.cpuRequest << parameters.api-cpu-request >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.memoryLimit << parameters.api-memory-limit >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.replicas << parameters.api-replicas >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] &&pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.replicas << parameters.stateful-service-replicas >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.replicas << parameters.stateful-service-replicas >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-name-1 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[0].name << parameters.service-name-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-image-1 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[0].image << parameters.service-image-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-limit-1 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[0].cpuLimit << parameters.service-cpu-limit-1 >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-request-1 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[0].cpuRequest << parameters.service-cpu-request-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-limit-1 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[0].memoryLimit << parameters.service-memory-limit-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-size-1 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[0].storageSize << parameters.service-storage-size-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-name-2 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[1].name << parameters.service-name-2 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-image-2 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[1].image << parameters.service-image-2 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-limit-2 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[1].cpuLimit << parameters.service-cpu-limit-2 >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-request-2 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[1].cpuRequest << parameters.service-cpu-request-2 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-limit-2 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[1].memoryLimit << parameters.service-memory-limit-2 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-size-2 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[1].storageSize << parameters.service-storage-size-2 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-name-3 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[2].name << parameters.service-name-3 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-image-3 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[2].image << parameters.service-image-3 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-limit-3 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[2].cpuLimit << parameters.service-cpu-limit-3 >>
+            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-request-3 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[2].cpuRequest << parameters.service-cpu-request-3 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-limit-3 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[2].memoryLimit << parameters.service-memory-limit-3 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-size-3 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[2].storageSize << parameters.service-storage-size-3 >>
             pulumi << parameters.pulumi-command >> --suppress-outputs
