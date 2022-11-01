@@ -31,9 +31,8 @@ func Logger(next http.Handler) http.Handler {
 
 		t := time.Now().UTC()
 
-		// do not write status header on websocket request as headers can only be written once
-		// and need to be handled by the websocket upgrader and bypass logging
-		if r.URL.Scheme == "ws" || r.URL.Scheme == "wss" {
+		// do not write status header for logging on websocket upgrade requests as headers can only be written once by the websocket upgrader
+		if r.Header.Get("Upgrade") == "websocket" {
 			next.ServeHTTP(w, r)
 			return
 		} else {

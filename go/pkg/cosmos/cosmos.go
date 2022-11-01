@@ -84,6 +84,10 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 	return c, nil
 }
 
+func (c *HTTPClient) GetEncoding() *params.EncodingConfig {
+	return c.encoding
+}
+
 // GRPCClient allows communicating over grpc
 type GRPCClient struct {
 	ctx      context.Context
@@ -173,6 +177,17 @@ func NewEncoding(registerInterfaces ...func(r codectypes.InterfaceRegistry)) *pa
 		Marshaler:         marshaler,
 		TxConfig:          tx.NewTxConfig(marshaler, tx.DefaultSignModes),
 		Amino:             codec.NewLegacyAmino(),
+	}
+}
+
+func CoinToValue(c *sdk.Coin) Value {
+	if c == nil {
+		return Value{}
+	}
+
+	return Value{
+		Amount: c.Amount.String(),
+		Denom:  c.Denom,
 	}
 }
 
