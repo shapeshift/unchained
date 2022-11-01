@@ -3,15 +3,8 @@
   "version": "8.0.0",
   "license": "MIT",
   "private": true,
+  "main": "src/index.ts",
   "scripts": {
     "clean": "rm -rf dist node_modules"
-  },
-  "dependencies": {
-    "@pulumi/kubernetes": "3.19.3",
-    "@types/folder-hash": "^4.0.1",
-    "@types/object-hash": "^2.2.1",
-    "dotenv": "^16.0.1",
-    "folder-hash": "^4.0.2",
-    "object-hash": "^3.0.0"
   }
 }

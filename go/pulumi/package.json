@@ -1,5 +1,5 @@
 {
-  "name": "@shapeshiftoss/common-pulumi-go",
+  "name": "@shapeshiftoss/common-pulumi",
   "license": "MIT",
   "private": true,
   "main": "src/index.ts",
