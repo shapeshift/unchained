@@ -1,6 +1,6 @@
 import * as k8s from '@pulumi/kubernetes'
 import { Input, Resource } from '@pulumi/pulumi'
-import { buildAndPushImage, BuildAndPushImageArgs, Config, getBaseHash, hasTag } from './index'
+import { buildAndPushImage, BuildAndPushImageArgs, Config, hasTag } from './index'
 
 export interface Autoscaling {
   enabled: boolean,
@@ -19,28 +19,30 @@ export interface ApiConfig {
 export interface DeployApiArgs {
   app: string,
   asset: string,
-  provider: k8s.Provider,
-  namespace: string,
-  config: Pick<Config, 'api' | 'dockerhub' | 'rootDomainName' | 'environment'>,
-  getHash: (coinstack: string, buildArgs: Record<string, string>) => Promise<string>,
+  baseImageName?: string,
   buildAndPushImageArgs: Pick<BuildAndPushImageArgs, 'context' | 'dockerFile'>,
-  secretEnvs: k8s.types.input.core.v1.EnvVar[],
+  config: Pick<Config, 'api' | 'dockerhub' | 'rootDomainName' | 'environment'>,
   container: Partial<Pick<k8s.types.input.core.v1.Container, 'args' | 'command'>>,
   deployDependencies?: Input<Array<Resource>>
+  getHash: (coinstack: string, buildArgs: Record<string, string>) => Promise<string>,
+  namespace: string,
+  provider: k8s.Provider,
+  secretEnvs: (coinstack: string, asset: string) => k8s.types.input.core.v1.EnvVar[],
 }
 
 export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deployment | undefined> {
   const {
     app,
     asset,
-    provider,
-    namespace,
-    config,
-    getHash,
+    baseImageName,
     buildAndPushImageArgs,
-    secretEnvs,
+    config,
     container,
-    deployDependencies = []
+    deployDependencies = [],
+    getHash,
+    namespace,
+    provider,
+    secretEnvs,
   } = args
 
   if (config.api === undefined) return
@@ -51,14 +53,18 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
   const name = `${asset}-${tier}`
 
   const repositoryName = `${app}-${coinstack}-${tier}`
-  let baseImageName = `${config.dockerhub?.username ?? 'shapeshiftdao'}/unchained-base:${await getBaseHash()}`
-  baseImageName = 'shapeshiftdao/unchained-base:latest'
-  const buildArgs = { BUILDKIT_INLINE_CACHE: '1', COINSTACK: coinstack, BASE_IMAGE: baseImageName }
+
+  const buildArgs: Record<string, string> = { BUILDKIT_INLINE_CACHE: '1', COINSTACK: coinstack }
+  if (baseImageName) buildArgs.BASE_IMAGE = baseImageName
+
   const tag = await getHash(coinstack, buildArgs)
 
   let imageName = `shapeshiftdao/${repositoryName}:${tag}` // default public image
   if (config.dockerhub) {
     const image = `${config.dockerhub.username}/${repositoryName}`
+
+    const cacheFroms = [`${image}:${tag}`, `${image}:latest`]
+    if (baseImageName) cacheFroms.push(baseImageName)
 
     imageName = `${image}:${tag}` // configured dockerhub image
 
@@ -73,7 +79,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
         buildArgs,
         env: { DOCKER_BUILDKIT: '1' },
         tags: [tag],
-        cacheFroms: [`${image}:${tag}`, `${image}:latest`],
+        cacheFroms,
         ...buildAndPushImageArgs
       })
     }
@@ -198,7 +204,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
           name: tier,
           image: imageName,
           ports: [{ containerPort: 3000, name: 'http' }],
-          env: [...secretEnvs],
+          env: [...secretEnvs(coinstack, asset)],
           resources: {
             limits: {
               cpu: config.api.cpuLimit,

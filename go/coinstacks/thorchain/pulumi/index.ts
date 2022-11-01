@@ -10,7 +10,9 @@ type Outputs = Record<string, any>
 export = async (): Promise<Outputs> => {
   const name = 'unchained'
   const coinstack = 'thorchain'
+
   const { kubeconfig, config, namespace } = await getConfig(coinstack)
+
   const asset = config.network !== 'mainnet' ? `${coinstack}-${config.network}` : coinstack
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
   const outputs: Outputs = {}
@@ -34,18 +36,15 @@ export = async (): Promise<Outputs> => {
   new k8s.core.v1.Secret(asset, { metadata: { name: asset, namespace }, stringData }, { provider })
 
   await deployApi({
-    app: name, asset, buildAndPushImageArgs: {
-      context: `../../../../go`,
-      dockerFile: `../../../build/Dockerfile`,
-    },
+    app: name,
+    asset,
+    buildAndPushImageArgs: { context: '../../../../go', dockerFile: '../../../build/Dockerfile' },
     config,
-    container: {
-      args: ['-swagger', 'swagger.json'],
-    },
+    container: { args: ['-swagger', 'swagger.json'] },
     getHash: api.getHash,
     namespace,
     provider,
-    secretEnvs: api.secretEnvs(coinstack, asset),
+    secretEnvs: api.secretEnvs,
   })
 
   if (config.statefulService) {
