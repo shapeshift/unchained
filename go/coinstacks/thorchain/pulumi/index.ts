@@ -1,8 +1,8 @@
 import { parse } from 'dotenv'
 import { readFileSync } from 'fs'
 import * as k8s from '@pulumi/kubernetes'
-import { deployApi, createService, deployStatefulService, getConfig, Service } from '../../../../pulumi/src'
-import { api } from '../../../pulumi/src'
+import { deployApi, createService, deployStatefulService, getConfig, Service } from '../../../../pulumi'
+import { api } from '../../../pulumi'
 
 type Outputs = Record<string, any>
 
@@ -50,12 +50,11 @@ export = async (): Promise<Outputs> => {
   if (config.statefulService) {
     const services = config.statefulService.services.reduce<Record<string, Service>>((prev, service) => {
       if (service.name === 'daemon') {
-        prev.daemon = createService({
+        prev[service.name] = createService({
           asset,
           config: service,
           dataDir: '/root',
           env: { 'CHAIN_ID': `${coinstack}-${config.network}-v1`, 'NET': config.network },
-          name: 'daemon',
           ports: {
             'daemon-api': { port: 1317, pathPrefix: '/lcd', stripPathPrefix: true },
             'daemon-rpc': { port: 27147, pathPrefix: '/rpc', stripPathPrefix: true }
@@ -64,7 +63,7 @@ export = async (): Promise<Outputs> => {
       }
 
       if (service.name === 'indexer') {
-        prev.indexer = createService({
+        prev[service.name] = createService({
           asset,
           config: service,
           dataDir: '/blockstore',
@@ -72,7 +71,6 @@ export = async (): Promise<Outputs> => {
             'MIDGARD_BLOCKSTORE_LOCAL': '/blockstore',
             'MIDGARD_BLOCKSTORE_REMOTE': 'https://storage.googleapis.com/public-snapshots-ninerealms/midgard-blockstore/mainnet/v2/'
           },
-          name: 'indexer',
           ports: { 'midgard': { port: 8080 } },
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
           volumeMounts: [{ name: 'config-map', 'mountPath': '/config.json', subPath: 'indexer-config.json' }]
@@ -80,7 +78,7 @@ export = async (): Promise<Outputs> => {
       }
 
       if (service.name === 'timescaledb') {
-        prev.timescaledb = createService({
+        prev[service.name] = createService({
           asset,
           config: service,
           dataDir: '/var/lib/postgresql/data',
@@ -90,7 +88,6 @@ export = async (): Promise<Outputs> => {
             'POSTGRES_PASSWORD': 'password',
             'PGDATA': '/var/lib/postgresql/data/pgdata'
           },
-          name: 'timescaledb',
           ports: { 'postgres': { port: 5432 } },
           volumeMounts: [{ name: 'dshm', mountPath: '/dev/shm' }]
         })

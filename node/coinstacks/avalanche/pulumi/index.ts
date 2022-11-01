@@ -1,9 +1,8 @@
-import { config as getEnv, parse } from 'dotenv'
-import { existsSync, readFileSync } from 'fs'
-import { join } from 'path'
+import { parse } from 'dotenv'
+import { readFileSync } from 'fs'
 import * as k8s from '@pulumi/kubernetes'
-import { deployApi, getConfig, Service, deployStatefulService, createService } from '../../../../pulumi/src'
-import * as api from '../../../pulumi/src/api'
+import { deployApi, createService, deployStatefulService, getConfig, Service } from '../../../../pulumi'
+import { api } from '../../../pulumi'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Outputs = Record<string, any>
@@ -12,12 +11,12 @@ type Outputs = Record<string, any>
 export = async (): Promise<Outputs> => {
   const name = 'unchained'
   const coinstack = 'avalanche'
-  const { kubeconfig, config, namespace } = await getConfig(coinstack)
-  const asset = config.network !== 'mainnet' ? `avalanche-${config.network}` : 'avalanche'
-  const provider = new k8s.Provider('kube-provider', { kubeconfig })
-  const outputs: Outputs = {}
 
-  if (existsSync('../.env')) getEnv({ path: join(__dirname, '../.env') })
+  const { kubeconfig, config, namespace } = await getConfig(coinstack)
+
+  const asset = config.network !== 'mainnet' ? `${coinstack}-${config.network}` : coinstack
+  const outputs: Outputs = {}
+  const provider = new k8s.Provider('kube-provider', { kubeconfig })
 
   const missingKeys: Array<string> = []
   const stringData = Object.keys(parse(readFileSync('../sample.env'))).reduce((prev, key) => {
@@ -37,34 +36,31 @@ export = async (): Promise<Outputs> => {
 
   new k8s.core.v1.Secret(asset, { metadata: { name: asset, namespace }, stringData }, { provider })
 
+  //const baseImageName = `${config.dockerhub?.username ?? 'shapeshiftdao'}/unchained-base:${await getBaseHash()}`
+  const baseImageName = 'shapeshiftdao/unchained-base:latest'
+
   await deployApi({
     app: name,
     asset,
-    buildAndPushImageArgs: {
-      context: `../../${coinstack}/api`,
-    },
+    baseImageName,
+    buildAndPushImageArgs: { context: '../api' },
     config,
-    container: {
-      command: ['node', `dist/${coinstack}/api/src/app.js`],
-    },
+    container: { command: ['node', `dist/${coinstack}/api/src/app.js`] },
     getHash: api.getHash,
     namespace,
     provider,
-    secretEnvs: api.secretEnvs(coinstack, asset),
+    secretEnvs: api.secretEnvs,
   })
 
   if (config.statefulService) {
     const services = config.statefulService.services.reduce<Record<string, Service>>((prev, service) => {
       if (service.name === 'indexer') {
-        prev.indexer = createService({
+        prev[service.name] = createService({
           asset,
           config: service,
-          dataDir: '/data',
-          name: 'indexer',
-          ports: { public: { port: 8001 } },
           command: [
             '/bin/blockbook',
-            '-blockchaincfg=/config/config.json',
+            '-blockchaincfg=/config.json',
             '-datadir=/data',
             '-sync',
             '-public=:8001',
@@ -72,8 +68,11 @@ export = async (): Promise<Outputs> => {
             '-logtostderr',
             '-debug',
           ],
+          ports: { public: { port: 8001 } },
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
           volumeMounts: [{ name: 'config-map', mountPath: '/config.json', subPath: 'indexer-config.json' }],
+          readinessProbe: { initialDelaySeconds: 20, periodSeconds: 5, failureThreshold: 12 },
+          livenessProbe: { timeoutSeconds: 10, initialDelaySeconds: 60, periodSeconds: 15, failureThreshold: 4 },
         })
       }
 
