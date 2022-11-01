@@ -49,15 +49,14 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
 
   const tier = 'api'
   const labels = { app, asset, tier }
-  const [coinstack] = asset.split('-')
   const name = `${asset}-${tier}`
-
-  const repositoryName = `${app}-${coinstack}-${tier}`
+  const [coinstack] = asset.split('-')
 
   const buildArgs: Record<string, string> = { BUILDKIT_INLINE_CACHE: '1', COINSTACK: coinstack }
   if (baseImageName) buildArgs.BASE_IMAGE = baseImageName
 
   const tag = await getHash(coinstack, buildArgs)
+  const repositoryName = `${app}-${coinstack}-${tier}`
 
   let imageName = `shapeshiftdao/${repositoryName}:${tag}` // default public image
   if (config.dockerhub) {

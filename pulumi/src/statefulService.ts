@@ -11,9 +11,9 @@ interface Port {
 export interface ServiceArgs {
   asset: string
   config: ServiceConfig
-  name: string
   ports: Record<string, Port>
   command?: Array<string>
+  args?: Array<string>
   env?: Record<string, string>
   dataDir?: string
   configMapData?: Record<string, string>
@@ -23,18 +23,18 @@ export interface ServiceArgs {
 }
 
 export function createService(args: ServiceArgs): Service {
-  const name = `${args.asset}-${args.name}`
+  const name = `${args.asset}-${args.config.name}`
   const ports = Object.entries(args.ports).map(([name, { port, pathPrefix, stripPathPrefix }]) => ({ name, port, pathPrefix, stripPathPrefix }))
   const env = Object.entries(args.env ?? []).map(([name, value]) => ({ name, value }))
 
-  const init = (() => { try { return readFileSync(`../${args.name}/init.sh`).toString() } catch (err) { return '' } })()
-  const liveness = (() => { try { return readFileSync(`../${args.name}/liveness.sh`).toString() } catch (err) { return '' } })()
-  const readiness = (() => { try { return readFileSync(`../${args.name}/readiness.sh`).toString() } catch (err) { return '' } })()
+  const init = (() => { try { return readFileSync(`../${args.config.name}/init.sh`).toString() } catch (err) { return '' } })()
+  const liveness = (() => { try { return readFileSync(`../${args.config.name}/liveness.sh`).toString() } catch (err) { return '' } })()
+  const readiness = (() => { try { return readFileSync(`../${args.config.name}/readiness.sh`).toString() } catch (err) { return '' } })()
 
   const configMapData = {
-    [`${args.name}-init.sh`]: init,
-    [`${args.name}-liveness.sh`]: liveness,
-    [`${args.name}-readiness.sh`]: readiness,
+    ...(Boolean(init) && { [`${args.config.name}-init.sh`]: init }),
+    ...(Boolean(liveness) && { [`${args.config.name}-liveness.sh`]: liveness }),
+    ...(Boolean(readiness) && { [`${args.config.name}-readiness.sh`]: readiness }),
     ...(args.configMapData ?? {})
   }
 
@@ -43,6 +43,7 @@ export function createService(args: ServiceArgs): Service {
       name,
       image: args.config.image,
       command: args.command ?? ['/init.sh'],
+      args: args.args,
       env,
       resources: {
         limits: {
@@ -58,30 +59,20 @@ export function createService(args: ServiceArgs): Service {
       ports: ports.map(({ port: containerPort, name }) => ({ containerPort, name })),
       volumeMounts: [
         {
-          name: `data-${args.name}`,
+          name: `data-${args.config.name}`,
           mountPath: args.dataDir ?? '/data',
         },
-        {
+        ...(init ? [{
           name: 'config-map',
           mountPath: '/init.sh',
-          subPath: `${args.name}-init.sh`,
-        },
+          subPath: `${args.config.name}-init.sh`,
+        }] : []),
         ...(args.volumeMounts ?? [])
       ],
     },
     {
       name: `${name}-monitor`,
       image: 'shapeshiftdao/unchained-probe:1.0.0',
-      ...(liveness && {
-        livenessProbe: {
-          exec: {
-            command: ['/liveness.sh'],
-          },
-          initialDelaySeconds: 30,
-          periodSeconds: 10,
-          ...args.livenessProbe
-        }
-      }),
       ...(readiness && {
         readinessProbe: {
           exec: {
@@ -92,16 +83,26 @@ export function createService(args: ServiceArgs): Service {
           ...args.readinessProbe
         }
       }),
+      ...(liveness && {
+        livenessProbe: {
+          exec: {
+            command: ['/liveness.sh'],
+          },
+          initialDelaySeconds: 30,
+          periodSeconds: 10,
+          ...args.livenessProbe
+        }
+      }),
       volumeMounts: [
         {
           name: 'config-map',
           mountPath: '/liveness.sh',
-          subPath: `${args.name}-liveness.sh`,
+          subPath: `${args.config.name}-liveness.sh`,
         },
         {
           name: 'config-map',
           mountPath: '/readiness.sh',
-          subPath: `${args.name}-readiness.sh`,
+          subPath: `${args.config.name}-readiness.sh`,
         },
       ],
     },
@@ -110,7 +111,7 @@ export function createService(args: ServiceArgs): Service {
   const volumeClaimTemplates = [
     {
       metadata: {
-        name: `data-${args.name}`,
+        name: `data-${args.config.name}`,
       },
       spec: {
         accessModes: ['ReadWriteOnce'],
@@ -145,7 +146,8 @@ export async function deployStatefulService(
   if (config.statefulService.replicas <= 0) return
   if (!Object.keys(services).length) return
 
-  const labels = { app, asset, tier: "statefulservice" }
+  const labels = { app, asset, tier: 'statefulservice' }
+
   const ports = Object.values(services).reduce<Array<k8s.types.input.core.v1.ServicePort>>((prev, { ports }) => [...prev, ...ports.map(({ name, port }) => ({ name, port }))], [])
   const configMapData = Object.values(services).reduce<Record<string, string>>((prev, { configMapData }) => ({ ...prev, ...configMapData }), {})
   const containers = Object.values(services).reduce<Array<k8s.types.input.core.v1.Container>>((prev, { containers }) => prev.concat(...containers), [])
