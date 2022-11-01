@@ -26,92 +26,6 @@ aliases:
           - main
   
   - &params
-    organization:
-      type: string
-    coinstack:
-      description: coinstack name
-      type: string
-    environment:
-      description: environment to deploy into. empty string ('') is our prod
-      type: string
-      default: ""
-    network:
-      type: string
-      default: mainnet
-    pulumi-stack:
-      description: pulumi stack to deploy to (public)
-      type: string
-    pulumi-dir:
-      description: path to pulumi directory
-      type: string
-    pulumi-command:
-      type: string
-      default: preview
-    api:
-      type: boolean
-      default: true
-    api-autoscaling:
-      type: boolean
-    api-cpu-threshold:
-      type: integer
-    api-max-replicas:
-      type: integer
-    api-cpu-limit:
-      type: string
-    api-cpu-request:
-      type: string
-    api-memory-limit:
-      type: string
-    api-replicas:
-      type: integer
-    stateful-service-replicas:
-      type: integer
-      default: 0
-    service-name-1:
-      type: string
-      default: ""
-    service-image-1:
-      type: string
-      default: ""
-    service-cpu-limit-1:
-      type: string
-      default: ""
-    service-memory-limit-1:
-      type: string
-      default: ""
-    service-storage-size-1:
-      type: string
-      default: ""
-    service-name-2:
-      type: string
-      default: ""
-    service-image-2:
-      type: string
-      default: ""
-    service-cpu-limit-2:
-      type: string
-      default: ""
-    service-memory-limit-2:
-      type: string
-      default: ""
-    service-storage-size-2:
-      type: string
-      default: ""
-    service-name-3:
-      type: string
-      default: ""
-    service-image-3:
-      type: string
-      default: ""
-    service-cpu-limit-3:
-      type: string
-      default: ""
-    service-memory-limit-3:
-      type: string
-      default: ""
-    service-storage-size-3:
-      type: string
-      default: ""
 
   - &bitcoin
     coinstack: bitcoin
@@ -683,13 +597,98 @@ jobs:
       DOCKER_BUILDKIT: 1
       LOG_LEVEL: debug
     parameters:
-      <<: *params
+      organization:
+        type: string
+      coinstack:
+        description: coinstack name
+        type: string
+      environment:
+        description: environment to deploy into. empty string ('') is our prod
+        type: string
+        default: ""
+      network:
+        type: string
+        default: mainnet
+      pulumi-stack:
+        description: pulumi stack to deploy to (public)
+        type: string
+      pulumi-dir:
+        description: path to pulumi directory
+        type: string
+      pulumi-command:
+        type: string
+        default: preview
       indexer-url:
         type: string
       indexer-ws-url:
         type: string
       rpc-url:
         type: string
+      api:
+        type: boolean
+        default: true
+      api-autoscaling:
+        type: boolean
+      api-cpu-threshold:
+        type: integer
+      api-max-replicas:
+        type: integer
+      api-cpu-limit:
+        type: string
+      api-cpu-request:
+        type: string
+      api-memory-limit:
+        type: string
+      api-replicas:
+        type: integer
+      stateful-service-replicas:
+        type: integer
+        default: 0
+      service-name-1:
+        type: string
+        default: ""
+      service-image-1:
+        type: string
+        default: ""
+      service-cpu-limit-1:
+        type: string
+        default: ""
+      service-memory-limit-1:
+        type: string
+        default: ""
+      service-storage-size-1:
+        type: string
+        default: ""
+      service-name-2:
+        type: string
+        default: ""
+      service-image-2:
+        type: string
+        default: ""
+      service-cpu-limit-2:
+        type: string
+        default: ""
+      service-memory-limit-2:
+        type: string
+        default: ""
+      service-storage-size-2:
+        type: string
+        default: ""
+      service-name-3:
+        type: string
+        default: ""
+      service-image-3:
+        type: string
+        default: ""
+      service-cpu-limit-3:
+        type: string
+        default: ""
+      service-memory-limit-3:
+        type: string
+        default: ""
+      service-storage-size-3:
+        type: string
+        default: ""
     steps:
       - setup_remote_docker:
           version: 20.10.2
@@ -746,7 +745,27 @@ jobs:
     environment:
       DOCKER_BUILDKIT: 1
     parameters:
-      <<: *params
+      organization:
+        type: string
+      coinstack:
+        description: coinstack name
+        type: string
+      environment:
+        description: environment to deploy into. empty string ('') is our prod
+        type: string
+        default: ""
+      network:
+        type: string
+        default: mainnet
+      pulumi-stack:
+        description: pulumi stack to deploy to (public)
+        type: string
+      pulumi-dir:
+        description: path to pulumi directory
+        type: string
+      pulumi-command:
+        type: string
+        default: preview
       lcd-url:
         type: string
       grpc-url:
@@ -759,6 +778,71 @@ jobs:
         default: ""
       ws-url:
         type: string
+      api:
+        type: boolean
+        default: true
+      api-autoscaling:
+        type: boolean
+      api-cpu-threshold:
+        type: integer
+      api-max-replicas:
+        type: integer
+      api-cpu-limit:
+        type: string
+      api-cpu-request:
+        type: string
+      api-memory-limit:
+        type: string
+      api-replicas:
+        type: integer
+      stateful-service-replicas:
+        type: integer
+        default: 0
+      service-name-1:
+        type: string
+        default: ""
+      service-image-1:
+        type: string
+        default: ""
+      service-cpu-limit-1:
+        type: string
+        default: ""
+      service-memory-limit-1:
+        type: string
+        default: ""
+      service-storage-size-1:
+        type: string
+        default: ""
+      service-name-2:
+        type: string
+        default: ""
+      service-image-2:
+        type: string
+        default: ""
+      service-cpu-limit-2:
+        type: string
+        default: ""
+      service-memory-limit-2:
+        type: string
+        default: ""
+      service-storage-size-2:
+        type: string
+        default: ""
+      service-name-3:
+        type: string
+        default: ""
+      service-image-3:
+        type: string
+        default: ""
+      service-cpu-limit-3:
+        type: string
+        default: ""
+      service-memory-limit-3:
+        type: string
+        default: ""
+      service-storage-size-3:
+        type: string
+        default: ""
     steps:
       - setup_remote_docker:
           version: 20.10.2
