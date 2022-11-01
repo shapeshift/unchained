@@ -5,11 +5,5 @@
   "private": true,
   "scripts": {
     "clean": "rm -rf dist node_modules"
-  },
-  "dependencies": {
-    "@shapeshiftoss/blockbook-pulumi": "^8.0.0",
-    "@shapeshiftoss/common-pulumi": "^8.0.0",
-    "@types/folder-hash": "^4.0.1",
-    "folder-hash": "^4.0.2"
   }
 }
