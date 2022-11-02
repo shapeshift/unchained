@@ -126,9 +126,9 @@ aliases:
     coinstack: bitcoin
     pulumi-stack: public
     pulumi-dir: coinstacks/bitcoin/pulumi
-    rpc-url: http://user:password@bitcoin-indexer-svc.unchained.svc.cluster.local:8332
-    indexer-url: http://bitcoin-indexer-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://bitcoin-indexer-svc.unchained.svc.cluster.local:8001/websocket
+    rpc-url: http://user:password@bitcoin-svc.unchained.svc.cluster.local:8332
+    indexer-url: http://bitcoin-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://bitcoin-svc.unchained.svc.cluster.local:8001/websocket
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -154,9 +154,9 @@ aliases:
     <<: *bitcoin
     environment: dev
     pulumi-stack: public-dev
-    rpc-url: http://user:password@bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8332
-    indexer-url: http://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001
-    indexer-ws-url: ws://bitcoin-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
+    rpc-url: http://user:password@bitcoin-svc.unchained-dev.svc.cluster.local:8332
+    indexer-url: http://bitcoin-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://bitcoin-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-max-replicas: 3
     api-cpu-limit: 300m
     api-memory-limit: 1Gi
@@ -166,9 +166,9 @@ aliases:
     coinstack: ethereum
     pulumi-stack: public
     pulumi-dir: coinstacks/ethereum/pulumi
-    rpc-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8332
-    indexer-url: http://ethereum-indexer-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://ethereum-indexer-svc.unchained.svc.cluster.local:8001/websocket
+    rpc-url: http://ethereum-svc.unchained.svc.cluster.local:8332
+    indexer-url: http://ethereum-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://ethereum-svc.unchained.svc.cluster.local:8001/websocket
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -200,9 +200,9 @@ aliases:
     <<: *ethereum
     environment: dev
     pulumi-stack: public-dev
-    rpc-url: http://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8332
-    indexer-url: http://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8001
-    indexer-ws-url: ws://ethereum-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
+    rpc-url: http://ethereum-svc.unchained-dev.svc.cluster.local:8332
+    indexer-url: http://ethereum-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://ethereum-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-max-replicas: 3
     api-cpu-limit: 300m
     api-memory-limit: 1Gi
@@ -262,8 +262,8 @@ aliases:
     pulumi-stack: public
     pulumi-dir: coinstacks/avalanche/pulumi
     rpc-url: https://avalanche--mainnet--rpc.datahub.figment.io/apikey/14c056a2415b6e0d2b9f55985214f3f1/ext/bc/C/rpc
-    indexer-url: http://avalanche-indexer-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://avalanche-indexer-svc.unchained.svc.cluster.local:8001/websocket
+    indexer-url: http://avalanche-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://avalanche-svc.unchained.svc.cluster.local:8001/websocket
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -283,8 +283,8 @@ aliases:
     <<: *avalanche
     environment: dev
     pulumi-stack: public-dev
-    indexer-url: http://avalanche-indexer-svc.unchained-dev.svc.cluster.local:8001
-    indexer-ws-url: ws://avalanche-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
+    indexer-url: http://avalanche-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://avalanche-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-max-replicas: 3
     api-cpu-limit: 300m
     api-memory-limit: 1Gi
@@ -294,9 +294,9 @@ aliases:
     coinstack: dogecoin
     pulumi-stack: public
     pulumi-dir: coinstacks/dogecoin/pulumi
-    rpc-url: http://user:password@dogecoin-indexer-svc.unchained.svc.cluster.local:8332
-    indexer-url: http://dogecoin-indexer-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://dogecoin-indexer-svc.unchained.svc.cluster.local:8001/websocket
+    rpc-url: http://user:password@dogecoin-svc.unchained.svc.cluster.local:8332
+    indexer-url: http://dogecoin-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://dogecoin-svc.unchained.svc.cluster.local:8001/websocket
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -322,9 +322,9 @@ aliases:
     <<: *dogecoin
     environment: dev
     pulumi-stack: public-dev
-    rpc-url: http://user:password@dogecoin-indexer-svc.unchained-dev.svc.cluster.local:8332
-    indexer-url: http://dogecoin-indexer-svc.unchained-dev.svc.cluster.local:8001
-    indexer-ws-url: ws://dogecoin-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
+    rpc-url: http://user:password@dogecoin-svc.unchained-dev.svc.cluster.local:8332
+    indexer-url: http://dogecoin-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://dogecoin-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-max-replicas: 3
     api-cpu-limit: 300m
     api-memory-limit: 1Gi
@@ -334,9 +334,9 @@ aliases:
     coinstack: litecoin
     pulumi-stack: public
     pulumi-dir: coinstacks/litecoin/pulumi
-    rpc-url: http://user:password@litecoin-indexer-svc.unchained.svc.cluster.local:8332
-    indexer-url: http://litecoin-indexer-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://litecoin-indexer-svc.unchained.svc.cluster.local:8001/websocket
+    rpc-url: http://user:password@litecoin-svc.unchained.svc.cluster.local:8332
+    indexer-url: http://litecoin-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://litecoin-svc.unchained.svc.cluster.local:8001/websocket
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -362,9 +362,9 @@ aliases:
     <<: *litecoin
     environment: dev
     pulumi-stack: public-dev
-    rpc-url: http://user:password@litecoin-indexer-svc.unchained-dev.svc.cluster.local:8332
-    indexer-url: http://litecoin-indexer-svc.unchained-dev.svc.cluster.local:8001
-    indexer-ws-url: ws://litecoin-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
+    rpc-url: http://user:password@litecoin-svc.unchained-dev.svc.cluster.local:8332
+    indexer-url: http://litecoin-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://litecoin-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-max-replicas: 3
     api-cpu-limit: 300m
     api-memory-limit: 1Gi
@@ -374,9 +374,9 @@ aliases:
     coinstack: bitcoincash
     pulumi-stack: public
     pulumi-dir: coinstacks/bitcoincash/pulumi
-    rpc-url: http://user:password@bitcoincash-indexer-svc.unchained.svc.cluster.local:8332
-    indexer-url: http://bitcoincash-indexer-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://bitcoincash-indexer-svc.unchained.svc.cluster.local:8001/websocket
+    rpc-url: http://user:password@bitcoincash-svc.unchained.svc.cluster.local:8332
+    indexer-url: http://bitcoincash-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://bitcoincash-svc.unchained.svc.cluster.local:8001/websocket
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -402,9 +402,9 @@ aliases:
     <<: *bitcoincash
     environment: dev
     pulumi-stack: public-dev
-    rpc-url: http://user:password@bitcoincash-indexer-svc.unchained-dev.svc.cluster.local:8332
-    indexer-url: http://bitcoincash-indexer-svc.unchained-dev.svc.cluster.local:8001
-    indexer-ws-url: ws://bitcoincash-indexer-svc.unchained-dev.svc.cluster.local:8001/websocket
+    rpc-url: http://user:password@bitcoincash-svc.unchained-dev.svc.cluster.local:8332
+    indexer-url: http://bitcoincash-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://bitcoincash-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-max-replicas: 3
     api-cpu-limit: 300m
     api-memory-limit: 1Gi
@@ -628,7 +628,7 @@ jobs:
           organization: <<parameters.organization>>
       - run:
           name: pulumi
-          working_directory: pulumi/cluster
+          working_directory: pulumi/src/cluster
           command: |
             pulumi stack select $<< parameters.organization >>_PULUMI_ORG/dependencies
             pulumi config set --path unchained:common.cluster eks
