@@ -632,7 +632,6 @@ jobs:
           command: |
             pulumi stack select $<< parameters.organization >>_PULUMI_ORG/dependencies
             pulumi config set --path unchained:common.cluster eks
-            pulumi config set --path unchained:common.isLocal false
             pulumi config set --path unchained:common.additionalEnvironments[0] dev
             pulumi config set --path unchained:common.additionalEnvironments[1] monitoring
             pulumi config set --path unchained:common.eks.allAZs true

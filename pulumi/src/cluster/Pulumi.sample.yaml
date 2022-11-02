@@ -7,10 +7,6 @@ config:
     # cluster - used to specify the kube context for local development and also used to set the correct storage class
     cluster: # docker-desktop, minikube, eks
 
-    # isLocal - is used to specify a local development environment (docker-desktop, minikube)
-    # if set to false, eks cluster configuration and rootDomainName is required
-    isLocal: true
-
     ## additionalEnvironments - is used to create additional environments inside of new namespaces
     ## by default 1 namespace is always created 'unchained'. However, if there are any additionalEnvironments it will create namepspaces per `unchained-<environment>`
     ## ie. 'unchained-dev'
