@@ -42,7 +42,7 @@ export function createService(args: ServiceArgs): Service {
     {
       name,
       image: args.config.image,
-      command: args.command ?? ['/init.sh'],
+      command: init && !args.command ? ['/init.sh'] : args.command,
       args: args.args,
       env,
       resources: {
@@ -57,6 +57,7 @@ export function createService(args: ServiceArgs): Service {
         }),
       },
       ports: ports.map(({ port: containerPort, name }) => ({ containerPort, name })),
+      securityContext: { runAsUser: 0 },
       volumeMounts: [
         {
           name: `data-${args.config.name}`,
