@@ -36,7 +36,6 @@ export = async (): Promise<Outputs> => {
 
   new k8s.core.v1.Secret(asset, { metadata: { name: asset, namespace }, stringData }, { provider })
 
-  //const baseImageName = `${config.dockerhub?.username ?? 'shapeshiftdao'}/unchained-base:${await getBaseHash()}`
   const baseImageName = 'shapeshiftdao/unchained-base:latest'
 
   await deployApi({
@@ -79,6 +78,7 @@ export = async (): Promise<Outputs> => {
             '--accept-terms-of-use',
           ],
           ports: {},
+          configMapData: { 'daemon-beacon-readiness.sh': readFileSync('../daemon/readiness-beacon.sh').toString() },
           volumeMounts: [{ name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' }],
         })
       }
