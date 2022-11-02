@@ -68,7 +68,7 @@ export = async (): Promise<Outputs> => {
     if (!(await hasTag(baseImage, baseTag))) {
       await buildAndPushImage({
         image: baseImage,
-        context: '../',
+        context: '../../../node',
         auth: {
           password: config.dockerhub.password,
           username: config.dockerhub.username,
@@ -82,12 +82,12 @@ export = async (): Promise<Outputs> => {
     }
 
     const blockbookImage = `${config.dockerhub.username}/${name}-blockbook`
-    const { hash: blockbookTag } = await hashElement(`../node/packages/blockbook/Dockerfile`, { encoding: 'hex' })
+    const { hash: blockbookTag } = await hashElement(`../../..//node/packages/blockbook/Dockerfile`, { encoding: 'hex' })
 
     if (!(await hasTag(blockbookImage, blockbookTag))) {
       await buildAndPushImage({
         image: blockbookImage,
-        context: '../packages/blockbook',
+        context: '../../../node/packages/blockbook',
         auth: {
           password: config.dockerhub.password,
           username: config.dockerhub.username,
