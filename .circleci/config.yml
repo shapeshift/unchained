@@ -998,6 +998,106 @@ workflows:
           <<: *thorchain-dev
           <<: *only-develop
 
+      ########## (TAXISTAKE) ##########
+      - deploy-dependencies:
+          name: deploy dependencies (taxistake)
+          organization: TAXISTAKE
+          #pulumi-command: up -f --yes
+          pulumi-command: preview
+          requires:
+            - lint and test project (persist to workspace)
+          <<: *only-develop
+
+      - deploy-coinstack-node:
+          name: deploy bitcoin develop (taxistake)
+          organization: TAXISTAKE
+          #pulumi-command: up -f --yes
+          pulumi-command: preview
+          requires:
+            - deploy dependencies (taxistake)
+          <<: *bitcoin-dev
+          <<: *only-develop
+
+      - deploy-coinstack-node:
+          name: deploy dogecoin develop (taxistake)
+          organization: TAXISTAKE
+          #pulumi-command: up -f --yes
+          pulumi-command: preview
+          requires:
+            - deploy dependencies (taxistake)
+          <<: *dogecoin-dev
+          <<: *only-develop
+
+      - deploy-coinstack-node:
+          name: deploy litecoin develop (taxistake)
+          organization: TAXISTAKE
+          #pulumi-command: up -f --yes
+          pulumi-command: preview
+          requires:
+            - deploy dependencies (taxistake)
+          <<: *litecoin-dev
+          <<: *only-develop
+
+      - deploy-coinstack-node:
+          name: deploy bitcoincash develop (taxistake)
+          organization: TAXISTAKE
+          #pulumi-command: up -f --yes
+          pulumi-command: preview
+          requires:
+            - deploy dependencies (taxistake)
+          <<: *bitcoincash-dev
+          <<: *only-develop
+
+      - deploy-coinstack-node:
+          name: deploy ethereum develop (taxistake)
+          organization: TAXISTAKE
+          #pulumi-command: up -f --yes
+          pulumi-command: preview
+          requires:
+            - deploy dependencies (taxistake)
+          <<: *ethereum-dev
+          <<: *only-develop
+
+      - deploy-coinstack-node:
+          name: deploy avalanche develop (taxistake)
+          organization: TAXISTAKE
+          #pulumi-command: up -f --yes
+          pulumi-command: preview
+          requires:
+            - deploy dependencies (taxistake)
+          <<: *avalanche-dev
+          <<: *only-develop
+
+      - deploy-coinstack-go:
+          name: deploy cosmos develop (taxistake)
+          organization: TAXISTAKE
+          #pulumi-command: up -f --yes
+          pulumi-command: preview
+          requires:
+            - deploy dependencies (taxistake)
+          <<: *cosmos-dev
+          <<: *only-develop
+
+      - deploy-coinstack-go:
+          name: deploy osmosis develop (taxistake)
+          organization: TAXISTAKE
+          #pulumi-command: up -f --yes
+          pulumi-command: preview
+          requires:
+            - deploy dependencies (taxistake)
+          <<: *osmosis-dev
+          <<: *only-develop
+
+      - deploy-coinstack-go:
+          name: deploy thorchain develop (shapshift)
+          organization: TAXISTAKE
+          #pulumi-command: up -f --yes
+          pulumi-command: preview
+          requires:
+            - deploy dependencies (taxistake)
+          <<: *thorchain-dev
+          <<: *only-develop
+
   deploy-monitoring:
     jobs:
       - approve-monitoring-workflow:
