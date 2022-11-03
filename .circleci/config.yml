@@ -1089,7 +1089,7 @@ workflows:
           <<: *only-develop
 
       - deploy-coinstack-go:
-          name: deploy thorchain develop (shapshift)
+          name: deploy thorchain develop (taxistake)
           organization: TAXISTAKE
           #pulumi-command: up -f --yes
           pulumi-command: preview
@@ -1410,26 +1410,11 @@ workflows:
 
       ########## (TAXISTAKE) ##########
       - deploy-dependencies:
-          name: preview dependencies (taxistake)
+          name: validate dependencies (taxistake)
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: preview --expect-no-changes
           requires:
             - lint and test project (persist to workspace)
-          <<: *only-main
-
-      - approve-taxistake:
-          name: approve dependencies (taxistake)
-          type: approval
-          requires:
-            - preview dependencies (taxistake)
-          <<: *only-main
-
-      - deploy-dependencies:
-          name: deploy dependencies (taxistake)
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve dependencies (taxistake)
           <<: *only-main
 
       ####### BITCOIN
@@ -1438,7 +1423,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: preview
           requires:
-            - deploy dependencies (taxistake)
+            - validate dependencies (taxistake)
           <<: *bitcoin
           <<: *only-main
 
@@ -1464,7 +1449,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: preview
           requires:
-            - deploy dependencies (taxistake)
+            - validate dependencies (taxistake)
           <<: *bitcoincash
           <<: *only-main
 
@@ -1490,7 +1475,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: preview
           requires:
-            - deploy dependencies (taxistake)
+            - validate dependencies (taxistake)
           <<: *dogecoin
           <<: *only-main
 
@@ -1516,7 +1501,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: preview
           requires:
-            - deploy dependencies (taxistake)
+            - validate dependencies (taxistake)
           <<: *litecoin
           <<: *only-main
 
@@ -1542,7 +1527,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: preview
           requires:
-            - deploy dependencies (taxistake)
+            - validate dependencies (taxistake)
           <<: *ethereum
           <<: *only-main
 
@@ -1568,7 +1553,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: preview
           requires:
-            - deploy dependencies (taxistake)
+            - validate dependencies (taxistake)
           <<: *avalanche
           <<: *only-main
 
@@ -1594,7 +1579,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: preview
           requires:
-            - deploy dependencies (taxistake)
+            - validate dependencies (taxistake)
           <<: *cosmos
           <<: *only-main
 
@@ -1620,7 +1605,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: preview
           requires:
-            - deploy dependencies (taxistake)
+            - validate dependencies (taxistake)
           <<: *osmosis
           <<: *only-main
 
@@ -1646,7 +1631,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: preview
           requires:
-            - deploy dependencies (taxistake)
+            - validate dependencies (taxistake)
           <<: *thorchain
           <<: *only-main
 
