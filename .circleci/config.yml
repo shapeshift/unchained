@@ -12,12 +12,14 @@ aliases:
         ignore:
           - main
           - develop
+          - shared-infra
 
   - &only-develop
     filters:
       branches:
         only:
           - develop
+          - shared-infra
 
   - &only-main
     filters:
@@ -629,6 +631,8 @@ jobs:
           name: pulumi
           working_directory: pulumi/src/cluster
           command: |
+            pulumi about
+            pulumi whoami
             pulumi stack select $<< parameters.organization >>_PULUMI_ORG/dependencies
             pulumi config set --path unchained:common.cluster eks
             pulumi config set --path unchained:common.additionalEnvironments[0] dev
@@ -681,6 +685,7 @@ jobs:
             pulumi config set --path unchained:common.dockerhub.password $DOCKERHUB_PASSWORD --plaintext
             pulumi config set --path unchained:common.dockerhub.server docker.io
             pulumi config set --path unchained:common.rootDomainName $<< parameters.organization >>_ROOT_DOMAIN_NAME
+            cat Pulumi.dependencies.yaml
             pulumi <<parameters.pulumi-command>> --suppress-outputs
 
   deploy-coinstack-node:
@@ -837,7 +842,7 @@ jobs:
           organization: <<parameters.organization>>
       - run:
           name: pulumi
-          working_directory: monitoring
+          working_directory: monitoring/src
           command: |
             pulumi stack select $<< parameters.organization >>_PULUMI_ORG/prod
             pulumi config set --path unchained:monitoring.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies
@@ -870,6 +875,7 @@ jobs:
       - precheck
       - postcheck
       - run:
+          working_directory: node
           name: Remove devDependencies
           command: yarn --production --ignore-scripts --prefer-offline --silent --frozen-lockfile
       - persist_to_workspace:
@@ -896,7 +902,8 @@ workflows:
       - deploy-dependencies:
           name: deploy dependencies (shapeshift)
           organization: SHAPESHIFT
-          pulumi-command: up -f --yes
+          #pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - lint and test project (persist to workspace)
           <<: *only-develop
@@ -904,7 +911,8 @@ workflows:
       - deploy-coinstack-node:
           name: deploy bitcoin develop (shapeshift)
           organization: SHAPESHIFT
-          pulumi-command: up -f --yes
+          #pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies (shapeshift)
           <<: *bitcoin-dev
@@ -913,7 +921,8 @@ workflows:
       - deploy-coinstack-node:
           name: deploy dogecoin develop (shapeshift)
           organization: SHAPESHIFT
-          pulumi-command: up -f --yes
+          #pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies (shapeshift)
           <<: *dogecoin-dev
@@ -922,7 +931,8 @@ workflows:
       - deploy-coinstack-node:
           name: deploy litecoin develop (shapeshift)
           organization: SHAPESHIFT
-          pulumi-command: up -f --yes
+          #pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies (shapeshift)
           <<: *litecoin-dev
@@ -931,7 +941,8 @@ workflows:
       - deploy-coinstack-node:
           name: deploy bitcoincash develop (shapeshift)
           organization: SHAPESHIFT
-          pulumi-command: up -f --yes
+          #pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies (shapeshift)
           <<: *bitcoincash-dev
@@ -940,7 +951,8 @@ workflows:
       - deploy-coinstack-node:
           name: deploy ethereum develop (shapeshift)
           organization: SHAPESHIFT
-          pulumi-command: up -f --yes
+          #pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies (shapeshift)
           <<: *ethereum-dev
@@ -949,7 +961,8 @@ workflows:
       - deploy-coinstack-node:
           name: deploy avalanche develop (shapeshift)
           organization: SHAPESHIFT
-          pulumi-command: up -f --yes
+          #pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies (shapeshift)
           <<: *avalanche-dev
@@ -958,7 +971,8 @@ workflows:
       - deploy-coinstack-go:
           name: deploy cosmos develop (shapeshift)
           organization: SHAPESHIFT
-          pulumi-command: up -f --yes
+          #pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies (shapeshift)
           <<: *cosmos-dev
@@ -967,7 +981,8 @@ workflows:
       - deploy-coinstack-go:
           name: deploy osmosis develop (shapeshift)
           organization: SHAPESHIFT
-          pulumi-command: up -f --yes
+          #pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies (shapeshift)
           <<: *osmosis-dev
@@ -976,7 +991,8 @@ workflows:
       - deploy-coinstack-go:
           name: deploy thorchain develop (shapshift)
           organization: SHAPESHIFT
-          pulumi-command: up -f --yes
+          #pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies (shapeshift)
           <<: *thorchain-dev
