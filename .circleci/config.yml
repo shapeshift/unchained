@@ -598,7 +598,7 @@ commands:
           name: install pulumi plugin resources
           command: |
             pulumi plugin install resource aws v5.8.0
-            pulumi plugin install resource kubernetes v3.19.3
+            pulumi plugin install resource kubernetes v3.21.4
             pulumi plugin install resource eks 0.40.0
       - run:
           name: create aws credentials file
