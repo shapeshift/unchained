@@ -80,7 +80,7 @@ func (a *API) Root(w http.ResponseWriter, r *http.Request) {
 	api.DocsRedirect(w, r)
 }
 
-func (a *API) validatePagingParams(w http.ResponseWriter, r *http.Request) (string, int) {
+func (a *API) validatePaginationParams(w http.ResponseWriter, r *http.Request) (string, int) {
 	cursor := r.URL.Query().Get("cursor")
 
 	pageSizeQ := r.URL.Query().Get("pageSize")
