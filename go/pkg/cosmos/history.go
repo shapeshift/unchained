@@ -65,8 +65,8 @@ func ValidatorHistorySources(client *HTTPClient, pubkey string, formatTx func(*c
 	}
 
 	return map[string]*TxState{
-		"send":    NewTxState(true, fmt.Sprintf(`"delegate.validator='%s'"`, pubkey), request),
-		"receive": NewTxState(true, fmt.Sprintf(`"unbond.validator='%s'"`, pubkey), request),
+		"delegate":    NewTxState(true, fmt.Sprintf(`"delegate.validator='%s'"`, pubkey), request),
+		"undelegate": NewTxState(true, fmt.Sprintf(`"unbond.validator='%s'"`, pubkey), request),
 	}
 }
 
