@@ -49,7 +49,7 @@ func TxHistorySources(client *HTTPClient, pubkey string, formatTx func(*coretype
 	}
 }
 
-func ValidatorHistorySources(client *HTTPClient, pubkey string, formatTx func(*coretypes.ResultTx) (*Tx, error)) map[string]*TxState {
+func ValidatorTxHistorySources(client *HTTPClient, pubkey string, formatTx func(*coretypes.ResultTx) (*Tx, error)) map[string]*TxState {
 	request := func(query string, page int, pageSize int) ([]HistoryTx, error) {
 		result, err := client.TxSearch(query, page, pageSize)
 		if err != nil {
