@@ -71,7 +71,7 @@ export function createService(args: ServiceArgs): Service {
         ...(args.volumeMounts ?? [])
       ],
     },
-    {
+    ...(readiness || liveness ? [{
       name: `${name}-monitor`,
       image: 'shapeshiftdao/unchained-probe:1.0.0',
       ...(readiness && {
@@ -106,7 +106,7 @@ export function createService(args: ServiceArgs): Service {
           subPath: `${args.config.name}-readiness.sh`,
         },
       ],
-    },
+    }] : []),
   ]
 
   const volumeClaimTemplates = [
