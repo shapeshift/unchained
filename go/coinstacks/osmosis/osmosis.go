@@ -1,39 +1,22 @@
 package osmosis
 
 import (
-	"net/url"
-
-	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 )
 
-type Config struct {
-	cosmos.Config
-	KEPLRURL string
-}
-
 type HTTPClient struct {
 	*cosmos.HTTPClient
-	keplr *resty.Client
 }
 
-func NewHTTPClient(conf Config) (*HTTPClient, error) {
-	httpClient, err := cosmos.NewHTTPClient(conf.Config)
+func NewHTTPClient(conf cosmos.Config) (*HTTPClient, error) {
+	httpClient, err := cosmos.NewHTTPClient(conf)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create new cosmos http client")
 	}
 
-	keplrURL, err := url.Parse(conf.KEPLRURL)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse keplrURL: %s", conf.KEPLRURL)
-	}
-
-	keplr := resty.New().SetBaseURL(keplrURL.String())
-
 	c := &HTTPClient{
 		HTTPClient: httpClient,
-		keplr:      keplr,
 	}
 
 	return c, nil

@@ -45,13 +45,12 @@ type API struct {
 	handler *Handler
 }
 
-func New(httpClient *osmosis.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, swaggerPath string) *API {
+func New(httpClient *osmosis.HTTPClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, swaggerPath string) *API {
 	r := mux.NewRouter()
 
 	handler := &Handler{
 		Handler: &cosmos.Handler{
 			HTTPClient:   httpClient.HTTPClient,
-			GRPCClient:   grpcClient,
 			WSClient:     wsClient,
 			BlockService: blockService,
 			Denom:        "uosmo",

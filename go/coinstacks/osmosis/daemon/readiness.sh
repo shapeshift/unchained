@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SYNCING=$(curl -s http://localhost:1317/syncing | jq -r .syncing)
+SYNCING=$(curl -sf http://localhost:1317/syncing | jq -r .syncing)
 
 if [ $SYNCING == "true" ]; then
   echo "node is still syncing"
