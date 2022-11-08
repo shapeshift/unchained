@@ -244,9 +244,9 @@ aliases:
     coinstack: osmosis
     pulumi-stack: public
     pulumi-dir: coinstacks/osmosis/pulumi
-    lcd-url: https://osmosis-1--lcd--archive.datahub.figment.io
-    rpc-url: https://osmosis-1--rpc--archive.datahub.figment.io
-    ws-url: wss://osmosis-1--rpc--archive.datahub.figment.io
+    lcd-url: http://osmosis-svc.unchained.svc.cluster.local:1317
+    rpc-url: http://osmosis-svc.unchained.svc.cluster.local:26657
+    ws-url: ws://osmosis-svc.unchained.svc.cluster.local:26657
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
