@@ -1,5 +1,4 @@
 # Project specific
-swagger.json
 node_modules
 Pulumi.*.yaml
 !Pulumi.sample.yaml

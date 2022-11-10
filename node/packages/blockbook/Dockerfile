@@ -11,9 +11,7 @@ RUN apt-get update && \
 ENV GOLANG_VERSION=go1.17.1.linux-amd64
 ENV GOPATH=/go
 ENV PATH=$PATH:$GOPATH/bin
-#ENV BLOCKBOOK_VERSION=master
-#ENV BLOCKBOOK_URL=https://github.com/trezor/blockbook.git
-ENV BLOCKBOOK_VERSION=avax
+ENV BLOCKBOOK_VERSION=avax-95eb699
 ENV BLOCKBOOK_URL=https://github.com/kaladinlight/blockbook.git
 ENV ROCKSDB_VERSION=v6.22.1
 ENV CGO_CFLAGS="-I/opt/rocksdb/include"
