@@ -1,14 +1,10 @@
 {
-  "name": "@shapeshiftoss/unchained-pulumi",
+  "name": "@shapeshiftoss/common-pulumi",
   "version": "8.0.0",
   "license": "MIT",
   "private": true,
+  "main": "src/index.ts",
   "scripts": {
     "clean": "rm -rf dist node_modules"
-  },
-  "dependencies": {
-    "@shapeshiftoss/cluster-launcher": "0.8.2",
-    "@types/folder-hash": "^4.0.1",
-    "folder-hash": "^4.0.2"
   }
 }

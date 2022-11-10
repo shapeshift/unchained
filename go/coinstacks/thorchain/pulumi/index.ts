@@ -1,22 +1,24 @@
 import { parse } from 'dotenv'
 import { readFileSync } from 'fs'
 import * as k8s from '@pulumi/kubernetes'
-import { createService, deployApi, deployStatefulService, getConfig, Service } from '../../../pulumi/src'
+import { deployApi, createService, deployStatefulService, getConfig, Service } from '../../../../pulumi'
+import { api } from '../../../pulumi'
 
 type Outputs = Record<string, any>
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
-  const { kubeconfig, config, namespace } = await getConfig('thorchain')
-
   const name = 'unchained'
-  const asset = config.network !== 'mainnet' ? `thorchain-${config.network}` : 'thorchain'
+  const coinstack = 'thorchain'
+
+  const { kubeconfig, config, namespace } = await getConfig(coinstack)
+
+  const asset = config.network !== 'mainnet' ? `${coinstack}-${config.network}` : coinstack
+  const provider = new k8s.Provider('kube-provider', { kubeconfig })
   const outputs: Outputs = {}
 
-  const provider = new k8s.Provider('kube-provider', { kubeconfig })
-
   const missingKeys: Array<string> = []
-  const stringData = Object.keys(parse(readFileSync('../../../cmd/thorchain/sample.env'))).reduce((prev, key) => {
+  const stringData = Object.keys(parse(readFileSync(`../../../cmd/${coinstack}/sample.env`))).reduce((prev, key) => {
     const value = process.env[key]
 
     if (!value) {
@@ -33,17 +35,26 @@ export = async (): Promise<Outputs> => {
 
   new k8s.core.v1.Secret(asset, { metadata: { name: asset, namespace }, stringData }, { provider })
 
-  await deployApi(name, asset, provider, namespace, config)
+  await deployApi({
+    app: name,
+    asset,
+    buildAndPushImageArgs: { context: '../../../../go', dockerFile: '../../../build/Dockerfile' },
+    config,
+    container: { args: ['-swagger', 'swagger.json'] },
+    getHash: api.getHash,
+    namespace,
+    provider,
+    secretEnvs: api.secretEnvs,
+  })
 
   if (config.statefulService) {
     const services = config.statefulService.services.reduce<Record<string, Service>>((prev, service) => {
       if (service.name === 'daemon') {
-        prev.daemon = createService({
+        prev[service.name] = createService({
           asset,
           config: service,
           dataDir: '/root',
-          env: { 'CHAIN_ID': `thorchain-${config.network}-v1`, 'NET': config.network },
-          name: 'daemon',
+          env: { 'CHAIN_ID': `${coinstack}-${config.network}-v1`, 'NET': config.network },
           ports: {
             'daemon-api': { port: 1317, pathPrefix: '/lcd', stripPathPrefix: true },
             'daemon-rpc': { port: 27147, pathPrefix: '/rpc', stripPathPrefix: true }
@@ -52,7 +63,7 @@ export = async (): Promise<Outputs> => {
       }
 
       if (service.name === 'indexer') {
-        prev.indexer = createService({
+        prev[service.name] = createService({
           asset,
           config: service,
           dataDir: '/blockstore',
@@ -60,15 +71,14 @@ export = async (): Promise<Outputs> => {
             'MIDGARD_BLOCKSTORE_LOCAL': '/blockstore',
             'MIDGARD_BLOCKSTORE_REMOTE': 'https://storage.googleapis.com/public-snapshots-ninerealms/midgard-blockstore/mainnet/v2/'
           },
-          name: 'indexer',
           ports: { 'midgard': { port: 8080 } },
-          configMapData: {'indexer-config.json': readFileSync('../indexer/config.json').toString()},
-          volumeMounts: [{name: 'config-map', 'mountPath': '/config.json', subPath: 'indexer-config.json'}]
+          configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
+          volumeMounts: [{ name: 'config-map', 'mountPath': '/config.json', subPath: 'indexer-config.json' }]
         })
       }
 
       if (service.name === 'timescaledb') {
-        prev.timescaledb = createService({
+        prev[service.name] = createService({
           asset,
           config: service,
           dataDir: '/var/lib/postgresql/data',
@@ -78,7 +88,6 @@ export = async (): Promise<Outputs> => {
             'POSTGRES_PASSWORD': 'password',
             'PGDATA': '/var/lib/postgresql/data/pgdata'
           },
-          name: 'timescaledb',
           ports: { 'postgres': { port: 5432 } },
           volumeMounts: [{ name: 'dshm', mountPath: '/dev/shm' }]
         })

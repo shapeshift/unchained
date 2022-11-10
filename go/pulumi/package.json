@@ -8,13 +8,10 @@
   },
   "dependencies": {
     "@pulumi/kubernetes": "3.19.3",
-    "@pulumi/pulumi": "3.34.0",
     "@types/folder-hash": "^4.0.1",
     "@types/object-hash": "^2.2.1",
-    "axios": "^0.27.2",
     "dotenv": "^16.0.1",
     "folder-hash": "^4.0.2",
-    "object-hash": "^3.0.0",
-    "path": "^0.12.7"
+    "object-hash": "^3.0.0"
   }
 }

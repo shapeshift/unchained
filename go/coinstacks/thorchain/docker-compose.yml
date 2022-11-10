@@ -1,12 +1,9 @@
 version: '3.4'
 services:
   api:
-    image: go-unchained-local
+    image: unchained-local-go
     environment:
       - GOCACHE=/tmp
-    build:
-      context: ../../build
-      dockerfile: Dockerfile.local
     labels:
       - 'traefik.enable=true'
       - 'traefik.http.routers.thorchain-api.rule=Host(`api.thorchain.localhost`)'
