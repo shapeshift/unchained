@@ -125,7 +125,7 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 		return txs, nil
 	}
 
-	sources := cosmos.NewDefaultSources(h.HTTPClient, pubkey, h.Handler.FormatTx)
+	sources := cosmos.TxHistorySources(h.HTTPClient, pubkey, h.Handler.FormatTx)
 	sources["swap"] = cosmos.NewTxState(true, fmt.Sprintf(`"outbound.to='%s'"`, pubkey), request)
 
 	res, err := h.HTTPClient.GetTxHistory(pubkey, cursor, pageSize, sources)

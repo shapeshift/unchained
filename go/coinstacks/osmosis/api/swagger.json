@@ -329,6 +329,60 @@
           }
         }
       }
+    },
+    "/api/v1/validators/{pubkey}/txs": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "summary": "Get paginated transaction history for a validator.",
+        "operationId": "ValidatorTxHistory",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Pubkey",
+            "description": "Account address or xpub",
+            "name": "pubkey",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "Cursor",
+            "description": "Pagination cursor from previous response or empty string for first page fetch",
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "PageSize",
+            "description": "Page size (default 10)",
+            "name": "pageSize",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "TxHistory",
+            "schema": {
+              "$ref": "#/definitions/TxHistory"
+            }
+          },
+          "400": {
+            "description": "BadRequestError",
+            "schema": {
+              "$ref": "#/definitions/BadRequestError"
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "schema": {
+              "$ref": "#/definitions/InternalServerError"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
