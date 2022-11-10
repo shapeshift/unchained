@@ -53,6 +53,18 @@ export = async (): Promise<Outputs> => {
 
   if (config.statefulService) {
     const services = config.statefulService.services.reduce<Record<string, Service>>((prev, service) => {
+      if (service.name === 'daemon') {
+        prev[service.name] = createService({
+          asset,
+          config: service,
+          ports: { 'daemon-rpc': { port: 8332 } },
+          configMapData: { 'c-chain-config.json': readFileSync('../daemon/config.json').toString() },
+          volumeMounts: [
+            { name: 'config-map', mountPath: '/configs/chains/C/config.json', subPath: 'c-chain-config.json' },
+          ],
+        })
+      }
+
       if (service.name === 'indexer') {
         prev[service.name] = createService({
           asset,

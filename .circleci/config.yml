@@ -144,7 +144,7 @@ aliases:
     service-memory-limit-1: 12Gi
     service-storage-size-1: 650Gi
     service-name-2: indexer
-    service-image-2: docker.io/shapeshiftdao/unchained-blockbook:latest
+    service-image-2: shapeshiftdao/unchained-blockbook:latest
     service-cpu-limit-2: "4"
     service-cpu-request-2: "2"
     service-memory-limit-2: 24Gi
@@ -190,7 +190,7 @@ aliases:
     service-memory-limit-2: 16Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: docker.io/shapeshiftdao/unchained-blockbook:latest
+    service-image-3: shapeshiftdao/unchained-blockbook:latest
     service-cpu-limit-3: "4"
     service-cpu-request-3: "2"
     service-memory-limit-3: 12Gi
@@ -223,6 +223,13 @@ aliases:
     api-cpu-request: 250m
     api-cpu-threshold: 30
     api-memory-limit: 2Gi
+    stateful-service-replicas: 2
+    service-name-1: daemon
+    service-image-1: ghcr.io/ovrclk/cosmos-omnibus:v0.3.9-cosmoshub-v7.1.0
+    service-cpu-limit-1: "16"
+    service-cpu-request-1: "8"
+    service-memory-limit-1: 32Gi
+    service-storage-size-1: 2000Gi
 
   - &cosmos-dev
     <<: *cosmos
@@ -231,15 +238,15 @@ aliases:
     api-max-replicas: 3
     api-cpu-limit: 300m
     api-memory-limit: 1Gi
+    stateful-service-replicas: 1
 
   - &osmosis
     coinstack: osmosis
     pulumi-stack: public
     pulumi-dir: coinstacks/osmosis/pulumi
-    lcd-url: https://osmosis-1--lcd--archive.datahub.figment.io
-    rpc-url: https://osmosis-1--rpc--archive.datahub.figment.io
-    ws-url: wss://osmosis-1--rpc--archive.datahub.figment.io
-    keplr-url: https://lcd-osmosis.keplr.app
+    lcd-url: http://osmosis-svc.unchained.svc.cluster.local:1317
+    rpc-url: http://osmosis-svc.unchained.svc.cluster.local:26657
+    ws-url: ws://osmosis-svc.unchained.svc.cluster.local:26657
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -247,14 +254,25 @@ aliases:
     api-cpu-request: 250m
     api-cpu-threshold: 30
     api-memory-limit: 2Gi
+    stateful-service-replicas: 2
+    service-name-1: daemon
+    service-image-1: ghcr.io/ovrclk/cosmos-omnibus:v0.3.9-osmosis-v12.2.0
+    service-cpu-limit-1: "16"
+    service-cpu-request-1: "8"
+    service-memory-limit-1: 32Gi
+    service-storage-size-1: 500Gi
 
   - &osmosis-dev
     <<: *osmosis
     environment: dev
     pulumi-stack: public-dev
+    lcd-url: http://osmosis-svc.unchained-dev.svc.cluster.local:1317
+    rpc-url: http://osmosis-svc.unchained-dev.svc.cluster.local:26657
+    ws-url: ws://osmosis-svc.unchained-dev.svc.cluster.local:26657
     api-max-replicas: 3
     api-cpu-limit: 300m
     api-memory-limit: 1Gi
+    stateful-service-replicas: 1
 
   - &avalanche
     coinstack: avalanche
@@ -271,12 +289,18 @@ aliases:
     api-cpu-threshold: 30
     api-memory-limit: 2Gi
     stateful-service-replicas: 2
-    service-name-1: indexer
-    service-image-1: docker.io/shapeshiftdao/unchained-blockbook:latest
-    service-cpu-limit-1: "4"
-    service-cpu-request-1: "2"
-    service-memory-limit-1: 12Gi
-    service-storage-size-1: 500Gi
+    service-name-1: daemon
+    service-image-1: avaplatform/avalanchego:v1.9.1
+    service-cpu-limit-1: "16"
+    service-cpu-request-1: "8"
+    service-memory-limit-1: 32Gi
+    service-storage-size-1: 1500Gi
+    service-name-2: indexer
+    service-image-2: shapeshiftdao/unchained-blockbook:latest
+    service-cpu-limit-2: "4"
+    service-cpu-request-2: "2"
+    service-memory-limit-2: 12Gi
+    service-storage-size-2: 500Gi
 
   - &avalanche-dev
     <<: *avalanche
@@ -311,7 +335,7 @@ aliases:
     service-memory-limit-1: 12Gi
     service-storage-size-1: 250Gi
     service-name-2: indexer
-    service-image-2: docker.io/shapeshiftdao/unchained-blockbook:latest
+    service-image-2: shapeshiftdao/unchained-blockbook:latest
     service-cpu-limit-2: "4"
     service-cpu-request-2: "2"
     service-memory-limit-2: 24Gi
@@ -351,7 +375,7 @@ aliases:
     service-memory-limit-1: 12Gi
     service-storage-size-1: 250Gi
     service-name-2: indexer
-    service-image-2: docker.io/shapeshiftdao/unchained-blockbook:latest
+    service-image-2: shapeshiftdao/unchained-blockbook:latest
     service-cpu-limit-2: "4"
     service-cpu-request-2: "2"
     service-memory-limit-2: 24Gi
@@ -391,7 +415,7 @@ aliases:
     service-memory-limit-1: 12Gi
     service-storage-size-1: 250Gi
     service-name-2: indexer
-    service-image-2: docker.io/shapeshiftdao/unchained-blockbook:latest
+    service-image-2: shapeshiftdao/unchained-blockbook:latest
     service-cpu-limit-2: "4"
     service-cpu-request-2: "2"
     service-memory-limit-2: 24Gi

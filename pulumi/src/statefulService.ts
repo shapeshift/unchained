@@ -38,40 +38,45 @@ export function createService(args: ServiceArgs): Service {
     ...(args.configMapData ?? {})
   }
 
-  const containers = [
-    {
-      name,
-      image: args.config.image,
-      command: init && !args.command ? ['/init.sh'] : args.command,
-      args: args.args,
-      env,
-      resources: {
-        limits: {
-          cpu: args.config.cpuLimit,
-          memory: args.config.memoryLimit,
-        },
-        ...(args.config.cpuRequest && {
-          requests: {
-            cpu: args.config.cpuRequest,
-          },
-        }),
+  const containers: Array<k8s.types.input.core.v1.Container> = []
+
+  const serviceContainer: k8s.types.input.core.v1.Container = {
+    name,
+    image: args.config.image,
+    command: init && !args.command ? ['/init.sh'] : args.command,
+    args: args.args,
+    env,
+    resources: {
+      limits: {
+        cpu: args.config.cpuLimit,
+        memory: args.config.memoryLimit,
       },
-      ports: ports.map(({ port: containerPort, name }) => ({ containerPort, name })),
-      securityContext: { runAsUser: 0 },
-      volumeMounts: [
-        {
-          name: `data-${args.config.name}`,
-          mountPath: args.dataDir ?? '/data',
+      ...(args.config.cpuRequest && {
+        requests: {
+          cpu: args.config.cpuRequest,
         },
-        ...(init ? [{
-          name: 'config-map',
-          mountPath: '/init.sh',
-          subPath: `${args.config.name}-init.sh`,
-        }] : []),
-        ...(args.volumeMounts ?? [])
-      ],
+      }),
     },
-    {
+    ports: ports.map(({ port: containerPort, name }) => ({ containerPort, name })),
+    securityContext: { runAsUser: 0 },
+    volumeMounts: [
+      {
+        name: `data-${args.config.name}`,
+        mountPath: args.dataDir ?? '/data',
+      },
+      ...(init ? [{
+        name: 'config-map',
+        mountPath: '/init.sh',
+        subPath: `${args.config.name}-init.sh`,
+      }] : []),
+      ...(args.volumeMounts ?? [])
+    ],
+  }
+
+  containers.push(serviceContainer)
+
+  if (readiness || liveness) {
+    const monitorContainer: k8s.types.input.core.v1.Container = {
       name: `${name}-monitor`,
       image: 'shapeshiftdao/unchained-probe:1.0.0',
       ...(readiness && {
@@ -95,19 +100,21 @@ export function createService(args: ServiceArgs): Service {
         }
       }),
       volumeMounts: [
-        {
-          name: 'config-map',
-          mountPath: '/liveness.sh',
-          subPath: `${args.config.name}-liveness.sh`,
-        },
-        {
+        ...(readiness ? [{
           name: 'config-map',
           mountPath: '/readiness.sh',
           subPath: `${args.config.name}-readiness.sh`,
-        },
+        }] : []),
+        ...(liveness ? [{
+          name: 'config-map',
+          mountPath: '/liveness.sh',
+          subPath: `${args.config.name}-liveness.sh`,
+        }] : [])
       ],
-    },
-  ]
+    }
+
+    containers.push(monitorContainer)
+  }
 
   const volumeClaimTemplates = [
     {
