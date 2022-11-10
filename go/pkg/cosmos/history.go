@@ -28,7 +28,7 @@ func NewTxState(hasMore bool, query string, request RequestFn) *TxState {
 	}
 }
 
-func NewDefaultSources(client *HTTPClient, pubkey string, formatTx func(*coretypes.ResultTx) (*Tx, error)) map[string]*TxState {
+func TxHistorySources(client *HTTPClient, pubkey string, formatTx func(*coretypes.ResultTx) (*Tx, error)) map[string]*TxState {
 	request := func(query string, page int, pageSize int) ([]HistoryTx, error) {
 		result, err := client.TxSearch(query, page, pageSize)
 		if err != nil {
@@ -46,6 +46,27 @@ func NewDefaultSources(client *HTTPClient, pubkey string, formatTx func(*coretyp
 	return map[string]*TxState{
 		"send":    NewTxState(true, fmt.Sprintf(`"message.sender='%s'"`, pubkey), request),
 		"receive": NewTxState(true, fmt.Sprintf(`"transfer.recipient='%s'"`, pubkey), request),
+	}
+}
+
+func ValidatorTxHistorySources(client *HTTPClient, pubkey string, formatTx func(*coretypes.ResultTx) (*Tx, error)) map[string]*TxState {
+	request := func(query string, page int, pageSize int) ([]HistoryTx, error) {
+		result, err := client.TxSearch(query, page, pageSize)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+
+		txs := []HistoryTx{}
+		for _, tx := range result.Txs {
+			txs = append(txs, &ResultTx{ResultTx: tx, formatTx: formatTx})
+		}
+
+		return txs, nil
+	}
+
+	return map[string]*TxState{
+		"delegate":   NewTxState(true, fmt.Sprintf(`"delegate.validator='%s'"`, pubkey), request),
+		"undelegate": NewTxState(true, fmt.Sprintf(`"unbond.validator='%s'"`, pubkey), request),
 	}
 }
 

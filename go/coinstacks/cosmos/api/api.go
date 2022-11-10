@@ -111,10 +111,13 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient 
 	v1Gas := v1.PathPrefix("/gas").Subrouter()
 	v1Gas.HandleFunc("/estimate", a.EstimateGas).Methods("POST")
 
+	v1ValidatorsRoot := v1.PathPrefix("/validators").Subrouter()
+	v1ValidatorsRoot.HandleFunc("", a.GetValidators).Methods("GET")
+
 	v1Validators := v1.PathPrefix("/validators").Subrouter()
 	v1Validators.Use(cosmos.ValidateValidatorPubkey)
-	v1Validators.HandleFunc("", a.GetValidators).Methods("GET")
 	v1Validators.HandleFunc("/{pubkey}", a.GetValidator).Methods("GET")
+	v1Validators.HandleFunc("/{pubkey}/txs", a.ValidatorTxHistory).Methods("GET")
 
 	// docs redirect paths
 	r.HandleFunc("/docs", api.DocsRedirect).Methods("GET")
@@ -165,4 +168,26 @@ func (a *API) GetValidator(w http.ResponseWriter, r *http.Request) {
 	}
 
 	api.HandleResponse(w, http.StatusOK, validator)
+}
+
+// swagger:route GET /api/v1/validators/{pubkey}/txs v1 ValidatorTxHistory
+//
+// Get paginated transaction history for a validator.
+//
+// responses:
+//
+//	200: TxHistory
+//	400: BadRequestError
+//	500: InternalServerError
+func (a *API) ValidatorTxHistory(w http.ResponseWriter, r *http.Request) {
+	validatorAddr := mux.Vars(r)["pubkey"]
+	cursor, pageSize := a.ValidatePagingParams(w, r)
+
+	txHistory, err := a.handler.GetValidatorTxHistory(validatorAddr, cursor, pageSize)
+	if err != nil {
+		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	api.HandleResponse(w, http.StatusOK, txHistory)
 }

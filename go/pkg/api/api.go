@@ -158,7 +158,7 @@ type PubkeyParam struct {
 	Pubkey string `json:"pubkey"`
 }
 
-// swagger:parameters GetTxHistory
+// swagger:parameters GetTxHistory ValidatorTxHistory
 type PaginatedPubkeyParam struct {
 	PubkeyParam
 	// Pagination cursor from previous response or empty string for first page fetch
