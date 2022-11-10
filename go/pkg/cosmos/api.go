@@ -80,7 +80,7 @@ func (a *API) Root(w http.ResponseWriter, r *http.Request) {
 	api.DocsRedirect(w, r)
 }
 
-func (a *API) validatePaginationParams(w http.ResponseWriter, r *http.Request) (string, int) {
+func (a *API) ValidatePagingParams(w http.ResponseWriter, r *http.Request) (string, int) {
 	cursor := r.URL.Query().Get("cursor")
 
 	pageSizeQ := r.URL.Query().Get("pageSize")
@@ -172,33 +172,9 @@ func (a *API) Account(w http.ResponseWriter, r *http.Request) {
 func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 	// pubkey validated by ValidatePubkey middleware
 	pubkey := mux.Vars(r)["pubkey"]
-	cursor, pageSize := a.validatePagingParams(w, r)
+	cursor, pageSize := a.ValidatePagingParams(w, r)
 
 	txHistory, err := a.handler.GetTxHistory(pubkey, cursor, pageSize)
-	if err != nil {
-		api.HandleError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	api.HandleResponse(w, http.StatusOK, txHistory)
-}
-
-// swagger:route GET /api/v1/validators/{pubkey}/txs v1 ValidatorTxHistory
-//
-// Get paginated transaction history for a validator.
-//
-// responses:
-//
-//	200: TxHistory
-//	400: BadRequestError
-//	500: InternalServerError
-func (a *API) ValidatorTxHistory(w http.ResponseWriter, r *http.Request) {
-	validatorAddr := mux.Vars(r)["pubkey"]
-	cursor, pageSize := a.validatePagingParams(w, r)
-	println(validatorAddr, cursor, pageSize)
-
-	txHistory, err := a.handler.GetValidatorTxHistory(validatorAddr, cursor, pageSize)
-
 	if err != nil {
 		api.HandleError(w, http.StatusInternalServerError, err.Error())
 		return
