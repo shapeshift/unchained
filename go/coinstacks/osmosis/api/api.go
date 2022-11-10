@@ -183,7 +183,6 @@ func (a *API) ValidatorTxHistory(w http.ResponseWriter, r *http.Request) {
 	cursor, pageSize := a.ValidatePagingParams(w, r)
 
 	txHistory, err := a.handler.GetValidatorTxHistory(validatorAddr, cursor, pageSize)
-
 	if err != nil {
 		api.HandleError(w, http.StatusInternalServerError, err.Error())
 		return
