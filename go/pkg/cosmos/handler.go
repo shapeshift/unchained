@@ -28,7 +28,6 @@ type RouteHandler interface {
 	GetInfo() (api.Info, error)
 	GetAccount(pubkey string) (api.Account, error)
 	GetTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error)
-	GetValidatorTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error)
 	GetTx(txid string) (api.Tx, error)
 	SendTx(hex string) (string, error)
 	EstimateGas(rawTx string) (string, error)
