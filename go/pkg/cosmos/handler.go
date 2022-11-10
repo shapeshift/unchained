@@ -192,7 +192,7 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 }
 
 func (h *Handler) GetValidatorTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
-	sources := ValidatorHistorySources(h.HTTPClient, pubkey, h.FormatTx)
+	sources := ValidatorTxHistorySources(h.HTTPClient, pubkey, h.FormatTx)
 
 	res, err := h.HTTPClient.GetTxHistory(pubkey, cursor, pageSize, sources)
 	if err != nil {
