@@ -1,7 +1,7 @@
 import { parse } from 'dotenv'
 import { readFileSync } from 'fs'
 import * as k8s from '@pulumi/kubernetes'
-import { deployApi, getConfig } from '../../../../pulumi'
+import { deployApi, createService, deployStatefulService, getConfig, Service } from '../../../../pulumi'
 import { api } from '../../../pulumi'
 
 type Outputs = Record<string, any>
@@ -46,6 +46,26 @@ export = async (): Promise<Outputs> => {
     provider,
     secretEnvs: api.secretEnvs,
   })
+
+  if (config.statefulService) {
+    const services = config.statefulService.services.reduce<Record<string, Service>>((prev, service) => {
+      if (service.name === 'daemon') {
+        prev[service.name] = createService({
+          asset,
+          config: service,
+          dataDir: '/root',
+          ports: {
+            'daemon-api': { port: 1317, pathPrefix: '/lcd', stripPathPrefix: true },
+            'daemon-rpc': { port: 26657, pathPrefix: '/rpc', stripPathPrefix: true }
+          }
+        })
+      }
+
+      return prev
+    }, {})
+
+    await deployStatefulService(name, asset, provider, namespace, config, services)
+  }
 
   return outputs
 }
