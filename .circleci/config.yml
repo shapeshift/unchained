@@ -789,9 +789,6 @@ jobs:
         default: ""
       rpc-url:
         type: string
-      keplr-url:
-        type: string
-        default: ""
       ws-url:
         type: string
     steps:
