@@ -58,7 +58,7 @@ export = async (): Promise<Outputs> => {
           asset,
           config: service,
           env: { NETWORK: config.network },
-          ports: { 'daemon-rpc': { port: 8332 }, 'daemon-beacon': { port: 8551 } },
+          ports: { 'daemon-rpc': { port: 8332 }, 'daemon-beacon': { port: 8551, ingressRoute: false } },
           configMapData: { 'jwt.hex': readFileSync('../daemon/jwt.hex').toString() },
           volumeMounts: [{ name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' }],
         })
@@ -78,7 +78,6 @@ export = async (): Promise<Outputs> => {
             '--accept-terms-of-use',
           ],
           ports: {},
-          configMapData: { 'daemon-beacon-readiness.sh': readFileSync('../daemon/readiness-beacon.sh').toString() },
           volumeMounts: [{ name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' }],
         })
       }

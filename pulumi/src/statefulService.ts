@@ -4,6 +4,7 @@ import { Config, Service, ServiceConfig } from '.'
 
 interface Port {
   port: number
+  ingressRoute?: boolean
   pathPrefix?: string
   stripPathPrefix?: boolean
 }
@@ -24,7 +25,7 @@ export interface ServiceArgs {
 
 export function createService(args: ServiceArgs): Service {
   const name = `${args.asset}-${args.config.name}`
-  const ports = Object.entries(args.ports).map(([name, { port, pathPrefix, stripPathPrefix }]) => ({ name, port, pathPrefix, stripPathPrefix }))
+  const ports = Object.entries(args.ports).map(([name, port]) => ({ name, ...port }))
   const env = Object.entries(args.env ?? []).map(([name, value]) => ({ name, value }))
 
   const init = (() => { try { return readFileSync(`../${args.config.name}/init.sh`).toString() } catch (err) { return '' } })()
@@ -322,8 +323,8 @@ export async function deployStatefulService(
         },
         spec: {
           entryPoints: ['web', 'websecure'],
-          routes: Object.entries(services).map(([service, { ports }]) => ports.map(({ port, pathPrefix }) => (
-            {
+          routes: Object.entries(services).map(([service, { ports }]) =>
+            ports.filter(({ ingressRoute = true }) => ingressRoute).map(({ port, pathPrefix }) => ({
               kind: 'Rule',
               match: match(service, pathPrefix),
               middlewares: [{ name: middleware.metadata.name, namespace: svc.metadata.namespace }],
