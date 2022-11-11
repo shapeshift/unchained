@@ -212,10 +212,10 @@ aliases:
     coinstack: cosmos
     pulumi-stack: public
     pulumi-dir: coinstacks/cosmos/pulumi
-    lcd-url: https://cosmoshub-4--lcd--archive.datahub.figment.io
-    grpc-url: cosmoshub-4--grpc--archive.grpc.datahub.figment.io:443
-    rpc-url: https://cosmoshub-4--rpc--archive.datahub.figment.io
-    ws-url: wss://cosmoshub-4--rpc--archive.datahub.figment.io
+    lcd-url: http://cosmos-svc.unchained.svc.cluster.local:1317
+    grpc-url: cosmos-svc.unchained.svc.cluster.local:9090
+    rpc-url: http://cosmos-svc.unchained.svc.cluster.local:26657
+    ws-url: ws://cosmos-svc.unchained.svc.cluster.local:26657
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -235,6 +235,10 @@ aliases:
     <<: *cosmos
     environment: dev
     pulumi-stack: public-dev
+    lcd-url: http://cosmos-svc.unchained-dev.svc.cluster.local:1317
+    grpc-url: cosmos-svc.unchained-dev.svc.cluster.local:9090
+    rpc-url: http://cosmos-svc.unchained-dev.svc.cluster.local:26657
+    ws-url: ws://cosmos-svc.unchained-dev.svc.cluster.local:26657
     api-max-replicas: 3
     api-cpu-limit: 300m
     api-memory-limit: 1Gi
