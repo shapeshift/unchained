@@ -48,7 +48,7 @@ export interface ServiceConfig {
 }
 
 export interface Service {
-  ports: Array<k8s.types.input.core.v1.ServicePort & { pathPrefix?: string, stripPathPrefix?: boolean }>
+  ports: Array<k8s.types.input.core.v1.ServicePort & { ingressRoute?: boolean, pathPrefix?: string, stripPathPrefix?: boolean }>
   configMapData: Record<string, string>
   containers: Array<k8s.types.input.core.v1.Container>
   volumeClaimTemplates: Array<k8s.types.input.core.v1.PersistentVolumeClaim>
