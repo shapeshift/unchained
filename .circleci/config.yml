@@ -229,7 +229,7 @@ aliases:
     service-cpu-limit-1: "16"
     service-cpu-request-1: "8"
     service-memory-limit-1: 32Gi
-    service-storage-size-1: 2000Gi
+    service-storage-size-1: 2500Gi
 
   - &cosmos-dev
     <<: *cosmos
