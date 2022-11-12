@@ -94,10 +94,6 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 	return a, nil
 }
 
-func (h *Handler) SendTx(hex string) (string, error) {
-	return h.HTTPClient.BroadcastTx(hex)
-}
-
 func (h *Handler) GetValidators() ([]cosmos.Validator, error) {
 	aprData, err := h.getAPRData()
 	if err != nil {

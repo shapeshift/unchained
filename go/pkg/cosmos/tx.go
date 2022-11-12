@@ -18,7 +18,6 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
 	ibcchanneltypes "github.com/cosmos/ibc-go/v3/modules/core/04-channel/types"
-	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	coretypes "github.com/tendermint/tendermint/rpc/core/types"
@@ -110,10 +109,6 @@ func (c *HTTPClient) TxSearch(query string, page int, pageSize int) (*coretypes.
 }
 
 func (c *HTTPClient) BroadcastTx(rawTx string) (string, error) {
-	return Broadcast(c.LCD, rawTx)
-}
-
-func Broadcast(client *resty.Client, rawTx string) (string, error) {
 	txBytes, err := base64.StdEncoding.DecodeString(rawTx)
 	if err != nil {
 		return "", errors.Wrapf(err, "failed to decode rawTx: %s", rawTx)
@@ -136,7 +131,7 @@ func Broadcast(client *resty.Client, rawTx string) (string, error) {
 		} `json:"tx_response"`
 	}
 
-	_, err = client.R().SetBody(&txtypes.BroadcastTxRequest{TxBytes: txBytes, Mode: txtypes.BroadcastMode_BROADCAST_MODE_SYNC}).SetResult(&res).Post("/cosmos/tx/v1beta1/txs")
+	_, err = c.LCD.R().SetBody(&txtypes.BroadcastTxRequest{TxBytes: txBytes, Mode: txtypes.BroadcastMode_BROADCAST_MODE_SYNC}).SetResult(&res).Post("/cosmos/tx/v1beta1/txs")
 	if err != nil {
 		return "", errors.Wrap(err, "failed to broadcast transaction")
 	}

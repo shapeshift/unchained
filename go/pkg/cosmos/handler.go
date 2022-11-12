@@ -171,7 +171,28 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 }
 
 func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
-	sources := NewDefaultSources(h.HTTPClient, pubkey, h.FormatTx)
+	sources := TxHistorySources(h.HTTPClient, pubkey, h.FormatTx)
+
+	res, err := h.HTTPClient.GetTxHistory(pubkey, cursor, pageSize, sources)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to get tx history")
+	}
+
+	txHistory := TxHistory{
+		BaseTxHistory: api.BaseTxHistory{
+			Pagination: api.Pagination{
+				Cursor: res.Cursor,
+			},
+			Pubkey: pubkey,
+		},
+		Txs: res.Txs,
+	}
+
+	return txHistory, nil
+}
+
+func (h *Handler) GetValidatorTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
+	sources := ValidatorTxHistorySources(h.HTTPClient, pubkey, h.FormatTx)
 
 	res, err := h.HTTPClient.GetTxHistory(pubkey, cursor, pageSize, sources)
 	if err != nil {

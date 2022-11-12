@@ -7,10 +7,6 @@ import (
 	"github.com/shapeshift/unchained/pkg/cosmos"
 )
 
-func (c *HTTPClient) BroadcastTx(rawTx string) (string, error) {
-	return cosmos.Broadcast(c.keplr, rawTx)
-}
-
 // ParseMessages will parse any osmosis or cosmos-sdk message types
 func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Message {
 	messages := []cosmos.Message{}

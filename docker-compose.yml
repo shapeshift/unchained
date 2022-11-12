@@ -1,10 +1,16 @@
 version: "3.6"
 
 services:
-  unchained-local:
-    image: unchained-local
+  unchained-local-node:
+    image: unchained-local-node
     build:
       context: ./node
+      dockerfile: Dockerfile.local
+
+  unchained-local-go:
+    image: unchained-local-go
+    build:
+      context: ./go/build
       dockerfile: Dockerfile.local
 
   watcher:

@@ -45,13 +45,12 @@ type API struct {
 	handler *Handler
 }
 
-func New(httpClient *osmosis.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, swaggerPath string) *API {
+func New(httpClient *osmosis.HTTPClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, swaggerPath string) *API {
 	r := mux.NewRouter()
 
 	handler := &Handler{
 		Handler: &cosmos.Handler{
 			HTTPClient:   httpClient.HTTPClient,
-			GRPCClient:   grpcClient,
 			WSClient:     wsClient,
 			BlockService: blockService,
 			Denom:        "uosmo",
@@ -167,4 +166,26 @@ func (a *API) GetValidator(w http.ResponseWriter, r *http.Request) {
 	}
 
 	api.HandleResponse(w, http.StatusOK, validator)
+}
+
+// swagger:route GET /api/v1/validators/{pubkey}/txs v1 ValidatorTxHistory
+//
+// Get paginated transaction history for a validator.
+//
+// responses:
+//
+//	200: TxHistory
+//	400: BadRequestError
+//	500: InternalServerError
+func (a *API) ValidatorTxHistory(w http.ResponseWriter, r *http.Request) {
+	validatorAddr := mux.Vars(r)["pubkey"]
+	cursor, pageSize := a.ValidatePagingParams(w, r)
+
+	txHistory, err := a.handler.GetValidatorTxHistory(validatorAddr, cursor, pageSize)
+	if err != nil {
+		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	api.HandleResponse(w, http.StatusOK, txHistory)
 }

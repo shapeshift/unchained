@@ -1,0 +1,13 @@
+{
+  "name": "@shapeshiftoss/unchained-monitoring",
+  "license": "MIT",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "clean": "rm -rf node_modules"
+  },
+  "dependencies": {
+    "@pulumi/kubernetes": "3.19.3",
+    "@pulumi/pulumi": "3.34.0"
+  }
+}

@@ -10,6 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/websocket"
+	abci "github.com/tendermint/tendermint/abci/types"
 	tendermintjson "github.com/tendermint/tendermint/libs/json"
 	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 	tendermint "github.com/tendermint/tendermint/rpc/jsonrpc/client"
@@ -17,16 +18,18 @@ import (
 )
 
 type TxHandlerFunc = func(tx types.EventDataTx, block *BlockResponse) (interface{}, []string, error)
+type EndBlockEventHandlerFunc = func(eventCache map[string]interface{}, blockHeader types.Header, endBlockEvents []abci.Event, eventIndex int) (interface{}, []string, error)
 
 type WSClient struct {
 	*websocket.Registry
-	blockService *BlockService
-	client       *tendermint.WSClient
-	encoding     *params.EncodingConfig
-	errChan      chan<- error
-	m            sync.RWMutex
-	txHandler    TxHandlerFunc
-	unhandledTxs map[int][]types.EventDataTx
+	blockService         *BlockService
+	client               *tendermint.WSClient
+	encoding             *params.EncodingConfig
+	errChan              chan<- error
+	m                    sync.RWMutex
+	txHandler            TxHandlerFunc
+	endBlockEventHandler EndBlockEventHandlerFunc
+	unhandledTxs         map[int][]types.EventDataTx
 }
 
 func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- error) (*WSClient, error) {
@@ -99,6 +102,10 @@ func (ws *WSClient) TxHandler(fn TxHandlerFunc) {
 	ws.txHandler = fn
 }
 
+func (ws *WSClient) EndBlockEventHandler(fn EndBlockEventHandlerFunc) {
+	ws.endBlockEventHandler = fn
+}
+
 func (ws *WSClient) EncodingConfig() params.EncodingConfig {
 	return *ws.encoding
 }
@@ -163,13 +170,15 @@ func (ws *WSClient) handleTx(tx types.EventDataTx) {
 		return
 	}
 
-	data, addrs, err := ws.txHandler(tx, block)
-	if err != nil {
-		logger.Error(err)
-		return
-	}
+	if ws.txHandler != nil {
+		data, addrs, err := ws.txHandler(tx, block)
+		if err != nil {
+			logger.Error(err)
+			return
+		}
 
-	ws.Publish(addrs, data)
+		ws.Publish(addrs, data)
+	}
 }
 
 func (ws *WSClient) handleNewBlockHeader(block types.EventDataNewBlockHeader) {
@@ -180,6 +189,24 @@ func (ws *WSClient) handleNewBlockHeader(block types.EventDataNewBlockHeader) {
 	}
 
 	ws.blockService.WriteBlock(b, true)
+
+	if ws.endBlockEventHandler != nil {
+		go func(b types.EventDataNewBlockHeader) {
+			eventCache := make(map[string]interface{})
+
+			for i := range b.ResultEndBlock.Events {
+				data, addrs, err := ws.endBlockEventHandler(eventCache, b.Header, b.ResultEndBlock.Events, i)
+				if err != nil {
+					logger.Error(err)
+					return
+				}
+
+				if data != nil {
+					ws.Publish(addrs, data)
+				}
+			}
+		}(block)
+	}
 
 	// process any unhandled transactions
 	for _, tx := range ws.unhandledTxs[b.Height] {

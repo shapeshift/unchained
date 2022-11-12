@@ -7,11 +7,14 @@ import (
 
 // ResultTx represents a tx_search ResultTx created from block_result block events
 type ResultTx struct {
+	Hash       string
 	Height     int64
+	Timestamp  int
 	Index      int
 	TxID       string
 	Fee        cosmos.Value
-	Event      cosmos.AttributesByEvent
+	Events     cosmos.EventsByMsgIndex
+	Messages   []cosmos.Message
 	TypedEvent thorchain.TypedEvent
 	formatTx   func(tx *ResultTx) (*cosmos.Tx, error)
 }
