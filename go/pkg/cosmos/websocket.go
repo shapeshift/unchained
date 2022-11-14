@@ -38,12 +38,7 @@ func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- 
 		return nil, errors.Wrapf(err, "failed to parse WSURL: %s", conf.WSURL)
 	}
 
-	path := "/websocket"
-	if conf.APIKey != "" {
-		path = fmt.Sprintf("/apikey/%s/websocket", conf.APIKey)
-	}
-
-	client, err := tendermint.NewWS(wsURL.String(), path)
+	client, err := tendermint.NewWS(wsURL.String(), "/websocket")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create websocket client")
 	}

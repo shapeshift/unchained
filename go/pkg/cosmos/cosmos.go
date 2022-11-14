@@ -34,7 +34,6 @@ var logger = log.WithoutFields()
 
 // Config for cosmos
 type Config struct {
-	APIKey            string
 	Bech32AddrPrefix  string
 	Bech32ValPrefix   string
 	Bech32PkPrefix    string
@@ -70,7 +69,7 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 	}
 
 	// untyped resty http clients
-	headers := map[string]string{"Accept": "application/json", "Authorization": conf.APIKey}
+	headers := map[string]string{"Accept": "application/json"}
 	lcd := resty.New().SetBaseURL(lcdURL.String()).SetHeaders(headers)
 	rpc := resty.New().SetBaseURL(rpcURL.String()).SetHeaders(headers)
 
@@ -111,7 +110,7 @@ func NewGRPCClient(conf Config) (*GRPCClient, error) {
 		return nil, errors.Wrapf(err, "failed to parse GRPCURL: %s", conf.GRPCURL)
 	}
 
-	md := metadata.Pairs("Authorization", conf.APIKey)
+	md := metadata.Pairs()
 	ctx := metadata.NewOutgoingContext(context.Background(), md)
 
 	grpcConn, err := grpc.DialContext(
