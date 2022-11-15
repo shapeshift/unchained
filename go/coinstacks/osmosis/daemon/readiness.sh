@@ -2,10 +2,10 @@
 
 SYNCING=$(curl -sf http://localhost:1317/syncing | jq -r .syncing)
 
-if [ $SYNCING == "true" ]; then
-  echo "node is still syncing"
-  exit 1
+if [ $SYNCING == "false" ]; then
+  echo "node is synced"
+  exit 0
 fi
 
-echo "node is synced"
-exit 0
+echo "node is still syncing"
+exit 1
