@@ -298,12 +298,12 @@ aliases:
     service-cpu-limit-1: "16"
     service-cpu-request-1: "8"
     service-memory-limit-1: 32Gi
-    service-storage-size-1: 1500Gi
+    service-storage-size-1: 2500Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:latest
     service-cpu-limit-2: "4"
     service-cpu-request-2: "2"
-    service-memory-limit-2: 12Gi
+    service-memory-limit-2: 24Gi
     service-storage-size-2: 500Gi
 
   - &avalanche-dev
