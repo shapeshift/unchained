@@ -193,7 +193,7 @@ aliases:
     service-image-3: shapeshiftdao/unchained-blockbook:latest
     service-cpu-limit-3: "4"
     service-cpu-request-3: "2"
-    service-memory-limit-3: 12Gi
+    service-memory-limit-3: 24Gi
     service-storage-size-3: 500Gi
 
   - &ethereum-dev
@@ -298,12 +298,12 @@ aliases:
     service-cpu-limit-1: "16"
     service-cpu-request-1: "8"
     service-memory-limit-1: 32Gi
-    service-storage-size-1: 1500Gi
+    service-storage-size-1: 2500Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:latest
     service-cpu-limit-2: "4"
     service-cpu-request-2: "2"
-    service-memory-limit-2: 12Gi
+    service-memory-limit-2: 24Gi
     service-storage-size-2: 500Gi
 
   - &avalanche-dev
@@ -789,9 +789,6 @@ jobs:
         default: ""
       rpc-url:
         type: string
-      keplr-url:
-        type: string
-        default: ""
       ws-url:
         type: string
     steps:
@@ -808,8 +805,6 @@ jobs:
             echo 'export GRPC_URL=<< parameters.grpc-url >>' >> $BASH_ENV
             echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
             echo 'export WS_URL=<< parameters.ws-url >>' >> $BASH_ENV
-            echo 'export API_KEY=$<< parameters.organization >>_DATAHUB_API_KEY' >> $BASH_ENV
-            echo 'export KEPLR_URL=<< parameters.keplr-url >>' >> $BASH_ENV
       - run:
           name: pulumi
           working_directory: go/<< parameters.pulumi-dir >>

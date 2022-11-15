@@ -14,7 +14,9 @@ services:
       dockerfile: Dockerfile.local
 
   watcher:
-    image: unchained-local
+    build:
+      context: ./node
+      dockerfile: Dockerfile.local
     working_dir: /app/node
     command: sh -c "yarn lerna run watch --scope @shapeshiftoss/* --parallel"
     volumes:

@@ -104,14 +104,6 @@ Traefik routes requests based on host name. which includes the coinstack name. F
 ## Common Issues
 
 - If you are running [Docker Desktop](https://docs.docker.com/desktop/) and see any `SIGKILL` errors, increase your resource limits in the Resources Tab.
-- To fix the error:
-  ```
-  Error response from daemon: pull access denied for unchained-local, repository does not exist or may require 'docker login': denied: requested access to the resource is denied
-  ```
-  Run the following command to force building the local image from the root `unchained/` directory:
-  ```sh
-  docker-compose up unchained-local
-  ```
   
 - Mac OS: when running one of the go coinstacks via `docker-compose` on, you might encounter an issue with the service failing to start indefinitely. This is due to Mac OS network security blocking the service from starting. To work around that issue, run the coinstack directly from CLI:
 
