@@ -8,14 +8,14 @@ cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: data-daemon-ethereum-indexer-sts-<pod number>-pv
+  name: data-daemon-ethereum-sts-0-pv
   labels:
-    failure-domain.beta.kubernetes.io/region: <region> # i.e. us-east-1
-    failure-domain.beta.kubernetes.io/zone: <zone>     # i.e. us-east-1b
+    failure-domain.beta.kubernetes.io/region: us-west-1
+    failure-domain.beta.kubernetes.io/zone: us-west-1a
 spec:
   storageClassName: gp2
   capacity:
-    storage: 1500Gi
+    storage: 2500Gi
   accessModes:
     - ReadWriteOnce
   awsElasticBlockStore:
@@ -26,19 +26,19 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: data-daemon-ethereum-indexer-sts-<pod number>
+  name: data-daemon-ethereum-sts-0
   namespace: unchained
   labels:
     app: unchained
     asset: ethereum
-    tier: daemon
+    tier: statefulservice
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1500Gi
+      storage: 2500Gi
   storageClassName: gp2
-  volumeName: data-daemon-ethereum-indexer-sts-<pod number>-pv
+  volumeName: data-daemon-ethereum-sts-0-pv
 EOF
 ```
