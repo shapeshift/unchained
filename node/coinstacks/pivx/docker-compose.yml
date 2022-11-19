@@ -1,0 +1,14 @@
+version: '3.6'
+
+services:
+  api:
+    image: unchained-local-node
+    env_file: .env
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.bitcoin-api.rule=Host(`api.bitcoin.localhost`)'
+      - 'traefik.http.services.bitcoin-api.loadbalancer.server.port=3000'
+    working_dir: /app/coinstacks/bitcoin/api
+    command: yarn nodemon
+    volumes:
+      - ../..:/app
