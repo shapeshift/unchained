@@ -317,6 +317,46 @@ aliases:
     api-memory-limit: 1Gi
     stateful-service-replicas: 1
 
+  - &pivx
+    coinstack: pivx
+    pulumi-stack: public
+    pulumi-dir: coinstacks/pivx/pulumi
+    rpc-url: http://user:password@pivx-svc.unchained.svc.cluster.local:8332
+    indexer-url: http://pivx-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://pivx-svc.unchained.svc.cluster.local:8001/websocket
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 6
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
+    api-cpu-threshold: 30
+    api-memory-limit: 2Gi
+    stateful-service-replicas: 2
+    service-name-1: daemon
+    service-image-1: greenbigfrog/pivx:1.14.5
+    service-cpu-limit-1: "2"
+    service-cpu-request-1: "1"
+    service-memory-limit-1: 12Gi
+    service-storage-size-1: 250Gi
+    service-name-2: indexer
+    service-image-2: shapeshiftdao/unchained-blockbook:latest
+    service-cpu-limit-2: "4"
+    service-cpu-request-2: "2"
+    service-memory-limit-2: 24Gi
+    service-storage-size-2: 250Gi
+
+  - &dogecoin-dev
+    <<: *pivx
+    environment: dev
+    pulumi-stack: public-dev
+    rpc-url: http://user:password@pivx-svc.unchained-dev.svc.cluster.local:8332
+    indexer-url: http://pivx-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://pivx-svc.unchained-dev.svc.cluster.local:8001/websocket
+    api-max-replicas: 3
+    api-cpu-limit: 300m
+    api-memory-limit: 1Gi
+    stateful-service-replicas: 1
+
   - &dogecoin
     coinstack: dogecoin
     pulumi-stack: public
@@ -935,6 +975,15 @@ workflows:
           <<: *only-develop
 
       - deploy-coinstack-node:
+          name: deploy pivx develop
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - deploy dependencies
+          <<: *pivx-dev
+          <<: *only-develop
+
+      - deploy-coinstack-node:
           name: deploy dogecoin develop
           organization: TAXISTAKE
           pulumi-command: up -f --yes
@@ -1106,6 +1155,32 @@ workflows:
           requires:
             - approve bitcoincash coinstack
           <<: *bitcoincash
+          <<: *only-main
+
+      ####### PIVX
+      - deploy-coinstack-node:
+          name: preview pivx
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies
+          <<: *pivx
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve pivx coinstack
+          type: approval
+          requires:
+            - preview pivx
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy pivx
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve pivx coinstack
+          <<: *pivx
           <<: *only-main
 
       ####### DOGECOIN
