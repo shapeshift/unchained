@@ -15,8 +15,7 @@
   "subversion": "",
   "address_format": "",
   "xpub_magic": 36513075,
-  "xpub_magic_segwit_p2sh": 0,
-  "xpub_magic_segwit_native": 0,
+  "slip44": 119,
 
   "mempool_workers": 8,
   "mempool_sub_workers": 2,
