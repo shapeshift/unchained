@@ -345,7 +345,7 @@ aliases:
     service-memory-limit-2: 24Gi
     service-storage-size-2: 250Gi
 
-  - &dogecoin-dev
+  - &pivx-dev
     <<: *pivx
     environment: dev
     pulumi-stack: public-dev
