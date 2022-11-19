@@ -2,5 +2,5 @@
   "ignore": ["src/routes.ts"],
   "watch": ["../../../packages/*/dist/tsconfig.tsbuildinfo", "../../common/api/dist/tsconfig.tsbuildinfo", "src"],
   "ext": "ts",
-  "exec": "yarn build && node dist/bitcoin/api/src/app.js"
+  "exec": "yarn build && node dist/pivx/api/src/app.js"
 }

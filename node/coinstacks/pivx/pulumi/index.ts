@@ -10,7 +10,7 @@ type Outputs = Record<string, any>
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
   const name = 'unchained'
-  const coinstack = 'bitcoin'
+  const coinstack = 'pivx'
 
   const { kubeconfig, config, namespace } = await getConfig(coinstack)
 
