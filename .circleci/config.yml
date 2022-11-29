@@ -282,7 +282,7 @@ aliases:
     coinstack: avalanche
     pulumi-stack: public
     pulumi-dir: coinstacks/avalanche/pulumi
-    rpc-url: https://avalanche--mainnet--rpc.datahub.figment.io/apikey/14c056a2415b6e0d2b9f55985214f3f1/ext/bc/C/rpc
+    rpc-url: http://avalanche-svc.unchained.svc.cluster.local:9650/ext/bc/C/rpc
     indexer-url: http://avalanche-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://avalanche-svc.unchained.svc.cluster.local:8001/websocket
     api-autoscaling: true
@@ -298,7 +298,7 @@ aliases:
     service-cpu-limit-1: "16"
     service-cpu-request-1: "8"
     service-memory-limit-1: 32Gi
-    service-storage-size-1: 2500Gi
+    service-storage-size-1: 4000Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:latest
     service-cpu-limit-2: "4"
@@ -310,6 +310,7 @@ aliases:
     <<: *avalanche
     environment: dev
     pulumi-stack: public-dev
+    rpc-url: http://avalanche-svc.unchained-dev.svc.cluster.local:9650/ext/bc/C/rpc
     indexer-url: http://avalanche-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://avalanche-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-max-replicas: 3

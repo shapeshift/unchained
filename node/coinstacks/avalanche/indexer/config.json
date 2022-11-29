@@ -6,7 +6,7 @@
   "coin_name": "Avalanche",
   "coin_shortcut": "AVAX",
   "coin_label": "Avalanche",
-  "rpc_url": "ws://localhost:8332/ext/bc/C/ws",
+  "rpc_url": "ws://localhost:9650/ext/bc/C/ws",
   "rpc_user": "",
   "rpc_pass": "",
   "rpc_timeout": 25,
