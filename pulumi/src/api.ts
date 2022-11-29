@@ -103,7 +103,6 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
 
   if (config.rootDomainName) {
     const subdomain = config.environment ? `${config.environment}.api.${asset}` : `api.${asset}`
-    const additionalSubdomain = config.environment ? `${config.environment}-api.${asset}` : `api.${asset}`
     const domain = `${subdomain}.${config.rootDomainName}`
 
     const secretName = `${name}-cert-secret`
@@ -139,9 +138,8 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
     )
 
     const additionalRootDomainName = process.env.ADDITIONAL_ROOT_DOMAIN_NAME
-    const extraMatch = additionalRootDomainName
-      ? ` || Host(\`${additionalSubdomain}.${additionalRootDomainName}\`)`
-      : ''
+    const hostMatch = `Host(\`${domain}\`)`
+    const additionalHostMatch = `Host(\`api.${asset}.${additionalRootDomainName}\`) || Host(\`dev-api.${asset}.${additionalRootDomainName}\`)`
 
     new k8s.apiextensions.CustomResource(
       `${name}-ingressroute`,
@@ -156,7 +154,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
           entryPoints: ['web', 'websecure'],
           routes: [
             {
-              match: `Host(\`${domain}\`) || Host(\`alpha-api.${asset}.${additionalRootDomainName}\`)` + extraMatch,
+              match: additionalRootDomainName ? `${hostMatch} || ${additionalHostMatch}` : hostMatch,
               kind: 'Rule',
               services: [
                 {
