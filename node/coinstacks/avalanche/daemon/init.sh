@@ -5,7 +5,6 @@ set -e
 start() {
   /avalanchego/build/avalanchego \
     --data-dir /data \
-    --http-port 8332 \
     --chain-config-dir=/configs/chains &
   PID="$!"
 }
