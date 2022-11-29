@@ -178,7 +178,7 @@ aliases:
     api-memory-limit: 2Gi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.10.25
+    service-image-1: ethereum/client-go:v1.10.26
     service-cpu-limit-1: "4"
     service-cpu-request-1: "3"
     service-memory-limit-1: 32Gi
@@ -264,7 +264,7 @@ aliases:
     service-cpu-limit-1: "16"
     service-cpu-request-1: "8"
     service-memory-limit-1: 32Gi
-    service-storage-size-1: 500Gi
+    service-storage-size-1: 1000Gi
 
   - &osmosis-dev
     <<: *osmosis
@@ -294,7 +294,7 @@ aliases:
     api-memory-limit: 2Gi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: avaplatform/avalanchego:v1.9.1
+    service-image-1: avaplatform/avalanchego:v1.9.3
     service-cpu-limit-1: "16"
     service-cpu-request-1: "8"
     service-memory-limit-1: 32Gi
