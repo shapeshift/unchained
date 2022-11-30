@@ -165,7 +165,6 @@ func ParseEvents(log string) EventsByMsgIndex {
 	if err != nil {
 		// transaction error logs are not in json format and will fail to parse
 		// return error event with the log message
-		// TODO: Figure out how to better handle this error case
 		events["0"] = AttributesByEvent{"error": ValueByAttribute{"message": log}}
 		return events
 	}
@@ -189,6 +188,10 @@ func ParseEvents(log string) EventsByMsgIndex {
 
 func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 	messages := []Message{}
+
+	if _, ok := events["0"]["error"]; ok {
+		return messages
+	}
 
 	for i, msg := range msgs {
 		switch v := msg.(type) {
@@ -233,10 +236,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 			}
 			messages = append(messages, message)
 		case *distributiontypes.MsgWithdrawDelegatorReward:
-			var amount string
-			if _, ok := events["0"]["error"]; !ok {
-				amount = events[strconv.Itoa(i)]["withdraw_rewards"]["amount"]
-			}
+			amount := events[strconv.Itoa(i)]["withdraw_rewards"]["amount"]
 
 			coin, err := sdk.ParseCoinNormalized(amount)
 			if err != nil && amount != "" {
@@ -277,10 +277,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 				logger.Error(err)
 			}
 
-			var amount string
-			if _, ok := events["0"]["error"]; !ok {
-				amount = events[strconv.Itoa(i)]["transfer"]["amount"]
-			}
+			amount := events[strconv.Itoa(i)]["transfer"]["amount"]
 
 			value := func() Value {
 				coin, err := sdk.ParseCoinNormalized(amount)
