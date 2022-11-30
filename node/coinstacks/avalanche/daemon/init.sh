@@ -5,6 +5,8 @@ set -e
 start() {
   /avalanchego/build/avalanchego \
     --data-dir /data \
+    --http-host= \
+    --staking-ephemeral-cert-enabled=true \
     --chain-config-dir=/configs/chains &
   PID="$!"
 }
