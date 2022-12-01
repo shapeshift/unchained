@@ -13,6 +13,10 @@ import (
 func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Message {
 	messages := []cosmos.Message{}
 
+	if _, ok := events["0"]["error"]; ok {
+		return messages
+	}
+
 	coinToValue := func(c common.Coin) cosmos.Value {
 		denom, ok := assetToDenom[c.Asset.String()]
 		if !ok {
@@ -39,11 +43,8 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 			}
 			messages = append(messages, message)
 		case *thorchaintypes.MsgDeposit:
-			var to string
-			if _, ok := events["0"]["error"]; !ok {
-				events[strconv.Itoa(i)]["message"]["memo"] = v.Memo // add memo value from message to events
-				to = events[strconv.Itoa(i)]["transfer"]["recipient"]
-			}
+			to := events[strconv.Itoa(i)]["transfer"]["recipient"]
+			events[strconv.Itoa(i)]["message"]["memo"] = v.Memo // add memo value from message to events
 
 			message := cosmos.Message{
 				Addresses: []string{v.Signer.String(), to},

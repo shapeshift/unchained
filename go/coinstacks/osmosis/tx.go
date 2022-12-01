@@ -1,6 +1,8 @@
 package osmosis
 
 import (
+	"strconv"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	gammtypes "github.com/osmosis-labs/osmosis/v6/x/gamm/types"
 	lockuptypes "github.com/osmosis-labs/osmosis/v6/x/lockup/types"
@@ -11,8 +13,12 @@ import (
 func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Message {
 	messages := []cosmos.Message{}
 
+	if _, ok := events["0"]["error"]; ok {
+		return messages
+	}
+
 	unhandledMsgs := []sdk.Msg{}
-	for _, msg := range msgs {
+	for i, msg := range msgs {
 		switch v := msg.(type) {
 		case *lockuptypes.MsgLockTokens:
 			message := cosmos.Message{
@@ -31,14 +37,42 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 			}
 			messages = append(messages, message)
 		case *gammtypes.MsgSwapExactAmountIn:
-			message := cosmos.Message{
-				Addresses: []string{v.Sender},
-				Origin:    v.Sender,
-				From:      v.Sender,
-				Type:      v.Type(),
-				Value:     cosmos.CoinToValue(&v.TokenIn),
+			sender := events[strconv.Itoa(i)]["transfer"]["sender"]
+			recipient := events[strconv.Itoa(i)]["transfer"]["recipient"]
+			swappedTokensOut := events[strconv.Itoa(i)]["token_swapped"]["tokens_out"]
+
+			// NOTE: attributes with the same key step on each other currently
+			// use the guaranteed message.Sender value to find the correct recipient address
+			if sender != v.Sender {
+				recipient = sender
 			}
-			messages = append(messages, message)
+
+			tokenOut, err := sdk.ParseCoinNormalized(swappedTokensOut)
+			if err != nil && swappedTokensOut != "" {
+				logger.Error(err)
+			}
+
+			msgs := []cosmos.Message{
+				// token in (sell)
+				{
+					Addresses: []string{v.Sender, recipient},
+					Origin:    v.Sender,
+					From:      v.Sender,
+					To:        recipient,
+					Type:      v.Type(),
+					Value:     cosmos.CoinToValue(&v.TokenIn),
+				},
+				// token out (buy)
+				{
+					Addresses: []string{v.Sender, recipient},
+					Origin:    v.Sender,
+					From:      recipient,
+					To:        v.Sender,
+					Type:      v.Type(),
+					Value:     cosmos.CoinToValue(&tokenOut),
+				},
+			}
+			messages = append(messages, msgs...)
 		default:
 			unhandledMsgs = append(unhandledMsgs, msg)
 		}
