@@ -414,7 +414,7 @@ aliases:
     api-memory-limit: 2Gi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: zquestz/bitcoin-cash-node:24.1.0
+    service-image-1: zquestz/bitcoin-cash-node:25.0.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
