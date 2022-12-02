@@ -2,8 +2,11 @@ package osmosis
 
 import (
 	"github.com/pkg/errors"
+	"github.com/shapeshift/unchained/internal/log"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 )
+
+var logger = log.WithoutFields()
 
 type HTTPClient struct {
 	*cosmos.HTTPClient

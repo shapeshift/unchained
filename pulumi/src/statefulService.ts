@@ -275,17 +275,12 @@ export async function deployStatefulService(
 
     const additionalRootDomainName = process.env.ADDITIONAL_ROOT_DOMAIN_NAME
 
-    const additionalDomain = (service: string) => {
-      const baseDomain = `${service}.${asset}.${additionalRootDomainName}`
-      return config.environment ? `${config.environment}-${baseDomain}` : baseDomain
-    }
-
     const match = (service: string, prefix?: string) => {
       const pathPrefixMatch = prefix ? ` && PathPrefix(\`${prefix}\`)` : ''
       const hostMatch = `(Host(\`${domain(`${service}`)}\`)${pathPrefixMatch})`
-      const additionalHostMatch = `(Host(\`${additionalDomain(`${service}`)}\`)${pathPrefixMatch})`
-      const additionalAlphaHostMatch = `(Host(\`alpha-${additionalDomain(`${service}`)}\`)${pathPrefixMatch})`
-      return additionalRootDomainName ? `${hostMatch} || ${additionalHostMatch} || ${additionalAlphaHostMatch}` : hostMatch
+      const additionalHostMatch = `(Host(\`${service}.${asset}.${additionalRootDomainName}\`)${pathPrefixMatch})`
+      const additionalDevHostMatch = `(Host(\`dev-${service}.${asset}.${additionalRootDomainName}\`)${pathPrefixMatch})`
+      return additionalRootDomainName ? `${hostMatch} || ${additionalHostMatch} || ${additionalDevHostMatch}` : hostMatch
     }
 
     const middleware = new k8s.apiextensions.CustomResource(

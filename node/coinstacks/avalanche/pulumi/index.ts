@@ -57,7 +57,7 @@ export = async (): Promise<Outputs> => {
         prev[service.name] = createService({
           asset,
           config: service,
-          ports: { 'daemon-rpc': { port: 8332 } },
+          ports: { 'daemon-rpc': { port: 9650 } },
           configMapData: { 'c-chain-config.json': readFileSync('../daemon/config.json').toString() },
           volumeMounts: [
             { name: 'config-map', mountPath: '/configs/chains/C/config.json', subPath: 'c-chain-config.json' },

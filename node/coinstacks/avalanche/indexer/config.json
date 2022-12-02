@@ -6,7 +6,7 @@
   "coin_name": "Avalanche",
   "coin_shortcut": "AVAX",
   "coin_label": "Avalanche",
-  "rpc_url": "wss://avalanche--mainnet--rpc.datahub.figment.io/apikey/14c056a2415b6e0d2b9f55985214f3f1/ext/bc/C/ws",
+  "rpc_url": "ws://localhost:9650/ext/bc/C/ws",
   "rpc_user": "",
   "rpc_pass": "",
   "rpc_timeout": 25,
