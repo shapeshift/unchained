@@ -2,6 +2,7 @@ import { bech32 } from 'bech32'
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Service } from '../../../common/api/src/utxo/service'
 import { UTXO } from '../../../common/api/src/utxo/controller'
+import { AddressFormatter } from '@shapeshiftoss/common-api'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -26,7 +27,9 @@ export const formatAddress = (address: string): string => {
   return address
 }
 
-export const service = new Service({ blockbook, rpcUrl: RPC_URL, isXpub })
+const addressFormatter: AddressFormatter = (address) => formatAddress(address)
+
+export const service = new Service({ addressFormatter, blockbook, rpcUrl: RPC_URL, isXpub })
 
 // assign service to be used for all instances of UTXO
 UTXO.service = service
