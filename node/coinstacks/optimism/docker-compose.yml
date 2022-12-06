@@ -6,9 +6,9 @@ services:
     env_file: .env
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.avalanche-api.rule=Host(`api.avalanche.localhost`)'
-      - 'traefik.http.services.avalanche-api.loadbalancer.server.port=3000'
-    working_dir: /app/coinstacks/avalanche/api
+      - 'traefik.http.routers.optimism-api.rule=Host(`api.optimism.localhost`)'
+      - 'traefik.http.services.optimism-api.loadbalancer.server.port=3000'
+    working_dir: /app/coinstacks/optimism/api
     command: yarn nodemon
     volumes:
       - ../..:/app
