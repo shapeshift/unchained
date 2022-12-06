@@ -23,7 +23,7 @@ export interface ServiceArgs {
   blockbook: Blockbook
   rpcUrl: string
   isXpub: (pubkey: string) => boolean
-  addressFormatter: AddressFormatter
+  addressFormatter?: AddressFormatter
 }
 
 export class Service implements Omit<BaseAPI, 'getInfo'>, API {
