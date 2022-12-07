@@ -21,9 +21,7 @@ export const formatAddress = (address: string): string => {
   if (address.startsWith('bitcoin') || bech32.decodeUnsafe(address.toLowerCase())?.prefix === 'bc')
     return address.toLowerCase()
 
-  // Slap the prefix in if it isn't present
-  // https://en.bitcoin.it/wiki/BIP_0021#Specification
-  return `bitcoin:${address}`
+  return address
 }
 
 export const service = new Service({ blockbook, rpcUrl: RPC_URL, isXpub })
