@@ -21,6 +21,8 @@ export const formatAddress = (address: string): string => {
   if (address.startsWith('bitcoincash') || bech32.decodeUnsafe(address.toLowerCase())?.prefix === 'bc')
     return address.toLowerCase()
 
+  // Slap the prefix in if it isn't present, blockbook only understands prefixed CashAddrs
+  // https://github.com/bitcoincashorg/bitcoincash.org/blob/master/spec/cashaddr.md#prefix
   if (address.startsWith('q')) return `bitcoincash:${address.toLowerCase()}`
 
   return address

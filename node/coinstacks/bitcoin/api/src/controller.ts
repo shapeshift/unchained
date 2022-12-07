@@ -18,8 +18,12 @@ const isXpub = (pubkey: string): boolean => {
 }
 
 export const formatAddress = (address: string): string => {
-  if (bech32.decodeUnsafe(address.toLowerCase())?.prefix === 'bc') return address.toLowerCase()
-  return address
+  if (address.startsWith('bitcoin') || bech32.decodeUnsafe(address.toLowerCase())?.prefix === 'bc')
+    return address.toLowerCase()
+
+  // Slap the prefix in if it isn't present
+  // https://en.bitcoin.it/wiki/BIP_0021#Specification
+  return `bitcoin:${address}`
 }
 
 export const service = new Service({ blockbook, rpcUrl: RPC_URL, isXpub })
