@@ -107,7 +107,8 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
           return this.blockbook.getXpub(pubkey, curCursor.page, pageSize, undefined, undefined, 'txs')
         }
 
-        return this.blockbook.getAddress(pubkey, curCursor.page, pageSize, undefined, undefined, 'txs')
+        const address = this.formatAddress(pubkey)
+        return this.blockbook.getAddress(address, curCursor.page, pageSize, undefined, undefined, 'txs')
       })()
 
       curCursor.page++
