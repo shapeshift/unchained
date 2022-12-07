@@ -18,8 +18,7 @@ const isXpub = (pubkey: string): boolean => {
 }
 
 export const formatAddress = (address: string): string => {
-  if (address.startsWith('bitcoin') || bech32.decodeUnsafe(address.toLowerCase())?.prefix === 'bc')
-    return address.toLowerCase()
+  if (bech32.decodeUnsafe(address.toLowerCase())?.prefix === 'bc') return address.toLowerCase()
 
   return address
 }
