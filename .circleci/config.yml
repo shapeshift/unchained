@@ -454,7 +454,7 @@ aliases:
     api-memory-limit: 2Gi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:chaosnet-multichain-1.100.0
+    service-image-1: registry.gitlab.com/thorchain/thornode:chaosnet-multichain-1.101.0
     service-cpu-limit-1: "4"
     service-memory-limit-1: 8Gi
     service-storage-size-1: 2000Gi
