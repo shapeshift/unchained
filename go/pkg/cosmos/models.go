@@ -230,7 +230,8 @@ type ValidatorCommission struct {
 // swagger:model Validators
 type Validators struct {
 	// required: true
-	Validators []Validator `json:"validators"`
+	Validators []Validator  `json:"validators"`
+	Pagination PageResponse `json:"pagination"`
 }
 
 // Contains info about a validator

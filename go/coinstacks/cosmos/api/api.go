@@ -136,14 +136,12 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient 
 //	200: Validators
 //	500: InternalServerError
 func (a *API) GetValidators(w http.ResponseWriter, r *http.Request) {
-	validators, err := a.handler.GetValidators()
+	cursor := r.URL.Query().Get("cursor")
+	v, err := a.handler.GetValidators(cursor)
+
 	if err != nil {
 		api.HandleError(w, http.StatusInternalServerError, err.Error())
 		return
-	}
-
-	v := cosmos.Validators{
-		Validators: validators,
 	}
 
 	api.HandleResponse(w, http.StatusOK, v)

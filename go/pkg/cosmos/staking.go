@@ -8,10 +8,10 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *HTTPClient) GetValidators(apr *big.Float) ([]Validator, error) {
+func (c *HTTPClient) GetValidators(apr *big.Float, cursor string) (*ValidatorsResponse, error) {
 	var res QueryValidatorsResponse
 
-	_, err := c.LCD.R().SetResult(&res).Get("/cosmos/staking/v1beta1/validators")
+	_, err := c.LCD.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/staking/v1beta1/validators?pagination.key=%s", cursor))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get validators")
 	}
@@ -21,7 +21,12 @@ func (c *HTTPClient) GetValidators(apr *big.Float) ([]Validator, error) {
 		validators = append(validators, *httpValidator(v, apr))
 	}
 
-	return validators, nil
+	resp := &ValidatorsResponse{
+		validators,
+		res.Pagination,
+	}
+
+	return resp, nil
 }
 
 func (c *HTTPClient) GetValidator(addr string, apr *big.Float) (*Validator, error) {
