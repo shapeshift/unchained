@@ -19,6 +19,7 @@ const isXpub = (pubkey: string): boolean => {
 
 export const formatAddress = (address: string): string => {
   if (bech32.decodeUnsafe(address.toLowerCase())?.prefix === 'ltc') return address.toLowerCase()
+
   return address
 }
 
