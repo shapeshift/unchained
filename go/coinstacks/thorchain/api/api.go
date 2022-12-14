@@ -29,12 +29,11 @@ import (
 )
 
 const (
-	PORT                     = 3000
-	GRACEFUL_SHUTDOWN        = 15 * time.Second
-	WRITE_TIMEOUT            = 15 * time.Second
-	READ_TIMEOUT             = 15 * time.Second
-	IDLE_TIMEOUT             = 60 * time.Second
-	MAX_PAGE_SIZE_TX_HISTORY = 100
+	PORT              = 3000
+	GRACEFUL_SHUTDOWN = 15 * time.Second
+	WRITE_TIMEOUT     = 15 * time.Second
+	READ_TIMEOUT      = 15 * time.Second
+	IDLE_TIMEOUT      = 60 * time.Second
 )
 
 var logger = log.WithoutFields()

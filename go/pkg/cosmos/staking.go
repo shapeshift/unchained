@@ -3,15 +3,21 @@ package cosmos
 import (
 	"fmt"
 	"math/big"
+	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/pkg/errors"
 )
 
-func (c *HTTPClient) GetValidators(apr *big.Float, cursor string) (*ValidatorsResponse, error) {
+func (c *HTTPClient) GetValidators(apr *big.Float, cursor string, pageSize int) (*ValidatorsResponse, error) {
 	var res QueryValidatorsResponse
 
-	_, err := c.LCD.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/staking/v1beta1/validators?pagination.key=%s", cursor))
+	queryParams := map[string]string{
+		"pagination.key":   cursor,
+		"pagination.limit": strconv.Itoa(pageSize),
+	}
+
+	_, err := c.LCD.R().SetResult(&res).SetQueryParams(queryParams).Get("/cosmos/staking/v1beta1/validators")
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get validators")
 	}

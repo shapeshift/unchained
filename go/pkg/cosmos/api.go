@@ -16,8 +16,10 @@ import (
 )
 
 const (
-	GRACEFUL_SHUTDOWN        = 15 * time.Second
-	MAX_PAGE_SIZE_TX_HISTORY = 100
+	GRACEFUL_SHUTDOWN            = 15 * time.Second
+	DEFAULT_PAGE_SIZE_VALIDATORS = 100
+	DEFAULT_PAGE_SIZE_TX_HISTORY = 10
+	MAX_PAGE_SIZE_TX_HISTORY     = 100
 )
 
 var (
@@ -80,12 +82,12 @@ func (a *API) Root(w http.ResponseWriter, r *http.Request) {
 	api.DocsRedirect(w, r)
 }
 
-func (a *API) ValidatePagingParams(w http.ResponseWriter, r *http.Request) (string, int) {
+func (a *API) ValidatePagingParams(w http.ResponseWriter, r *http.Request, defaultPageSize int, maxPageSize *int) (string, int) {
 	cursor := r.URL.Query().Get("cursor")
 
 	pageSizeQ := r.URL.Query().Get("pageSize")
 	if pageSizeQ == "" {
-		pageSizeQ = "10"
+		pageSizeQ = strconv.Itoa(defaultPageSize)
 	}
 
 	pageSize, err := strconv.Atoi(pageSizeQ)
@@ -93,8 +95,10 @@ func (a *API) ValidatePagingParams(w http.ResponseWriter, r *http.Request) (stri
 		api.HandleError(w, http.StatusBadRequest, err.Error())
 	}
 
-	if pageSize > MAX_PAGE_SIZE_TX_HISTORY {
-		api.HandleError(w, http.StatusBadRequest, fmt.Sprintf("page size max is %d", MAX_PAGE_SIZE_TX_HISTORY))
+	if maxPageSize != nil {
+		if pageSize > MAX_PAGE_SIZE_TX_HISTORY {
+			api.HandleError(w, http.StatusBadRequest, fmt.Sprintf("page size max is %d", MAX_PAGE_SIZE_TX_HISTORY))
+		}
 	}
 
 	if pageSize == 0 {
@@ -172,7 +176,9 @@ func (a *API) Account(w http.ResponseWriter, r *http.Request) {
 func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 	// pubkey validated by ValidatePubkey middleware
 	pubkey := mux.Vars(r)["pubkey"]
-	cursor, pageSize := a.ValidatePagingParams(w, r)
+
+	maxPageSize := MAX_PAGE_SIZE_TX_HISTORY
+	cursor, pageSize := a.ValidatePagingParams(w, r, DEFAULT_PAGE_SIZE_TX_HISTORY, &maxPageSize)
 
 	txHistory, err := a.handler.GetTxHistory(pubkey, cursor, pageSize)
 	if err != nil {

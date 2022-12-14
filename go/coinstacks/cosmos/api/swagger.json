@@ -95,7 +95,7 @@
             "type": "integer",
             "format": "int64",
             "x-go-name": "PageSize",
-            "description": "Page size (default 10)",
+            "description": "Page size",
             "name": "pageSize",
             "in": "query"
           }
@@ -281,6 +281,23 @@
         ],
         "summary": "Get the list of current validators.",
         "operationId": "GetValidators",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Cursor",
+            "description": "Pagination cursor from previous response or empty string for first page fetch",
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "PageSize",
+            "description": "Page size",
+            "name": "pageSize",
+            "in": "query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Validators",
@@ -357,7 +374,7 @@
             "type": "integer",
             "format": "int64",
             "x-go-name": "PageSize",
-            "description": "Page size (default 10)",
+            "description": "Page size",
             "name": "pageSize",
             "in": "query"
           }
@@ -1166,19 +1183,26 @@
     },
     "Validators": {
       "description": "Contains a list of validators",
-      "type": "object",
-      "required": [
-        "validators"
-      ],
-      "properties": {
-        "validators": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Validator"
-          },
-          "x-go-name": "Validators"
+      "allOf": [
+        {
+          "$ref": "#/definitions/Pagination"
+        },
+        {
+          "type": "object",
+          "required": [
+            "validators"
+          ],
+          "properties": {
+            "validators": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Validator"
+              },
+              "x-go-name": "Validators"
+            }
+          }
         }
-      },
+      ],
       "x-go-package": "github.com/shapeshift/unchained/pkg/cosmos"
     },
     "Value": {

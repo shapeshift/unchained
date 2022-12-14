@@ -108,21 +108,22 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 	return a, nil
 }
 
-func (h *Handler) GetValidators(cursor string) (*cosmos.Validators, error) {
+func (h *Handler) GetValidators(cursor string, pageSize int) (*cosmos.Validators, error) {
 	aprData, err := h.getAPRData()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get apr data")
 	}
 
-	res, err := h.HTTPClient.GetValidators(aprData.bRate, cursor)
-
+	res, err := h.HTTPClient.GetValidators(aprData.bRate, cursor, pageSize)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get validators")
 	}
 
 	v := &cosmos.Validators{
 		Validators: res.Validators,
-		Pagination: res.Pagination,
+		Pagination: api.Pagination{
+			Cursor: res.Pagination.NextKey,
+		},
 	}
 
 	return v, nil
