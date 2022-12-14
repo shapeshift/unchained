@@ -16,7 +16,9 @@ const isXpub = (pubkey: string): boolean => {
   return pubkey.startsWith('dgub')
 }
 
-export const service = new Service({ blockbook, rpcUrl: RPC_URL, isXpub })
+export const formatAddress = (address: string): string => address
+
+export const service = new Service({ blockbook, rpcUrl: RPC_URL, isXpub, addressFormatter: formatAddress })
 
 // assign service to be used for all instances of UTXO
 UTXO.service = service
