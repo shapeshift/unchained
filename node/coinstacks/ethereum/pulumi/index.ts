@@ -58,7 +58,11 @@ export = async (): Promise<Outputs> => {
           asset,
           config: service,
           env: { NETWORK: config.network },
-          ports: { 'daemon-rpc': { port: 8332 }, 'daemon-beacon': { port: 8551, ingressRoute: false } },
+          ports: {
+            'daemon-rpc': { port: 8332 },
+            'daemon-ws': { port: 8333, pathPrefix: 'websocket', stripPathPrefix: true },
+            'daemon-beacon': { port: 8551, ingressRoute: false },
+          },
           configMapData: { 'jwt.hex': readFileSync('../daemon/jwt.hex').toString() },
           volumeMounts: [{ name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' }],
         })

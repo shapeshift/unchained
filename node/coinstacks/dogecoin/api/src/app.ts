@@ -7,7 +7,7 @@ import { Logger } from '@shapeshiftoss/logger'
 import { middleware, ConnectionHandler, Registry, BlockHandler, TransactionHandler } from '@shapeshiftoss/common-api'
 import { getAddresses, NewBlock, Tx as BlockbookTx, WebsocketClient } from '@shapeshiftoss/blockbook'
 import { utxo } from '@shapeshiftoss/common-api'
-import { service } from './controller'
+import { formatAddress, service } from './controller'
 import { RegisterRoutes } from './routes'
 
 const PORT = process.env.PORT ?? 3000
@@ -62,7 +62,7 @@ const transactionHandler: TransactionHandler<BlockbookTx, utxo.Tx> = async (bloc
   return { addresses, tx }
 }
 
-const registry = new Registry({ blockHandler, transactionHandler })
+const registry = new Registry({ addressFormatter: formatAddress, blockHandler, transactionHandler })
 
 const server = app.listen(PORT, () => logger.info('Server started'))
 const wsServer = new Server({ server })
