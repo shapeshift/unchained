@@ -7,8 +7,8 @@
     "clean": "rm -rf node_modules"
   },
   "dependencies": {
-    "@pulumi/kubernetes": "3.19.3",
-    "@pulumi/pulumi": "3.34.0",
+    "@pulumi/kubernetes": "3.23.1",
+    "@pulumi/pulumi": "3.50.2",
     "@shapeshiftoss/cluster-launcher": "^0.8.2",
     "@types/folder-hash": "^4.0.1",
     "axios": "^0.27.2",
