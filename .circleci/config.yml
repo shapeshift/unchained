@@ -3,7 +3,7 @@ version: 2.1
 executors:
   pulumi:
     docker:
-      - image: pulumi/pulumi-nodejs:3.34.0
+      - image: pulumi/pulumi-nodejs:3.50.2
 
 aliases:
   - &only-feature
@@ -492,7 +492,6 @@ commands:
             echo 'export GOPATH=/home/circleci/go' >> $BASH_ENV
             echo 'export PATH=$GOPATH/bin:/usr/local/go/bin:$PATH' >> $BASH_ENV
             echo 'export PATH=/home/circleci/.yarn/bin:$PATH' >> $BASH_ENV
-            echo 'export PATH=/opt/jdk-11/bin:$PATH' >> $BASH_ENV
       - run:
           name: golang
           command: |
@@ -505,18 +504,18 @@ commands:
       - run:
           name: node
           command: |
-            curl -L -o node.tar.xz "https://nodejs.org/dist/v14.17.3/node-v14.17.3-linux-x64.tar.xz"
+            curl -L -o node.tar.xz "https://nodejs.org/dist/v18.12.1/node-v18.12.1-linux-x64.tar.xz"
             sudo tar -xJf node.tar.xz -C /usr/local --strip-components=1
             rm node.tar.xz
             sudo ln -s /usr/local/bin/node /usr/local/bin/nodejs
       - run:
           name: yarn
           command: |
-            curl -L -o yarn.tar.gz "https://yarnpkg.com/downloads/1.22.11/yarn-v1.22.11.tar.gz"
+            curl -L -o yarn.tar.gz "https://yarnpkg.com/downloads/1.22.19/yarn-v1.22.19.tar.gz"
             sudo tar -xzf yarn.tar.gz -C /opt/
             rm yarn.tar.gz
-            sudo ln -s /opt/yarn-v1.22.11/bin/yarn /usr/local/bin/yarn
-            sudo ln -s /opt/yarn-v1.22.11/bin/yarnpkg /usr/local/bin/yarnpkg
+            sudo ln -s /opt/yarn-v1.22.19/bin/yarn /usr/local/bin/yarn
+            sudo ln -s /opt/yarn-v1.22.19/bin/yarnpkg /usr/local/bin/yarnpkg
       - run:
           name: goswagger
           command: docker pull quay.io/goswagger/swagger:v0.29.0
@@ -613,7 +612,7 @@ commands:
       - run:
           name: install helm charts
           command: |
-            wget -O helm.tar.gz https://get.helm.sh/helm-v3.6.2-linux-amd64.tar.gz
+            wget -O helm.tar.gz https://get.helm.sh/helm-v3.10.3-linux-amd64.tar.gz
             tar -zxvf helm.tar.gz
             mv linux-amd64/helm /usr/local/bin/helm
             helm repo add autoscaler https://kubernetes.github.io/autoscaler
