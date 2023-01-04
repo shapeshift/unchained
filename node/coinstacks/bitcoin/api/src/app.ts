@@ -4,14 +4,7 @@ import { join } from 'path'
 import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
 import { Logger } from '@shapeshiftoss/logger'
-import {
-  middleware,
-  ConnectionHandler,
-  Registry,
-  AddressFormatter,
-  BlockHandler,
-  TransactionHandler,
-} from '@shapeshiftoss/common-api'
+import { middleware, ConnectionHandler, Registry, BlockHandler, TransactionHandler } from '@shapeshiftoss/common-api'
 import { getAddresses, NewBlock, Tx as BlockbookTx, WebsocketClient } from '@shapeshiftoss/blockbook'
 import { utxo } from '@shapeshiftoss/common-api'
 import { service, formatAddress } from './controller'
@@ -56,8 +49,6 @@ app.get('/', async (_, res) => {
 app.use(middleware.errorHandler)
 app.use(middleware.notFoundHandler)
 
-const addressFormatter: AddressFormatter = (address) => formatAddress(address)
-
 const blockHandler: BlockHandler<NewBlock, Array<BlockbookTx>> = async (block) => {
   const txs = await service.handleBlock(block.hash)
   return { txs }
@@ -69,7 +60,7 @@ const transactionHandler: TransactionHandler<BlockbookTx, utxo.Tx> = async (bloc
   return { addresses, tx }
 }
 
-const registry = new Registry({ addressFormatter, blockHandler, transactionHandler })
+const registry = new Registry({ addressFormatter: formatAddress, blockHandler, transactionHandler })
 
 const server = app.listen(PORT, () => logger.info('Server started'))
 const wsServer = new Server({ server })

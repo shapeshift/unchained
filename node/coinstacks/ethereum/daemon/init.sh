@@ -8,16 +8,19 @@ start_coin_bg() {
     --authrpc.jwtsecret /jwt.hex \
     --syncmode full \
     --datadir /data \
-    --cache 4096 \
-    --txlookuplimit 0 \
     --http \
-    --http.addr=0.0.0.0 \
+    --http.addr 0.0.0.0 \
     --http.port 8332 \
     --http.api eth,net,web3,debug,txpool,engine \
     --http.vhosts '*' \
     --http.corsdomain '*' \
     --ws \
+    --ws.addr 0.0.0.0 \
     --ws.port 8333 \
+    --ws.api eth,net,web3,debug,txpool,engine \
+    --ws.origins '*' \
+    --txlookuplimit 0 \
+    --cache 4096 \
     --ipcdisable \
     --nat none &
   PID="$!"

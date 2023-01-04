@@ -95,7 +95,7 @@
             "type": "integer",
             "format": "int64",
             "x-go-name": "PageSize",
-            "description": "Page size (default 10)",
+            "description": "Page size",
             "name": "pageSize",
             "in": "query"
           }
@@ -1016,19 +1016,26 @@
     },
     "Validators": {
       "description": "Contains a list of validators",
-      "type": "object",
-      "required": [
-        "validators"
-      ],
-      "properties": {
-        "validators": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Validator"
-          },
-          "x-go-name": "Validators"
+      "allOf": [
+        {
+          "$ref": "#/definitions/Pagination"
+        },
+        {
+          "type": "object",
+          "required": [
+            "validators"
+          ],
+          "properties": {
+            "validators": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Validator"
+              },
+              "x-go-name": "Validators"
+            }
+          }
         }
-      },
+      ],
       "x-go-package": "github.com/shapeshift/unchained/pkg/cosmos"
     },
     "Value": {

@@ -19,10 +19,11 @@ const isXpub = (pubkey: string): boolean => {
 
 export const formatAddress = (address: string): string => {
   if (bech32.decodeUnsafe(address.toLowerCase())?.prefix === 'bc') return address.toLowerCase()
+
   return address
 }
 
-export const service = new Service({ blockbook, rpcUrl: RPC_URL, isXpub })
+export const service = new Service({ blockbook, rpcUrl: RPC_URL, isXpub, addressFormatter: formatAddress })
 
 // assign service to be used for all instances of UTXO
 UTXO.service = service

@@ -7,7 +7,7 @@
     "clean": "rm -rf node_modules"
   },
   "dependencies": {
-    "@pulumi/kubernetes": "3.19.3",
-    "@pulumi/pulumi": "3.34.0"
+    "@pulumi/kubernetes": "3.23.1",
+    "@pulumi/pulumi": "3.50.2"
   }
 }

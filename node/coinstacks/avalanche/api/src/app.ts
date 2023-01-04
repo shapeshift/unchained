@@ -8,7 +8,6 @@ import {
   middleware,
   ConnectionHandler,
   Registry,
-  AddressFormatter,
   BlockHandler,
   TransactionHandler,
 } from '@shapeshiftoss/common-api'
@@ -56,8 +55,6 @@ app.get('/', async (_, res) => {
 app.use(middleware.errorHandler)
 app.use(middleware.notFoundHandler)
 
-const addressFormatter: AddressFormatter = (address) => evm.formatAddress(address)
-
 const blockHandler: BlockHandler<NewBlock, Array<BlockbookTx>> = async (block) => {
   const txs = await service.handleBlock(block.hash)
   return { txs }
@@ -71,7 +68,7 @@ const transactionHandler: TransactionHandler<BlockbookTx, evm.Tx> = async (block
   return { addresses, tx }
 }
 
-const registry = new Registry({ addressFormatter, blockHandler, transactionHandler })
+const registry = new Registry({ addressFormatter: evm.formatAddress, blockHandler, transactionHandler })
 
 const server = app.listen(PORT, () => logger.info('Server started'))
 const wsServer = new Server({ server })

@@ -7,7 +7,7 @@
     "clean": "rm -rf node_modules"
   },
   "dependencies": {
-    "@pulumi/kubernetes": "3.19.3",
+    "@pulumi/kubernetes": "3.23.1",
     "@types/folder-hash": "^4.0.1",
     "@types/object-hash": "^2.2.1",
     "dotenv": "^16.0.1",

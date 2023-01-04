@@ -62,3 +62,8 @@ type TxHistoryResponse struct {
 	Cursor string
 	Txs    []Tx
 }
+
+type ValidatorsResponse struct {
+	Validators []Validator
+	Pagination PageResponse
+}

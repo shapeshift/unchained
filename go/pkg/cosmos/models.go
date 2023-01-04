@@ -229,6 +229,8 @@ type ValidatorCommission struct {
 // Contains a list of validators
 // swagger:model Validators
 type Validators struct {
+	// swagger:allOf
+	api.Pagination
 	// required: true
 	Validators []Validator `json:"validators"`
 }

@@ -322,7 +322,9 @@ export async function deployStatefulService(
             ports.filter(({ ingressRoute = true }) => ingressRoute).map(({ port, pathPrefix }) => ({
               kind: 'Rule',
               match: match(service, pathPrefix),
-              middlewares: [{ name: middleware.metadata.name, namespace: svc.metadata.namespace }],
+              ...(pathPrefix && {
+                middlewares: [{ name: middleware.metadata.name, namespace: svc.metadata.namespace }],
+              }),
               services: [
                 {
                   kind: 'Service',

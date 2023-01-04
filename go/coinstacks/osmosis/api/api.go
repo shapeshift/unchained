@@ -30,12 +30,11 @@ import (
 )
 
 const (
-	PORT                     = 3000
-	GRACEFUL_SHUTDOWN        = 15 * time.Second
-	WRITE_TIMEOUT            = 15 * time.Second
-	READ_TIMEOUT             = 15 * time.Second
-	IDLE_TIMEOUT             = 60 * time.Second
-	MAX_PAGE_SIZE_TX_HISTORY = 100
+	PORT              = 3000
+	GRACEFUL_SHUTDOWN = 15 * time.Second
+	WRITE_TIMEOUT     = 15 * time.Second
+	READ_TIMEOUT      = 15 * time.Second
+	IDLE_TIMEOUT      = 60 * time.Second
 )
 
 var logger = log.WithoutFields()
@@ -112,10 +111,13 @@ func New(httpClient *osmosis.HTTPClient, wsClient *cosmos.WSClient, blockService
 	v1Gas := v1.PathPrefix("/gas").Subrouter()
 	v1Gas.HandleFunc("/estimate", a.EstimateGas).Methods("POST")
 
+	v1ValidatorsRoot := v1.PathPrefix("/validators").Subrouter()
+	v1ValidatorsRoot.HandleFunc("", a.GetValidators).Methods("GET")
+
 	v1Validators := v1.PathPrefix("/validators").Subrouter()
 	v1Validators.Use(cosmos.ValidateValidatorPubkey)
-	v1Validators.HandleFunc("", a.GetValidators).Methods("GET")
 	v1Validators.HandleFunc("/{pubkey}", a.GetValidator).Methods("GET")
+	v1Validators.HandleFunc("/{pubkey}/txs", a.ValidatorTxHistory).Methods("GET")
 
 	// docs redirect paths
 	r.HandleFunc("/docs", api.DocsRedirect).Methods("GET")
@@ -134,17 +136,15 @@ func New(httpClient *osmosis.HTTPClient, wsClient *cosmos.WSClient, blockService
 //	200: Validators
 //	500: InternalServerError
 func (a *API) GetValidators(w http.ResponseWriter, r *http.Request) {
-	validators, err := a.handler.GetValidators()
+	cursor, pageSize := a.ValidatePagingParams(w, r, cosmos.DEFAULT_PAGE_SIZE_VALIDATORS, nil)
+
+	validators, err := a.handler.GetValidators(cursor, pageSize)
 	if err != nil {
 		api.HandleError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	v := cosmos.Validators{
-		Validators: validators,
-	}
-
-	api.HandleResponse(w, http.StatusOK, v)
+	api.HandleResponse(w, http.StatusOK, validators)
 }
 
 // swagger:route Get /api/v1/validators/{pubkey} v1 GetValidator
@@ -179,7 +179,9 @@ func (a *API) GetValidator(w http.ResponseWriter, r *http.Request) {
 //	500: InternalServerError
 func (a *API) ValidatorTxHistory(w http.ResponseWriter, r *http.Request) {
 	validatorAddr := mux.Vars(r)["pubkey"]
-	cursor, pageSize := a.ValidatePagingParams(w, r)
+
+	maxPageSize := cosmos.MAX_PAGE_SIZE_TX_HISTORY
+	cursor, pageSize := a.ValidatePagingParams(w, r, cosmos.DEFAULT_PAGE_SIZE_TX_HISTORY, &maxPageSize)
 
 	txHistory, err := a.handler.GetValidatorTxHistory(validatorAddr, cursor, pageSize)
 	if err != nil {
