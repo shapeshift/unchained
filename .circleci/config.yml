@@ -483,22 +483,6 @@ aliases:
     stateful-service-replicas: 1
 
 commands:
-  setup-runtime:
-    description: setup runtime environment
-    steps:
-      - run:
-          name: environment variables
-          command: |
-            echo 'export PATH=/usr/local/bin:$PATH' >> $BASH_ENV
-      - run:
-          name: golang
-          command: |
-            curl -sSL "https://github.com/gotestyourself/gotestsum/releases/download/v1.7.0/gotestsum_1.7.0_linux_amd64.tar.gz" | sudo tar -xz -C /usr/local/bin gotestsum
-            curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sudo sh -s -- -b /usr/local/bin v1.50.1
-      - run:
-          name: goswagger
-          command: docker pull quay.io/goswagger/swagger:v0.29.0
-
   precheck:
     description: install dependencies
     steps:
@@ -580,12 +564,12 @@ commands:
       - run:
           name: install docker cli
           command: |
-            wget -O dockercli.deb https://download.docker.com/linux/debian/dists/buster/pool/stable/amd64/docker-ce-cli_20.10.5~3-0~debian-buster_amd64.deb
+            wget -O dockercli.deb https://download.docker.com/linux/debian/dists/buster/pool/stable/amd64/docker-ce-cli_20.10.22~3-0~debian-buster_amd64.deb
             dpkg -i dockercli.deb
       - run:
           name: install kubectl
           command: |
-            wget -O kubectl "https://dl.k8s.io/release/v1.21.3/bin/linux/amd64/kubectl"
+            wget -O kubectl "https://dl.k8s.io/release/v1.26.0/bin/linux/amd64/kubectl"
             chmod +x kubectl
             mv ./kubectl /usr/local/bin/kubectl
       - run:
@@ -628,7 +612,7 @@ jobs:
         default: preview
     steps:
       - setup_remote_docker:
-          version: 20.10.2
+          version: 20.10.18
       - attach_workspace:
           at: ~/
       - pulumi-dependencies:
@@ -707,7 +691,7 @@ jobs:
         type: string
     steps:
       - setup_remote_docker:
-          version: 20.10.2
+          version: 20.10.18
       - attach_workspace:
           at: ~/
       - pulumi-dependencies:
@@ -773,7 +757,7 @@ jobs:
         type: string
     steps:
       - setup_remote_docker:
-          version: 20.10.2
+          version: 20.10.18
       - attach_workspace:
           at: ~/
       - pulumi-dependencies:
@@ -833,7 +817,7 @@ jobs:
         default: preview
     steps:
       - setup_remote_docker:
-          version: 20.10.2
+          version: 20.10.18
       - attach_workspace:
           at: ~/
       - pulumi-dependencies:
@@ -859,7 +843,6 @@ jobs:
     resource_class: large
     steps:
       - checkout
-      - setup-runtime
       - precheck
 
   lint-and-test-persist:
@@ -869,7 +852,6 @@ jobs:
     resource_class: large
     steps:
       - checkout
-      - setup-runtime
       - precheck
       - postcheck
       - run:
