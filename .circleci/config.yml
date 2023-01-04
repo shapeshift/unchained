@@ -855,7 +855,7 @@ jobs:
   lint-and-test:
     description: lint and test project
     machine:
-      image: ubuntu-2004:202111-02
+      image: ubuntu-2204:2022.10.2
     resource_class: large
     steps:
       - checkout
@@ -865,7 +865,7 @@ jobs:
   lint-and-test-persist:
     description: lint and test project (persist to workspace)
     machine:
-      image: ubuntu-2004:202111-02
+      image: ubuntu-2204:2022.10.2
     resource_class: large
     steps:
       - checkout
