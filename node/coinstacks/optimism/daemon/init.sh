@@ -56,13 +56,16 @@ start() {
     --wsorigins="*" \
     --eth1.syncservice \
     --eth1.ctcdeploymentheight=13596466 \
-    --rollup.backend=l1 \
+    --rollup.backend=l2 \
     --rollup.clienthttp=http://localhost:7878 \
     --rollup.maxcalldatasize=40000 \
     --rollup.pollinterval=1s \
     --rollup.verifier \
     --sequencer.clienthttp=https://mainnet.optimism.io \
+    --cache=4096 \
     --nousb \
+    --ipcdisable \
+    --nat=none \
     --nodiscover \
     --syncmode=full \
     --gcmode=full &
