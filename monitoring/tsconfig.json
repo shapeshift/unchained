@@ -1,6 +1,7 @@
 {
   "extends": "../node/tsconfig.json",
   "compilerOptions": {
+    "types": ["node"],
     "outDir": "dist",
     "incremental": true
   },
