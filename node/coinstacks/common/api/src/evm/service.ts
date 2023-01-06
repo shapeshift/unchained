@@ -208,14 +208,13 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   async getGasFees(): Promise<GasFees> {
     try {
       const feeData = await this.provider.getFeeData()
-      if (!feeData.gasPrice || !feeData.maxFeePerGas || !feeData.maxPriorityFeePerGas) {
-        throw { message: 'no fee data returned from node' }
-      }
+
+      if (!feeData.gasPrice) throw { message: 'no fee data returned from node' }
 
       return {
         gasPrice: feeData.gasPrice.toString(),
-        maxFeePerGas: feeData.maxFeePerGas.toString(),
-        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas.toString(),
+        maxFeePerGas: feeData.maxFeePerGas?.toString(),
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas?.toString(),
       }
     } catch (err) {
       throw new ApiError('Internal Server Error', 500, JSON.stringify(err))
