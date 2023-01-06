@@ -658,9 +658,6 @@ jobs:
             pulumi config set --path unchained:common.eks.traefik.whitelist[12] 104.24.0.0/14
             pulumi config set --path unchained:common.eks.traefik.whitelist[13] 172.64.0.0/13
             pulumi config set --path unchained:common.eks.traefik.whitelist[14] 131.0.72.0/22
-            pulumi config set --path unchained:common.eks.traefik.whitelist[15] $AWS_NAT_ADDRESS_0
-            pulumi config set --path unchained:common.eks.traefik.whitelist[16] $AWS_NAT_ADDRESS_1
-            pulumi config set --path unchained:common.eks.traefik.whitelist[17] $AWS_NAT_ADDRESS_2
             pulumi config set --path unchained:common.eks.traefik.whitelist[18] $VPN_ADDRESS_0
             pulumi config set --path unchained:common.eks.traefik.whitelist[19] $VPN_ADDRESS_1
             pulumi config set --path unchained:common.eks.traefik.whitelist[20] $VPN_ADDRESS_2
@@ -832,8 +829,6 @@ jobs:
             pulumi config set --path unchained:monitoring.githubOrg $<< parameters.organization>>_GITHUB_ORG
             pulumi config set --path unchained:monitoring.githubOauthID $<< parameters.organization>>_GITHUB_OAUTH_ID
             pulumi config set --path unchained:monitoring.githubOauthSecret $<< parameters.organization>>_GITHUB_OAUTH_SECRET --plaintext
-            pulumi config set --path unchained:monitoring.alerting true
-            pulumi config set --path unchained:monitoring.opsgenieApiKey $<< parameters.organization >>_OPSGENIE_API_KEY
             pulumi <<parameters.pulumi-command>> --suppress-outputs
 
   lint-and-test:
