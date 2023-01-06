@@ -64,20 +64,20 @@ export class Optimism extends Controller implements BaseAPI, API {
    *
    * @returns {Promise<Account>} account details
    *
-   * @example pubkey "0x9D1170D30944F2E30664Be502aC57F6096fB5366"
+   * @example pubkey "0x15E03a18349cA885482F59935Af48C5fFbAb8DE1"
    */
   @Example<Account>({
-    balance: '183750000000000',
+    balance: '1502668290366088',
     unconfirmedBalance: '0',
-    nonce: 322,
-    pubkey: '0x9D1170D30944F2E30664Be502aC57F6096fB5366',
+    nonce: 1,
+    pubkey: '0x15E03a18349cA885482F59935Af48C5fFbAb8DE1',
     tokens: [
       {
-        balance: '1337',
-        contract: '0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB',
-        decimals: 18,
-        name: 'Wrapped Ether',
-        symbol: 'WETH.e',
+        balance: '0',
+        contract: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
+        decimals: 6,
+        name: 'USD Coin',
+        symbol: 'USDC',
         type: 'ERC20',
       },
     ],
@@ -99,27 +99,39 @@ export class Optimism extends Controller implements BaseAPI, API {
    *
    * @returns {Promise<TxHistory>} transaction history
    *
-   * @example pubkey "0x9D1170D30944F2E30664Be502aC57F6096fB5366"
+   * @example pubkey "0x15E03a18349cA885482F59935Af48C5fFbAb8DE1"
    */
   @Example<TxHistory>({
-    pubkey: '0x9D1170D30944F2E30664Be502aC57F6096fB5366',
-    cursor:
-      'eyJibG9ja2Jvb2tQYWdlIjoyLCJleHBsb3JlclBhZ2UiOjEsImJsb2NrYm9va1R4aWQiOiIweDE0YTZlYTA4MWRhYWI1OWI1ZGQ3YTE3NjQ4YTAwNGU5Y2EzNzdhNWVkMmE5N2E4NGUyYWQ4MDVkZjJlMjUzM2QiLCJibG9ja0hlaWdodCI6MTc1MTIxNjR9',
+    pubkey: '0x15E03a18349cA885482F59935Af48C5fFbAb8DE1',
     txs: [
       {
-        txid: '0x14a6ea081daab59b5dd7a17648a004e9ca377a5ed2a97a84e2ad805df2e2533d',
-        blockHash: '0x748fff248d4a033c28cb6cc45b78ad7f471ac4d958971570e3e3afe4e0f84c1f',
-        blockHeight: 17512164,
-        timestamp: 1658197214,
+        txid: '0xf4101d7a7fc71410b9ca82dce0b1cce153dea3d4d09bd83bbe510e28033e85db',
+        blockHash: '0x980152b8671b1e3e3b0bd5d26f09a584210da32dbad3a586a2fa2bb7c6be926f',
+        blockHeight: 60720938,
+        timestamp: 1672939590,
         status: 1,
-        from: '0xa3682Fe8fD73B90A7564585A436EC2D2AEb612eE',
-        to: '0x9D1170D30944F2E30664Be502aC57F6096fB5366',
-        confirmations: 119004,
-        value: '410000000000000000',
-        fee: '525000000000000',
-        gasLimit: '21000',
-        gasUsed: '21000',
-        gasPrice: '25000000000',
+        from: '0x15E03a18349cA885482F59935Af48C5fFbAb8DE1',
+        to: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
+        confirmations: 1002,
+        value: '0',
+        fee: '58723200000',
+        gasLimit: '150000',
+        gasUsed: '36702',
+        gasPrice: '1600000',
+        inputData:
+          '0xa9059cbb000000000000000000000000ebe80f029b1c02862b9e8a70a7e5317c06f62cae000000000000000000000000000000000000000000000000000000000788d3b0',
+        tokenTransfers: [
+          {
+            contract: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
+            decimals: 6,
+            name: 'USD Coin',
+            symbol: 'USDC',
+            type: 'ERC20',
+            from: '0x15E03a18349cA885482F59935Af48C5fFbAb8DE1',
+            to: '0xEbe80f029b1c02862B9E8a70a7e5317C06F62Cae',
+            value: '126407600',
+          },
+        ],
       },
     ],
   })
@@ -136,24 +148,37 @@ export class Optimism extends Controller implements BaseAPI, API {
    *
    * @param {string} txid transaction hash
    *
-   * @example txid "0x14a6ea081daab59b5dd7a17648a004e9ca377a5ed2a97a84e2ad805df2e2533d"
-   *
+   * @example txid "0xf4101d7a7fc71410b9ca82dce0b1cce153dea3d4d09bd83bbe510e28033e85db"
    * @returns {Promise<Tx>} transaction payload
    */
   @Example<Tx>({
-    txid: '0x14a6ea081daab59b5dd7a17648a004e9ca377a5ed2a97a84e2ad805df2e2533d',
-    blockHash: '0x748fff248d4a033c28cb6cc45b78ad7f471ac4d958971570e3e3afe4e0f84c1f',
-    blockHeight: 17512164,
-    timestamp: 1658197214,
+    txid: '0xf4101d7a7fc71410b9ca82dce0b1cce153dea3d4d09bd83bbe510e28033e85db',
+    blockHash: '0x980152b8671b1e3e3b0bd5d26f09a584210da32dbad3a586a2fa2bb7c6be926f',
+    blockHeight: 60720938,
+    timestamp: 1672939590,
     status: 1,
-    from: '0xa3682Fe8fD73B90A7564585A436EC2D2AEb612eE',
-    to: '0x9D1170D30944F2E30664Be502aC57F6096fB5366',
-    confirmations: 119004,
-    value: '410000000000000000',
-    fee: '525000000000000',
-    gasLimit: '21000',
-    gasUsed: '21000',
-    gasPrice: '25000000000',
+    from: '0x15E03a18349cA885482F59935Af48C5fFbAb8DE1',
+    to: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
+    confirmations: 1303,
+    value: '0',
+    fee: '58723200000',
+    gasLimit: '150000',
+    gasUsed: '36702',
+    gasPrice: '1600000',
+    inputData:
+      '0xa9059cbb000000000000000000000000ebe80f029b1c02862b9e8a70a7e5317c06f62cae000000000000000000000000000000000000000000000000000000000788d3b0',
+    tokenTransfers: [
+      {
+        contract: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
+        decimals: 6,
+        name: 'USD Coin',
+        symbol: 'USDC',
+        type: 'ERC20',
+        from: '0x15E03a18349cA885482F59935Af48C5fFbAb8DE1',
+        to: '0xEbe80f029b1c02862B9E8a70a7e5317C06F62Cae',
+        value: '126407600',
+      },
+    ],
   })
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
@@ -175,7 +200,7 @@ export class Optimism extends Controller implements BaseAPI, API {
    *
    * @example data "0x"
    * @example from "0x0000000000000000000000000000000000000000"
-   * @example to "0x9D1170D30944F2E30664Be502aC57F6096fB5366"
+   * @example to "0x15E03a18349cA885482F59935Af48C5fFbAb8DE1"
    * @example value "1337"
    */
   @Example<string>('21000')
