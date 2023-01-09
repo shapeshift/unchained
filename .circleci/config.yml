@@ -138,7 +138,7 @@ aliases:
     api-memory-limit: 2Gi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ruimarinho/bitcoin-core:23.0
+    service-image-1: shapeshiftdao/bitcoin-core:24.0.1
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
