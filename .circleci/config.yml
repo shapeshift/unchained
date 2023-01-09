@@ -184,7 +184,7 @@ aliases:
     service-memory-limit-1: 32Gi
     service-storage-size-1: 2500Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:stable
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v3.2.0
     service-cpu-limit-2: "6"
     service-cpu-request-2: "4"
     service-memory-limit-2: 16Gi
