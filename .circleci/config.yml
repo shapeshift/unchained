@@ -658,14 +658,14 @@ jobs:
             pulumi config set --path unchained:common.eks.traefik.whitelist[12] 104.24.0.0/14
             pulumi config set --path unchained:common.eks.traefik.whitelist[13] 172.64.0.0/13
             pulumi config set --path unchained:common.eks.traefik.whitelist[14] 131.0.72.0/22
-            pulumi config set --path unchained:common.eks.traefik.whitelist[18] $VPN_ADDRESS_0
-            pulumi config set --path unchained:common.eks.traefik.whitelist[19] $VPN_ADDRESS_1
-            pulumi config set --path unchained:common.eks.traefik.whitelist[20] $VPN_ADDRESS_2
-            pulumi config set --path unchained:common.eks.traefik.whitelist[21] $VPN_ADDRESS_3
-            pulumi config set --path unchained:common.eks.traefik.whitelist[22] $VPN_ADDRESS_4
-            pulumi config set --path unchained:common.eks.traefik.whitelist[23] $AWS_TAXISTAKE_NAT_ADDRESS_0
-            pulumi config set --path unchained:common.eks.traefik.whitelist[24] $AWS_TAXISTAKE_NAT_ADDRESS_1
-            pulumi config set --path unchained:common.eks.traefik.whitelist[25] $AWS_TAXISTAKE_NAT_ADDRESS_2
+            pulumi config set --path unchained:common.eks.traefik.whitelist[15] $VPN_ADDRESS_0
+            pulumi config set --path unchained:common.eks.traefik.whitelist[16] $VPN_ADDRESS_1
+            pulumi config set --path unchained:common.eks.traefik.whitelist[17] $VPN_ADDRESS_2
+            pulumi config set --path unchained:common.eks.traefik.whitelist[18] $VPN_ADDRESS_3
+            pulumi config set --path unchained:common.eks.traefik.whitelist[19] $VPN_ADDRESS_4
+            pulumi config set --path unchained:common.eks.traefik.whitelist[20] $AWS_TAXISTAKE_NAT_ADDRESS_0
+            pulumi config set --path unchained:common.eks.traefik.whitelist[21] $AWS_TAXISTAKE_NAT_ADDRESS_1
+            pulumi config set --path unchained:common.eks.traefik.whitelist[22] $AWS_TAXISTAKE_NAT_ADDRESS_2
             pulumi config set --path unchained:common.dockerhub.username $DOCKERHUB_USERNAME
             pulumi config set --path unchained:common.dockerhub.password $DOCKERHUB_PASSWORD --plaintext
             pulumi config set --path unchained:common.dockerhub.server docker.io
