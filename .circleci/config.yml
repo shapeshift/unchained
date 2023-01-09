@@ -260,7 +260,7 @@ aliases:
     api-memory-limit: 2Gi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ghcr.io/ovrclk/cosmos-omnibus:v0.3.16-osmosis-v13.0.0
+    service-image-1: ghcr.io/ovrclk/cosmos-omnibus:v0.3.20-osmosis-v13.1.0
     service-cpu-limit-1: "16"
     service-cpu-request-1: "8"
     service-memory-limit-1: 32Gi
