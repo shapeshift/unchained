@@ -656,6 +656,9 @@ jobs:
       pulumi-command:
         type: string
         default: preview
+      etherscan-api-key-var:
+        type: string
+        default: ETHERSCAN_API_KEY
     steps:
       - setup_remote_docker:
           version: 20.10.18
@@ -663,6 +666,10 @@ jobs:
           at: ~/
       - pulumi-dependencies:
           organization: <<parameters.organization>>
+      - run:
+          name: add environment variables
+          command: |
+            echo 'export ETHERSCAN_API_KEY=$<< parameters.etherscan-api-key-var >>' >> $BASH_ENV
       - run:
           name: pulumi
           working_directory: pulumi/src/cluster
@@ -985,6 +992,7 @@ workflows:
           name: deploy optimism develop
           organization: TAXISTAKE
           pulumi-command: up -f --yes
+          etherscan-api-key-var: ETHERSCAN_API_KEY_OPTIMISM
           requires:
             - deploy dependencies
           <<: *optimism-dev
@@ -1228,6 +1236,7 @@ workflows:
           name: preview optimism
           organization: TAXISTAKE
           pulumi-command: preview
+          etherscan-api-key-var: ETHERSCAN_API_KEY_OPTIMISM
           requires:
             - validate dependencies
           <<: *optimism
@@ -1244,6 +1253,7 @@ workflows:
           name: deploy optimism
           organization: TAXISTAKE
           pulumi-command: up -f --yes
+          etherscan-api-key-var: ETHERSCAN_API_KEY_OPTIMISM
           requires:
             - approve optimism coinstack
           <<: *optimism
