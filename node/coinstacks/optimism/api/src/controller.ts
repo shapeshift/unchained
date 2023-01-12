@@ -13,11 +13,13 @@ import {
 import { API, Account, GasFees, Tx, TxHistory } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { Service } from '../../../common/api/src/evm/service'
 
+const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
 const NETWORK = process.env.NETWORK
 const RPC_URL = process.env.RPC_URL
 
+if (!ETHERSCAN_API_KEY) throw new Error('ETHERSCAN_API_KEY env var not set')
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 if (!NETWORK) throw new Error('NETWORK env var not set')
@@ -33,7 +35,8 @@ const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
 
 export const service = new Service({
   blockbook,
-  explorerApiUrl: 'https://optimistic.etherscan.io/',
+  explorerApiKey: ETHERSCAN_API_KEY,
+  explorerApiUrl: 'https://api-optimistic.etherscan.io/api',
   provider,
   logger,
   rpcUrl: RPC_URL,

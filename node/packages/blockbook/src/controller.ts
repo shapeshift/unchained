@@ -453,7 +453,6 @@ export class Blockbook extends Controller {
       return data
     } catch (err) {
       if (err instanceof AxiosError || err instanceof Error) {
-        console.log('axios error')
         throw new ApiError(err)
       }
 
