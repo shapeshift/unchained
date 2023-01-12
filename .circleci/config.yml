@@ -510,7 +510,7 @@ aliases:
     service-memory-limit-2: 4Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:latest
+    service-image-3: shapeshiftdao/unchained-blockbook:evm-2c85a36
     service-cpu-limit-3: "4"
     service-cpu-request-3: "2"
     service-memory-limit-3: 24Gi
