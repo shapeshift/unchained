@@ -501,20 +501,20 @@ aliases:
     service-image-1: ethereumoptimism/l2geth:0.5.31
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
-    service-memory-limit-1: 12Gi
+    service-memory-limit-1: 24Gi
     service-storage-size-1: 500Gi
     service-name-2: dtl
     service-image-2: ethereumoptimism/data-transport-layer:0.5.50
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 4Gi
+    service-memory-limit-2: 2Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
     service-image-3: shapeshiftdao/unchained-blockbook:evm-2c85a36
     service-cpu-limit-3: "4"
     service-cpu-request-3: "2"
-    service-memory-limit-3: 24Gi
-    service-storage-size-3: 250Gi
+    service-memory-limit-3: 12Gi
+    service-storage-size-3: 500Gi
 
   - &optimism-dev
     <<: *optimism
