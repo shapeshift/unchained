@@ -317,9 +317,7 @@
 					}
 				},
 				"required": [
-					"gasPrice",
-					"maxFeePerGas",
-					"maxPriorityFeePerGas"
+					"gasPrice"
 				],
 				"type": "object",
 				"additionalProperties": false
