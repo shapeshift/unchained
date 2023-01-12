@@ -5,8 +5,8 @@ import { BaseAccount, BaseTx, BaseTxHistory } from '../models' // unable to impo
  */
 export interface GasFees {
   gasPrice: string
-  maxFeePerGas: string
-  maxPriorityFeePerGas: string
+  maxFeePerGas?: string
+  maxPriorityFeePerGas?: string
 }
 
 /**

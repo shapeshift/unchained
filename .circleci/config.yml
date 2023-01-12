@@ -482,6 +482,52 @@ aliases:
     api-memory-limit: 1Gi
     stateful-service-replicas: 1
 
+  - &optimism
+    coinstack: optimism
+    pulumi-stack: public
+    pulumi-dir: coinstacks/optimism/pulumi
+    rpc-url: http://optimism-svc.unchained.svc.cluster.local:8545
+    indexer-url: http://optimism-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://optimism-svc.unchained.svc.cluster.local:8001/websocket
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 6
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
+    api-cpu-threshold: 30
+    api-memory-limit: 2Gi
+    stateful-service-replicas: 2
+    service-name-1: daemon
+    service-image-1: ethereumoptimism/l2geth:0.5.31
+    service-cpu-limit-1: "4"
+    service-cpu-request-1: "2"
+    service-memory-limit-1: 24Gi
+    service-storage-size-1: 500Gi
+    service-name-2: dtl
+    service-image-2: ethereumoptimism/data-transport-layer:0.5.50
+    service-cpu-limit-2: "2"
+    service-cpu-request-2: "1"
+    service-memory-limit-2: 2Gi
+    service-storage-size-2: 500Gi
+    service-name-3: indexer
+    service-image-3: shapeshiftdao/unchained-blockbook:evm-2c85a36
+    service-cpu-limit-3: "4"
+    service-cpu-request-3: "2"
+    service-memory-limit-3: 12Gi
+    service-storage-size-3: 500Gi
+
+  - &optimism-dev
+    <<: *optimism
+    environment: dev
+    pulumi-stack: public-dev
+    rpc-url: http://optimism-svc.unchained-dev.svc.cluster.local:8545
+    indexer-url: http://optimism-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://optimism-svc.unchained-dev.svc.cluster.local:8001/websocket
+    api-max-replicas: 3
+    api-cpu-limit: 300m
+    api-memory-limit: 1Gi
+    stateful-service-replicas: 1
+
 commands:
   precheck:
     description: install dependencies
@@ -686,6 +732,9 @@ jobs:
         type: string
       rpc-url:
         type: string
+      etherscan-env-var:
+        type: string
+        default: ETHERSCAN_API_KEY
     steps:
       - setup_remote_docker:
           version: 20.10.18
@@ -700,6 +749,7 @@ jobs:
             echo 'export INDEXER_WS_URL=<< parameters.indexer-ws-url >>' >> $BASH_ENV
             echo 'export NETWORK=<< parameters.network >>' >> $BASH_ENV
             echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
+            echo 'export ETHERSCAN_API_KEY=$<< parameters.etherscan-env-var >>' >> $BASH_ENV
       - run:
           name: pulumi
           working_directory: node/<< parameters.pulumi-dir >>
@@ -935,6 +985,16 @@ workflows:
           <<: *avalanche-dev
           <<: *only-develop
 
+      - deploy-coinstack-node:
+          name: deploy optimism develop
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          etherscan-env-var: ETHERSCAN_API_KEY_OPTIMISM
+          requires:
+            - deploy dependencies
+          <<: *optimism-dev
+          <<: *only-develop
+
       - deploy-coinstack-go:
           name: deploy cosmos develop
           organization: TAXISTAKE
@@ -1166,6 +1226,34 @@ workflows:
           requires:
             - approve avalanche coinstack
           <<: *avalanche
+          <<: *only-main
+
+      ####### OPTIMISM
+      - deploy-coinstack-node:
+          name: preview optimism
+          organization: TAXISTAKE
+          pulumi-command: preview
+          etherscan-env-var: ETHERSCAN_API_KEY_OPTIMISM
+          requires:
+            - validate dependencies
+          <<: *optimism
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve optimism coinstack
+          type: approval
+          requires:
+            - preview optimism
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy optimism
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          etherscan-env-var: ETHERSCAN_API_KEY_OPTIMISM
+          requires:
+            - approve optimism coinstack
+          <<: *optimism
           <<: *only-main
 
       ####### COSMOS
