@@ -339,7 +339,7 @@
 		"securitySchemes": {}
 	},
 	"info": {
-		"title": "@shapeshiftoss/ethereum-api",
+		"title": "@shapeshiftoss/optimism-api",
 		"version": "8.0.0",
 		"license": {
 			"name": "MIT"
@@ -392,17 +392,17 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"balance": "284809805024198107",
+											"balance": "1502668290366088",
 											"unconfirmedBalance": "0",
 											"nonce": 1,
-											"pubkey": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa",
+											"pubkey": "0x15E03a18349cA885482F59935Af48C5fFbAb8DE1",
 											"tokens": [
 												{
-													"balance": "1337",
-													"contract": "0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d",
-													"decimals": 18,
-													"name": "FOX",
-													"symbol": "FOX",
+													"balance": "0",
+													"contract": "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
+													"decimals": 6,
+													"name": "USD Coin",
+													"symbol": "USDC",
 													"type": "ERC20"
 												}
 											]
@@ -457,7 +457,7 @@
 						"schema": {
 							"type": "string"
 						},
-						"example": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
+						"example": "0x15E03a18349cA885482F59935Af48C5fFbAb8DE1"
 					}
 				]
 			}
@@ -476,24 +476,35 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"pubkey": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa",
-											"cursor": "eyJibG9ja2Jvb2tQYWdlIjoxLCJldGhlcnNjYW5QYWdlIjoxLCJibG9ja2Jvb2tUeGlkIjoiMHhhZWU0MzJmODUzZmRjMTNhZDlmZjZjYWJlMmEzOTQwM2Q4N2RkZWUxODQyNDk2ODE4ZmNkODg3NDdmNjU2NmY5IiwiYmxvY2tIZWlnaHQiOjEzODUwMjEzfQ==",
+											"pubkey": "0x15E03a18349cA885482F59935Af48C5fFbAb8DE1",
 											"txs": [
 												{
-													"txid": "0x8e3528c933483770a3c8377c2ee7e34f846908653168188fd0d90a20b295d002",
-													"blockHash": "0x94228c1b7052720846e2d7b9f36de30acf45d9a06ec483bd4433c5c38c8673a8",
-													"blockHeight": 12267105,
-													"timestamp": 1618788849,
+													"txid": "0xf4101d7a7fc71410b9ca82dce0b1cce153dea3d4d09bd83bbe510e28033e85db",
+													"blockHash": "0x980152b8671b1e3e3b0bd5d26f09a584210da32dbad3a586a2fa2bb7c6be926f",
+													"blockHeight": 60720938,
+													"timestamp": 1672939590,
 													"status": 1,
-													"from": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa",
-													"to": "0x642F4Bda144C63f6DC47EE0fDfbac0a193e2eDb7",
-													"confirmations": 2088440,
-													"value": "737092621690531649",
-													"fee": "3180000000009000",
-													"gasLimit": "21000",
-													"gasUsed": "21000",
-													"gasPrice": "151428571429",
-													"inputData": "0x"
+													"from": "0x15E03a18349cA885482F59935Af48C5fFbAb8DE1",
+													"to": "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
+													"confirmations": 1002,
+													"value": "0",
+													"fee": "58723200000",
+													"gasLimit": "150000",
+													"gasUsed": "36702",
+													"gasPrice": "1600000",
+													"inputData": "0xa9059cbb000000000000000000000000ebe80f029b1c02862b9e8a70a7e5317c06f62cae000000000000000000000000000000000000000000000000000000000788d3b0",
+													"tokenTransfers": [
+														{
+															"contract": "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
+															"decimals": 6,
+															"name": "USD Coin",
+															"symbol": "USDC",
+															"type": "ERC20",
+															"from": "0x15E03a18349cA885482F59935Af48C5fFbAb8DE1",
+															"to": "0xEbe80f029b1c02862B9E8a70a7e5317C06F62Cae",
+															"value": "126407600"
+														}
+													]
 												}
 											]
 										}
@@ -547,7 +558,7 @@
 						"schema": {
 							"type": "string"
 						},
-						"example": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
+						"example": "0x15E03a18349cA885482F59935Af48C5fFbAb8DE1"
 					},
 					{
 						"description": "the cursor returned in previous query (base64 encoded json object with a 'page' property)",
@@ -586,20 +597,32 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"txid": "0x8825fe8d60e1aa8d990f150bffe1196adcab36d0c4e98bac76c691719103b79d",
-											"blockHash": "0x122f1e1b594b797d96c1777ce9cdb68ddb69d262ac7f2ddc345909aba4ebabd7",
-											"blockHeight": 14813163,
-											"timestamp": 1653078780,
+											"txid": "0xf4101d7a7fc71410b9ca82dce0b1cce153dea3d4d09bd83bbe510e28033e85db",
+											"blockHash": "0x980152b8671b1e3e3b0bd5d26f09a584210da32dbad3a586a2fa2bb7c6be926f",
+											"blockHeight": 60720938,
+											"timestamp": 1672939590,
 											"status": 1,
-											"from": "0xEA674fdDe714fd979de3EdF0F56AA9716B898ec8",
-											"to": "0x275C7d416c1DBfafa53A861EEc6F0AD6138ca4dD",
-											"confirmations": 21,
-											"value": "49396718157429775",
-											"fee": "603633477678000",
-											"gasLimit": "250000",
-											"gasUsed": "21000",
-											"gasPrice": "28744451318",
-											"inputData": "0x"
+											"from": "0x15E03a18349cA885482F59935Af48C5fFbAb8DE1",
+											"to": "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
+											"confirmations": 1303,
+											"value": "0",
+											"fee": "58723200000",
+											"gasLimit": "150000",
+											"gasUsed": "36702",
+											"gasPrice": "1600000",
+											"inputData": "0xa9059cbb000000000000000000000000ebe80f029b1c02862b9e8a70a7e5317c06f62cae000000000000000000000000000000000000000000000000000000000788d3b0",
+											"tokenTransfers": [
+												{
+													"contract": "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
+													"decimals": 6,
+													"name": "USD Coin",
+													"symbol": "USDC",
+													"type": "ERC20",
+													"from": "0x15E03a18349cA885482F59935Af48C5fFbAb8DE1",
+													"to": "0xEbe80f029b1c02862B9E8a70a7e5317C06F62Cae",
+													"value": "126407600"
+												}
+											]
 										}
 									}
 								}
@@ -651,7 +674,7 @@
 						"schema": {
 							"type": "string"
 						},
-						"example": "0x8825fe8d60e1aa8d990f150bffe1196adcab36d0c4e98bac76c691719103b79d"
+						"example": "0xf4101d7a7fc71410b9ca82dce0b1cce153dea3d4d09bd83bbe510e28033e85db"
 					}
 				]
 			}
@@ -669,7 +692,7 @@
 								},
 								"examples": {
 									"Example 1": {
-										"value": "26540"
+										"value": "21000"
 									}
 								}
 							}
@@ -730,7 +753,7 @@
 						"schema": {
 							"type": "string"
 						},
-						"example": "0x642F4Bda144C63f6DC47EE0fDfbac0a193e2eDb7"
+						"example": "0x15E03a18349cA885482F59935Af48C5fFbAb8DE1"
 					},
 					{
 						"description": "transaction value in wei",
@@ -759,9 +782,9 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"gasPrice": "172301756423",
-											"maxFeePerGas": "342603512846",
-											"maxPriorityFeePerGas": "1000000000"
+											"gasPrice": "25000000000",
+											"maxFeePerGas": "51500000000",
+											"maxPriorityFeePerGas": "1500000000"
 										}
 									}
 								}
@@ -837,7 +860,7 @@
 						}
 					}
 				},
-				"description": "Sends raw transaction to be broadcast to the node.",
+				"description": "Broadcast signed raw transaction",
 				"tags": [
 					"v1"
 				],

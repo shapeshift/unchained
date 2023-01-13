@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/dogecoin-api",
-  "version": "8.0.0",
+  "version": "8.1.0",
   "license": "MIT",
   "private": true,
   "files": [
@@ -12,8 +12,8 @@
     "generate": "tsoa spec-and-routes"
   },
   "dependencies": {
-    "@shapeshiftoss/blockbook": "^8.0.0",
-    "@shapeshiftoss/common-api": "^8.0.0",
+    "@shapeshiftoss/blockbook": "^8.1.0",
+    "@shapeshiftoss/common-api": "^8.1.0",
     "@shapeshiftoss/logger": "^1.1.2",
     "bech32": "^2.0.0",
     "cors": "^2.8.5"
