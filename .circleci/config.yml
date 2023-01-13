@@ -135,7 +135,7 @@ aliases:
     api-cpu-limit: 500m
     api-cpu-request: 250m
     api-cpu-threshold: 30
-    api-memory-limit: 1Gi
+    api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: shapeshiftdao/bitcoin-core:24.0.1
@@ -159,7 +159,7 @@ aliases:
     indexer-ws-url: ws://bitcoin-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-max-replicas: 3
     api-cpu-limit: 300m
-    api-memory-limit: 500Mi
+    api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &ethereum
@@ -175,7 +175,7 @@ aliases:
     api-cpu-limit: 500m
     api-cpu-request: 250m
     api-cpu-threshold: 30
-    api-memory-limit: 1Gi
+    api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: ethereum/client-go:v1.10.26
@@ -187,7 +187,7 @@ aliases:
     service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v3.2.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 12Gi
+    service-memory-limit-2: 8Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
     service-image-3: shapeshiftdao/unchained-blockbook:latest
@@ -205,7 +205,7 @@ aliases:
     indexer-ws-url: ws://ethereum-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-max-replicas: 3
     api-cpu-limit: 300m
-    api-memory-limit: 500Mi
+    api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &cosmos
@@ -222,7 +222,7 @@ aliases:
     api-cpu-limit: 500m
     api-cpu-request: 250m
     api-cpu-threshold: 30
-    api-memory-limit: 1Gi
+    api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: ghcr.io/ovrclk/cosmos-omnibus:v0.3.9-cosmoshub-v7.1.0
@@ -241,7 +241,7 @@ aliases:
     ws-url: ws://cosmos-svc.unchained-dev.svc.cluster.local:26657
     api-max-replicas: 3
     api-cpu-limit: 300m
-    api-memory-limit: 500Mi
+    api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &osmosis
@@ -257,7 +257,7 @@ aliases:
     api-cpu-limit: 500m
     api-cpu-request: 250m
     api-cpu-threshold: 30
-    api-memory-limit: 1Gi
+    api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: ghcr.io/ovrclk/cosmos-omnibus:v0.3.20-osmosis-v13.1.2
@@ -275,7 +275,7 @@ aliases:
     ws-url: ws://osmosis-svc.unchained-dev.svc.cluster.local:26657
     api-max-replicas: 3
     api-cpu-limit: 300m
-    api-memory-limit: 500Mi
+    api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &avalanche
@@ -291,7 +291,7 @@ aliases:
     api-cpu-limit: 500m
     api-cpu-request: 250m
     api-cpu-threshold: 30
-    api-memory-limit: 1Gi
+    api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: avaplatform/avalanchego:v1.9.5
@@ -303,7 +303,7 @@ aliases:
     service-image-2: shapeshiftdao/unchained-blockbook:latest
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 8Gi
+    service-memory-limit-2: 6Gi
     service-storage-size-2: 500Gi
 
   - &avalanche-dev
@@ -315,7 +315,7 @@ aliases:
     indexer-ws-url: ws://avalanche-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-max-replicas: 3
     api-cpu-limit: 300m
-    api-memory-limit: 500Mi
+    api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &dogecoin
@@ -331,7 +331,7 @@ aliases:
     api-cpu-limit: 500m
     api-cpu-request: 250m
     api-cpu-threshold: 30
-    api-memory-limit: 1Gi
+    api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: greenbigfrog/dogecoin:1.14.5
@@ -355,7 +355,7 @@ aliases:
     indexer-ws-url: ws://dogecoin-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-max-replicas: 3
     api-cpu-limit: 300m
-    api-memory-limit: 500Mi
+    api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &litecoin
@@ -371,7 +371,7 @@ aliases:
     api-cpu-limit: 500m
     api-cpu-request: 250m
     api-cpu-threshold: 30
-    api-memory-limit: 1Gi
+    api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: uphold/litecoin-core:0.21
@@ -395,7 +395,7 @@ aliases:
     indexer-ws-url: ws://litecoin-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-max-replicas: 3
     api-cpu-limit: 300m
-    api-memory-limit: 500Mi
+    api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &bitcoincash
@@ -411,7 +411,7 @@ aliases:
     api-cpu-limit: 500m
     api-cpu-request: 250m
     api-cpu-threshold: 30
-    api-memory-limit: 1Gi
+    api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: zquestz/bitcoin-cash-node:26.0.0
@@ -435,7 +435,7 @@ aliases:
     indexer-ws-url: ws://bitcoincash-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-max-replicas: 3
     api-cpu-limit: 300m
-    api-memory-limit: 500Mi
+    api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &thorchain
@@ -451,7 +451,7 @@ aliases:
     api-cpu-limit: 500m
     api-cpu-request: 250m
     api-cpu-threshold: 30
-    api-memory-limit: 1Gi
+    api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: registry.gitlab.com/thorchain/thornode:chaosnet-multichain-1.102.0
@@ -480,7 +480,7 @@ aliases:
     ws-url: ws://thorchain-svc.unchained-dev.svc.cluster.local:27147
     api-max-replicas: 3
     api-cpu-limit: 300m
-    api-memory-limit: 500Mi
+    api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &optimism
@@ -496,7 +496,7 @@ aliases:
     api-cpu-limit: 500m
     api-cpu-request: 250m
     api-cpu-threshold: 30
-    api-memory-limit: 2Gi
+    api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: ethereumoptimism/l2geth:0.5.31
@@ -512,9 +512,9 @@ aliases:
     service-storage-size-2: 500Gi
     service-name-3: indexer
     service-image-3: shapeshiftdao/unchained-blockbook:evm-2c85a36
-    service-cpu-limit-3: "4"
-    service-cpu-request-3: "2"
-    service-memory-limit-3: 12Gi
+    service-cpu-limit-3: "2"
+    service-cpu-request-3: "1"
+    service-memory-limit-3: 6Gi
     service-storage-size-3: 500Gi
 
   - &optimism-dev
@@ -526,7 +526,7 @@ aliases:
     indexer-ws-url: ws://optimism-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-max-replicas: 3
     api-cpu-limit: 300m
-    api-memory-limit: 1Gi
+    api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
 commands:
