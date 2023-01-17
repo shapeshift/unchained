@@ -678,18 +678,14 @@ jobs:
             pulumi config set --path unchained:common.eks.cidrBlock 10.0.0.0/16
             pulumi config set --path unchained:common.eks.nodeGroups[0].name spot
             pulumi config set --path unchained:common.eks.nodeGroups[0].type SPOT
-            pulumi config set --path unchained:common.eks.nodeGroups[0].desiredSize 12
-            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 12
-            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 24 
-            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[0] r5.4xlarge
-            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r5a.4xlarge
-            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r5b.4xlarge
-            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[3] r5n.4xlarge
-            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[4] r6in.4xlarge
-            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[5] r6idn.4xlarge
-            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[6] r6a.4xlarge
-            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[7] r6i.4xlarge
-            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[8] r6id.4xlarge
+            pulumi config set --path unchained:common.eks.nodeGroups[0].desiredSize 4
+            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 4
+            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 12
+            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[0] r6in.4xlarge
+            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r6idn.4xlarge
+            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r6a.4xlarge
+            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[3] r6i.4xlarge
+            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[4] r6id.4xlarge
             pulumi config set --path unchained:common.eks.traefik.autoscaling.enabled true
             pulumi config set --path unchained:common.eks.traefik.autoscaling.cpuThreshold 20
             pulumi config set --path unchained:common.eks.traefik.autoscaling.maxReplicas 20
