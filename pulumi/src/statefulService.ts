@@ -278,9 +278,8 @@ export async function deployStatefulService(
     const match = (service: string, prefix?: string) => {
       const pathPrefixMatch = prefix ? ` && PathPrefix(\`${prefix}\`)` : ''
       const hostMatch = `(Host(\`${domain(`${service}`)}\`)${pathPrefixMatch})`
-      const additionalHostMatch = `(Host(\`${service}.${asset}.${additionalRootDomainName}\`)${pathPrefixMatch})`
-      const additionalDevHostMatch = `(Host(\`dev-${service}.${asset}.${additionalRootDomainName}\`)${pathPrefixMatch})`
-      return additionalRootDomainName ? `${hostMatch} || ${additionalHostMatch} || ${additionalDevHostMatch}` : hostMatch
+      const additionalHostMatch = `(Host(\`${config.environment ? `${config.environment}-${service}` : service}.${asset}.${additionalRootDomainName}\`)${pathPrefixMatch})`
+      return additionalRootDomainName ? `${hostMatch} || ${additionalHostMatch}` : hostMatch
     }
 
     const middleware = new k8s.apiextensions.CustomResource(
