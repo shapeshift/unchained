@@ -303,8 +303,25 @@
 				"$ref": "#/components/schemas/BaseTxHistory_Tx_",
 				"description": "Contains info about EVM transaction history"
 			},
-			"GasFees": {
-				"description": "Contains info about current recommended fees to use in a transaction",
+			"OptimismGasEstimate": {
+				"description": "Contains info about estimated gas cost of a transaction on both L1 and L2",
+				"properties": {
+					"gasLimit": {
+						"type": "string"
+					},
+					"l1GasLimit": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"gasLimit",
+					"l1GasLimit"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"OptimismGasFees": {
+				"description": "Contains info about current recommended fees for a transaction on both L1 and L2",
 				"properties": {
 					"gasPrice": {
 						"type": "string"
@@ -314,10 +331,14 @@
 					},
 					"maxPriorityFeePerGas": {
 						"type": "string"
+					},
+					"l1GasPrice": {
+						"type": "string"
 					}
 				},
 				"required": [
-					"gasPrice"
+					"gasPrice",
+					"l1GasPrice"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -688,11 +709,14 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/OptimismGasEstimate"
 								},
 								"examples": {
 									"Example 1": {
-										"value": "21000"
+										"value": {
+											"gasLimit": "21000",
+											"l1GasLimit": "3800"
+										}
 									}
 								}
 							}
@@ -777,14 +801,13 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/GasFees"
+									"$ref": "#/components/schemas/OptimismGasFees"
 								},
 								"examples": {
 									"Example 1": {
 										"value": {
-											"gasPrice": "25000000000",
-											"maxFeePerGas": "51500000000",
-											"maxPriorityFeePerGas": "1500000000"
+											"gasPrice": "1000000",
+											"l1GasPrice": "25000000000"
 										}
 									}
 								}
@@ -802,7 +825,7 @@
 						}
 					}
 				},
-				"description": "Get the current recommended gas fees to use in a transaction\n\n* For EIP-1559 transactions, use `maxFeePerGas` and `maxPriorityFeePerGas`\n* For Legacy transactions, use `gasPrice`",
+				"description": "Get the current recommended gas fees to use in a transaction\n\n* `l1GasPrice` = l1BaseFee * scalar",
 				"tags": [
 					"v1"
 				],
