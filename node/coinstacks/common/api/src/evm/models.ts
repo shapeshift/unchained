@@ -1,6 +1,13 @@
 import { BaseAccount, BaseTx, BaseTxHistory } from '../models' // unable to import models from a module with tsoa
 
 /**
+ * Contains info about estimated gas cost of a transaction
+ */
+export interface GasEstimate {
+  gasLimit: string
+}
+
+/**
  * Contains info about current recommended fees to use in a transaction
  */
 export interface GasFees {
@@ -98,10 +105,10 @@ export interface API {
    * @param {string} to to address
    * @param {string} value transaction value in wei
    *
-   * @returns {Promise<string>} estimated gas cost
+   * @returns {Promise<GasEstimate>} estimated gas cost
    */
   //@Get('/gas/estimate')
-  estimateGas(data: string, from: string, to: string, value: string): Promise<string>
+  estimateGas(data: string, from: string, to: string, value: string): Promise<GasEstimate>
 
   /**
    * Get the current recommended gas fees to use in a transaction
