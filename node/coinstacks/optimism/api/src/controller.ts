@@ -1,10 +1,10 @@
+import { serialize } from '@ethersproject/transactions'
 import { ethers, Contract, BigNumber } from 'ethers'
 import { BigNumber as bn } from 'bignumber.js'
 import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
 import { predeploys, getContractInterface } from '@eth-optimism/contracts'
-import { asL2Provider } from '@eth-optimism/sdk'
 
 import {
   BadRequestError,
@@ -35,17 +35,21 @@ export const logger = new Logger({
   level: process.env.LOG_LEVEL,
 })
 
+const CHAIN_ID: Record<string, number> = { mainnet: 10 }
+
+const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
+
 export const service = new Service({
   blockbook: new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL }),
   explorerApiKey: ETHERSCAN_API_KEY,
   explorerApiUrl: 'https://api-optimistic.etherscan.io/api',
-  provider: new ethers.providers.JsonRpcProvider(RPC_URL),
+  provider,
   logger,
   rpcUrl: RPC_URL,
 })
 
-const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
-const l2Provider = asL2Provider(provider)
+// gas price oracle contract to query current l1 and l2 values
+const gpo = new Contract(predeploys.OVM_GasPriceOracle, getContractInterface('OVM_GasPriceOracle'), provider)
 
 @Route('api/v1')
 @Tags('v1')
@@ -221,8 +225,20 @@ export class Optimism extends Controller implements BaseAPI, API {
     @Query() to: string,
     @Query() value: string
   ): Promise<OptimismGasEstimate> {
+    // l2 gas limit
     const { gasLimit } = await service.estimateGas(data, from, to, value)
-    const l1GasLimit = (await l2Provider.estimateL1Gas({ data, from, to, value })).toString()
+
+    // l1 gas limit
+    const unsignedTxHash = serialize({
+      data,
+      to,
+      value: ethers.utils.parseUnits(value, 'wei'),
+      gasLimit: BigNumber.from(gasLimit),
+      chainId: CHAIN_ID[NETWORK as string],
+      nonce: await provider.getTransactionCount(from),
+    })
+    const l1GasLimit = ((await gpo.getL1GasUsed(unsignedTxHash)) as BigNumber).toString()
+
     return { gasLimit, l1GasLimit }
   }
 
@@ -240,11 +256,8 @@ export class Optimism extends Controller implements BaseAPI, API {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
   async getGasFees(): Promise<OptimismGasFees> {
-    // gas price oracle contract to query current l1 and l2 values
-    const gpo = new Contract(predeploys.OVM_GasPriceOracle, getContractInterface('OVM_GasPriceOracle'), provider)
-
     // ethers bignumber values read from contract are stringified to be used with bignumber.js which handles floats for scalar math
-    const l1BaseFee = (await l2Provider.getL1GasPrice()).toString()
+    const l1BaseFee = ((await gpo.l1BaseFee()) as BigNumber).toString()
     const baseScalar = ((await gpo.scalar()) as BigNumber).toString()
     const decimals = ((await gpo.decimals()) as BigNumber).toString()
 

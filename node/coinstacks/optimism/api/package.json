@@ -12,7 +12,7 @@
     "generate": "tsoa spec-and-routes"
   },
   "dependencies": {
-    "@eth-optimism/sdk": "^1.10.0",
+    "@eth-optimism/contracts": "^0.5.40",
     "@shapeshiftoss/blockbook": "^8.1.0",
     "@shapeshiftoss/common-api": "^8.1.0",
     "@shapeshiftoss/logger": "^1.1.2",
