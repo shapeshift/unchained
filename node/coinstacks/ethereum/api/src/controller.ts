@@ -10,7 +10,7 @@ import {
   SendTxBody,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { API, Account, GasFees, Tx, TxHistory } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
+import { API, Account, GasFees, Tx, TxHistory, GasEstimate } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { Service } from '../../../common/api/src/evm/service'
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
@@ -176,14 +176,14 @@ export class Ethereum extends Controller implements BaseAPI, API {
    * @param {string} to to address
    * @param {string} value transaction value in wei
    *
-   * @returns {Promise<string>} estimated gas cost
+   * @returns {Promise<GasEstimate>} estimated gas cost
    *
    * @example data "0x"
    * @example from "0x0000000000000000000000000000000000000000"
    * @example to "0x642F4Bda144C63f6DC47EE0fDfbac0a193e2eDb7"
    * @example value "1337"
    */
-  @Example<string>('26540')
+  @Example<GasEstimate>({ gasLimit: '26540' })
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/estimate')
@@ -192,7 +192,7 @@ export class Ethereum extends Controller implements BaseAPI, API {
     @Query() from: string,
     @Query() to: string,
     @Query() value: string
-  ): Promise<string> {
+  ): Promise<GasEstimate> {
     return service.estimateGas(data, from, to, value)
   }
 

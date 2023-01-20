@@ -303,6 +303,19 @@
 				"$ref": "#/components/schemas/BaseTxHistory_Tx_",
 				"description": "Contains info about EVM transaction history"
 			},
+			"GasEstimate": {
+				"description": "Contains info about estimated gas cost of a transaction",
+				"properties": {
+					"gasLimit": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"gasLimit"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"GasFees": {
 				"description": "Contains info about current recommended fees to use in a transaction",
 				"properties": {
@@ -665,11 +678,13 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/GasEstimate"
 								},
 								"examples": {
 									"Example 1": {
-										"value": "26540"
+										"value": {
+											"gasLimit": "26540"
+										}
 									}
 								}
 							}

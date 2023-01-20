@@ -5,7 +5,7 @@ import { ethers } from 'ethers'
 import { ApiError as BlockbookApiError, Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
 import { ApiError, BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
-import { Account, API, TokenBalance, Tx, TxHistory, GasFees, InternalTx } from './models'
+import { Account, API, TokenBalance, Tx, TxHistory, GasFees, InternalTx, GasEstimate } from './models'
 import { Cursor, NodeBlock, CallStack, ExplorerApiResponse, ExplorerInternalTx } from './types'
 import { formatAddress } from './utils'
 
@@ -195,11 +195,11 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     }
   }
 
-  async estimateGas(data: string, from: string, to: string, value: string): Promise<string> {
+  async estimateGas(data: string, from: string, to: string, value: string): Promise<GasEstimate> {
     try {
       const tx: ethers.providers.TransactionRequest = { data, from, to, value: ethers.utils.parseUnits(value, 'wei') }
-      const estimatedGas = await this.provider.estimateGas(tx)
-      return estimatedGas?.toString()
+      const gasLimit = await this.provider.estimateGas(tx)
+      return { gasLimit: gasLimit.toString() }
     } catch (err) {
       throw new ApiError('Internal Server Error', 500, JSON.stringify(err))
     }

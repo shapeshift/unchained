@@ -1,7 +1,11 @@
-import { ethers } from 'ethers'
+import { serialize } from '@ethersproject/transactions'
+import { ethers, Contract, BigNumber } from 'ethers'
+import { BigNumber as bn } from 'bignumber.js'
 import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
+import { predeploys, getContractInterface } from '@eth-optimism/contracts'
+
 import {
   BadRequestError,
   BaseAPI,
@@ -10,8 +14,9 @@ import {
   SendTxBody,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { API, Account, GasFees, Tx, TxHistory } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
+import { API, Account, Tx, TxHistory } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { Service } from '../../../common/api/src/evm/service'
+import { OptimismGasEstimate, OptimismGasFees } from './models'
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
@@ -30,17 +35,21 @@ export const logger = new Logger({
   level: process.env.LOG_LEVEL,
 })
 
-const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
+const CHAIN_ID: Record<string, number> = { mainnet: 10 }
+
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
 
 export const service = new Service({
-  blockbook,
+  blockbook: new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL }),
   explorerApiKey: ETHERSCAN_API_KEY,
   explorerApiUrl: 'https://api-optimistic.etherscan.io/api',
   provider,
   logger,
   rpcUrl: RPC_URL,
 })
+
+// gas price oracle contract to query current l1 and l2 values
+const gpo = new Contract(predeploys.OVM_GasPriceOracle, getContractInterface('OVM_GasPriceOracle'), provider)
 
 @Route('api/v1')
 @Tags('v1')
@@ -199,14 +208,14 @@ export class Optimism extends Controller implements BaseAPI, API {
    * @param {string} to to address
    * @param {string} value transaction value in wei
    *
-   * @returns {Promise<string>} estimated gas cost
+   * @returns {Promise<OptimismGasEstimate>} estimated gas cost
    *
    * @example data "0x"
    * @example from "0x0000000000000000000000000000000000000000"
    * @example to "0x15E03a18349cA885482F59935Af48C5fFbAb8DE1"
    * @example value "1337"
    */
-  @Example<string>('21000')
+  @Example<OptimismGasEstimate>({ gasLimit: '21000', l1GasLimit: '3800' })
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/estimate')
@@ -215,27 +224,51 @@ export class Optimism extends Controller implements BaseAPI, API {
     @Query() from: string,
     @Query() to: string,
     @Query() value: string
-  ): Promise<string> {
-    return service.estimateGas(data, from, to, value)
+  ): Promise<OptimismGasEstimate> {
+    // l2 gas limit
+    const { gasLimit } = await service.estimateGas(data, from, to, value)
+
+    // l1 gas limit
+    const unsignedTxHash = serialize({
+      data,
+      to,
+      value: ethers.utils.parseUnits(value, 'wei'),
+      gasLimit: BigNumber.from(gasLimit),
+      chainId: CHAIN_ID[NETWORK as string],
+      nonce: await provider.getTransactionCount(from),
+    })
+    const l1GasLimit = ((await gpo.getL1GasUsed(unsignedTxHash)) as BigNumber).toString()
+
+    return { gasLimit, l1GasLimit }
   }
 
   /**
    * Get the current recommended gas fees to use in a transaction
    *
-   * * For EIP-1559 transactions, use `maxFeePerGas` and `maxPriorityFeePerGas`
-   * * For Legacy transactions, use `gasPrice`
+   * * `l1GasPrice` = l1BaseFee * scalar
    *
-   * @returns {Promise<GasFees>} current fees specified in wei
+   * @returns {Promise<OptimismGasFees>} current fees specified in wei
    */
-  @Example<GasFees>({
-    gasPrice: '25000000000',
-    maxFeePerGas: '51500000000',
-    maxPriorityFeePerGas: '1500000000',
+  @Example<OptimismGasFees>({
+    gasPrice: '1000000',
+    l1GasPrice: '25000000000',
   })
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
-  async getGasFees(): Promise<GasFees> {
-    return service.getGasFees()
+  async getGasFees(): Promise<OptimismGasFees> {
+    // ethers bignumber values read from contract are stringified to be used with bignumber.js which handles floats for scalar math
+    const l1BaseFee = ((await gpo.l1BaseFee()) as BigNumber).toString()
+    const baseScalar = ((await gpo.scalar()) as BigNumber).toString()
+    const decimals = ((await gpo.decimals()) as BigNumber).toString()
+
+    // l1 gas price
+    const scalar = bn(baseScalar).div(bn(10).pow(decimals)).toFixed()
+    const l1GasPrice = bn(l1BaseFee).times(scalar).toFixed(0)
+
+    // l2 gas price
+    const { gasPrice } = await service.getGasFees()
+
+    return { gasPrice, l1GasPrice }
   }
 
   /**
