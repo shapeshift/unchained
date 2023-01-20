@@ -1,0 +1,9 @@
+{
+  "name": "@shapeshiftoss/bnbsmartchain-pulumi",
+  "version": "8.1.0",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "clean": "rm -rf dist node_modules"
+  }
+}
