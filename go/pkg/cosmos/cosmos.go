@@ -225,7 +225,6 @@ func SerializedPoolTransferStringtoValue(s string) Value {
 		Amount: s[:denomIdx[0]],
 		Denom:  s[denomIdx[0]:],
 	}
-
 }
 
 func IsValidAddress(address string) bool {
