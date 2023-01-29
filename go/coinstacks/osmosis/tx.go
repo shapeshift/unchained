@@ -29,13 +29,64 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 			}
 			messages = append(messages, message)
 		case *gammtypes.MsgJoinPool:
-			message := cosmos.Message{
-				Addresses: []string{v.Sender},
-				From:      v.Sender,
-				Type:      v.Type(),
-				Value:     cosmos.CoinToValue(&v.TokenInMaxs[0]),
+			tokenInValues := cosmos.PoolEventAmountToValues(events["0"]["pool_joined"]["tokens_in"])
+			msgs := []cosmos.Message{
+				// token in 0
+				{
+					Addresses: []string{v.Sender},
+					Origin:    v.Sender,
+					From:      v.Sender,
+					Type:      v.Type(),
+					Value:     tokenInValues[0],
+				},
+				// token in 1
+				{
+					Addresses: []string{v.Sender},
+					Origin:    v.Sender,
+					From:      v.Sender,
+					Type:      v.Type(),
+					Value:     tokenInValues[1],
+				},
+				// token out (lp token)
+				{
+					Addresses: []string{v.Sender},
+					Origin:    v.Sender,
+					From:      events["0"]["transfer"]["sender"],
+					To:        v.Sender,
+					Type:      v.Type(),
+					Value:     cosmos.SerializedPoolTransferStringtoValue(events["0"]["transfer"]["amount"]),
+				},
 			}
-			messages = append(messages, message)
+			messages = append(messages, msgs...)
+		case *gammtypes.MsgExitPool:
+			tokenOutValues := cosmos.PoolEventAmountToValues(events["0"]["pool_exited"]["tokens_out"])
+			msgs := []cosmos.Message{
+				// token out 0
+				{
+					Addresses: []string{v.Sender},
+					Origin:    v.Sender,
+					To:        v.Sender,
+					Type:      v.Type(),
+					Value:     tokenOutValues[0],
+				},
+				// token out 1
+				{
+					Addresses: []string{v.Sender},
+					Origin:    v.Sender,
+					To:        v.Sender,
+					Type:      v.Type(),
+					Value:     tokenOutValues[1],
+				},
+				// token in (lp token)
+				{
+					Addresses: []string{v.Sender},
+					Origin:    v.Sender,
+					From:      v.Sender,
+					Type:      v.Type(),
+					Value:     cosmos.SerializedPoolTransferStringtoValue(events["0"]["transfer"]["amount"]),
+				},
+			}
+			messages = append(messages, msgs...)
 		case *gammtypes.MsgSwapExactAmountIn:
 			sender := events[strconv.Itoa(i)]["transfer"]["sender"]
 			recipient := events[strconv.Itoa(i)]["transfer"]["recipient"]
