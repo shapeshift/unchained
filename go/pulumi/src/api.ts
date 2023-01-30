@@ -57,12 +57,19 @@ export const getHash = async (coinstack: string, buildArgs: Record<string, strin
   })
   hash.update(pkgHash)
 
+  // hash contents of coinstack
+  const { hash: coinstackHash } = await hashElement(`../../${coinstack}`, {
+    folders: { exclude: ['.*', '*'] },
+    files: { include: ['*.go'] },
+  })
+  hash.update(coinstackHash)
+
   // hash contents of coinstack api
-  const { hash: coinstackHash } = await hashElement(`../../${coinstack}/api`, {
+  const { hash: coinstackApiHash } = await hashElement(`../../${coinstack}/api`, {
     folders: { include: ['**'], exclude: ['.*'] },
     files: { include: ['*.go', '*.json'] },
   })
-  hash.update(coinstackHash)
+  hash.update(coinstackApiHash)
 
   hash.update(objectHash(buildArgs))
 
