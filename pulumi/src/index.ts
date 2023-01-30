@@ -39,10 +39,11 @@ export interface Config extends BaseConfig {
 }
 
 export interface ServiceConfig {
-  cpuLimit: string
+  cpuLimit?: string
   cpuRequest?: string
   image: string
-  memoryLimit: string
+  memoryLimit?: string
+  memoryRequest?: string
   name: string
   storageSize: string
 }

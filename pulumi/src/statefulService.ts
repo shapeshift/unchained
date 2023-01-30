@@ -49,14 +49,13 @@ export function createService(args: ServiceArgs): Service {
     env,
     resources: {
       limits: {
-        cpu: args.config.cpuLimit,
-        memory: args.config.memoryLimit,
+        ...(args.config.cpuLimit && { cpu: args.config.cpuLimit }),
+        ...(args.config.memoryLimit && { memory: args.config.memoryLimit }),
       },
-      ...(args.config.cpuRequest && {
-        requests: {
-          cpu: args.config.cpuRequest,
-        },
-      }),
+      requests: {
+        ...(args.config.cpuRequest && { cpu: args.config.cpuRequest }),
+        ...(args.config.memoryRequest && { memory: args.config.memoryRequest }),
+      }
     },
     ports: ports.map(({ port: containerPort, name }) => ({ containerPort, name })),
     securityContext: { runAsUser: 0 },
