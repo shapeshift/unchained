@@ -29,7 +29,9 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 			}
 			messages = append(messages, message)
 		case *gammtypes.MsgJoinPool:
-			tokenInValues := cosmos.PoolEventAmountToValues(events["0"]["pool_joined"]["tokens_in"])
+			tokenInCoins, _ := sdk.ParseCoinsNormalized(events[strconv.Itoa(i)]["pool_joined"]["tokens_in"])
+			tokenOutCoin, _ := sdk.ParseCoinNormalized(events[strconv.Itoa(i)]["transfer"]["amount"])
+
 			msgs := []cosmos.Message{
 				// token in 0
 				{
@@ -37,7 +39,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 					Origin:    v.Sender,
 					From:      v.Sender,
 					Type:      v.Type(),
-					Value:     tokenInValues[0],
+					Value:     cosmos.CoinToValue(&tokenInCoins[0]),
 				},
 				// token in 1
 				{
@@ -45,21 +47,22 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 					Origin:    v.Sender,
 					From:      v.Sender,
 					Type:      v.Type(),
-					Value:     tokenInValues[1],
+					Value:     cosmos.CoinToValue(&tokenInCoins[1]),
 				},
 				// token out (lp token)
 				{
 					Addresses: []string{v.Sender},
 					Origin:    v.Sender,
-					From:      events["0"]["transfer"]["sender"],
+					From:      events[strconv.Itoa(i)]["transfer"]["sender"],
 					To:        v.Sender,
 					Type:      v.Type(),
-					Value:     cosmos.SerializedPoolTransferStringtoValue(events["0"]["transfer"]["amount"]),
+					Value:     cosmos.CoinToValue(&tokenOutCoin),
 				},
 			}
 			messages = append(messages, msgs...)
 		case *gammtypes.MsgExitPool:
-			tokenOutValues := cosmos.PoolEventAmountToValues(events["0"]["pool_exited"]["tokens_out"])
+			tokenOutCoins, _ := sdk.ParseCoinsNormalized(events[strconv.Itoa(i)]["pool_exited"]["tokens_out"])
+			tokenInCoin, _ := sdk.ParseCoinNormalized(events[strconv.Itoa(i)]["transfer"]["amount"])
 			msgs := []cosmos.Message{
 				// token out 0
 				{
@@ -67,7 +70,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 					Origin:    v.Sender,
 					To:        v.Sender,
 					Type:      v.Type(),
-					Value:     tokenOutValues[0],
+					Value:     cosmos.CoinToValue(&tokenOutCoins[0]),
 				},
 				// token out 1
 				{
@@ -75,15 +78,16 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 					Origin:    v.Sender,
 					To:        v.Sender,
 					Type:      v.Type(),
-					Value:     tokenOutValues[1],
+					Value:     cosmos.CoinToValue(&tokenOutCoins[1]),
 				},
 				// token in (lp token)
 				{
 					Addresses: []string{v.Sender},
 					Origin:    v.Sender,
 					From:      v.Sender,
+					To:        events[strconv.Itoa(i)]["transfer"]["recipient"],
 					Type:      v.Type(),
-					Value:     cosmos.SerializedPoolTransferStringtoValue(events["0"]["transfer"]["amount"]),
+					Value:     cosmos.CoinToValue(&tokenInCoin),
 				},
 			}
 			messages = append(messages, msgs...)
