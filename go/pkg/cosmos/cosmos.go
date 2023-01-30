@@ -4,9 +4,6 @@ package cosmos
 import (
 	"context"
 	"net/url"
-	"reflect"
-	"regexp"
-	"strings"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -190,40 +187,6 @@ func CoinToValue(c *sdk.Coin) Value {
 	return Value{
 		Amount: c.Amount.String(),
 		Denom:  c.Denom,
-	}
-}
-
-func PoolEventAmountToValues(s string) []Value {
-	ret := []Value{}
-
-	if s == "" {
-		return ret
-	}
-
-	for _, t := range strings.Split(s, ",") {
-		v := SerializedPoolTransferStringtoValue(t)
-		if reflect.DeepEqual(v, Value{}) {
-			return []Value{}
-		}
-		ret = append(ret, v)
-	}
-
-	return ret
-}
-
-func SerializedPoolTransferStringtoValue(s string) Value {
-	if s == "" {
-		return Value{}
-	}
-
-	isNonNumeric := regexp.MustCompile(`\D`)
-	denomIdx := isNonNumeric.FindStringIndex(s)
-	if denomIdx == nil {
-		return Value{}
-	}
-	return Value{
-		Amount: s[:denomIdx[0]],
-		Denom:  s[denomIdx[0]:],
 	}
 }
 
