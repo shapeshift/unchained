@@ -57,9 +57,9 @@ export const getConfig = async (coinstack: string): Promise<Config> => {
     if (config.statefulService?.replicas === undefined) missingRequiredConfig.push('statefulService.replicas')
 
     config.statefulService?.services.forEach((service, i) => {
-      if (service.cpuLimit === undefined) missingRequiredConfig.push(`statefulService.services.[${i}].cpuLimit`)
+      if (service.cpuRequest === undefined && service.cpuLimit === undefined) missingRequiredConfig.push(`statefulService.services.[${i}].cpuRequest OR statefulService.services.[${i}].cpuLimit`)
+      if (service.memoryRequest === undefined && service.memoryLimit === undefined) missingRequiredConfig.push(`statefulService.services.[${i}].memoryRequest OR statefulService.services.[${i}].memoryLimit`)
       if (service.image === undefined) missingRequiredConfig.push(`statefulService.services.[${i}].image`)
-      if (service.memoryLimit === undefined) missingRequiredConfig.push(`statefulService.services.[${i}].memoryLimit`)
       if (service.name === undefined) missingRequiredConfig.push(`statefulService.services.[${i}].name`)
       if (service.storageSize === undefined) missingRequiredConfig.push(`statefulService.services.[${i}].storageSize`)
     })
