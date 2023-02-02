@@ -7,15 +7,7 @@
     "last_chain_backoff": "7s",
     "fetch_batch_size": 100,
     "parallelism": 4,
-    "read_timeout": "32s",
-    "proxied_whitelisted_endpoints": [
-      "inbound_addresses",
-      "constants",
-      "lastblock",
-      "mimir",
-      "queue",
-      "nodes"
-    ]
+    "read_timeout": "32s"
   },
   "timescale": {
     "host": "localhost",
@@ -27,15 +19,14 @@
     "commit_batch_size": 100,
     "max_open_conns": 80
   },
+  "websockets": {
+    "enable": false,
+    "connection_limit": 100
+  },
   "usdpools": [
+    "AVAX.USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E",
     "BNB.BUSD-BD1",
-    "BNB.BUSD-BAF",
-    "BNB.BUSD-74E",
-    "BNB.USDT-DC8",
-    "ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7",
     "ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48",
-    "ETH.USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306",
-    "ETH.USDT-0X62E273709DA575835C7F6AEF4A31140CA5B1D190",
-    "TERRA.UST"
+    "ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7"
   ]
 }
