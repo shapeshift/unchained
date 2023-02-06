@@ -234,11 +234,11 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ghcr.io/ovrclk/cosmos-omnibus:v0.3.20-cosmoshub-v7.1.0
+    service-image-1: shapeshiftdao/cosmoshub:v8.0.0
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 32Gi
-    service-storage-size-1: 5500Gi
+    service-storage-size-1: 2500Gi
 
   - &cosmos-dev
     <<: *cosmos
@@ -269,11 +269,11 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/cosmos-omnibus:v0.3.20-osmosis-v14.0.0
+    service-image-1: shapeshiftdao/osmosis:v14.0.0
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-request-1: 32Gi
-    service-storage-size-1: 10000Gi
+    service-storage-size-1: 500Gi
 
   - &osmosis-dev
     <<: *osmosis
