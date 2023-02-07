@@ -538,6 +538,46 @@ aliases:
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
+  - &bnbsmartchain
+    coinstack: bnbsmartchain
+    pulumi-stack: public
+    pulumi-dir: coinstacks/bnbsmartchain/pulumi
+    rpc-url: http://bnbsmartchain-svc.unchained.svc.cluster.local:8545
+    indexer-url: http://bnbsmartchain-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://bnbsmartchain-svc.unchained.svc.cluster.local:8001/websocket
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 6
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
+    api-cpu-threshold: 30
+    api-memory-limit: 500Mi
+    stateful-service-replicas: 2
+    service-name-1: daemon
+    service-image-1: shapeshiftdao/bnb-smart-chain:v1.1.18_hf
+    service-cpu-limit-1: "4"
+    service-cpu-request-1: "2"
+    service-memory-limit-1: 32Gi
+    service-storage-size-1: 3000Gi
+    service-name-2: indexer
+    service-image-2: shapeshiftdao/unchained-blockbook:bsc-38cb629
+    service-cpu-limit-2: "4"
+    service-cpu-request-2: "2"
+    service-memory-limit-2: 24Gi
+    service-storage-size-2: 500Gi
+
+  - &bnbsmartchain-dev
+    <<: *optimism
+    environment: dev
+    pulumi-stack: public-dev
+    rpc-url: http://bnbsmartchain-svc.unchained-dev.svc.cluster.local:8545
+    indexer-url: http://bnbsmartchain-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://bnbsmartchain-svc.unchained-dev.svc.cluster.local:8001/websocket
+    api-max-replicas: 3
+    api-cpu-limit: 300m
+    api-memory-limit: 250Mi
+    stateful-service-replicas: 1
+
 commands:
   precheck:
     description: install dependencies
@@ -1013,6 +1053,16 @@ workflows:
           <<: *optimism-dev
           <<: *only-develop
 
+      - deploy-coinstack-node:
+          name: deploy bnbsmartchain develop
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          etherscan-env-var: ETHERSCAN_API_KEY_BSC
+          requires:
+            - deploy dependencies
+          <<: *bnbsmartchain-dev
+          <<: *only-develop
+
       - deploy-coinstack-go:
           name: deploy cosmos develop
           organization: TAXISTAKE
@@ -1272,6 +1322,34 @@ workflows:
           requires:
             - approve optimism coinstack
           <<: *optimism
+          <<: *only-main
+
+      ####### BNB SMART CHAIN
+      - deploy-coinstack-node:
+          name: preview bnbsmartchain
+          organization: TAXISTAKE
+          pulumi-command: preview
+          etherscan-env-var: ETHERSCAN_API_KEY_BSC
+          requires:
+            - validate dependencies
+          <<: *bnbsmartchain
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve bnbsmartchain coinstack
+          type: approval
+          requires:
+            - preview bnbsmartchain
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy bnbsmartchain
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          etherscan-env-var: ETHERSCAN_API_KEY_BSC
+          requires:
+            - approve bnbsmartchain coinstack
+          <<: *bnbsmartchain
           <<: *only-main
 
       ####### COSMOS
