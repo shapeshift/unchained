@@ -4,6 +4,7 @@ import { ApiError as BlockbookApiError, Blockbook, Tx as BlockbookTx } from '@sh
 import { AddressFormatter, ApiError, BadRequestError, BaseAPI, Cursor, RPCRequest, RPCResponse, SendTxBody } from '../'
 import { Account, Address, API, NetworkFee, NetworkFees, RawTx, Tx, TxHistory, Utxo } from './models'
 import { NodeBlock } from './types'
+import { validatePageSize } from '../utils'
 
 axiosRetry(axios, { retries: 5, retryDelay: axiosRetry.exponentialDelay })
 
@@ -88,7 +89,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   }
 
   async getTxHistory(pubkey: string, cursor?: string, pageSize = 10): Promise<TxHistory> {
-    if (pageSize <= 0) throw new ApiError('Bad Request', 422, 'page size must be greater than 0')
+    validatePageSize(pageSize)
 
     try {
       const curCursor = ((): Cursor => {
