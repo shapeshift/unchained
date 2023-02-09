@@ -82,7 +82,7 @@ func (a *API) Root(w http.ResponseWriter, r *http.Request) {
 	api.DocsRedirect(w, r)
 }
 
-func (a *API) ValidatePagingParams(w http.ResponseWriter, r *http.Request, defaultPageSize int, maxPageSize *int) (string, int) {
+func (a *API) ValidatePagingParams(w http.ResponseWriter, r *http.Request, defaultPageSize int, maxPageSize *int) (string, int, error) {
 	cursor := r.URL.Query().Get("cursor")
 
 	pageSizeQ := r.URL.Query().Get("pageSize")
@@ -93,19 +93,22 @@ func (a *API) ValidatePagingParams(w http.ResponseWriter, r *http.Request, defau
 	pageSize, err := strconv.Atoi(pageSizeQ)
 	if err != nil {
 		api.HandleError(w, http.StatusBadRequest, err.Error())
+		return cursor, 0, fmt.Errorf("error parsing page size: %w", err)
 	}
 
 	if maxPageSize != nil {
 		if pageSize > MAX_PAGE_SIZE_TX_HISTORY {
-			api.HandleError(w, http.StatusBadRequest, fmt.Sprintf("page size max is %d", MAX_PAGE_SIZE_TX_HISTORY))
+			api.HandleError(w, http.StatusBadRequest, fmt.Sprintf("max page size is %d", MAX_PAGE_SIZE_TX_HISTORY))
+			return cursor, 0, fmt.Errorf("page size max is %d", MAX_PAGE_SIZE_TX_HISTORY)
 		}
 	}
 
 	if pageSize == 0 {
 		api.HandleError(w, http.StatusBadRequest, "page size cannot be 0")
+		return cursor, 0, fmt.Errorf("page size cannot be 0")
 	}
 
-	return cursor, pageSize
+	return cursor, pageSize, nil
 }
 
 // swagger:route GET / Websocket Websocket
@@ -178,7 +181,10 @@ func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 	pubkey := mux.Vars(r)["pubkey"]
 
 	maxPageSize := MAX_PAGE_SIZE_TX_HISTORY
-	cursor, pageSize := a.ValidatePagingParams(w, r, DEFAULT_PAGE_SIZE_TX_HISTORY, &maxPageSize)
+	cursor, pageSize, err := a.ValidatePagingParams(w, r, DEFAULT_PAGE_SIZE_TX_HISTORY, &maxPageSize)
+	if err != nil {
+		return
+	}
 
 	txHistory, err := a.handler.GetTxHistory(pubkey, cursor, pageSize)
 	if err != nil {
