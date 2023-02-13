@@ -136,7 +136,10 @@ func New(httpClient *osmosis.HTTPClient, wsClient *cosmos.WSClient, blockService
 //	200: Validators
 //	500: InternalServerError
 func (a *API) GetValidators(w http.ResponseWriter, r *http.Request) {
-	cursor, pageSize := a.ValidatePagingParams(w, r, cosmos.DEFAULT_PAGE_SIZE_VALIDATORS, nil)
+	cursor, pageSize, err := a.ValidatePagingParams(w, r, cosmos.DEFAULT_PAGE_SIZE_VALIDATORS, nil)
+	if err != nil {
+		return
+	}
 
 	validators, err := a.handler.GetValidators(cursor, pageSize)
 	if err != nil {
@@ -181,7 +184,10 @@ func (a *API) ValidatorTxHistory(w http.ResponseWriter, r *http.Request) {
 	validatorAddr := mux.Vars(r)["pubkey"]
 
 	maxPageSize := cosmos.MAX_PAGE_SIZE_TX_HISTORY
-	cursor, pageSize := a.ValidatePagingParams(w, r, cosmos.DEFAULT_PAGE_SIZE_TX_HISTORY, &maxPageSize)
+	cursor, pageSize, err := a.ValidatePagingParams(w, r, cosmos.DEFAULT_PAGE_SIZE_TX_HISTORY, &maxPageSize)
+	if err != nil {
+		return
+	}
 
 	txHistory, err := a.handler.GetValidatorTxHistory(validatorAddr, cursor, pageSize)
 	if err != nil {

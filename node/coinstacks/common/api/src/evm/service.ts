@@ -8,6 +8,7 @@ import { ApiError, BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody
 import { Account, API, TokenBalance, Tx, TxHistory, GasFees, InternalTx, GasEstimate } from './models'
 import { Cursor, NodeBlock, CallStack, ExplorerApiResponse, ExplorerInternalTx } from './types'
 import { formatAddress } from './utils'
+import { validatePageSize } from '../utils'
 
 axiosRetry(axios, { retries: 5, retryDelay: axiosRetry.exponentialDelay })
 
@@ -81,7 +82,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   }
 
   async getTxHistory(pubkey: string, cursor?: string, pageSize = 10): Promise<TxHistory> {
-    if (pageSize <= 0) throw new ApiError('Bad Request', 422, 'page size must be greater than 0')
+    validatePageSize(pageSize)
 
     const curCursor = ((): Cursor => {
       try {
