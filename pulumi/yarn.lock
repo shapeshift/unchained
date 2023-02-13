@@ -173,10 +173,10 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==
 
-"@pulumi/aws@5.25.0":
-  version "5.25.0"
-  resolved "https://registry.yarnpkg.com/@pulumi/aws/-/aws-5.25.0.tgz#8637deafb09e0b3accb2f01660b71ba49594d099"
-  integrity sha512-I219gKTWjUAEBVcGG8v2OTYTV3kKFIZmVTh6huX4Px4zQ9Nipujj98lXw9eQWJ1wEqpYJXasyz18/bufn2Y5Iw==
+"@pulumi/aws@5.16.2":
+  version "5.16.2"
+  resolved "https://registry.yarnpkg.com/@pulumi/aws/-/aws-5.16.2.tgz#c434639360b151e65d96ac2e5a1124d5ec9e3c43"
+  integrity sha512-PikY/4oss/BNrNmK2/r8pQWetP7D5J0xCFeoKPmDRqk6mGmrkFFuT8+zdZ6Qm9M5OQ6ulgbnzZTsuW9M+0vFag==
   dependencies:
     "@pulumi/pulumi" "^3.0.0"
     aws-sdk "^2.0.0"
@@ -185,10 +185,10 @@
     read-package-tree "^5.2.1"
     resolve "^1.7.1"
 
-"@pulumi/aws@^5.1.2":
-  version "5.16.0"
-  resolved "https://registry.yarnpkg.com/@pulumi/aws/-/aws-5.16.0.tgz#7047b90bd9c04186a5c6615f3ce8b4217a4100fd"
-  integrity sha512-j8yT4EBq8JOEH9URk0nmXtu5/WaXnOn60ra4poQAa0BijAcAqodgNb7eAtLyUPaTgDlOHa6bpoeqKPGfTfm0Tg==
+"@pulumi/aws@5.29.1", "@pulumi/aws@^5.16.2":
+  version "5.29.1"
+  resolved "https://registry.yarnpkg.com/@pulumi/aws/-/aws-5.29.1.tgz#387f5a6517362b632051def719c3b95a97a73a0f"
+  integrity sha512-IHMSCrdkssoqN1u3SUMOCUOJos0BjVpJ8tkbby6yqASe5p3LCRpkQXwVPoSPRpS7TEoCvJpLw0f8ue+MEcCRdQ==
   dependencies:
     "@pulumi/pulumi" "^3.0.0"
     aws-sdk "^2.0.0"
@@ -197,35 +197,37 @@
     read-package-tree "^5.2.1"
     resolve "^1.7.1"
 
-"@pulumi/awsx@0.40.0":
-  version "0.40.0"
-  resolved "https://registry.yarnpkg.com/@pulumi/awsx/-/awsx-0.40.0.tgz#14da49be027f9208dfc266e5a1d0c65aae74e0e2"
-  integrity sha512-4xMmVOHT/PZQsqPAPWe1cYguUCdk0ZUJ1JN7wfYUoGy1I3LR7gxPD14IK5I79o20PmZI65BRlAwNuntByVy6xw==
+"@pulumi/awsx@1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@pulumi/awsx/-/awsx-1.0.2.tgz#d6cc03d8f13ffba964466ebaf469c44c12800f4d"
+  integrity sha512-gT3piAGSa0ErafYYQ3iu7W175+usJ7fWtmoTcJ+oQW2bpnS+fM6uHro/bJlsBup1Ax2A8ep5Ts9AubPGbq01vA==
   dependencies:
-    "@pulumi/docker" "^3.0.0"
+    "@pulumi/aws" "^5.16.2"
+    "@pulumi/docker" "^3.6.1"
+    "@pulumi/pulumi" "^3.0.0"
     "@types/aws-lambda" "^8.10.23"
     mime "^2.0.0"
 
-"@pulumi/docker@^3.0.0":
-  version "3.4.1"
-  resolved "https://registry.yarnpkg.com/@pulumi/docker/-/docker-3.4.1.tgz#70551e9b4eb7b7b9297db368a4334548b9b1222a"
-  integrity sha512-SOZ7Cz6JrUnbTbOrwL5tuiGnFq3IIvGQqZnksIoPuJAjEKYB1bsc3EUtrLVLlLYKQAP/vML0YQVY6BWYXoidtg==
+"@pulumi/docker@^3.6.1":
+  version "3.6.1"
+  resolved "https://registry.yarnpkg.com/@pulumi/docker/-/docker-3.6.1.tgz#a216c9bd2bbd35dd7091db2827a3a434adff021c"
+  integrity sha512-BZME50QkT556v+LvmTXPT8ssB2xxNkp9+msB5xYFEnUnWcdGAx5yUysQw70RJCb+U0GbkJSbxtlgMJgOQf/now==
   dependencies:
     "@pulumi/pulumi" "^3.0.0"
     semver "^5.4.0"
 
-"@pulumi/eks@0.40.0":
-  version "0.40.0"
-  resolved "https://registry.yarnpkg.com/@pulumi/eks/-/eks-0.40.0.tgz#c22f41ccb98ec9333a3b7a4c691a89ae877e5f16"
-  integrity sha512-2iyzKm8LesW9VzQi/VA0Me49bbcZotpvQMK0zANS/QRVOIG55erhUt9zngJl2PzOBnXqZu9Xv4wsszUKmo5+zw==
+"@pulumi/eks@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@pulumi/eks/-/eks-1.0.1.tgz#a3a90629b4557ec806252e16c11984b427cebd26"
+  integrity sha512-WOYqWwrzz5FoBy3hpoDPl9GqPfyzitNvXmu2GU/fvSt35bzPESxL3LLFk3Jgkt138/8VNqBhCKswmMo5PZWqAA==
   dependencies:
-    "@pulumi/aws" "^5.1.2"
-    "@pulumi/kubernetes" "^3.0.0"
-    "@pulumi/pulumi" "^3.0.0"
-    axios "^0.21.1"
-    https-proxy-agent "^5.0.0"
-    js-yaml "^3.13.0"
-    netmask "^2.0.1"
+    "@pulumi/aws" "5.16.2"
+    "@pulumi/kubernetes" "^3.20.2"
+    "@pulumi/pulumi" "^3.47.0"
+    https-proxy-agent "^5.0.1"
+    js-yaml "^4.1.0"
+    netmask "^2.0.2"
+    semver "^7.3.7"
     which "^1.3.1"
 
 "@pulumi/kubernetes@3.23.1":
@@ -242,10 +244,10 @@
     shell-quote "^1.6.1"
     tmp "^0.0.33"
 
-"@pulumi/kubernetes@^3.0.0":
-  version "3.21.4"
-  resolved "https://registry.yarnpkg.com/@pulumi/kubernetes/-/kubernetes-3.21.4.tgz#f967b9ff72632f62e5de764a988d459298024a5d"
-  integrity sha512-y93V+IYbwlURGzeeelhQHNj1ykqqsEbnJ8cla0iyyV5Cs3ZfcwW6ZP7g3JZ2sdLD8RWjDWYB6rahYUpnQbOSPQ==
+"@pulumi/kubernetes@^3.20.2":
+  version "3.24.0"
+  resolved "https://registry.yarnpkg.com/@pulumi/kubernetes/-/kubernetes-3.24.0.tgz#aca455b9a71c759e67e1c0fb44e2a2e22ee195f1"
+  integrity sha512-/8d7wjJd8DyGfhJbC2DVNf/x+qDG+Wf8haZX6+XmDFZb9fcuupDfj/I+n6HL3dskcZpuwRo9FmPE0nxkl7bKAQ==
   dependencies:
     "@pulumi/pulumi" "^3.25.0"
     "@types/glob" "^5.0.35"
@@ -340,19 +342,48 @@
     typescript "~3.8.3"
     upath "^1.1.0"
 
+"@pulumi/pulumi@^3.47.0":
+  version "3.54.0"
+  resolved "https://registry.yarnpkg.com/@pulumi/pulumi/-/pulumi-3.54.0.tgz#de3abdb09912857f2e4ef30684e23c105ce8320e"
+  integrity sha512-7c56BCsepB9gIN1jOpBHCQyx/aSyURmuW6fV9y6aw1IspgJqBylvLCfE+5tA0i6UedaAvf8xV4R58ckgbFM5Vg==
+  dependencies:
+    "@grpc/grpc-js" "~1.3.8"
+    "@logdna/tail-file" "^2.0.6"
+    "@opentelemetry/api" "^1.2.0"
+    "@opentelemetry/exporter-zipkin" "^1.6.0"
+    "@opentelemetry/instrumentation-grpc" "^0.32.0"
+    "@opentelemetry/resources" "^1.6.0"
+    "@opentelemetry/sdk-trace-base" "^1.6.0"
+    "@opentelemetry/sdk-trace-node" "^1.6.0"
+    "@opentelemetry/semantic-conventions" "^1.6.0"
+    "@pulumi/query" "^0.3.0"
+    execa "^5.1.0"
+    google-protobuf "^3.5.0"
+    ini "^2.0.0"
+    js-yaml "^3.14.0"
+    minimist "^1.2.6"
+    normalize-package-data "^2.4.0"
+    read-package-tree "^5.3.1"
+    require-from-string "^2.0.1"
+    semver "^6.1.0"
+    source-map-support "^0.5.6"
+    ts-node "^7.0.1"
+    typescript "~3.8.3"
+    upath "^1.1.0"
+
 "@pulumi/query@^0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@pulumi/query/-/query-0.3.0.tgz#f496608e86a18c3dd31b6c533408e2441c29071d"
   integrity sha512-xfo+yLRM2zVjVEA4p23IjQWzyWl1ZhWOGobsBqRpIarzLvwNH/RAGaoehdxlhx4X92302DrpdIFgTICMN4P38w==
 
-"@shapeshiftoss/cluster-launcher@^0.10.0":
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/@shapeshiftoss/cluster-launcher/-/cluster-launcher-0.10.0.tgz#71c71f90c8b7f4c33c441ca163a8afb010d2e635"
-  integrity sha512-5Mixk3BfOQyFpntnAwGn4KEK8FyEcwkRqcntA+doZW5QvJsSWwsjy70yObDRTNYEE0LNBSFx53z6gLDCVncCCA==
+"@shapeshiftoss/cluster-launcher@^0.12.0":
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/@shapeshiftoss/cluster-launcher/-/cluster-launcher-0.12.0.tgz#b6ead3965dd0cf4c534d31ccc5db77ddea233a07"
+  integrity sha512-sskMUmuK/HiiVxSllVCESLgaBD/0m8sFzEeuXrENqLLUqVunKIEMnGxAgLz9Bqc0zHmag1cvr7aUq/1P9j3x8A==
   dependencies:
-    "@pulumi/aws" "5.25.0"
-    "@pulumi/awsx" "0.40.0"
-    "@pulumi/eks" "0.40.0"
+    "@pulumi/aws" "5.29.1"
+    "@pulumi/awsx" "1.0.2"
+    "@pulumi/eks" "1.0.1"
     "@pulumi/kubernetes" "3.23.1"
     "@pulumi/kubernetesx" "0.1.6"
     "@pulumi/pulumi" "3.50.2"
@@ -417,6 +448,11 @@ argparse@^1.0.7:
   dependencies:
     sprintf-js "~1.0.2"
 
+argparse@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/argparse/-/argparse-2.0.1.tgz#246f50f3ca78a3240f6c997e8a9bd1eac49e4b38"
+  integrity sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==
+
 arrify@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/arrify/-/arrify-1.0.1.tgz#898508da2226f380df904728456849c1501a4b0d"
@@ -452,13 +488,6 @@ aws-sdk@^2.0.0:
     util "^0.12.4"
     uuid "8.0.0"
     xml2js "0.4.19"
-
-axios@^0.21.1:
-  version "0.21.4"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-0.21.4.tgz#c67b90dc0568e5c1cf2b0b858c43ba28e2eda575"
-  integrity sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==
-  dependencies:
-    follow-redirects "^1.14.0"
 
 axios@^0.27.2:
   version "0.27.2"
@@ -692,11 +721,6 @@ folder-hash@^4.0.2:
     graceful-fs "~4.2.9"
     minimatch "~5.0.0"
 
-follow-redirects@^1.14.0:
-  version "1.15.2"
-  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.2.tgz#b460864144ba63f2681096f274c4e57026da2c13"
-  integrity sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==
-
 follow-redirects@^1.14.9:
   version "1.15.1"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.1.tgz#0ca6a452306c9b276e4d3127483e29575e207ad5"
@@ -851,7 +875,7 @@ hosted-git-info@^2.1.4:
   resolved "https://registry.yarnpkg.com/hosted-git-info/-/hosted-git-info-2.8.9.tgz#dffc0bf9a21c02209090f2aa69429e1414daf3f9"
   integrity sha512-mxIDAb9Lsm6DoOJ7xH+5+X4y1LU/4Hi50L9C5sIswK3JzULS4bwk1FvjdBgvYR4bzT4tuUQiC15FE2f5HbLvYw==
 
-https-proxy-agent@^5.0.0:
+https-proxy-agent@^5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-5.0.1.tgz#c59ef224a04fe8b754f3db0063a25ea30d0005d6"
   integrity sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA==
@@ -1046,13 +1070,20 @@ jmespath@0.16.0:
   resolved "https://registry.yarnpkg.com/jmespath/-/jmespath-0.16.0.tgz#b15b0a85dfd4d930d43e69ed605943c802785076"
   integrity sha512-9FzQjJ7MATs1tSpnco1K6ayiYE3figslrXA72G2HQ/n76RzvYlofyi5QM+iX4YRs/pu3yzxlVQSST23+dMDknw==
 
-js-yaml@^3.13.0, js-yaml@^3.14.0:
+js-yaml@^3.14.0:
   version "3.14.1"
   resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.14.1.tgz#dae812fdb3825fa306609a8717383c50c36a0537"
   integrity sha512-okMH7OXXJ7YrN9Ok3/SXrnu4iX9yOk+25nqX4imS2npuvTYDmo/QEZoqwZkYaIDk3jVvBOTOIEgEhaLOynBS9g==
   dependencies:
     argparse "^1.0.7"
     esprima "^4.0.0"
+
+js-yaml@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-4.1.0.tgz#c1fb65f8f5017901cdd2c951864ba18458a10602"
+  integrity sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==
+  dependencies:
+    argparse "^2.0.1"
 
 json-parse-even-better-errors@^2.3.0:
   version "2.3.1"
@@ -1139,7 +1170,7 @@ ms@2.1.2:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"
   integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
 
-netmask@^2.0.1:
+netmask@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/netmask/-/netmask-2.0.2.tgz#8b01a07644065d536383835823bc52004ebac5e7"
   integrity sha512-dBpDMdxv9Irdq66304OLfEmQ9tbNRFnFTuZiLo+bD+r332bBmMJ8GBLXklIXXgxd3+v9+KUnZaUR5PJMa75Gsg==
@@ -1388,6 +1419,13 @@ semver@^7.3.2, semver@^7.3.5:
   version "7.3.7"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.3.7.tgz#12c5b649afdbf9049707796e22a4028814ce523f"
   integrity sha512-QlYTucUYOews+WeEujDoEGziz4K6c47V/Bd+LjSSYcA94p+DmINdf7ncaUinThfvZyu13lN9OY1XDxt8C0Tw0g==
+  dependencies:
+    lru-cache "^6.0.0"
+
+semver@^7.3.7:
+  version "7.3.8"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-7.3.8.tgz#07a78feafb3f7b32347d725e33de7e2a2df67798"
+  integrity sha512-NB1ctGL5rlHrPJtFDVIVzTyQylMLu9N9VICA6HSFJo8MCGVTMW6gfpicwKmmK/dAjTOrqu5l63JJOpDSrAis3A==
   dependencies:
     lru-cache "^6.0.0"
 
