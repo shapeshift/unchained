@@ -12,14 +12,12 @@ aliases:
         ignore:
           - main
           - develop
-          - unchained-us
 
   - &only-develop
     filters:
       branches:
         only:
           - develop
-          - unchained-us
 
   - &only-main
     filters:
@@ -487,6 +485,7 @@ aliases:
     service-name-3: indexer
     service-image-3: registry.gitlab.com/thorchain/midgard:2.13.0
     service-cpu-limit-3: 500m
+    service-cpu-request-3: 250m
     service-memory-limit-3: 1Gi
     service-storage-size-3: 50Gi
 
@@ -643,7 +642,7 @@ commands:
       - run:
           name: install helm charts
           command: |
-            wget -O helm.tar.gz https://get.helm.sh/helm-v3.10.3-linux-amd64.tar.gz
+            wget -O helm.tar.gz https://get.helm.sh/helm-v3.11.0-linux-amd64.tar.gz
             tar -zxvf helm.tar.gz
             mv linux-amd64/helm /usr/local/bin/helm
             helm repo add autoscaler https://kubernetes.github.io/autoscaler
@@ -958,7 +957,7 @@ workflows:
       - deploy-dependencies:
           name: deploy dependencies
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - lint and test project (persist to workspace)
           <<: *only-develop
@@ -966,7 +965,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy bitcoin develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies
           <<: *bitcoin-dev
@@ -975,7 +974,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy dogecoin develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies
           <<: *dogecoin-dev
@@ -984,7 +983,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy litecoin develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies
           <<: *litecoin-dev
@@ -993,7 +992,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy bitcoincash develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies
           <<: *bitcoincash-dev
@@ -1002,7 +1001,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy ethereum develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies
           <<: *ethereum-dev
@@ -1011,7 +1010,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy avalanche develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies
           <<: *avalanche-dev
@@ -1020,7 +1019,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy optimism develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           etherscan-env-var: ETHERSCAN_API_KEY_OPTIMISM
           requires:
             - deploy dependencies
@@ -1030,7 +1029,7 @@ workflows:
       - deploy-coinstack-go:
           name: deploy cosmos develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies
           <<: *cosmos-dev
@@ -1039,7 +1038,7 @@ workflows:
       - deploy-coinstack-go:
           name: deploy osmosis develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies
           <<: *osmosis-dev
@@ -1048,7 +1047,7 @@ workflows:
       - deploy-coinstack-go:
           name: deploy thorchain develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies
           <<: *thorchain-dev
@@ -1085,7 +1084,7 @@ workflows:
       - deploy-monitoring:
           name: deploy monitoring
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - approve
           <<: *only-develop
