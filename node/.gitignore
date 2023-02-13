@@ -2,8 +2,6 @@
 db
 dist
 **/test-report
-Pulumi.*.yaml
-!Pulumi.sample.yaml
 **/generated
 routes.ts
 
