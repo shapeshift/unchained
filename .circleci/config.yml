@@ -892,7 +892,7 @@ jobs:
           name: pulumi
           working_directory: monitoring/src
           command: |
-            pulumi stack select $<< parameters.organization >>_PULUMI_ORG/prod
+            pulumi stack select $<< parameters.organization >>_PULUMI_ORG/prod-us-east-2
             pulumi config set --path unchained:monitoring.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies-us-east-2
             pulumi config set --path unchained:monitoring.environment monitoring
             pulumi config set --path unchained:monitoring.githubOrg $<< parameters.organization>>_GITHUB_ORG
