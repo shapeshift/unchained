@@ -39,7 +39,7 @@ aliases:
       type: string
       default: mainnet
     pulumi-stack:
-      description: pulumi stack to deploy to (public)
+      description: pulumi stack to deploy to
       type: string
     pulumi-dir:
       description: path to pulumi directory
@@ -133,7 +133,7 @@ aliases:
 
   - &bitcoin
     coinstack: bitcoin
-    pulumi-stack: public
+    pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/bitcoin/pulumi
     rpc-url: http://user:password@bitcoin-svc.unchained.svc.cluster.local:8332
     indexer-url: http://bitcoin-svc.unchained.svc.cluster.local:8001
@@ -162,18 +162,19 @@ aliases:
   - &bitcoin-dev
     <<: *bitcoin
     environment: dev
-    pulumi-stack: public-dev
+    pulumi-stack: public-dev-us-east-2
     rpc-url: http://user:password@bitcoin-svc.unchained-dev.svc.cluster.local:8332
     indexer-url: http://bitcoin-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://bitcoin-svc.unchained-dev.svc.cluster.local:8001/websocket
-    api-max-replicas: 3
+    api-replicas: 1
+    api-max-replicas: 2
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &ethereum
     coinstack: ethereum
-    pulumi-stack: public
+    pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/ethereum/pulumi
     rpc-url: http://ethereum-svc.unchained.svc.cluster.local:8332
     indexer-url: http://ethereum-svc.unchained.svc.cluster.local:8001
@@ -208,18 +209,19 @@ aliases:
   - &ethereum-dev
     <<: *ethereum
     environment: dev
-    pulumi-stack: public-dev
+    pulumi-stack: public-dev-us-east-2
     rpc-url: http://ethereum-svc.unchained-dev.svc.cluster.local:8332
     indexer-url: http://ethereum-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-svc.unchained-dev.svc.cluster.local:8001/websocket
-    api-max-replicas: 3
+    api-replicas: 1
+    api-max-replicas: 2
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &cosmos
     coinstack: cosmos
-    pulumi-stack: public
+    pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/cosmos/pulumi
     lcd-url: http://cosmos-svc.unchained.svc.cluster.local:1317
     grpc-url: cosmos-svc.unchained.svc.cluster.local:9090
@@ -234,28 +236,29 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ghcr.io/ovrclk/cosmos-omnibus:v0.3.20-cosmoshub-v7.1.0
+    service-image-1: shapeshiftdao/cosmoshub:v7.1.1
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 32Gi
-    service-storage-size-1: 5500Gi
+    service-storage-size-1: 2500Gi
 
   - &cosmos-dev
     <<: *cosmos
     environment: dev
-    pulumi-stack: public-dev
+    pulumi-stack: public-dev-us-east-2
     lcd-url: http://cosmos-svc.unchained-dev.svc.cluster.local:1317
     grpc-url: cosmos-svc.unchained-dev.svc.cluster.local:9090
     rpc-url: http://cosmos-svc.unchained-dev.svc.cluster.local:26657
     ws-url: ws://cosmos-svc.unchained-dev.svc.cluster.local:26657
-    api-max-replicas: 3
+    api-replicas: 1
+    api-max-replicas: 2
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &osmosis
     coinstack: osmosis
-    pulumi-stack: public
+    pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/osmosis/pulumi
     lcd-url: http://osmosis-svc.unchained.svc.cluster.local:1317
     rpc-url: http://osmosis-svc.unchained.svc.cluster.local:26657
@@ -269,27 +272,28 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/cosmos-omnibus:v0.3.20-osmosis-v14.0.0
+    service-image-1: shapeshiftdao/osmosis:v14.0.0
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-request-1: 32Gi
-    service-storage-size-1: 10000Gi
+    service-storage-size-1: 500Gi
 
   - &osmosis-dev
     <<: *osmosis
     environment: dev
-    pulumi-stack: public-dev
+    pulumi-stack: public-dev-us-east-2
     lcd-url: http://osmosis-svc.unchained-dev.svc.cluster.local:1317
     rpc-url: http://osmosis-svc.unchained-dev.svc.cluster.local:26657
     ws-url: ws://osmosis-svc.unchained-dev.svc.cluster.local:26657
-    api-max-replicas: 3
+    api-replicas: 1
+    api-max-replicas: 2
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &avalanche
     coinstack: avalanche
-    pulumi-stack: public
+    pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/avalanche/pulumi
     rpc-url: http://avalanche-svc.unchained.svc.cluster.local:9650/ext/bc/C/rpc
     indexer-url: http://avalanche-svc.unchained.svc.cluster.local:8001
@@ -318,18 +322,19 @@ aliases:
   - &avalanche-dev
     <<: *avalanche
     environment: dev
-    pulumi-stack: public-dev
+    pulumi-stack: public-dev-us-east-2
     rpc-url: http://avalanche-svc.unchained-dev.svc.cluster.local:9650/ext/bc/C/rpc
     indexer-url: http://avalanche-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://avalanche-svc.unchained-dev.svc.cluster.local:8001/websocket
-    api-max-replicas: 3
+    api-replicas: 1
+    api-max-replicas: 2
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &dogecoin
     coinstack: dogecoin
-    pulumi-stack: public
+    pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/dogecoin/pulumi
     rpc-url: http://user:password@dogecoin-svc.unchained.svc.cluster.local:8332
     indexer-url: http://dogecoin-svc.unchained.svc.cluster.local:8001
@@ -358,18 +363,19 @@ aliases:
   - &dogecoin-dev
     <<: *dogecoin
     environment: dev
-    pulumi-stack: public-dev
+    pulumi-stack: public-dev-us-east-2
     rpc-url: http://user:password@dogecoin-svc.unchained-dev.svc.cluster.local:8332
     indexer-url: http://dogecoin-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://dogecoin-svc.unchained-dev.svc.cluster.local:8001/websocket
-    api-max-replicas: 3
+    api-replicas: 1
+    api-max-replicas: 2
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &litecoin
     coinstack: litecoin
-    pulumi-stack: public
+    pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/litecoin/pulumi
     rpc-url: http://user:password@litecoin-svc.unchained.svc.cluster.local:8332
     indexer-url: http://litecoin-svc.unchained.svc.cluster.local:8001
@@ -398,18 +404,19 @@ aliases:
   - &litecoin-dev
     <<: *litecoin
     environment: dev
-    pulumi-stack: public-dev
+    pulumi-stack: public-dev-us-east-2
     rpc-url: http://user:password@litecoin-svc.unchained-dev.svc.cluster.local:8332
     indexer-url: http://litecoin-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://litecoin-svc.unchained-dev.svc.cluster.local:8001/websocket
-    api-max-replicas: 3
+    api-replicas: 1
+    api-max-replicas: 2
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &bitcoincash
     coinstack: bitcoincash
-    pulumi-stack: public
+    pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/bitcoincash/pulumi
     rpc-url: http://user:password@bitcoincash-svc.unchained.svc.cluster.local:8332
     indexer-url: http://bitcoincash-svc.unchained.svc.cluster.local:8001
@@ -438,18 +445,19 @@ aliases:
   - &bitcoincash-dev
     <<: *bitcoincash
     environment: dev
-    pulumi-stack: public-dev
+    pulumi-stack: public-dev-us-east-2
     rpc-url: http://user:password@bitcoincash-svc.unchained-dev.svc.cluster.local:8332
     indexer-url: http://bitcoincash-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://bitcoincash-svc.unchained-dev.svc.cluster.local:8001/websocket
-    api-max-replicas: 3
+    api-replicas: 1
+    api-max-replicas: 2
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &thorchain
     coinstack: thorchain
-    pulumi-stack: public
+    pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/thorchain/pulumi
     lcd-url: http://thorchain-svc.unchained.svc.cluster.local:1317
     rpc-url: http://thorchain-svc.unchained.svc.cluster.local:27147
@@ -477,24 +485,26 @@ aliases:
     service-name-3: indexer
     service-image-3: registry.gitlab.com/thorchain/midgard:2.13.0
     service-cpu-limit-3: 500m
+    service-cpu-request-3: 250m
     service-memory-limit-3: 1Gi
     service-storage-size-3: 50Gi
 
   - &thorchain-dev
     <<: *thorchain
     environment: dev
-    pulumi-stack: public-dev
+    pulumi-stack: public-dev-us-east-2
     lcd-url: http://thorchain-svc.unchained-dev.svc.cluster.local:1317
     rpc-url: http://thorchain-svc.unchained-dev.svc.cluster.local:27147
     ws-url: ws://thorchain-svc.unchained-dev.svc.cluster.local:27147
-    api-max-replicas: 3
+    api-replicas: 1
+    api-max-replicas: 2
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &optimism
     coinstack: optimism
-    pulumi-stack: public
+    pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/optimism/pulumi
     rpc-url: http://optimism-svc.unchained.svc.cluster.local:8545
     indexer-url: http://optimism-svc.unchained.svc.cluster.local:8001
@@ -529,11 +539,12 @@ aliases:
   - &optimism-dev
     <<: *optimism
     environment: dev
-    pulumi-stack: public-dev
+    pulumi-stack: public-dev-us-east-2
     rpc-url: http://optimism-svc.unchained-dev.svc.cluster.local:8545
     indexer-url: http://optimism-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://optimism-svc.unchained-dev.svc.cluster.local:8001/websocket
-    api-max-replicas: 3
+    api-replicas: 1
+    api-max-replicas: 2
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
@@ -671,7 +682,7 @@ commands:
       - run:
           name: install helm charts
           command: |
-            wget -O helm.tar.gz https://get.helm.sh/helm-v3.10.3-linux-amd64.tar.gz
+            wget -O helm.tar.gz https://get.helm.sh/helm-v3.11.0-linux-amd64.tar.gz
             tar -zxvf helm.tar.gz
             mv linux-amd64/helm /usr/local/bin/helm
             helm repo add autoscaler https://kubernetes.github.io/autoscaler
@@ -680,12 +691,14 @@ commands:
             helm repo add grafana https://grafana.github.io/helm-charts
             helm repo add traefik https://helm.traefik.io/traefik
             helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+            helm repo add aws-ebs-csi-driver https://kubernetes-sigs.github.io/aws-ebs-csi-driver
+            helm repo update
       - run:
           name: install pulumi plugin resources
           command: |
-            pulumi plugin install resource aws v5.8.0
-            pulumi plugin install resource kubernetes v3.21.4
-            pulumi plugin install resource eks 0.40.0
+            pulumi plugin install resource aws 5.29.1
+            pulumi plugin install resource kubernetes 3.23.1
+            pulumi plugin install resource eks 1.0.1
       - run:
           name: create aws credentials file
           command: |
@@ -717,7 +730,7 @@ jobs:
           name: pulumi
           working_directory: pulumi/src/cluster
           command: |
-            pulumi stack select $<< parameters.organization >>_PULUMI_ORG/dependencies
+            pulumi stack select $<< parameters.organization >>_PULUMI_ORG/dependencies-us-east-2
             pulumi config set --path unchained:common.cluster eks
             pulumi config set --path unchained:common.additionalEnvironments[0] dev
             pulumi config set --path unchained:common.additionalEnvironments[1] monitoring
@@ -729,7 +742,7 @@ jobs:
             pulumi config set --path unchained:common.eks.nodeGroups[0].type SPOT
             pulumi config set --path unchained:common.eks.nodeGroups[0].desired 4
             pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 4
-            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 12
+            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 8
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[0] r6in.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r6idn.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r6a.4xlarge
@@ -807,7 +820,7 @@ jobs:
           working_directory: node/<< parameters.pulumi-dir >>
           command: |
             pulumi stack select $<< parameters.organization >>_PULUMI_ORG/<< parameters.pulumi-stack >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies
+            pulumi config set --path unchained:<< parameters.coinstack >>.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies-us-east-2
             [ -n "<< parameters.environment >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.environment << parameters.environment >>
             pulumi config set --path unchained:<< parameters.coinstack >>.network << parameters.network >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.autoscaling.enabled << parameters.api-autoscaling >>
@@ -877,7 +890,7 @@ jobs:
           command: |
             yarn install --immutable
             pulumi stack select $<< parameters.organization >>_PULUMI_ORG/<< parameters.pulumi-stack >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies
+            pulumi config set --path unchained:<< parameters.coinstack >>.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies-us-east-2
             [ -n "<< parameters.environment >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.environment << parameters.environment >>
             pulumi config set --path unchained:<< parameters.coinstack >>.network << parameters.network >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.autoscaling.enabled << parameters.api-autoscaling >>
@@ -931,8 +944,8 @@ jobs:
           name: pulumi
           working_directory: monitoring/src
           command: |
-            pulumi stack select $<< parameters.organization >>_PULUMI_ORG/prod
-            pulumi config set --path unchained:monitoring.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies
+            pulumi stack select $<< parameters.organization >>_PULUMI_ORG/prod-us-east-2
+            pulumi config set --path unchained:monitoring.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies-us-east-2
             pulumi config set --path unchained:monitoring.environment monitoring
             pulumi config set --path unchained:monitoring.githubOrg $<< parameters.organization>>_GITHUB_ORG
             pulumi config set --path unchained:monitoring.githubOauthID $<< parameters.organization>>_GITHUB_OAUTH_ID

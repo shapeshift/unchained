@@ -69,6 +69,7 @@ export = async (): Promise<Outputs> => {
         prev[service.name] = createService({
           asset,
           config: service,
+          env: { L1_RPC_ENDPOINT: `http://ethereum-svc.${namespace}.svc.cluster.local:8332` },
           ports: { http: { port: 7878 } },
         })
       }
