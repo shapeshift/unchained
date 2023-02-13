@@ -12,12 +12,14 @@ aliases:
         ignore:
           - main
           - develop
+          - unchained-us
 
   - &only-develop
     filters:
       branches:
         only:
           - develop
+          - unchained-us
 
   - &only-main
     filters:
@@ -166,7 +168,8 @@ aliases:
     rpc-url: http://user:password@bitcoin-svc.unchained-dev.svc.cluster.local:8332
     indexer-url: http://bitcoin-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://bitcoin-svc.unchained-dev.svc.cluster.local:8001/websocket
-    api-max-replicas: 3
+    api-replicas: 1
+    api-max-replicas: 2
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
@@ -212,7 +215,8 @@ aliases:
     rpc-url: http://ethereum-svc.unchained-dev.svc.cluster.local:8332
     indexer-url: http://ethereum-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-svc.unchained-dev.svc.cluster.local:8001/websocket
-    api-max-replicas: 3
+    api-replicas: 1
+    api-max-replicas: 2
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
@@ -248,7 +252,8 @@ aliases:
     grpc-url: cosmos-svc.unchained-dev.svc.cluster.local:9090
     rpc-url: http://cosmos-svc.unchained-dev.svc.cluster.local:26657
     ws-url: ws://cosmos-svc.unchained-dev.svc.cluster.local:26657
-    api-max-replicas: 3
+    api-replicas: 1
+    api-max-replicas: 2
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
@@ -282,7 +287,8 @@ aliases:
     lcd-url: http://osmosis-svc.unchained-dev.svc.cluster.local:1317
     rpc-url: http://osmosis-svc.unchained-dev.svc.cluster.local:26657
     ws-url: ws://osmosis-svc.unchained-dev.svc.cluster.local:26657
-    api-max-replicas: 3
+    api-replicas: 1
+    api-max-replicas: 2
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
@@ -322,7 +328,8 @@ aliases:
     rpc-url: http://avalanche-svc.unchained-dev.svc.cluster.local:9650/ext/bc/C/rpc
     indexer-url: http://avalanche-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://avalanche-svc.unchained-dev.svc.cluster.local:8001/websocket
-    api-max-replicas: 3
+    api-replicas: 1
+    api-max-replicas: 2
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
@@ -362,7 +369,8 @@ aliases:
     rpc-url: http://user:password@dogecoin-svc.unchained-dev.svc.cluster.local:8332
     indexer-url: http://dogecoin-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://dogecoin-svc.unchained-dev.svc.cluster.local:8001/websocket
-    api-max-replicas: 3
+    api-replicas: 1
+    api-max-replicas: 2
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
@@ -402,7 +410,8 @@ aliases:
     rpc-url: http://user:password@litecoin-svc.unchained-dev.svc.cluster.local:8332
     indexer-url: http://litecoin-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://litecoin-svc.unchained-dev.svc.cluster.local:8001/websocket
-    api-max-replicas: 3
+    api-replicas: 1
+    api-max-replicas: 2
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
@@ -442,7 +451,8 @@ aliases:
     rpc-url: http://user:password@bitcoincash-svc.unchained-dev.svc.cluster.local:8332
     indexer-url: http://bitcoincash-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://bitcoincash-svc.unchained-dev.svc.cluster.local:8001/websocket
-    api-max-replicas: 3
+    api-replicas: 1
+    api-max-replicas: 2
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
@@ -487,7 +497,8 @@ aliases:
     lcd-url: http://thorchain-svc.unchained-dev.svc.cluster.local:1317
     rpc-url: http://thorchain-svc.unchained-dev.svc.cluster.local:27147
     ws-url: ws://thorchain-svc.unchained-dev.svc.cluster.local:27147
-    api-max-replicas: 3
+    api-replicas: 1
+    api-max-replicas: 2
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
@@ -533,7 +544,8 @@ aliases:
     rpc-url: http://optimism-svc.unchained-dev.svc.cluster.local:8545
     indexer-url: http://optimism-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://optimism-svc.unchained-dev.svc.cluster.local:8001/websocket
-    api-max-replicas: 3
+    api-replicas: 1
+    api-max-replicas: 2
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
@@ -641,6 +653,7 @@ commands:
             helm repo add traefik https://helm.traefik.io/traefik
             helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
             helm repo add aws-ebs-csi-driver https://kubernetes-sigs.github.io/aws-ebs-csi-driver
+            helm repo update
       - run:
           name: install pulumi plugin resources
           command: |
@@ -690,7 +703,7 @@ jobs:
             pulumi config set --path unchained:common.eks.nodeGroups[0].type SPOT
             pulumi config set --path unchained:common.eks.nodeGroups[0].desired 4
             pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 4
-            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 12
+            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 8
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[0] r6in.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r6idn.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r6a.4xlarge
@@ -945,7 +958,7 @@ workflows:
       - deploy-dependencies:
           name: deploy dependencies
           organization: TAXISTAKE
-          pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - lint and test project (persist to workspace)
           <<: *only-develop
@@ -953,7 +966,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy bitcoin develop
           organization: TAXISTAKE
-          pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies
           <<: *bitcoin-dev
@@ -962,7 +975,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy dogecoin develop
           organization: TAXISTAKE
-          pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies
           <<: *dogecoin-dev
@@ -971,7 +984,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy litecoin develop
           organization: TAXISTAKE
-          pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies
           <<: *litecoin-dev
@@ -980,7 +993,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy bitcoincash develop
           organization: TAXISTAKE
-          pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies
           <<: *bitcoincash-dev
@@ -989,7 +1002,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy ethereum develop
           organization: TAXISTAKE
-          pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies
           <<: *ethereum-dev
@@ -998,7 +1011,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy avalanche develop
           organization: TAXISTAKE
-          pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies
           <<: *avalanche-dev
@@ -1007,7 +1020,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy optimism develop
           organization: TAXISTAKE
-          pulumi-command: up -f --yes
+          pulumi-command: preview
           etherscan-env-var: ETHERSCAN_API_KEY_OPTIMISM
           requires:
             - deploy dependencies
@@ -1017,7 +1030,7 @@ workflows:
       - deploy-coinstack-go:
           name: deploy cosmos develop
           organization: TAXISTAKE
-          pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies
           <<: *cosmos-dev
@@ -1026,7 +1039,7 @@ workflows:
       - deploy-coinstack-go:
           name: deploy osmosis develop
           organization: TAXISTAKE
-          pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies
           <<: *osmosis-dev
@@ -1035,7 +1048,7 @@ workflows:
       - deploy-coinstack-go:
           name: deploy thorchain develop
           organization: TAXISTAKE
-          pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies
           <<: *thorchain-dev
@@ -1072,7 +1085,7 @@ workflows:
       - deploy-monitoring:
           name: deploy monitoring
           organization: TAXISTAKE
-          pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - approve
           <<: *only-develop
