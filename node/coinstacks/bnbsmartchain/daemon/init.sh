@@ -10,8 +10,8 @@ CHAINDATA_DIR=$DATA_DIR/geth/chaindata
 # shapshots provided by: https://github.com/bnb-chain/bsc-snapshots
 if [[ -n $SNAPSHOT && ! -d "$CHAINDATA_DIR" ]]; then
   rm -rf $DATA_DIR/geth;
-  mkdir -p $DATA_DIR/geth
-  wget -c $SNAPSHOT -O - | lz4 -d | tar -C $DATA_DIR/geth xf -
+  mkdir -p $DATA_DIR/geth/chaindata
+  wget -c $SNAPSHOT -O - | lz4 -cd | tar xf -
 fi
 
 tail -f /dev/null
