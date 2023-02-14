@@ -57,6 +57,10 @@ export = async (): Promise<Outputs> => {
         prev[service.name] = createService({
           asset,
           config: service,
+          env: {
+            SNAPSHOT:
+              'https://matic-blockchain-snapshots.s3-accelerate.amazonaws.com/matic-mainnet/bor-fullnode-snapshot-2023-02-09.tar.gz',
+          },
           ports: {
             'daemon-rpc': { port: 8545 },
             'daemon-ws': { port: 8546, pathPrefix: '/websocket', stripPathPrefix: true },
