@@ -1,6 +1,7 @@
 {
   "fiat_rates": "coingecko",
-  "fiat_rates_params": "{\"url\": \"https://api.coingecko.com/api/v3\", \"coin\": \"bitcoin-cash\", \"periodSeconds\": 60}",
+  "fiat_rates_params": "{\"url\": \"https://api.coingecko.com/api/v3\", \"coin\": \"bitcoin-cash\", \"periodSeconds\": 900}",
+  "fiat_rates_vs_currencies": "AED,ARS,AUD,BDT,BHD,BMD,BRL,CAD,CHF,CLP,CNY,CZK,DKK,EUR,GBP,HKD,HUF,IDR,ILS,INR,JPY,KRW,KWD,LKR,MMK,MXN,MYR,NGN,NOK,NZD,PHP,PKR,PLN,RUB,SAR,SEK,SGD,THB,TRY,TWD,UAH,USD,VEF,VND,ZAR,BTC,ETH",
   "coin_name": "Bcash",
   "coin_shortcut": "BCH",
   "coin_label": "Bitcoin Cash",
@@ -10,11 +11,10 @@
   "rpc_timeout": 25,
   "parse": true,
   "message_queue_binding": "tcp://localhost:28332",
-  "subversion": "/Bitcoin ABC Cash Node:22.1.0/",
+  "subversion": "",
   "address_format": "cashaddr",
   "xpub_magic": 76067358,
   "slip44": 145,
-
   "mempool_workers": 8,
   "mempool_sub_workers": 2,
   "block_addresses_to_keep": 300
