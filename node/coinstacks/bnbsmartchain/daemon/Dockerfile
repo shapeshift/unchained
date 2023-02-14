@@ -1,7 +1,7 @@
 FROM debian:bullseye-slim
 
 RUN apt-get update -y \
-	&& apt-get install -y curl wget jq unzip \
+	&& apt-get install -y curl wget jq unzip lz4 \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 

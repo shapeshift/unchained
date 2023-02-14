@@ -11,7 +11,7 @@ CHAINDATA_DIR=$DATA_DIR/geth/chaindata
 if [[ -n $SNAPSHOT && ! -d "$CHAINDATA_DIR" ]]; then
   rm -rf $DATA_DIR/geth;
   mkdir -p $DATA_DIR/geth
-  wget -c $SNAPSHOT -O - | tar -I lz4 -xvf -C $DATA_DIR/geth -
+  wget -c $SNAPSHOT -O - | lz4 -d | tar -C $DATA_DIR/geth xf -
 fi
 
 tail -f /dev/null
