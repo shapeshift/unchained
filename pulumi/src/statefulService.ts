@@ -123,7 +123,7 @@ export function createService(args: ServiceArgs): Service {
       },
       spec: {
         accessModes: ['ReadWriteOnce'],
-        storageClassName: 'gp2',
+        storageClassName: 'ebs-csi-gp2',
         resources: {
           requests: {
             storage: args.config.storageSize,
@@ -223,7 +223,7 @@ export async function deployStatefulService(
         selector: { matchLabels: labels },
         serviceName: `${asset}-svc`,
         replicas: config.statefulService.replicas,
-        podManagementPolicy: 'OrderedReady',
+        podManagementPolicy: 'Parallel',
         updateStrategy: {
           type: 'RollingUpdate',
         },
