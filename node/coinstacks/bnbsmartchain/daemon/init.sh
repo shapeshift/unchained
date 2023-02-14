@@ -1,15 +1,26 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
+
+[ "$DEBUG" == "true" ] && set -x
 
 DATA_DIR=/data
 CHAINDATA_DIR=$DATA_DIR/geth/chaindata
 
-start() {
-  if [ ! -d "$CHAINDATA_DIR" ]; then
-      geth init --datadir $DATA_DIR genesis.json
-  fi
+# shapshots provided by: https://github.com/bnb-chain/bsc-snapshots
+if [[ -n $SNAPSHOT && ! -d "$CHAINDATA_DIR" ]]; then
+  rm -rf $DATA_DIR/geth;
+  mkdir -p $DATA_DIR/geth
+  wget -c $SNAPSHOT -O - | tar -I lz4 -xvf -C $DATA_DIR/geth -
+fi
 
+tail -f /dev/null
+
+if [ ! -d "$CHAINDATA_DIR" ]; then
+    geth init --datadir $DATA_DIR genesis.json
+fi
+
+start() {
   geth \
     --networkid 56 \
     --datadir $DATA_DIR \

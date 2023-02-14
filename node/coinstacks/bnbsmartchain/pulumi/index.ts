@@ -57,6 +57,7 @@ export = async (): Promise<Outputs> => {
         prev[service.name] = createService({
           asset,
           config: service,
+          env: { SNAPSHOT: 'https://pub-c0627345c16f47ab858c9469133073a8.r2.dev/geth-20230210.tar.lz4' },
           ports: {
             'daemon-rpc': { port: 8545 },
             'daemon-ws': { port: 8546, pathPrefix: '/websocket', stripPathPrefix: true },
