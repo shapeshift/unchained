@@ -10,11 +10,9 @@ CHAINDATA_DIR=$DATA_DIR/geth/chaindata
 # shapshots provided by: https://github.com/bnb-chain/bsc-snapshots
 if [[ -n $SNAPSHOT && ! -d "$CHAINDATA_DIR" ]]; then
   rm -rf $DATA_DIR/geth;
-  mkdir -p $DATA_DIR/geth/chaindata
-  wget -c $SNAPSHOT -O - | lz4 -cd | tar xf -
+  wget -c $SNAPSHOT -O - | lz4 -cd | tar xf - -C $DATA_DIR
+  mv /data/server/data-seed/geth $DATA_DIR/geth
 fi
-
-tail -f /dev/null
 
 if [ ! -d "$CHAINDATA_DIR" ]; then
     geth init --datadir $DATA_DIR genesis.json
