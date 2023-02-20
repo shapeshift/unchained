@@ -64,21 +64,21 @@ export class BNBSmartChain extends Controller implements BaseAPI, API {
    *
    * @returns {Promise<Account>} account details
    *
-   * @example pubkey "0x9D1170D30944F2E30664Be502aC57F6096fB5366"
+   * @example pubkey "0xC480394241c76F3993ec5D121ce4F198f7844443"
    */
   @Example<Account>({
-    balance: '183750000000000',
+    balance: '294505451261967226',
     unconfirmedBalance: '0',
-    nonce: 322,
-    pubkey: '0x9D1170D30944F2E30664Be502aC57F6096fB5366',
+    nonce: 74,
+    pubkey: '0xC480394241c76F3993ec5D121ce4F198f7844443',
     tokens: [
       {
-        balance: '1337',
-        contract: '0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB',
+        balance: '0',
+        contract: '0x04756126F044634C9a0f0E985e60c88a51ACC206',
         decimals: 18,
-        name: 'Wrapped Ether',
-        symbol: 'WETH.e',
-        type: 'ERC20',
+        name: 'Carbon',
+        symbol: 'CSIX',
+        type: 'BEP20',
       },
     ],
   })
@@ -99,27 +99,27 @@ export class BNBSmartChain extends Controller implements BaseAPI, API {
    *
    * @returns {Promise<TxHistory>} transaction history
    *
-   * @example pubkey "0x9D1170D30944F2E30664Be502aC57F6096fB5366"
+   * @example pubkey "0xC480394241c76F3993ec5D121ce4F198f7844443"
    */
   @Example<TxHistory>({
-    pubkey: '0x9D1170D30944F2E30664Be502aC57F6096fB5366',
+    pubkey: '0xC480394241c76F3993ec5D121ce4F198f7844443',
     cursor:
-      'eyJibG9ja2Jvb2tQYWdlIjoyLCJleHBsb3JlclBhZ2UiOjEsImJsb2NrYm9va1R4aWQiOiIweDE0YTZlYTA4MWRhYWI1OWI1ZGQ3YTE3NjQ4YTAwNGU5Y2EzNzdhNWVkMmE5N2E4NGUyYWQ4MDVkZjJlMjUzM2QiLCJibG9ja0hlaWdodCI6MTc1MTIxNjR9',
+      'eyJibG9ja2Jvb2tQYWdlIjoxLCJleHBsb3JlclBhZ2UiOjEsImV4cGxvcmVyVHhpZCI6IjB4MTVkODlmMTdmOWQ2NmZiM2VkMTIwZTc3Mjc0NWQ1MTIzODQ3ZGY3MjM2N2EyNWMwNGUzYWRjY2JlYjgwM2FiMyIsImJsb2NrYm9va1R4aWQiOiIweDJkZjdkZTM1ZTk1NmE3ZTY1M2M1YTE3Mjc2NzM5ZGViNmY0NGUzOGZlMDRiMmUxYjcwYTc2ZmE4YjA2NWNkYjIiLCJibG9ja0hlaWdodCI6MjU4Mzk1Njl9',
     txs: [
       {
-        txid: '0x14a6ea081daab59b5dd7a17648a004e9ca377a5ed2a97a84e2ad805df2e2533d',
-        blockHash: '0x748fff248d4a033c28cb6cc45b78ad7f471ac4d958971570e3e3afe4e0f84c1f',
-        blockHeight: 17512164,
-        timestamp: 1658197214,
+        txid: '0x025b88d4b35e1fd28ee372deb1cb28c2c862703dce444629c47e27b8b8759cc4',
+        blockHash: '0x695b9e8a01b9564387bde6d52fd2775867c7b56ee0c1a9d61bbcc2b38a9c835f',
+        blockHeight: 25839827,
+        timestamp: 1676923869,
         status: 1,
-        from: '0xa3682Fe8fD73B90A7564585A436EC2D2AEb612eE',
-        to: '0x9D1170D30944F2E30664Be502aC57F6096fB5366',
-        confirmations: 119004,
-        value: '410000000000000000',
-        fee: '525000000000000',
+        from: '0xC480394241c76F3993ec5D121ce4F198f7844443',
+        to: '0x215B8E1810Bb8FCcf2D90eE87631F16B5F4a895f',
+        confirmations: 50,
+        value: '1200000000000000000',
+        fee: '105000000000000',
         gasLimit: '21000',
         gasUsed: '21000',
-        gasPrice: '25000000000',
+        gasPrice: '5000000000',
       },
     ],
   })
@@ -136,24 +136,24 @@ export class BNBSmartChain extends Controller implements BaseAPI, API {
    *
    * @param {string} txid transaction hash
    *
-   * @example txid "0x14a6ea081daab59b5dd7a17648a004e9ca377a5ed2a97a84e2ad805df2e2533d"
+   * @example txid "0x025b88d4b35e1fd28ee372deb1cb28c2c862703dce444629c47e27b8b8759cc4"
    *
    * @returns {Promise<Tx>} transaction payload
    */
   @Example<Tx>({
-    txid: '0x14a6ea081daab59b5dd7a17648a004e9ca377a5ed2a97a84e2ad805df2e2533d',
-    blockHash: '0x748fff248d4a033c28cb6cc45b78ad7f471ac4d958971570e3e3afe4e0f84c1f',
-    blockHeight: 17512164,
-    timestamp: 1658197214,
+    txid: '0x025b88d4b35e1fd28ee372deb1cb28c2c862703dce444629c47e27b8b8759cc4',
+    blockHash: '0x695b9e8a01b9564387bde6d52fd2775867c7b56ee0c1a9d61bbcc2b38a9c835f',
+    blockHeight: 25839827,
+    timestamp: 1676923869,
     status: 1,
-    from: '0xa3682Fe8fD73B90A7564585A436EC2D2AEb612eE',
-    to: '0x9D1170D30944F2E30664Be502aC57F6096fB5366',
-    confirmations: 119004,
-    value: '410000000000000000',
-    fee: '525000000000000',
+    from: '0xC480394241c76F3993ec5D121ce4F198f7844443',
+    to: '0x215B8E1810Bb8FCcf2D90eE87631F16B5F4a895f',
+    confirmations: 50,
+    value: '1200000000000000000',
+    fee: '105000000000000',
     gasLimit: '21000',
     gasUsed: '21000',
-    gasPrice: '25000000000',
+    gasPrice: '5000000000',
   })
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
@@ -175,7 +175,7 @@ export class BNBSmartChain extends Controller implements BaseAPI, API {
    *
    * @example data "0x"
    * @example from "0x0000000000000000000000000000000000000000"
-   * @example to "0x9D1170D30944F2E30664Be502aC57F6096fB5366"
+   * @example to "0xC480394241c76F3993ec5D121ce4F198f7844443"
    * @example value "1337"
    */
   @Example<GasEstimate>({ gasLimit: '21000' })
@@ -194,15 +194,10 @@ export class BNBSmartChain extends Controller implements BaseAPI, API {
   /**
    * Get the current recommended gas fees to use in a transaction
    *
-   * * For EIP-1559 transactions, use `maxFeePerGas` and `maxPriorityFeePerGas`
-   * * For Legacy transactions, use `gasPrice`
-   *
    * @returns {Promise<GasFees>} current fees specified in wei
    */
   @Example<GasFees>({
-    gasPrice: '25000000000',
-    maxFeePerGas: '51500000000',
-    maxPriorityFeePerGas: '1500000000',
+    gasPrice: '5000000000',
   })
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
