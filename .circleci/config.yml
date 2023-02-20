@@ -737,6 +737,7 @@ jobs:
             pulumi config set --path unchained:common.eks.traefik.whitelist[20] $AWS_TAXISTAKE_NAT_ADDRESS_0
             pulumi config set --path unchained:common.eks.traefik.whitelist[21] $AWS_TAXISTAKE_NAT_ADDRESS_1
             pulumi config set --path unchained:common.eks.traefik.whitelist[22] $AWS_TAXISTAKE_NAT_ADDRESS_2
+            pulumi config set --path unchained:common.eks.volumeSize 100
             pulumi config set --path unchained:common.dockerhub.username $DOCKERHUB_USERNAME
             pulumi config set --path unchained:common.dockerhub.password $DOCKERHUB_PASSWORD --plaintext
             pulumi config set --path unchained:common.dockerhub.server docker.io
