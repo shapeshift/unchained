@@ -11,27 +11,28 @@ RUN apt-get update && \
 ENV GOLANG_VERSION=go1.19.2.linux-amd64
 ENV GOPATH=/go
 ENV PATH=$PATH:$GOPATH/bin
-ENV BLOCKBOOK_VERSION=v0.4.0
-ENV BLOCKBOOK_URL=https://github.com/trezor/blockbook.git
-ENV ROCKSDB_VERSION=v7.7.2
-ENV ROCKSDB_PORTABLE=0
-ENV CGO_CFLAGS="-I/opt/rocksdb/include"
-ENV CGO_LDFLAGS="-L/opt/rocksdb -ldl -lrocksdb -lstdc++ -lm -lz -lbz2 -lsnappy -llz4 -lzstd"
 
 # install and configure go
-RUN cd /opt && wget https://dl.google.com/go/$GOLANG_VERSION.tar.gz && \
-    tar xf $GOLANG_VERSION.tar.gz
+RUN wget https://dl.google.com/go/$GOLANG_VERSION.tar.gz -O - | tar -xzf - -C /opt
 RUN ln -s /opt/go/bin/go /usr/bin/go
 RUN mkdir -p $GOPATH
 
+ENV ROCKSDB_VERSION=v7.7.2
+ENV ROCKSDB_PORTABLE=0
+
 # install rocksdb
 RUN cd /opt && git clone -b $ROCKSDB_VERSION --depth 1 https://github.com/facebook/rocksdb.git
-RUN cd /opt/rocksdb && CFLAGS=-fPIC CXXFLAGS=-fPIC PORTABLE=$PORTABLE_ROCKSDB make -j 4 release
-RUN strip /opt/rocksdb/ldb /opt/rocksdb/sst_dump
+RUN cd /opt/rocksdb && CFLAGS=-fPIC CXXFLAGS=-fPIC PORTABLE=$PORTABLE_ROCKSDB make -j 4 static_lib
+
+ENV BLOCKBOOK_VERSION=v0.4.0
+ENV BLOCKBOOK_URL=https://github.com/trezor/blockbook.git
 
 # set up blockbook
 RUN git clone -b $BLOCKBOOK_VERSION --depth 1 $BLOCKBOOK_URL
 WORKDIR /blockbook
+
+ENV CGO_CFLAGS="-I/opt/rocksdb/include"
+ENV CGO_LDFLAGS="-L/opt/rocksdb -ldl -lrocksdb -lstdc++ -lm -lz -lbz2 -lsnappy -llz4 -lzstd"
 
 # build blockbook binary
 RUN go build -ldflags="-s -w -X github.com/trezor/blockbook/common.version=${BLOCKBOOK_VERSION}"
