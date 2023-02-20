@@ -236,7 +236,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/cosmoshub:v7.1.1
+    service-image-1: shapeshiftdao/cosmoshub:v8.0.1
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 32Gi
@@ -313,7 +313,7 @@ aliases:
     service-memory-limit-1: 12Gi
     service-storage-size-1: 4000Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:latest
+    service-image-2: shapeshiftdao/unchained-blockbook:v0.4.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 6Gi
