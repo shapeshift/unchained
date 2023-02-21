@@ -268,8 +268,8 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"TokenTransfer": {
-				"description": "Contains info about a token transfer done in a transaction",
+			"TokenTransferWithToken": {
+				"description": "Contains info about a token transfer with legacy `token` key for contract address",
 				"properties": {
 					"type": {
 						"type": "string"
@@ -278,9 +278,6 @@
 						"type": "string"
 					},
 					"to": {
-						"type": "string"
-					},
-					"token": {
 						"type": "string"
 					},
 					"name": {
@@ -295,17 +292,62 @@
 					},
 					"value": {
 						"type": "string"
+					},
+					"token": {
+						"type": "string"
 					}
 				},
 				"required": [
 					"type",
 					"from",
 					"to",
-					"token",
 					"name",
 					"symbol",
 					"decimals",
-					"value"
+					"value",
+					"token"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TokenTransferWithContract": {
+				"description": "Contains info about a token transfer with new `contract` key for contract address",
+				"properties": {
+					"type": {
+						"type": "string"
+					},
+					"from": {
+						"type": "string"
+					},
+					"to": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"symbol": {
+						"type": "string"
+					},
+					"decimals": {
+						"type": "number",
+						"format": "double"
+					},
+					"value": {
+						"type": "string"
+					},
+					"contract": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"type",
+					"from",
+					"to",
+					"name",
+					"symbol",
+					"decimals",
+					"value",
+					"contract"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -409,7 +451,14 @@
 					},
 					"tokenTransfers": {
 						"items": {
-							"$ref": "#/components/schemas/TokenTransfer"
+							"anyOf": [
+								{
+									"$ref": "#/components/schemas/TokenTransferWithToken"
+								},
+								{
+									"$ref": "#/components/schemas/TokenTransferWithContract"
+								}
+							]
 						},
 						"type": "array"
 					},
