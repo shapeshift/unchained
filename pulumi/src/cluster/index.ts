@@ -55,6 +55,7 @@ export = async (): Promise<Outputs> => {
     region: config.eks.region,
     rootDomainName: config.rootDomainName,
     traefik: config.eks.traefik,
+    volumeSize: config.eks.volumeSize,
   })
 
   outputs.kubeconfig = cluster.kubeconfig

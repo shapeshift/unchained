@@ -188,13 +188,13 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.10.26
+    service-image-1: ethereum/client-go:v1.11.1
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 32Gi
     service-storage-size-1: 2500Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v3.2.0
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v3.2.1
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 8Gi
@@ -236,7 +236,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/cosmoshub:v7.1.1
+    service-image-1: shapeshiftdao/cosmoshub:v8.0.1
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 32Gi
@@ -272,7 +272,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/osmosis:v14.0.0
+    service-image-1: shapeshiftdao/osmosis:v14.0.1
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-request-1: 32Gi
@@ -737,6 +737,7 @@ jobs:
             pulumi config set --path unchained:common.eks.traefik.whitelist[20] $AWS_TAXISTAKE_NAT_ADDRESS_0
             pulumi config set --path unchained:common.eks.traefik.whitelist[21] $AWS_TAXISTAKE_NAT_ADDRESS_1
             pulumi config set --path unchained:common.eks.traefik.whitelist[22] $AWS_TAXISTAKE_NAT_ADDRESS_2
+            pulumi config set --path unchained:common.eks.volumeSize 100
             pulumi config set --path unchained:common.dockerhub.username $DOCKERHUB_USERNAME
             pulumi config set --path unchained:common.dockerhub.password $DOCKERHUB_PASSWORD --plaintext
             pulumi config set --path unchained:common.dockerhub.server docker.io
