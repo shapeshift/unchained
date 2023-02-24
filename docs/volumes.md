@@ -10,10 +10,10 @@ kind: PersistentVolume
 metadata:
   name: data-daemon-ethereum-sts-0-pv
   labels:
-    failure-domain.beta.kubernetes.io/region: us-west-1
-    failure-domain.beta.kubernetes.io/zone: us-west-1a
+    failure-domain.beta.kubernetes.io/region: us-east-2
+    failure-domain.beta.kubernetes.io/zone: us-east-2b
 spec:
-  storageClassName: gp2
+  storageClassName: ebs-csi-gp2
   capacity:
     storage: 2500Gi
   accessModes:
@@ -38,7 +38,7 @@ spec:
   resources:
     requests:
       storage: 2500Gi
-  storageClassName: gp2
+  storageClassName: ebs-csi-gp2
   volumeName: data-daemon-ethereum-sts-0-pv
 EOF
 ```
