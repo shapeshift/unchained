@@ -15,6 +15,9 @@ RUN wget https://github.com/bnb-chain/bsc/releases/download/${VERSION}/mainnet.z
 	unzip mainnet.zip && \
 	rm mainnet.zip
 
+# Remove LogConfig from included config.toml to keep logging directed at stdout
+RUN sed -i -e '/\[Node.LogConfig\]/,+5d' config.toml
+
 EXPOSE 8545 8546 30303 30303/udp
 
 ENTRYPOINT ["bsc"]
