@@ -55,13 +55,13 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       const data = await this.blockbook.getAddress(pubkey, undefined, undefined, undefined, undefined, 'tokenBalances')
 
       const tokens = (data.tokens ?? []).reduce<Array<TokenBalance>>((prev, token) => {
-        if (token.balance && token.contract && token.decimals && token.symbol) {
+        if (token.balance && token.contract) {
           prev.push({
             balance: token.balance,
             contract: token.contract,
-            decimals: token.decimals,
+            decimals: token.decimals ?? 0,
             name: token.name,
-            symbol: token.symbol,
+            symbol: token.symbol ?? '',
             type: token.type,
           })
         }
