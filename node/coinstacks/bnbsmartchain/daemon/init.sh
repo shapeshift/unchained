@@ -20,17 +20,17 @@ fi
 
 start() {
   geth \
-    --networkid 56 \
+    --config config.toml \
     --datadir $DATA_DIR \
     --http \
     --http.addr 0.0.0.0 \
     --http.port 8545 \
-    --http.api eth,net,web3,debug,txpool \
+    --http.api eth,net,web3,debug,txpool,parlia \
     --http.vhosts '*' \
     --http.corsdomain '*' \
     --ws \
     --ws.port 8546 \
-    --ws.api eth,net,web3,debug,txpool \
+    --ws.api eth,net,web3,debug,txpool,parlia \
     --ws.origins '*' \
     --syncmode full \
     --rpc.allow-unprotected-txs \
