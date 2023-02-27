@@ -578,7 +578,7 @@ aliases:
     service-storage-size-2: 500Gi
 
   - &bnbsmartchain-dev
-    <<: *optimism
+    <<: *bnbsmartchain
     environment: dev
     pulumi-stack: public-dev
     rpc-url: http://bnbsmartchain-svc.unchained-dev.svc.cluster.local:8545
