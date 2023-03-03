@@ -16,6 +16,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	_ "net/http/pprof"
 	"path/filepath"
 	"strconv"
 	"time"
@@ -31,6 +32,7 @@ import (
 
 const (
 	PORT              = 3000
+	PPROF_PORT        = 3001
 	GRACEFUL_SHUTDOWN = 15 * time.Second
 	WRITE_TIMEOUT     = 15 * time.Second
 	READ_TIMEOUT      = 15 * time.Second
@@ -80,6 +82,11 @@ func New(httpClient *osmosis.HTTPClient, wsClient *cosmos.WSClient, blockService
 	if err := handler.ValidateCoinSpecific(handler); err != nil {
 		logger.Panicf("%+v", err)
 	}
+
+	// pprof server
+	go func() {
+		logger.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", PPROF_PORT), http.DefaultServeMux))
+	}()
 
 	r.Use(api.Scheme)
 	r.Use(api.Logger)
