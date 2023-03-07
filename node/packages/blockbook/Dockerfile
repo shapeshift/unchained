@@ -24,6 +24,7 @@ ENV ROCKSDB_PORTABLE=0
 RUN cd /opt && git clone -b $ROCKSDB_VERSION --depth 1 https://github.com/facebook/rocksdb.git
 RUN cd /opt/rocksdb && CFLAGS=-fPIC CXXFLAGS=-fPIC PORTABLE=$PORTABLE_ROCKSDB make -j 4 static_lib
 
+# commit: 1bcdcc6
 ENV BLOCKBOOK_VERSION=master
 ENV BLOCKBOOK_URL=https://github.com/trezor/blockbook.git
 
@@ -39,6 +40,7 @@ RUN go mod download
 
 # hack to increase read limit for go-ethereum websocket client
 RUN sed -i 's/wsMessageSizeLimit\ =\ 15\ \*\ 1024\ \*\ 1024/wsMessageSizeLimit = 50 * 1024 * 1024/g' $GOPATH/pkg/mod/github.com/ethereum/go-ethereum*/rpc/websocket.go 
+RUN sed -i 's/wsMessageSizeLimit\ =\ 15\ \*\ 1024\ \*\ 1024/wsMessageSizeLimit = 50 * 1024 * 1024/g' $GOPATH/pkg/mod/github.com/ava-labs/coreth*/rpc/websocket.go 
 
 # build blockbook binary
 RUN go build -ldflags="-s -w -X github.com/trezor/blockbook/common.version=${BLOCKBOOK_VERSION}"
