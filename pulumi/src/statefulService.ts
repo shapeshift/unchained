@@ -1,6 +1,7 @@
 import * as k8s from '@pulumi/kubernetes'
 import { readFileSync } from 'fs'
 import { Config, Service, ServiceConfig } from '.'
+import { getPvcNames } from './util'
 
 interface Port {
   port: number
@@ -354,5 +355,35 @@ export async function deployStatefulService(
       },
       { provider }
     )
+  }
+
+  if (config.statefulService.backupSchedule) {
+    const pvcs = getPvcNames(config.statefulService.replicas, config.statefulService?.services)
+
+    const backupContainer: k8s.types.input.core.v1.Container = {
+      name: `${asset}-backup-runner`,
+      image: 'lukmyslinski/backuprunner:0.2',
+      command: ['-n', namespace, '-s', `${asset}-sts`, '-p', pvcs],
+    }
+
+    new k8s.batch.v1.CronJob(`${asset}-backup-job`, {
+      metadata: {
+        name: `${asset}-backup-job`,
+        namespace: namespace,
+        annotations: { 'pulumi.com/skipAwait': 'true' },
+      },
+      spec: {
+        schedule: config.statefulService.backupSchedule,
+        jobTemplate: {
+          spec: {
+            template: {
+              spec: {
+                containers: [backupContainer],
+              },
+            },
+          },
+        },
+      },
+    })
   }
 }

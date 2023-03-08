@@ -34,7 +34,8 @@ export interface Config extends BaseConfig {
   api?: ApiConfig
   statefulService?: {
     replicas: number
-    services: Array<ServiceConfig>
+    services: Array<ServiceConfig>,
+    backupSchedule: string
   }
 }
 
