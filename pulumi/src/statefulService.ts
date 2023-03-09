@@ -58,7 +58,7 @@ export function createService(args: ServiceArgs): Service {
         ...(args.config.memoryRequest && { memory: args.config.memoryRequest }),
       }
     },
-    ports: ports.map(({ port: containerPort, name }) => ({ containerPort, name })),
+    ports: [],
     securityContext: { runAsUser: 0 },
     volumeMounts: [
       {
@@ -154,6 +154,8 @@ export async function deployStatefulService(
   if (!config.statefulService) return
   if (config.statefulService.replicas <= 0) return
   if (!Object.keys(services).length) return
+
+  console.log(`namespace:${namespace};`)
 
   const labels = { app, asset, tier: 'statefulservice' }
 
@@ -362,8 +364,8 @@ export async function deployStatefulService(
 
     const backupContainer: k8s.types.input.core.v1.Container = {
       name: `${asset}-backup-runner`,
-      image: 'lukmyslinski/backuprunner:0.2',
-      command: ['-n', namespace, '-s', `${asset}-sts`, '-p', pvcs],
+      image: 'lukmyslinski/backuprunner:0.3',
+      args: ['-n', namespace, '-s', `${asset}-sts`, '-p', pvcs],
     }
 
     new k8s.batch.v1.CronJob(`${asset}-backup-job`, {
@@ -379,11 +381,12 @@ export async function deployStatefulService(
             template: {
               spec: {
                 containers: [backupContainer],
+                restartPolicy: "Never"
               },
             },
           },
         },
       },
-    })
+    }, { provider })
   }
 }
