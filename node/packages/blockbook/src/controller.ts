@@ -215,7 +215,7 @@ export class Blockbook extends Controller {
         type: 'ERC20',
         from: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
         to: '0xa64D0b5ccFdaB0e4D8Ec7C65862Aac1c78A5666c',
-        token: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+        contract: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
         name: 'Tether USD',
         symbol: 'USDT',
         decimals: 6,

@@ -268,8 +268,8 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"TokenTransferWithToken": {
-				"description": "Contains info about a token transfer with legacy `token` key for contract address",
+			"TokenTransfer": {
+				"description": "Contains info about a token transfer in a transaction",
 				"properties": {
 					"type": {
 						"type": "string"
@@ -278,76 +278,34 @@
 						"type": "string"
 					},
 					"to": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					},
-					"symbol": {
-						"type": "string"
-					},
-					"decimals": {
-						"type": "number",
-						"format": "double"
-					},
-					"value": {
-						"type": "string"
-					},
-					"token": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"type",
-					"from",
-					"to",
-					"name",
-					"symbol",
-					"decimals",
-					"value",
-					"token"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"TokenTransferWithContract": {
-				"description": "Contains info about a token transfer with new `contract` key for contract address",
-				"properties": {
-					"type": {
-						"type": "string"
-					},
-					"from": {
-						"type": "string"
-					},
-					"to": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					},
-					"symbol": {
-						"type": "string"
-					},
-					"decimals": {
-						"type": "number",
-						"format": "double"
-					},
-					"value": {
 						"type": "string"
 					},
 					"contract": {
 						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"symbol": {
+						"type": "string"
+					},
+					"decimals": {
+						"type": "number",
+						"format": "double"
+					},
+					"value": {
+						"type": "string"
 					}
 				},
 				"required": [
 					"type",
 					"from",
 					"to",
+					"contract",
 					"name",
 					"symbol",
 					"decimals",
-					"value",
-					"contract"
+					"value"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -451,14 +409,7 @@
 					},
 					"tokenTransfers": {
 						"items": {
-							"anyOf": [
-								{
-									"$ref": "#/components/schemas/TokenTransferWithToken"
-								},
-								{
-									"$ref": "#/components/schemas/TokenTransferWithContract"
-								}
-							]
+							"$ref": "#/components/schemas/TokenTransfer"
 						},
 						"type": "array"
 					},
@@ -1058,7 +1009,7 @@
 													"type": "ERC20",
 													"from": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa",
 													"to": "0xa64D0b5ccFdaB0e4D8Ec7C65862Aac1c78A5666c",
-													"token": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+													"contract": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
 													"name": "Tether USD",
 													"symbol": "USDT",
 													"decimals": 6,
