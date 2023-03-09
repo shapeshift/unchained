@@ -153,7 +153,7 @@ aliases:
     service-memory-limit-1: 8Gi
     service-storage-size-1: 650Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:v0.4.0
+    service-image-2: shapeshiftdao/unchained-blockbook:a83d073
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 24Gi
@@ -188,7 +188,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.11.2
+    service-image-1: ethereum/client-go:v1.11.3
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 32Gi
@@ -200,7 +200,7 @@ aliases:
     service-memory-limit-2: 8Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:v0.4.0
+    service-image-3: shapeshiftdao/unchained-blockbook:a83d073
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
     service-memory-limit-3: 16Gi
@@ -307,13 +307,13 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: avaplatform/avalanchego:v1.9.9
+    service-image-1: avaplatform/avalanchego:v1.9.11
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
     service-storage-size-1: 4000Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:v0.4.0
+    service-image-2: shapeshiftdao/unchained-blockbook:a83d073
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 6Gi
@@ -354,7 +354,7 @@ aliases:
     service-memory-limit-1: 4Gi
     service-storage-size-1: 250Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:v0.4.0
+    service-image-2: shapeshiftdao/unchained-blockbook:a83d073
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 6Gi
@@ -395,7 +395,7 @@ aliases:
     service-memory-limit-1: 4Gi
     service-storage-size-1: 250Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:v0.4.0
+    service-image-2: shapeshiftdao/unchained-blockbook:a83d073
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 8Gi
@@ -436,7 +436,7 @@ aliases:
     service-memory-limit-1: 4Gi
     service-storage-size-1: 250Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:v0.4.0
+    service-image-2: shapeshiftdao/unchained-blockbook:a83d073
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 8Gi
@@ -471,7 +471,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:chaosnet-multichain-1.105.0
+    service-image-1: registry.gitlab.com/thorchain/thornode:chaosnet-multichain-1.106.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 8Gi
