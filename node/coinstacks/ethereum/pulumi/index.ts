@@ -53,7 +53,7 @@ export = async (): Promise<Outputs> => {
         config: service,
         args: [],
         ports: {},
-        volumeMounts: [{ name: 'data', mountPath: '/data' }],
+        volumeMounts: [{ name: 'v1', mountPath: '/v1' }],
       })
       return prev
     }, {})

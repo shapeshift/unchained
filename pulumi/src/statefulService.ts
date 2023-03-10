@@ -58,7 +58,7 @@ export function createService(args: ServiceArgs): Service {
         ...(args.config.memoryRequest && { memory: args.config.memoryRequest }),
       }
     },
-    ports: [],
+    ports: ports.map(({ port: containerPort, name }) => ({ containerPort, name })),
     securityContext: { runAsUser: 0 },
     volumeMounts: [
       {
@@ -159,27 +159,27 @@ export async function deployStatefulService(
 
   const labels = { app, asset, tier: 'statefulservice' }
 
-  const ports = Object.values(services).reduce<Array<k8s.types.input.core.v1.ServicePort>>((prev, { ports }) => [...prev, ...ports.map(({ name, port }) => ({ name, port }))], [])
+  // const ports = Object.values(services).reduce<Array<k8s.types.input.core.v1.ServicePort>>((prev, { ports }) => [...prev, ...ports.map(({ name, port }) => ({ name, port }))], [])
   const configMapData = Object.values(services).reduce<Record<string, string>>((prev, { configMapData }) => ({ ...prev, ...configMapData }), {})
   const containers = Object.values(services).reduce<Array<k8s.types.input.core.v1.Container>>((prev, { containers }) => prev.concat(...containers), [])
   const volumeClaimTemplates = Object.values(services).reduce<Array<k8s.types.input.core.v1.PersistentVolumeClaim>>((prev, { volumeClaimTemplates }) => prev.concat(...volumeClaimTemplates), [])
 
-  const svc = new k8s.core.v1.Service(
-    `${asset}-svc`,
-    {
-      metadata: {
-        name: `${asset}-svc`,
-        namespace: namespace,
-        labels: labels,
-      },
-      spec: {
-        ports: ports,
-        selector: labels,
-        type: 'ClusterIP',
-      },
-    },
-    { provider, deleteBeforeReplace: true }
-  )
+  // const svc = new k8s.core.v1.Service(
+  //   `${asset}-svc`,
+  //   {
+  //     metadata: {
+  //       name: `${asset}-svc`,
+  //       namespace: namespace,
+  //       labels: labels,
+  //     },
+  //     spec: {
+  //       ports: ports,
+  //       selector: labels,
+  //       type: 'ClusterIP',
+  //     },
+  //   },
+  //   { provider, deleteBeforeReplace: true }
+  // )
 
   const configMap = new k8s.core.v1.ConfigMap(
     `${asset}-cm`,
@@ -275,98 +275,139 @@ export async function deployStatefulService(
       { provider }
     )
 
-    const additionalRootDomainName = process.env.ADDITIONAL_ROOT_DOMAIN_NAME
+    // const additionalRootDomainName = process.env.ADDITIONAL_ROOT_DOMAIN_NAME
 
-    const match = (service: string, prefix?: string) => {
-      const pathPrefixMatch = prefix ? ` && PathPrefix(\`${prefix}\`)` : ''
-      const hostMatch = `(Host(\`${domain(`${service}`)}\`)${pathPrefixMatch})`
-      const additionalHostMatch = `(Host(\`${config.environment ? `${config.environment}-${service}` : service}.${asset}.${additionalRootDomainName}\`)${pathPrefixMatch})`
-      return additionalRootDomainName ? `${hostMatch} || ${additionalHostMatch}` : hostMatch
-    }
+    // const match = (service: string, prefix?: string) => {
+    //   const pathPrefixMatch = prefix ? ` && PathPrefix(\`${prefix}\`)` : ''
+    //   const hostMatch = `(Host(\`${domain(`${service}`)}\`)${pathPrefixMatch})`
+    //   const additionalHostMatch = `(Host(\`${config.environment ? `${config.environment}-${service}` : service}.${asset}.${additionalRootDomainName}\`)${pathPrefixMatch})`
+    //   return additionalRootDomainName ? `${hostMatch} || ${additionalHostMatch}` : hostMatch
+    // }
 
-    const middleware = new k8s.apiextensions.CustomResource(
-      `${asset}-middleware`,
-      {
-        apiVersion: 'traefik.containo.us/v1alpha1',
-        kind: 'Middleware',
-        metadata: {
-          namespace: namespace,
-          labels: labels,
-        },
-        spec: {
-          stripPrefix: {
-            prefixes: Object.values(services).reduce<Array<string>>((prev, { ports }) => {
-              const prefixes = ports.reduce<Array<string>>((prev, { pathPrefix, stripPathPrefix }) => {
-                if (!pathPrefix || !stripPathPrefix) return prev
-                return [...prev, pathPrefix]
-              }, [])
-              return [...prev, ...prefixes]
-            }, [])
-          }
-        },
-      },
-      { provider }
-    )
+    // const middleware = new k8s.apiextensions.CustomResource(
+    //   `${asset}-middleware`,
+    //   {
+    //     apiVersion: 'traefik.containo.us/v1alpha1',
+    //     kind: 'Middleware',
+    //     metadata: {
+    //       namespace: namespace,
+    //       labels: labels,
+    //     },
+    //     spec: {
+    //       stripPrefix: {
+    //         prefixes: Object.values(services).reduce<Array<string>>((prev, { ports }) => {
+    //           const prefixes = ports.reduce<Array<string>>((prev, { pathPrefix, stripPathPrefix }) => {
+    //             if (!pathPrefix || !stripPathPrefix) return prev
+    //             return [...prev, pathPrefix]
+    //           }, [])
+    //           return [...prev, ...prefixes]
+    //         }, [])
+    //       }
+    //     },
+    //   },
+    //   { provider }
+    // )
 
-    new k8s.apiextensions.CustomResource(
-      `${asset}-ingressroute`,
-      {
-        apiVersion: 'traefik.containo.us/v1alpha1',
-        kind: 'IngressRoute',
-        metadata: {
-          namespace: namespace,
-          labels: labels,
-        },
-        spec: {
-          entryPoints: ['web', 'websecure'],
-          routes: Object.entries(services).map(([service, { ports }]) =>
-            ports.filter(({ ingressRoute = true }) => ingressRoute).map(({ port, pathPrefix }) => ({
-              kind: 'Rule',
-              match: match(service, pathPrefix),
-              ...(pathPrefix && {
-                middlewares: [{ name: middleware.metadata.name, namespace: svc.metadata.namespace }],
-              }),
-              services: [
-                {
-                  kind: 'Service',
-                  name: svc.metadata.name,
-                  port: port,
-                  namespace: svc.metadata.namespace,
-                },
-              ],
-            }))).flat(),
-          tls: {
-            secretName: secretName,
-            domains: Object.keys(services).map(service => ({ main: domain(service) })),
-          },
-        },
-      },
-      { provider }
-    )
+    // new k8s.apiextensions.CustomResource(
+    //   `${asset}-ingressroute`,
+    //   {
+    //     apiVersion: 'traefik.containo.us/v1alpha1',
+    //     kind: 'IngressRoute',
+    //     metadata: {
+    //       namespace: namespace,
+    //       labels: labels,
+    //     },
+    //     spec: {
+    //       entryPoints: ['web', 'websecure'],
+    //       routes: Object.entries(services).map(([service, { ports }]) =>
+    //         ports.filter(({ ingressRoute = true }) => ingressRoute).map(({ port, pathPrefix }) => ({
+    //           kind: 'Rule',
+    //           match: match(service, pathPrefix),
+    //           ...(pathPrefix && {
+    //             middlewares: [{ name: middleware.metadata.name, namespace: svc.metadata.namespace }],
+    //           }),
+    //           services: [
+    //             {
+    //               kind: 'Service',
+    //               name: svc.metadata.name,
+    //               port: port,
+    //               namespace: svc.metadata.namespace,
+    //             },
+    //           ],
+    //         }))).flat(),
+    //       tls: {
+    //         secretName: secretName,
+    //         domains: Object.keys(services).map(service => ({ main: domain(service) })),
+    //       },
+    //     },
+    //   },
+    //   { provider }
+    // )
 
-    new k8s.networking.v1.Ingress(
-      `${asset}-ingress`,
-      {
-        metadata: {
-          namespace: namespace,
-          labels: labels,
-        },
-        spec: {
-          rules: Object.keys(services).map(service => ({ host: domain(service) })),
-        },
-      },
-      { provider }
-    )
+    // new k8s.networking.v1.Ingress(
+    //   `${asset}-ingress`,
+    //   {
+    //     metadata: {
+    //       namespace: namespace,
+    //       labels: labels,
+    //     },
+    //     spec: {
+    //       rules: Object.keys(services).map(service => ({ host: domain(service) })),
+    //     },
+    //   },
+    //   { provider }
+    // )
   }
 
   if (config.statefulService.backupSchedule) {
     const pvcs = getPvcNames(config.statefulService.replicas, config.statefulService?.services)
+    const backupsToKeep = 1;
 
     const backupContainer: k8s.types.input.core.v1.Container = {
       name: `${asset}-backup-runner`,
-      image: 'lukmyslinski/backuprunner:0.3',
-      args: ['-n', namespace, '-s', `${asset}-sts`, '-p', pvcs],
+      image: 'lukmyslinski/backuprunner:0.5',
+      args: ['-n', namespace, '-s', `${asset}-sts`, '-p', pvcs, '-r', `${config.statefulService.replicas}`, "-c", `${backupsToKeep}`],
     }
+
+    new k8s.core.v1.ServiceAccount(`${asset}-backup-job-sa`, {
+      metadata: {
+        name: `${asset}-backup-job-sa`,
+        namespace: namespace
+      }
+    }, { provider });
+
+    new k8s.rbac.v1.Role(`${asset}-backup-job-role`, {
+      metadata: {
+        name: `${asset}-backup-job-role`,
+        namespace: namespace
+      },
+      rules: [
+        {
+          apiGroups: ["*"],
+          resources: ["*"],
+          verbs: ["get", "watch", "list", "create", "update"],
+        }
+      ]
+    }, { provider });
+
+    new k8s.rbac.v1.RoleBinding(`${asset}-backup-job-role-binding`, {
+      metadata: {
+        name: `${asset}-backup-job-role`,
+        namespace: namespace
+      },
+      roleRef: {
+        kind: "Role",
+        name: `${asset}-backup-job-role`,
+        apiGroup: ""
+      },
+      subjects: [
+        {
+          kind: "ServiceAccount",
+          name: `${asset}-backup-job-sa`,
+          apiGroup: ""
+        }
+      ]
+    }, {provider})
 
     new k8s.batch.v1.CronJob(`${asset}-backup-job`, {
       metadata: {
@@ -380,6 +421,7 @@ export async function deployStatefulService(
           spec: {
             template: {
               spec: {
+                serviceAccountName: `${asset}-backup-job-sa`,
                 containers: [backupContainer],
                 restartPolicy: "Never"
               },
