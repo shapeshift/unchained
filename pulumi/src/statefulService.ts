@@ -360,12 +360,12 @@ export async function deployStatefulService(
   }
 
   if (config.statefulService.backupSchedule) {
-    const pvcs = getPvcNames(config.statefulService.replicas, config.statefulService?.services)
+    const pvcs = getPvcNames(asset, config.statefulService.replicas, config.statefulService?.services)
     const backupsToKeep = 1;
 
     const backupContainer: k8s.types.input.core.v1.Container = {
       name: `${asset}-backup-runner`,
-      image: 'lukmyslinski/backuprunner:0.6',
+      image: 'lukmyslinski/backuprunner:0.8',
       args: ['-n', namespace, '-s', `${asset}-sts`, '-p', pvcs, '-r', `${config.statefulService.replicas}`, "-c", `${backupsToKeep}`],
     }
 

@@ -12,7 +12,7 @@ const waitForScalingToFinish = async (
 ) => {
   var done = false;
   var iterations = 0;
-  var max_iterations = 10;
+  var max_iterations = 50;
 
   while (!done) {
     iterations++;
