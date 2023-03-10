@@ -12,10 +12,11 @@ const waitForScalingToFinish = async (
 ) => {
   var done = false;
   var iterations = 0;
-  var max_iterations = 50;
+  var max_iterations = 100;
 
   while (!done) {
     iterations++;
+    // termination grace period is 120s so need to account for that 
     await delay(3000);
     var status = await k8sAppsClient.readNamespacedStatefulSetStatus(
       name,

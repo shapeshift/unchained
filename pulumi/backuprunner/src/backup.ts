@@ -21,7 +21,7 @@ export const runBackup = async (opts: Options) => {
   try {
     await scaleStatefulSet(k8sAppsClient, opts.statefulset, opts.namespace, 0, true)
     await takeSnapshots(k8sObjectClient, opts.pvcList)
-    await scaleStatefulSet(k8sAppsClient, opts.statefulset, opts.namespace, 1, false)
+    await scaleStatefulSet(k8sAppsClient, opts.statefulset, opts.namespace, opts.replicas, false)
     await cleanup(k8sObjectClient, opts.pvcList, opts.replicas, opts.count)
     console.log("Backup runner completed")
   } catch (err) {
