@@ -3,6 +3,7 @@ import k8s from '@kubernetes/client-node'
 export const cleanup = async (k8sApi: k8s.KubernetesObjectApi, pvcList: string, replicas: number, backupCount: number) => {
   var pvcCount = pvcList.split(',').length;
   var pvcsToKeep = pvcCount*replicas*backupCount;
+  // TODO ignore replica count here, it's already taken into account in pvcList
   console.log(`Backup count to keep - 1. System consists of ${pvcCount} PVC's on ${replicas} replicas, so will keep ${pvcsToKeep} latest snapshots`)
 
   const snapshots = await k8sApi.list("snapshot.storage.k8s.io/v1", "VolumeSnapshot");
