@@ -51,9 +51,10 @@ export = async (): Promise<Outputs> => {
       prev[service.name] = createService({
         asset,
         config: service,
-        args: [],
+        command: ['/bin/sh'],
+        args: ['-c', 'while true; do echo $(date -u) >> /data/out.txt; sleep 5; done'],
         ports: {},
-        volumeMounts: [{ name: 'v1', mountPath: '/v1' }],
+        // volumeMounts: [{ name: 'config-map', subPath: 'out.txt' }],
       })
       return prev
     }, {})

@@ -365,7 +365,7 @@ export async function deployStatefulService(
 
     const backupContainer: k8s.types.input.core.v1.Container = {
       name: `${asset}-backup-runner`,
-      image: 'lukmyslinski/backuprunner:0.5',
+      image: 'lukmyslinski/backuprunner:0.6',
       args: ['-n', namespace, '-s', `${asset}-sts`, '-p', pvcs, '-r', `${config.statefulService.replicas}`, "-c", `${backupsToKeep}`],
     }
 

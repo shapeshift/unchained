@@ -1,6 +1,6 @@
 import k8s, { HttpError } from '@kubernetes/client-node'
 import { takeSnapshots } from './snapshot.js'
-import { scaleStatefulSet } from './scaling.js'
+import { delay, scaleStatefulSet } from './scaling.js'
 
 interface Options {
   pvcList: string
@@ -19,6 +19,8 @@ export const runBackup = async (opts: Options) => {
 
   try {
     await scaleStatefulSet(k8sAppsClient, opts.statefulset, opts.namespace, 0, true)
+    console.log("Sleeping for 30 seconds")
+    await delay(30000);
     await takeSnapshots(k8sObjectClient, opts.pvcList)
     await scaleStatefulSet(k8sAppsClient, opts.statefulset, opts.namespace, 1, false)
     console.log("Backup runner completed")
