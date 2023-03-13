@@ -1,7 +1,7 @@
 import * as pulumi from '@pulumi/pulumi'
 import { Config as BaseConfig, Dockerhub } from '.'
 
-const SUPPORTED_NETWORKS = ['mainnet']
+const SUPPORTED_NETWORKS = ['mainnet', 'goerli']
 
 export interface Config {
   kubeconfig: string

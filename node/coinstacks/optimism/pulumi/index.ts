@@ -14,7 +14,8 @@ export = async (): Promise<Outputs> => {
 
   const { kubeconfig, config, namespace } = await getConfig(coinstack)
 
-  const asset = config.network !== 'mainnet' ? `${coinstack}-${config.network}` : coinstack
+  //const asset = config.network !== 'mainnet' ? `${coinstack}-${config.network}` : coinstack
+  const asset = `${coinstack}-bedrock`
   const outputs: Outputs = {}
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
 
@@ -57,20 +58,45 @@ export = async (): Promise<Outputs> => {
         prev[service.name] = createService({
           asset,
           config: service,
+          env: {
+            NETWORK: config.network,
+            SNAPSHOT: 'https://storage.googleapis.com/oplabs-goerli-data/goerli-bedrock.tar',
+          },
           ports: {
             'daemon-rpc': { port: 8545 },
             'daemon-ws': { port: 8546, pathPrefix: '/websocket', stripPathPrefix: true },
+            'daemon-auth': { port: 8551, ingressRoute: false },
           },
-          readinessProbe: { failureThreshold: 5 },
+          configMapData: { 'jwt.hex': readFileSync('../daemon/jwt.hex').toString() },
+          volumeMounts: [{ name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' }],
         })
       }
 
-      if (service.name === 'dtl') {
+      if (service.name === 'op-node') {
         prev[service.name] = createService({
           asset,
           config: service,
-          env: { L1_RPC_ENDPOINT: `http://ethereum-svc.${namespace}.svc.cluster.local:8332` },
-          ports: { http: { port: 7878 } },
+          env: {
+            NETWORK: config.network,
+            L1_RPC_ENDPOINT: 'https://eth-goerli.g.alchemy.com/v2/AIYxhjifvuCKmIgcmpr4oTZybTtUNiv4',
+          },
+          ports: { 'op-node-rpc': { port: 9545 } },
+          volumeMounts: [{ name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' }],
+        })
+      }
+
+      if (service.name === 'l2geth') {
+        prev[service.name] = createService({
+          asset,
+          config: service,
+          env: {
+            NETWORK: config.network,
+            SNAPSHOT: 'https://storage.googleapis.com/oplabs-goerli-data/goerli-legacy-archival.tar',
+          },
+          ports: {
+            'l2geth-rpc': { port: 7545 },
+            'l2geth-ws': { port: 7546, pathPrefix: '/websocket', stripPathPrefix: true },
+          },
         })
       }
 
