@@ -275,7 +275,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       gasPrice: tx.ethereumSpecific.gasPrice.toString(),
       inputData: inputData && inputData !== '0x' && inputData !== '0x0' ? inputData : undefined,
       tokenTransfers: tx.tokenTransfers?.map((tt) => ({
-        contract: 'token' in tt ? tt.token : tt.contract,
+        contract: tt.contract,
         decimals: tt.decimals,
         name: tt.name,
         symbol: tt.symbol,
