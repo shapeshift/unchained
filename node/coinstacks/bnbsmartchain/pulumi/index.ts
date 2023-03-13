@@ -77,7 +77,6 @@ export = async (): Promise<Outputs> => {
             '-enablesubnewtx',
             '-logtostderr',
             '-debug',
-            '-workers=16',
           ],
           ports: { public: { port: 8001 } },
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
