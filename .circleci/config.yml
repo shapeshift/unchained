@@ -575,7 +575,7 @@ aliases:
     service-cpu-limit-2: "4"
     service-cpu-request-2: "2"
     service-memory-limit-2: 12Gi
-    service-storage-size-2: 500Gi
+    service-storage-size-2: 750Gi
 
   - &bnbsmartchain-dev
     <<: *bnbsmartchain
