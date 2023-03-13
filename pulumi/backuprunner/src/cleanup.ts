@@ -1,6 +1,6 @@
 import k8s, { KubernetesObject } from '@kubernetes/client-node'
 
-const sortByCreationTimestamp = (a: KubernetesObject, b: KubernetesObject) => (a.metadata?.creationTimestamp?.getTime() || 0 - (b.metadata?.creationTimestamp?.getTime() || 0))
+const sortByCreationTimestamp = 
 
 export const cleanup = async (k8sApi: k8s.KubernetesObjectApi, sts: string, namespace: string, pvcList: string, backupCount: number) => {
   var pvcCount = pvcList.split(',').length;
@@ -11,7 +11,12 @@ export const cleanup = async (k8sApi: k8s.KubernetesObjectApi, sts: string, name
   const items = snapshots.body.items
   console.log(`Found ${items.length} snapshots for ${namespace}.${sts}`)
 
-  var sorted = items.sort(sortByCreationTimestamp);
+  console.log(items[0].metadata)
+  console.log(typeof(items[0].metadata))
+  console.log(typeof(items[0].metadata?.creationTimestamp))
+  console.log(items[0].metadata?.creationTimestamp)
+
+  var sorted = items.sort((a, b) => (a.metadata?.creationTimestamp?.getTime() || 0 - (b.metadata?.creationTimestamp?.getTime() || 0)));
 
   sorted.forEach(x => console.log(x))
 
