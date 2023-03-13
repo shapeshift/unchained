@@ -10,14 +10,17 @@ export const cleanup = async (k8sApi: k8s.KubernetesObjectApi, sts: string, name
   if(snapshots.length <= pvcsToKeepCount){
     console.log(`Not archiving old snapshots, too few results`)
   }else {
-    removeOldSnapshots(k8sApi, snapshots, pvcsToKeepCount)
+    await removeOldSnapshots(k8sApi, snapshots, pvcsToKeepCount)
   }
 
   console.log("Snapshot cleanup completed");
 }
 
-const removeOldSnapshots = (k8sApi: k8s.KubernetesObjectApi, snapshots: KubernetesObject[], pvcsToKeepCount: number) => {
-  getSnapshotsToRemove(snapshots, pvcsToKeepCount).forEach(async vc => {
+const removeOldSnapshots = async (k8sApi: k8s.KubernetesObjectApi, snapshots: KubernetesObject[], pvcsToKeepCount: number) => {
+  Promise.all(getSnapshotsToRemove(snapshots, pvcsToKeepCount).map(async vc => deleteSnapshot(k8sApi, vc)))
+}
+
+const deleteSnapshot = async (k8sApi: k8s.KubernetesObjectApi, vc: KubernetesObject) => {
     await k8sApi.delete({
       apiVersion: vc.apiVersion,
       metadata: {
@@ -26,7 +29,6 @@ const removeOldSnapshots = (k8sApi: k8s.KubernetesObjectApi, snapshots: Kubernet
       }
     })
     console.log(`Deleted ${vc.metadata?.name}`)
-  })
 }
 
 const getSnapshotsToRemove = (snapshots: KubernetesObject[], pvcsToKeepCount: number) => {
