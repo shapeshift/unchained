@@ -551,7 +551,7 @@ aliases:
 
   - &bnbsmartchain
     coinstack: bnbsmartchain
-    pulumi-stack: public
+    pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/bnbsmartchain/pulumi
     rpc-url: http://bnbsmartchain-svc.unchained.svc.cluster.local:8545
     indexer-url: http://bnbsmartchain-svc.unchained.svc.cluster.local:8001
@@ -580,7 +580,7 @@ aliases:
   - &bnbsmartchain-dev
     <<: *bnbsmartchain
     environment: dev
-    pulumi-stack: public-dev
+    pulumi-stack: public-dev-us-east-2
     rpc-url: http://bnbsmartchain-svc.unchained-dev.svc.cluster.local:8545
     indexer-url: http://bnbsmartchain-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://bnbsmartchain-svc.unchained-dev.svc.cluster.local:8001/websocket
