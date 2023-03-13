@@ -17,6 +17,7 @@ const waitForScalingToFinish = async (
   while (!done) {
     iterations++;
     // termination grace period is 120s so need to account for that 
+    console.log(`Waiting for ${name} to shut down...`)
     await delay(3000);
     var status = await k8sAppsClient.readNamespacedStatefulSetStatus(
       name,

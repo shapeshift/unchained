@@ -1,7 +1,7 @@
 import * as k8s from '@pulumi/kubernetes'
 import { readFileSync } from 'fs'
 import { Config, Service, ServiceConfig } from '.'
-import { getPvcNames } from './util'
+import { deployStsBackupCron } from './cluster/sts/backup-cron'
 
 interface Port {
   port: number
@@ -359,76 +359,7 @@ export async function deployStatefulService(
     // )
   }
 
-  if (config.statefulService.backupSchedule) {
-    const pvcs = getPvcNames(asset, config.statefulService.replicas, config.statefulService?.services)
-    const backupsToKeep = 1;
-
-    const backupContainer: k8s.types.input.core.v1.Container = {
-      name: `${asset}-backup-runner`,
-      image: 'lukmyslinski/backuprunner:0.9',
-      args: ['-n', namespace, '-s', `${asset}-sts`, '-p', pvcs, '-r', `${config.statefulService.replicas}`, "-c", `${backupsToKeep}`],
-    }
-
-    new k8s.core.v1.ServiceAccount(`${asset}-backup-job-sa`, {
-      metadata: {
-        name: `${asset}-backup-job-sa`,
-        namespace: namespace
-      }
-    }, { provider });
-
-    new k8s.rbac.v1.Role(`${asset}-backup-job-role`, {
-      metadata: {
-        name: `${asset}-backup-job-role`,
-        namespace: namespace
-      },
-      rules: [
-        {
-          apiGroups: ["*"],
-          resources: ["*"],
-          verbs: ["get", "watch", "list", "create", "update"],
-        }
-      ]
-    }, { provider });
-
-    new k8s.rbac.v1.RoleBinding(`${asset}-backup-job-role-binding`, {
-      metadata: {
-        name: `${asset}-backup-job-role`,
-        namespace: namespace
-      },
-      roleRef: {
-        kind: "Role",
-        name: `${asset}-backup-job-role`,
-        apiGroup: ""
-      },
-      subjects: [
-        {
-          kind: "ServiceAccount",
-          name: `${asset}-backup-job-sa`,
-          apiGroup: ""
-        }
-      ]
-    }, {provider})
-
-    new k8s.batch.v1.CronJob(`${asset}-backup-job`, {
-      metadata: {
-        name: `${asset}-backup-job`,
-        namespace: namespace,
-        annotations: { 'pulumi.com/skipAwait': 'true' },
-      },
-      spec: {
-        schedule: config.statefulService.backupSchedule,
-        jobTemplate: {
-          spec: {
-            template: {
-              spec: {
-                serviceAccountName: `${asset}-backup-job-sa`,
-                containers: [backupContainer],
-                restartPolicy: "Never"
-              },
-            },
-          },
-        },
-      },
-    }, { provider })
+  if(config.statefulService.backupCount && config.statefulService.backupSchedule){
+    deployStsBackupCron(asset, config.statefulService, namespace, provider);
   }
 }

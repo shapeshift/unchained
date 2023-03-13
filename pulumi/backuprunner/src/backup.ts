@@ -5,7 +5,7 @@ import { cleanup } from './cleanup.js'
 
 interface Options {
   pvcList: string
-  count: number
+  backupCount: number
   replicas: number
   namespace: string
   statefulset: string
@@ -20,9 +20,9 @@ export const runBackup = async (opts: Options) => {
 
   try {
     await scaleStatefulSet(k8sAppsClient, opts.statefulset, opts.namespace, 0, true)
-    await takeSnapshots(k8sObjectClient, opts.pvcList)
+    await takeSnapshots(k8sObjectClient, opts.statefulset, opts.pvcList)
     await scaleStatefulSet(k8sAppsClient, opts.statefulset, opts.namespace, opts.replicas, false)
-    await cleanup(k8sObjectClient, opts.pvcList, opts.replicas, opts.count)
+    await cleanup(k8sObjectClient, opts.pvcList, opts.backupCount)
     console.log("Backup runner completed")
   } catch (err) {
     if (err instanceof HttpError) {
