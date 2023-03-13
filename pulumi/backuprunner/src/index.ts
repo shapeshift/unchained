@@ -4,8 +4,6 @@ import { runBackup } from "./backup.js";
 
 console.log(figlet.textSync("Unchained Backup Runner"));
 
-import "log-timestamp";
-
 const program = new Command();
 
 program
@@ -34,7 +32,9 @@ program
   )
   .parse(process.argv);
 
-const args = program.opts();
+const args = program.opts()
+
+console.log(args)
 
 await runBackup({
   pvcList: String(args.pvcs),

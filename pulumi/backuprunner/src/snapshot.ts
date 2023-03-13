@@ -11,9 +11,9 @@ interface VolumeSnapshot extends KubernetesObject {
 
 export const takeSnapshots = async (k8sApi: k8s.KubernetesObjectApi, sts: string, pvcList: string) => {
   const timestamp = new Date().getTime();
-  pvcList
+  await Promise.all(pvcList
   .split(',')
-  .forEach(async pvc => await takeSnapshot(k8sApi, sts, pvc, timestamp)) 
+  .map(async pvc => takeSnapshot(k8sApi, sts, pvc, timestamp)))
 }
 
 const takeSnapshot = async (k8sApi: k8s.KubernetesObjectApi, sts: string, pvcName: string, timestamp: number) => {  
@@ -37,5 +37,5 @@ const takeSnapshot = async (k8sApi: k8s.KubernetesObjectApi, sts: string, pvcNam
 
   };
   await k8sApi.create(snapshotYaml)
-  console.log("Snapshot backup finished")
+  console.log(`Snapshot ${snapshotName} backup finished`)
 };

@@ -33,6 +33,7 @@ export const deployStsBackupCron = (asset: string, sts: StsDefinition, namespace
 
 const createBackupContainer = (asset: string, namespace: string, sts: StsDefinition): k8s.types.input.core.v1.Container => {
   const pvcList = getPvcNames(asset, sts.replicas, sts.services)
+  console.log(sts)
   return {
     name: `${asset}-backup-runner`,
     image: 'lukmyslinski/backuprunner:0.11',
@@ -65,7 +66,7 @@ const createRbac = (asset: string, namespace: string, provider: k8s.Provider) =>
     rules: [
       {
         apiGroups: ["apps"],
-        resources: ["statefulsets"],
+        resources: ["*"],
         verbs: ["get", "watch", "list", "update"],
       },
       {

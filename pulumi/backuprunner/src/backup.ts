@@ -3,6 +3,9 @@ import { takeSnapshots } from './snapshot.js'
 import { scaleStatefulSet } from './scaling.js'
 import { cleanup } from './cleanup.js'
 
+// Implicitly adds timestamp to all console.log statements upon import
+import "log-timestamp";
+
 interface Options {
   pvcList: string
   backupCount: number
