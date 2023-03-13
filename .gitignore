@@ -3,3 +3,4 @@
 node_modules/
 Pulumi.*.yaml
 !Pulumi.sample.yaml
+dist/
