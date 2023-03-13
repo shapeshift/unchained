@@ -25,7 +25,7 @@ const takeSnapshot = async (k8sApi: k8s.KubernetesObjectApi, sts: string, pvcNam
     metadata: {
       name: snapshotName,
       labels: {
-        "statefulSet": sts
+        "statefulset": sts
       }
     },
     spec: {

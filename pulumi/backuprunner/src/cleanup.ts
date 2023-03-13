@@ -1,13 +1,33 @@
-import k8s from '@kubernetes/client-node'
+import k8s, { KubernetesObject } from '@kubernetes/client-node'
+
+const sortByCreationTimestamp = (a: KubernetesObject, b: KubernetesObject) => (a.metadata?.creationTimestamp?.getDate()!! - b.metadata?.creationTimestamp?.getDate()!!)
 
 export const cleanup = async (k8sApi: k8s.KubernetesObjectApi, sts: string, namespace: string, pvcList: string, backupCount: number) => {
   var pvcCount = pvcList.split(',').length;
   var pvcsToKeep = pvcCount*backupCount;
   console.log(`Backup count to keep - ${backupCount}. System consists of ${pvcCount} PVC's replicas, so will keep ${pvcsToKeep} latest snapshots`)
 
-  const snapshots = await k8sApi.list("snapshot.storage.k8s.io/v1", "VolumeSnapshot", namespace, undefined, undefined, undefined, `statefulset=${sts}`);
+  const snapshots = await k8sApi.list("snapshot.storage.k8s.io/v1", "VolumeSnapshot", namespace, undefined, undefined, undefined, undefined, `statefulset=${sts}`);
   const items = snapshots.body.items
   console.log(`Found ${items.length} snapshots for ${namespace}.${sts}`)
+
+  var sorted = items.sort(sortByCreationTimestamp);
+
+  sorted.forEach(x => console.log(x))
+
+  if(sorted.length <= pvcsToKeep){
+    console.log(`Not archiving old snapshots, too few results`)
+    return;
+  }
+
+  var [toKeep, toRemove] = [sorted.slice(0, pvcsToKeep), sorted.slice(pvcsToKeep)]
+
+  console.log("Volume snapshots to keep: ")
+  toKeep.forEach(x => console.log(x))
+
+  console.log("Volume snapshots to remove: ")
+  toRemove.forEach(x => console.log(x))
+
 
 
   // const timestamp = new Date().getTime();

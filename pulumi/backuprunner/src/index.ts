@@ -34,8 +34,6 @@ program
 
 const args = program.opts()
 
-console.log(args)
-
 await runBackup({
   pvcList: String(args.pvcs),
   backupCount: Number(args.count),
