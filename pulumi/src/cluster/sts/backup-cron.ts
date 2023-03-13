@@ -35,7 +35,7 @@ const createBackupContainer = (asset: string, namespace: string, sts: StsDefinit
   const pvcList = getPvcNames(asset, sts.replicas, sts.services)
   return {
     name: `${asset}-backup-runner`,
-    image: 'lukmyslinski/backuprunner:0.10',
+    image: 'lukmyslinski/backuprunner:0.11',
     args: ['-n', namespace, '-s', `${asset}-sts`, '-p', pvcList, '-r', `${sts.replicas}`, "-c", `${sts.backupCount}`],
   }
 }
@@ -64,9 +64,14 @@ const createRbac = (asset: string, namespace: string, provider: k8s.Provider) =>
     },
     rules: [
       {
-        apiGroups: ["apps", "snapshot.storage.k8s.io"],
-        resources: ["statefulsets", "volumesnapshots"],
-        verbs: ["get", "watch", "list", "create", "update"],
+        apiGroups: ["apps"],
+        resources: ["statefulsets"],
+        verbs: ["get", "watch", "list", "update"],
+      },
+      {
+        apiGroups: ["snapshot.storage.k8s.io"],
+        resources: ["volumesnapshots"],
+        verbs: ["get", "watch", "list", "create", "update", "delete"],
       }
     ]
   }, { provider });
