@@ -26,7 +26,7 @@ const getExistingVolumeSnapshots = async (k8sApi: k8s.KubernetesObjectApi, sts: 
 const sortByCreationTimestampDesc = ((a: KubernetesObject, b: KubernetesObject) => (new Date(b.metadata!!.creationTimestamp!!).getTime()  - new Date(a.metadata!!.creationTimestamp!!).getTime()));
 
 const removeOldSnapshots = async (k8sApi: k8s.KubernetesObjectApi, snapshots: KubernetesObject[], pvcsToKeepCount: number) => {
-  Promise.all(getSnapshotsToRemove(snapshots, pvcsToKeepCount).map(async vc => await deleteSnapshot(k8sApi, vc)))
+  await Promise.all(getSnapshotsToRemove(snapshots, pvcsToKeepCount).map(async vc => await deleteSnapshot(k8sApi, vc)))
 }
 
 const deleteSnapshot = async (k8sApi: k8s.KubernetesObjectApi, vc: KubernetesObject) => {
