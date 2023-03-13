@@ -35,7 +35,7 @@ const createBackupContainer = (asset: string, namespace: string, sts: StsDefinit
   const pvcList = getPvcNames(asset, sts.replicas, sts.services)
   return {
     name: `${asset}-backup-runner`,
-    image: 'lukmyslinski/backuprunner:0.13',
+    image: 'lukmyslinski/backuprunner:0.14',
     args: ['-n', namespace, '-s', `${asset}-sts`, '-p', pvcList, '-r', `${sts.replicas}`, "-c", `${sts.backupCount}`],
   }
 }

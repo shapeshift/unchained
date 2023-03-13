@@ -1,11 +1,11 @@
 import k8s, { KubernetesObject } from '@kubernetes/client-node'
 
-const sortByCreationTimestamp = (a: KubernetesObject, b: KubernetesObject) => (a.metadata?.creationTimestamp?.getDate()!! - b.metadata?.creationTimestamp?.getDate()!!)
+const sortByCreationTimestamp = (a: KubernetesObject, b: KubernetesObject) => (a.metadata?.creationTimestamp?.getTime() || 0 - (b.metadata?.creationTimestamp?.getTime() || 0))
 
 export const cleanup = async (k8sApi: k8s.KubernetesObjectApi, sts: string, namespace: string, pvcList: string, backupCount: number) => {
   var pvcCount = pvcList.split(',').length;
   var pvcsToKeep = pvcCount*backupCount;
-  console.log(`Backup count to keep - ${backupCount}. System consists of ${pvcCount} PVC's replicas, so will keep ${pvcsToKeep} latest snapshots`)
+  console.log(`Backup count to keep - ${backupCount}. ${sts} consists of ${pvcCount} PVC's, so will keep ${pvcsToKeep} latest snapshots`)
 
   const snapshots = await k8sApi.list("snapshot.storage.k8s.io/v1", "VolumeSnapshot", namespace, undefined, undefined, undefined, undefined, `statefulset=${sts}`);
   const items = snapshots.body.items
