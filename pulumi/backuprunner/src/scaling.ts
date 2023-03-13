@@ -4,6 +4,26 @@ export const delay = (time: number) => {
   return new Promise((resolve) => setTimeout(resolve, time));
 };
 
+export const scaleStatefulSet = async (
+  k8sAppsClient: k8s.AppsV1Api,
+  name: string,
+  namespace: string,
+  count: number,
+  waitToFinish: boolean
+) => {
+  console.log(`Scaling StatefulSet ${namespace}.${name} to ${count} replicas`);
+
+  var res = await k8sAppsClient.readNamespacedStatefulSet(name, namespace);
+  let ss = res.body;
+  ss.spec!!.replicas = Number(count);
+  await k8sAppsClient.replaceNamespacedStatefulSet(name, namespace, ss);
+
+  if (waitToFinish) {
+    await waitForScalingToFinish(k8sAppsClient, name, namespace, count);
+  }
+};
+
+
 const waitForScalingToFinish = async (
   k8sAppsClient: k8s.AppsV1Api,
   name: string,
@@ -33,24 +53,5 @@ const waitForScalingToFinish = async (
       );
       process.exit(1);
     }
-  }
-};
-
-export const scaleStatefulSet = async (
-  k8sAppsClient: k8s.AppsV1Api,
-  name: string,
-  namespace: string,
-  count: number,
-  waitToFinish: boolean
-) => {
-  console.log(`Scaling StatefulSet ${namespace}.${name} to ${count} replicas`);
-
-  var res = await k8sAppsClient.readNamespacedStatefulSet(name, namespace);
-  let ss = res.body;
-  ss.spec!!.replicas = Number(count);
-  await k8sAppsClient.replaceNamespacedStatefulSet(name, namespace, ss);
-
-  if (waitToFinish) {
-    await waitForScalingToFinish(k8sAppsClient, name, namespace, count);
   }
 };

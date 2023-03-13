@@ -4,38 +4,42 @@ import * as k8s from '@pulumi/kubernetes'
 export const deployStsBackupCron = (asset: string, sts: StsDefinition, namespace: string, provider: k8s.Provider) => {    
     const backupContainer = createBackupContainer(asset, namespace, sts)
     const serviceAccountName = createRbac(asset, namespace, provider)
+    
+    createCronJob(asset, namespace, serviceAccountName, sts, backupContainer, provider)
+}
 
-    new k8s.batch.v1.CronJob(`${asset}-backup-job`, {
-      metadata: {
-        name: `${asset}-backup-job`,
-        namespace: namespace,
-        annotations: { 'pulumi.com/skipAwait': 'true' },
-      },
-      spec: {
-        successfulJobsHistoryLimit: 1,
-        failedJobsHistoryLimit: 1,
-        concurrencyPolicy: "Forbid",
-        schedule: sts.backupSchedule!!,
-        jobTemplate: {
-          spec: {
-            template: {
-              spec: {
-                serviceAccountName: serviceAccountName,
-                containers: [backupContainer],
-                restartPolicy: "Never"
-              },
+const createCronJob = (asset: string, namespace: string, serviceAccountName: string, sts: StsDefinition, backupContainer: k8s.types.input.core.v1.Container, provider: k8s.Provider) => {
+  new k8s.batch.v1.CronJob(`${asset}-backup-job`, {
+    metadata: {
+      name: `${asset}-backup-job`,
+      namespace: namespace,
+      annotations: { 'pulumi.com/skipAwait': 'true' },
+    },
+    spec: {
+      successfulJobsHistoryLimit: 1,
+      failedJobsHistoryLimit: 1,
+      concurrencyPolicy: "Forbid",
+      schedule: sts.backupSchedule!!,
+      jobTemplate: {
+        spec: {
+          template: {
+            spec: {
+              serviceAccountName: serviceAccountName,
+              containers: [backupContainer],
+              restartPolicy: "Never"
             },
           },
         },
       },
-    }, { provider })
+    },
+  }, { provider })
 }
 
 const createBackupContainer = (asset: string, namespace: string, sts: StsDefinition): k8s.types.input.core.v1.Container => {
   const pvcList = getPvcNames(asset, sts.replicas, sts.services)
   return {
     name: `${asset}-backup-runner`,
-    image: 'lukmyslinski/backuprunner:0.19',
+    image: 'lukmyslinski/backuprunner:0.22',
     args: ['-n', namespace, '-s', `${asset}-sts`, '-p', pvcList, '-r', `${sts.replicas}`, "-c", `${sts.backupCount}`],
   }
 }

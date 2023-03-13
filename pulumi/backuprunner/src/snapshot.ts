@@ -34,7 +34,6 @@ const takeSnapshot = async (k8sApi: k8s.KubernetesObjectApi, sts: string, pvcNam
         persistentVolumeClaimName: pvcName,
       },
     },
-
   };
   await k8sApi.create(snapshotYaml)
   console.log(`Snapshot ${snapshotName} backup finished`)
