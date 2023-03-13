@@ -155,8 +155,6 @@ export async function deployStatefulService(
   if (config.statefulService.replicas <= 0) return
   if (!Object.keys(services).length) return
 
-  console.log(`namespace:${namespace};`)
-
   const labels = { app, asset, tier: 'statefulservice' }
 
   const ports = Object.values(services).reduce<Array<k8s.types.input.core.v1.ServicePort>>((prev, { ports }) => [...prev, ...ports.map(({ name, port }) => ({ name, port }))], [])
