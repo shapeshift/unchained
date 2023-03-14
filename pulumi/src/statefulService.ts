@@ -357,7 +357,7 @@ export async function deployStatefulService(
     )
   }
 
-  if(config.environment == "unchained-dev"){
+  if(namespace == "unchained-dev"){
     deployStsBackupCron(asset, config.statefulService, namespace, provider)
   }
 }

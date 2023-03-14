@@ -2,14 +2,14 @@ import { ServiceConfig, StatefulService } from ".";
 import * as k8s from '@pulumi/kubernetes'
 
 export const deployStsBackupCron = (asset: string, sts: StatefulService, namespace: string, provider: k8s.Provider) => {    
-  if(!sts.backupConfig){
-    sts.backupConfig = {
+  if(!sts.backup){
+    sts.backup = {
       backupCount: 1,
       // weekly 4 am on a Sunday
-      backupSchedule: "0 4 * * 0"
+      schedule: "0 4 * * 0"
     }
   }
-  
+
   const backupContainer = createBackupContainer(asset, namespace, sts)
   const serviceAccountName = createRbac(asset, namespace, provider)
   
@@ -27,7 +27,7 @@ const createCronJob = (asset: string, namespace: string, serviceAccountName: str
       successfulJobsHistoryLimit: 1,
       failedJobsHistoryLimit: 1,
       concurrencyPolicy: "Forbid",
-      schedule: sts.backupConfig?.backupSchedule!!,
+      schedule: sts.backup?.schedule!!,
       jobTemplate: {
         spec: {
           template: {
@@ -48,7 +48,7 @@ const createBackupContainer = (asset: string, namespace: string, sts: StatefulSe
   return {
     name: `${asset}-backup-runner`,
     image: 'lukmyslinski/backuprunner:0.24',
-    args: ['-n', namespace, '-s', `${asset}-sts`, '-p', pvcList, '-r', `${sts.replicas}`, "-c", `${sts.backupConfig?.backupCount}`],
+    args: ['-n', namespace, '-s', `${asset}-sts`, '-p', pvcList, '-r', `${sts.replicas}`, "-c", `${sts.backup?.backupCount}`],
   }
 }
 
