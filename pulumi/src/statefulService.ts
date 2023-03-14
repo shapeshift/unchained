@@ -357,7 +357,7 @@ export async function deployStatefulService(
     )
   }
 
-  if(config.statefulService.backupCount && config.statefulService.backupSchedule){
+  if (config.statefulService.backup) {
     deployStsBackupCron(asset, config.statefulService, namespace, provider);
   }
 }
