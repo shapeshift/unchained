@@ -35,16 +35,17 @@ const waitForScalingToFinish = async (
   namespace: string,
   count: number
 ) => {
-  var done = false;
-  var iterations = 0;
   const max_iterations = 100;
 
+  var done = false;
+  var iterations = 0;
+  
   while (!done) {
     iterations++;
     // termination grace period is 120s so need to account for that 
     console.log(`Waiting for ${name} to shut down...`)
     await delay(3000);
-    var status = await k8sAppsClient.readNamespacedStatefulSetStatus(
+    const status = await k8sAppsClient.readNamespacedStatefulSetStatus(
       name,
       namespace
     );

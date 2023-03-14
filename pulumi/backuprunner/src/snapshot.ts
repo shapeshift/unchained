@@ -17,7 +17,7 @@ export const takeSnapshots = async (k8sApi: k8s.KubernetesObjectApi, sts: string
 }
 
 const takeSnapshot = async (k8sApi: k8s.KubernetesObjectApi, sts: string, pvcName: string, timestamp: number) => {  
-  var snapshotName = `${pvcName}-backup-${timestamp}`
+  const snapshotName = `${pvcName}-backup-${timestamp}`
   console.log(`Taking snapshot of pvc ${pvcName} - ${snapshotName}`);
   const snapshotYaml: VolumeSnapshot = {
     apiVersion: "snapshot.storage.k8s.io/v1",
