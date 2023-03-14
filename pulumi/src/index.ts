@@ -27,7 +27,7 @@ export interface BaseConfig {
   rootDomainName?: string
 }
 
-export interface StsDefinition {
+export interface StatefulService {
   replicas: number
   services: Array<ServiceConfig>,
   backupSchedule?: string
@@ -39,7 +39,7 @@ export interface Config extends BaseConfig {
   network: string
   environment?: string
   api?: ApiConfig
-  statefulService?: StsDefinition
+  statefulService?: StatefulService
 }
 
 export interface ServiceConfig {

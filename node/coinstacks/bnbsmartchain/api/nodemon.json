@@ -1,0 +1,6 @@
+{
+  "ignore": ["src/routes.ts"],
+  "watch": ["../../../packages/*/dist/tsconfig.tsbuildinfo", "../../common/api/dist/tsconfig.tsbuildinfo", "src"],
+  "ext": "ts",
+  "exec": "yarn build && node dist/bnbsmartchain/api/src/app.js"
+}

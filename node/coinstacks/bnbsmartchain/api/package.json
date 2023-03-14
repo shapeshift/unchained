@@ -1,0 +1,24 @@
+{
+  "name": "@shapeshiftoss/bnbsmartchain-api",
+  "version": "8.3.0",
+  "license": "MIT",
+  "private": true,
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "yarn generate && tsc",
+    "clean": "rm -rf dist node_modules src/routes.ts src/swagger.json",
+    "generate": "tsoa spec-and-routes"
+  },
+  "dependencies": {
+    "@shapeshiftoss/blockbook": "^8.3.0",
+    "@shapeshiftoss/common-api": "^8.3.0",
+    "@shapeshiftoss/logger": "^1.1.2",
+    "cors": "^2.8.5",
+    "ethers": "^5.7.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.12"
+  }
+}
