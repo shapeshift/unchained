@@ -30,8 +30,10 @@ export interface BaseConfig {
 export interface StatefulService {
   replicas: number
   services: Array<ServiceConfig>,
-  backupSchedule?: string
-  backupCount?: number
+  backup?: {
+    schedule: string
+    backupCount: number
+  }
 }
 
 export interface Config extends BaseConfig {
