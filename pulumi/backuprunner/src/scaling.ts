@@ -13,7 +13,7 @@ export const scaleStatefulSet = async (
 ) => {
   console.log(`Scaling StatefulSet ${namespace}.${name} to ${count} replicas`);
 
-  var res = await k8sAppsClient.readNamespacedStatefulSet(name, namespace);
+  const { body } = await k8sAppsClient.readNamespacedStatefulSet(name, namespace);
   let ss = res.body;
   ss.spec!!.replicas = Number(count);
   await k8sAppsClient.replaceNamespacedStatefulSet(name, namespace, ss);
