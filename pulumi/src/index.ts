@@ -39,7 +39,7 @@ export interface Config extends BaseConfig {
   network: string
   environment?: string
   api?: ApiConfig
-  statefulService?: StsDefinition
+  statefulService?: StatefulService
 }
 
 export interface ServiceConfig {
