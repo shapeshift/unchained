@@ -1,4 +1,6 @@
-FROM node:18.12.1-alpine
+ARG BASE_IMAGE
+
+FROM $BASE_IMAGE
 
 COPY . .
 
