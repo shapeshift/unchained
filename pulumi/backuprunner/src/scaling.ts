@@ -14,9 +14,14 @@ export const scaleStatefulSet = async (
   console.log(`Scaling StatefulSet ${namespace}.${name} to ${count} replicas`);
 
   const { body } = await k8sAppsClient.readNamespacedStatefulSet(name, namespace);
-  let ss = res.body;
-  ss.spec!!.replicas = Number(count);
-  await k8sAppsClient.replaceNamespacedStatefulSet(name, namespace, ss);
+
+  if(typeof(body.spec?.replicas) === "string"){
+    body.spec.replicas = count
+  }else{
+    console.warn(`Invalid replica count: ${body.spec?.replicas}`)
+  }
+
+  await k8sAppsClient.replaceNamespacedStatefulSet(name, namespace, body);
 
   if (waitToFinish) {
     await waitForScalingToFinish(k8sAppsClient, name, namespace, count);
@@ -32,7 +37,7 @@ const waitForScalingToFinish = async (
 ) => {
   var done = false;
   var iterations = 0;
-  var max_iterations = 100;
+  const max_iterations = 100;
 
   while (!done) {
     iterations++;
@@ -43,7 +48,7 @@ const waitForScalingToFinish = async (
       name,
       namespace
     );
-    if (status.body.status?.availableReplicas === Number(count)) {
+    if (status.body.status?.availableReplicas === count) {
       done = true;
       console.log(`Scaling finished - ${namespace}.${name} availableReplicas is now ${count}`);
     }
