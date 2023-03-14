@@ -1,7 +1,7 @@
 import * as k8s from '@pulumi/kubernetes'
 import { readFileSync } from 'fs'
 import { Config, Service, ServiceConfig } from '.'
-import { deployStsBackupCron } from './cluster/sts/backup-cron'
+import { deployStsBackupCron } from './backupCron'
 
 interface Port {
   port: number
@@ -357,7 +357,7 @@ export async function deployStatefulService(
     )
   }
 
-  if (config.statefulService.backup) {
+  if(config.environment == "unchained-dev"){
     deployStsBackupCron(asset, config.statefulService, namespace, provider)
   }
 }

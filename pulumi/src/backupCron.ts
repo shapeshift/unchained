@@ -1,14 +1,22 @@
-import { ServiceConfig, StsDefinition } from "../..";
+import { ServiceConfig, StatefulService } from ".";
 import * as k8s from '@pulumi/kubernetes'
 
-export const deployStsBackupCron = (asset: string, sts: StsDefinition, namespace: string, provider: k8s.Provider) => {    
-    const backupContainer = createBackupContainer(asset, namespace, sts)
-    const serviceAccountName = createRbac(asset, namespace, provider)
-    
-    createCronJob(asset, namespace, serviceAccountName, sts, backupContainer, provider)
+export const deployStsBackupCron = (asset: string, sts: StatefulService, namespace: string, provider: k8s.Provider) => {    
+  if(!sts.backupConfig){
+    sts.backupConfig = {
+      backupCount: 1,
+      // weekly 4 am on a Sunday
+      backupSchedule: "0 4 * * 0"
+    }
+  }
+  
+  const backupContainer = createBackupContainer(asset, namespace, sts)
+  const serviceAccountName = createRbac(asset, namespace, provider)
+  
+  createCronJob(asset, namespace, serviceAccountName, sts, backupContainer, provider)
 }
 
-const createCronJob = (asset: string, namespace: string, serviceAccountName: string, sts: StsDefinition, backupContainer: k8s.types.input.core.v1.Container, provider: k8s.Provider) => {
+const createCronJob = (asset: string, namespace: string, serviceAccountName: string, sts: StatefulService, backupContainer: k8s.types.input.core.v1.Container, provider: k8s.Provider) => {
   new k8s.batch.v1.CronJob(`${asset}-backup-job`, {
     metadata: {
       name: `${asset}-backup-job`,
@@ -19,7 +27,7 @@ const createCronJob = (asset: string, namespace: string, serviceAccountName: str
       successfulJobsHistoryLimit: 1,
       failedJobsHistoryLimit: 1,
       concurrencyPolicy: "Forbid",
-      schedule: sts.backupSchedule!!,
+      schedule: sts.backupConfig?.backupSchedule!!,
       jobTemplate: {
         spec: {
           template: {
@@ -35,12 +43,12 @@ const createCronJob = (asset: string, namespace: string, serviceAccountName: str
   }, { provider })
 }
 
-const createBackupContainer = (asset: string, namespace: string, sts: StsDefinition): k8s.types.input.core.v1.Container => {
+const createBackupContainer = (asset: string, namespace: string, sts: StatefulService): k8s.types.input.core.v1.Container => {
   const pvcList = getPvcNames(asset, sts.replicas, sts.services)
   return {
     name: `${asset}-backup-runner`,
     image: 'lukmyslinski/backuprunner:0.24',
-    args: ['-n', namespace, '-s', `${asset}-sts`, '-p', pvcList, '-r', `${sts.replicas}`, "-c", `${sts.backupCount}`],
+    args: ['-n', namespace, '-s', `${asset}-sts`, '-p', pvcList, '-r', `${sts.replicas}`, "-c", `${sts.backupConfig?.backupCount}`],
   }
 }
 
