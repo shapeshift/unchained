@@ -1,7 +1,7 @@
 
 # Unchained Backup Runner
 
-A small Node.js CLI tool for creationg k8s VolumeSnapshots for Unchained stateful sets.
+A small Node.js CLI tool for creating k8s VolumeSnapshots for Unchained stateful sets.
 
 ## How it works
 
