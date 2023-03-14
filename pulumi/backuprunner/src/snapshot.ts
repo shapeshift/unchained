@@ -1,4 +1,4 @@
-import k8s, { KubernetesObject } from "@kubernetes/client-node";
+import k8s, { KubernetesObject } from '@kubernetes/client-node';
 
 interface VolumeSnapshot extends KubernetesObject {
   spec: {

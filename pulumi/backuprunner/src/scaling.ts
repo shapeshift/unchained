@@ -1,4 +1,4 @@
-import k8s from "@kubernetes/client-node";
+import k8s from '@kubernetes/client-node';
 
 export const delay = (time: number) => {
   return new Promise((resolve) => setTimeout(resolve, time));

@@ -1,6 +1,6 @@
-import figlet from "figlet";
-import { Command } from "commander";
-import { runBackup } from "./backup.js";
+import figlet from 'figlet';
+import { Command } from 'commander';
+import { runBackup } from './backup';
 
 console.log(figlet.textSync("Unchained Backup Runner"));
 
@@ -32,12 +32,14 @@ program
   )
   .parse(process.argv);
 
-const args = program.opts()
+const args = program.opts();
 
-await runBackup({
-  pvcList: String(args.pvcs),
-  backupCount: Number(args.count),
-  replicas: Number(args.replicas),
-  statefulset: String(args.statefulset),
-  namespace: String(args.namespace),
-});
+(async () => {
+  await runBackup({
+    pvcList: String(args.pvcs),
+    backupCount: Number(args.count),
+    replicas: Number(args.replicas),
+    statefulset: String(args.statefulset),
+    namespace: String(args.namespace),
+  });
+})();
