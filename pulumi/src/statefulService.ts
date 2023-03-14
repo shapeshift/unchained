@@ -358,6 +358,6 @@ export async function deployStatefulService(
   }
 
   if (config.statefulService.backup) {
-    deployStsBackupCron(asset, config.statefulService, namespace, provider);
+    deployStsBackupCron(asset, config.statefulService, namespace, provider)
   }
 }
