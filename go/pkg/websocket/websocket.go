@@ -105,12 +105,17 @@ func (c *Connection) Start() {
 	// send ping message to verify health of client.
 	// if there is an error responding to client, connection will be closed.
 	go func() {
-		for range c.ticker.C {
-			if err := c.conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
-				logger.Errorf("failed to set write deadline: %+v", err)
-			}
-			if err := c.send(websocket.PingMessage, nil); err != nil {
-				logger.Errorf("failed to write ping message packet: %+v", err)
+		for {
+			select {
+			case <-c.ticker.C:
+				if err := c.conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
+					logger.Errorf("failed to set write deadline: %+v", err)
+				}
+				if err := c.send(websocket.PingMessage, nil); err != nil {
+					logger.Errorf("failed to write ping message packet: %+v", err)
+				}
+			case <-c.doneChan:
+				return
 			}
 		}
 	}()

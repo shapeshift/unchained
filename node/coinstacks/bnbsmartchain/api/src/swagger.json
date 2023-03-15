@@ -19,25 +19,42 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Address": {
-				"description": "Contains info about an address associated with an extended public key",
+			"TokenBalance": {
+				"description": "Contains info about a token including balance for an address",
 				"properties": {
-					"balance": {
+					"contract": {
 						"type": "string"
 					},
-					"pubkey": {
+					"decimals": {
+						"type": "number",
+						"format": "double"
+					},
+					"name": {
+						"type": "string"
+					},
+					"symbol": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string"
+					},
+					"balance": {
 						"type": "string"
 					}
 				},
 				"required": [
-					"balance",
-					"pubkey"
+					"contract",
+					"decimals",
+					"name",
+					"symbol",
+					"type",
+					"balance"
 				],
 				"type": "object",
 				"additionalProperties": false
 			},
 			"Account": {
-				"description": "Contains info about an address or extended public key account",
+				"description": "Contains info about an EVM account",
 				"properties": {
 					"balance": {
 						"type": "string"
@@ -48,28 +65,23 @@
 					"pubkey": {
 						"type": "string"
 					},
-					"addresses": {
+					"nonce": {
+						"type": "number",
+						"format": "double"
+					},
+					"tokens": {
 						"items": {
-							"$ref": "#/components/schemas/Address"
+							"$ref": "#/components/schemas/TokenBalance"
 						},
-						"type": "array",
-						"description": "List of associated addresses for an extended public key"
-					},
-					"nextReceiveAddressIndex": {
-						"type": "number",
-						"format": "double",
-						"description": "The next unused receive address index for an extended public key (change index 0)"
-					},
-					"nextChangeAddressIndex": {
-						"type": "number",
-						"format": "double",
-						"description": "The next unused change address index for an extended public key (change index 1)"
+						"type": "array"
 					}
 				},
 				"required": [
 					"balance",
 					"unconfirmedBalance",
-					"pubkey"
+					"pubkey",
+					"nonce",
+					"tokens"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -123,81 +135,71 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Vin": {
-				"description": "Contains info about a transaction input",
+			"TokenTransfer": {
+				"description": "Contains info about a token including transfer details",
 				"properties": {
-					"txid": {
+					"contract": {
 						"type": "string"
 					},
-					"vout": {
-						"type": "string"
-					},
-					"sequence": {
+					"decimals": {
 						"type": "number",
 						"format": "double"
 					},
-					"coinbase": {
+					"name": {
 						"type": "string"
 					},
-					"scriptSig": {
-						"properties": {
-							"hex": {
-								"type": "string"
-							}
-						},
-						"type": "object"
+					"symbol": {
+						"type": "string"
 					},
-					"addresses": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+					"type": {
+						"type": "string"
+					},
+					"from": {
+						"type": "string"
+					},
+					"to": {
+						"type": "string"
 					},
 					"value": {
 						"type": "string"
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Vout": {
-				"description": "Contains info about a transaction output",
-				"properties": {
-					"value": {
-						"type": "string"
-					},
-					"n": {
-						"type": "number",
-						"format": "double"
-					},
-					"opReturn": {
-						"type": "string"
-					},
-					"scriptPubKey": {
-						"properties": {
-							"hex": {
-								"type": "string"
-							}
-						},
-						"type": "object"
-					},
-					"addresses": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
 					}
 				},
 				"required": [
-					"value",
-					"n",
-					"scriptPubKey"
+					"contract",
+					"decimals",
+					"name",
+					"symbol",
+					"type",
+					"from",
+					"to",
+					"value"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"InternalTx": {
+				"description": "Contains info about an EVM internal transaction",
+				"properties": {
+					"from": {
+						"type": "string"
+					},
+					"to": {
+						"type": "string"
+					},
+					"value": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"from",
+					"to",
+					"value"
 				],
 				"type": "object",
 				"additionalProperties": false
 			},
 			"Tx": {
-				"description": "Contains info about a transaction",
+				"description": "Contains info about an EVM transaction",
 				"properties": {
 					"txid": {
 						"type": "string"
@@ -213,17 +215,11 @@
 						"type": "number",
 						"format": "double"
 					},
-					"vin": {
-						"items": {
-							"$ref": "#/components/schemas/Vin"
-						},
-						"type": "array"
+					"from": {
+						"type": "string"
 					},
-					"vout": {
-						"items": {
-							"$ref": "#/components/schemas/Vout"
-						},
-						"type": "array"
+					"to": {
+						"type": "string"
 					},
 					"confirmations": {
 						"type": "number",
@@ -235,20 +231,47 @@
 					"fee": {
 						"type": "string"
 					},
-					"hex": {
+					"gasLimit": {
 						"type": "string"
+					},
+					"gasUsed": {
+						"type": "string"
+					},
+					"gasPrice": {
+						"type": "string"
+					},
+					"status": {
+						"type": "number",
+						"format": "double"
+					},
+					"inputData": {
+						"type": "string"
+					},
+					"tokenTransfers": {
+						"items": {
+							"$ref": "#/components/schemas/TokenTransfer"
+						},
+						"type": "array"
+					},
+					"internalTxs": {
+						"items": {
+							"$ref": "#/components/schemas/InternalTx"
+						},
+						"type": "array"
 					}
 				},
 				"required": [
 					"txid",
 					"blockHeight",
 					"timestamp",
-					"vin",
-					"vout",
+					"from",
+					"to",
 					"confirmations",
 					"value",
 					"fee",
-					"hex"
+					"gasLimit",
+					"gasPrice",
+					"status"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -278,209 +301,36 @@
 			},
 			"TxHistory": {
 				"$ref": "#/components/schemas/BaseTxHistory_Tx_",
-				"description": "Contains info about transaction history"
+				"description": "Contains info about EVM transaction history"
 			},
-			"Utxo": {
-				"description": "Contains info about an unspent transaction output",
+			"GasEstimate": {
+				"description": "Contains info about estimated gas cost of a transaction",
 				"properties": {
-					"txid": {
+					"gasLimit": {
 						"type": "string"
-					},
-					"vout": {
-						"type": "number",
-						"format": "double"
-					},
-					"value": {
-						"type": "string"
-					},
-					"height": {
-						"type": "number",
-						"format": "double"
-					},
-					"confirmations": {
-						"type": "number",
-						"format": "double"
-					},
-					"address": {
-						"type": "string"
-					},
-					"path": {
-						"type": "string"
-					},
-					"locktime": {
-						"type": "number",
-						"format": "double"
-					},
-					"coinbase": {
-						"type": "boolean"
 					}
 				},
 				"required": [
-					"txid",
-					"vout",
-					"value",
-					"confirmations"
+					"gasLimit"
 				],
 				"type": "object",
 				"additionalProperties": false
 			},
-			"RawTx": {
-				"description": "Contains info about a transaction as returned from the node",
+			"GasFees": {
+				"description": "Contains info about current recommended fees to use in a transaction",
 				"properties": {
-					"txid": {
+					"gasPrice": {
 						"type": "string"
 					},
-					"hash": {
+					"maxFeePerGas": {
 						"type": "string"
 					},
-					"version": {
-						"type": "number",
-						"format": "double"
-					},
-					"size": {
-						"type": "number",
-						"format": "double"
-					},
-					"vsize": {
-						"type": "number",
-						"format": "double"
-					},
-					"weight": {
-						"type": "number",
-						"format": "double"
-					},
-					"locktime": {
-						"type": "number",
-						"format": "double"
-					},
-					"vin": {
-						"items": {
-							"properties": {
-								"txinwitness": {
-									"type": "string"
-								},
-								"scriptSig": {
-									"properties": {
-										"hex": {
-											"type": "string"
-										},
-										"asm": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"hex",
-										"asm"
-									],
-									"type": "object"
-								},
-								"coinbase": {
-									"type": "string"
-								},
-								"sequence": {
-									"type": "number",
-									"format": "double"
-								},
-								"vout": {
-									"type": "number",
-									"format": "double"
-								},
-								"txid": {
-									"type": "string"
-								}
-							},
-							"type": "object"
-						},
-						"type": "array"
-					},
-					"vout": {
-						"items": {
-							"properties": {
-								"scriptPubKey": {
-									"properties": {
-										"addresses": {
-											"items": {
-												"type": "string"
-											},
-											"type": "array"
-										},
-										"type": {
-											"type": "string"
-										},
-										"reqSigs": {
-											"type": "number",
-											"format": "double"
-										},
-										"hex": {
-											"type": "string"
-										},
-										"asm": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"addresses",
-										"type",
-										"reqSigs",
-										"hex",
-										"asm"
-									],
-									"type": "object"
-								},
-								"n": {
-									"type": "number",
-									"format": "double"
-								},
-								"value": {
-									"anyOf": [
-										{
-											"type": "string"
-										},
-										{
-											"type": "number",
-											"format": "double"
-										}
-									]
-								}
-							},
-							"type": "object"
-						},
-						"type": "array"
-					},
-					"hex": {
+					"maxPriorityFeePerGas": {
 						"type": "string"
-					},
-					"blockhash": {
-						"type": "string"
-					},
-					"confirmations": {
-						"type": "number",
-						"format": "double"
-					},
-					"time": {
-						"type": "number",
-						"format": "double"
-					},
-					"blocktime": {
-						"type": "number",
-						"format": "double"
 					}
 				},
 				"required": [
-					"txid",
-					"hash",
-					"version",
-					"size",
-					"vsize",
-					"weight",
-					"locktime",
-					"vin",
-					"vout",
-					"hex",
-					"blockhash",
-					"confirmations",
-					"time",
-					"blocktime"
+					"gasPrice"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -497,46 +347,12 @@
 				],
 				"type": "object",
 				"additionalProperties": false
-			},
-			"NetworkFee": {
-				"properties": {
-					"satsPerKiloByte": {
-						"type": "number",
-						"format": "double"
-					},
-					"blocksUntilConfirmation": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"satsPerKiloByte",
-					"blocksUntilConfirmation"
-				],
-				"type": "object",
-				"description": "Contains info about the network fee"
-			},
-			"NetworkFees": {
-				"description": "Contains info about current recommended network fees",
-				"properties": {
-					"fast": {
-						"$ref": "#/components/schemas/NetworkFee"
-					},
-					"average": {
-						"$ref": "#/components/schemas/NetworkFee"
-					},
-					"slow": {
-						"$ref": "#/components/schemas/NetworkFee"
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
 	},
 	"info": {
-		"title": "@shapeshiftoss/bitcoin-api",
+		"title": "@shapeshiftoss/bnbsmartchain-api",
 		"version": "8.3.0",
 		"license": {
 			"name": "MIT"
@@ -555,6 +371,13 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/BaseInfo"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"network": "mainnet"
+										}
+									}
 								}
 							}
 						}
@@ -578,6 +401,26 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Account"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"balance": "294505451261967226",
+											"unconfirmedBalance": "0",
+											"nonce": 74,
+											"pubkey": "0xC480394241c76F3993ec5D121ce4F198f7844443",
+											"tokens": [
+												{
+													"balance": "0",
+													"contract": "0x04756126F044634C9a0f0E985e60c88a51ACC206",
+													"decimals": 18,
+													"name": "Carbon",
+													"symbol": "CSIX",
+													"type": "BEP20"
+												}
+											]
+										}
+									}
 								}
 							}
 						}
@@ -613,20 +456,21 @@
 						}
 					}
 				},
-				"description": "Get account details by address or extended public key",
+				"description": "Get account details by address",
 				"tags": [
 					"v1"
 				],
 				"security": [],
 				"parameters": [
 					{
-						"description": "account address or extended public key",
+						"description": "account address",
 						"in": "path",
 						"name": "pubkey",
 						"required": true,
 						"schema": {
 							"type": "string"
-						}
+						},
+						"example": "0xC480394241c76F3993ec5D121ce4F198f7844443"
 					}
 				]
 			}
@@ -641,6 +485,31 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/TxHistory"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"pubkey": "0xC480394241c76F3993ec5D121ce4F198f7844443",
+											"cursor": "eyJibG9ja2Jvb2tQYWdlIjoxLCJleHBsb3JlclBhZ2UiOjEsImV4cGxvcmVyVHhpZCI6IjB4MTVkODlmMTdmOWQ2NmZiM2VkMTIwZTc3Mjc0NWQ1MTIzODQ3ZGY3MjM2N2EyNWMwNGUzYWRjY2JlYjgwM2FiMyIsImJsb2NrYm9va1R4aWQiOiIweDJkZjdkZTM1ZTk1NmE3ZTY1M2M1YTE3Mjc2NzM5ZGViNmY0NGUzOGZlMDRiMmUxYjcwYTc2ZmE4YjA2NWNkYjIiLCJibG9ja0hlaWdodCI6MjU4Mzk1Njl9",
+											"txs": [
+												{
+													"txid": "0x025b88d4b35e1fd28ee372deb1cb28c2c862703dce444629c47e27b8b8759cc4",
+													"blockHash": "0x695b9e8a01b9564387bde6d52fd2775867c7b56ee0c1a9d61bbcc2b38a9c835f",
+													"blockHeight": 25839827,
+													"timestamp": 1676923869,
+													"status": 1,
+													"from": "0xC480394241c76F3993ec5D121ce4F198f7844443",
+													"to": "0x215B8E1810Bb8FCcf2D90eE87631F16B5F4a895f",
+													"confirmations": 50,
+													"value": "1200000000000000000",
+													"fee": "105000000000000",
+													"gasLimit": "21000",
+													"gasUsed": "21000",
+													"gasPrice": "5000000000"
+												}
+											]
+										}
+									}
 								}
 							}
 						}
@@ -676,20 +545,21 @@
 						}
 					}
 				},
-				"description": "Get transaction history by address or extended public key",
+				"description": "Get transaction history by address",
 				"tags": [
 					"v1"
 				],
 				"security": [],
 				"parameters": [
 					{
-						"description": "account address or extended public key",
+						"description": "account address",
 						"in": "path",
 						"name": "pubkey",
 						"required": true,
 						"schema": {
 							"type": "string"
-						}
+						},
+						"example": "0xC480394241c76F3993ec5D121ce4F198f7844443"
 					},
 					{
 						"description": "the cursor returned in previous query (base64 encoded json object with a 'page' property)",
@@ -714,72 +584,6 @@
 				]
 			}
 		},
-		"/api/v1/account/{pubkey}/utxos": {
-			"get": {
-				"operationId": "GetUtxos",
-				"responses": {
-					"200": {
-						"description": "account utxos",
-						"content": {
-							"application/json": {
-								"schema": {
-									"items": {
-										"$ref": "#/components/schemas/Utxo"
-									},
-									"type": "array"
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Bad Request",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/BadRequestError"
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Validation Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ValidationError"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/InternalServerError"
-								}
-							}
-						}
-					}
-				},
-				"description": "Get all unspent transaction outputs for an address or extended public key",
-				"tags": [
-					"v1"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"description": "account address or extended public key",
-						"in": "path",
-						"name": "pubkey",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
-			}
-		},
 		"/api/v1/tx/{txid}": {
 			"get": {
 				"operationId": "GetTransaction",
@@ -790,6 +594,25 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Tx"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"txid": "0x025b88d4b35e1fd28ee372deb1cb28c2c862703dce444629c47e27b8b8759cc4",
+											"blockHash": "0x695b9e8a01b9564387bde6d52fd2775867c7b56ee0c1a9d61bbcc2b38a9c835f",
+											"blockHeight": 25839827,
+											"timestamp": 1676923869,
+											"status": 1,
+											"from": "0xC480394241c76F3993ec5D121ce4F198f7844443",
+											"to": "0x215B8E1810Bb8FCcf2D90eE87631F16B5F4a895f",
+											"confirmations": 50,
+											"value": "1200000000000000000",
+											"fee": "105000000000000",
+											"gasLimit": "21000",
+											"gasUsed": "21000",
+											"gasPrice": "5000000000"
+										}
+									}
 								}
 							}
 						}
@@ -838,31 +661,29 @@
 						"required": true,
 						"schema": {
 							"type": "string"
-						}
+						},
+						"example": "0x025b88d4b35e1fd28ee372deb1cb28c2c862703dce444629c47e27b8b8759cc4"
 					}
 				]
 			}
 		},
-		"/api/v1/tx/{txid}/raw": {
+		"/api/v1/gas/estimate": {
 			"get": {
-				"operationId": "GetRawTransaction",
+				"operationId": "EstimateGas",
 				"responses": {
 					"200": {
-						"description": "transaction payload",
+						"description": "estimated gas cost",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/RawTx"
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Bad Request",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/BadRequestError"
+									"$ref": "#/components/schemas/GasEstimate"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"gasLimit": "21000"
+										}
+									}
 								}
 							}
 						}
@@ -888,22 +709,93 @@
 						}
 					}
 				},
-				"description": "Get raw transaction details directly from the node",
+				"description": "Get the estimated gas cost of a transaction",
 				"tags": [
 					"v1"
 				],
 				"security": [],
 				"parameters": [
 					{
-						"description": "transaction hash",
-						"in": "path",
-						"name": "txid",
+						"description": "input data",
+						"in": "query",
+						"name": "data",
 						"required": true,
 						"schema": {
 							"type": "string"
-						}
+						},
+						"example": "0x"
+					},
+					{
+						"description": "from address",
+						"in": "query",
+						"name": "from",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"example": "0x0000000000000000000000000000000000000000"
+					},
+					{
+						"description": "to address",
+						"in": "query",
+						"name": "to",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"example": "0xC480394241c76F3993ec5D121ce4F198f7844443"
+					},
+					{
+						"description": "transaction value in wei",
+						"in": "query",
+						"name": "value",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"example": "1337"
 					}
 				]
+			}
+		},
+		"/api/v1/gas/fees": {
+			"get": {
+				"operationId": "GetGasFees",
+				"responses": {
+					"200": {
+						"description": "current fees specified in wei",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GasFees"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"gasPrice": "5000000000"
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get the current recommended gas fees to use in a transaction",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": []
 			}
 		},
 		"/api/v1/send": {
@@ -916,6 +808,11 @@
 							"application/json": {
 								"schema": {
 									"type": "string"
+								},
+								"examples": {
+									"Example 1": {
+										"value": "0xb9d4ad5408f53eac8627f9ccd840ba8fb3469d55cd9cc2a11c6e049f1eef4edd"
+									}
 								}
 							}
 						}
@@ -951,7 +848,7 @@
 						}
 					}
 				},
-				"description": "Sends raw transaction to be broadcast to the node.",
+				"description": "Broadcast signed raw transaction",
 				"tags": [
 					"v1"
 				],
@@ -965,53 +862,13 @@
 							"schema": {
 								"$ref": "#/components/schemas/SendTxBody",
 								"description": "serialized raw transaction hex"
+							},
+							"example": {
+								"hex": "0xf86c0a85046c7cfe0083016dea94d1310c1e038bc12865d3d3997275b3e4737c6302880b503be34d9fe80080269fc7eaaa9c21f59adf8ad43ed66cf5ef9ee1c317bd4d32cd65401e7aaca47cfaa0387d79c65b90be6260d09dcfb780f29dd8133b9b1ceb20b83b7e442b4bfc30cb"
 							}
 						}
 					}
 				}
-			}
-		},
-		"/api/v1/fees": {
-			"get": {
-				"operationId": "GetNetworkFees",
-				"responses": {
-					"200": {
-						"description": "current network fees",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/NetworkFees"
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Bad Request",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/BadRequestError"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/InternalServerError"
-								}
-							}
-						}
-					}
-				},
-				"description": "Get current recommended network fees to use in a transaction",
-				"tags": [
-					"v1"
-				],
-				"security": [],
-				"parameters": []
 			}
 		}
 	},
