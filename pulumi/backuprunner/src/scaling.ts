@@ -15,11 +15,9 @@ export const scaleStatefulSet = async (
 
   const { body } = await k8sAppsClient.readNamespacedStatefulSet(name, namespace);
 
-  if(typeof(body.spec?.replicas) === "string"){
-    body.spec.replicas = count
-  }else{
-    console.warn(`Invalid replica count: ${body.spec?.replicas}`)
-  }
+  if (!body.spec) throw new Error(`No spec found for StatefulSet: ${namespace}.${name}`)
+
+  body.spec.replicas = count
 
   await k8sAppsClient.replaceNamespacedStatefulSet(name, namespace, body);
 
