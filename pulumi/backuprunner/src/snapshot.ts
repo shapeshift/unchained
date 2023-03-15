@@ -1,8 +1,15 @@
 import k8s, { KubernetesObject } from '@kubernetes/client-node';
 
-interface VolumeSnapshot extends KubernetesObject {
+export interface VolumeSnapshot extends Required<KubernetesObject> {
+  metadata: {
+    name: string,
+    creationTimestamp: Date
+    labels: {
+      statefulset: string
+    }
+  }
   spec: {
-    volumeSnapshotClassName: string,
+    volumeSnapshotClassName: string
     source: {
       persistentVolumeClaimName: string
     }
