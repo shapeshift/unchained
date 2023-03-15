@@ -1,12 +1,11 @@
 import k8s, { HttpError } from '@kubernetes/client-node'
 import { takeSnapshots } from './snapshot'
-import { scaleStatefulSet } from './scaling'
+import { getCurrentReplicas, scaleStatefulSet } from './scaling'
 import { cleanup } from './cleanup'
 
 interface Options {
   pvcList: string
   backupCount: number
-  replicas: number
   namespace: string
   statefulset: string
 }
@@ -17,13 +16,14 @@ export const runBackup = async (opts: Options) => {
   kc.loadFromDefault()
   const k8sObjectClient = k8s.KubernetesObjectApi.makeApiClient(kc)
   const k8sAppsClient = kc.makeApiClient(k8s.AppsV1Api)
+  const replicas = await getCurrentReplicas(k8sAppsClient, opts.statefulset, opts.namespace)
 
   try {
-    await scaleStatefulSet(k8sAppsClient, opts.statefulset, opts.namespace, 0, true)
+    await scaleStatefulSet(k8sAppsClient, opts.statefulset, opts.namespace, replicas-1, true)
     await takeSnapshots(k8sObjectClient, opts.statefulset, opts.pvcList)
-    await scaleStatefulSet(k8sAppsClient, opts.statefulset, opts.namespace, opts.replicas, false)
+    await scaleStatefulSet(k8sAppsClient, opts.statefulset, opts.namespace, replicas, false)
     await cleanup(k8sObjectClient, opts.statefulset, opts.namespace, opts.pvcList, opts.backupCount)
-    console.log("Backup runner completed")
+    console.log('Backup runner completed')
   } catch (err) {
     if (err instanceof HttpError) {
       console.error('K8s operation failed:', err.body)

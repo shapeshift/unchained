@@ -1,22 +1,21 @@
-import { ServiceConfig, StatefulService } from ".";
+import { StatefulService } from ".";
 import * as k8s from '@pulumi/kubernetes'
 
 export const deployStsBackupCron = (asset: string, sts: StatefulService, namespace: string, provider: k8s.Provider) => {    
-  if(!sts.backup){
-    sts.backup = {
-      backupCount: 1,
-      // weekly 4 am on a Sunday
-      schedule: "0 4 * * 0"
-    }
+  if (!sts.backup) return
+
+  const serviceAccountName = createRbac(asset, namespace, provider)
+
+  const pvcs = Array.from(Array(sts.replicas).keys())
+    .flatMap((n) => sts.services.map((svc) => `data-${svc.name}-${asset}-sts-${n}`))
+    .join(',')
+
+  const backupContainer = {
+    name: `${asset}-backup-runner`,
+    image: 'shapeshift/volumereaper:0.24',
+    args: ['-n', namespace, '-s', `${asset}-sts`, '-p', pvcs, "-c", `${sts.backup.backupCount}`],
   }
 
-  const backupContainer = createBackupContainer(asset, namespace, sts)
-  const serviceAccountName = createRbac(asset, namespace, provider)
-  
-  createCronJob(asset, namespace, serviceAccountName, sts, backupContainer, provider)
-}
-
-const createCronJob = (asset: string, namespace: string, serviceAccountName: string, sts: StatefulService, backupContainer: k8s.types.input.core.v1.Container, provider: k8s.Provider) => {
   new k8s.batch.v1.CronJob(`${asset}-backup-job`, {
     metadata: {
       name: `${asset}-backup-job`,
@@ -27,7 +26,7 @@ const createCronJob = (asset: string, namespace: string, serviceAccountName: str
       successfulJobsHistoryLimit: 1,
       failedJobsHistoryLimit: 1,
       concurrencyPolicy: "Forbid",
-      schedule: sts.backup?.schedule!!,
+      schedule: sts.backup.schedule,
       jobTemplate: {
         spec: {
           template: {
@@ -43,24 +42,9 @@ const createCronJob = (asset: string, namespace: string, serviceAccountName: str
   }, { provider })
 }
 
-const createBackupContainer = (asset: string, namespace: string, sts: StatefulService): k8s.types.input.core.v1.Container => {
-  const pvcList = getPvcNames(asset, sts.replicas, sts.services)
-  return {
-    name: `${asset}-backup-runner`,
-    image: 'lukmyslinski/backuprunner:0.24',
-    args: ['-n', namespace, '-s', `${asset}-sts`, '-p', pvcList, '-r', `${sts.replicas}`, "-c", `${sts.backup?.backupCount}`],
-  }
-}
-
-const getPvcNames = (asset: string, replicas: number, services: ServiceConfig[]) => {
-  return (Array.from(Array(replicas).keys()).flatMap(n => {
-      return services.map(svc => `data-${svc.name}-${asset}-sts-${n}`)
-    }).filter((pvc) => pvc) as string[]).join(',')
-}
-
-
 const createRbac = (asset: string, namespace: string, provider: k8s.Provider) => {
   const serviceAccountName = `${asset}-backup-job-sa`;
+  const backupJobRole = `${asset}-backup-job-role`
 
   new k8s.core.v1.ServiceAccount(serviceAccountName, {
     metadata: {
@@ -69,9 +53,9 @@ const createRbac = (asset: string, namespace: string, provider: k8s.Provider) =>
     }
   }, { provider });
 
-  new k8s.rbac.v1.Role(`${asset}-backup-job-role`, {
+  new k8s.rbac.v1.Role(backupJobRole, {
     metadata: {
-      name: `${asset}-backup-job-role`,
+      name: backupJobRole,
       namespace: namespace
     },
     rules: [
@@ -90,12 +74,12 @@ const createRbac = (asset: string, namespace: string, provider: k8s.Provider) =>
 
   new k8s.rbac.v1.RoleBinding(`${asset}-backup-job-role-binding`, {
     metadata: {
-      name: `${asset}-backup-job-role`,
+      name: backupJobRole,
       namespace: namespace
     },
     roleRef: {
       kind: "Role",
-      name: `${asset}-backup-job-role`,
+      name: backupJobRole,
       apiGroup: ""
     },
     subjects: [
