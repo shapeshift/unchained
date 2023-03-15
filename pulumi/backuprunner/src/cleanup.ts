@@ -7,9 +7,7 @@ export const cleanup = async (k8sApi: k8s.KubernetesObjectApi, sts: string, name
   const snapshots = await getExistingVolumeSnapshots(k8sApi, sts, namespace);
   console.log(`Backup count to keep - ${backupCount}. ${sts} consists of ${pvcCount} PVC's, so will keep ${pvcsToKeepCount} latest snapshots`)
 
-  if(snapshots.length <= pvcsToKeepCount){
-    console.log(`Not archiving old snapshots, too few results`)
-  }else {
+  if (snapshots.length > pvcsToKeepCount) {
     await removeOldSnapshots(k8sApi, snapshots, pvcsToKeepCount)
   }
 
