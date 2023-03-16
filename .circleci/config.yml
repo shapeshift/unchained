@@ -574,7 +574,8 @@ aliases:
     service-image-2: shapeshiftdao/unchained-blockbook:15c19ac
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 12Gi
+    service-memory-limit-2: 24Gi
+    service-memory-request-2: 12Gi
     service-storage-size-2: 750Gi
 
   - &bnbsmartchain-dev
