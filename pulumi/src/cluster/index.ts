@@ -102,7 +102,6 @@ export = async (): Promise<Outputs> => {
     }
 
     const volumeReaperImage = `${config.dockerhub.username}/volumereaper`
-    const volumeReaperTag = 'test-tag'
     const buildArgs = { BUILDKIT_INLINE_CACHE: '1', BASE_IMAGE: baseImage }
 
     await buildAndPushImage({
@@ -116,7 +115,7 @@ export = async (): Promise<Outputs> => {
       buildArgs: buildArgs,
       env: { DOCKER_BUILDKIT: '1' },
       tags: ['test-hash'],
-      cacheFroms: [`${volumeReaperImage}:${volumeReaperTag}`, `${volumeReaperImage}:latest`],
+      cacheFroms: [`${volumeReaperImage}:${baseTag}`, `${volumeReaperImage}:latest`],
     })
   }
 
