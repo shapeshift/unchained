@@ -17,9 +17,9 @@ program
   .option('-c, --count [value]', 'Total number of historic backups to keep', '1')
   .parse(process.argv)
 
-const args = program.opts();
+const args = program.opts()
 
-(async () => {
+;(async () => {
   await runBackup({
     pvcList: String(args.pvcs),
     backupCount: Number(args.count),

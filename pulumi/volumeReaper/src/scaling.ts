@@ -1,7 +1,10 @@
 import k8s from '@kubernetes/client-node'
 
-
-export const getCurrentReplicas = async (k8sAppsClient: k8s.AppsV1Api, name: string, namespace: string): Promise<number> => {
+export const getCurrentReplicas = async (
+  k8sAppsClient: k8s.AppsV1Api,
+  name: string,
+  namespace: string
+): Promise<number> => {
   const { body } = await k8sAppsClient.readNamespacedStatefulSetStatus(name, namespace)
   if (!body.spec?.replicas) throw new Error(`No spec found for StatefulSet: ${namespace}.${name}`)
   return body.spec?.replicas
