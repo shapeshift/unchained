@@ -100,6 +100,24 @@ export = async (): Promise<Outputs> => {
         cacheFroms: [`${blockbookImage}:${blockbookTag}`, `${blockbookImage}:latest`],
       })
     }
+
+    const volumeReaperImage = `${config.dockerhub.username}/volumereaper`
+    const volumeReaperTag = 'test-tag'
+    const buildArgs = { BUILDKIT_INLINE_CACHE: '1', BASE_IMAGE: baseImage }
+
+    await buildAndPushImage({
+      image: volumeReaperImage,
+      context: '../../volumeReaper',
+      auth: {
+        password: config.dockerhub.password,
+        username: config.dockerhub.username,
+        server: config.dockerhub.server,
+      },
+      buildArgs: buildArgs,
+      env: { DOCKER_BUILDKIT: '1' },
+      tags: ['test-hash'],
+      cacheFroms: [`${volumeReaperImage}:${volumeReaperTag}`, `${volumeReaperImage}:latest`],
+    })
   }
 
   const namespaces: Array<string> = [defaultNamespace]

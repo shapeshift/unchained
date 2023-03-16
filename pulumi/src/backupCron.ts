@@ -5,10 +5,7 @@ export const deployStsBackupCron = (asset: string, sts: StatefulService, namespa
   if (!sts.backup) return
 
   const serviceAccountName = createRbac(asset, namespace, provider)
-
-  const pvcs = Array.from(Array(sts.replicas).keys())
-    .flatMap((n) => sts.services.map((svc) => `data-${svc.name}-${asset}-sts-${n}`))
-    .join(',')
+  const pvcs = sts.services.map(svc => `data-${svc.name}-${asset}-sts-${sts.replicas-1}`).join(',')
 
   const backupContainer = {
     name: `${asset}-backup-runner`,
