@@ -34,7 +34,7 @@ export const scaleStatefulSet = async (
 const waitForScalingToFinish = async (k8sAppsClient: k8s.AppsV1Api, name: string, namespace: string, count: number) => {
   for (let i = 0; i < 100; i++) {
     // termination grace period is 120s so need to account for that
-    console.log(`Waiting for ${name} to shut down...`)
+    console.log(`Waiting for ${name} to scale down...`)
 
     await delay(3000)
     const status = await k8sAppsClient.readNamespacedStatefulSetStatus(name, namespace)

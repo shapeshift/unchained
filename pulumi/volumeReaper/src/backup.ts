@@ -1,7 +1,9 @@
-import k8s, { HttpError } from '@kubernetes/client-node'
+import * as k8s from '@kubernetes/client-node'
+
 import { takeSnapshots } from './snapshot'
 import { getCurrentReplicas, scaleStatefulSet } from './scaling'
 import { cleanup } from './cleanup'
+import { HttpError } from '@kubernetes/client-node'
 
 interface Options {
   pvcList: string

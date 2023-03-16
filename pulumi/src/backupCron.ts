@@ -9,7 +9,8 @@ export const deployStsBackupCron = (asset: string, sts: StatefulService, namespa
 
   const backupContainer = {
     name: `${asset}-backup-runner`,
-    image: 'shapeshift/volumereaper:0.24',
+    image: 'shapeshiftdao/volumereaper:latest',
+    imagePullPolicy: "Always",
     args: ['-n', namespace, '-s', `${asset}-sts`, '-p', pvcs, "-c", `${sts.backup.backupCount}`],
   }
 
@@ -30,7 +31,7 @@ export const deployStsBackupCron = (asset: string, sts: StatefulService, namespa
             spec: {
               serviceAccountName: serviceAccountName,
               containers: [backupContainer],
-              restartPolicy: "Never"
+              restartPolicy: "Never",
             },
           },
         },
