@@ -82,7 +82,7 @@ export = async (): Promise<Outputs> => {
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
           volumeMounts: [{ name: 'config-map', mountPath: '/config.json', subPath: 'indexer-config.json' }],
           readinessProbe: { initialDelaySeconds: 20, periodSeconds: 5, failureThreshold: 12 },
-          livenessProbe: { timeoutSeconds: 10, initialDelaySeconds: 60, periodSeconds: 15, failureThreshold: 4 },
+          livenessProbe: { timeoutSeconds: 10, initialDelaySeconds: 60, periodSeconds: 15, failureThreshold: 8 },
         })
       }
 
