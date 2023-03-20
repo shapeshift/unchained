@@ -69,6 +69,6 @@ const getSnapshotsToRemove = (snapshots: KubernetesObject[], pvcsToKeepCount: nu
   console.log(`Volume snapshots to remove: ${toRemove.length}`)
   toRemove.forEach((x) => console.log(x.metadata?.name))
 
-  // Start removal from the oldest VC's
+  // Start removal from the oldest snapshot first
   return toRemove.reverse()
 }
