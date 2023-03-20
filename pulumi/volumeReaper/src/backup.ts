@@ -25,7 +25,7 @@ export const runBackup = async (opts: Options) => {
     await takeSnapshots(k8sObjectClient, opts.statefulset, opts.pvcList)
     await scaleStatefulSet(k8sAppsClient, opts.statefulset, opts.namespace, replicas, false)
     await cleanup(k8sObjectClient, opts.statefulset, opts.namespace, opts.pvcList, opts.backupCount)
-    console.log('Backup runner completed')
+    console.log('Backup completed')
   } catch (err) {
     if (err instanceof HttpError) {
       console.error('K8s operation failed:', err.body)
