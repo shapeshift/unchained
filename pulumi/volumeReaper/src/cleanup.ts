@@ -48,7 +48,7 @@ const removeOldSnapshots = async (
   )
 }
 
-const deleteSnapshot = async (k8sApi: k8s.KubernetesObjectApi, snapshot: KubernetesObject) => {
+const deleteSnapshot = async (k8sApi: k8s.KubernetesObjectApi, snapshot: VolumeSnapshot) => {
   await k8sApi.delete({
     apiVersion: snapshot.apiVersion,
     kind: snapshot.kind,
