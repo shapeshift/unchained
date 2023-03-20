@@ -40,7 +40,7 @@ const sortByCreationTimestampDesc = (a: VolumeSnapshot, b: VolumeSnapshot) =>
 
 const removeOldSnapshots = async (
   k8sApi: k8s.KubernetesObjectApi,
-  snapshots: KubernetesObject[],
+  snapshots: VolumeSnapshot[],
   snapshotsToKeepCount: number
 ) => {
   await Promise.all(
