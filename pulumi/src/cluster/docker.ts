@@ -58,7 +58,7 @@ export const buildAndPushDockerImages = async (dockerhub: Dockerhub) => {
       buildArgs: { BUILDKIT_INLINE_CACHE: '1', BASE_IMAGE: baseImage },
       env: { DOCKER_BUILDKIT: '1' },
       tags: [volumeReaperHash],
-      cacheFroms: [`${baseImage}:latest`, `${volumeReaperImage}:latest`, `${volumeReaperImage}:${volumeReaperHash}`,],
+      cacheFroms: [`${volumeReaperImage}:latest`, `${volumeReaperImage}:${volumeReaperHash}`, `${baseImage}:latest`],
     })
   }
 }
