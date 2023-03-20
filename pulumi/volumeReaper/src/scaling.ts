@@ -1,4 +1,4 @@
-import k8s from '@kubernetes/client-node'
+import * as k8s from '@kubernetes/client-node'
 
 export const getCurrentReplicas = async (
   k8sAppsClient: k8s.AppsV1Api,

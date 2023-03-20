@@ -2,7 +2,7 @@ import figlet from 'figlet'
 import { Command } from 'commander'
 import { runBackup } from './backup'
 
-console.log(figlet.textSync('Unchained Backup Runner'))
+console.log(figlet.textSync('Unchained Volume Reaper'))
 
 const program = new Command()
 
