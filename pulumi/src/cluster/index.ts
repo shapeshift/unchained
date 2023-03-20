@@ -101,7 +101,7 @@ export = async (): Promise<Outputs> => {
       })
     }
 
-    const volumeReaperImage = `${config.dockerhub.username}/volumereaper`
+    const volumeReaperImage = `${config.dockerhub.username}/${name}-volume-reaper`
     const buildArgs = { BUILDKIT_INLINE_CACHE: '1', BASE_IMAGE: baseImage }
 
     await buildAndPushImage({
