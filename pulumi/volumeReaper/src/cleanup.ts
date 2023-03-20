@@ -53,11 +53,11 @@ const deleteSnapshot = async (k8sApi: k8s.KubernetesObjectApi, snapshot: Kuberne
     apiVersion: snapshot.apiVersion,
     kind: snapshot.kind,
     metadata: {
-      name: snapshot.metadata?.name,
-      labels: snapshot.metadata?.labels,
+      name: snapshot.metadata.name,
+      labels: snapshot.metadata.labels,
     },
   })
-  console.log(`Deleted ${snapshot.metadata?.name}`)
+  console.log(`Deleted ${snapshot.metadata.name}`)
 }
 
 const getSnapshotsToRemove = (snapshots: VolumeSnapshot[], pvcsToKeepCount: number) => {
