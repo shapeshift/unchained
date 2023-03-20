@@ -64,10 +64,10 @@ const getSnapshotsToRemove = (snapshots: KubernetesObject[], pvcsToKeepCount: nu
   const [toKeep, toRemove] = [snapshots.slice(0, pvcsToKeepCount), snapshots.slice(pvcsToKeepCount)]
 
   console.log(`Volume snapshots to keep: ${toKeep.length}`)
-  toKeep.forEach((x) => console.log(x.metadata?.name))
+  toKeep.forEach((x) => console.log(x.metadata.name))
 
   console.log(`Volume snapshots to remove: ${toRemove.length}`)
-  toRemove.forEach((x) => console.log(x.metadata?.name))
+  toRemove.forEach((x) => console.log(x.metadata.name))
 
   // Start removal from the oldest snapshot first
   return toRemove.reverse()
