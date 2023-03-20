@@ -20,4 +20,4 @@ RUN sed -i -e '/\[Node.LogConfig\]/,+5d' config.toml
 
 EXPOSE 8545 8546 30303 30303/udp
 
-ENTRYPOINT ["bsc"]
+ENTRYPOINT ["geth"]
