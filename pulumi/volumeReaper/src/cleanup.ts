@@ -36,7 +36,7 @@ const getExistingVolumeSnapshots = async (
 }
 
 const sortByCreationTimestampDesc = (a: VolumeSnapshot, b: VolumeSnapshot) =>
-  new Date(b.metadata?.creationTimestamp).getTime() - new Date(a.metadata?.creationTimestamp).getTime()
+  new Date(b.metadata.creationTimestamp).getTime() - new Date(a.metadata.creationTimestamp).getTime()
 
 const removeOldSnapshots = async (
   k8sApi: k8s.KubernetesObjectApi,
