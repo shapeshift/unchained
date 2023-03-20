@@ -39,7 +39,7 @@ export const getBaseHash = async (): Promise<string> => {
   return hash.digest('hex')
 }
 
-export const getVolumeReaperHJash = async (): Promise<string> => {
+export const getVolumeReaperHash = async (): Promise<string> => {
   const hash = createHash('sha1')
   // hash volume reaper files
   const { hash: volumeReaperHash } = await hashElement(volumeReaperDir, {
