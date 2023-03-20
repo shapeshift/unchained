@@ -1,7 +1,6 @@
 import * as k8s from '@kubernetes/client-node'
-import { KubernetesObject } from '@kubernetes/client-node'
 
-export interface VolumeSnapshot extends Required<KubernetesObject> {
+export interface VolumeSnapshot extends Required<k8s.KubernetesObject> {
   metadata: {
     name: string
     creationTimestamp: Date

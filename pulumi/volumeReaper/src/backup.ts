@@ -1,9 +1,7 @@
 import * as k8s from '@kubernetes/client-node'
-
 import { takeSnapshots } from './snapshot'
 import { getCurrentReplicas, scaleStatefulSet } from './scaling'
 import { cleanup } from './cleanup'
-import { HttpError } from '@kubernetes/client-node'
 import assert from 'assert'
 
 interface Options {
@@ -35,7 +33,7 @@ export const runBackup = async (opts: Options) => {
     await cleanup(k8sObjectClient, statefulset, opts.namespace, pvcsToKeepCount)
     console.log('Backup completed')
   } catch (err) {
-    if (err instanceof HttpError) {
+    if (err instanceof k8s.HttpError) {
       console.error('K8s operation failed:', err.body)
     } else {
       console.error(err)
