@@ -7,7 +7,6 @@ export const cleanup = async (
   namespace: string,
   pvcsToKeepCount: number
 ) => {
-
   const snapshots = await getExistingVolumeSnapshots(k8sApi, sts, namespace)
   if (snapshots.length > pvcsToKeepCount) {
     await removeOldSnapshots(k8sApi, snapshots, pvcsToKeepCount)

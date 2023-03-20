@@ -25,7 +25,7 @@ export const runBackup = async (opts: Options) => {
   const replicas = await getCurrentReplicas(k8sAppsClient, statefulset, opts.namespace)
   assert(replicas >= 1, 'Replicas needs to be larger than 0 to run backup')
 
-  const pvcList = opts.stsServices.split(',').map(svc => `data-${svc}-${opts.asset}-sts-${replicas}`)
+  const pvcList = opts.stsServices.split(',').map((svc) => `data-${svc}-${opts.asset}-sts-${replicas}`)
   const pvcsToKeepCount = pvcList.length * opts.backupCount
 
   try {
