@@ -1,20 +1,14 @@
 import k8s, { KubernetesObject } from '@kubernetes/client-node'
+import { VolumeSnapshot } from './snapshot'
 
 export const cleanup = async (
   k8sApi: k8s.KubernetesObjectApi,
   sts: string,
   namespace: string,
-  pvcList: string,
-  backupCount: number
+  pvcsToKeepCount: number
 ) => {
-  var pvcCount = pvcList.split(',').length
-  var pvcsToKeepCount = pvcCount * backupCount
 
   const snapshots = await getExistingVolumeSnapshots(k8sApi, sts, namespace)
-  console.log(
-    `Backup count to keep - ${backupCount}. ${sts} consists of ${pvcCount} PVC's, so will keep ${pvcsToKeepCount} latest snapshots`
-  )
-
   if (snapshots.length > pvcsToKeepCount) {
     await removeOldSnapshots(k8sApi, snapshots, pvcsToKeepCount)
   }
@@ -42,8 +36,8 @@ const getExistingVolumeSnapshots = async (
   return items.sort(sortByCreationTimestampDesc)
 }
 
-const sortByCreationTimestampDesc = (a: KubernetesObject, b: KubernetesObject) =>
-  new Date(b.metadata?.creationTimestamp!!).getTime() - new Date(a.metadata?.creationTimestamp!!).getTime()
+const sortByCreationTimestampDesc = (a: VolumeSnapshot, b: VolumeSnapshot) =>
+  new Date(b.metadata?.creationTimestamp).getTime() - new Date(a.metadata?.creationTimestamp).getTime()
 
 const removeOldSnapshots = async (
   k8sApi: k8s.KubernetesObjectApi,

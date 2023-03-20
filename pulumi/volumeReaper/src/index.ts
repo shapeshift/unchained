@@ -11,8 +11,8 @@ program
   .description(
     'A CLI for creating EBS Snapshots for Unchained. This CLI will stop a target StatefulSet, take a snapshot of an attached PVC, start the StatefulSet back up and finally, clean up older backups.'
   )
-  .requiredOption('-p, --pvcs [value]', 'List of comma-separated PVC names to be snapshotted')
-  .requiredOption('-s, --statefulset [value]', 'Name of the StatefulSet which will be stopped/started')
+  .requiredOption('-a, --asset [value]', 'The asset to backup')
+  .requiredOption('-s, --sts-services [value]', 'List of comma-separated service names in the StatefulSet')
   .requiredOption('-n, --namespace [value]', 'Kubernetes namespace')
   .option('-c, --count [value]', 'Total number of historic backups to keep', '1')
   .parse(process.argv)
@@ -21,9 +21,9 @@ const args = program.opts()
 
 ;(async () => {
   await runBackup({
-    pvcList: String(args.pvcs),
-    backupCount: Number(args.count),
-    statefulset: String(args.statefulset),
+    asset: String(args.asset),
+    stsServices: String(args.stsServices),
     namespace: String(args.namespace),
+    backupCount: Number(args.count),
   })
 })()

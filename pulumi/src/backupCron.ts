@@ -5,13 +5,13 @@ export const deployStsBackupCron = (asset: string, sts: StatefulService, namespa
   if (!sts.backup) return
 
   const serviceAccountName = createRbac(asset, namespace, provider)
-  const pvcs = sts.services.map(svc => `data-${svc.name}-${asset}-sts-${sts.replicas-1}`).join(',')
+  const svcs = sts.services.map(svc => svc.name).join(',')
 
   const backupContainer = {
     name: `${asset}-backup-runner`,
     image: 'shapeshiftdao/volumereaper:latest',
     imagePullPolicy: "Always",
-    args: ['-n', namespace, '-s', `${asset}-sts`, '-p', pvcs, "-c", `${sts.backup.backupCount}`],
+    args: ['-n', namespace, '-s', svcs, '-a', asset, "-c", `${sts.backup.backupCount}`],
   }
 
   new k8s.batch.v1.CronJob(`${asset}-backup-job`, {
