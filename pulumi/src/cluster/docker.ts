@@ -1,7 +1,7 @@
 import { hashElement } from "folder-hash"
 import { Dockerhub } from ".."
 import { hasTag, buildAndPushImage } from "../docker"
-import { getBaseHash, getVolumeReaperHJash as getVolumeReaperHash } from "../hasher"
+import { getBaseHash, getVolumeReaperHash } from "../hasher"
 
 export const buildAndPushDockerImages = async (dockerhub: Dockerhub) => {
   const baseImage = `${dockerhub.username}/${name}-base`
