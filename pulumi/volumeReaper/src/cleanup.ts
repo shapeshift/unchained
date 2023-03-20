@@ -1,4 +1,4 @@
-import k8s from '@kubernetes/client-node'
+import * as k8s from '@kubernetes/client-node'
 import { VolumeSnapshot } from './snapshot'
 
 export const cleanup = async (
