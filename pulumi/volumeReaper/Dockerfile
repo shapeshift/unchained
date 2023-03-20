@@ -4,6 +4,4 @@ FROM $BASE_IMAGE
 
 COPY . .
 
-WORKDIR dist
-
-ENTRYPOINT ["/usr/local/bin/node", "index.js", "$@"]
+ENTRYPOINT ["node", "dist/index.js"]
