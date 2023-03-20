@@ -44,7 +44,7 @@ const removeOldSnapshots = async (
   snapshotsToKeepCount: number
 ) => {
   await Promise.all(
-    getSnapshotsToRemove(snapshots, snapshotsToKeepCount).map(async (vc) => await deleteSnapshot(k8sApi, vc))
+    getSnapshotsToRemove(snapshots, snapshotsToKeepCount).map(async (snapshot) => await deleteSnapshot(k8sApi, snapshot))
   )
 }
 
