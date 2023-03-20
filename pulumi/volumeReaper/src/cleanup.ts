@@ -27,7 +27,7 @@ const getExistingVolumeSnapshots = async (
   sts: string,
   namespace: string
 ): Promise<KubernetesObject[]> => {
-  const snapshots = await k8sApi.list(
+  const snapshots = await k8sApi.list<VolumeSnapshot>(
     'snapshot.storage.k8s.io/v1',
     'VolumeSnapshot',
     namespace,
