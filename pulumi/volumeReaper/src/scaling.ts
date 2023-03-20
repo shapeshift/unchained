@@ -7,7 +7,7 @@ export const getCurrentReplicas = async (
 ): Promise<number> => {
   const { body } = await k8sAppsClient.readNamespacedStatefulSetStatus(name, namespace)
   if (!body.spec?.replicas) throw new Error(`No spec found for StatefulSet: ${namespace}.${name}`)
-  return body.spec?.replicas
+  return body.spec.replicas
 }
 
 export const delay = (time: number) => {
