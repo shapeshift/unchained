@@ -67,6 +67,12 @@ aliases:
     stateful-service-replicas:
       type: integer
       default: 0
+    stateful-service-backup-count:
+      type: integer
+      default: 3
+    stateful-service-backup-schedule:
+      type: string
+      default: "04**0" 
     service-name-1:
       type: string
       default: ""
@@ -600,6 +606,10 @@ commands:
           name: yarn install pulumi
           command: yarn install --immutable
       - run:
+          working_directory: pulumi/volumeReaper
+          name: yarn install volume reaper
+          command: yarn install --immutable
+      - run:
           working_directory: monitoring
           name: yarn install monitoring
           command: yarn install --immutable
@@ -611,6 +621,10 @@ commands:
           working_directory: go/pulumi
           name: yarn install go pulumi
           command: yarn install --immutable
+      - run:
+          working_directory: pulumi/volumeReaper
+          name: build volume reaper
+          command: yarn build
       - run:
           working_directory: node
           name: build node
@@ -694,6 +708,7 @@ commands:
             helm repo add traefik https://helm.traefik.io/traefik
             helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
             helm repo add aws-ebs-csi-driver https://kubernetes-sigs.github.io/aws-ebs-csi-driver
+            helm repo add piraeus-charts https://piraeus.io/helm-charts/
             helm repo update
       - run:
           name: install pulumi plugin resources
@@ -833,6 +848,8 @@ jobs:
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.cpuRequest << parameters.api-cpu-request >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.memoryLimit << parameters.api-memory-limit >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.replicas << parameters.api-replicas >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.backup.count << parameters.stateful-service-backup-count >>
+            pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.backup.schedule << parameters.stateful-service-backup-schedule >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.replicas << parameters.stateful-service-replicas >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-name-1 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[0].name << parameters.service-name-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-image-1 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[0].image << parameters.service-image-1 >>
