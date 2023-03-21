@@ -1,13 +1,10 @@
 import axios from 'axios'
 import { execSync } from 'child_process'
 import * as pulumi from '@pulumi/pulumi'
+import { Dockerhub } from '.'
 
 export interface BuildAndPushImageArgs {
-  auth: {
-    username: string
-    password: string
-    server: string
-  }
+  auth: Dockerhub
   buildArgs?: Record<string, string>
   env?: Record<string, string>
   cacheFroms?: Array<string>

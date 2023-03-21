@@ -3,8 +3,8 @@ import { Input, Resource } from '@pulumi/pulumi'
 import { buildAndPushImage, BuildAndPushImageArgs, Config, hasTag } from './index'
 
 export interface Autoscaling {
-  enabled: boolean,
-  maxReplicas: number,
+  enabled: boolean
+  maxReplicas: number
   cpuThreshold: number
 }
 
@@ -17,17 +17,17 @@ export interface ApiConfig {
 }
 
 export interface DeployApiArgs {
-  app: string,
-  asset: string,
-  baseImageName?: string,
-  buildAndPushImageArgs: Pick<BuildAndPushImageArgs, 'context' | 'dockerFile'>,
-  config: Pick<Config, 'api' | 'dockerhub' | 'rootDomainName' | 'environment'>,
-  container: Partial<Pick<k8s.types.input.core.v1.Container, 'args' | 'command'>>,
+  app: string
+  asset: string
+  baseImageName?: string
+  buildAndPushImageArgs: Pick<BuildAndPushImageArgs, 'context' | 'dockerFile'>
+  config: Pick<Config, 'api' | 'dockerhub' | 'rootDomainName' | 'environment'>
+  container: Partial<Pick<k8s.types.input.core.v1.Container, 'args' | 'command'>>
   deployDependencies?: Input<Array<Resource>>
-  getHash: (coinstack: string, buildArgs: Record<string, string>) => Promise<string>,
-  namespace: string,
-  provider: k8s.Provider,
-  secretEnvs: (coinstack: string, asset: string) => k8s.types.input.core.v1.EnvVar[],
+  getHash: (coinstack: string, buildArgs: Record<string, string>) => Promise<string>
+  namespace: string
+  provider: k8s.Provider
+  secretEnvs: (coinstack: string, asset: string) => k8s.types.input.core.v1.EnvVar[]
 }
 
 export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deployment | undefined> {
@@ -79,7 +79,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
         env: { DOCKER_BUILDKIT: '1' },
         tags: [tag],
         cacheFroms,
-        ...buildAndPushImageArgs
+        ...buildAndPushImageArgs,
       })
     }
   }
@@ -139,7 +139,9 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
 
     const additionalRootDomainName = process.env.ADDITIONAL_ROOT_DOMAIN_NAME
     const hostMatch = `Host(\`${domain}\`)`
-    const additionalHostMatch = `Host(\`${config.environment ? `${config.environment}-api` : 'api'}.${asset}.${additionalRootDomainName}\`)`
+    const additionalHostMatch = `Host(\`${
+      config.environment ? `${config.environment}-api` : 'api'
+    }.${asset}.${additionalRootDomainName}\`)`
 
     new k8s.apiextensions.CustomResource(
       `${name}-ingressroute`,
@@ -227,7 +229,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
             failureThreshold: 3,
             successThreshold: 1,
           },
-          ...container
+          ...container,
         },
       ],
     },
