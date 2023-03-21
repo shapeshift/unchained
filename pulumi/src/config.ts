@@ -57,9 +57,9 @@ export const getConfig = async (coinstack: string): Promise<Config> => {
   if (config.statefulService) {
     if (config.statefulService?.replicas === undefined) missingRequiredConfig.push('statefulService.replicas')
 
-    if (config.statefulService.backup) {
-      if (config.statefulService.backup.count === undefined) missingRequiredConfig.push('statefulService.backup.count')
-      if (config.statefulService.backup.schedule === undefined)
+    if (config.statefulService?.backup) {
+      if (config.statefulService?.backup?.count === undefined) missingRequiredConfig.push('statefulService.backup.count')
+      if (config.statefulService?.backup?.schedule === undefined)
         missingRequiredConfig.push('statefulService.backup.schedule')
     }
 
