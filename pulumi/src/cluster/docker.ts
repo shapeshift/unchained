@@ -3,7 +3,7 @@ import { Dockerhub } from ".."
 import { hasTag, buildAndPushImage } from "../docker"
 import { getBaseHash, getVolumeReaperHash } from "../hasher"
 
-export const buildAndPushDockerImages = async (dockerhub: Dockerhub) => {
+export const buildAndPushDockerImages = async (dockerhub: Dockerhub, name: string) => {
   const baseImage = `${dockerhub.username}/${name}-base`
   const baseTag = await getBaseHash()
 

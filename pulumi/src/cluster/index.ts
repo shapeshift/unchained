@@ -62,7 +62,7 @@ export = async (): Promise<Outputs> => {
   const provider = new Provider('kube-provider', { kubeconfig: cluster.kubeconfig })
 
   if (config.dockerhub) {
-    buildAndPushDockerImages(config.dockerhub)
+    buildAndPushDockerImages(config.dockerhub, name)
   }
 
   const namespaces: Array<string> = [defaultNamespace]
