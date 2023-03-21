@@ -1,9 +1,8 @@
-import { hashElement } from 'folder-hash'
 import * as pulumi from '@pulumi/pulumi'
 import { core, Provider } from '@pulumi/kubernetes'
 import { EKSClusterLauncher, EKSClusterLauncherArgs } from '@shapeshiftoss/cluster-launcher'
-import { buildAndPushImage, hasTag } from '../docker'
-import { BaseConfig, getBaseHash } from '..'
+import { BaseConfig } from '..'
+import { buildAndPushDockerImages } from './docker'
 
 interface Config extends BaseConfig {
   cluster: 'eks'
@@ -63,43 +62,7 @@ export = async (): Promise<Outputs> => {
   const provider = new Provider('kube-provider', { kubeconfig: cluster.kubeconfig })
 
   if (config.dockerhub) {
-    const baseImage = `${config.dockerhub.username}/${name}-base`
-    const baseTag = await getBaseHash()
-
-    if (!(await hasTag(baseImage, baseTag))) {
-      await buildAndPushImage({
-        image: baseImage,
-        context: '../../../node',
-        auth: {
-          password: config.dockerhub.password,
-          username: config.dockerhub.username,
-          server: config.dockerhub.server,
-        },
-        buildArgs: { BUILDKIT_INLINE_CACHE: '1' },
-        env: { DOCKER_BUILDKIT: '1' },
-        tags: [baseTag],
-        cacheFroms: [`${baseImage}:${baseTag}`, `${baseImage}:latest`],
-      })
-    }
-
-    const blockbookImage = `${config.dockerhub.username}/${name}-blockbook`
-    const { hash: blockbookTag } = await hashElement(`../../..//node/packages/blockbook/Dockerfile`, { encoding: 'hex' })
-
-    if (!(await hasTag(blockbookImage, blockbookTag))) {
-      await buildAndPushImage({
-        image: blockbookImage,
-        context: '../../../node/packages/blockbook',
-        auth: {
-          password: config.dockerhub.password,
-          username: config.dockerhub.username,
-          server: config.dockerhub.server,
-        },
-        buildArgs: { BUILDKIT_INLINE_CACHE: '1' },
-        env: { DOCKER_BUILDKIT: '1' },
-        tags: [blockbookTag],
-        cacheFroms: [`${blockbookImage}:${blockbookTag}`, `${blockbookImage}:latest`],
-      })
-    }
+    buildAndPushDockerImages(config.dockerhub, name)
   }
 
   const namespaces: Array<string> = [defaultNamespace]

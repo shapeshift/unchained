@@ -27,15 +27,23 @@ export interface BaseConfig {
   rootDomainName?: string
 }
 
+export interface BackupConfig {
+  schedule: string
+  backupCount: number
+}
+
+export interface StatefulService {
+  replicas: number
+  services: Array<ServiceConfig>,
+  backup?: BackupConfig
+}
+
 export interface Config extends BaseConfig {
   stack: string
   network: string
   environment?: string
   api?: ApiConfig
-  statefulService?: {
-    replicas: number
-    services: Array<ServiceConfig>
-  }
+  statefulService?: StatefulService
 }
 
 export interface ServiceConfig {
