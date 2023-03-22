@@ -41,11 +41,12 @@ export const getBaseHash = async (): Promise<string> => {
 
 export const getVolumeReaperHash = async (): Promise<string> => {
   const hash = createHash('sha1')
-  // hash volume reaper files
+
   const { hash: volumeReaperHash } = await hashElement(volumeReaperDir, {
     folders: { include: ['**'], exclude: ['.*', 'dist', 'node_modules'] },
     files: { include: ['*.ts', '*.json', 'Dockerfile'] },
   })
   hash.update(volumeReaperHash)
-  return hash.digest('hex') 
+
+  return hash.digest('hex')
 }

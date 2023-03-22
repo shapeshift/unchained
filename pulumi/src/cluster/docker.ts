@@ -1,7 +1,7 @@
-import { hashElement } from "folder-hash"
-import { Dockerhub } from ".."
-import { hasTag, buildAndPushImage } from "../docker"
-import { getBaseHash, getVolumeReaperHash } from "../hasher"
+import { hashElement } from 'folder-hash'
+import { hasTag, buildAndPushImage } from '../docker'
+import { getBaseHash, getVolumeReaperHash } from '../hasher'
+import { Dockerhub } from '..'
 
 export const buildAndPushDockerImages = async (dockerhub: Dockerhub, name: string) => {
   const baseImage = `${dockerhub.username}/${name}-base`
@@ -11,11 +11,7 @@ export const buildAndPushDockerImages = async (dockerhub: Dockerhub, name: strin
     await buildAndPushImage({
       image: baseImage,
       context: '../../../node',
-      auth: {
-        password: dockerhub.password,
-        username: dockerhub.username,
-        server: dockerhub.server,
-      },
+      auth: dockerhub,
       buildArgs: { BUILDKIT_INLINE_CACHE: '1' },
       env: { DOCKER_BUILDKIT: '1' },
       tags: [baseTag],
@@ -30,11 +26,7 @@ export const buildAndPushDockerImages = async (dockerhub: Dockerhub, name: strin
     await buildAndPushImage({
       image: blockbookImage,
       context: '../../../node/packages/blockbook',
-      auth: {
-        password: dockerhub.password,
-        username: dockerhub.username,
-        server: dockerhub.server,
-      },
+      auth: dockerhub,
       buildArgs: { BUILDKIT_INLINE_CACHE: '1' },
       env: { DOCKER_BUILDKIT: '1' },
       tags: [blockbookTag],
@@ -43,21 +35,17 @@ export const buildAndPushDockerImages = async (dockerhub: Dockerhub, name: strin
   }
 
   const volumeReaperImage = `${dockerhub.username}/${name}-volume-reaper`
-  const volumeReaperHash = await getVolumeReaperHash()
+  const volumeReaperTag = await getVolumeReaperHash()
 
-  if (!(await hasTag(volumeReaperImage, volumeReaperHash))) {
+  if (!(await hasTag(volumeReaperImage, volumeReaperTag))) {
     await buildAndPushImage({
       image: volumeReaperImage,
       context: '../../volumeReaper',
-      auth: {
-        password: dockerhub.password,
-        username: dockerhub.username,
-        server: dockerhub.server,
-      },
+      auth: dockerhub,
       buildArgs: { BUILDKIT_INLINE_CACHE: '1', BASE_IMAGE: baseImage },
       env: { DOCKER_BUILDKIT: '1' },
-      tags: [volumeReaperHash],
-      cacheFroms: [`${volumeReaperImage}:latest`, `${volumeReaperImage}:${volumeReaperHash}`, `${baseImage}:latest`],
+      tags: [volumeReaperTag],
+      cacheFroms: [`${volumeReaperImage}:${volumeReaperTag}`, `${volumeReaperImage}:latest`, `${baseImage}:latest`],
     })
   }
 }

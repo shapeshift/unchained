@@ -1,13 +1,12 @@
 import figlet from 'figlet'
 import { Command } from 'commander'
-import { runBackup } from './backup'
+import { VolumeReaper } from './volumeReaper'
 
 console.log(figlet.textSync('Unchained Volume Reaper'))
 
 const program = new Command()
 
 program
-  .version('1.0.0')
   .description(
     'A CLI for creating EBS Snapshots for Unchained. This CLI will stop a target StatefulSet, take a snapshot of an attached PVC, start the StatefulSet back up and finally, clean up older backups.'
   )
@@ -19,11 +18,13 @@ program
 
 const args = program.opts()
 
+const volumeReaper = new VolumeReaper({
+  asset: String(args.asset),
+  services: String(args.stsServices),
+  namespace: String(args.namespace),
+  backupCount: Number(args.count),
+})
+
 ;(async () => {
-  await runBackup({
-    asset: String(args.asset),
-    stsServices: String(args.stsServices),
-    namespace: String(args.namespace),
-    backupCount: Number(args.count),
-  })
+  await volumeReaper.run()
 })()

@@ -45,7 +45,8 @@ export const getConfig = async (coinstack: string): Promise<Config> => {
     if (config.api?.autoscaling) {
       if (config.api?.autoscaling?.enabled === undefined) missingRequiredConfig.push('api.autoscaling.enabled')
       if (config.api?.autoscaling?.maxReplicas === undefined) missingRequiredConfig.push('api.autoscaling.maxReplicas')
-      if (config.api?.autoscaling?.cpuThreshold === undefined) missingRequiredConfig.push('api.autoscaling.cpuThreshold')
+      if (config.api?.autoscaling?.cpuThreshold === undefined)
+        missingRequiredConfig.push('api.autoscaling.cpuThreshold')
     }
 
     if (config.api?.cpuLimit === undefined) missingRequiredConfig.push('api.cpuLimit')
@@ -56,9 +57,21 @@ export const getConfig = async (coinstack: string): Promise<Config> => {
   if (config.statefulService) {
     if (config.statefulService?.replicas === undefined) missingRequiredConfig.push('statefulService.replicas')
 
+    if (config.statefulService?.backup) {
+      if (config.statefulService?.backup?.count === undefined) missingRequiredConfig.push('statefulService.backup.count')
+      if (config.statefulService?.backup?.schedule === undefined)
+        missingRequiredConfig.push('statefulService.backup.schedule')
+    }
+
     config.statefulService?.services.forEach((service, i) => {
-      if (service.cpuRequest === undefined && service.cpuLimit === undefined) missingRequiredConfig.push(`statefulService.services.[${i}].cpuRequest OR statefulService.services.[${i}].cpuLimit`)
-      if (service.memoryRequest === undefined && service.memoryLimit === undefined) missingRequiredConfig.push(`statefulService.services.[${i}].memoryRequest OR statefulService.services.[${i}].memoryLimit`)
+      if (service.cpuRequest === undefined && service.cpuLimit === undefined)
+        missingRequiredConfig.push(
+          `statefulService.services.[${i}].cpuRequest OR statefulService.services.[${i}].cpuLimit`
+        )
+      if (service.memoryRequest === undefined && service.memoryLimit === undefined)
+        missingRequiredConfig.push(
+          `statefulService.services.[${i}].memoryRequest OR statefulService.services.[${i}].memoryLimit`
+        )
       if (service.image === undefined) missingRequiredConfig.push(`statefulService.services.[${i}].image`)
       if (service.name === undefined) missingRequiredConfig.push(`statefulService.services.[${i}].name`)
       if (service.storageSize === undefined) missingRequiredConfig.push(`statefulService.services.[${i}].storageSize`)
