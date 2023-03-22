@@ -1,6 +1,5 @@
 import { parse } from 'dotenv'
 import { readFileSync } from 'fs'
-import * as pulumi from '@pulumi/pulumi'
 import * as k8s from '@pulumi/kubernetes'
 import { deployApi, createService, deployStatefulService, getConfig, Service } from '../../../../pulumi'
 import { api } from '../../../pulumi'
@@ -11,11 +10,10 @@ type Outputs = Record<string, any>
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
   const name = 'unchained'
-  const coinstack = 'avalanche-snapshot-testing'
 
-  console.log(pulumi.Config.toString())
+  const { kubeconfig, config, namespace } = await getConfig()
 
-  const { kubeconfig, config, namespace } = await getConfig(coinstack)
+  const coinstack = config.name
 
   const asset = config.network !== 'mainnet' ? `${coinstack}-${config.network}` : coinstack
   const outputs: Outputs = {}

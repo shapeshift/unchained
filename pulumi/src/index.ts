@@ -40,6 +40,7 @@ export interface StatefulService {
 
 export interface Config extends BaseConfig {
   stack: string
+  name: string
   network: string
   environment?: string
   api?: ApiConfig
