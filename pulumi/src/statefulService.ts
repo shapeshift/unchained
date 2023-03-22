@@ -1,7 +1,7 @@
 import * as k8s from '@pulumi/kubernetes'
 import { readFileSync } from 'fs'
 import { Config, Service, ServiceConfig } from '.'
-import { deployStsBackupCron } from './backupCron'
+import { deployReaperCron } from './reaperCron'
 
 interface Port {
   port: number
@@ -412,6 +412,6 @@ export async function deployStatefulService(
   }
 
   if (namespace == 'unchained-dev') {
-    deployStsBackupCron(asset, config.statefulService, namespace, provider)
+    deployReaperCron(asset, config.statefulService, namespace, provider)
   }
 }

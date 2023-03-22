@@ -1,7 +1,7 @@
 import * as k8s from '@pulumi/kubernetes'
 import { StatefulService } from '.'
 
-export const deployStsBackupCron = (asset: string, sts: StatefulService, namespace: string, provider: k8s.Provider) => {
+export const deployReaperCron = (asset: string, sts: StatefulService, namespace: string, provider: k8s.Provider) => {
   if (!sts.backup) return
 
   const name = `${asset}-volume-reaper`

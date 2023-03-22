@@ -67,6 +67,9 @@ aliases:
     stateful-service-replicas:
       type: integer
       default: 0
+    stateful-service-backup:
+      type: boolean
+      default: false
     stateful-service-backup-count:
       type: integer
       default: 3
@@ -848,8 +851,8 @@ jobs:
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.cpuRequest << parameters.api-cpu-request >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.memoryLimit << parameters.api-memory-limit >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:<< parameters.coinstack >>.api.replicas << parameters.api-replicas >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.backup.count << parameters.stateful-service-backup-count >>
-            pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.backup.schedule << parameters.stateful-service-backup-schedule >>
+            [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.backup.count << parameters.stateful-service-backup-count >>
+            [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.backup.schedule << parameters.stateful-service-backup-schedule >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.replicas << parameters.stateful-service-replicas >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-name-1 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[0].name << parameters.service-name-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-image-1 >>" ] && pulumi config set --path unchained:<< parameters.coinstack >>.statefulService.services[0].image << parameters.service-image-1 >>
