@@ -45,7 +45,7 @@ export = async (): Promise<Outputs> => {
     baseImageName,
     buildAndPushImageArgs: { context: '../api' },
     config,
-    container: { command: ['node', `dist/${coinstack}/api/src/app.js`] },
+    container: { command: ['node', `dist/avalanche/api/src/app.js`] },
     getHash: api.getHash,
     namespace,
     provider,
