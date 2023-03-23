@@ -18,6 +18,12 @@ if [ ! -d "$CHAINDATA_DIR" ]; then
     geth init --datadir $DATA_DIR genesis.json
 fi
 
+# replace peers
+PEERS=$(curl -s https://api.binance.org/v2/discovery/peers | jq -c .peers)
+if [[ -n "$PEERS" && "$PEERS" != "null" ]]; then
+  sed -i -e "s|StaticNodes.*|StaticNodes = $PEERS|" config.toml
+fi
+
 start() {
   geth \
     --config config.toml \
