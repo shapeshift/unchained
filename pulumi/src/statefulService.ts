@@ -1,4 +1,5 @@
 import * as k8s from '@pulumi/kubernetes'
+import * as k8sClient from '@kubernetes/client-node'
 import { readFileSync } from 'fs'
 import { Config, Service, ServiceConfig } from '.'
 import { deployReaperCron } from './reaperCron'
@@ -10,6 +11,22 @@ interface Port {
   stripPathPrefix?: boolean
 }
 
+export interface VolumeSnapshot extends Required<k8sClient.KubernetesObject> {
+  metadata: {
+    name: string
+    creationTimestamp: Date
+    labels: {
+      statefulset: string
+    }
+  }
+  spec: {
+    volumeSnapshotClassName: string
+    source: {
+      persistentVolumeClaimName: string
+    }
+  }
+}
+
 export interface ServiceArgs {
   asset: string
   config: ServiceConfig
@@ -19,9 +36,55 @@ export interface ServiceArgs {
   env?: Record<string, string>
   dataDir?: string
   configMapData?: Record<string, string>
+  snapshots?: Array<VolumeSnapshot>
   volumeMounts?: Array<k8s.types.input.core.v1.VolumeMount>
   readinessProbe?: k8s.types.input.core.v1.Probe
   livenessProbe?: k8s.types.input.core.v1.Probe
+}
+
+const getVolumeClaimTemplates = (name: string, storageSize: string, snapshots?: Array<VolumeSnapshot>) => {
+  if(snapshots) {
+    const matching = snapshots.filter(snapshot => snapshot.metadata.labels.statefulset === name)
+    if(matching.length > 0) {
+      return [
+        {
+          metadata: {
+            name: `data-${name}`,
+          },
+          spec: {
+            accessModes: ['ReadWriteOnce'],
+            storageClassName: 'ebs-csi-gp2',
+            resources: {
+              requests: {
+                storage: storageSize,
+              },
+            },
+            datasource: {
+              name: matching[0],
+              kind: "VolumeSnapshot",
+              apiGroup: "snapshot.storage.k8s.io"
+            }
+          },
+        },
+      ]
+    }
+  }
+  return [
+    {
+      metadata: {
+        name: `data-${name}`,
+      },
+      spec: {
+        accessModes: ['ReadWriteOnce'],
+        storageClassName: 'ebs-csi-gp2',
+        resources: {
+          requests: {
+            storage: storageSize,
+          },
+        },
+      },
+    },
+  ]
 }
 
 export function createService(args: ServiceArgs): Service {
@@ -149,22 +212,7 @@ export function createService(args: ServiceArgs): Service {
     containers.push(monitorContainer)
   }
 
-  const volumeClaimTemplates = [
-    {
-      metadata: {
-        name: `data-${args.config.name}`,
-      },
-      spec: {
-        accessModes: ['ReadWriteOnce'],
-        storageClassName: 'ebs-csi-gp2',
-        resources: {
-          requests: {
-            storage: args.config.storageSize,
-          },
-        },
-      },
-    },
-  ]
+  const volumeClaimTemplates = getVolumeClaimTemplates(args.config.name, args.config.storageSize, args.snapshots)
 
   return {
     configMapData,

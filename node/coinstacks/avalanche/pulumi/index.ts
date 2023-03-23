@@ -1,7 +1,8 @@
 import { parse } from 'dotenv'
 import { readFileSync } from 'fs'
 import * as k8s from '@pulumi/kubernetes'
-import { deployApi, createService, deployStatefulService, getConfig, Service } from '../../../../pulumi'
+import * as k8sClient from '@kubernetes/client-node'
+import { deployApi, createService, deployStatefulService, getConfig, Service, VolumeSnapshot } from '../../../../pulumi'
 import { api } from '../../../pulumi'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -12,12 +13,15 @@ export = async (): Promise<Outputs> => {
   const name = 'unchained'
 
   const { kubeconfig, config, namespace } = await getConfig()
-
   const coinstack = config.name
-
   const asset = config.network !== 'mainnet' ? `${coinstack}-${config.network}` : coinstack
+
   const outputs: Outputs = {}
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
+
+  const kc = new k8sClient.KubeConfig()
+  kc.loadFromString(kubeconfig)
+  const k8sObjectApi = kc.makeApiClient(k8sClient.KubernetesObjectApi)
 
   const missingKeys: Array<string> = []
   const stringData = Object.keys(parse(readFileSync('../sample.env'))).reduce((prev, key) => {
@@ -53,6 +57,21 @@ export = async (): Promise<Outputs> => {
   })
 
   if (config.statefulService) {
+    const response = await k8sObjectApi.list<VolumeSnapshot>(
+      'snapshot.storage.k8s.io/v1',
+      'VolumeSnapshot',
+      namespace,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      `statefulset=${asset}-sts`
+    )
+
+    const snapshots = response.body.items.sort(
+      (a, b) => b.metadata.creationTimestamp.getTime() - a.metadata.creationTimestamp.getTime()
+    )
+
     const services = config.statefulService.services.reduce<Record<string, Service>>((prev, service) => {
       if (service.name === 'daemon') {
         prev[service.name] = createService({
@@ -63,6 +82,7 @@ export = async (): Promise<Outputs> => {
           volumeMounts: [
             { name: 'config-map', mountPath: '/configs/chains/C/config.json', subPath: 'c-chain-config.json' },
           ],
+          snapshots,
         })
       }
 
@@ -83,6 +103,7 @@ export = async (): Promise<Outputs> => {
           ports: { public: { port: 8001 } },
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
           volumeMounts: [{ name: 'config-map', mountPath: '/config.json', subPath: 'indexer-config.json' }],
+          snapshots,
           readinessProbe: { initialDelaySeconds: 20, periodSeconds: 5, failureThreshold: 12 },
           livenessProbe: { timeoutSeconds: 10, initialDelaySeconds: 60, periodSeconds: 15, failureThreshold: 4 },
         })
