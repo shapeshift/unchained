@@ -11,7 +11,7 @@ $(COINSTACKS):; $(MAKE) -C $@ generate
 install:
 	go install gotest.tools/gotestsum@latest
 	go install golang.org/x/tools/cmd/goimports@latest
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.51.2
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.52.1
 
 build:
 	go build ./...
