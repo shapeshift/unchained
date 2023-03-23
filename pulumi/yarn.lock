@@ -357,10 +357,10 @@
   resolved "https://registry.yarnpkg.com/@pulumi/query/-/query-0.3.0.tgz#f496608e86a18c3dd31b6c533408e2441c29071d"
   integrity sha512-xfo+yLRM2zVjVEA4p23IjQWzyWl1ZhWOGobsBqRpIarzLvwNH/RAGaoehdxlhx4X92302DrpdIFgTICMN4P38w==
 
-"@shapeshiftoss/cluster-launcher@^0.14.0":
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/@shapeshiftoss/cluster-launcher/-/cluster-launcher-0.14.0.tgz#2185db2ebfd0515b39efd027991bb588ff642e48"
-  integrity sha512-AshgkwyBE76uQU539rToyln8xKWnpsdGVxWXNKpubGOrV83LKROKvyBBqucaGpRddKQksh81NXd+o0M/ZBV63w==
+"@shapeshiftoss/cluster-launcher@^0.15.0-alpha.0":
+  version "0.15.0-alpha.0"
+  resolved "https://registry.yarnpkg.com/@shapeshiftoss/cluster-launcher/-/cluster-launcher-0.15.0-alpha.0.tgz#5ab6547d19483dfe8617f2a3c190dce4a70560bd"
+  integrity sha512-5oiQAy4qcTXgaO1ZU9GzWuf2OBkrWTahbUPlmcleim37gW1nefEaQ4yPpwod01VDlh1SOUcWiko9KNc70SYP6g==
   dependencies:
     "@pulumi/aws" "5.29.1"
     "@pulumi/awsx" "1.0.2"
