@@ -93,7 +93,6 @@ export class VolumeReaper {
   }
 
   private async scaleStatefulSet(count: number, skipAwait: boolean): Promise<void> {
-
     console.log(`Scaling StatefulSet ${this.namespace}.${this.name} to ${count} replicas`)
 
     const sts = await this.getStatefulSet()
