@@ -66,9 +66,9 @@ export class VolumeReaper {
       const pvcList = this.services.split(',').map((svc) => `data-${svc}-${this.asset}-sts-${replicas - 1}`)
       const retainCount = pvcList.length * this.backupCount
 
-      await this.scaleStatefulSet(sts, replicas - 1, false)
+      await this.scaleStatefulSet(replicas - 1, false)
       await this.takeSnapshots(pvcList)
-      await this.scaleStatefulSet(sts, replicas, true)
+      await this.scaleStatefulSet(replicas, true)
       await this.removeSnapshots(retainCount)
     } catch (err) {
       if (err instanceof k8s.HttpError) {
@@ -92,10 +92,11 @@ export class VolumeReaper {
     return sts
   }
 
-  private async scaleStatefulSet(_sts: StatefulSet, count: number, skipAwait: boolean): Promise<void> {
+  private async scaleStatefulSet(count: number, skipAwait: boolean): Promise<void> {
+
     console.log(`Scaling StatefulSet ${this.namespace}.${this.name} to ${count} replicas`)
 
-    const sts = { ..._sts }
+    const sts = await this.getStatefulSet()
     sts.spec.replicas = count
 
     await this.k8sAppsApi.replaceNamespacedStatefulSet(this.name, this.namespace, sts)
