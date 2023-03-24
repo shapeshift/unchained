@@ -28,28 +28,20 @@ export async function deployStatefulService(
     []
   )
 
-  console.log(ports)
-
   const configMapData = Object.values(services).reduce<Record<string, string>>(
     (prev, { configMapData }) => ({ ...prev, ...configMapData }),
     {}
   )
-
-  console.log(configMapData)
 
   const containers = Object.values(services).reduce<Array<k8s.types.input.core.v1.Container>>(
     (prev, { containers }) => prev.concat(...containers),
     []
   )
 
-  console.log(containers)
-
   const volumeClaimTemplates = Object.values(services).reduce<Array<k8s.types.input.core.v1.PersistentVolumeClaim>>(
     (prev, { volumeClaimTemplates }) => prev.concat(...volumeClaimTemplates),
     []
   )
-
-  console.log(volumeClaimTemplates)
 
   const svc = new k8s.core.v1.Service(
     `${asset}-svc`,
