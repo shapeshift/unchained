@@ -27,15 +27,23 @@ export interface BaseConfig {
   rootDomainName?: string
 }
 
+export interface BackupConfig {
+  count: number
+  schedule: string
+}
+
+export interface StatefulService {
+  replicas: number
+  services: Array<ServiceConfig>
+  backup?: BackupConfig
+}
+
 export interface Config extends BaseConfig {
   stack: string
   network: string
   environment?: string
   api?: ApiConfig
-  statefulService?: {
-    replicas: number
-    services: Array<ServiceConfig>
-  }
+  statefulService?: StatefulService
 }
 
 export interface ServiceConfig {
@@ -49,7 +57,9 @@ export interface ServiceConfig {
 }
 
 export interface Service {
-  ports: Array<k8s.types.input.core.v1.ServicePort & { ingressRoute?: boolean, pathPrefix?: string, stripPathPrefix?: boolean }>
+  ports: Array<
+    k8s.types.input.core.v1.ServicePort & { ingressRoute?: boolean; pathPrefix?: string; stripPathPrefix?: boolean }
+  >
   configMapData: Record<string, string>
   containers: Array<k8s.types.input.core.v1.Container>
   volumeClaimTemplates: Array<k8s.types.input.core.v1.PersistentVolumeClaim>

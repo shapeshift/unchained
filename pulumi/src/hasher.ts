@@ -2,6 +2,7 @@ import { createHash } from 'crypto'
 import { hashElement } from 'folder-hash'
 
 const rootDir = `${__dirname}/../../node`
+const volumeReaperDir = `${__dirname}/../volumeReaper`
 
 // creates a hash of the content included in the final build image (base)
 export const getBaseHash = async (): Promise<string> => {
@@ -34,6 +35,18 @@ export const getBaseHash = async (): Promise<string> => {
     files: { include: ['package.json'] },
   })
   hash.update(dependenciesHash)
+
+  return hash.digest('hex')
+}
+
+export const getVolumeReaperHash = async (): Promise<string> => {
+  const hash = createHash('sha1')
+
+  const { hash: volumeReaperHash } = await hashElement(volumeReaperDir, {
+    folders: { include: ['**'], exclude: ['.*', 'dist', 'node_modules'] },
+    files: { include: ['*.ts', '*.json', 'Dockerfile'] },
+  })
+  hash.update(volumeReaperHash)
 
   return hash.digest('hex')
 }

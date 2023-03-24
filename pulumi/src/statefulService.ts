@@ -1,6 +1,7 @@
 import * as k8s from '@pulumi/kubernetes'
 import { readFileSync } from 'fs'
 import { Config, Service, ServiceConfig } from '.'
+import { deployReaperCron } from './reaperCron'
 
 interface Port {
   port: number
@@ -28,15 +29,35 @@ export function createService(args: ServiceArgs): Service {
   const ports = Object.entries(args.ports).map(([name, port]) => ({ name, ...port }))
   const env = Object.entries(args.env ?? []).map(([name, value]) => ({ name, value }))
 
-  const init = (() => { try { return readFileSync(`../${args.config.name}/init.sh`).toString() } catch (err) { return '' } })()
-  const liveness = (() => { try { return readFileSync(`../${args.config.name}/liveness.sh`).toString() } catch (err) { return '' } })()
-  const readiness = (() => { try { return readFileSync(`../${args.config.name}/readiness.sh`).toString() } catch (err) { return '' } })()
+  const init = (() => {
+    try {
+      return readFileSync(`../${args.config.name}/init.sh`).toString()
+    } catch (err) {
+      return ''
+    }
+  })()
+
+  const liveness = (() => {
+    try {
+      return readFileSync(`../${args.config.name}/liveness.sh`).toString()
+    } catch (err) {
+      return ''
+    }
+  })()
+
+  const readiness = (() => {
+    try {
+      return readFileSync(`../${args.config.name}/readiness.sh`).toString()
+    } catch (err) {
+      return ''
+    }
+  })()
 
   const configMapData = {
     ...(Boolean(init) && { [`${args.config.name}-init.sh`]: init }),
     ...(Boolean(liveness) && { [`${args.config.name}-liveness.sh`]: liveness }),
     ...(Boolean(readiness) && { [`${args.config.name}-readiness.sh`]: readiness }),
-    ...(args.configMapData ?? {})
+    ...(args.configMapData ?? {}),
   }
 
   const containers: Array<k8s.types.input.core.v1.Container> = []
@@ -55,7 +76,7 @@ export function createService(args: ServiceArgs): Service {
       requests: {
         ...(args.config.cpuRequest && { cpu: args.config.cpuRequest }),
         ...(args.config.memoryRequest && { memory: args.config.memoryRequest }),
-      }
+      },
     },
     ports: ports.map(({ port: containerPort, name }) => ({ containerPort, name })),
     securityContext: { runAsUser: 0 },
@@ -64,12 +85,16 @@ export function createService(args: ServiceArgs): Service {
         name: `data-${args.config.name}`,
         mountPath: args.dataDir ?? '/data',
       },
-      ...(init ? [{
-        name: 'config-map',
-        mountPath: '/init.sh',
-        subPath: `${args.config.name}-init.sh`,
-      }] : []),
-      ...(args.volumeMounts ?? [])
+      ...(init
+        ? [
+            {
+              name: 'config-map',
+              mountPath: '/init.sh',
+              subPath: `${args.config.name}-init.sh`,
+            },
+          ]
+        : []),
+      ...(args.volumeMounts ?? []),
     ],
   }
 
@@ -86,8 +111,8 @@ export function createService(args: ServiceArgs): Service {
           },
           initialDelaySeconds: 30,
           periodSeconds: 10,
-          ...args.readinessProbe
-        }
+          ...args.readinessProbe,
+        },
       }),
       ...(liveness && {
         livenessProbe: {
@@ -96,20 +121,28 @@ export function createService(args: ServiceArgs): Service {
           },
           initialDelaySeconds: 30,
           periodSeconds: 10,
-          ...args.livenessProbe
-        }
+          ...args.livenessProbe,
+        },
       }),
       volumeMounts: [
-        ...(readiness ? [{
-          name: 'config-map',
-          mountPath: '/readiness.sh',
-          subPath: `${args.config.name}-readiness.sh`,
-        }] : []),
-        ...(liveness ? [{
-          name: 'config-map',
-          mountPath: '/liveness.sh',
-          subPath: `${args.config.name}-liveness.sh`,
-        }] : [])
+        ...(readiness
+          ? [
+              {
+                name: 'config-map',
+                mountPath: '/readiness.sh',
+                subPath: `${args.config.name}-readiness.sh`,
+              },
+            ]
+          : []),
+        ...(liveness
+          ? [
+              {
+                name: 'config-map',
+                mountPath: '/liveness.sh',
+                subPath: `${args.config.name}-liveness.sh`,
+              },
+            ]
+          : []),
       ],
     }
 
@@ -156,10 +189,25 @@ export async function deployStatefulService(
 
   const labels = { app, asset, tier: 'statefulservice' }
 
-  const ports = Object.values(services).reduce<Array<k8s.types.input.core.v1.ServicePort>>((prev, { ports }) => [...prev, ...ports.map(({ name, port }) => ({ name, port }))], [])
-  const configMapData = Object.values(services).reduce<Record<string, string>>((prev, { configMapData }) => ({ ...prev, ...configMapData }), {})
-  const containers = Object.values(services).reduce<Array<k8s.types.input.core.v1.Container>>((prev, { containers }) => prev.concat(...containers), [])
-  const volumeClaimTemplates = Object.values(services).reduce<Array<k8s.types.input.core.v1.PersistentVolumeClaim>>((prev, { volumeClaimTemplates }) => prev.concat(...volumeClaimTemplates), [])
+  const ports = Object.values(services).reduce<Array<k8s.types.input.core.v1.ServicePort>>(
+    (prev, { ports }) => [...prev, ...ports.map(({ name, port }) => ({ name, port }))],
+    []
+  )
+
+  const configMapData = Object.values(services).reduce<Record<string, string>>(
+    (prev, { configMapData }) => ({ ...prev, ...configMapData }),
+    {}
+  )
+
+  const containers = Object.values(services).reduce<Array<k8s.types.input.core.v1.Container>>(
+    (prev, { containers }) => prev.concat(...containers),
+    []
+  )
+
+  const volumeClaimTemplates = Object.values(services).reduce<Array<k8s.types.input.core.v1.PersistentVolumeClaim>>(
+    (prev, { volumeClaimTemplates }) => prev.concat(...volumeClaimTemplates),
+    []
+  )
 
   const svc = new k8s.core.v1.Service(
     `${asset}-svc`,
@@ -205,7 +253,7 @@ export async function deployStatefulService(
             defaultMode: 0o755,
           },
         },
-        ...(volumes ?? [])
+        ...(volumes ?? []),
       ],
       terminationGracePeriodSeconds: 120,
     },
@@ -261,7 +309,7 @@ export async function deployStatefulService(
             encoding: 'PKCS1',
             size: 2048,
           },
-          dnsNames: Object.keys(services).map(service => domain(service)),
+          dnsNames: Object.keys(services).map((service) => domain(service)),
           issuerRef: {
             name: 'lets-encrypt',
             kind: 'ClusterIssuer',
@@ -277,7 +325,9 @@ export async function deployStatefulService(
     const match = (service: string, prefix?: string) => {
       const pathPrefixMatch = prefix ? ` && PathPrefix(\`${prefix}\`)` : ''
       const hostMatch = `(Host(\`${domain(`${service}`)}\`)${pathPrefixMatch})`
-      const additionalHostMatch = `(Host(\`${config.environment ? `${config.environment}-${service}` : service}.${asset}.${additionalRootDomainName}\`)${pathPrefixMatch})`
+      const additionalHostMatch = `(Host(\`${
+        config.environment ? `${config.environment}-${service}` : service
+      }.${asset}.${additionalRootDomainName}\`)${pathPrefixMatch})`
       return additionalRootDomainName ? `${hostMatch} || ${additionalHostMatch}` : hostMatch
     }
 
@@ -298,8 +348,8 @@ export async function deployStatefulService(
                 return [...prev, pathPrefix]
               }, [])
               return [...prev, ...prefixes]
-            }, [])
-          }
+            }, []),
+          },
         },
       },
       { provider }
@@ -316,25 +366,30 @@ export async function deployStatefulService(
         },
         spec: {
           entryPoints: ['web', 'websecure'],
-          routes: Object.entries(services).map(([service, { ports }]) =>
-            ports.filter(({ ingressRoute = true }) => ingressRoute).map(({ port, pathPrefix }) => ({
-              kind: 'Rule',
-              match: match(service, pathPrefix),
-              ...(pathPrefix && {
-                middlewares: [{ name: middleware.metadata.name, namespace: svc.metadata.namespace }],
-              }),
-              services: [
-                {
-                  kind: 'Service',
-                  name: svc.metadata.name,
-                  port: port,
-                  namespace: svc.metadata.namespace,
-                },
-              ],
-            }))).flat(),
+          routes: Object.entries(services)
+            .map(([service, { ports }]) =>
+              ports
+                .filter(({ ingressRoute = true }) => ingressRoute)
+                .map(({ port, pathPrefix }) => ({
+                  kind: 'Rule',
+                  match: match(service, pathPrefix),
+                  ...(pathPrefix && {
+                    middlewares: [{ name: middleware.metadata.name, namespace: svc.metadata.namespace }],
+                  }),
+                  services: [
+                    {
+                      kind: 'Service',
+                      name: svc.metadata.name,
+                      port: port,
+                      namespace: svc.metadata.namespace,
+                    },
+                  ],
+                }))
+            )
+            .flat(),
           tls: {
             secretName: secretName,
-            domains: Object.keys(services).map(service => ({ main: domain(service) })),
+            domains: Object.keys(services).map((service) => ({ main: domain(service) })),
           },
         },
       },
@@ -349,10 +404,14 @@ export async function deployStatefulService(
           labels: labels,
         },
         spec: {
-          rules: Object.keys(services).map(service => ({ host: domain(service) })),
+          rules: Object.keys(services).map((service) => ({ host: domain(service) })),
         },
       },
       { provider }
     )
+  }
+
+  if (namespace == 'unchained-dev') {
+    deployReaperCron(asset, config.statefulService, namespace, provider)
   }
 }
