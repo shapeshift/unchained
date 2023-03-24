@@ -58,6 +58,7 @@ export interface ServiceConfig {
 }
 
 export interface Service {
+  serviceName: string,
   ports: Array<
     k8s.types.input.core.v1.ServicePort & { ingressRoute?: boolean; pathPrefix?: string; stripPathPrefix?: boolean }
   >

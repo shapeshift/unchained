@@ -30,6 +30,10 @@ export interface DeployApiArgs {
   secretEnvs: (coinstack: string, asset: string) => k8s.types.input.core.v1.EnvVar[]
 }
 
+// validation
+// optional docker image building
+// k8s object creation
+
 export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deployment | undefined> {
   const {
     app,
