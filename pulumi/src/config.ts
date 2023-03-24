@@ -1,5 +1,5 @@
 import * as pulumi from '@pulumi/pulumi'
-import { Config as BaseConfig, Dockerhub } from '.'
+import { CoinStackConfig as BaseConfig, Dockerhub } from '.'
 
 const SUPPORTED_NETWORKS = ['mainnet']
 
@@ -65,18 +65,18 @@ export const getConfig = async (): Promise<Config> => {
         missingRequiredConfig.push('statefulService.backup.schedule')
     }
 
-    config.statefulService?.services.forEach((service, i) => {
+    config.statefulService?.coinServices.forEach((service, i) => {
       if (service.cpuRequest === undefined && service.cpuLimit === undefined)
         missingRequiredConfig.push(
-          `statefulService.services.[${i}].cpuRequest OR statefulService.services.[${i}].cpuLimit`
+          `statefulService.coinServices.[${i}].cpuRequest OR statefulService.coinServices.[${i}].cpuLimit`
         )
       if (service.memoryRequest === undefined && service.memoryLimit === undefined)
         missingRequiredConfig.push(
-          `statefulService.services.[${i}].memoryRequest OR statefulService.services.[${i}].memoryLimit`
+          `statefulService.coinServices.[${i}].memoryRequest OR statefulService.coinServices.[${i}].memoryLimit`
         )
-      if (service.image === undefined) missingRequiredConfig.push(`statefulService.services.[${i}].image`)
-      if (service.name === undefined) missingRequiredConfig.push(`statefulService.services.[${i}].name`)
-      if (service.storageSize === undefined) missingRequiredConfig.push(`statefulService.services.[${i}].storageSize`)
+      if (service.image === undefined) missingRequiredConfig.push(`statefulService.coinServices.[${i}].image`)
+      if (service.name === undefined) missingRequiredConfig.push(`statefulService.coinServices.[${i}].name`)
+      if (service.storageSize === undefined) missingRequiredConfig.push(`statefulService.coinServices.[${i}].storageSize`)
     })
   }
 

@@ -1,6 +1,6 @@
 import * as k8s from '@pulumi/kubernetes'
 import { readFileSync } from 'fs'
-import { Service, ServiceConfig } from '.'
+import { CoinService as CoinService, CoinServiceConfig as CoinServiceConfig } from '.'
 import { PvcResolver } from './pvcResolver'
 
 interface Port {
@@ -10,10 +10,10 @@ interface Port {
   stripPathPrefix?: boolean
 }
 
-export interface ServiceArgs {
+export interface CoinServiceArgs {
   serviceName: string
   asset: string
-  config: ServiceConfig
+  config: CoinServiceConfig
   ports: Record<string, Port>
   command?: Array<string>
   args?: Array<string>
@@ -26,7 +26,7 @@ export interface ServiceArgs {
   pvcResolver: PvcResolver
 }
 
-export async function createService(args: ServiceArgs): Promise<Service> {
+export async function createCoinService(args: CoinServiceArgs): Promise<CoinService> {
   const name = `${args.asset}-${args.config.name}`
   const ports = Object.entries(args.ports).map(([name, port]) => ({ name, ...port }))
   const env = Object.entries(args.env ?? []).map(([name, value]) => ({ name, value }))

@@ -1,6 +1,6 @@
 import * as k8s from '@pulumi/kubernetes'
 import { Input, Resource } from '@pulumi/pulumi'
-import { buildAndPushImage, BuildAndPushImageArgs, Config, hasTag } from './index'
+import { buildAndPushImage, BuildAndPushImageArgs, CoinStackConfig, hasTag } from './index'
 
 export interface Autoscaling {
   enabled: boolean
@@ -21,7 +21,7 @@ export interface DeployApiArgs {
   asset: string
   baseImageName?: string
   buildAndPushImageArgs: Pick<BuildAndPushImageArgs, 'context' | 'dockerFile'>
-  config: Pick<Config, 'api' | 'dockerhub' | 'rootDomainName' | 'environment'>
+  config: Pick<CoinStackConfig, 'api' | 'dockerhub' | 'rootDomainName' | 'environment'>
   container: Partial<Pick<k8s.types.input.core.v1.Container, 'args' | 'command'>>
   deployDependencies?: Input<Array<Resource>>
   getHash: (coinstack: string, buildArgs: Record<string, string>) => Promise<string>

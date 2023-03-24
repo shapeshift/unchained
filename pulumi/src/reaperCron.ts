@@ -6,7 +6,7 @@ export const deployReaperCron = (asset: string, sts: StatefulService, namespace:
 
   const name = `${asset}-volume-reaper`
   const serviceAccountName = createRbac(name, namespace, provider)
-  const services = sts.services.map((svc) => svc.name).join(',')
+  const services = sts.coinServices.map((coinService) => coinService.name).join(',')
 
   const container = {
     name,

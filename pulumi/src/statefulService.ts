@@ -1,7 +1,5 @@
 import * as k8s from '@pulumi/kubernetes'
-import { readFileSync } from 'fs'
-import { Config, Service, ServiceConfig } from '.'
-import { PvcResolver } from './pvcResolver'
+import { CoinStackConfig, CoinService } from '.'
 import { deployReaperCron } from './reaperCron'
 
 
@@ -15,8 +13,8 @@ export async function deployStatefulService(
   asset: string,
   provider: k8s.Provider,
   namespace: string,
-  config: Pick<Config, 'rootDomainName' | 'environment' | 'statefulService'>,
-  services: Record<string, Service>,
+  config: Pick<CoinStackConfig, 'rootDomainName' | 'environment' | 'statefulService'>,
+  services: CoinService[],
   volumes?: Array<k8s.types.input.core.v1.Volume>
 ): Promise<void> {
   if (!config.statefulService) return
@@ -30,20 +28,28 @@ export async function deployStatefulService(
     []
   )
 
+  console.log(ports)
+
   const configMapData = Object.values(services).reduce<Record<string, string>>(
     (prev, { configMapData }) => ({ ...prev, ...configMapData }),
     {}
   )
+
+  console.log(configMapData)
 
   const containers = Object.values(services).reduce<Array<k8s.types.input.core.v1.Container>>(
     (prev, { containers }) => prev.concat(...containers),
     []
   )
 
+  console.log(containers)
+
   const volumeClaimTemplates = Object.values(services).reduce<Array<k8s.types.input.core.v1.PersistentVolumeClaim>>(
     (prev, { volumeClaimTemplates }) => prev.concat(...volumeClaimTemplates),
     []
   )
+
+  console.log(volumeClaimTemplates)
 
   const svc = new k8s.core.v1.Service(
     `${asset}-svc`,

@@ -1,10 +1,10 @@
 import { parse } from 'dotenv'
 import { readFileSync } from 'fs'
 import * as k8s from '@pulumi/kubernetes'
-import { deployApi, deployStatefulService, getConfig, Service } from '../../../../pulumi'
+import { deployApi, deployStatefulService, getConfig } from '../../../../pulumi'
 import { api } from '../../../pulumi'
 import { PvcResolver } from '../../../../pulumi/src/pvcResolver'
-import { createService } from '../../../../pulumi/src/serviceResolver'
+import { deployCoinServices } from '../../../../pulumi/src/coinServiceDeployer'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Outputs = Record<string, any>
@@ -60,55 +60,8 @@ export = async (): Promise<Outputs> => {
   })
 
   if (config.statefulService) {
-    // deploy one by one instead of reduce -> deploy?
-    // const services =
-
-    config.statefulService.services.map(async (service) => {
-      if (service.name === 'daemon') {
-        return [
-          service.name,
-          await createService({
-            asset,
-            config: service,
-            ports: { 'daemon-rpc': { port: 9650 } },
-            configMapData: { 'c-chain-config.json': readFileSync('../daemon/config.json').toString() },
-            volumeMounts: [
-              { name: 'config-map', mountPath: '/configs/chains/C/config.json', subPath: 'c-chain-config.json' },
-            ],
-            pvcResolver,
-          }),
-        ]
-      }
-
-      if (service.name === 'daemon') {
-        return [
-          service.name,
-          await createService({
-            asset,
-            config: service,
-            command: [
-              '/bin/blockbook',
-              '-blockchaincfg=/config.json',
-              '-datadir=/data',
-              '-sync',
-              '-public=:8001',
-              '-enablesubnewtx',
-              '-logtostderr',
-              '-debug',
-            ],
-            ports: { public: { port: 8001 } },
-            configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
-            volumeMounts: [{ name: 'config-map', mountPath: '/config.json', subPath: 'indexer-config.json' }],
-            readinessProbe: { initialDelaySeconds: 20, periodSeconds: 5, failureThreshold: 12 },
-            livenessProbe: { timeoutSeconds: 10, initialDelaySeconds: 60, periodSeconds: 15, failureThreshold: 4 },
-            pvcResolver,
-          }),
-        ]
-      }
-      return null
-    })
-
-    await deployStatefulService(name, asset, provider, namespace, config, services)
+    const coinServices = await deployCoinServices(config.statefulService, asset, pvcResolver)
+    await deployStatefulService(name, asset, provider, namespace, config, coinServices)
   }
 
   return outputs

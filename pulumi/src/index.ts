@@ -34,11 +34,11 @@ export interface BackupConfig {
 
 export interface StatefulService {
   replicas: number
-  services: Array<ServiceConfig>
+  coinServices: Array<CoinServiceConfig>
   backup?: BackupConfig
 }
 
-export interface Config extends BaseConfig {
+export interface CoinStackConfig extends BaseConfig {
   stack: string
   name: string
   network: string
@@ -47,7 +47,7 @@ export interface Config extends BaseConfig {
   statefulService?: StatefulService
 }
 
-export interface ServiceConfig {
+export interface CoinServiceConfig {
   cpuLimit?: string
   cpuRequest?: string
   image: string
@@ -57,7 +57,7 @@ export interface ServiceConfig {
   storageSize: string
 }
 
-export interface Service {
+export interface CoinService {
   serviceName: string,
   ports: Array<
     k8s.types.input.core.v1.ServicePort & { ingressRoute?: boolean; pathPrefix?: string; stripPathPrefix?: boolean }
