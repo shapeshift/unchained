@@ -316,7 +316,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: avaplatform/avalanchego:v1.9.12
+    service-image-1: avaplatform/avalanchego:v1.9.14
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
@@ -651,7 +651,7 @@ commands:
       - run:
          working_directory: go
          name: lint go
-         command: golangci-lint run
+         command: golangci-lint run --version --verbose 
 
   postcheck:
     description: perform postcheck operations
