@@ -19,10 +19,6 @@ export = async (): Promise<Outputs> => {
   const outputs: Outputs = {}
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
 
-  const kc = new k8sClient.KubeConfig()
-  kc.loadFromString(kubeconfig)
-  const k8sObjectApi = kc.makeApiClient(k8sClient.KubernetesObjectApi)
-
   const missingKeys: Array<string> = []
   const stringData = Object.keys(parse(readFileSync('../sample.env'))).reduce((prev, key) => {
     const value = process.env[key]
@@ -67,6 +63,8 @@ export = async (): Promise<Outputs> => {
       undefined,
       `statefulset=${asset}-sts`
     )
+
+    console.log('Snapshots found: ', response.body.items.length)
 
     const snapshots = response.body.items.sort(
       (a, b) => b.metadata.creationTimestamp.getTime() - a.metadata.creationTimestamp.getTime()

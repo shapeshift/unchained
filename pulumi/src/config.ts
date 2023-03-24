@@ -12,7 +12,7 @@ export interface Config {
 export const getConfig = async (): Promise<Config> => {
   const config = (() => {
     try {
-      return new pulumi.Config().requireObject<BaseConfig>("coinstack")
+      return new pulumi.Config('unchained').requireObject<BaseConfig>('coinstack')
     } catch (e) {
       throw new pulumi.RunError('Could not find required configuration file')
     }

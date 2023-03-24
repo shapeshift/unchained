@@ -3,6 +3,7 @@ import * as k8sClient from '@kubernetes/client-node'
 import { readFileSync } from 'fs'
 import { Config, Service, ServiceConfig } from '.'
 import { deployReaperCron } from './reaperCron'
+import { getVolumeClaimTemplates } from './volume'
 
 interface Port {
   port: number
@@ -40,51 +41,6 @@ export interface ServiceArgs {
   volumeMounts?: Array<k8s.types.input.core.v1.VolumeMount>
   readinessProbe?: k8s.types.input.core.v1.Probe
   livenessProbe?: k8s.types.input.core.v1.Probe
-}
-
-const getVolumeClaimTemplates = (name: string, storageSize: string, snapshots?: Array<VolumeSnapshot>) => {
-  if(snapshots) {
-    const matching = snapshots.filter(snapshot => snapshot.metadata.labels.statefulset === name)
-    if(matching.length > 0) {
-      return [
-        {
-          metadata: {
-            name: `data-${name}`,
-          },
-          spec: {
-            accessModes: ['ReadWriteOnce'],
-            storageClassName: 'ebs-csi-gp2',
-            resources: {
-              requests: {
-                storage: storageSize,
-              },
-            },
-            datasource: {
-              name: matching[0],
-              kind: "VolumeSnapshot",
-              apiGroup: "snapshot.storage.k8s.io"
-            }
-          },
-        },
-      ]
-    }
-  }
-  return [
-    {
-      metadata: {
-        name: `data-${name}`,
-      },
-      spec: {
-        accessModes: ['ReadWriteOnce'],
-        storageClassName: 'ebs-csi-gp2',
-        resources: {
-          requests: {
-            storage: storageSize,
-          },
-        },
-      },
-    },
-  ]
 }
 
 export function createService(args: ServiceArgs): Service {
