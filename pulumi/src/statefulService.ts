@@ -1,31 +1,13 @@
 import * as k8s from '@pulumi/kubernetes'
-import * as k8sClient from '@kubernetes/client-node'
 import { readFileSync } from 'fs'
 import { Config, Service, ServiceConfig } from '.'
 import { deployReaperCron } from './reaperCron'
-import { getVolumeClaimTemplates } from './volume'
 
 interface Port {
   port: number
   ingressRoute?: boolean
   pathPrefix?: string
   stripPathPrefix?: boolean
-}
-
-export interface VolumeSnapshot extends Required<k8sClient.KubernetesObject> {
-  metadata: {
-    name: string
-    creationTimestamp: Date
-    labels: {
-      statefulset: string
-    }
-  }
-  spec: {
-    volumeSnapshotClassName: string
-    source: {
-      persistentVolumeClaimName: string
-    }
-  }
 }
 
 export interface ServiceArgs {
@@ -37,7 +19,6 @@ export interface ServiceArgs {
   env?: Record<string, string>
   dataDir?: string
   configMapData?: Record<string, string>
-  snapshots?: Array<VolumeSnapshot>
   volumeMounts?: Array<k8s.types.input.core.v1.VolumeMount>
   readinessProbe?: k8s.types.input.core.v1.Probe
   livenessProbe?: k8s.types.input.core.v1.Probe
