@@ -94,8 +94,6 @@ export class PvcResolver {
             apiGroup: "snapshot.storage.k8s.io"
           }
         }) as PVCFromBackup] : [pvcBase])
-
-    console.log(`PVC: ${JSON.stringify(ret)}`)
     return ret;
   }
 }
