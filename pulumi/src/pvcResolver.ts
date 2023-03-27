@@ -14,6 +14,9 @@ interface VolumeSnapshot extends Required<k8sClient.KubernetesObject> {
     source: {
       persistentVolumeClaimName: string
     }
+  },
+  status: {
+    readyToUse: boolean,
   }
 }
 
@@ -37,7 +40,7 @@ export class PvcResolver {
     this.namespace = namespace;
   }
 
-  private getLatestSnapshot = async (assetName: string): Promise<VolumeSnapshot | undefined> => {
+  private getLatestSnapshot = async (assetName: string, serviceName: string): Promise<VolumeSnapshot | undefined> => {
     const response = await this.k8sObjectApi.list<VolumeSnapshot>(
       'snapshot.storage.k8s.io/v1',
       'VolumeSnapshot',
@@ -49,22 +52,24 @@ export class PvcResolver {
       `statefulset=${assetName}-sts`
     )
 
-    console.log('Snapshots found: ', response.body.items.length)
-
-    const latestSnapshots = response.body.items.sort(
-      (a, b) => b.metadata.creationTimestamp.getTime() - a.metadata.creationTimestamp.getTime()
-    ).filter(snapshot => snapshot.metadata.labels.statefulset === assetName);
+    const latestSnapshots = 
+      response.body.items
+      .filter(vs => vs.metadata.name.includes(serviceName))
+      .filter(vs => vs.status.readyToUse).sort(
+        (a, b) => new Date(b.metadata.creationTimestamp).getTime() - new Date(a.metadata.creationTimestamp).getTime()
+      )
 
     if(latestSnapshots.length > 0 ){
+      console.log('Restoring volume from snapshot: ' + latestSnapshots[0].metadata.name)
       return latestSnapshots[0]
     }
     return undefined;
   }
 
-  private getPvcBase = (assetName: string, storageSize: string): k8s.types.input.core.v1.PersistentVolumeClaim => {
+  private getPvcBase = (serviceName: string, storageSize: string): k8s.types.input.core.v1.PersistentVolumeClaim => {
     return {
       metadata: {
-        name: `data-${assetName}`,
+        name: `data-${serviceName}`,
       },
       spec: {
         accessModes: ['ReadWriteOnce'],
@@ -78,16 +83,19 @@ export class PvcResolver {
     }
   }
 
-  getVolumeClaimTemplates = async (assetName: string, storageSize: string): Promise<Array<k8s.types.input.core.v1.PersistentVolumeClaim>> => {
-    const pvcBase = this.getPvcBase(assetName, storageSize);
-    const snapshot = await this.getLatestSnapshot(assetName);
+  getVolumeClaimTemplates = async (assetName: string, serviceName: string, storageSize: string): Promise<Array<k8s.types.input.core.v1.PersistentVolumeClaim>> => {
+    const pvcBase = this.getPvcBase(serviceName, storageSize);
+    const snapshot = await this.getLatestSnapshot(assetName, serviceName);
 
-    return (snapshot ? [Object.assign(pvcBase, {
+    const ret = (snapshot ? [Object.assign(pvcBase, {
           datasource: {
             name: snapshot.metadata.name,
             kind: "VolumeSnapshot",
             apiGroup: "snapshot.storage.k8s.io"
           }
         }) as PVCFromBackup] : [pvcBase])
+
+    console.log(`PVC: ${JSON.stringify(ret)}`)
+    return ret;
   }
 }

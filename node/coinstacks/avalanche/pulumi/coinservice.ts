@@ -197,7 +197,11 @@ async function createCoinService(args: CoinServiceArgs): Promise<CoinService> {
     containers.push(monitorContainer)
   }
 
-  const volumeClaimTemplates = await args.pvcResolver.getVolumeClaimTemplates(args.config.name, args.config.storageSize)
+  const volumeClaimTemplates = await args.pvcResolver.getVolumeClaimTemplates(
+    args.asset,
+    args.serviceName,
+    args.config.storageSize
+  )
 
   return {
     serviceName: args.serviceName,
