@@ -4,7 +4,7 @@ import * as k8s from '@pulumi/kubernetes'
 import { deployApi, deployStatefulService, getConfig } from '../../../../pulumi'
 import { api } from '../../../pulumi'
 import { PvcResolver } from '../../../../pulumi/src/pvcResolver'
-import { deployCoinServices } from '../../../../pulumi/src/coinServiceDeployer'
+import { deployCoinServices } from './coinservice'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Outputs = Record<string, any>
