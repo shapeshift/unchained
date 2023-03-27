@@ -9,10 +9,6 @@ import { deployCoinServices } from './coinservice'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Outputs = Record<string, any>
 
-// 1. Validation the configuration
-// 2. Deploy the API
-// 3. Deploy stateful service
-
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
   const name = 'unchained'
