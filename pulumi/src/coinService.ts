@@ -1,53 +1,8 @@
-import * as k8s from '@pulumi/kubernetes'
+import { CoinServiceConfig, CoinService } from "."
 import { readFileSync } from 'fs'
-import { CoinService, CoinServiceConfig, StatefulService } from '../../../../pulumi/src'
-import { PvcResolver } from '../../../../pulumi/src/pvcResolver'
-
-export const deployCoinServices = async (statefulService: StatefulService, asset: string, pvcResolver: PvcResolver) => {
-  return await Promise.all(
-    statefulService.coinServices
-      .map((coinService) => {
-        if (coinService.name === 'daemon') {
-          return createCoinService({
-            asset,
-            config: coinService,
-            serviceName: coinService.name,
-            ports: { 'daemon-rpc': { port: 9650 } },
-            configMapData: { 'c-chain-config.json': readFileSync('../daemon/config.json').toString() },
-            volumeMounts: [
-              { name: 'config-map', mountPath: '/configs/chains/C/config.json', subPath: 'c-chain-config.json' },
-            ],
-            pvcResolver,
-          })
-        }
-        if (coinService.name === 'indexer') {
-          return createCoinService({
-            serviceName: coinService.name,
-            asset,
-            config: coinService,
-            command: [
-              '/bin/blockbook',
-              '-blockchaincfg=/config.json',
-              '-datadir=/data',
-              '-sync',
-              '-public=:8001',
-              '-enablesubnewtx',
-              '-logtostderr',
-              '-debug',
-            ],
-            ports: { public: { port: 8001 } },
-            configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
-            volumeMounts: [{ name: 'config-map', mountPath: '/config.json', subPath: 'indexer-config.json' }],
-            readinessProbe: { initialDelaySeconds: 20, periodSeconds: 5, failureThreshold: 12 },
-            livenessProbe: { timeoutSeconds: 10, initialDelaySeconds: 60, periodSeconds: 15, failureThreshold: 4 },
-            pvcResolver,
-          })
-        }
-        return null
-      })
-      .filter((s): s is Promise<CoinService> => Boolean(s))
-  )
-}
+import * as k8s from '@pulumi/kubernetes'
+import { VolumeSnapshot } from "./volumeSnapshotClient"
+import { getVolumeClaimTemplates } from "./pvcResolver"
 
 interface Port {
   port: number
@@ -69,10 +24,10 @@ export interface CoinServiceArgs {
   volumeMounts?: Array<k8s.types.input.core.v1.VolumeMount>
   readinessProbe?: k8s.types.input.core.v1.Probe
   livenessProbe?: k8s.types.input.core.v1.Probe
-  pvcResolver: PvcResolver
+  volumeSnapshots: VolumeSnapshot[]
 }
 
-async function createCoinService(args: CoinServiceArgs): Promise<CoinService> {
+export function createCoinService(args: CoinServiceArgs): CoinService {
   const name = `${args.asset}-${args.config.name}`
   const ports = Object.entries(args.ports).map(([name, port]) => ({ name, ...port }))
   const env = Object.entries(args.env ?? []).map(([name, value]) => ({ name, value }))
@@ -197,8 +152,8 @@ async function createCoinService(args: CoinServiceArgs): Promise<CoinService> {
     containers.push(monitorContainer)
   }
 
-  const volumeClaimTemplates = await args.pvcResolver.getVolumeClaimTemplates(
-    args.asset,
+  const volumeClaimTemplates = getVolumeClaimTemplates(
+    args.volumeSnapshots,
     args.serviceName,
     args.config.storageSize
   )
