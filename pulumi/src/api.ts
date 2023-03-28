@@ -18,10 +18,10 @@ export interface ApiConfig {
 
 export interface DeployApiArgs {
   app: string
-  asset: string
+  coinstack: string
   baseImageName?: string
   buildAndPushImageArgs: Pick<BuildAndPushImageArgs, 'context' | 'dockerFile'>
-  config: Pick<Config, 'api' | 'dockerhub' | 'rootDomainName' | 'environment'>
+  config: Pick<Config, 'api' | 'dockerhub' | 'rootDomainName' | 'environment' | 'assetName'>
   container: Partial<Pick<k8s.types.input.core.v1.Container, 'args' | 'command'>>
   deployDependencies?: Input<Array<Resource>>
   getHash: (coinstack: string, buildArgs: Record<string, string>) => Promise<string>
@@ -33,7 +33,7 @@ export interface DeployApiArgs {
 export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deployment | undefined> {
   const {
     app,
-    asset,
+    coinstack,
     baseImageName,
     buildAndPushImageArgs,
     config,
@@ -48,9 +48,9 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
   if (config.api === undefined) return
 
   const tier = 'api'
-  const labels = { app, asset, tier }
+  const asset = config.assetName
+  const labels = { coinstack, asset, tier }
   const name = `${asset}-${tier}`
-  const [coinstack] = asset.split('-')
 
   const buildArgs: Record<string, string> = { BUILDKIT_INLINE_CACHE: '1', COINSTACK: coinstack }
   if (baseImageName) buildArgs.BASE_IMAGE = baseImageName

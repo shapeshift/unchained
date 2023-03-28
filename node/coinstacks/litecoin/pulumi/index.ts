@@ -9,12 +9,11 @@ type Outputs = Record<string, any>
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
-  const name = 'unchained'
+  const appName = 'unchained'
   const coinstack = 'litecoin'
 
-  const { kubeconfig, config, namespace } = await getConfig(coinstack)
+  const { kubeconfig, config, namespace } = await getConfig()
 
-  const asset = config.network !== 'mainnet' ? `${coinstack}-${config.network}` : coinstack
   const outputs: Outputs = {}
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
 
@@ -34,13 +33,17 @@ export = async (): Promise<Outputs> => {
     throw new Error(`Missing the following required environment variables: ${missingKeys.join(', ')}`)
   }
 
-  new k8s.core.v1.Secret(asset, { metadata: { name: asset, namespace }, stringData }, { provider })
+  new k8s.core.v1.Secret(
+    config.assetName,
+    { metadata: { name: config.assetName, namespace }, stringData },
+    { provider }
+  )
 
   const baseImageName = 'shapeshiftdao/unchained-base:latest'
 
   await deployApi({
-    app: name,
-    asset,
+    app: appName,
+    coinstack: coinstack,
     baseImageName,
     buildAndPushImageArgs: { context: '../api' },
     config,
@@ -55,16 +58,17 @@ export = async (): Promise<Outputs> => {
     const services = config.statefulService.services.reduce<Record<string, Service>>((prev, service) => {
       if (service.name === 'daemon') {
         prev[service.name] = createService({
-          asset,
+          assetName: config.assetName,
           config: service,
           env: { NETWORK: config.network },
           ports: { 'daemon-rpc': { port: 8332 } },
+          snapshots,
         })
       }
 
       if (service.name === 'indexer') {
         prev[service.name] = createService({
-          asset,
+          assetName: config.assetName,
           config: service,
           command: [
             '/bin/blockbook',
@@ -81,13 +85,14 @@ export = async (): Promise<Outputs> => {
           volumeMounts: [{ name: 'config-map', mountPath: '/config.json', subPath: 'indexer-config.json' }],
           readinessProbe: { initialDelaySeconds: 20, periodSeconds: 5, failureThreshold: 12 },
           livenessProbe: { timeoutSeconds: 10, initialDelaySeconds: 60, periodSeconds: 15, failureThreshold: 4 },
+          snapshots,
         })
       }
 
       return prev
     }, {})
 
-    await deployStatefulService(name, asset, provider, namespace, config, services)
+    await deployStatefulService(appName, config.assetName, provider, namespace, config, services)
   }
 
   return outputs

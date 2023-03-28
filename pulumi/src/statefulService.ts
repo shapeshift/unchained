@@ -1,7 +1,9 @@
 import * as k8s from '@pulumi/kubernetes'
 import { readFileSync } from 'fs'
 import { Config, Service, ServiceConfig } from '.'
+import { getVolumeClaimTemplates } from './pvcResolver'
 import { deployReaperCron } from './reaperCron'
+import { VolumeSnapshot } from './volumeSnapshotClient'
 
 interface Port {
   port: number
@@ -11,7 +13,7 @@ interface Port {
 }
 
 export interface ServiceArgs {
-  asset: string
+  assetName: string
   config: ServiceConfig
   ports: Record<string, Port>
   command?: Array<string>
@@ -21,11 +23,12 @@ export interface ServiceArgs {
   configMapData?: Record<string, string>
   volumeMounts?: Array<k8s.types.input.core.v1.VolumeMount>
   readinessProbe?: k8s.types.input.core.v1.Probe
-  livenessProbe?: k8s.types.input.core.v1.Probe
+  livenessProbe?: k8s.types.input.core.v1.Probe,
+  snapshots?: VolumeSnapshot[]
 }
 
 export function createService(args: ServiceArgs): Service {
-  const name = `${args.asset}-${args.config.name}`
+  const name = `${args.assetName}-${args.config.name}`
   const ports = Object.entries(args.ports).map(([name, port]) => ({ name, ...port }))
   const env = Object.entries(args.env ?? []).map(([name, value]) => ({ name, value }))
 
@@ -149,22 +152,7 @@ export function createService(args: ServiceArgs): Service {
     containers.push(monitorContainer)
   }
 
-  const volumeClaimTemplates = [
-    {
-      metadata: {
-        name: `data-${args.config.name}`,
-      },
-      spec: {
-        accessModes: ['ReadWriteOnce'],
-        storageClassName: 'ebs-csi-gp2',
-        resources: {
-          requests: {
-            storage: args.config.storageSize,
-          },
-        },
-      },
-    },
-  ]
+  const volumeClaimTemplates = getVolumeClaimTemplates(args.config.name, args.config.storageSize, args.snapshots)
 
   return {
     configMapData,
