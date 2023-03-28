@@ -89,7 +89,7 @@ export = async (): Promise<Outputs> => {
       return prev
     }, {})
 
-    await deployStatefulService(appName, config.assetName, provider, namespace, config, services)
+    await deployStatefulService(appName, assetName, provider, namespace, config, services)
   }
 
   return outputs

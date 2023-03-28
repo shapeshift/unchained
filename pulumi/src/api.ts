@@ -204,7 +204,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
           name: tier,
           image: imageName,
           ports: [{ containerPort: 3000, name: 'http' }],
-          env: [...secretEnvs(coinstack, asset)],
+          env: [...secretEnvs(coinstack, assetName)],
           resources: {
             limits: {
               cpu: config.api.cpuLimit,
