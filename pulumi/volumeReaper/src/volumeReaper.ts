@@ -12,6 +12,7 @@ interface StatefulSet extends k8s.V1StatefulSet {
 interface VolumeSnapshot extends Required<k8s.KubernetesObject> {
   metadata: {
     name: string
+    // the actual type is string but the parent object has this messed up
     creationTimestamp: Date
     labels: {
       statefulset: string
@@ -132,7 +133,7 @@ export class VolumeReaper {
     console.log(`Found ${items.length} snapshots for ${this.namespace}.${this.name}`)
 
     // sorted newest -> oldest
-    return items.sort((a, b) => b.metadata.creationTimestamp.getTime() - a.metadata.creationTimestamp.getTime())
+    return items.sort((a, b) => new Date(b.metadata.creationTimestamp).getTime() - new Date(a.metadata.creationTimestamp).getTime())
   }
 
   private async takeSnapshots(pvcList: Array<string>): Promise<void> {
@@ -187,7 +188,7 @@ export class VolumeReaper {
     await Promise.all(
       toRemove.reverse().map(async (snapshot) => {
         await this.k8sObjectApi.delete(snapshot)
-        console.log(`Snapshot ${snapshot} removed`)
+        console.log(`Snapshot ${snapshot.metadata.name} removed`)
       })
     )
 
