@@ -17,8 +17,9 @@ export interface ApiConfig {
 }
 
 export interface DeployApiArgs {
-  app: string
+  appName: string
   coinstack: string
+  assetName: string
   baseImageName?: string
   buildAndPushImageArgs: Pick<BuildAndPushImageArgs, 'context' | 'dockerFile'>
   config: Pick<Config, 'api' | 'dockerhub' | 'rootDomainName' | 'environment' | 'assetName'>
@@ -32,7 +33,8 @@ export interface DeployApiArgs {
 
 export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deployment | undefined> {
   const {
-    app,
+    appName,
+    assetName,
     coinstack,
     baseImageName,
     buildAndPushImageArgs,
@@ -48,15 +50,14 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
   if (config.api === undefined) return
 
   const tier = 'api'
-  const asset = config.assetName
-  const labels = { coinstack, asset, tier }
-  const name = `${asset}-${tier}`
+  const labels = { coinstack, assetName, tier }
+  const name = `${assetName}-${tier}`
 
   const buildArgs: Record<string, string> = { BUILDKIT_INLINE_CACHE: '1', COINSTACK: coinstack }
   if (baseImageName) buildArgs.BASE_IMAGE = baseImageName
 
   const tag = await getHash(coinstack, buildArgs)
-  const repositoryName = `${app}-${coinstack}-${tier}`
+  const repositoryName = `${appName}-${coinstack}-${tier}`
 
   let imageName = `shapeshiftdao/${repositoryName}:${tag}` // default public image
   if (config.dockerhub) {
@@ -102,7 +103,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
   )
 
   if (config.rootDomainName) {
-    const subdomain = config.environment ? `${config.environment}.api.${asset}` : `api.${asset}`
+    const subdomain = config.environment ? `${config.environment}.api.${assetName}` : `api.${assetName}`
     const domain = `${subdomain}.${config.rootDomainName}`
 
     const secretName = `${name}-cert-secret`
@@ -141,7 +142,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
     const hostMatch = `Host(\`${domain}\`)`
     const additionalHostMatch = `Host(\`${
       config.environment ? `${config.environment}-api` : 'api'
-    }.${asset}.${additionalRootDomainName}\`)`
+    }.${assetName}.${additionalRootDomainName}\`)`
 
     new k8s.apiextensions.CustomResource(
       `${name}-ingressroute`,

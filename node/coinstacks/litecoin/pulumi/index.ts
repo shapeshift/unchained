@@ -17,6 +17,8 @@ export = async (): Promise<Outputs> => {
   const outputs: Outputs = {}
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
 
+  const assetName = config.network !== 'mainnet' ? `${config.assetName}-${config.network}` : config.assetName
+
   const missingKeys: Array<string> = []
   const stringData = Object.keys(parse(readFileSync('../sample.env'))).reduce((prev, key) => {
     const value = process.env[key]
@@ -33,17 +35,14 @@ export = async (): Promise<Outputs> => {
     throw new Error(`Missing the following required environment variables: ${missingKeys.join(', ')}`)
   }
 
-  new k8s.core.v1.Secret(
-    config.assetName,
-    { metadata: { name: config.assetName, namespace }, stringData },
-    { provider }
-  )
+  new k8s.core.v1.Secret(assetName, { metadata: { name: assetName, namespace }, stringData }, { provider })
 
   const baseImageName = 'shapeshiftdao/unchained-base:latest'
 
   await deployApi({
-    app: appName,
-    coinstack: coinstack,
+    appName,
+    assetName,
+    coinstack,
     baseImageName,
     buildAndPushImageArgs: { context: '../api' },
     config,
@@ -58,17 +57,16 @@ export = async (): Promise<Outputs> => {
     const services = config.statefulService.services.reduce<Record<string, Service>>((prev, service) => {
       if (service.name === 'daemon') {
         prev[service.name] = createService({
-          assetName: config.assetName,
+          assetName: assetName,
           config: service,
           env: { NETWORK: config.network },
           ports: { 'daemon-rpc': { port: 8332 } },
-          snapshots,
         })
       }
 
       if (service.name === 'indexer') {
         prev[service.name] = createService({
-          assetName: config.assetName,
+          assetName: assetName,
           config: service,
           command: [
             '/bin/blockbook',
@@ -85,7 +83,6 @@ export = async (): Promise<Outputs> => {
           volumeMounts: [{ name: 'config-map', mountPath: '/config.json', subPath: 'indexer-config.json' }],
           readinessProbe: { initialDelaySeconds: 20, periodSeconds: 5, failureThreshold: 12 },
           livenessProbe: { timeoutSeconds: 10, initialDelaySeconds: 60, periodSeconds: 15, failureThreshold: 4 },
-          snapshots,
         })
       }
 
