@@ -54,11 +54,11 @@ export = async (): Promise<Outputs> => {
           asset,
           config: service,
           dataDir: '/root',
-          env: { 'CHAIN_ID': `${coinstack}-${config.network}-v1`, 'NET': config.network },
+          env: { CHAIN_ID: `${coinstack}-${config.network}-v1`, NET: config.network },
           ports: {
             'daemon-api': { port: 1317, pathPrefix: '/lcd', stripPathPrefix: true },
-            'daemon-rpc': { port: 27147, pathPrefix: '/rpc', stripPathPrefix: true }
-          }
+            'daemon-rpc': { port: 27147, pathPrefix: '/rpc', stripPathPrefix: true },
+          },
         })
       }
 
@@ -67,10 +67,10 @@ export = async (): Promise<Outputs> => {
           asset,
           config: service,
           dataDir: '/blockstore',
-          env: { 'MIDGARD_BLOCKSTORE_LOCAL': '/blockstore' },
-          ports: { 'midgard': { port: 8080 } },
+          env: { MIDGARD_BLOCKSTORE_LOCAL: '/blockstore' },
+          ports: { midgard: { port: 8080 } },
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
-          volumeMounts: [{ name: 'config-map', 'mountPath': '/config.json', subPath: 'indexer-config.json' }]
+          volumeMounts: [{ name: 'config-map', mountPath: '/config.json', subPath: 'indexer-config.json' }],
         })
       }
 
@@ -80,13 +80,13 @@ export = async (): Promise<Outputs> => {
           config: service,
           dataDir: '/var/lib/postgresql/data',
           env: {
-            'POSTGRES_DB': 'midgard',
-            'POSTGRES_USER': 'midgard',
-            'POSTGRES_PASSWORD': 'password',
-            'PGDATA': '/var/lib/postgresql/data/pgdata'
+            POSTGRES_DB: 'midgard',
+            POSTGRES_USER: 'midgard',
+            POSTGRES_PASSWORD: 'password',
+            PGDATA: '/var/lib/postgresql/data/pgdata',
           },
-          ports: { 'postgres': { port: 5432 } },
-          volumeMounts: [{ name: 'dshm', mountPath: '/dev/shm' }]
+          ports: { postgres: { port: 5432 } },
+          volumeMounts: [{ name: 'dshm', mountPath: '/dev/shm' }],
         })
       }
 

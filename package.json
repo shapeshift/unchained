@@ -6,9 +6,13 @@
     "node": ">=16"
   },
   "workspaces": [
-    "packages/**/*",
-    "coinstacks/**/*",
-    "pulumi"
+    "monitoring",
+    "pulumi",
+    "node/pulumi",
+    "node/packages/**/*",
+    "node/coinstacks/**/*",
+    "go/pulumi",
+    "go/coinstacks/**/pulumi"
   ],
   "scripts": {
     "build": "lerna run build --scope @shapeshiftoss/*",
@@ -22,7 +26,7 @@
     "version:major": "lerna version major --force-publish --no-push",
     "version:minor": "lerna version minor --force-publish --no-push",
     "version:patch": "lerna version patch --force-publish --no-push",
-    "prepare": "cd .. && husky install"
+    "prepare": "husky install"
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.18.1",

@@ -1,5 +1,5 @@
 {
-  "name": "@shapeshiftoss/common-pulumi",
+  "name": "@shapeshiftoss/common-pulumi-node",
   "version": "8.3.0",
   "license": "MIT",
   "private": true,

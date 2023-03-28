@@ -56,8 +56,8 @@ export = async (): Promise<Outputs> => {
           dataDir: '/root',
           ports: {
             'daemon-api': { port: 1317, pathPrefix: '/lcd', stripPathPrefix: true },
-            'daemon-rpc': { port: 26657, pathPrefix: '/rpc', stripPathPrefix: true }
-          }
+            'daemon-rpc': { port: 26657, pathPrefix: '/rpc', stripPathPrefix: true },
+          },
         })
       }
 

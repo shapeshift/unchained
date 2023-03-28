@@ -10,7 +10,8 @@ export const buildAndPushDockerImages = async (dockerhub: Dockerhub, name: strin
   if (!(await hasTag(baseImage, baseTag))) {
     await buildAndPushImage({
       image: baseImage,
-      context: '../../../node',
+      context: '../../..',
+      dockerFile: 'Dockerfile.node',
       auth: dockerhub,
       buildArgs: { BUILDKIT_INLINE_CACHE: '1' },
       env: { DOCKER_BUILDKIT: '1' },

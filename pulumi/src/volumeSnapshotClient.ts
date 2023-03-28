@@ -13,26 +13,44 @@ export interface VolumeSnapshot extends Required<k8sClient.KubernetesObject> {
     source: {
       persistentVolumeClaimName: string
     }
-  },
+  }
   status: {
-    readyToUse: boolean,
+    readyToUse: boolean
   }
 }
 
+export interface VolumeSnapshotClientArgs {
+  asset: string
+  kubeconfig?: string
+  namespace: string
+}
+
 export class VolumeSnapshotClient {
+  readonly asset: string
+  readonly name: string
+  readonly namespace: string
 
-  private readonly k8sObjectApi: k8sClient.KubernetesObjectApi
-  private readonly namespace: string
+  protected readonly kubeConfig: k8sClient.KubeConfig
+  protected readonly k8sObjectApi: k8sClient.KubernetesObjectApi
 
-  constructor(kubeconfig: string, namespace: string){
-    const kc = new k8sClient.KubeConfig()
-    kc.loadFromString(kubeconfig)
-    this.k8sObjectApi = kc.makeApiClient(k8sClient.KubernetesObjectApi)
-    this.namespace = namespace;
+  constructor(args: VolumeSnapshotClientArgs) {
+    this.asset = args.asset
+    this.name = `${args.asset}-sts`
+    this.namespace = args.namespace
+
+    this.kubeConfig = new k8sClient.KubeConfig()
+
+    if (args.kubeconfig) {
+      this.kubeConfig.loadFromString(args.kubeconfig)
+    } else {
+      this.kubeConfig.loadFromDefault()
+    }
+
+    this.k8sObjectApi = this.kubeConfig.makeApiClient(k8sClient.KubernetesObjectApi)
   }
 
-  getVolumeSnapshots = async (assetName: string): Promise<VolumeSnapshot[]> => {
-    const response = await this.k8sObjectApi.list<VolumeSnapshot>(
+  async getSnapshots(): Promise<VolumeSnapshot[]> {
+    const { body } = await this.k8sObjectApi.list<VolumeSnapshot>(
       'snapshot.storage.k8s.io/v1',
       'VolumeSnapshot',
       this.namespace,
@@ -40,9 +58,78 @@ export class VolumeSnapshotClient {
       undefined,
       undefined,
       undefined,
-      `statefulset=${assetName}-sts`
+      `statefulset=${this.name}`
     )
 
-    return response.body.items;
+    const items = body.items.map((item) => {
+      const deserializedItem = Object.assign({}, item)
+      deserializedItem.metadata.creationTimestamp = new Date(item.metadata.creationTimestamp)
+      return deserializedItem
+    })
+
+    // sorted newest -> oldest
+    return items.sort((a, b) => b.metadata.creationTimestamp.getTime() - a.metadata.creationTimestamp.getTime())
+  }
+
+  protected async takeSnapshots(pvcList: Array<string>): Promise<void> {
+    const timestamp = new Date()
+
+    await Promise.all(
+      pvcList.map(async (pvc) => {
+        const snapshotName = `${pvc}-backup-${timestamp.getTime()}`
+        console.log(`Taking snapshot of pvc ${pvc} - ${snapshotName}`)
+
+        const snapshotYaml: VolumeSnapshot = {
+          apiVersion: 'snapshot.storage.k8s.io/v1',
+          kind: 'VolumeSnapshot',
+          metadata: {
+            name: snapshotName,
+            labels: {
+              statefulset: this.name,
+            },
+            creationTimestamp: timestamp, // will be overwritten by k8s
+          },
+          spec: {
+            volumeSnapshotClassName: 'csi-aws-vsc',
+            source: {
+              persistentVolumeClaimName: pvc,
+            },
+          },
+          status: {
+            readyToUse: false, // will be overwritten by k8s
+          },
+        }
+
+        await this.k8sObjectApi.create(snapshotYaml)
+        console.log(`Snapshot ${snapshotName} finished`)
+      })
+    )
+  }
+
+  protected async removeSnapshots(retainCount: number): Promise<void> {
+    const snapshots = await this.getSnapshots()
+
+    if (snapshots.length < retainCount) {
+      console.log('No snapshots to clean up')
+      return
+    }
+
+    const [toKeep, toRemove] = [snapshots.slice(0, retainCount), snapshots.slice(retainCount)]
+
+    console.log(`Volume snapshots to keep: ${toKeep.length}`)
+    toKeep.forEach((x) => console.log(x.metadata.name))
+
+    console.log(`Volume snapshots to remove: ${toRemove.length}`)
+    toRemove.forEach((x) => console.log(x.metadata.name))
+
+    // remove oldest -> newest
+    await Promise.all(
+      toRemove.reverse().map(async (snapshot) => {
+        await this.k8sObjectApi.delete(snapshot)
+        console.log(`Snapshot ${snapshot.metadata.name} removed`)
+      })
+    )
+
+    console.log('Snapshot removal finished')
   }
 }

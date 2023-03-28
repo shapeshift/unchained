@@ -2,7 +2,7 @@ import { createHash } from 'crypto'
 import { hashElement } from 'folder-hash'
 
 const rootDir = `${__dirname}/../../node`
-const volumeReaperDir = `${__dirname}/../volumeReaper`
+const volumeReaperDir = `${__dirname}/volumeReaper`
 
 // creates a hash of the content included in the final build image (base)
 export const getBaseHash = async (): Promise<string> => {

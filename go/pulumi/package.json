@@ -1,17 +1,10 @@
 {
-  "name": "@shapeshiftoss/common-pulumi",
+  "name": "@shapeshiftoss/common-pulumi-go",
+  "version": "8.3.0",
   "license": "MIT",
   "private": true,
   "main": "src/index.ts",
   "scripts": {
     "clean": "rm -rf node_modules"
-  },
-  "dependencies": {
-    "@pulumi/kubernetes": "3.23.1",
-    "@types/folder-hash": "^4.0.1",
-    "@types/object-hash": "^2.2.1",
-    "dotenv": "^16.0.1",
-    "folder-hash": "^4.0.2",
-    "object-hash": "^3.0.0"
   }
 }

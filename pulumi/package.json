@@ -1,18 +1,20 @@
 {
   "name": "@shapeshiftoss/unchained-pulumi",
+  "version": "8.3.0",
   "license": "MIT",
   "private": true,
   "main": "src/index.ts",
   "scripts": {
-    "clean": "rm -rf node_modules"
+    "build": "tsc",
+    "clean": "rm -rf dist node_modules"
   },
   "dependencies": {
-    "@pulumi/kubernetes": "3.23.1",
-    "@pulumi/pulumi": "3.50.2",
-    "@kubernetes/client-node": "^0.18.1",
     "@shapeshiftoss/cluster-launcher": "^0.16.0",
-    "@types/folder-hash": "^4.0.1",
     "axios": "^0.27.2",
-    "folder-hash": "^4.0.2"
+    "commander": "^10.0.0",
+    "figlet": "^1.5.2"
+  },
+  "devDependencies": {
+    "@types/figlet": "^1.5.5"
   }
 }
