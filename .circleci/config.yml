@@ -841,7 +841,7 @@ jobs:
           working_directory: node/<< parameters.pulumi-dir >>
           command: |
             pulumi stack select $<< parameters.organization >>_PULUMI_ORG/<< parameters.pulumi-stack >>
-            pulumi config set --path unchained.coinstack.assetname << parameters.assetName >>
+            pulumi config set --path unchained.coinstack.assetName << parameters.assetName >>
             pulumi config set --path unchained.coinstack.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies-us-east-2
             [ -n "<< parameters.environment >>" ] && pulumi config set --path unchained.coinstack.environment << parameters.environment >>
             pulumi config set --path unchained.coinstack.network << parameters.network >>
