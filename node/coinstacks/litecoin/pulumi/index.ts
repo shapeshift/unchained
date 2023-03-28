@@ -13,7 +13,7 @@ export = async (): Promise<Outputs> => {
   const name = 'unchained'
   const coinstack = 'litecoin'
 
-  const { kubeconfig, config, namespace } = await getConfig()
+  const { kubeconfig, config, namespace } = await getConfig(coinstack)
 
   const asset = config.network !== 'mainnet' ? `${coinstack}-${config.network}` : coinstack
   const outputs: Outputs = {}
