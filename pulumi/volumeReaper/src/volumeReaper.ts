@@ -9,9 +9,10 @@ interface StatefulSet extends k8s.V1StatefulSet {
   spec: k8s.V1StatefulSetSpec
 }
 
-interface VolumeSnapshot extends Required<k8s.KubernetesObject> {
+export interface VolumeSnapshot extends Required<k8s.KubernetesObject> {
   metadata: {
     name: string
+    // the actual type is string but the parent object has this messed up
     creationTimestamp: Date
     labels: {
       statefulset: string
@@ -116,6 +117,12 @@ export class VolumeReaper {
     }
   }
 
+  private deserialize(snapshot: VolumeSnapshot): VolumeSnapshot {
+    const deserializedSnapshot = Object.assign({}, snapshot)
+    deserializedSnapshot.metadata.creationTimestamp = new Date(snapshot.metadata.creationTimestamp)
+    return deserializedSnapshot
+  }
+
   private async getSnapshots(): Promise<VolumeSnapshot[]> {
     const snapshots = await this.k8sObjectApi.list<VolumeSnapshot>(
       'snapshot.storage.k8s.io/v1',
@@ -127,10 +134,8 @@ export class VolumeReaper {
       undefined,
       `statefulset=${this.name}`
     )
-
-    const items = snapshots.body.items
+    const items = snapshots.body.items.map(this.deserialize);
     console.log(`Found ${items.length} snapshots for ${this.namespace}.${this.name}`)
-
     // sorted newest -> oldest
     return items.sort((a, b) => b.metadata.creationTimestamp.getTime() - a.metadata.creationTimestamp.getTime())
   }
@@ -187,7 +192,7 @@ export class VolumeReaper {
     await Promise.all(
       toRemove.reverse().map(async (snapshot) => {
         await this.k8sObjectApi.delete(snapshot)
-        console.log(`Snapshot ${snapshot} removed`)
+        console.log(`Snapshot ${snapshot.metadata.name} removed`)
       })
     )
 
