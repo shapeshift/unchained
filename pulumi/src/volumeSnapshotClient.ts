@@ -20,7 +20,6 @@ export interface VolumeSnapshot extends Required<k8sClient.KubernetesObject> {
 }
 
 export class VolumeSnapshotClient {
-
   private readonly k8sObjectApi: k8sClient.KubernetesObjectApi
   private readonly namespace: string
 
