@@ -1,9 +1,15 @@
 import { parse } from 'dotenv'
 import { readFileSync } from 'fs'
 import * as k8s from '@pulumi/kubernetes'
-import { deployApi, createService, deployStatefulService, getConfig, Service } from '../../../../pulumi'
+import {
+  deployApi,
+  createService,
+  deployStatefulService,
+  getConfig,
+  Service,
+  VolumeSnapshotClient,
+} from '../../../../pulumi'
 import { api } from '../../../pulumi'
-import { VolumeSnapshotClient } from '../../../../pulumi/src/volumeSnapshotClient'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Outputs = Record<string, any>

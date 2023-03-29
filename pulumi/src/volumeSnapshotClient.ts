@@ -31,6 +31,12 @@ export class VolumeSnapshotClient {
     this.namespace = namespace;
   }
 
+  private deserialize(snapshot: VolumeSnapshot): VolumeSnapshot {
+    const deserializedSnapshot = Object.assign({}, snapshot)
+    deserializedSnapshot.metadata.creationTimestamp = new Date(snapshot.metadata.creationTimestamp)
+    return deserializedSnapshot
+  }
+
   getVolumeSnapshots = async (assetName: string): Promise<VolumeSnapshot[]> => {
     const response = await this.k8sObjectApi.list<VolumeSnapshot>(
       'snapshot.storage.k8s.io/v1',
@@ -42,7 +48,6 @@ export class VolumeSnapshotClient {
       undefined,
       `statefulset=${assetName}-sts`
     )
-
-    return response.body.items;
+    return response.body.items.map(this.deserialize);
   }
 }
