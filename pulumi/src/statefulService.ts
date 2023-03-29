@@ -24,7 +24,7 @@ export interface ServiceArgs {
   volumeMounts?: Array<k8s.types.input.core.v1.VolumeMount>
   readinessProbe?: k8s.types.input.core.v1.Probe
   livenessProbe?: k8s.types.input.core.v1.Probe,
-  snapshots?: VolumeSnapshot[]
+  snapshots: VolumeSnapshot[]
 }
 
 export function createService(args: ServiceArgs): Service {

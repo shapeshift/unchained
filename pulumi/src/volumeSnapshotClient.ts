@@ -48,6 +48,6 @@ export class VolumeSnapshotClient {
       undefined,
       `statefulset=${assetName}-sts`
     )
-    return response.body.items.map(this.deserialize);
+    return response.body.items.map(this.deserialize).sort((a, b) => b.metadata.creationTimestamp.getTime() - a.metadata.creationTimestamp.getTime());
   }
 }
