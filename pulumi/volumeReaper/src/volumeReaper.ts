@@ -137,7 +137,7 @@ export class VolumeReaper {
     const items = snapshots.body.items.map(this.deserialize);
     console.log(`Found ${items.length} snapshots for ${this.namespace}.${this.name}`)
     // sorted newest -> oldest
-    return items.sort((a, b) => new Date(b.metadata.creationTimestamp).getTime() - new Date(a.metadata.creationTimestamp).getTime())
+    return items.sort((a, b) => b.metadata.creationTimestamp.getTime() - a.metadata.creationTimestamp.getTime())
   }
 
   private async takeSnapshots(pvcList: Array<string>): Promise<void> {
