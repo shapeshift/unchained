@@ -2,7 +2,7 @@
   "extends": "../../node/tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
-    "types": ["node"],
+    "types": ["node"]
   },
   "include": ["./src"],
   "exclude": ["node_modules"]
