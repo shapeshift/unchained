@@ -50,7 +50,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
   if (config.api === undefined) return
 
   const tier = 'api'
-  const labels = { coinstack, assetName, tier }
+  const labels = { app: appName, coinstack, asset: assetName, tier }
   const name = `${assetName}-${tier}`
 
   const buildArgs: Record<string, string> = { BUILDKIT_INLINE_CACHE: '1', COINSTACK: coinstack }
