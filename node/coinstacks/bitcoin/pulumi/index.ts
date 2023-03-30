@@ -1,7 +1,14 @@
 import { parse } from 'dotenv'
 import { readFileSync } from 'fs'
 import * as k8s from '@pulumi/kubernetes'
-import { deployApi, createService, deployStatefulService, getConfig, Service } from '../../../../pulumi'
+import {
+  deployApi,
+  createService,
+  deployStatefulService,
+  getConfig,
+  Service,
+  VolumeSnapshotClient,
+} from '../../../../pulumi'
 import { api } from '../../../pulumi'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,6 +24,7 @@ export = async (): Promise<Outputs> => {
   const asset = config.network !== 'mainnet' ? `${coinstack}-${config.network}` : coinstack
   const outputs: Outputs = {}
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
+  const snapshots = await new VolumeSnapshotClient(kubeconfig, namespace).getVolumeSnapshots(asset)
 
   const missingKeys: Array<string> = []
   const stringData = Object.keys(parse(readFileSync('../sample.env'))).reduce((prev, key) => {
@@ -59,6 +67,7 @@ export = async (): Promise<Outputs> => {
           config: service,
           env: { NETWORK: config.network },
           ports: { 'daemon-rpc': { port: 8332 } },
+          snapshots,
         })
       }
 
@@ -81,6 +90,7 @@ export = async (): Promise<Outputs> => {
           volumeMounts: [{ name: 'config-map', mountPath: '/config.json', subPath: 'indexer-config.json' }],
           readinessProbe: { initialDelaySeconds: 20, periodSeconds: 5, failureThreshold: 12 },
           livenessProbe: { timeoutSeconds: 10, initialDelaySeconds: 60, periodSeconds: 15, failureThreshold: 4 },
+          snapshots,
         })
       }
 

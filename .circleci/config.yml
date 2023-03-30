@@ -203,7 +203,7 @@ aliases:
     service-memory-limit-1: 32Gi
     service-storage-size-1: 2500Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v3.2.2
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.0.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 8Gi
@@ -574,11 +574,12 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/bnb-smart-chain:v1.1.20
-    service-cpu-limit-1: "2"
-    service-cpu-request-1: "1"
-    service-memory-limit-1: 24Gi
-    service-storage-size-1: 2500Gi
+    service-image-1: shapeshiftdao/bnb-smart-chain:v1.1.21
+    service-cpu-limit-1: "8"
+    service-cpu-request-1: "4"
+    service-memory-limit-1: 48Gi
+    service-memory-request-1: 24Gi
+    service-storage-size-1: 3000Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:15c19ac
     service-cpu-limit-2: "2"
