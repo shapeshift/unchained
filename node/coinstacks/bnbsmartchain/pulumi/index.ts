@@ -16,15 +16,15 @@ type Outputs = Record<string, any>
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
-  const name = 'unchained'
+  const appName = 'unchained'
   const coinstack = 'bnbsmartchain'
 
-  const { kubeconfig, config, namespace } = await getConfig(coinstack)
+  const { kubeconfig, config, namespace } = await getConfig()
 
-  const asset = config.network !== 'mainnet' ? `${coinstack}-${config.network}` : coinstack
+  const assetName = config.network !== 'mainnet' ? `${coinstack}-${config.network}` : coinstack
   const outputs: Outputs = {}
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
-  const snapshots = await new VolumeSnapshotClient(kubeconfig, namespace).getVolumeSnapshots(asset)
+  const snapshots = await new VolumeSnapshotClient(kubeconfig, namespace).getVolumeSnapshots(assetName)
 
   const missingKeys: Array<string> = []
   const stringData = Object.keys(parse(readFileSync('../sample.env'))).reduce((prev, key) => {
@@ -42,13 +42,14 @@ export = async (): Promise<Outputs> => {
     throw new Error(`Missing the following required environment variables: ${missingKeys.join(', ')}`)
   }
 
-  new k8s.core.v1.Secret(asset, { metadata: { name: asset, namespace }, stringData }, { provider })
+  new k8s.core.v1.Secret(assetName, { metadata: { name: assetName, namespace }, stringData }, { provider })
 
   const baseImageName = 'shapeshiftdao/unchained-base:latest'
 
   await deployApi({
-    app: name,
-    asset,
+    appName,
+    assetName,
+    coinstack,
     baseImageName,
     buildAndPushImageArgs: { context: '../api' },
     config,
@@ -63,7 +64,7 @@ export = async (): Promise<Outputs> => {
     const services = config.statefulService.services.reduce<Record<string, Service>>((prev, service) => {
       if (service.name === 'daemon') {
         prev[service.name] = createService({
-          asset,
+          assetName,
           config: service,
           env: { SNAPSHOT: 'https://pub-c0627345c16f47ab858c9469133073a8.r2.dev/geth-20230326.tar.lz4' },
           ports: {
@@ -77,7 +78,7 @@ export = async (): Promise<Outputs> => {
 
       if (service.name === 'indexer') {
         prev[service.name] = createService({
-          asset,
+          assetName,
           config: service,
           command: [
             '/bin/blockbook',
@@ -101,7 +102,7 @@ export = async (): Promise<Outputs> => {
       return prev
     }, {})
 
-    await deployStatefulService(name, asset, provider, namespace, config, services)
+    await deployStatefulService(appName, assetName, provider, namespace, config, services)
   }
 
   return outputs
