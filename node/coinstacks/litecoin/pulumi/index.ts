@@ -57,7 +57,7 @@ export = async (): Promise<Outputs> => {
     const services = config.statefulService.services.reduce<Record<string, Service>>((prev, service) => {
       if (service.name === 'daemon') {
         prev[service.name] = createService({
-          assetName: assetName,
+          assetName,
           config: service,
           env: { NETWORK: config.network },
           ports: { 'daemon-rpc': { port: 8332 } },
