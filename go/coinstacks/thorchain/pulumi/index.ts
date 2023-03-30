@@ -15,7 +15,7 @@ export = async (): Promise<Outputs> => {
 
   const assetName = config.network !== 'mainnet' ? `${config.assetName}-${config.network}` : config.assetName
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
-  const snapshots = await new VolumeSnapshotClient(kubeconfig, namespace).getVolumeSnapshots(asset)
+  const snapshots = await new VolumeSnapshotClient(kubeconfig, namespace).getVolumeSnapshots(assetName)
   const outputs: Outputs = {}
 
   const missingKeys: Array<string> = []

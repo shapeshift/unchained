@@ -20,12 +20,11 @@ export = async (): Promise<Outputs> => {
   const coinstack = 'litecoin'
 
   const { kubeconfig, config, namespace } = await getConfig()
+  const assetName = config.network !== 'mainnet' ? `${config.assetName}-${config.network}` : config.assetName
 
   const outputs: Outputs = {}
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
-  const snapshots = await new VolumeSnapshotClient(kubeconfig, namespace).getVolumeSnapshots(asset)
-
-  const assetName = config.network !== 'mainnet' ? `${config.assetName}-${config.network}` : config.assetName
+  const snapshots = await new VolumeSnapshotClient(kubeconfig, namespace).getVolumeSnapshots(assetName)
 
   const missingKeys: Array<string> = []
   const stringData = Object.keys(parse(readFileSync('../sample.env'))).reduce((prev, key) => {
