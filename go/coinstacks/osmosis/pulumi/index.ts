@@ -8,12 +8,12 @@ type Outputs = Record<string, any>
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
-  const name = 'unchained'
+  const appName = 'unchained'
   const coinstack = 'osmosis'
 
-  const { kubeconfig, config, namespace } = await getConfig(coinstack)
+  const { kubeconfig, config, namespace } = await getConfig()
 
-  const asset = config.network !== 'mainnet' ? `${coinstack}-${config.network}` : coinstack
+  const assetName = config.network !== 'mainnet' ? `${config.assetName}-${config.network}` : config.assetName
   const outputs: Outputs = {}
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
 
@@ -33,11 +33,12 @@ export = async (): Promise<Outputs> => {
     throw new Error(`Missing the following required environment variables: ${missingKeys.join(', ')}`)
   }
 
-  new k8s.core.v1.Secret(asset, { metadata: { name: asset, namespace }, stringData }, { provider })
+  new k8s.core.v1.Secret(assetName, { metadata: { name: assetName, namespace }, stringData }, { provider })
 
   await deployApi({
-    app: name,
-    asset,
+    appName,
+    assetName,
+    coinstack,
     buildAndPushImageArgs: { context: '../../../../go', dockerFile: '../../../build/Dockerfile' },
     config,
     container: { args: ['-swagger', 'swagger.json'] },
@@ -51,7 +52,7 @@ export = async (): Promise<Outputs> => {
     const services = config.statefulService.services.reduce<Record<string, Service>>((prev, service) => {
       if (service.name === 'daemon') {
         prev[service.name] = createService({
-          asset,
+          assetName,
           config: service,
           dataDir: '/root',
           ports: {
@@ -64,7 +65,7 @@ export = async (): Promise<Outputs> => {
       return prev
     }, {})
 
-    await deployStatefulService(name, asset, provider, namespace, config, services)
+    await deployStatefulService(appName, assetName, provider, namespace, config, services)
   }
 
   return outputs
