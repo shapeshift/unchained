@@ -1,7 +1,7 @@
 import { parse } from 'dotenv'
 import { readFileSync } from 'fs'
 import * as k8s from '@pulumi/kubernetes'
-import { deployApi, createService, deployStatefulService, getConfig, Service } from '../../../../pulumi'
+import { deployApi, createService, deployStatefulService, getConfig, Service, VolumeSnapshotClient } from '../../../../pulumi'
 import { api } from '../../../pulumi'
 
 type Outputs = Record<string, any>
@@ -15,6 +15,7 @@ export = async (): Promise<Outputs> => {
 
   const assetName = config.network !== 'mainnet' ? `${config.assetName}-${config.network}` : config.assetName
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
+  const snapshots = await new VolumeSnapshotClient(kubeconfig, namespace).getVolumeSnapshots(asset)
   const outputs: Outputs = {}
 
   const missingKeys: Array<string> = []
@@ -59,7 +60,8 @@ export = async (): Promise<Outputs> => {
           ports: {
             'daemon-api': { port: 1317, pathPrefix: '/lcd', stripPathPrefix: true },
             'daemon-rpc': { port: 27147, pathPrefix: '/rpc', stripPathPrefix: true }
-          }
+          },
+          snapshots
         })
       }
 
@@ -71,7 +73,8 @@ export = async (): Promise<Outputs> => {
           env: { 'MIDGARD_BLOCKSTORE_LOCAL': '/blockstore' },
           ports: { 'midgard': { port: 8080 } },
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
-          volumeMounts: [{ name: 'config-map', 'mountPath': '/config.json', subPath: 'indexer-config.json' }]
+          volumeMounts: [{ name: 'config-map', 'mountPath': '/config.json', subPath: 'indexer-config.json' }],
+          snapshots
         })
       }
 
@@ -87,7 +90,8 @@ export = async (): Promise<Outputs> => {
             'PGDATA': '/var/lib/postgresql/data/pgdata'
           },
           ports: { 'postgres': { port: 5432 } },
-          volumeMounts: [{ name: 'dshm', mountPath: '/dev/shm' }]
+          volumeMounts: [{ name: 'dshm', mountPath: '/dev/shm' }],
+          snapshots
         })
       }
 
