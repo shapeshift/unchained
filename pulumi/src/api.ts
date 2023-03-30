@@ -22,7 +22,7 @@ export interface DeployApiArgs {
   assetName: string
   baseImageName?: string
   buildAndPushImageArgs: Pick<BuildAndPushImageArgs, 'context' | 'dockerFile'>
-  config: Pick<Config, 'api' | 'dockerhub' | 'rootDomainName' | 'environment' | 'assetName'>
+  config: Pick<Config, 'api' | 'dockerhub' | 'rootDomainName' | 'environment'>
   container: Partial<Pick<k8s.types.input.core.v1.Container, 'args' | 'command'>>
   deployDependencies?: Input<Array<Resource>>
   getHash: (coinstack: string, buildArgs: Record<string, string>) => Promise<string>
