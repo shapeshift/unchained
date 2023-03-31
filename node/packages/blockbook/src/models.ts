@@ -183,30 +183,17 @@ export interface Token {
 }
 
 /**
- * Contains info about a token transfer done in a transaction
+ * Contains info about a token transfer in a transaction
  */
 export interface TokenTransfer {
   type: string
   from: string
   to: string
+  contract: string
   name: string
   symbol: string
   decimals: number
   value: string
-}
-
-/**
- * Contains info about a token transfer with legacy `token` key for contract address
- */
-export interface TokenTransferWithToken extends TokenTransfer {
-  token: string
-}
-
-/**
- * Contains info about a token transfer with new `contract` key for contract address
- */
-export interface TokenTransferWithContract extends TokenTransfer {
-  contract: string
 }
 
 /**
@@ -228,7 +215,7 @@ export interface Tx {
   fees?: string
   hex?: string
   rbf?: boolean
-  tokenTransfers?: Array<TokenTransferWithToken | TokenTransferWithContract>
+  tokenTransfers?: Array<TokenTransfer>
   coinSpecificData?: unknown
   ethereumSpecific?: EthereumSpecific
 }

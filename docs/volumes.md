@@ -8,25 +8,35 @@ cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: data-daemon-ethereum-sts-0-pv
-  labels:
-    failure-domain.beta.kubernetes.io/region: us-east-2
-    failure-domain.beta.kubernetes.io/zone: us-east-2b
+  finalizers:
+  - kubernetes.io/pv-protection
+  - external-attacher/ebs-csi-aws-com
+  name: data-indexer-ethereum-sts-0-pv
 spec:
-  storageClassName: ebs-csi-gp2
-  capacity:
-    storage: 2500Gi
   accessModes:
     - ReadWriteOnce
-  awsElasticBlockStore:
-    volumeID: <vol-XXXXXXXXXXXXXXXX>
+  capacity:
+    storage: 500Gi
+  csi:
+    driver: ebs.csi.aws.com
     fsType: ext4
+    volumeHandle: vol-xxxxxxxxxxxxxxxxx
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: topology.ebs.csi.aws.com/zone
+          operator: In
+          values:
+          - us-east-2a
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: ebs-csi-gp2
+  volumeMode: Filesystem
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: data-daemon-ethereum-sts-0
+  name: data-indexer-ethereum-sts-0
   namespace: unchained
   labels:
     app: unchained
@@ -37,8 +47,8 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 2500Gi
+      storage: 500Gi
   storageClassName: ebs-csi-gp2
-  volumeName: data-daemon-ethereum-sts-0-pv
+  volumeName: data-indexer-ethereum-sts-0-pv
 EOF
 ```

@@ -34,6 +34,7 @@ services:
       - "--providers.docker.exposedbydefault=false"
     networks:
       - avalanche_default
+      - bnbsmartchain_default
       - bitcoin_default
       - bitcoincash_default
       - cosmos_default
@@ -56,6 +57,8 @@ services:
 networks:
   avalanche_default:
     name: avalanche_default
+  bnbsmartchain_default:
+    name: bnbsmartchain_default
   bitcoin_default:
     name: bitcoin_default
   bitcoincash_default:

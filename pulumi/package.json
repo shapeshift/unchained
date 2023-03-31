@@ -9,7 +9,8 @@
   "dependencies": {
     "@pulumi/kubernetes": "3.23.1",
     "@pulumi/pulumi": "3.50.2",
-    "@shapeshiftoss/cluster-launcher": "^0.13.0",
+    "@kubernetes/client-node": "^0.18.1",
+    "@shapeshiftoss/cluster-launcher": "^0.16.0",
     "@types/folder-hash": "^4.0.1",
     "axios": "^0.27.2",
     "folder-hash": "^4.0.2"

@@ -3,8 +3,8 @@ import { Input, Resource } from '@pulumi/pulumi'
 import { buildAndPushImage, BuildAndPushImageArgs, Config, hasTag } from './index'
 
 export interface Autoscaling {
-  enabled: boolean,
-  maxReplicas: number,
+  enabled: boolean
+  maxReplicas: number
   cpuThreshold: number
 }
 
@@ -17,23 +17,25 @@ export interface ApiConfig {
 }
 
 export interface DeployApiArgs {
-  app: string,
-  asset: string,
-  baseImageName?: string,
-  buildAndPushImageArgs: Pick<BuildAndPushImageArgs, 'context' | 'dockerFile'>,
-  config: Pick<Config, 'api' | 'dockerhub' | 'rootDomainName' | 'environment'>,
-  container: Partial<Pick<k8s.types.input.core.v1.Container, 'args' | 'command'>>,
+  appName: string
+  coinstack: string
+  assetName: string
+  baseImageName?: string
+  buildAndPushImageArgs: Pick<BuildAndPushImageArgs, 'context' | 'dockerFile'>
+  config: Pick<Config, 'api' | 'dockerhub' | 'rootDomainName' | 'environment'>
+  container: Partial<Pick<k8s.types.input.core.v1.Container, 'args' | 'command'>>
   deployDependencies?: Input<Array<Resource>>
-  getHash: (coinstack: string, buildArgs: Record<string, string>) => Promise<string>,
-  namespace: string,
-  provider: k8s.Provider,
-  secretEnvs: (coinstack: string, asset: string) => k8s.types.input.core.v1.EnvVar[],
+  getHash: (coinstack: string, buildArgs: Record<string, string>) => Promise<string>
+  namespace: string
+  provider: k8s.Provider
+  secretEnvs: (coinstack: string, asset: string) => k8s.types.input.core.v1.EnvVar[]
 }
 
 export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deployment | undefined> {
   const {
-    app,
-    asset,
+    appName,
+    assetName,
+    coinstack,
     baseImageName,
     buildAndPushImageArgs,
     config,
@@ -48,15 +50,14 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
   if (config.api === undefined) return
 
   const tier = 'api'
-  const labels = { app, asset, tier }
-  const name = `${asset}-${tier}`
-  const [coinstack] = asset.split('-')
+  const labels = { app: appName, coinstack, asset: assetName, tier }
+  const name = `${assetName}-${tier}`
 
   const buildArgs: Record<string, string> = { BUILDKIT_INLINE_CACHE: '1', COINSTACK: coinstack }
   if (baseImageName) buildArgs.BASE_IMAGE = baseImageName
 
   const tag = await getHash(coinstack, buildArgs)
-  const repositoryName = `${app}-${coinstack}-${tier}`
+  const repositoryName = `${appName}-${coinstack}-${tier}`
 
   let imageName = `shapeshiftdao/${repositoryName}:${tag}` // default public image
   if (config.dockerhub) {
@@ -79,7 +80,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
         env: { DOCKER_BUILDKIT: '1' },
         tags: [tag],
         cacheFroms,
-        ...buildAndPushImageArgs
+        ...buildAndPushImageArgs,
       })
     }
   }
@@ -102,7 +103,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
   )
 
   if (config.rootDomainName) {
-    const subdomain = config.environment ? `${config.environment}.api.${asset}` : `api.${asset}`
+    const subdomain = config.environment ? `${config.environment}.api.${assetName}` : `api.${assetName}`
     const domain = `${subdomain}.${config.rootDomainName}`
 
     const secretName = `${name}-cert-secret`
@@ -139,7 +140,9 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
 
     const additionalRootDomainName = process.env.ADDITIONAL_ROOT_DOMAIN_NAME
     const hostMatch = `Host(\`${domain}\`)`
-    const additionalHostMatch = `Host(\`${config.environment ? `${config.environment}-api` : 'api'}.${asset}.${additionalRootDomainName}\`)`
+    const additionalHostMatch = `Host(\`${
+      config.environment ? `${config.environment}-api` : 'api'
+    }.${assetName}.${additionalRootDomainName}\`)`
 
     new k8s.apiextensions.CustomResource(
       `${name}-ingressroute`,
@@ -201,7 +204,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
           name: tier,
           image: imageName,
           ports: [{ containerPort: 3000, name: 'http' }],
-          env: [...secretEnvs(coinstack, asset)],
+          env: [...secretEnvs(coinstack, assetName)],
           resources: {
             limits: {
               cpu: config.api.cpuLimit,
@@ -227,7 +230,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
             failureThreshold: 3,
             successThreshold: 1,
           },
-          ...container
+          ...container,
         },
       ],
     },
