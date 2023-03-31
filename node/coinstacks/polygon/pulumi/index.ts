@@ -1,7 +1,14 @@
 import { parse } from 'dotenv'
 import { readFileSync } from 'fs'
 import * as k8s from '@pulumi/kubernetes'
-import { deployApi, createService, deployStatefulService, getConfig, Service } from '../../../../pulumi'
+import {
+  deployApi,
+  createService,
+  deployStatefulService,
+  getConfig,
+  Service,
+  VolumeSnapshotClient,
+} from '../../../../pulumi'
 import { api } from '../../../pulumi'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -9,14 +16,15 @@ type Outputs = Record<string, any>
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
-  const name = 'unchained'
+  const appName = 'unchained'
   const coinstack = 'polygon'
 
-  const { kubeconfig, config, namespace } = await getConfig(coinstack)
+  const { kubeconfig, config, namespace } = await getConfig()
+  const assetName = config.network !== 'mainnet' ? `${config.assetName}-${config.network}` : config.assetName
 
-  const asset = config.network !== 'mainnet' ? `${coinstack}-${config.network}` : coinstack
   const outputs: Outputs = {}
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
+  const snapshots = await new VolumeSnapshotClient(kubeconfig, namespace).getVolumeSnapshots(assetName)
 
   const missingKeys: Array<string> = []
   const stringData = Object.keys(parse(readFileSync('../sample.env'))).reduce((prev, key) => {
@@ -34,13 +42,14 @@ export = async (): Promise<Outputs> => {
     throw new Error(`Missing the following required environment variables: ${missingKeys.join(', ')}`)
   }
 
-  new k8s.core.v1.Secret(asset, { metadata: { name: asset, namespace }, stringData }, { provider })
+  new k8s.core.v1.Secret(assetName, { metadata: { name: assetName, namespace }, stringData }, { provider })
 
   const baseImageName = 'shapeshiftdao/unchained-base:latest'
 
   await deployApi({
-    app: name,
-    asset,
+    appName,
+    assetName,
+    coinstack,
     baseImageName,
     buildAndPushImageArgs: { context: '../api' },
     config,
@@ -55,18 +64,19 @@ export = async (): Promise<Outputs> => {
     const services = config.statefulService.services.reduce<Record<string, Service>>((prev, service) => {
       if (service.name === 'daemon') {
         prev[service.name] = createService({
-          asset,
+          assetName,
           config: service,
           ports: {
             'daemon-rpc': { port: 8545 },
             'daemon-ws': { port: 8546, pathPrefix: '/websocket', stripPathPrefix: true },
           },
+          snapshots,
         })
       }
 
       if (service.name === 'heimdall') {
         prev[service.name] = createService({
-          asset,
+          assetName,
           config: service,
           dataDir: '/root',
           env: { ETH_RPC_URL: `http://ethereum-svc.${namespace}.svc.cluster.local:8332` },
@@ -74,12 +84,13 @@ export = async (): Promise<Outputs> => {
             'heimdall-api': { port: 1317, pathPrefix: '/lcd', stripPathPrefix: true },
             'heimdall-rpc': { port: 26657, pathPrefix: '/rpc', stripPathPrefix: true },
           },
+          snapshots,
         })
       }
 
       if (service.name === 'indexer') {
         prev[service.name] = createService({
-          asset,
+          assetName,
           config: service,
           command: [
             '/bin/blockbook',
@@ -87,23 +98,24 @@ export = async (): Promise<Outputs> => {
             '-datadir=/data',
             '-sync',
             '-public=:8001',
+            '-prof=:8002',
             '-enablesubnewtx',
             '-logtostderr',
             '-debug',
-            '-workers=16',
           ],
           ports: { public: { port: 8001 } },
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
           volumeMounts: [{ name: 'config-map', mountPath: '/config.json', subPath: 'indexer-config.json' }],
           readinessProbe: { initialDelaySeconds: 20, periodSeconds: 5, failureThreshold: 12 },
           livenessProbe: { timeoutSeconds: 10, initialDelaySeconds: 60, periodSeconds: 15, failureThreshold: 4 },
+          snapshots,
         })
       }
 
       return prev
     }, {})
 
-    await deployStatefulService(name, asset, provider, namespace, config, services)
+    await deployStatefulService(appName, assetName, provider, namespace, config, services)
   }
 
   return outputs
