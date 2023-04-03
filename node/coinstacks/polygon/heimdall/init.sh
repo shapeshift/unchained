@@ -27,22 +27,17 @@ start() {
     --home $HOME_DIR \
     --rpc.laddr tcp://0.0.0.0:26657 \
     --bor_rpc_url http://localhost:8545 \
-    --eth_rpc_url $ETH_RPC_URL &
-  DAEMON_PID="$!"
-
-  heimdalld rest-server \
-    --home $HOME_DIR \
+    --eth_rpc_url $ETH_RPC_URL \
+    --rest-server \
     --node "tcp://localhost:26657" &
-  REST_SERVER_PID="$!"
+  PID="$!"
 }
 
 stop() {
-  echo "Catching signal and sending to PID: $DAEMON_PID" && kill $DAEMON_PID
-  while $(kill -0 $DAEMON_PID 2>/dev/null); do sleep 1; done
-  echo "Catching signal and sending to PID: $REST_SERVER_PID" && kill $REST_SERVER_PID
-  while $(kill -0 $REST_SERVER_PID 2>/dev/null); do sleep 1; done
+  echo "Catching signal and sending to PID: $PID" && kill $PID
+  while $(kill -0 $PID 2>/dev/null); do sleep 1; done
 }
 
 trap 'stop' TERM INT
 start
-wait $DAEMON_PID $REST_SERVER_PID
+wait $PID
