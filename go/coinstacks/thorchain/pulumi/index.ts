@@ -1,14 +1,7 @@
 import { parse } from 'dotenv'
 import { readFileSync } from 'fs'
 import * as k8s from '@pulumi/kubernetes'
-import {
-  deployApi,
-  createService,
-  deployStatefulService,
-  getConfig,
-  Service,
-  VolumeSnapshotClient,
-} from '../../../../pulumi'
+import { deployApi, createService, deployStatefulService, getConfig, Service, Snapper } from '../../../../pulumi'
 import { api } from '../../../pulumi'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,7 +16,7 @@ export = async (): Promise<Outputs> => {
 
   const assetName = config.network !== 'mainnet' ? `${config.assetName}-${config.network}` : config.assetName
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
-  const snapshots = await new VolumeSnapshotClient({ assetName, kubeconfig, namespace }).getSnapshots()
+  const snapshots = await new Snapper({ assetName, kubeconfig, namespace }).getSnapshots()
   const outputs: Outputs = {}
 
   const missingKeys: Array<string> = []
