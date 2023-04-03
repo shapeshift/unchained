@@ -39,7 +39,7 @@ export const getBaseHash = async (): Promise<string> => {
   return hash.digest('hex')
 }
 
-export const getPulumiHash = async (): Promise<string> => {
+export const getVolumeReaperHash = async (): Promise<string> => {
   const hash = createHash('sha1')
 
   // hash root level unchained files
@@ -50,9 +50,16 @@ export const getPulumiHash = async (): Promise<string> => {
   hash.update(unchainedHash)
 
   // hash contents of pulumi
-  const { hash: pulumiHash } = await hashElement(`${__dirname}/..`, {
+  const { hash: importsHash } = await hashElement(`${__dirname}/..`, {
+    folders: { include: ['**'], exclude: ['.*', 'dist', 'node_modules', 'cluster', 'volumeReaper'] },
+    files: { include: ['package.json', 'Dockerfile.volumeReaper', 'snapper.ts'] },
+  })
+  hash.update(importsHash)
+
+  // hash contents of volume reaper
+  const { hash: pulumiHash } = await hashElement(`${__dirname}/../src/volumeReaper`, {
     folders: { include: ['**'], exclude: ['.*', 'dist', 'node_modules'] },
-    files: { include: ['*.ts', '*.json', 'Dockerfile*'] },
+    files: { include: ['*.ts'] },
   })
   hash.update(pulumiHash)
 
