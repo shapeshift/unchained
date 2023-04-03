@@ -1,6 +1,6 @@
 import { hashElement } from 'folder-hash'
 import { hasTag, buildAndPushImage } from '../docker'
-import { getBaseHash, getPulumiHash } from '../hasher'
+import { getBaseHash, getVolumeReaperHash } from '../hasher'
 import { Dockerhub } from '..'
 
 export const buildAndPushDockerImages = async (dockerhub: Dockerhub, name: string) => {
@@ -36,7 +36,7 @@ export const buildAndPushDockerImages = async (dockerhub: Dockerhub, name: strin
   }
 
   const volumeReaperImage = `${dockerhub.username}/${name}-volume-reaper`
-  const volumeReaperTag = await getPulumiHash()
+  const volumeReaperTag = await getVolumeReaperHash()
 
   if (!(await hasTag(volumeReaperImage, volumeReaperTag))) {
     await buildAndPushImage({
