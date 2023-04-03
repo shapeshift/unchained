@@ -5,6 +5,7 @@ export * from './config'
 export * from './api'
 export * from './docker'
 export * from './statefulService'
+export * from './volumeSnapshotClient'
 export * from './hasher'
 
 export interface Dockerhub {
@@ -40,6 +41,7 @@ export interface StatefulService {
 
 export interface Config extends BaseConfig {
   stack: string
+  assetName: string
   network: string
   environment?: string
   api?: ApiConfig

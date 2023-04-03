@@ -12,7 +12,7 @@ interface Port {
 }
 
 export interface ServiceArgs {
-  asset: string
+  assetName: string
   config: ServiceConfig
   ports: Record<string, Port>
   command?: Array<string>
@@ -23,11 +23,11 @@ export interface ServiceArgs {
   volumeMounts?: Array<k8s.types.input.core.v1.VolumeMount>
   readinessProbe?: k8s.types.input.core.v1.Probe
   livenessProbe?: k8s.types.input.core.v1.Probe
-  snapshots?: VolumeSnapshot[]
+  snapshots: VolumeSnapshot[]
 }
 
 export function createService(args: ServiceArgs): Service {
-  const name = `${args.asset}-${args.config.name}`
+  const name = `${args.assetName}-${args.config.name}`
   const ports = Object.entries(args.ports).map(([name, port]) => ({ name, ...port }))
   const env = Object.entries(args.env ?? []).map(([name, value]) => ({ name, value }))
 
@@ -151,7 +151,7 @@ export function createService(args: ServiceArgs): Service {
     containers.push(monitorContainer)
   }
 
-  const snapshot = args.snapshots?.filter(
+  const snapshot = args.snapshots.filter(
     (snapshot) => snapshot.metadata.name.includes(args.config.name) && snapshot.status.readyToUse
   )[0]
 
@@ -188,8 +188,8 @@ export function createService(args: ServiceArgs): Service {
 }
 
 export async function deployStatefulService(
-  app: string,
-  asset: string,
+  appName: string,
+  assetName: string,
   provider: k8s.Provider,
   namespace: string,
   config: Pick<Config, 'rootDomainName' | 'environment' | 'statefulService'>,
@@ -200,7 +200,7 @@ export async function deployStatefulService(
   if (config.statefulService.replicas <= 0) return
   if (!Object.keys(services).length) return
 
-  const labels = { app, asset, tier: 'statefulservice' }
+  const labels = { app: appName, asset: assetName, tier: 'statefulservice' }
 
   const ports = Object.values(services).reduce<Array<k8s.types.input.core.v1.ServicePort>>(
     (prev, { ports }) => [...prev, ...ports.map(({ name, port }) => ({ name, port }))],
@@ -223,10 +223,10 @@ export async function deployStatefulService(
   )
 
   const svc = new k8s.core.v1.Service(
-    `${asset}-svc`,
+    `${assetName}-svc`,
     {
       metadata: {
-        name: `${asset}-svc`,
+        name: `${assetName}-svc`,
         namespace: namespace,
         labels: labels,
       },
@@ -240,7 +240,7 @@ export async function deployStatefulService(
   )
 
   const configMap = new k8s.core.v1.ConfigMap(
-    `${asset}-cm`,
+    `${assetName}-cm`,
     {
       metadata: {
         namespace: namespace,
@@ -273,16 +273,16 @@ export async function deployStatefulService(
   }
 
   new k8s.apps.v1.StatefulSet(
-    `${asset}-sts`,
+    `${assetName}-sts`,
     {
       metadata: {
-        name: `${asset}-sts`,
+        name: `${assetName}-sts`,
         namespace: namespace,
         annotations: { 'pulumi.com/skipAwait': 'true' },
       },
       spec: {
         selector: { matchLabels: labels },
-        serviceName: `${asset}-svc`,
+        serviceName: `${assetName}-svc`,
         replicas: config.statefulService.replicas,
         podManagementPolicy: 'Parallel',
         updateStrategy: {
@@ -297,14 +297,14 @@ export async function deployStatefulService(
 
   if (config.rootDomainName) {
     const domain = (service: string) => {
-      const baseDomain = `${service}.${asset}.${config.rootDomainName}`
+      const baseDomain = `${service}.${assetName}.${config.rootDomainName}`
       return config.environment ? `${config.environment}.${baseDomain}` : baseDomain
     }
 
-    const secretName = `${asset}-cert-secret`
+    const secretName = `${assetName}-cert-secret`
 
     new k8s.apiextensions.CustomResource(
-      `${asset}-cert`,
+      `${assetName}-cert`,
       {
         apiVersion: 'cert-manager.io/v1',
         kind: 'Certificate',
@@ -340,12 +340,12 @@ export async function deployStatefulService(
       const hostMatch = `(Host(\`${domain(`${service}`)}\`)${pathPrefixMatch})`
       const additionalHostMatch = `(Host(\`${
         config.environment ? `${config.environment}-${service}` : service
-      }.${asset}.${additionalRootDomainName}\`)${pathPrefixMatch})`
+      }.${assetName}.${additionalRootDomainName}\`)${pathPrefixMatch})`
       return additionalRootDomainName ? `${hostMatch} || ${additionalHostMatch}` : hostMatch
     }
 
     const middleware = new k8s.apiextensions.CustomResource(
-      `${asset}-middleware`,
+      `${assetName}-middleware`,
       {
         apiVersion: 'traefik.containo.us/v1alpha1',
         kind: 'Middleware',
@@ -369,7 +369,7 @@ export async function deployStatefulService(
     )
 
     new k8s.apiextensions.CustomResource(
-      `${asset}-ingressroute`,
+      `${assetName}-ingressroute`,
       {
         apiVersion: 'traefik.containo.us/v1alpha1',
         kind: 'IngressRoute',
@@ -410,7 +410,7 @@ export async function deployStatefulService(
     )
 
     new k8s.networking.v1.Ingress(
-      `${asset}-ingress`,
+      `${assetName}-ingress`,
       {
         metadata: {
           namespace: namespace,
@@ -425,6 +425,6 @@ export async function deployStatefulService(
   }
 
   if (namespace == 'unchained-dev') {
-    deployReaperCron(asset, config.statefulService, namespace, provider)
+    deployReaperCron(assetName, config.statefulService, namespace, provider)
   }
 }
