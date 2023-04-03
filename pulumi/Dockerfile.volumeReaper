@@ -4,6 +4,9 @@ FROM $BASE_IMAGE
 
 WORKDIR /app/pulumi
 
-COPY . .
+COPY package.json package.json
+
+COPY dist/volumeReaper/index.js dist/volumeReaper/index.js
+COPY dist/volumeSnapshotClient.js dist/volumeSnapshotClient.js
 
 ENTRYPOINT ["node", "dist/volumeReaper/index.js"]

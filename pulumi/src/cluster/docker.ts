@@ -1,6 +1,6 @@
 import { hashElement } from 'folder-hash'
 import { hasTag, buildAndPushImage } from '../docker'
-import { getBaseHash, getVolumeReaperHash } from '../hasher'
+import { getBaseHash, getPulumiHash } from '../hasher'
 import { Dockerhub } from '..'
 
 export const buildAndPushDockerImages = async (dockerhub: Dockerhub, name: string) => {
@@ -11,7 +11,7 @@ export const buildAndPushDockerImages = async (dockerhub: Dockerhub, name: strin
     await buildAndPushImage({
       image: baseImage,
       context: '../../..',
-      dockerFile: 'Dockerfile.node',
+      dockerFile: '../../../Dockerfile.node',
       auth: dockerhub,
       buildArgs: { BUILDKIT_INLINE_CACHE: '1' },
       env: { DOCKER_BUILDKIT: '1' },
@@ -36,13 +36,13 @@ export const buildAndPushDockerImages = async (dockerhub: Dockerhub, name: strin
   }
 
   const volumeReaperImage = `${dockerhub.username}/${name}-volume-reaper`
-  const volumeReaperTag = await getVolumeReaperHash()
+  const volumeReaperTag = await getPulumiHash()
 
   if (!(await hasTag(volumeReaperImage, volumeReaperTag))) {
     await buildAndPushImage({
       image: volumeReaperImage,
       context: '../..',
-      dockerFile: 'Dockerfile.volumeReaper',
+      dockerFile: '../../Dockerfile.volumeReaper',
       auth: dockerhub,
       buildArgs: { BUILDKIT_INLINE_CACHE: '1', BASE_IMAGE: baseImage },
       env: { DOCKER_BUILDKIT: '1' },
