@@ -19,13 +19,13 @@ export interface VolumeSnapshot extends Required<k8sClient.KubernetesObject> {
   }
 }
 
-export interface VolumeSnapshotClientArgs {
+export interface SnapperArgs {
   assetName: string
   kubeconfig?: string
   namespace: string
 }
 
-export class VolumeSnapshotClient {
+export class Snapper {
   readonly assetName: string
   readonly stsName: string
   readonly namespace: string
@@ -33,7 +33,7 @@ export class VolumeSnapshotClient {
   protected readonly kubeConfig: k8sClient.KubeConfig
   protected readonly k8sObjectApi: k8sClient.KubernetesObjectApi
 
-  constructor(args: VolumeSnapshotClientArgs) {
+  constructor(args: SnapperArgs) {
     this.assetName = args.assetName
     this.stsName = `${args.assetName}-sts`
     this.namespace = args.namespace

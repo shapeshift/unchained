@@ -1,6 +1,6 @@
 import * as k8s from '@kubernetes/client-node'
 import assert from 'assert'
-import { VolumeSnapshotClient, VolumeSnapshotClientArgs } from '../volumeSnapshotClient'
+import { Snapper, SnapperArgs } from '../snapper'
 
 const delay = (time: number) => {
   return new Promise((resolve) => setTimeout(resolve, time))
@@ -10,12 +10,12 @@ interface StatefulSet extends k8s.V1StatefulSet {
   spec: k8s.V1StatefulSetSpec
 }
 
-export interface VolumeReaperArgs extends VolumeSnapshotClientArgs {
+export interface VolumeReaperArgs extends SnapperArgs {
   backupCount: number
   services: string
 }
 
-export class VolumeReaper extends VolumeSnapshotClient {
+export class VolumeReaper extends Snapper {
   readonly backupCount: number
   readonly services: string
 

@@ -2,7 +2,7 @@ import * as k8s from '@pulumi/kubernetes'
 import { readFileSync } from 'fs'
 import { Config, Service, ServiceConfig } from '.'
 import { deployReaperCron } from './reaperCron'
-import { VolumeSnapshot } from './volumeSnapshotClient'
+import { VolumeSnapshot } from './snapper'
 
 interface Port {
   port: number
