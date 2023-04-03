@@ -24,7 +24,7 @@ export = async (): Promise<Outputs> => {
   const assetName = config.network !== 'mainnet' ? `${coinstack}-${config.network}` : coinstack
   const outputs: Outputs = {}
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
-  const snapshots = await new VolumeSnapshotClient(kubeconfig, namespace).getVolumeSnapshots(assetName)
+  const snapshots = await new VolumeSnapshotClient({ assetName, kubeconfig, namespace }).getSnapshots()
 
   const missingKeys: Array<string> = []
   const stringData = Object.keys(parse(readFileSync('../sample.env'))).reduce((prev, key) => {

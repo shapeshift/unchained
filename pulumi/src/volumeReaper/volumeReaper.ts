@@ -36,7 +36,7 @@ export class VolumeReaper extends VolumeSnapshotClient {
 
       assert(replicas >= 1, 'Replicas needs to be larger than 0 to run backup')
 
-      const pvcList = this.services.split(',').map((svc) => `data-${svc}-${this.asset}-sts-${replicas - 1}`)
+      const pvcList = this.services.split(',').map((svc) => `data-${svc}-${this.assetName}-sts-${replicas - 1}`)
       const retainCount = pvcList.length * this.backupCount
 
       await this.scaleStatefulSet(replicas - 1, false)
@@ -53,9 +53,9 @@ export class VolumeReaper extends VolumeSnapshotClient {
   }
 
   private async getStatefulSet(): Promise<StatefulSet> {
-    const { body } = await this.k8sAppsApi.readNamespacedStatefulSetStatus(this.name, this.namespace)
+    const { body } = await this.k8sAppsApi.readNamespacedStatefulSetStatus(this.stsName, this.namespace)
 
-    if (!body.spec) throw new Error(`No spec found for StatefulSet: ${this.namespace}.${this.name}`)
+    if (!body.spec) throw new Error(`No spec found for StatefulSet: ${this.namespace}.${this.stsName}`)
 
     const sts: StatefulSet = {
       ...body,
@@ -66,24 +66,24 @@ export class VolumeReaper extends VolumeSnapshotClient {
   }
 
   private async scaleStatefulSet(count: number, skipAwait: boolean): Promise<void> {
-    console.log(`Scaling StatefulSet ${this.namespace}.${this.name} to ${count} replicas`)
+    console.log(`Scaling StatefulSet ${this.namespace}.${this.stsName} to ${count} replicas`)
 
     const sts = await this.getStatefulSet()
     sts.spec.replicas = count
 
-    await this.k8sAppsApi.replaceNamespacedStatefulSet(this.name, this.namespace, sts)
+    await this.k8sAppsApi.replaceNamespacedStatefulSet(this.stsName, this.namespace, sts)
 
     if (skipAwait) return
 
     for (let i = 0; i < 100; i++) {
       // termination grace period is 120s so need to account for that
-      console.log(`Waiting for ${this.name} to scale down...`)
+      console.log(`Waiting for ${this.stsName} to scale down...`)
 
       await delay(3000)
-      const status = await this.k8sAppsApi.readNamespacedStatefulSetStatus(this.name, this.namespace)
+      const status = await this.k8sAppsApi.readNamespacedStatefulSetStatus(this.stsName, this.namespace)
 
       if (status.body.status?.availableReplicas === count) {
-        console.log(`Scaling finished - ${this.namespace}.${this.name} availableReplicas is now ${count}`)
+        console.log(`Scaling finished - ${this.namespace}.${this.stsName} availableReplicas is now ${count}`)
         return
       }
     }

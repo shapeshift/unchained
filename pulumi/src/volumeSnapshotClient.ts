@@ -14,28 +14,28 @@ export interface VolumeSnapshot extends Required<k8sClient.KubernetesObject> {
       persistentVolumeClaimName: string
     }
   }
-  status: {
+  status?: {
     readyToUse: boolean
   }
 }
 
 export interface VolumeSnapshotClientArgs {
-  asset: string
+  assetName: string
   kubeconfig?: string
   namespace: string
 }
 
 export class VolumeSnapshotClient {
-  readonly asset: string
-  readonly name: string
+  readonly assetName: string
+  readonly stsName: string
   readonly namespace: string
 
   protected readonly kubeConfig: k8sClient.KubeConfig
   protected readonly k8sObjectApi: k8sClient.KubernetesObjectApi
 
   constructor(args: VolumeSnapshotClientArgs) {
-    this.asset = args.asset
-    this.name = `${args.asset}-sts`
+    this.assetName = args.assetName
+    this.stsName = `${args.assetName}-sts`
     this.namespace = args.namespace
 
     this.kubeConfig = new k8sClient.KubeConfig()
@@ -58,7 +58,7 @@ export class VolumeSnapshotClient {
       undefined,
       undefined,
       undefined,
-      `statefulset=${this.name}`
+      `statefulset=${this.stsName}`
     )
 
     const items = body.items.map((item) => {
@@ -85,7 +85,7 @@ export class VolumeSnapshotClient {
           metadata: {
             name: snapshotName,
             labels: {
-              statefulset: this.name,
+              statefulset: this.stsName,
             },
             creationTimestamp: timestamp, // will be overwritten by k8s
           },
@@ -94,9 +94,6 @@ export class VolumeSnapshotClient {
             source: {
               persistentVolumeClaimName: pvc,
             },
-          },
-          status: {
-            readyToUse: false, // will be overwritten by k8s
           },
         }
 

@@ -41,7 +41,8 @@ export const buildAndPushDockerImages = async (dockerhub: Dockerhub, name: strin
   if (!(await hasTag(volumeReaperImage, volumeReaperTag))) {
     await buildAndPushImage({
       image: volumeReaperImage,
-      context: '../../volumeReaper',
+      context: '../..',
+      dockerFile: 'Dockerfile.volumeReaper',
       auth: dockerhub,
       buildArgs: { BUILDKIT_INLINE_CACHE: '1', BASE_IMAGE: baseImage },
       env: { DOCKER_BUILDKIT: '1' },

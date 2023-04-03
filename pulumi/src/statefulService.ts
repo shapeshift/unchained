@@ -152,7 +152,7 @@ export function createService(args: ServiceArgs): Service {
   }
 
   const snapshot = args.snapshots.filter(
-    (snapshot) => snapshot.metadata.name.includes(args.config.name) && snapshot.status.readyToUse
+    (snapshot) => snapshot.metadata.name.includes(args.config.name) && !!snapshot.status?.readyToUse
   )[0]
 
   const volumeClaimTemplates = [

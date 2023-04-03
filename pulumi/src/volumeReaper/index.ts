@@ -19,7 +19,7 @@ program
 const args = program.opts()
 
 const volumeReaper = new VolumeReaper({
-  asset: String(args.asset),
+  assetName: String(args.asset),
   services: String(args.stsServices),
   namespace: String(args.namespace),
   backupCount: Number(args.count),
