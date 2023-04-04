@@ -7,6 +7,6 @@ COPY package.json ./package.json
 COPY lerna.json ./lerna.json
 COPY node_modules ./node_modules
 
-# Include common packages
-COPY node/packages packages/
-COPY node/coinstacks/common coinstacks/common/
+# Include common node packages
+COPY node/packages node/packages/
+COPY node/coinstacks/common node/coinstacks/common/
