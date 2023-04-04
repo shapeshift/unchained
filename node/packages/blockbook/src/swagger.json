@@ -793,7 +793,7 @@
 	},
 	"info": {
 		"title": "@shapeshiftoss/blockbook",
-		"version": "8.3.0",
+		"version": "9.0.0",
 		"license": {
 			"name": "MIT"
 		},

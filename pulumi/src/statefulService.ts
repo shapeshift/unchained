@@ -1,6 +1,7 @@
 import * as k8s from '@pulumi/kubernetes'
 import { readFileSync } from 'fs'
 import { Config, Service, ServiceConfig } from '.'
+import { ServiceInput } from './coinstack'
 import { deployReaperCron } from './reaperCron'
 import { VolumeSnapshot } from './snapper'
 
@@ -11,7 +12,7 @@ interface Port {
   stripPathPrefix?: boolean
 }
 
-export interface ServiceArgs {
+export interface ServiceArgs extends ServiceInput  {
   assetName: string
   config: ServiceConfig
   ports: Record<string, Port>

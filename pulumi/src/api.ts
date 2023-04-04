@@ -1,6 +1,7 @@
 import * as k8s from '@pulumi/kubernetes'
 import { Input, Resource } from '@pulumi/pulumi'
 import { buildAndPushImage, BuildAndPushImageArgs, Config, hasTag } from './index'
+import { CoinstackType, getCoinstackHash, secretEnvs } from './hash'
 
 export interface Autoscaling {
   enabled: boolean
@@ -18,17 +19,37 @@ export interface ApiConfig {
 
 export interface DeployApiArgs {
   appName: string
-  coinstack: string
-  assetName: string
-  baseImageName?: string
-  buildAndPushImageArgs: Pick<BuildAndPushImageArgs, 'context' | 'dockerFile'>
+  assetName: string,
+  coinstack: string,
+  coinstackType: CoinstackType,
+  baseImageName?: string,
+  sampleEnv: Buffer,
   config: Pick<Config, 'api' | 'dockerhub' | 'rootDomainName' | 'environment'>
-  container: Partial<Pick<k8s.types.input.core.v1.Container, 'args' | 'command'>>
   deployDependencies?: Input<Array<Resource>>
-  getHash: (coinstack: string, buildArgs: Record<string, string>) => Promise<string>
   namespace: string
   provider: k8s.Provider
-  secretEnvs: (coinstack: string, asset: string) => k8s.types.input.core.v1.EnvVar[]
+}
+
+const getbuildAndPushImageArgs = (coinstackType: CoinstackType, coinstack: string) => {
+
+  const nodeBasePath = `../../node/${coinstack}`
+  const goBasePath = `../../go/${coinstack}`
+
+  switch(coinstackType){
+    case CoinstackType.GO:  
+      return { context: `${goBasePath}/go`, dockerFile: `${goBasePath}/build/Dockerfile` }
+    case CoinstackType.NODE:
+      return { context: `${nodeBasePath}/api` }
+  }
+}
+
+const getContainer = (coinstackType: CoinstackType, coinstack: string) => {
+  switch(coinstackType){
+    case CoinstackType.GO:  
+      return {container: { args: ['-swagger', 'swagger.json'] }}
+    case CoinstackType.NODE:
+      return { command: ['node', `dist/${coinstack}/api/src/app.js`] }
+  }
 }
 
 export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deployment | undefined> {
@@ -36,15 +57,13 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
     appName,
     assetName,
     coinstack,
+    coinstackType,
     baseImageName,
-    buildAndPushImageArgs,
+    sampleEnv,
     config,
-    container,
     deployDependencies = [],
-    getHash,
     namespace,
     provider,
-    secretEnvs,
   } = args
 
   if (config.api === undefined) return
@@ -56,7 +75,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
   const buildArgs: Record<string, string> = { BUILDKIT_INLINE_CACHE: '1', COINSTACK: coinstack }
   if (baseImageName) buildArgs.BASE_IMAGE = baseImageName
 
-  const tag = await getHash(coinstack, buildArgs)
+  const tag = await getCoinstackHash(coinstack, buildArgs, coinstackType)
   const repositoryName = `${appName}-${coinstack}-${tier}`
 
   let imageName = `shapeshiftdao/${repositoryName}:${tag}` // default public image
@@ -80,7 +99,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
         env: { DOCKER_BUILDKIT: '1' },
         tags: [tag],
         cacheFroms,
-        ...buildAndPushImageArgs,
+        ...getbuildAndPushImageArgs(coinstackType, coinstack),
       })
     }
   }
@@ -204,7 +223,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
           name: tier,
           image: imageName,
           ports: [{ containerPort: 3000, name: 'http' }],
-          env: [...secretEnvs(coinstack, assetName)],
+          env: [...secretEnvs(coinstack, sampleEnv)],
           resources: {
             limits: {
               cpu: config.api.cpuLimit,
@@ -230,7 +249,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
             failureThreshold: 3,
             successThreshold: 1,
           },
-          ...container,
+          ...getContainer(coinstackType, coinstack),
         },
       ],
     },
