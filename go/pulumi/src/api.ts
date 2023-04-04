@@ -6,10 +6,12 @@ import { readFileSync } from 'fs'
 import * as k8s from '@pulumi/kubernetes'
 
 export const secretEnvs = (coinstack: string, asset: string) =>
-  Object.keys(parse(readFileSync(`../../../cmd/${coinstack}/sample.env`))).map<k8s.types.input.core.v1.EnvVar>((key) => ({
-    name: key,
-    valueFrom: { secretKeyRef: { name: asset, key: key } },
-  }))
+  Object.keys(parse(readFileSync(`../../../cmd/${coinstack}/sample.env`))).map<k8s.types.input.core.v1.EnvVar>(
+    (key) => ({
+      name: key,
+      valueFrom: { secretKeyRef: { name: asset, key: key } },
+    })
+  )
 
 // creates a hash of the content included in the final build image
 export const getHash = async (coinstack: string, buildArgs: Record<string, string>): Promise<string> => {

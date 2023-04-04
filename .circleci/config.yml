@@ -606,52 +606,21 @@ commands:
     description: install dependencies
     steps:
       - run:
-          working_directory: pulumi
-          name: yarn install pulumi
           command: yarn install --immutable
       - run:
-          working_directory: pulumi/volumeReaper
-          name: yarn install volume reaper
-          command: yarn install --immutable
-      - run:
-          working_directory: monitoring
-          name: yarn install monitoring
-          command: yarn install --immutable
-      - run:
-          working_directory: node
-          name: yarn install node
-          command: yarn install --immutable
-      - run:
-          working_directory: go/pulumi
-          name: yarn install go pulumi
-          command: yarn install --immutable
-      - run:
-          working_directory: pulumi/volumeReaper
-          name: build volume reaper
           command: yarn build
       - run:
-          working_directory: node
-          name: build node
-          command: yarn build
-      - run:
-          working_directory: node
-          name: lint node
           command: yarn lint
       - run:
-          working_directory: node
-          name: test node
           command: yarn test
       - run:
           working_directory: go
-          name: go get
           command: go get ./...
       - run:
           working_directory: go
-          name: make go
           command: make
       - run:
          working_directory: go
-         name: lint go
          command: golangci-lint run --version --verbose 
 
   postcheck:
@@ -997,7 +966,6 @@ jobs:
       - precheck
       - postcheck
       - run:
-          working_directory: node
           name: Remove devDependencies
           command: yarn --production --ignore-scripts --prefer-offline --silent --frozen-lockfile
       - persist_to_workspace:

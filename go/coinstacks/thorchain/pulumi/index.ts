@@ -1,9 +1,10 @@
 import { parse } from 'dotenv'
 import { readFileSync } from 'fs'
 import * as k8s from '@pulumi/kubernetes'
-import { deployApi, createService, deployStatefulService, getConfig, Service, VolumeSnapshotClient } from '../../../../pulumi'
+import { deployApi, createService, deployStatefulService, getConfig, Service, Snapper } from '../../../../pulumi'
 import { api } from '../../../pulumi'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Outputs = Record<string, any>
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
@@ -15,7 +16,7 @@ export = async (): Promise<Outputs> => {
 
   const assetName = config.network !== 'mainnet' ? `${config.assetName}-${config.network}` : config.assetName
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
-  const snapshots = await new VolumeSnapshotClient(kubeconfig, namespace).getVolumeSnapshots(assetName)
+  const snapshots = await new Snapper({ assetName, kubeconfig, namespace }).getSnapshots()
   const outputs: Outputs = {}
 
   const missingKeys: Array<string> = []
@@ -56,12 +57,12 @@ export = async (): Promise<Outputs> => {
           assetName,
           config: service,
           dataDir: '/root',
-          env: { 'CHAIN_ID': `${coinstack}-${config.network}-v1`, 'NET': config.network },
+          env: { CHAIN_ID: `${coinstack}-${config.network}-v1`, NET: config.network },
           ports: {
             'daemon-api': { port: 1317, pathPrefix: '/lcd', stripPathPrefix: true },
-            'daemon-rpc': { port: 27147, pathPrefix: '/rpc', stripPathPrefix: true }
+            'daemon-rpc': { port: 27147, pathPrefix: '/rpc', stripPathPrefix: true },
           },
-          snapshots
+          snapshots,
         })
       }
 
@@ -70,11 +71,11 @@ export = async (): Promise<Outputs> => {
           assetName,
           config: service,
           dataDir: '/blockstore',
-          env: { 'MIDGARD_BLOCKSTORE_LOCAL': '/blockstore' },
-          ports: { 'midgard': { port: 8080 } },
+          env: { MIDGARD_BLOCKSTORE_LOCAL: '/blockstore' },
+          ports: { midgard: { port: 8080 } },
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
-          volumeMounts: [{ name: 'config-map', 'mountPath': '/config.json', subPath: 'indexer-config.json' }],
-          snapshots
+          volumeMounts: [{ name: 'config-map', mountPath: '/config.json', subPath: 'indexer-config.json' }],
+          snapshots,
         })
       }
 
@@ -84,14 +85,14 @@ export = async (): Promise<Outputs> => {
           config: service,
           dataDir: '/var/lib/postgresql/data',
           env: {
-            'POSTGRES_DB': 'midgard',
-            'POSTGRES_USER': 'midgard',
-            'POSTGRES_PASSWORD': 'password',
-            'PGDATA': '/var/lib/postgresql/data/pgdata'
+            POSTGRES_DB: 'midgard',
+            POSTGRES_USER: 'midgard',
+            POSTGRES_PASSWORD: 'password',
+            PGDATA: '/var/lib/postgresql/data/pgdata',
           },
-          ports: { 'postgres': { port: 5432 } },
+          ports: { postgres: { port: 5432 } },
           volumeMounts: [{ name: 'dshm', mountPath: '/dev/shm' }],
-          snapshots
+          snapshots,
         })
       }
 

@@ -16,9 +16,9 @@ export const getHash = async (coinstack: string, buildArgs: Record<string, strin
   const hash = createHash('sha1')
 
   // hash root level unchained files
-  const { hash: unchainedHash } = await hashElement('../../../', {
+  const { hash: unchainedHash } = await hashElement('../../../../', {
     folders: { exclude: ['.*', '*'] },
-    files: { include: ['package.json', 'lerna.json'] },
+    files: { include: ['package.json', 'lerna.json', 'yarn.lock', 'Dockerfile.node'] },
   })
   hash.update(unchainedHash)
 
