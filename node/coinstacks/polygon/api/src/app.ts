@@ -19,6 +19,8 @@ import { RegisterRoutes } from './routes'
 const PORT = process.env.PORT ?? 3000
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
 
+console.log(`WS: ${INDEXER_WS_URL}`)
+
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 
 export const logger = new Logger({

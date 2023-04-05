@@ -52,7 +52,7 @@ RUN sed -i 's/wsMessageSizeLimit\ =\ 15\ \*\ 1024\ \*\ 1024/wsMessageSizeLimit =
 RUN sed -i 's/conn.SetReadLimit\(maxRequestContentLength\)/conn.SetReadLimit(50 * 1024 * 1024)/g' $GOPATH/pkg/mod/github.com/ethereum-optimism/optimism/l2geth*/rpc/websocket.go 2>&1 > /dev/null || exit 0
 
 # build blockbook binary
-RUN go build -ldflags="-s -w -X github.com/trezor/blockbook/common.version=${BLOCKBOOK_VERSION} -X github.com/trezor/blockbook/common.gitcommit=${BLOCKBOOK_COMMIT}"
+RUN go build -ldflags="-s -w -X github.com/kaladinlight/blockbook/common.version=${BLOCKBOOK_VERSION} -X github.com/trezor/kaladinlight/common.gitcommit=${BLOCKBOOK_COMMIT}"
 RUN mv blockbook /bin
 
 # copy in generate config script

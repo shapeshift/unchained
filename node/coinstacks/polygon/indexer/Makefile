@@ -6,4 +6,4 @@ gen-config:
 
 run:
 	- mkdir -p db
-	- docker run --platform linux/amd64 --rm -t -v "$(CURDIR)/config.json:/config.json" -v "$(CURDIR)/db:/db" -p 8000:8000 -p 8001:8001 $(IMAGE) /bin/blockbook -blockchaincfg=/config.json -datadir=/db -sync -internal=:8000 -public=:8001 -logtostderror
+	- docker run --platform linux/amd64 --rm -t -v "$(CURDIR)/config.json:/config.json" -v "$(CURDIR)/db:/db" -p 8000:8000 -p 8001:8001 $(IMAGE) /bin/blockbook -blockchaincfg=/config.json -datadir=/db -sync -internal=:8000 -public=:8001 -logtostderr -blockheight=41177416
