@@ -1,9 +1,11 @@
 IMAGE = blockbook
 PACKAGER = $(shell id -u):$(shell id -g)
-
+BLOCKHEIGHT = $(shell curl -s "https://api.polygonscan.com/api?module=block&action=getblocknobytime&timestamp=$(date +%s)&closest=before" | jq -r '.result | tonumber')
+ 
 gen-config:
 	- docker run --platform linux/amd64 --rm -t -e PACKAGER=$(PACKAGER) -v "$(CURDIR):/out" $(IMAGE) ./generate-config.sh polygon
 
 run:
 	- mkdir -p db
-	- docker run --platform linux/amd64 --rm -t -v "$(CURDIR)/config.json:/config.json" -v "$(CURDIR)/db:/db" -p 8000:8000 -p 8001:8001 $(IMAGE) /bin/blockbook -blockchaincfg=/config.json -datadir=/db -sync -internal=:8000 -public=:8001 -logtostderr -blockheight=41177416
+	- echo $(BLOCKHEIGHT)
+	- docker run --platform linux/amd64 --rm -t -v "$(CURDIR)/config.json:/config.json" -v "$(CURDIR)/db:/db" -p 8000:8000 -p 8001:8001 $(IMAGE) /bin/blockbook -blockchaincfg=/config.json -datadir=/db -sync -internal=:8000 -public=:8001 -logtostderr -blockheight=$(BLOCKHEIGHT)
