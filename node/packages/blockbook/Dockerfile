@@ -22,22 +22,26 @@ ENV ROCKSDB_PORTABLE=0
 
 # install rocksdb
 RUN cd /opt && git clone -b $ROCKSDB_VERSION --depth 1 https://github.com/facebook/rocksdb.git
-RUN cd /opt/rocksdb && CFLAGS=-fPIC CXXFLAGS=-fPIC PORTABLE=$PORTABLE_ROCKSDB make -j 4 static_lib
+RUN cd /opt/rocksdb && CFLAGS=-fPIC CXXFLAGS=-fPIC PORTABLE=$ROCKSDB_PORTABLE make static_lib
 
 ENV BLOCKBOOK_VERSION=master
-ENV BLOCKBOOK_COMMIT=15c19ac
-ENV BLOCKBOOK_URL=https://github.com/trezor/blockbook.git
+ENV BLOCKBOOK_COMMIT=2788bf88
+ENV BLOCKBOOK_URL=https://github.com/kaladinlight/blockbook.git
 
 # set up blockbook
-RUN git clone -b $BLOCKBOOK_VERSION --depth 1 $BLOCKBOOK_URL
+RUN git clone $BLOCKBOOK_URL
 WORKDIR /blockbook
+RUN git checkout 2788bf88b9b1b84463be795973dde335a5365d07
 
 # verify matching commit
 RUN echo "HEAD=$(git rev-parse --short HEAD)"
 RUN [ "${BLOCKBOOK_COMMIT}" = $(git rev-parse --short HEAD) ]
 
 ENV CGO_CFLAGS="-I/opt/rocksdb/include"
-ENV CGO_LDFLAGS="-L/opt/rocksdb -ldl -lrocksdb -lstdc++ -lm -lz -lbz2 -lsnappy -llz4 -lzstd"
+# ENV CGO_CFLAGS="-I/path/to/rocksdb/include"
+# ENV CGO_LDFLAGS="-L/opt/rocksdb -ldl -lrocksdb -lstdc++ -lm -lz -lbz2 -lsnappy -llz4 -lzstd"
+ENV CGO_LDFLAGS="-L/opt/rocksdb -lrocksdb -lstdc++ -lm -lz -ldl -lbz2 -lsnappy -llz4 -lzstd"
+
 
 # download blockbook dependencies
 RUN go mod download
