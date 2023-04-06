@@ -159,6 +159,7 @@ export function createService(cs: JointCoinServiceInput, assetName: string, snap
   ]
 
   return {
+    name: cs.name,
     configMapData,
     containers,
     ports,
@@ -177,26 +178,28 @@ export async function deployStatefulService(
 ): Promise<void> {
   if (!config.statefulService) return
   if (config.statefulService.replicas <= 0) return
-  if (!Object.keys(services).length) return
+  if (!services.length) return
 
   const labels = { app: appName, asset: assetName, tier: 'statefulservice' }
 
-  const ports = Object.values(services).reduce<Array<k8s.types.input.core.v1.ServicePort>>(
+  const ports = services.reduce<Array<k8s.types.input.core.v1.ServicePort>>(
     (prev, { ports }) => [...prev, ...ports.map(({ name, port }) => ({ name, port }))],
     []
   )
 
-  const configMapData = Object.values(services).reduce<Record<string, string>>(
+  const configMapData = services.reduce<Record<string, string>>(
     (prev, { configMapData }) => ({ ...prev, ...configMapData }),
     {}
   )
 
-  const containers = Object.values(services).reduce<Array<k8s.types.input.core.v1.Container>>(
+  const containers = services.reduce<Array<k8s.types.input.core.v1.Container>>(
     (prev, { containers }) => prev.concat(...containers),
     []
   )
 
-  const volumeClaimTemplates = Object.values(services).reduce<Array<k8s.types.input.core.v1.PersistentVolumeClaim>>(
+  console.log('containers', containers)
+
+  const volumeClaimTemplates = services.reduce<Array<k8s.types.input.core.v1.PersistentVolumeClaim>>(
     (prev, { volumeClaimTemplates }) => prev.concat(...volumeClaimTemplates),
     []
   )
@@ -275,8 +278,8 @@ export async function deployStatefulService(
   )
 
   if (config.rootDomainName) {
-    const domain = (service: string) => {
-      const baseDomain = `${service}.${assetName}.${config.rootDomainName}`
+    const domain = (service: Service) => {
+      const baseDomain = `${service.name}.${assetName}.${config.rootDomainName}`
       return config.environment ? `${config.environment}.${baseDomain}` : baseDomain
     }
 
@@ -301,7 +304,7 @@ export async function deployStatefulService(
             encoding: 'PKCS1',
             size: 2048,
           },
-          dnsNames: Object.keys(services).map((service) => domain(service)),
+          dnsNames: services.map((service) => domain(service)),
           issuerRef: {
             name: 'lets-encrypt',
             kind: 'ClusterIssuer',
@@ -314,9 +317,9 @@ export async function deployStatefulService(
 
     const additionalRootDomainName = process.env.ADDITIONAL_ROOT_DOMAIN_NAME
 
-    const match = (service: string, prefix?: string) => {
+    const match = (service: Service, prefix?: string) => {
       const pathPrefixMatch = prefix ? ` && PathPrefix(\`${prefix}\`)` : ''
-      const hostMatch = `(Host(\`${domain(`${service}`)}\`)${pathPrefixMatch})`
+      const hostMatch = `(Host(\`${domain(service)}\`)${pathPrefixMatch})`
       const additionalHostMatch = `(Host(\`${
         config.environment ? `${config.environment}-${service}` : service
       }.${assetName}.${additionalRootDomainName}\`)${pathPrefixMatch})`
@@ -334,7 +337,7 @@ export async function deployStatefulService(
         },
         spec: {
           stripPrefix: {
-            prefixes: Object.values(services).reduce<Array<string>>((prev, { ports }) => {
+            prefixes: services.reduce<Array<string>>((prev, { ports }) => {
               const prefixes = ports.reduce<Array<string>>((prev, { pathPrefix, stripPathPrefix }) => {
                 if (!pathPrefix || !stripPathPrefix) return prev
                 return [...prev, pathPrefix]
@@ -358,9 +361,9 @@ export async function deployStatefulService(
         },
         spec: {
           entryPoints: ['web', 'websecure'],
-          routes: Object.entries(services)
-            .map(([service, { ports }]) =>
-              ports
+          routes: services
+            .map((service) =>
+              service.ports
                 .filter(({ ingressRoute = true }) => ingressRoute)
                 .map(({ port, pathPrefix }) => ({
                   kind: 'Rule',
@@ -381,7 +384,7 @@ export async function deployStatefulService(
             .flat(),
           tls: {
             secretName: secretName,
-            domains: Object.keys(services).map((service) => ({ main: domain(service) })),
+            domains: services.map((service) => ({ main: domain(service) })),
           },
         },
       },
@@ -396,7 +399,7 @@ export async function deployStatefulService(
           labels: labels,
         },
         spec: {
-          rules: Object.keys(services).map((service) => ({ host: domain(service) })),
+          rules: services.map((service) => ({ host: domain(service) })),
         },
       },
       { provider }

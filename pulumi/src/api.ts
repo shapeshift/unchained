@@ -31,14 +31,14 @@ export interface DeployApiArgs {
 }
 
 const getbuildAndPushImageArgs = (coinstackType: CoinstackType, coinstack: string) => {
-  const nodeBasePath = `../../node/${coinstack}`
-  const goBasePath = `../../go/${coinstack}`
+  const nodeBasePath = `${__dirname}/../../node/${coinstack}`
+  const goBasePath = `${__dirname}/../../go/${coinstack}`
 
   switch (coinstackType) {
     case CoinstackType.GO:
       return { context: `${goBasePath}/go`, dockerFile: `${goBasePath}/build/Dockerfile` }
     case CoinstackType.NODE:
-      return { context: `${nodeBasePath}/api` }
+      return { context: `../api` }
   }
 }
 

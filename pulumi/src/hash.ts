@@ -5,7 +5,8 @@ import objectHash from 'object-hash'
 import * as k8s from '@pulumi/kubernetes'
 
 export enum CoinstackType {
-  GO, NODE
+  GO,
+  NODE,
 }
 
 export const secretEnvs = (assetName: string, sampleEnv: Buffer) =>
@@ -14,20 +15,23 @@ export const secretEnvs = (assetName: string, sampleEnv: Buffer) =>
     valueFrom: { secretKeyRef: { name: assetName, key: key } },
   }))
 
-
-export const getCoinstackHash = async(coinstack: string , buildArgs: Record<string, string>, coinstackType: CoinstackType): Promise<string> => {
-  switch(coinstackType){
+export const getCoinstackHash = async (
+  coinstack: string,
+  buildArgs: Record<string, string>,
+  coinstackType: CoinstackType
+): Promise<string> => {
+  switch (coinstackType) {
     case CoinstackType.NODE:
-      return await getNodeCoinstackHash(coinstack, buildArgs);
+      return await getNodeCoinstackHash(coinstack, buildArgs)
     case CoinstackType.GO:
-      return await getGoCoinstackHash(coinstack, buildArgs);
+      return await getGoCoinstackHash(coinstack, buildArgs)
   }
 }
 
 // creates a hash of the content included in the final build image
 const getNodeCoinstackHash = async (coinstack: string, buildArgs: Record<string, string>): Promise<string> => {
   const hash = createHash('sha1')
-  const nodeBasePath = '../../node'
+  const nodeBasePath = `${__dirname}/../../node`
 
   // hash root level unchained files
   const { hash: unchainedHash } = await hashElement(nodeBasePath, {
@@ -44,14 +48,14 @@ const getNodeCoinstackHash = async (coinstack: string, buildArgs: Record<string,
   hash.update(packagesHash)
 
   // hash contents of common-api
-  const { hash: commonApiHash } = await hashElement(`${nodeBasePath}/common/api`, {
+  const { hash: commonApiHash } = await hashElement(`${nodeBasePath}/coinstacks/common/api`, {
     folders: { include: ['**'], exclude: ['.*', 'dist', 'node_modules', 'pulumi'] },
     files: { include: ['*.ts', '*.json', 'Dockerfile'] },
   })
   hash.update(commonApiHash)
 
   // hash contents of coinstack-api
-  const { hash: apiHash } = await hashElement(`${nodeBasePath}/${coinstack}/api`, {
+  const { hash: apiHash } = await hashElement(`${nodeBasePath}/coinstacks/${coinstack}/api`, {
     folders: { include: ['**'], exclude: ['.*', 'dist', 'node_modules', 'pulumi'] },
     files: { include: ['*.ts', '*.json', 'Dockerfile'] },
   })

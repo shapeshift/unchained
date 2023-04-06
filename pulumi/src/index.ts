@@ -82,6 +82,7 @@ export interface ServiceInput {
 export interface JointCoinServiceInput extends ServiceInput, ServiceConfig {}
 
 export interface Service {
+  name: string
   ports: Array<
     k8s.types.input.core.v1.ServicePort & { ingressRoute?: boolean; pathPrefix?: string; stripPathPrefix?: boolean }
   >
