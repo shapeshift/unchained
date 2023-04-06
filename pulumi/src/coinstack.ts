@@ -1,10 +1,10 @@
-import { deployApi, Service, ServiceConfig } from "."
-import { getConfig } from "./config"
+import { deployApi, ServiceConfig, Snapper, VolumeSnapshot } from '.'
+import { getConfig } from './config'
 import { parse } from 'dotenv'
-import { createService, deployStatefulService } from "./statefulService"
+import { createService, deployStatefulService } from './statefulService'
 import * as k8s from '@pulumi/kubernetes'
-import * as pulumi from "@pulumi/pulumi";
-import { CoinstackType } from "./hash"
+import * as pulumi from '@pulumi/pulumi'
+import { CoinstackType } from './hash'
 
 interface Port {
   port: number
@@ -13,7 +13,7 @@ interface Port {
   stripPathPrefix?: boolean
 }
 
-export interface ServiceInput{
+export interface ServiceInput {
   coinServiceName: string
   ports: Record<string, Port>
   command?: Array<string>
@@ -23,28 +23,31 @@ export interface ServiceInput{
   configMapData?: Record<string, string>
   volumeMounts?: Array<k8s.types.input.core.v1.VolumeMount>
   readinessProbe?: k8s.types.input.core.v1.Probe
-  livenessProbe?: k8s.types.input.core.v1.Probe 
+  livenessProbe?: k8s.types.input.core.v1.Probe
 }
 
-interface CoinService extends ServiceInput, ServiceConfig {
-  
-}
+interface CoinService extends ServiceInput, ServiceConfig {}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Outputs = Record<string, any>
 
-export const deployCoinstack = async (appName: string, coinstack: string, coinServiceInput: ServiceInput[], sampleEnv: Buffer, coinstackType: CoinstackType) => {
-
+export const deployCoinstack = async (
+  appName: string,
+  coinstack: string,
+  coinServiceInput: ServiceInput[],
+  sampleEnv: Buffer,
+  coinstackType: CoinstackType
+): Promise<Outputs> => {
   const { kubeconfig, config, namespace } = await getConfig()
 
   const assetName = config.network !== 'mainnet' ? `${config.assetName}-${config.network}` : config.assetName
-  const outputs: Outputs = {}
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
   const secretData = getSecretData(sampleEnv)
 
   new k8s.core.v1.Secret(assetName, { metadata: { name: assetName, namespace }, stringData: secretData }, { provider })
 
   const baseImageName = 'shapeshiftdao/unchained-base:latest'
+  const snapshots = await new Snapper({ assetName, kubeconfig, namespace }).getSnapshots()
 
   await deployApi({
     appName,
@@ -57,69 +60,35 @@ export const deployCoinstack = async (appName: string, coinstack: string, coinSe
     namespace,
     provider,
   })
-  
 
-  const coinServices = config.statefulService?.services.reduce<CoinService[]>((acc, itemA) => {
-    const matchingItemB = coinServiceInput.find(itemB => itemB.coinServiceName === itemA.name);
-    if (matchingItemB) {
-      acc.push({...itemA, ...matchingItemB});
-    }
-    return acc;
-  }, []) || [];
-
-  coinServices.forEach(cs => createService({
-    command: cs.command,
-    ports: cs.ports,
-    assetName: cs.assetName,
-  })
-
-  if (config.statefulService) {
-
-
-
-    const services = config.statefulService.services.reduce<Record<string, Service>>((prev, service) => {
-      if (service.name === 'daemon') {
-        prev[service.name] = createService({
-          asset,
-          config: service,
-          env: { NETWORK: config.network },
-          ports: { 'daemon-rpc': { port: 8332 } },
-        })
+  const coinServices =
+    config.statefulService?.services.reduce<CoinService[]>((acc, itemA) => {
+      const matchingItemB = coinServiceInput.find((itemB) => itemB.coinServiceName === itemA.name)
+      if (matchingItemB) {
+        acc.push({ ...itemA, ...matchingItemB })
       }
+      return acc
+    }, []) || []
 
-      if (service.name === 'indexer') {
-        prev[service.name] = createService({
-          asset,
-          config: service,
-          command: [
-            '/bin/blockbook',
-            '-blockchaincfg=/config.json',
-            '-datadir=/data',
-            '-sync',
-            '-public=:8001',
-            '-enablesubnewtx',
-            '-logtostderr',
-            '-debug',
-          ],
-          ports: { public: { port: 8001 } },
-          configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
-          volumeMounts: [{ name: 'config-map', mountPath: '/config.json', subPath: 'indexer-config.json' }],
-          readinessProbe: { initialDelaySeconds: 20, periodSeconds: 5, failureThreshold: 12 },
-          livenessProbe: { timeoutSeconds: 10, initialDelaySeconds: 60, periodSeconds: 15, failureThreshold: 4 },
-        })
-      }
+  const services = coinServices.map((cs) =>
+    createService({
+      command: cs.command,
+      ports: cs.ports,
+      assetName: assetName,
+      args: cs.args,
+      config: cs,
+      snapshots: snapshots,
+      coinServiceName: cs.coinServiceName,
+    })
+  )
 
-      return prev
-    }, {})
+  await deployStatefulService(appName, assetName, provider, namespace, config, services)
 
-    await deployStatefulService(name, asset, provider, namespace, config, services)
-  }
-
-  return outputs
+  return {}
 }
 
 type SecretData = pulumi.Input<{
-  [key: string]: pulumi.Input<string>;
+  [key: string]: pulumi.Input<string>
 }>
 
 const getSecretData = (sampleEnv: Buffer): SecretData => {
@@ -138,5 +107,5 @@ const getSecretData = (sampleEnv: Buffer): SecretData => {
   if (missingKeys.length) {
     throw new Error(`Missing the following required environment variables: ${missingKeys.join(', ')}`)
   }
-  return stringData;
+  return stringData
 }
