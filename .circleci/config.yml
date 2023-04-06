@@ -227,6 +227,9 @@ aliases:
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
+    # “At 04:00 on Wednesday.”
+    stateful-service-backup-schedule: "04**3"
+    stateful-service-backup-count: 1
 
   - &cosmos
     assetName: cosmos
