@@ -30,13 +30,10 @@ export interface DeployApiArgs {
   provider: k8s.Provider
 }
 
-const getbuildAndPushImageArgs = (coinstackType: CoinstackType, coinstack: string) => {
-  const nodeBasePath = `${__dirname}/../../node/${coinstack}`
-  const goBasePath = `${__dirname}/../../go/${coinstack}`
-
+const getbuildAndPushImageArgs = (coinstackType: CoinstackType) => {
   switch (coinstackType) {
     case CoinstackType.GO:
-      return { context: `${goBasePath}/go`, dockerFile: `${goBasePath}/build/Dockerfile` }
+      return { context: `../go`, dockerFile: `../build/Dockerfile` }
     case CoinstackType.NODE:
       return { context: `../api` }
   }
@@ -86,7 +83,10 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
 
     imageName = `${image}:${tag}` // configured dockerhub image
 
+    console.log(`ImageName: ${imageName}`)
+
     if (!(await hasTag(image, tag))) {
+      console.log(`Building and pushing ${imageName}...`)
       await buildAndPushImage({
         image,
         auth: {
@@ -98,7 +98,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
         env: { DOCKER_BUILDKIT: '1' },
         tags: [tag],
         cacheFroms,
-        ...getbuildAndPushImageArgs(coinstackType, coinstack),
+        ...getbuildAndPushImageArgs(coinstackType),
       })
     }
   }

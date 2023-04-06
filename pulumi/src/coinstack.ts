@@ -35,12 +35,20 @@ export const deployCoinstack = async (
     provider,
   })
 
-  const coinServices = aggregateCoinServiceInput(config.statefulService?.services || [], serviceInput).map((cs) =>
-    createService(cs, assetName, snapshots)
-  )
+  const coinServices = aggregateCoinServiceInput(config.statefulService?.services || [], serviceInput)
+    .map((cs) => enrichWithPulumiConfig(cs, namespace))
+    .map((cs) => createService(cs, assetName, snapshots))
   await deployStatefulService(appName, assetName, provider, namespace, config, coinServices)
-
   return {}
+}
+
+const enrichWithPulumiConfig = (csi: JointCoinServiceInput, namespace: string): JointCoinServiceInput => {
+  // TODO how to solve this elegantly so that we know what to apply to which service?
+  csi.env = {
+    ...csi.env,
+    L1_RPC_ENDPOINT: `http://ethereum-svc.${namespace}.svc.cluster.local:8332`,
+  }
+  return csi
 }
 
 // Join the config set in the Pulumi config with the typescript input from the coinstack
@@ -48,15 +56,13 @@ const aggregateCoinServiceInput = (
   services: ServiceConfig[],
   coinServiceInput: ServiceInput[]
 ): JointCoinServiceInput[] => {
-  return (
-    services.reduce<JointCoinServiceInput[]>((acc, itemA) => {
-      const matchingItemB = coinServiceInput.find((itemB) => itemB.coinServiceName === itemA.name)
-      if (matchingItemB) {
-        acc.push({ ...itemA, ...matchingItemB })
-      }
-      return acc
-    }, []) || []
-  )
+  return services.reduce<JointCoinServiceInput[]>((acc, configInput) => {
+    const serviceInput = coinServiceInput.find((svc) => svc.coinServiceName === configInput.name)
+    if (serviceInput) {
+      acc.push({ ...configInput, ...serviceInput })
+    }
+    return acc
+  }, [])
 }
 
 const getSecretData = (sampleEnv: Buffer): SecretData => {

@@ -197,8 +197,6 @@ export async function deployStatefulService(
     []
   )
 
-  console.log('containers', containers)
-
   const volumeClaimTemplates = services.reduce<Array<k8s.types.input.core.v1.PersistentVolumeClaim>>(
     (prev, { volumeClaimTemplates }) => prev.concat(...volumeClaimTemplates),
     []
