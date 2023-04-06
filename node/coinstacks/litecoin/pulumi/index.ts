@@ -1,9 +1,7 @@
 import { readFileSync } from 'fs'
-import { deployCoinstack, ServiceInput } from '../../../../pulumi/src/coinstack'
+import { deployCoinstack } from '../../../../pulumi/src/coinstack'
 import { CoinstackType } from '../../../../pulumi/src/hash'
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Outputs = Record<string, any>
+import { Outputs, ServiceInput } from '../../../../pulumi/src'
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {

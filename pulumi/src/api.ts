@@ -1,6 +1,6 @@
 import * as k8s from '@pulumi/kubernetes'
 import { Input, Resource } from '@pulumi/pulumi'
-import { buildAndPushImage, BuildAndPushImageArgs, Config, hasTag } from './index'
+import { buildAndPushImage, Config, hasTag } from './index'
 import { CoinstackType, getCoinstackHash, secretEnvs } from './hash'
 
 export interface Autoscaling {
@@ -19,11 +19,11 @@ export interface ApiConfig {
 
 export interface DeployApiArgs {
   appName: string
-  assetName: string,
-  coinstack: string,
-  coinstackType: CoinstackType,
-  baseImageName?: string,
-  sampleEnv: Buffer,
+  assetName: string
+  coinstack: string
+  coinstackType: CoinstackType
+  baseImageName?: string
+  sampleEnv: Buffer
   config: Pick<Config, 'api' | 'dockerhub' | 'rootDomainName' | 'environment'>
   deployDependencies?: Input<Array<Resource>>
   namespace: string
@@ -31,12 +31,11 @@ export interface DeployApiArgs {
 }
 
 const getbuildAndPushImageArgs = (coinstackType: CoinstackType, coinstack: string) => {
-
   const nodeBasePath = `../../node/${coinstack}`
   const goBasePath = `../../go/${coinstack}`
 
-  switch(coinstackType){
-    case CoinstackType.GO:  
+  switch (coinstackType) {
+    case CoinstackType.GO:
       return { context: `${goBasePath}/go`, dockerFile: `${goBasePath}/build/Dockerfile` }
     case CoinstackType.NODE:
       return { context: `${nodeBasePath}/api` }
@@ -44,9 +43,9 @@ const getbuildAndPushImageArgs = (coinstackType: CoinstackType, coinstack: strin
 }
 
 const getContainer = (coinstackType: CoinstackType, coinstack: string) => {
-  switch(coinstackType){
-    case CoinstackType.GO:  
-      return {container: { args: ['-swagger', 'swagger.json'] }}
+  switch (coinstackType) {
+    case CoinstackType.GO:
+      return { container: { args: ['-swagger', 'swagger.json'] } }
     case CoinstackType.NODE:
       return { command: ['node', `dist/${coinstack}/api/src/app.js`] }
   }
