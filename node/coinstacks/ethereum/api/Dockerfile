@@ -3,5 +3,5 @@ ARG BASE_IMAGE
 FROM $BASE_IMAGE
 
 # Include app
-WORKDIR /app/coinstacks/ethereum/api
+WORKDIR /app/node/coinstacks/ethereum/api
 COPY . .

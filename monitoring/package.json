@@ -1,13 +1,10 @@
 {
   "name": "@shapeshiftoss/unchained-monitoring",
+  "version": "9.0.0",
   "license": "MIT",
   "private": true,
   "main": "src/index.ts",
   "scripts": {
     "clean": "rm -rf node_modules"
-  },
-  "dependencies": {
-    "@pulumi/kubernetes": "3.23.1",
-    "@pulumi/pulumi": "3.50.2"
   }
 }

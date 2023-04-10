@@ -22,8 +22,6 @@
 
 ## Initial Setup
 
-- Any commands should be run from within `unchained/go`
-
 - Install [Golang](https://go.dev/doc/install)
 
   make sure `GOPATH` is set in your shell environment, since it's needed for `docker-compose` setup to work properly
@@ -31,16 +29,16 @@
 - Make coinstacks
 
   ```sh
-  make
+  cd go && make
   ```
 
 - Copy sample env file:
 
   ```sh
-  cp cmd/ethereum/sample.env cmd/ethereum/.env
+  cp go/cmd/ethereum/sample.env go/cmd/ethereum/.env
   ```
 
-- Go to `unchained/node` and install dependencies by running `yarn` (which will also prepare the git pre-commit hook with `goimports`)
+- Go to `unchained/` and install dependencies by running `yarn` (which will also prepare the git pre-commit hook with `goimports`)
   ```sh
   yarn
   ```

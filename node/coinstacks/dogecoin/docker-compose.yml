@@ -8,7 +8,7 @@ services:
       - 'traefik.enable=true'
       - 'traefik.http.routers.dogecoin-api.rule=Host(`api.dogecoin.localhost`)'
       - 'traefik.http.services.dogecoin-api.loadbalancer.server.port=3000'
-    working_dir: /app/coinstacks/dogecoin/api
+    working_dir: /app/node/coinstacks/dogecoin/api
     command: yarn nodemon
     volumes:
-      - ../..:/app
+      - ../../..:/app
