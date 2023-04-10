@@ -919,33 +919,33 @@ jobs:
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-size-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageSize << parameters.service-storage-size-3 >>
             pulumi << parameters.pulumi-command >> --suppress-outputs
 
-  deploy-monitoring:
-    description: deploy unchained monitoring stack
-    executor: pulumi
-    parameters:
-      organization:
-        type: string
-      pulumi-command:
-        type: string
-        default: preview
-    steps:
-      - setup_remote_docker:
-          version: 20.10.18
-      - attach_workspace:
-          at: ~/
-      - pulumi-dependencies:
-          organization: <<parameters.organization>>
-      - run:
-          name: pulumi
-          working_directory: monitoring/src
-          command: |
-            pulumi stack select $<< parameters.organization >>_PULUMI_ORG/prod-us-east-2
-            pulumi config set --path unchained:monitoring.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies-us-east-2
-            pulumi config set --path unchained:monitoring.environment monitoring
-            pulumi config set --path unchained:monitoring.githubOrg $<< parameters.organization>>_GITHUB_ORG
-            pulumi config set --path unchained:monitoring.githubOauthID $<< parameters.organization>>_GITHUB_OAUTH_ID
-            pulumi config set --path unchained:monitoring.githubOauthSecret $<< parameters.organization>>_GITHUB_OAUTH_SECRET --plaintext
-            pulumi <<parameters.pulumi-command>> --suppress-outputs
+  # deploy-monitoring:
+  #   description: deploy unchained monitoring stack
+  #   executor: pulumi
+  #   parameters:
+  #     organization:
+  #       type: string
+  #     pulumi-command:
+  #       type: string
+  #       default: preview
+  #   steps:
+  #     - setup_remote_docker:
+  #         version: 20.10.18
+  #     - attach_workspace:
+  #         at: ~/
+  #     - pulumi-dependencies:
+  #         organization: <<parameters.organization>>
+  #     - run:
+  #         name: pulumi
+  #         working_directory: monitoring/src
+  #         command: |
+  #           pulumi stack select $<< parameters.organization >>_PULUMI_ORG/prod-us-east-2
+  #           pulumi config set --path unchained:monitoring.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies-us-east-2
+  #           pulumi config set --path unchained:monitoring.environment monitoring
+  #           pulumi config set --path unchained:monitoring.githubOrg $<< parameters.organization>>_GITHUB_ORG
+  #           pulumi config set --path unchained:monitoring.githubOauthID $<< parameters.organization>>_GITHUB_OAUTH_ID
+  #           pulumi config set --path unchained:monitoring.githubOauthSecret $<< parameters.organization>>_GITHUB_OAUTH_SECRET --plaintext
+  #           pulumi <<parameters.pulumi-command>> --suppress-outputs
 
   lint-and-test:
     description: lint and test project
