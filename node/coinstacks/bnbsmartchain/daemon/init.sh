@@ -59,7 +59,7 @@ start() {
     --ws.api eth,net,web3,debug,txpool,parlia \
     --ws.origins '*' \
     --syncmode full \
-    --maxpeers 200 \
+    --maxpeers 300 \
     --rpc.allow-unprotected-txs \
     --txlookuplimit 0 \
     --cache 8000 \
