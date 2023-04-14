@@ -621,11 +621,11 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: 0xpolygon/bor:0.3.4
+    service-image-1: 0xpolygon/bor:0.3.7
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 24Gi
-    service-storage-size-1: 2500Gi
+    service-storage-size-1: 3000Gi
     service-name-2: heimdall
     service-image-2: 0xpolygon/heimdall:0.3.3
     service-cpu-limit-2: "2"
@@ -633,7 +633,7 @@ aliases:
     service-memory-limit-2: 2Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:polygon-8a082f9
+    service-image-3: shapeshiftdao/unchained-blockbook:polygon-e655dd8
     service-cpu-limit-3: "4"
     service-cpu-request-3: "2"
     service-memory-limit-3: 24Gi
