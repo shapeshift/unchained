@@ -1,14 +1,7 @@
 import { parse } from 'dotenv'
 import { readFileSync } from 'fs'
 import * as k8s from '@pulumi/kubernetes'
-import {
-  deployApi,
-  createService,
-  deployStatefulService,
-  getConfig,
-  Service,
-  VolumeSnapshotClient,
-} from '../../../../pulumi'
+import { deployApi, createService, deployStatefulService, getConfig, Service, Snapper } from '../../../../pulumi'
 import { api } from '../../../pulumi'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -24,7 +17,7 @@ export = async (): Promise<Outputs> => {
   const assetName = config.network !== 'mainnet' ? `${coinstack}-${config.network}` : coinstack
   const outputs: Outputs = {}
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
-  const snapshots = await new VolumeSnapshotClient(kubeconfig, namespace).getVolumeSnapshots(assetName)
+  const snapshots = await new Snapper({ assetName, kubeconfig, namespace }).getSnapshots()
 
   const missingKeys: Array<string> = []
   const stringData = Object.keys(parse(readFileSync('../sample.env'))).reduce((prev, key) => {
@@ -66,7 +59,7 @@ export = async (): Promise<Outputs> => {
         prev[service.name] = createService({
           assetName,
           config: service,
-          env: { SNAPSHOT: 'https://pub-c0627345c16f47ab858c9469133073a8.r2.dev/geth-20230326.tar.lz4' },
+          env: { SNAPSHOT: 'https://pub-c0627345c16f47ab858c9469133073a8.r2.dev/geth-20230409.tar.lz4' },
           ports: {
             'daemon-rpc': { port: 8545 },
             'daemon-ws': { port: 8546, pathPrefix: '/websocket', stripPathPrefix: true },

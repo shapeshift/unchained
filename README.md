@@ -60,7 +60,7 @@ Traefik routes requests based on host name. which includes the coinstack name. F
   - [Node](node/README.md) - `unchained/node`
 - Both `go` and `node` module have linter installed in git pre-commit hook. To set up the hook:
   ```sh
-  cd node && yarn
+  yarn
   ```
 
 ## Docker-Compose Local Dev Instructions
@@ -74,7 +74,7 @@ Traefik routes requests based on host name. which includes the coinstack name. F
 - Install node dependencies
 
   ```sh
-  cd node && yarn
+  yarn
   ```
 
 - Start the reverse proxy and any common service (ex. hot reloading):

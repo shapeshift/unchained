@@ -5,7 +5,7 @@ export * from './config'
 export * from './api'
 export * from './docker'
 export * from './statefulService'
-export * from './volumeSnapshotClient'
+export * from './snapper'
 export * from './hasher'
 
 export interface Dockerhub {

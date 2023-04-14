@@ -1,9 +1,10 @@
 import { parse } from 'dotenv'
 import { readFileSync } from 'fs'
 import * as k8s from '@pulumi/kubernetes'
-import { deployApi, createService, deployStatefulService, getConfig, Service, VolumeSnapshotClient } from '../../../../pulumi'
+import { deployApi, createService, deployStatefulService, getConfig, Service, Snapper } from '../../../../pulumi'
 import { api } from '../../../pulumi'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Outputs = Record<string, any>
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
@@ -16,7 +17,7 @@ export = async (): Promise<Outputs> => {
   const assetName = config.network !== 'mainnet' ? `${config.assetName}-${config.network}` : config.assetName
   const outputs: Outputs = {}
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
-  const snapshots = await new VolumeSnapshotClient(kubeconfig, namespace).getVolumeSnapshots(assetName)
+  const snapshots = await new Snapper({ assetName, kubeconfig, namespace }).getSnapshots()
 
   const missingKeys: Array<string> = []
   const stringData = Object.keys(parse(readFileSync(`../../../cmd/${coinstack}/sample.env`))).reduce((prev, key) => {
@@ -60,7 +61,7 @@ export = async (): Promise<Outputs> => {
             'daemon-api': { port: 1317, pathPrefix: '/lcd', stripPathPrefix: true },
             'daemon-rpc': { port: 26657, pathPrefix: '/rpc', stripPathPrefix: true },
           },
-          snapshots
+          snapshots,
         })
       }
 

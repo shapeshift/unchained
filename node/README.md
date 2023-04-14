@@ -19,8 +19,6 @@
 
 ## Initial Setup
 
-- Any commands should be run from within `unchained/node`
-
 - Install [Node.js LTS](https://nodejs.org/en/)
 
   - (Optional) use nvm to automatically install the node version specified in `.nvmrc`
@@ -52,7 +50,7 @@
 - Copy sample env file:
 
   ```sh
-  cp coinstacks/ethereum/sample.env coinstacks/ethereum/.env
+  cp node/coinstacks/ethereum/sample.env node/coinstacks/ethereum/.env
   ```
 
 - Fill out any missing variables

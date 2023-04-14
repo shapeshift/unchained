@@ -8,7 +8,7 @@ services:
       - 'traefik.enable=true'
       - 'traefik.http.routers.bnbsmartchain-api.rule=Host(`api.bnbsmartchain.localhost`)'
       - 'traefik.http.services.bnbsmartchain-api.loadbalancer.server.port=3000'
-    working_dir: /app/coinstacks/bnbsmartchain/api
+    working_dir: /app/node/coinstacks/bnbsmartchain/api
     command: yarn nodemon
     volumes:
-      - ../..:/app
+      - ../../..:/app
