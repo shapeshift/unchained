@@ -827,7 +827,7 @@ jobs:
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.memoryLimit << parameters.api-memory-limit >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.replicas << parameters.api-replicas >>
             [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:coinstack.statefulService.backup.count << parameters.stateful-service-backup-count >>
-            [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:coinstack.statefulService.backup.schedule << parameters.stateful-service-backup-schedule >>
+            [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:coinstack.statefulService.backup.schedule "<< parameters.stateful-service-backup-schedule >>"
             [ << parameters.stateful-service-replicas >> -gt 0 ] && pulumi config set --path unchained:coinstack.statefulService.replicas << parameters.stateful-service-replicas >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-name-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].name << parameters.service-name-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-image-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].image << parameters.service-image-1 >>
@@ -899,6 +899,8 @@ jobs:
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.cpuRequest << parameters.api-cpu-request >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.memoryLimit << parameters.api-memory-limit >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.replicas << parameters.api-replicas >>
+            [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:coinstack.statefulService.backup.count << parameters.stateful-service-backup-count >>
+            [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:coinstack.statefulService.backup.schedule "<< parameters.stateful-service-backup-schedule >>"
             [ << parameters.stateful-service-replicas >> -gt 0 ] && pulumi config set --path unchained:coinstack.statefulService.replicas << parameters.stateful-service-replicas >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-name-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].name << parameters.service-name-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-image-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].image << parameters.service-image-1 >>
