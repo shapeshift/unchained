@@ -75,7 +75,7 @@ aliases:
       default: 3
     stateful-service-backup-schedule:
       type: string
-      default: "04**0" 
+      default: "0 4 * * 0" 
     service-name-1:
       type: string
       default: ""
@@ -229,7 +229,7 @@ aliases:
     stateful-service-replicas: 1
     # “At 04:00 on Wednesday.”
     stateful-service-backup: true
-    stateful-service-backup-schedule: "04**3"
+    stateful-service-backup-schedule: "0 4 * * 3"
     stateful-service-backup-count: 1
 
   - &cosmos
