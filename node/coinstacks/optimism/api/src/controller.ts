@@ -1,5 +1,5 @@
 import { serialize } from '@ethersproject/transactions'
-import { ethers, Contract, BigNumber } from 'ethers'
+import { ethers, Contract, Transaction } from 'ethers'
 import { BigNumber as bn } from 'bignumber.js'
 import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import { Blockbook } from '@shapeshiftoss/blockbook'
@@ -37,7 +37,7 @@ export const logger = new Logger({
 
 const CHAIN_ID: Record<string, number> = { mainnet: 10 }
 
-const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
+const provider = new ethers.JsonRpcProvider(RPC_URL)
 
 export const service = new Service({
   blockbook: new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL }),
@@ -48,8 +48,10 @@ export const service = new Service({
   rpcUrl: RPC_URL,
 })
 
+const gpoAbi = ethers.Interface.from(getContractInterface('OVM_GasPriceOracle'))
+
 // gas price oracle contract to query current l1 and l2 values
-const gpo = new Contract(predeploys.OVM_GasPriceOracle, getContractInterface('OVM_GasPriceOracle'), provider)
+const gpo = new Contract(predeploys.OVM_GasPriceOracle, gpoAbi, provider)
 
 @Route('api/v1')
 @Tags('v1')
@@ -228,16 +230,28 @@ export class Optimism extends Controller implements BaseAPI, API {
     // l2 gas limit
     const { gasLimit } = await service.estimateGas(data, from, to, value)
 
-    // l1 gas limit
-    const unsignedTxHash = serialize({
+    const unsignedTxHashOld = serialize({
       data,
       to,
-      value: ethers.utils.parseUnits(value, 'wei'),
-      gasLimit: BigNumber.from(gasLimit),
+      value: ethers.parseUnits(value, 'wei'),
+      gasLimit: BigInt(gasLimit),
       chainId: CHAIN_ID[NETWORK as string],
       nonce: await provider.getTransactionCount(from),
     })
-    const l1GasLimit = ((await gpo.getL1GasUsed(unsignedTxHash)) as BigNumber).toString()
+
+    // l1 gas limit
+    const unsignedTxHash = Transaction.from({
+      data,
+      to,
+      value: ethers.parseUnits(value, 'wei'),
+      gasLimit: BigInt(gasLimit),
+      chainId: CHAIN_ID[NETWORK as string],
+      nonce: await provider.getTransactionCount(from),
+    }).unsignedSerialized
+
+    console.log({ unsignedTxHashOld, unsignedTxHash })
+
+    const l1GasLimit = ((await gpo.getL1GasUsed(unsignedTxHash)) as bigint).toString()
 
     return { gasLimit, l1GasLimit }
   }
@@ -257,9 +271,9 @@ export class Optimism extends Controller implements BaseAPI, API {
   @Get('/gas/fees')
   async getGasFees(): Promise<OptimismGasFees> {
     // ethers bignumber values read from contract are stringified to be used with bignumber.js which handles floats for scalar math
-    const l1BaseFee = ((await gpo.l1BaseFee()) as BigNumber).toString()
-    const baseScalar = ((await gpo.scalar()) as BigNumber).toString()
-    const decimals = ((await gpo.decimals()) as BigNumber).toString()
+    const l1BaseFee = ((await gpo.l1BaseFee()) as bigint).toString()
+    const baseScalar = ((await gpo.scalar()) as bigint).toString()
+    const decimals = ((await gpo.decimals()) as bigint).toString()
 
     // l1 gas price
     const scalar = bn(baseScalar).div(bn(10).pow(decimals)).toFixed()

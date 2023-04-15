@@ -15,10 +15,6 @@
     "@shapeshiftoss/blockbook": "^9.0.0",
     "@shapeshiftoss/common-api": "^9.0.0",
     "@shapeshiftoss/logger": "^1.1.2",
-    "bech32": "^2.0.0",
-    "cors": "^2.8.5"
-  },
-  "devDependencies": {
-    "@types/cors": "^2.8.12"
+    "bech32": "^2.0.0"
   }
 }

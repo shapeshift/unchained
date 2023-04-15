@@ -8,12 +8,21 @@ export interface GasEstimate {
 }
 
 /**
+ * Contains info about legacy and/or EIP-1559 fees
+ */
+export interface Fees {
+  gasPrice?: string
+  maxFeePerGas?: string
+  maxPriorityFeePerGas?: string
+}
+
+/**
  * Contains info about current recommended fees to use in a transaction
  */
 export interface GasFees {
-  gasPrice: string
-  maxFeePerGas?: string
-  maxPriorityFeePerGas?: string
+  slow: Fees
+  average: Fees
+  fast: Fees
 }
 
 /**

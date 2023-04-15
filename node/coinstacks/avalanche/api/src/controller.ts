@@ -29,7 +29,7 @@ export const logger = new Logger({
 })
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
-const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
+const provider = new ethers.JsonRpcProvider(RPC_URL)
 
 export const service = new Service({
   blockbook,

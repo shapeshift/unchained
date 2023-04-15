@@ -6,7 +6,7 @@ import { ApiError as BlockbookApiError, Blockbook, Tx as BlockbookTx } from '@sh
 import { Logger } from '@shapeshiftoss/logger'
 import { ApiError, BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
 import { Account, API, TokenBalance, Tx, TxHistory, GasFees, InternalTx, GasEstimate } from './models'
-import { Cursor, NodeBlock, CallStack, ExplorerApiResponse, ExplorerInternalTx } from './types'
+import { Cursor, NodeBlock, CallStack, ExplorerApiResponse, ExplorerInternalTx, FeeHistory } from './types'
 import { formatAddress } from './utils'
 import { validatePageSize } from '../utils'
 
@@ -29,7 +29,7 @@ export interface ServiceArgs {
   explorerApiKey?: string
   explorerApiUrl: string
   logger: Logger
-  provider: ethers.providers.JsonRpcProvider
+  provider: ethers.JsonRpcProvider
   rpcUrl: string
 }
 
@@ -38,7 +38,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   private readonly explorerApiKey?: string
   private readonly explorerApiUrl: string
   private readonly logger: Logger
-  private readonly provider: ethers.providers.JsonRpcProvider
+  private readonly provider: ethers.JsonRpcProvider
   private readonly rpcUrl: string
 
   constructor(args: ServiceArgs) {
@@ -198,7 +198,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
   async estimateGas(data: string, from: string, to: string, value: string): Promise<GasEstimate> {
     try {
-      const tx: ethers.providers.TransactionRequest = { data, from, to, value: ethers.utils.parseUnits(value, 'wei') }
+      const tx: ethers.TransactionRequest = { data, from, to, value: ethers.parseUnits(value, 'wei') }
       const gasLimit = await this.provider.estimateGas(tx)
       return { gasLimit: gasLimit.toString() }
     } catch (err) {
@@ -206,17 +206,69 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     }
   }
 
+  async estimateGasFees() {
+    const totalBlocks = 20
+
+    // fetch fee history for the last 20 blocks and with maxPriorityFeePerGas reported at the 1st, 50th, and 95th percentiles (slow, average, fast)
+    const feeHistory = (await this.provider.send('eth_feeHistory', [totalBlocks, 'latest', [1, 50, 95]])) as FeeHistory
+
+    const oldestBlock = Number(feeHistory.oldestBlock)
+    const latestBlock = oldestBlock + totalBlocks
+
+    // hex -> decimal
+    const blockHistory = []
+    for (let i = oldestBlock; i < latestBlock; i++) {
+      const index = i - oldestBlock
+      blockHistory.push({
+        number: i,
+        baseFeePerGas: Number(feeHistory.baseFeePerGas[index]),
+        gasUsedRatio: Number(feeHistory.gasUsedRatio[index]),
+        maxPriorityFeePerGas: feeHistory.reward[index].map((r) => Number(r)),
+      })
+    }
+
+    // baseFeePerGas for pending block as determined by network
+    const baseFeePerGas = Number(feeHistory.baseFeePerGas[totalBlocks])
+
+    const avg = (arr: Array<number>): number => {
+      return Math.round(arr.reduce((prev, a) => prev + a, 0) / arr.length)
+    }
+
+    const slow = avg(blockHistory.map((block) => block.maxPriorityFeePerGas[0]))
+    const average = avg(blockHistory.map((block) => block.maxPriorityFeePerGas[1]))
+    const fast = avg(blockHistory.map((block) => block.maxPriorityFeePerGas[2]))
+
+    const fees = {
+      slow: {
+        maxFeePerGas: (slow + baseFeePerGas).toString(),
+        maxPriorityFeePerGas: slow.toString(),
+      },
+      average: {
+        maxFeePerGas: (average + baseFeePerGas).toString(),
+        maxPriorityFeePerGas: average.toString(),
+      },
+      fast: {
+        maxFeePerGas: (fast + baseFeePerGas).toString(),
+        maxPriorityFeePerGas: fast.toString(),
+      },
+    }
+
+    return fees
+  }
+
   async getGasFees(): Promise<GasFees> {
     try {
-      const feeData = await this.provider.getFeeData()
+      const fees = await this.estimateGasFees()
+      return fees
+      //const feeData = await this.provider.getFeeData()
 
-      if (!feeData.gasPrice) throw { message: 'no fee data returned from node' }
+      //if (!feeData.gasPrice) throw { message: 'no fee data returned from node' }
 
-      return {
-        gasPrice: feeData.gasPrice.toString(),
-        maxFeePerGas: feeData.maxFeePerGas?.toString(),
-        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas?.toString(),
-      }
+      //return {
+      //  gasPrice: feeData.gasPrice.toString(),
+      //  maxFeePerGas: feeData.maxFeePerGas?.toString(),
+      //  maxPriorityFeePerGas: feeData.maxPriorityFeePerGas?.toString(),
+      //}
     } catch (err) {
       throw new ApiError('Internal Server Error', 500, JSON.stringify(err))
     }

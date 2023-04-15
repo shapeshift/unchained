@@ -31,7 +31,7 @@ export const logger = new Logger({
 })
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
-const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
+const provider = new ethers.JsonRpcProvider(RPC_URL)
 
 export const service = new Service({
   blockbook,
@@ -204,11 +204,11 @@ export class Ethereum extends Controller implements BaseAPI, API {
    *
    * @returns {Promise<GasFees>} current fees specified in wei
    */
-  @Example<GasFees>({
-    gasPrice: '172301756423',
-    maxFeePerGas: '342603512846',
-    maxPriorityFeePerGas: '1000000000',
-  })
+  //@Example<GasFees>({
+  //  gasPrice: '172301756423',
+  //  maxFeePerGas: '342603512846',
+  //  maxPriorityFeePerGas: '1000000000',
+  //})
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
   async getGasFees(): Promise<GasFees> {

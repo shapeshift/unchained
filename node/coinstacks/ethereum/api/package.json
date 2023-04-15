@@ -14,11 +14,6 @@
   "dependencies": {
     "@shapeshiftoss/blockbook": "^9.0.0",
     "@shapeshiftoss/common-api": "^9.0.0",
-    "@shapeshiftoss/logger": "^1.1.2",
-    "cors": "^2.8.5",
-    "ethers": "^5.7.0"
-  },
-  "devDependencies": {
-    "@types/cors": "^2.8.12"
+    "@shapeshiftoss/logger": "^1.1.2"
   }
 }
