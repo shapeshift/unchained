@@ -604,6 +604,54 @@ aliases:
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
+  - &polygon
+    assetName: polygon
+    pulumi-stack: public
+    pulumi-dir: coinstacks/polygon/pulumi
+    rpc-url: http://polygon-svc.unchained.svc.cluster.local:8545
+    indexer-url: http://polygon-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://polygon-svc.unchained.svc.cluster.local:8001/websocket
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 6
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
+    api-cpu-threshold: 30
+    api-memory-limit: 500Mi
+    stateful-service-replicas: 2
+    service-name-1: daemon
+    service-image-1: 0xpolygon/bor:0.3.7
+    service-cpu-limit-1: "4"
+    service-cpu-request-1: "2"
+    service-memory-limit-1: 24Gi
+    service-storage-size-1: 3000Gi
+    service-name-2: heimdall
+    service-image-2: 0xpolygon/heimdall:0.3.3
+    service-cpu-limit-2: "2"
+    service-cpu-request-2: "1"
+    service-memory-limit-2: 2Gi
+    service-storage-size-2: 500Gi
+    service-name-3: indexer
+    service-image-3: shapeshiftdao/unchained-blockbook:polygon-e655dd8
+    service-cpu-limit-3: "4"
+    service-cpu-request-3: "2"
+    service-memory-limit-3: 12Gi
+    service-storage-size-3: 500Gi
+
+
+  - &polygon-dev
+    <<: *polygon
+    environment: dev
+    pulumi-stack: public-dev
+    rpc-url: http://polygon-svc.unchained-dev.svc.cluster.local:8545
+    indexer-url: http://polygon-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://polygon-svc.unchained-dev.svc.cluster.local:8001/websocket
+    api-replicas: 1
+    api-max-replicas: 2
+    api-cpu-limit: 300m
+    api-memory-limit: 250Mi
+    stateful-service-replicas: 1
+
 commands:
   precheck:
     description: install dependencies
@@ -1075,6 +1123,16 @@ workflows:
           <<: *bnbsmartchain-dev
           <<: *only-develop
 
+      - deploy-coinstack-node:
+          name: deploy polygon develop
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          etherscan-env-var: ETHERSCAN_API_KEY_POLYGON
+          requires:
+            - deploy dependencies
+          <<: *polygon-dev
+          <<: *only-develop
+
       - deploy-coinstack-go:
           name: deploy cosmos develop
           organization: TAXISTAKE
@@ -1362,6 +1420,34 @@ workflows:
           requires:
             - approve bnbsmartchain coinstack
           <<: *bnbsmartchain
+          <<: *only-main
+
+      ####### POLYGON
+      - deploy-coinstack-node:
+          name: preview polygon
+          organization: TAXISTAKE
+          pulumi-command: preview
+          etherscan-env-var: ETHERSCAN_API_KEY_POLYGON
+          requires:
+            - validate dependencies
+          <<: *polygon
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve polygon coinstack
+          type: approval
+          requires:
+            - preview polygon
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy polygon
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          etherscan-env-var: ETHERSCAN_API_KEY_POLYGON
+          requires:
+            - approve polygon coinstack
+          <<: *polygon
           <<: *only-main
 
       ####### COSMOS
