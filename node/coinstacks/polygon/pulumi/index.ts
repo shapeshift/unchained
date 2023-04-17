@@ -91,7 +91,6 @@ export = async (): Promise<Outputs> => {
             '-datadir=/data',
             '-sync',
             '-public=:8001',
-            '-prof=:8002',
             '-enablesubnewtx',
             '-logtostderr',
             '-debug',
