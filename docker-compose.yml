@@ -43,6 +43,7 @@ services:
       - litecoin_default
       - optimism_default
       - osmosis_default
+      - polygon_default
       - thorchain_default
     ports:
       # The HTTP port
@@ -74,5 +75,7 @@ networks:
     name: optimism_default
   osmosis_default:
     name: osmosis_default
+  polygon_default:
+    name: polygon_default
   thorchain_default:
     name: thorchain_default
