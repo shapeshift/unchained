@@ -606,7 +606,7 @@ aliases:
 
   - &polygon
     assetName: polygon
-    pulumi-stack: public
+    pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/polygon/pulumi
     rpc-url: http://polygon-svc.unchained.svc.cluster.local:8545
     indexer-url: http://polygon-svc.unchained.svc.cluster.local:8001
@@ -642,7 +642,7 @@ aliases:
   - &polygon-dev
     <<: *polygon
     environment: dev
-    pulumi-stack: public-dev
+    pulumi-stack: public-dev-us-east-2
     rpc-url: http://polygon-svc.unchained-dev.svc.cluster.local:8545
     indexer-url: http://polygon-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://polygon-svc.unchained-dev.svc.cluster.local:8001/websocket
