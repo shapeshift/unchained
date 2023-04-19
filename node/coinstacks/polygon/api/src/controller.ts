@@ -230,8 +230,18 @@ export class Polygon extends Controller implements BaseAPI, API {
    */
   @Example<GasFees>({
     gasPrice: '250000000000',
-    maxFeePerGas: '400000000000',
-    maxPriorityFeePerGas: '1500000000',
+    slow: {
+      maxFeePerGas: '250000000000',
+      maxPriorityFeePerGas: '10000000000',
+    },
+    average: {
+      maxFeePerGas: '350000000000',
+      maxPriorityFeePerGas: '150000000000',
+    },
+    fast: {
+      maxFeePerGas: '450000000000',
+      maxPriorityFeePerGas: '250000000000',
+    },
   })
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')

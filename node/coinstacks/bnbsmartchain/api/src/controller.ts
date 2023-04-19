@@ -29,7 +29,7 @@ export const logger = new Logger({
 })
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
-const provider = new ethers.JsonRpcProvider(RPC_URL)
+const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
 
 export const service = new Service({
   blockbook,
@@ -198,6 +198,9 @@ export class BNBSmartChain extends Controller implements BaseAPI, API {
    */
   @Example<GasFees>({
     gasPrice: '5000000000',
+    slow: {},
+    average: {},
+    fast: {},
   })
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')

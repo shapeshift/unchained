@@ -320,8 +320,8 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"OptimismGasFees": {
-				"description": "Contains info about current recommended fees for a transaction on both L1 and L2",
+			"Fees": {
+				"description": "Contains info about legacy and/or EIP-1559 fees",
 				"properties": {
 					"gasPrice": {
 						"type": "string"
@@ -331,6 +331,25 @@
 					},
 					"maxPriorityFeePerGas": {
 						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"OptimismGasFees": {
+				"description": "Contains info about current recommended fees for a transaction on both L1 and L2",
+				"properties": {
+					"gasPrice": {
+						"type": "string"
+					},
+					"slow": {
+						"$ref": "#/components/schemas/Fees"
+					},
+					"average": {
+						"$ref": "#/components/schemas/Fees"
+					},
+					"fast": {
+						"$ref": "#/components/schemas/Fees"
 					},
 					"l1GasPrice": {
 						"type": "string"
@@ -338,6 +357,9 @@
 				},
 				"required": [
 					"gasPrice",
+					"slow",
+					"average",
+					"fast",
 					"l1GasPrice"
 				],
 				"type": "object",
@@ -806,8 +828,11 @@
 								"examples": {
 									"Example 1": {
 										"value": {
+											"l1GasPrice": "25000000000",
 											"gasPrice": "1000000",
-											"l1GasPrice": "25000000000"
+											"slow": {},
+											"average": {},
+											"fast": {}
 										}
 									}
 								}
