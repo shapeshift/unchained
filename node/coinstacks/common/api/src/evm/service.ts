@@ -267,15 +267,15 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
         return {
           slow: {
-            maxFeePerGas: slowPriorityFee.plus(baseFeePerGas).toFixed(),
+            maxFeePerGas: slowPriorityFee.plus(baseFeePerGas).toFixed(0),
             maxPriorityFeePerGas: slowPriorityFee.toFixed(0),
           },
           average: {
-            maxFeePerGas: averagePriorityFee.plus(baseFeePerGas).toFixed(),
+            maxFeePerGas: averagePriorityFee.plus(baseFeePerGas).toFixed(0),
             maxPriorityFeePerGas: averagePriorityFee.toFixed(0),
           },
           fast: {
-            maxFeePerGas: fastPriorityFee.plus(baseFeePerGas).toFixed(),
+            maxFeePerGas: fastPriorityFee.plus(baseFeePerGas).toFixed(0),
             maxPriorityFeePerGas: fastPriorityFee.toFixed(0),
           },
         }
@@ -283,16 +283,12 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
       // TODO: percentile estimations for gasPrice
       return {
-        gasPrice: new BigNumber(gasPrice).toFixed(),
-        slow: {
-          ...eip1559Fees?.slow,
-        },
-        average: {
-          ...eip1559Fees?.average,
-        },
-        fast: {
-          ...eip1559Fees?.fast,
-        },
+        gasPrice: new BigNumber(gasPrice).toFixed(0),
+        maxFeePerGas: eip1559Fees?.average?.maxFeePerGas,
+        maxPriorityFeePerGas: eip1559Fees?.average?.maxPriorityFeePerGas,
+        slow: { ...eip1559Fees?.slow },
+        average: { ...eip1559Fees?.average },
+        fast: { ...eip1559Fees?.fast },
       }
     } catch (err) {
       throw new ApiError('Internal Server Error', 500, JSON.stringify(err))

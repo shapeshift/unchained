@@ -21,6 +21,10 @@ export interface Fees {
  */
 export interface GasFees {
   gasPrice: string
+  // @deprecated
+  maxFeePerGas?: string
+  // @deprecated
+  maxPriorityFeePerGas?: string
   slow: Fees
   average: Fees
   fast: Fees

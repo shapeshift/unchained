@@ -338,6 +338,12 @@
 					"gasPrice": {
 						"type": "string"
 					},
+					"maxFeePerGas": {
+						"type": "string"
+					},
+					"maxPriorityFeePerGas": {
+						"type": "string"
+					},
 					"slow": {
 						"$ref": "#/components/schemas/Fees"
 					},
