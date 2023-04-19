@@ -63,3 +63,10 @@ export interface ExplorerInternalTx {
   isError: string
   errCode: string
 }
+
+export interface FeeHistory {
+  oldestBlock: string
+  baseFeePerGas: Array<string>
+  gasUsedRatio: Array<number>
+  reward: Array<Array<string>>
+}
