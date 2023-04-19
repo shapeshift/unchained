@@ -20,6 +20,7 @@ export interface Fees {
  * Contains info about current recommended fees to use in a transaction
  */
 export interface GasFees {
+  gasPrice: string
   slow: Fees
   average: Fees
   fast: Fees

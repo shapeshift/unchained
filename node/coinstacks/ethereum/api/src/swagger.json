@@ -335,6 +335,9 @@
 			"GasFees": {
 				"description": "Contains info about current recommended fees to use in a transaction",
 				"properties": {
+					"gasPrice": {
+						"type": "string"
+					},
 					"slow": {
 						"$ref": "#/components/schemas/Fees"
 					},
@@ -346,6 +349,7 @@
 					}
 				},
 				"required": [
+					"gasPrice",
 					"slow",
 					"average",
 					"fast"
@@ -788,6 +792,25 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/GasFees"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"gasPrice": "100000000000",
+											"slow": {
+												"maxFeePerGas": "95000000000",
+												"maxPriorityFeePerGas": "40000000"
+											},
+											"average": {
+												"maxFeePerGas": "96000000000",
+												"maxPriorityFeePerGas": "1000000000"
+											},
+											"fast": {
+												"maxFeePerGas": "100000000000",
+												"maxPriorityFeePerGas": "5000000000"
+											}
+										}
+									}
 								}
 							}
 						}

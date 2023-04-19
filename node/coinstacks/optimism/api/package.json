@@ -15,7 +15,6 @@
     "@eth-optimism/contracts": "^0.5.40",
     "@shapeshiftoss/blockbook": "^9.0.0",
     "@shapeshiftoss/common-api": "^9.0.0",
-    "@shapeshiftoss/logger": "^1.1.2",
     "bignumber.js": "^9.1.1"
   }
 }

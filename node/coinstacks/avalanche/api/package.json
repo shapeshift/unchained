@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@shapeshiftoss/blockbook": "^9.0.0",
-    "@shapeshiftoss/common-api": "^9.0.0",
-    "@shapeshiftoss/logger": "^1.1.2"
+    "@shapeshiftoss/common-api": "^9.0.0"
   }
 }
