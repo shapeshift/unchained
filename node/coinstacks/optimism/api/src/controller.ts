@@ -1,4 +1,5 @@
 import { serialize } from '@ethersproject/transactions'
+import bn from 'bignumber.js'
 import { ethers, Contract, BigNumber } from 'ethers'
 import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import { Blockbook } from '@shapeshiftoss/blockbook'
@@ -16,7 +17,6 @@ import {
 import { API, Account, Tx, TxHistory } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { Service } from '../../../common/api/src/evm/service'
 import { OptimismGasEstimate, OptimismGasFees } from './models'
-import bn from 'bignumber.js'
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
