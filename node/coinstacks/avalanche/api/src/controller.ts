@@ -200,9 +200,19 @@ export class Avalanche extends Controller implements BaseAPI, API {
    * @returns {Promise<GasFees>} current fees specified in wei
    */
   @Example<GasFees>({
-    gasPrice: '25000000000',
-    maxFeePerGas: '51500000000',
-    maxPriorityFeePerGas: '1500000000',
+    gasPrice: '27000000000',
+    slow: {
+      maxFeePerGas: '28000000000',
+      maxPriorityFeePerGas: '1000000000',
+    },
+    average: {
+      maxFeePerGas: '30000000000',
+      maxPriorityFeePerGas: '4500000000',
+    },
+    fast: {
+      maxFeePerGas: '33000000000',
+      maxPriorityFeePerGas: '6300000000',
+    },
   })
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')

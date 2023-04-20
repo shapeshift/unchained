@@ -484,7 +484,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:chaosnet-multichain-1.108.1
+    service-image-1: registry.gitlab.com/thorchain/thornode:chaosnet-multichain-1.108.3
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 8Gi
@@ -579,8 +579,8 @@ aliases:
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: shapeshiftdao/bnb-smart-chain:v1.1.23
-    service-cpu-limit-1: "8"
-    service-cpu-request-1: "4"
+    service-cpu-limit-1: "16"
+    service-cpu-request-1: "8"
     service-memory-limit-1: 48Gi
     service-memory-request-1: 24Gi
     service-storage-size-1: 3000Gi
@@ -606,7 +606,7 @@ aliases:
 
   - &polygon
     assetName: polygon
-    pulumi-stack: public
+    pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/polygon/pulumi
     rpc-url: http://polygon-svc.unchained.svc.cluster.local:8545
     indexer-url: http://polygon-svc.unchained.svc.cluster.local:8001
@@ -642,7 +642,7 @@ aliases:
   - &polygon-dev
     <<: *polygon
     environment: dev
-    pulumi-stack: public-dev
+    pulumi-stack: public-dev-us-east-2
     rpc-url: http://polygon-svc.unchained-dev.svc.cluster.local:8545
     indexer-url: http://polygon-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://polygon-svc.unchained-dev.svc.cluster.local:8001/websocket

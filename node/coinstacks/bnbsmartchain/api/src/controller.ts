@@ -198,6 +198,9 @@ export class BNBSmartChain extends Controller implements BaseAPI, API {
    */
   @Example<GasFees>({
     gasPrice: '5000000000',
+    slow: {},
+    average: {},
+    fast: {},
   })
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
