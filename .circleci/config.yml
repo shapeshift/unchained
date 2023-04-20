@@ -603,6 +603,9 @@ aliases:
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
+    stateful-service-backup: true
+    stateful-service-backup-schedule: "0 4 * * 3,6"
+    stateful-service-backup-count: 2
 
   - &polygon
     assetName: polygon
@@ -651,6 +654,9 @@ aliases:
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
+    stateful-service-backup: true
+    stateful-service-backup-schedule: "0 4 * * 3,6"
+    stateful-service-backup-count: 2
 
 commands:
   precheck:
