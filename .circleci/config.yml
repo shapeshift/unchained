@@ -641,6 +641,7 @@ commands:
 
   kube-prometheus-dependencies:
     description: setup kube-prometheus
+    working_directory: monitoring/my-kube-prometheus
     parameters:
       organization:
         type: string
@@ -1018,10 +1019,15 @@ jobs:
           name: setup kube-prometheus
           working_directory: monitoring/my-kube-prometheus
           command: |
-            
             ./build.sh unchained-kube-promstack.jsonnet
+      - run:
+          name: diff CRD
+          command: |
             echo "CRD Changes: "
-            kubectl diff -f manifests/setup
+            kubectl diff -f manifests/setup/
+      - run:
+          name: diff Kube prometheus
+          command: |
             echo "Kube prometheus changes: "
             kubectl diff -f manifests/
 
