@@ -679,6 +679,10 @@ commands:
             echo [default] > ~/.aws/credentials
             echo aws_access_key_id = $<< parameters.organization >>_AWS_ACCESS_KEY_ID >> ~/.aws/credentials
             echo aws_secret_access_key = $<< parameters.organization >>_AWS_SECRET_ACCESS_KEY >> ~/.aws/credentials
+      - run:
+          name: update kubeconfig
+          command: aws eks update-kubeconfig --region us-east-2 --name unchained-eksCluster-23ea126
+        
 
   pulumi-dependencies:
     description: set up pulumi dependencies
@@ -1012,6 +1016,7 @@ jobs:
             go install -a github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@latest
             jb install github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@main
             ./build.sh unchained-kube-promstack.jsonnet
+            kubectl config view
             kubectl diff -f manifests/setup
             kubectl diff -f manifests/
             # kubectl apply --server-side -f manifests/setup
