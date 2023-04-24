@@ -1001,7 +1001,8 @@ jobs:
       - attach_workspace:
           at: ~/
       - checkout
-      - kube-prometheus-dependencies
+      - kube-prometheus-dependencies:
+          organization: <<parameters.organization>>
       - run:
           name: setup kube-prometheus
           working_directory: monitoring/my-kube-prometheus
