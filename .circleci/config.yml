@@ -641,13 +641,13 @@ commands:
 
   kube-prometheus-dependencies:
     description: setup kube-prometheus
-    working_directory: monitoring/my-kube-prometheus
     parameters:
       organization:
         type: string
     steps:
       - run:
           name: setup JB
+          working_directory: monitoring/my-kube-prometheus
           command: |
             go install github.com/google/go-jsonnet/cmd/jsonnet@latest
             go install github.com/brancz/gojsontoyaml@latest
