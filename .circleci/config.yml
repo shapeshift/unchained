@@ -1022,11 +1022,13 @@ jobs:
             ./build.sh unchained-kube-promstack.jsonnet
       - run:
           name: diff CRD
+          working_directory: monitoring/my-kube-prometheus
           command: |
             echo "CRD Changes: "
             kubectl diff -f manifests/setup/
       - run:
           name: diff Kube prometheus
+          working_directory: monitoring/my-kube-prometheus
           command: |
             echo "Kube prometheus changes: "
             kubectl diff -f manifests/
