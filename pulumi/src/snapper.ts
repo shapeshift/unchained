@@ -4,6 +4,7 @@ export interface VolumeSnapshot extends Required<k8sClient.KubernetesObject> {
   metadata: {
     name: string
     creationTimestamp: Date
+    namespace: string
     labels: {
       statefulset: string
     }
@@ -72,8 +73,16 @@ export class Snapper {
   }
 
   protected async takeSnapshots(pvcList: Array<string>): Promise<void> {
-    const timestamp = new Date()
+    try {
+      return await this.takeSnapshotInternal(pvcList)
+    } catch (err) {
+      console.error(`Could not create VolumeSnaphot:`, err)
+      return Promise.resolve()
+    }
+  }
 
+  private async takeSnapshotInternal(pvcList: Array<string>): Promise<void> {
+    const timestamp = new Date()
     await Promise.all(
       pvcList.map(async (pvc) => {
         const snapshotName = `${pvc}-backup-${timestamp.getTime()}`
@@ -84,6 +93,7 @@ export class Snapper {
           kind: 'VolumeSnapshot',
           metadata: {
             name: snapshotName,
+            namespace: this.namespace,
             labels: {
               statefulset: this.stsName,
             },
