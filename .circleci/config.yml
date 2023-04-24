@@ -681,7 +681,7 @@ commands:
             echo aws_secret_access_key = $<< parameters.organization >>_AWS_SECRET_ACCESS_KEY >> ~/.aws/credentials
       - run:
           name: update kubeconfig
-          command: aws eks update-kubeconfig --region us-east-2 --name unchained-eksCluster-23ea126
+          command: aws eks update-kubeconfig --region $AWS_REGION --name unchained-eksCluster-23ea126
         
 
   pulumi-dependencies:
@@ -1017,12 +1017,10 @@ jobs:
             jb install github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@main
             ./build.sh unchained-kube-promstack.jsonnet
             kubectl config view
-            echo "Diff of manifests/setup: "
-            kubectl diff -f manifests/setup
-            echo "Diff of manifests: "
+            # echo "Diff of manifests/setup: "
+            # kubectl diff -f manifests/setup
+            echo "Changes to be applied: "
             kubectl diff -f manifests/
-            # kubectl apply --server-side -f manifests/setup
-            # kubectl apply -f manifests/
 
   lint-and-test:
     description: lint and test project
