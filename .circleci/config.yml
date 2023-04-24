@@ -646,6 +646,13 @@ commands:
         type: string
     steps:
       - run:
+          name: setup JB
+          command: |
+            go install github.com/google/go-jsonnet/cmd/jsonnet@latest
+            go install github.com/brancz/gojsontoyaml@latest
+            go install -a github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@latest
+            jb install github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@maingo
+      - run:
           name: add environment variables
           command: |
             echo 'export ADDITIONAL_ROOT_DOMAIN_NAME=$<< parameters.organization >>_ADDITIONAL_ROOT_DOMAIN_NAME' >> $BASH_ENV
@@ -1011,10 +1018,7 @@ jobs:
           name: setup kube-prometheus
           working_directory: monitoring/my-kube-prometheus
           command: |
-            go install github.com/google/go-jsonnet/cmd/jsonnet@latest
-            go install github.com/brancz/gojsontoyaml@latest
-            go install -a github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@latest
-            jb install github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@main
+            
             ./build.sh unchained-kube-promstack.jsonnet
             echo "CRD Changes: "
             kubectl diff -f manifests/setup
