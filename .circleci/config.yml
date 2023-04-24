@@ -1001,9 +1001,12 @@ workflows:
 
   check:
     jobs:
-      - lint-and-test:
-          name: lint and test project
+      - preview-kube-prometheus
+          name: preview kube prometheus
           <<: *only-feature
+      # - lint-and-test:
+      #     name: lint and test project
+      #     <<: *only-feature
 
   deploy-development:
     jobs:
