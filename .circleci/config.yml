@@ -1002,6 +1002,7 @@ workflows:
   check:
     jobs:
       - preview-kube-prometheus:
+          organization: TAXISTAKE
           name: preview kube prometheus
           <<: *only-feature
       # - lint-and-test:
