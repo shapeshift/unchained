@@ -966,12 +966,14 @@ jobs:
       - setup_remote_docker:
           version: 20.10.18
       - attach_workspace:
-          at: ~/monitoring/my-kube-prometheus
+          at: ~/
       - run:
           name: setup kube-prometheus
+          working_directory: monitoring/my-kube-prometheus
           command: |
             pwd
             ls -al
+            ls -al ~/
             go install -a github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@latest
             jb install github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@main
             ./build.sh unchained-kube-promstack.jsonnet
