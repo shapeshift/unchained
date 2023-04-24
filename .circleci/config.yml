@@ -5,6 +5,11 @@ executors:
     docker:
       - image: pulumi/pulumi-nodejs:3.50.2
 
+executors:
+  golang:
+    docker:
+      - image: golang:1.20.3-bullseye
+
 aliases:
   - &only-feature
     filters:
@@ -919,33 +924,53 @@ jobs:
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-size-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageSize << parameters.service-storage-size-3 >>
             pulumi << parameters.pulumi-command >> --suppress-outputs
 
-  # deploy-monitoring:
-  #   description: deploy unchained monitoring stack
-  #   executor: pulumi
-  #   parameters:
-  #     organization:
-  #       type: string
-  #     pulumi-command:
-  #       type: string
-  #       default: preview
-  #   steps:
-  #     - setup_remote_docker:
-  #         version: 20.10.18
-  #     - attach_workspace:
-  #         at: ~/
-  #     - pulumi-dependencies:
-  #         organization: <<parameters.organization>>
-  #     - run:
-  #         name: pulumi
-  #         working_directory: monitoring/src
-  #         command: |
-  #           pulumi stack select $<< parameters.organization >>_PULUMI_ORG/prod-us-east-2
-  #           pulumi config set --path unchained:monitoring.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies-us-east-2
-  #           pulumi config set --path unchained:monitoring.environment monitoring
-  #           pulumi config set --path unchained:monitoring.githubOrg $<< parameters.organization>>_GITHUB_ORG
-  #           pulumi config set --path unchained:monitoring.githubOauthID $<< parameters.organization>>_GITHUB_OAUTH_ID
-  #           pulumi config set --path unchained:monitoring.githubOauthSecret $<< parameters.organization>>_GITHUB_OAUTH_SECRET --plaintext
-  #           pulumi <<parameters.pulumi-command>> --suppress-outputs
+  deploy-monitoring:
+    description: deploy unchained monitoring stack
+    executor: pulumi
+    parameters:
+      organization:
+        type: string
+      pulumi-command:
+        type: string
+        default: preview
+    steps:
+      - setup_remote_docker:
+          version: 20.10.18
+      - attach_workspace:
+          at: ~/
+      - pulumi-dependencies:
+          organization: <<parameters.organization>>
+      - run:
+          name: pulumi
+          working_directory: monitoring/src
+          command: |
+            pulumi stack select $<< parameters.organization >>_PULUMI_ORG/prod-us-east-2
+            pulumi config set --path unchained:monitoring.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies-us-east-2
+            pulumi config set --path unchained:monitoring.environment monitoring
+            pulumi <<parameters.pulumi-command>> --suppress-outputs
+
+  preview-kube-prometheus:
+    description: deploy unchained monitoring stack
+    executor: golang
+    parameters:
+      organization:
+        type: string
+    steps:
+      - setup_remote_docker:
+          version: 20.10.18
+      - attach_workspace:
+          at: ~/
+      - pulumi-dependencies:
+          organization: <<parameters.organization>>
+      - run:
+          name: setup kube-prometheus
+          working_directory: monitoring/my-kube-prometheus
+          command: |
+            go install -a github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@latest
+            jb install github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@main
+            ./build.sh unchained-kube-promstack.jsonnet
+            # kubectl apply --server-side -f manifests/setup
+            # kubectl apply -f manifests/
 
   lint-and-test:
     description: lint and test project
@@ -1110,28 +1135,43 @@ workflows:
             - approve monitoring workflow
           <<: *only-develop
 
+      - preview-kube-prometheus:
+          name: preview monitoring kube-prometheus
+          organization: TAXISTAKE
+          requires:
+            # - lint and test project (persist to workplace)
+          # <<: *only-develop
+
       - deploy-monitoring:
-          name: preview monitoring
+          name: preview monitoring pulumi
           organization: TAXISTAKE
           pulumi-command: preview
           requires:
             - lint and test project (persist to workplace)
           <<: *only-develop
 
-      - approve-monitoring:
-          name: approve
-          type: approval
-          requires:
-            - preview monitoring
-          <<: *only-develop
+      # - approve-monitoring:
+      #     name: approve
+      #     type: approval
+      #     requires:
+      #       - preview monitoring
+      #     <<: *only-develop
 
-      - deploy-monitoring:
-          name: deploy monitoring
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve
-          <<: *only-develop
+      # - deploy-kube-prometheus:
+      #     name: preview monitoring kube-prometheus
+      #     organization: TAXISTAKE
+      #     dry-run: true
+      #     requires:
+      #       - approve
+      #     <<: *only-develop
+
+      # - deploy-monitoring:
+      #     name: deploy monitoring
+      #     organization: TAXISTAKE
+      #     pulumi-command: up -f --yes
+      #     requires:
+      #       - approve
+      #     <<: *only-develop
 
   deploy-main:
     jobs:
