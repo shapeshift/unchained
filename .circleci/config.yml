@@ -1017,7 +1017,9 @@ jobs:
             jb install github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@main
             ./build.sh unchained-kube-promstack.jsonnet
             kubectl config view
+            echo "Diff of manifests/setup: "
             kubectl diff -f manifests/setup
+            echo "Diff of manifests: "
             kubectl diff -f manifests/
             # kubectl apply --server-side -f manifests/setup
             # kubectl apply -f manifests/
