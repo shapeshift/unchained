@@ -654,7 +654,7 @@ commands:
           name: install tools
           command: |
             apt update
-            apt install wget unzip
+            apt install wget unzip -y
       - run:
           name: install aws-cli
           command: |
@@ -1012,6 +1012,8 @@ jobs:
             go install -a github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@latest
             jb install github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@main
             ./build.sh unchained-kube-promstack.jsonnet
+            kubectl diff -f manifests/setup
+            kubectl diff -f manifests/
             # kubectl apply --server-side -f manifests/setup
             # kubectl apply -f manifests/
 
