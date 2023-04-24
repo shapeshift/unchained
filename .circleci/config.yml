@@ -1002,7 +1002,7 @@ jobs:
             pulumi <<parameters.pulumi-command>> --suppress-outputs
 
   preview-kube-prometheus:
-    description: deploy unchained monitoring stack
+    description: preview kube-prometheus monitoring stack
     executor: golang
     parameters:
       organization:
@@ -1032,6 +1032,35 @@ jobs:
           command: |
             echo "Kube prometheus changes: "
             kubectl diff -f manifests/
+
+
+  deploy-kube-prometheus:
+    description: deploy unchained monitoring stack
+    executor: golang
+    parameters:
+      organization:
+        type: string
+    steps:
+      - setup_remote_docker:
+          version: 20.10.18
+      - attach_workspace:
+          at: ~/
+      - checkout
+      - kube-prometheus-dependencies:
+          organization: <<parameters.organization>>
+      - run:
+          name: setup kube-prometheus
+          working_directory: monitoring/my-kube-prometheus
+          command: |
+            ./build.sh unchained-kube-promstack.jsonnet
+      - run:
+          name: deploy CRD
+          working_directory: monitoring/my-kube-prometheus
+          command: kubectl apply --server-side -f manifests/setup
+      - run:
+          name: deploy Kube prometheus
+          working_directory: monitoring/my-kube-prometheus
+          command: kubectl apply --server-side -f manifests/
 
   lint-and-test:
     description: lint and test project
@@ -1064,13 +1093,9 @@ workflows:
 
   check:
     jobs:
-      - preview-kube-prometheus:
-          organization: TAXISTAKE
-          name: preview kube prometheus
+      - lint-and-test:
+          name: lint and test project
           <<: *only-feature
-      # - lint-and-test:
-      #     name: lint and test project
-      #     <<: *only-feature
 
   deploy-development:
     jobs:
@@ -1215,28 +1240,27 @@ workflows:
             - lint and test project (persist to workplace)
           <<: *only-develop
 
-      # - approve-monitoring:
-      #     name: approve
-      #     type: approval
-      #     requires:
-      #       - preview monitoring
-      #     <<: *only-develop
+      - approve-monitoring:
+          name: approve
+          type: approval
+          requires:
+            - preview monitoring
+          <<: *only-develop
 
-      # - deploy-kube-prometheus:
-      #     name: preview monitoring kube-prometheus
-      #     organization: TAXISTAKE
-      #     dry-run: true
-      #     requires:
-      #       - approve
-      #     <<: *only-develop
+      - deploy-kube-prometheus:
+          name: preview monitoring kube-prometheus
+          organization: TAXISTAKE
+          requires:
+            - approve
+          <<: *only-develop
 
-      # - deploy-monitoring:
-      #     name: deploy monitoring
-      #     organization: TAXISTAKE
-      #     pulumi-command: up -f --yes
-      #     requires:
-      #       - approve
-      #     <<: *only-develop
+      - deploy-monitoring:
+          name: deploy monitoring
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve
+          <<: *only-develop
 
   deploy-main:
     jobs:
