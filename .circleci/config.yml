@@ -967,11 +967,11 @@ jobs:
           version: 20.10.18
       - attach_workspace:
           at: ~/
-      - kube-prometheus-dependencies
       - run:
           name: setup kube-prometheus
           working_directory: monitoring/my-kube-prometheus
           command: |
+            go install -a github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@latest
             jb install github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@main
             ./build.sh unchained-kube-promstack.jsonnet
             # kubectl apply --server-side -f manifests/setup
