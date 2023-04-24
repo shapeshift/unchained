@@ -13,8 +13,8 @@ export = async (): Promise<Outputs> => {
   const coinstack = 'litecoin'
 
   const { kubeconfig, config, namespace } = await getConfig()
-  const assetName = config.network !== 'mainnet' ? `${config.assetName}-${config.network}` : config.assetName
 
+  const assetName = config.network !== 'mainnet' ? `${config.assetName}-${config.network}` : config.assetName
   const outputs: Outputs = {}
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
   const snapshots = await new Snapper({ assetName, kubeconfig, namespace }).getSnapshots()
