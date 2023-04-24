@@ -1016,10 +1016,9 @@ jobs:
             go install -a github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@latest
             jb install github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@main
             ./build.sh unchained-kube-promstack.jsonnet
-            kubectl config view
-            # echo "Diff of manifests/setup: "
-            # kubectl diff -f manifests/setup
-            echo "Changes to be applied: "
+            echo "CRD Changes: "
+            kubectl diff -f manifests/setup
+            echo "Kube prometheus changes: "
             kubectl diff -f manifests/
 
   lint-and-test:
