@@ -1035,7 +1035,7 @@ jobs:
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-size-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageSize << parameters.service-storage-size-3 >>
             pulumi << parameters.pulumi-command >> --suppress-outputs
 
-  deploy-monitoring:
+  deploy-monitoring-pulumi:
     description: deploy unchained monitoring stack
     executor: pulumi
     parameters:
@@ -1301,7 +1301,7 @@ workflows:
             - lint and test project (persist to workplace)
           <<: *only-develop
 
-      - preview-monitoring-pulumi:
+      - deploy-monitoring-pulumi:
           name: preview monitoring pulumi
           organization: TAXISTAKE
           pulumi-command: preview
