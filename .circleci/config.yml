@@ -971,6 +971,8 @@ jobs:
           name: setup kube-prometheus
           working_directory: monitoring/my-kube-prometheus
           command: |
+            pwd
+            ls -al
             go install -a github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@latest
             jb install github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@main
             ./build.sh unchained-kube-promstack.jsonnet
@@ -1147,9 +1149,9 @@ workflows:
       - preview-kube-prometheus:
           name: preview monitoring kube-prometheus
           organization: TAXISTAKE
-          # requires:
-            # - lint and test project (persist to workplace)
-          # <<: *only-develop
+          requires:
+            - lint and test project (persist to workplace)
+          <<: *only-develop
 
       - deploy-monitoring:
           name: preview monitoring pulumi
