@@ -966,10 +966,9 @@ jobs:
       - setup_remote_docker:
           version: 20.10.18
       - attach_workspace:
-          at: ~/
+          at: ~/monitoring/my-kube-prometheus
       - run:
           name: setup kube-prometheus
-          working_directory: monitoring/my-kube-prometheus
           command: |
             pwd
             ls -al
