@@ -967,7 +967,7 @@ jobs:
           version: 20.10.18
       - attach_workspace:
           at: ~/
-      - kube-prometheus-dependencies:
+      - kube-prometheus-dependencies
       - run:
           name: setup kube-prometheus
           working_directory: monitoring/my-kube-prometheus
