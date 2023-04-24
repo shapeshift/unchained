@@ -972,9 +972,8 @@ jobs:
           name: setup kube-prometheus
           working_directory: monitoring/my-kube-prometheus
           command: |
-            pwd
-            ls -al
-            ls -al ~/
+            echo $GOPATH
+            export PATH=$PATH:$(go env GOPATH)/bin
             go install -a github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@latest
             jb install github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@main
             ./build.sh unchained-kube-promstack.jsonnet
