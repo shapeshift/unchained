@@ -1232,7 +1232,7 @@ workflows:
             - lint and test project (persist to workplace)
           <<: *only-develop
 
-      - deploy-monitoring:
+      - preview-monitoring:
           name: preview monitoring pulumi
           organization: TAXISTAKE
           pulumi-command: preview
@@ -1244,11 +1244,12 @@ workflows:
           name: approve
           type: approval
           requires:
-            - preview monitoring
+            - preview monitoring kube-prometheus
+            - preview monitoring pulumi
           <<: *only-develop
 
       - deploy-kube-prometheus:
-          name: preview monitoring kube-prometheus
+          name: deploy monitoring kube-prometheus
           organization: TAXISTAKE
           requires:
             - approve
