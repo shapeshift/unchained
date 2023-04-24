@@ -6,7 +6,9 @@ This is a basic monitoring setup based on the [kube-prometheus](https://github.c
 -  `build.sh` generates the manifests from the jsonnet files
 -  We need to manually apply the manifests to the cluster
 
-All of the state is kept in the repo for visibility of the changes and to make it easy to roll back.
+The state is not kept in the repository, as it's a lot of generated yaml files.
+
+This setup works in tandem with the existing Pulumi config, and the Pulumi monitoring config should be applied directly after deploying the changes configured here.
 
 # Usage
 
