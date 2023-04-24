@@ -1001,7 +1001,7 @@ workflows:
 
   check:
     jobs:
-      - preview-kube-prometheus
+      - preview-kube-prometheus:
           name: preview kube prometheus
           <<: *only-feature
       # - lint-and-test:
