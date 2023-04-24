@@ -1301,7 +1301,7 @@ workflows:
             - lint and test project (persist to workplace)
           <<: *only-develop
 
-      - preview-monitoring:
+      - preview-monitoring-pulumi:
           name: preview monitoring pulumi
           organization: TAXISTAKE
           pulumi-command: preview
@@ -1324,8 +1324,8 @@ workflows:
             - approve
           <<: *only-develop
 
-      - deploy-monitoring:
-          name: deploy monitoring
+      - deploy-monitoring-pulumi:
+          name: deploy monitoring pulumi
           organization: TAXISTAKE
           pulumi-command: up -f --yes
           requires:
