@@ -1147,7 +1147,7 @@ workflows:
       - preview-kube-prometheus:
           name: preview monitoring kube-prometheus
           organization: TAXISTAKE
-          requires:
+          # requires:
             # - lint and test project (persist to workplace)
           # <<: *only-develop
 
