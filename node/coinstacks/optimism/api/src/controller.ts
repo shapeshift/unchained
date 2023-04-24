@@ -1,6 +1,6 @@
 import { serialize } from '@ethersproject/transactions'
+import bn from 'bignumber.js'
 import { ethers, Contract, BigNumber } from 'ethers'
-import { BigNumber as bn } from 'bignumber.js'
 import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
@@ -237,6 +237,7 @@ export class Optimism extends Controller implements BaseAPI, API {
       chainId: CHAIN_ID[NETWORK as string],
       nonce: await provider.getTransactionCount(from),
     })
+
     const l1GasLimit = ((await gpo.getL1GasUsed(unsignedTxHash)) as BigNumber).toString()
 
     return { gasLimit, l1GasLimit }
@@ -250,25 +251,18 @@ export class Optimism extends Controller implements BaseAPI, API {
    * @returns {Promise<OptimismGasFees>} current fees specified in wei
    */
   @Example<OptimismGasFees>({
-    gasPrice: '1000000',
     l1GasPrice: '25000000000',
+    gasPrice: '1000000',
+    slow: {},
+    average: {},
+    fast: {},
   })
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
   async getGasFees(): Promise<OptimismGasFees> {
-    // ethers bignumber values read from contract are stringified to be used with bignumber.js which handles floats for scalar math
-    const l1BaseFee = ((await gpo.l1BaseFee()) as BigNumber).toString()
-    const baseScalar = ((await gpo.scalar()) as BigNumber).toString()
-    const decimals = ((await gpo.decimals()) as BigNumber).toString()
-
-    // l1 gas price
-    const scalar = bn(baseScalar).div(bn(10).pow(decimals)).toFixed()
-    const l1GasPrice = bn(l1BaseFee).times(scalar).toFixed(0)
-
-    // l2 gas price
-    const { gasPrice } = await service.getGasFees()
-
-    return { gasPrice, l1GasPrice }
+    const { l1GasPrice } = (await provider.send('rollup_gasPrices', [])) as { l1GasPrice: string }
+    const gasFees = await service.getGasFees()
+    return { l1GasPrice: new bn(l1GasPrice).toFixed(0), ...gasFees }
   }
 
   /**

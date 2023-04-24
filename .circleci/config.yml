@@ -78,7 +78,7 @@ aliases:
       default: 3
     stateful-service-backup-schedule:
       type: string
-      default: "04**0" 
+      default: "0 4 * * 0" 
     service-name-1:
       type: string
       default: ""
@@ -165,7 +165,7 @@ aliases:
     service-memory-limit-1: 8Gi
     service-storage-size-1: 650Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:15c19ac
+    service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 24Gi
@@ -206,13 +206,13 @@ aliases:
     service-memory-limit-1: 32Gi
     service-storage-size-1: 2500Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.0.1
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.0.2
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 8Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:15c19ac
+    service-image-3: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
     service-memory-limit-3: 16Gi
@@ -230,6 +230,10 @@ aliases:
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
+    # “At 04:00 on Wednesday.”
+    stateful-service-backup: true
+    stateful-service-backup-schedule: "0 4 * * 3"
+    stateful-service-backup-count: 1
 
   - &cosmos
     assetName: cosmos
@@ -319,13 +323,13 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: avaplatform/avalanchego:v1.9.16
+    service-image-1: avaplatform/avalanchego:v1.10.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
     service-storage-size-1: 4000Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:15c19ac
+    service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 6Gi
@@ -366,7 +370,7 @@ aliases:
     service-memory-limit-1: 4Gi
     service-storage-size-1: 250Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:15c19ac
+    service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 6Gi
@@ -407,7 +411,7 @@ aliases:
     service-memory-limit-1: 4Gi
     service-storage-size-1: 250Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:15c19ac
+    service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 8Gi
@@ -448,7 +452,7 @@ aliases:
     service-memory-limit-1: 4Gi
     service-storage-size-1: 250Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:15c19ac
+    service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 8Gi
@@ -483,7 +487,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:chaosnet-multichain-1.108.0
+    service-image-1: registry.gitlab.com/thorchain/thornode:chaosnet-multichain-1.108.3
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 8Gi
@@ -577,18 +581,17 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/bnb-smart-chain:v1.1.22
-    service-cpu-limit-1: "8"
-    service-cpu-request-1: "4"
+    service-image-1: shapeshiftdao/bnb-smart-chain:v1.1.23
+    service-cpu-limit-1: "16"
+    service-cpu-request-1: "8"
     service-memory-limit-1: 48Gi
     service-memory-request-1: 24Gi
     service-storage-size-1: 3000Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:15c19ac
-    service-cpu-limit-2: "2"
-    service-cpu-request-2: "1"
-    service-memory-limit-2: 24Gi
-    service-memory-request-2: 12Gi
+    service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
+    service-cpu-limit-2: "4"
+    service-cpu-request-2: "2"
+    service-memory-limit-2: 12Gi
     service-storage-size-2: 750Gi
 
   - &bnbsmartchain-dev
@@ -603,6 +606,60 @@ aliases:
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
+    stateful-service-backup: true
+    stateful-service-backup-schedule: "0 4 * * 3,6"
+    stateful-service-backup-count: 2
+
+  - &polygon
+    assetName: polygon
+    pulumi-stack: public-us-east-2
+    pulumi-dir: coinstacks/polygon/pulumi
+    rpc-url: http://polygon-svc.unchained.svc.cluster.local:8545
+    indexer-url: http://polygon-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://polygon-svc.unchained.svc.cluster.local:8001/websocket
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 6
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
+    api-cpu-threshold: 30
+    api-memory-limit: 500Mi
+    stateful-service-replicas: 2
+    service-name-1: daemon
+    service-image-1: 0xpolygon/bor:0.3.7
+    service-cpu-limit-1: "4"
+    service-cpu-request-1: "2"
+    service-memory-limit-1: 32Gi
+    service-storage-size-1: 3000Gi
+    service-name-2: heimdall
+    service-image-2: 0xpolygon/heimdall:0.3.3
+    service-cpu-limit-2: "2"
+    service-cpu-request-2: "1"
+    service-memory-limit-2: 2Gi
+    service-storage-size-2: 500Gi
+    service-name-3: indexer
+    service-image-3: shapeshiftdao/unchained-blockbook:polygon-e655dd8
+    service-cpu-limit-3: "4"
+    service-cpu-request-3: "2"
+    service-memory-limit-3: 12Gi
+    service-storage-size-3: 500Gi
+
+
+  - &polygon-dev
+    <<: *polygon
+    environment: dev
+    pulumi-stack: public-dev-us-east-2
+    rpc-url: http://polygon-svc.unchained-dev.svc.cluster.local:8545
+    indexer-url: http://polygon-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://polygon-svc.unchained-dev.svc.cluster.local:8001/websocket
+    api-replicas: 1
+    api-max-replicas: 2
+    api-cpu-limit: 300m
+    api-memory-limit: 250Mi
+    stateful-service-replicas: 1
+    stateful-service-backup: true
+    stateful-service-backup-schedule: "0 4 * * 3,6"
+    stateful-service-backup-count: 2
 
 commands:
   precheck:
@@ -880,7 +937,7 @@ jobs:
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.memoryLimit << parameters.api-memory-limit >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.replicas << parameters.api-replicas >>
             [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:coinstack.statefulService.backup.count << parameters.stateful-service-backup-count >>
-            [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:coinstack.statefulService.backup.schedule << parameters.stateful-service-backup-schedule >>
+            [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:coinstack.statefulService.backup.schedule "<< parameters.stateful-service-backup-schedule >>"
             [ << parameters.stateful-service-replicas >> -gt 0 ] && pulumi config set --path unchained:coinstack.statefulService.replicas << parameters.stateful-service-replicas >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-name-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].name << parameters.service-name-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-image-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].image << parameters.service-image-1 >>
@@ -952,6 +1009,8 @@ jobs:
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.cpuRequest << parameters.api-cpu-request >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.memoryLimit << parameters.api-memory-limit >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.replicas << parameters.api-replicas >>
+            [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:coinstack.statefulService.backup.count << parameters.stateful-service-backup-count >>
+            [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:coinstack.statefulService.backup.schedule "<< parameters.stateful-service-backup-schedule >>"
             [ << parameters.stateful-service-replicas >> -gt 0 ] && pulumi config set --path unchained:coinstack.statefulService.replicas << parameters.stateful-service-replicas >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-name-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].name << parameters.service-name-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-image-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].image << parameters.service-image-1 >>
@@ -1183,6 +1242,16 @@ workflows:
           requires:
             - deploy dependencies
           <<: *bnbsmartchain-dev
+          <<: *only-develop
+
+      - deploy-coinstack-node:
+          name: deploy polygon develop
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          etherscan-env-var: ETHERSCAN_API_KEY_POLYGON
+          requires:
+            - deploy dependencies
+          <<: *polygon-dev
           <<: *only-develop
 
       - deploy-coinstack-go:
@@ -1486,6 +1555,34 @@ workflows:
           requires:
             - approve bnbsmartchain coinstack
           <<: *bnbsmartchain
+          <<: *only-main
+
+      ####### POLYGON
+      - deploy-coinstack-node:
+          name: preview polygon
+          organization: TAXISTAKE
+          pulumi-command: preview
+          etherscan-env-var: ETHERSCAN_API_KEY_POLYGON
+          requires:
+            - validate dependencies
+          <<: *polygon
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve polygon coinstack
+          type: approval
+          requires:
+            - preview polygon
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy polygon
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          etherscan-env-var: ETHERSCAN_API_KEY_POLYGON
+          requires:
+            - approve polygon coinstack
+          <<: *polygon
           <<: *only-main
 
       ####### COSMOS
