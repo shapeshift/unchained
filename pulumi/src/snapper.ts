@@ -73,42 +73,37 @@ export class Snapper {
   }
 
   protected async takeSnapshots(pvcList: Array<string>): Promise<void> {
-    try {
-      return await this.takeSnapshotInternal(pvcList)
-    } catch (err) {
-      console.error(`Could not create VolumeSnaphot:`, err)
-      return Promise.resolve()
-    }
-  }
-
-  private async takeSnapshotInternal(pvcList: Array<string>): Promise<void> {
     const timestamp = new Date()
-    await Promise.all(
+    await Promise.allSettled(
       pvcList.map(async (pvc) => {
-        const snapshotName = `${pvc}-backup-${timestamp.getTime()}`
-        console.log(`Taking snapshot of pvc ${pvc} - ${snapshotName}`)
+        try {
+          const snapshotName = `${pvc}-backup-${timestamp.getTime()}`
+          console.log(`Taking snapshot of pvc ${pvc} - ${snapshotName}`)
 
-        const snapshotYaml: VolumeSnapshot = {
-          apiVersion: 'snapshot.storage.k8s.io/v1',
-          kind: 'VolumeSnapshot',
-          metadata: {
-            name: snapshotName,
-            namespace: this.namespace,
-            labels: {
-              statefulset: this.stsName,
+          const snapshotYaml: VolumeSnapshot = {
+            apiVersion: 'snapshot.storage.k8s.io/v1',
+            kind: 'VolumeSnapshot',
+            metadata: {
+              name: snapshotName,
+              namespace: this.namespace,
+              labels: {
+                statefulset: this.stsName,
+              },
+              creationTimestamp: timestamp, // will be overwritten by k8s
             },
-            creationTimestamp: timestamp, // will be overwritten by k8s
-          },
-          spec: {
-            volumeSnapshotClassName: 'csi-aws-vsc',
-            source: {
-              persistentVolumeClaimName: pvc,
+            spec: {
+              volumeSnapshotClassName: 'csi-aws-vsc',
+              source: {
+                persistentVolumeClaimName: pvc,
+              },
             },
-          },
+          }
+
+          await this.k8sObjectApi.create(snapshotYaml)
+          console.log(`Snapshot ${snapshotName} finished`)
+        } catch (err) {
+          console.error(`Could not create VolumeSnaphot:`, err)
         }
-
-        await this.k8sObjectApi.create(snapshotYaml)
-        console.log(`Snapshot ${snapshotName} finished`)
       })
     )
   }
