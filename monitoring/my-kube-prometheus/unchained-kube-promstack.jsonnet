@@ -19,7 +19,7 @@ local kp =
         config+: {
           sections+: {
             server+: {
-              root_url: 'http://grafana.dev.unchained.com/',
+              root_url: 'https://monitoring.shapeshift.com/',
             },
           },
         },
