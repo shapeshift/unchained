@@ -75,7 +75,7 @@ export class Snapper {
   protected async takeSnapshots(pvcList: Array<string>): Promise<void> {
     const timestamp = new Date()
     try {
-      await Promise.allSettled(
+      await Promise.all(
         pvcList.map(async (pvc) => {
           const snapshotName = `${pvc}-backup-${timestamp.getTime()}`
           console.log(`Taking snapshot of pvc ${pvc} - ${snapshotName}`)
