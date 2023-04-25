@@ -695,21 +695,12 @@ commands:
             for file in $(git diff --name-only); do [[ $file == *"swagger.json" ]] && git add $file; done
             if [[ $(git diff --staged --name-only) ]]; then git commit -m "chore: update openapi spec [skip ci]"; git push origin $(git branch --show-current); fi
 
-
-  kube-prometheus-dependencies:
-    description: setup kube-prometheus
+  generic-dependencies:
+    description: setup misc tooling
     parameters:
       organization:
         type: string
     steps:
-      - run:
-          name: Setup Jsonnet
-          working_directory: monitoring/my-kube-prometheus
-          command: |
-            go install github.com/google/go-jsonnet/cmd/jsonnet@latest
-            go install github.com/brancz/gojsontoyaml@latest
-            go install -a github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@latest
-            jb install github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@main
       - run:
           name: add environment variables
           command: |
@@ -744,44 +735,36 @@ commands:
             echo [default] > ~/.aws/credentials
             echo aws_access_key_id = $<< parameters.organization >>_AWS_ACCESS_KEY_ID >> ~/.aws/credentials
             echo aws_secret_access_key = $<< parameters.organization >>_AWS_SECRET_ACCESS_KEY >> ~/.aws/credentials
+    
+
+  kube-prometheus-dependencies:
+    description: setup kube-prometheus
+    parameters:
+      organization:
+        type: string
+    steps:
+      - generic-dependencies:
+          organization: <<parameters.organization>>
+      - run:
+          name: Setup Jsonnet
+          working_directory: monitoring/my-kube-prometheus
+          command: |
+            go install github.com/google/go-jsonnet/cmd/jsonnet@latest
+            go install github.com/brancz/gojsontoyaml@latest
+            go install -a github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@latest
+            jb install github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@main
       - run:
           name: update kubeconfig
-          command: aws eks update-kubeconfig --region $AWS_REGION --name unchained-eksCluster-23ea126
+          command: aws eks update-kubeconfig --region $AWS_REGION --name $UNCHAINED_EKS_CLUSTER
         
-
   pulumi-dependencies:
     description: set up pulumi dependencies
     parameters:
       organization:
         type: string
     steps:
-      - run:
-          name: add environment variables
-          command: |
-            echo 'export ADDITIONAL_ROOT_DOMAIN_NAME=$<< parameters.organization >>_ADDITIONAL_ROOT_DOMAIN_NAME' >> $BASH_ENV
-            echo 'export PULUMI_ACCESS_TOKEN=$<< parameters.organization >>_PULUMI_ACCESS_TOKEN' >> $BASH_ENV
-      - run:
-          name: install tools
-          command: |
-            apt update
-            apt install wget unzip
-      - run:
-          name: install aws-cli
-          command: |
-            wget -O awscliv2.zip https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
-            unzip awscliv2.zip
-            ./aws/install
-      - run:
-          name: install docker cli
-          command: |
-            wget -O dockercli.deb https://download.docker.com/linux/debian/dists/buster/pool/stable/amd64/docker-ce-cli_20.10.22~3-0~debian-buster_amd64.deb
-            dpkg -i dockercli.deb
-      - run:
-          name: install kubectl
-          command: |
-            wget -O kubectl "https://dl.k8s.io/release/v1.26.0/bin/linux/amd64/kubectl"
-            chmod +x kubectl
-            mv ./kubectl /usr/local/bin/kubectl
+      - generic-dependencies:
+          organization: <<parameters.organization>>
       - run:
           name: install helm charts
           command: |
@@ -803,13 +786,6 @@ commands:
             pulumi plugin install resource aws 5.29.1
             pulumi plugin install resource kubernetes 3.23.1
             pulumi plugin install resource eks 1.0.1
-      - run:
-          name: create aws credentials file
-          command: |
-            mkdir ~/.aws
-            echo [default] > ~/.aws/credentials
-            echo aws_access_key_id = $<< parameters.organization >>_AWS_ACCESS_KEY_ID >> ~/.aws/credentials
-            echo aws_secret_access_key = $<< parameters.organization >>_AWS_SECRET_ACCESS_KEY >> ~/.aws/credentials
 
 jobs:
   deploy-dependencies:

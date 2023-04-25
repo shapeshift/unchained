@@ -8,9 +8,9 @@ local kp =
       common+: {
         namespace: 'unchained-monitoring',
       },
-      alertmanager+: {
-       config: importstr 'alertmanager-config.yaml',
-      },
+      // alertmanager+: {
+      //  config: importstr 'alertmanager-config.yaml',
+      // },
       prometheus+:: {
         // The namespaces to monitor with Prometheus.
         namespaces+: ['unchained-dev'],
