@@ -4,12 +4,9 @@ import * as pulumi from '@pulumi/pulumi'
 export interface deploymentArgs {
   namespace: pulumi.Input<string>
   domain: string
-  githubOrg: string
-  githubOauthID: string
-  githubOauthSecret: string
 }
 
-export class Deployment extends pulumi.ComponentResource {
+export class Ingress extends pulumi.ComponentResource {
   constructor(name: string, args: deploymentArgs, opts?: pulumi.ComponentResourceOptions) {
     super('grafana', name, {}, opts)
 
@@ -85,70 +82,6 @@ export class Deployment extends pulumi.ComponentResource {
         },
         spec: {
           rules: [{ host: `grafana.${args.domain}` }],
-        },
-      },
-      { ...opts }
-    )
-
-    new k8s.helm.v3.Chart(
-      `${name}-grafana`,
-      {
-        // https://github.com/grafana/helm-charts/tree/main/charts/grafana
-        chart: 'grafana',
-        repo: 'grafana',
-        namespace: args.namespace,
-        version: '6.17.6',
-        values: {
-          datasources: {
-            'datasources.yaml': {
-              apiVersion: 1,
-              datasources: [
-                {
-                  name: 'Loki',
-                  type: 'loki',
-                  url: `http://${name}-loki:3100`,
-                  access: 'proxy',
-                },
-                {
-                  name: 'Prometheus',
-                  type: 'prometheus',
-                  url: `http://${name}-prometheus-server:80`,
-                  access: 'proxy',
-                },
-              ],
-            },
-          },
-          'grafana.ini': {
-            'auth.github': {
-              enabled: true,
-              allow_sign_up: true,
-              scopes: 'user:email,read:org',
-              auth_url: 'https://github.com/login/oauth/authorize',
-              token_url: 'https://github.com/login/oauth/access_token',
-              api_url: 'https://api.github.com/user',
-              allowed_organizations: args.githubOrg,
-              client_id: args.githubOauthID,
-              client_secret: args.githubOauthSecret,
-            },
-            server: {
-              root_url: `https://grafana.${args.domain}`,
-            },
-          },
-          persistence: {
-            type: 'statefulset',
-            enabled: true,
-            size: '5Gi',
-          },
-          resources: {
-            limits: {
-              cpu: '500m',
-              memory: '1Gi',
-            },
-            requests: {
-              cpu: '500m',
-              memory: '1Gi',
-            },
-          },
         },
       },
       { ...opts }

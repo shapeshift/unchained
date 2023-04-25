@@ -3,11 +3,6 @@ import * as pulumi from '@pulumi/pulumi'
 export interface MonitoringConfig {
   stack: string
   environment: string
-  githubOauthID: string
-  githubOauthSecret: string
-  githubOrg: string
-  alerting: boolean
-  opsgenieApiKey: string
 }
 
 export interface LoopConfig {
@@ -16,6 +11,7 @@ export interface LoopConfig {
   namespace: string
   domain: string
 }
+
 export const getConfig = async (): Promise<LoopConfig> => {
   let config: MonitoringConfig
   try {
@@ -40,11 +36,6 @@ export const getConfig = async (): Promise<LoopConfig> => {
   }
 
   const missingRequiredConfig: Array<string> = []
-
-  if (!config.stack) missingRequiredConfig.push('stack')
-  if (config.alerting) {
-    if (!config.opsgenieApiKey) missingRequiredConfig.push('opsgenieApiKey')
-  }
 
   if (missingRequiredConfig.length) {
     throw new Error(
