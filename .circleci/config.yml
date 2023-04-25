@@ -752,7 +752,7 @@ commands:
             go install github.com/google/go-jsonnet/cmd/jsonnet@latest
             go install github.com/brancz/gojsontoyaml@latest
             go install -a github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@latest
-            jb install github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@main
+            jb install
       - run:
           name: update kubeconfig
           command: aws eks update-kubeconfig --region $AWS_REGION --name $UNCHAINED_EKS_CLUSTER
