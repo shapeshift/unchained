@@ -1128,12 +1128,9 @@ workflows:
 
   check:
     jobs:
-      # - lint-and-test:
-      #     name: lint and test project
-      #     <<: *only-feature
-      - preview-kube-prometheus:
-          name: preview monitoring kube-prometheus
-          organization: TAXISTAKE
+      - lint-and-test:
+          name: lint and test project
+          <<: *only-feature
 
   deploy-development:
     jobs:
