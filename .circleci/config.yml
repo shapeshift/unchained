@@ -1066,7 +1066,7 @@ jobs:
           working_directory: monitoring/my-kube-prometheus
           command: |
             echo "Kube prometheus changes: "
-            kubectl diff -f manifests/
+            kubectl diff -f manifests/ || true #For some reason this returns -1 in CI, no idea works locally
 
 
   deploy-kube-prometheus:
