@@ -74,9 +74,9 @@ export class Snapper {
 
   protected async takeSnapshots(pvcList: Array<string>): Promise<void> {
     const timestamp = new Date()
-    await Promise.allSettled(
-      pvcList.map(async (pvc) => {
-        try {
+    try {
+      await Promise.allSettled(
+        pvcList.map(async (pvc) => {
           const snapshotName = `${pvc}-backup-${timestamp.getTime()}`
           console.log(`Taking snapshot of pvc ${pvc} - ${snapshotName}`)
 
@@ -101,11 +101,11 @@ export class Snapper {
 
           await this.k8sObjectApi.create(snapshotYaml)
           console.log(`Snapshot ${snapshotName} finished`)
-        } catch (err) {
-          console.error(`Could not create VolumeSnaphot:`, err)
-        }
-      })
-    )
+        })
+      )
+    } catch (err) {
+      console.error(`Could not create VolumeSnaphot:`, err)
+    }
   }
 
   protected async removeSnapshots(retainCount: number): Promise<void> {
