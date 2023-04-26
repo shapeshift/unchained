@@ -35,15 +35,5 @@ export const getConfig = async (): Promise<LoopConfig> => {
     )
   }
 
-  const missingRequiredConfig: Array<string> = []
-
-  if (missingRequiredConfig.length) {
-    throw new Error(
-      `Missing the following configuration values from Pulumi.${pulumi.getStack()}.yaml: ${missingRequiredConfig.join(
-        ', '
-      )}`
-    )
-  }
-
   return { kubeconfig, config, namespace, domain }
 }

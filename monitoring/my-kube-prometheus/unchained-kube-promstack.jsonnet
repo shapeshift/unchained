@@ -8,21 +8,8 @@ local kp =
       common+: {
         namespace: 'unchained-monitoring',
       },
-      // alertmanager+: {
-      //  config: importstr 'alertmanager-config.yaml',
-      // },
       prometheus+:: {
-        // The namespaces to monitor with Prometheus.
-        namespaces+: ['unchained-dev'],
-      },
-      grafana+:: {
-        config+: {
-          sections+: {
-            server+: {
-              root_url: 'https://monitoring.shapeshift.com/',
-            },
-          },
-        },
+        namespaces+: ['unchained', 'unchained-dev', 'unchained-infra'],
       },
     },
     kubeStateMetrics+:: {
