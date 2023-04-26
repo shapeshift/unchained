@@ -197,13 +197,13 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.11.5
+    service-image-1: ethereum/client-go:v1.11.6
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 32Gi
     service-storage-size-1: 2500Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.0.2
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.0.3
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 8Gi
