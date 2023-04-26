@@ -30,7 +30,7 @@ export class Ingress extends pulumi.ComponentResource {
             encoding: 'PKCS1',
             size: 2048,
           },
-          dnsNames: [`monitoring.${args.domain}`],
+          dnsNames: [`grafana.${args.domain}`],
           issuerRef: {
             name: 'lets-encrypt',
             kind: 'ClusterIssuer',
@@ -53,12 +53,12 @@ export class Ingress extends pulumi.ComponentResource {
           entryPoints: ['web', 'websecure'],
           routes: [
             {
-              match: `Host(\`monitoring.${args.domain}\`)`,
+              match: `Host(\`grafana.${args.domain}\`)`,
               kind: 'Rule',
               services: [
                 {
                   kind: 'Service',
-                  name: `grafana`,
+                  name: `${name}-grafana`,
                   port: 80,
                   namespace: `${name}-monitoring`,
                 },
@@ -67,7 +67,7 @@ export class Ingress extends pulumi.ComponentResource {
           ],
           tls: {
             secretName: secretName,
-            domains: [{ main: `monitoring.${args.domain}` }],
+            domains: [{ main: `grafana.${args.domain}` }],
           },
         },
       },
@@ -81,7 +81,7 @@ export class Ingress extends pulumi.ComponentResource {
           namespace: args.namespace,
         },
         spec: {
-          rules: [{ host: `monitoring.${args.domain}` }],
+          rules: [{ host: `grafana.${args.domain}` }],
         },
       },
       { ...opts }

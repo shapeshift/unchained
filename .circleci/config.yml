@@ -1033,7 +1033,6 @@ jobs:
             pulumi stack select $<< parameters.organization >>_PULUMI_ORG/prod-us-east-2
             pulumi config set --path unchained:monitoring.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies-us-east-2
             pulumi config set --path unchained:monitoring.environment monitoring
-            pulumi config set --path unchained:monitoring.domain shapeshift.com
             pulumi <<parameters.pulumi-command>> --suppress-outputs
 
   preview-kube-prometheus:
