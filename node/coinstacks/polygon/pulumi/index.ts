@@ -63,6 +63,7 @@ export = async (): Promise<Outputs> => {
             'daemon-rpc': { port: 8545 },
             'daemon-ws': { port: 8546, pathPrefix: '/websocket', stripPathPrefix: true },
           },
+          readinessProbe: { initialDelaySeconds: 30, periodSeconds: 10, failureThreshold: 12 },
           snapshots,
         })
       }
