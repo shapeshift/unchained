@@ -935,7 +935,6 @@ jobs:
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-limit-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].memoryLimit << parameters.service-memory-limit-3 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-request-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].memoryRequest << parameters.service-memory-request-3 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-size-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageSize << parameters.service-storage-size-3 >>
-            pulumi config
             pulumi << parameters.pulumi-command >> --suppress-outputs
 
   deploy-coinstack-go:
