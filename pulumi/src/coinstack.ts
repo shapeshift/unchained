@@ -42,8 +42,19 @@ export const deployCoinstack = async (
   return {}
 }
 
-const enrichWithPulumiConfig = (csi: JointCoinServiceInput, namespace: string): JointCoinServiceInput => {
+const enrichWithPulumiConfig = (
+  csi: JointCoinServiceInput,
+  namespace: string,
+  coinstack: string,
+  config: Config
+): JointCoinServiceInput => {
   // TODO how to solve this elegantly so that we know what to apply to which service?
+  if (csi.coinServiceName == 'daemon' && coinstack == 'ethereum') {
+    csi.env = {
+      ...csi.env,
+      NETWORK: config.network,
+    }
+  }
   csi.env = {
     ...csi.env,
     L1_RPC_ENDPOINT: `http://ethereum-svc.${namespace}.svc.cluster.local:8332`,
