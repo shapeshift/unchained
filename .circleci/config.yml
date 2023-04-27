@@ -4,6 +4,9 @@ executors:
   pulumi:
     docker:
       - image: pulumi/pulumi-nodejs:3.50.2
+  golang:
+    docker:
+      - image: golang:1.20.3-bullseye
 
 aliases:
   - &only-feature
@@ -692,8 +695,8 @@ commands:
             for file in $(git diff --name-only); do [[ $file == *"swagger.json" ]] && git add $file; done
             if [[ $(git diff --staged --name-only) ]]; then git commit -m "chore: update openapi spec [skip ci]"; git push origin $(git branch --show-current); fi
 
-  pulumi-dependencies:
-    description: set up pulumi dependencies
+  generic-dependencies:
+    description: setup misc tooling
     parameters:
       organization:
         type: string
@@ -707,7 +710,7 @@ commands:
           name: install tools
           command: |
             apt update
-            apt install wget unzip
+            apt install wget unzip -y
       - run:
           name: install aws-cli
           command: |
@@ -725,6 +728,42 @@ commands:
             wget -O kubectl "https://dl.k8s.io/release/v1.26.0/bin/linux/amd64/kubectl"
             chmod +x kubectl
             mv ./kubectl /usr/local/bin/kubectl
+      - run:
+          name: create aws credentials file
+          command: |
+            mkdir ~/.aws
+            echo [default] > ~/.aws/credentials
+            echo aws_access_key_id = $<< parameters.organization >>_AWS_ACCESS_KEY_ID >> ~/.aws/credentials
+            echo aws_secret_access_key = $<< parameters.organization >>_AWS_SECRET_ACCESS_KEY >> ~/.aws/credentials
+    
+  kube-prometheus-dependencies:
+    description: setup kube-prometheus
+    parameters:
+      organization:
+        type: string
+    steps:
+      - generic-dependencies:
+          organization: <<parameters.organization>>
+      - run:
+          name: Setup Jsonnet
+          working_directory: monitoring/my-kube-prometheus
+          command: |
+            go install github.com/google/go-jsonnet/cmd/jsonnet@latest
+            go install github.com/brancz/gojsontoyaml@latest
+            go install -a github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@latest
+            jb install
+      - run:
+          name: update kubeconfig
+          command: aws eks update-kubeconfig --region $AWS_REGION --name $UNCHAINED_EKS_CLUSTER
+        
+  pulumi-dependencies:
+    description: set up pulumi dependencies
+    parameters:
+      organization:
+        type: string
+    steps:
+      - generic-dependencies:
+          organization: <<parameters.organization>>
       - run:
           name: install helm charts
           command: |
@@ -746,13 +785,6 @@ commands:
             pulumi plugin install resource aws 5.29.1
             pulumi plugin install resource kubernetes 3.23.1
             pulumi plugin install resource eks 1.0.1
-      - run:
-          name: create aws credentials file
-          command: |
-            mkdir ~/.aws
-            echo [default] > ~/.aws/credentials
-            echo aws_access_key_id = $<< parameters.organization >>_AWS_ACCESS_KEY_ID >> ~/.aws/credentials
-            echo aws_secret_access_key = $<< parameters.organization >>_AWS_SECRET_ACCESS_KEY >> ~/.aws/credentials
 
 jobs:
   deploy-dependencies:
@@ -978,7 +1010,7 @@ jobs:
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-size-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageSize << parameters.service-storage-size-3 >>
             pulumi << parameters.pulumi-command >> --suppress-outputs
 
-  deploy-monitoring:
+  deploy-monitoring-pulumi:
     description: deploy unchained monitoring stack
     executor: pulumi
     parameters:
@@ -1001,10 +1033,68 @@ jobs:
             pulumi stack select $<< parameters.organization >>_PULUMI_ORG/prod-us-east-2
             pulumi config set --path unchained:monitoring.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies-us-east-2
             pulumi config set --path unchained:monitoring.environment monitoring
-            pulumi config set --path unchained:monitoring.githubOrg $<< parameters.organization>>_GITHUB_ORG
-            pulumi config set --path unchained:monitoring.githubOauthID $<< parameters.organization>>_GITHUB_OAUTH_ID
-            pulumi config set --path unchained:monitoring.githubOauthSecret $<< parameters.organization>>_GITHUB_OAUTH_SECRET --plaintext
             pulumi <<parameters.pulumi-command>> --suppress-outputs
+
+  preview-kube-prometheus:
+    description: preview kube-prometheus monitoring stack
+    executor: golang
+    parameters:
+      organization:
+        type: string
+    steps:
+      - setup_remote_docker:
+          version: 20.10.18
+      - attach_workspace:
+          at: ~/
+      - checkout
+      - kube-prometheus-dependencies:
+          organization: <<parameters.organization>>
+      - run:
+          name: setup kube-prometheus
+          working_directory: monitoring/my-kube-prometheus
+          command: |
+            ./build.sh unchained-kube-promstack.jsonnet
+      - run:
+          name: diff CRD
+          working_directory: monitoring/my-kube-prometheus
+          command: |
+            echo "CRD Changes: "
+            kubectl diff -f manifests/setup/ || true #For some reason this returns -1 in CI, no idea works locally
+      - run:
+          name: diff Kube prometheus
+          working_directory: monitoring/my-kube-prometheus
+          command: |
+            echo "Kube prometheus changes: "
+            kubectl diff -f manifests/ || true #For some reason this returns -1 in CI, no idea works locally
+
+
+  deploy-kube-prometheus:
+    description: deploy unchained monitoring stack
+    executor: golang
+    parameters:
+      organization:
+        type: string
+    steps:
+      - setup_remote_docker:
+          version: 20.10.18
+      - attach_workspace:
+          at: ~/
+      - checkout
+      - kube-prometheus-dependencies:
+          organization: <<parameters.organization>>
+      - run:
+          name: setup kube-prometheus
+          working_directory: monitoring/my-kube-prometheus
+          command: |
+            ./build.sh unchained-kube-promstack.jsonnet
+      - run:
+          name: deploy CRD
+          working_directory: monitoring/my-kube-prometheus
+          command: kubectl apply --server-side -f manifests/setup
+      - run:
+          name: deploy Kube prometheus
+          working_directory: monitoring/my-kube-prometheus
+          command: kubectl apply --server-side -f manifests/
 
   lint-and-test:
     description: lint and test project
@@ -1179,8 +1269,15 @@ workflows:
             - approve monitoring workflow
           <<: *only-develop
 
-      - deploy-monitoring:
-          name: preview monitoring
+      - preview-kube-prometheus:
+          name: preview monitoring kube-prometheus
+          organization: TAXISTAKE
+          requires:
+            - lint and test project (persist to workplace)
+          <<: *only-develop
+
+      - deploy-monitoring-pulumi:
+          name: preview monitoring pulumi
           organization: TAXISTAKE
           pulumi-command: preview
           requires:
@@ -1191,11 +1288,19 @@ workflows:
           name: approve
           type: approval
           requires:
-            - preview monitoring
+            - preview monitoring kube-prometheus
+            - preview monitoring pulumi
           <<: *only-develop
 
-      - deploy-monitoring:
-          name: deploy monitoring
+      - deploy-kube-prometheus:
+          name: deploy monitoring kube-prometheus
+          organization: TAXISTAKE
+          requires:
+            - approve
+          <<: *only-develop
+
+      - deploy-monitoring-pulumi:
+          name: deploy monitoring pulumi
           organization: TAXISTAKE
           pulumi-command: up -f --yes
           requires:
