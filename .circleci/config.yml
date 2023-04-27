@@ -1142,20 +1142,20 @@ workflows:
           <<: *bitcoin-dev
           <<: *only-feature
 
-      ####### BITCOINCASH
-      - deploy-coinstack-node:
-          name: preview bitcoincash-dev
-          organization: TAXISTAKE
-          pulumi-command: preview
-          <<: *bitcoincash-dev
-          <<: *only-feature
-      ####### ETHEREUM
-      - deploy-coinstack-node:
-          name: preview ethereum-dev
-          organization: TAXISTAKE
-          pulumi-command: preview
-          <<: *ethereum-dev
-          <<: *only-feature
+      # ####### BITCOINCASH
+      # - deploy-coinstack-node:
+      #     name: preview bitcoincash-dev
+      #     organization: TAXISTAKE
+      #     pulumi-command: preview
+      #     <<: *bitcoincash-dev
+      #     <<: *only-feature
+      # ####### ETHEREUM
+      # - deploy-coinstack-node:
+      #     name: preview ethereum-dev
+      #     organization: TAXISTAKE
+      #     pulumi-command: preview
+      #     <<: *ethereum-dev
+      #     <<: *only-feature
 
   deploy-development:
     jobs:
