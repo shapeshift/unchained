@@ -1,4 +1,4 @@
-import { deployApi, JointCoinServiceInput, Outputs, SecretData, ServiceConfig, ServiceInput, Snapper } from '.'
+import { Config, deployApi, JointCoinServiceInput, Outputs, SecretData, ServiceConfig, ServiceInput, Snapper } from '.'
 import { getConfig } from './config'
 import { parse } from 'dotenv'
 import { createService, deployStatefulService } from './statefulService'
@@ -36,7 +36,7 @@ export const deployCoinstack = async (
   })
 
   const coinServices = aggregateCoinServiceInput(config.statefulService?.services || [], serviceInput)
-    .map((cs) => enrichWithPulumiConfig(cs, namespace))
+    .map((cs) => enrichWithPulumiConfig(cs, namespace, coinstack, config))
     .map((cs) => createService(cs, assetName, snapshots))
   await deployStatefulService(appName, assetName, provider, namespace, config, coinServices)
   return {}
@@ -55,10 +55,12 @@ const enrichWithPulumiConfig = (
       NETWORK: config.network,
     }
   }
+
   csi.env = {
     ...csi.env,
     L1_RPC_ENDPOINT: `http://ethereum-svc.${namespace}.svc.cluster.local:8332`,
   }
+
   return csi
 }
 
