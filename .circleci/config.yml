@@ -627,8 +627,8 @@ aliases:
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: 0xpolygon/bor:0.3.7
-    service-cpu-limit-1: "4"
-    service-cpu-request-1: "2"
+    service-cpu-limit-1: "8"
+    service-cpu-request-1: "4"
     service-memory-limit-1: 32Gi
     service-storage-size-1: 3000Gi
     service-name-2: heimdall
