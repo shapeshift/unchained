@@ -17,8 +17,6 @@
     "watch": "nodemon -e ts --watch src --ignore src/routes.ts -x yarn build"
   },
   "dependencies": {
-    "axios": "^0.27.2",
-    "axios-retry": "^3.2.5",
     "ws": "^8.8.0"
   },
   "devDependencies": {
