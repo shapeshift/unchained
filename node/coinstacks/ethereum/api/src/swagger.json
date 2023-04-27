@@ -316,8 +316,8 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"GasFees": {
-				"description": "Contains info about current recommended fees to use in a transaction",
+			"Fees": {
+				"description": "Contains info about legacy and/or EIP-1559 fees",
 				"properties": {
 					"gasPrice": {
 						"type": "string"
@@ -329,8 +329,36 @@
 						"type": "string"
 					}
 				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"GasFees": {
+				"description": "Contains info about current recommended fees to use in a transaction",
+				"properties": {
+					"gasPrice": {
+						"type": "string"
+					},
+					"maxFeePerGas": {
+						"type": "string"
+					},
+					"maxPriorityFeePerGas": {
+						"type": "string"
+					},
+					"slow": {
+						"$ref": "#/components/schemas/Fees"
+					},
+					"average": {
+						"$ref": "#/components/schemas/Fees"
+					},
+					"fast": {
+						"$ref": "#/components/schemas/Fees"
+					}
+				},
 				"required": [
-					"gasPrice"
+					"gasPrice",
+					"slow",
+					"average",
+					"fast"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -774,9 +802,19 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"gasPrice": "172301756423",
-											"maxFeePerGas": "342603512846",
-											"maxPriorityFeePerGas": "1000000000"
+											"gasPrice": "100000000000",
+											"slow": {
+												"maxFeePerGas": "95000000000",
+												"maxPriorityFeePerGas": "40000000"
+											},
+											"average": {
+												"maxFeePerGas": "96000000000",
+												"maxPriorityFeePerGas": "1000000000"
+											},
+											"fast": {
+												"maxFeePerGas": "100000000000",
+												"maxPriorityFeePerGas": "5000000000"
+											}
 										}
 									}
 								}

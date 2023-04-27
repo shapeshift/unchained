@@ -4,6 +4,9 @@ executors:
   pulumi:
     docker:
       - image: pulumi/pulumi-nodejs:3.50.2
+  golang:
+    docker:
+      - image: golang:1.20.3-bullseye
 
 aliases:
   - &only-feature
@@ -75,7 +78,7 @@ aliases:
       default: 3
     stateful-service-backup-schedule:
       type: string
-      default: "04**0" 
+      default: "0 4 * * 0" 
     service-name-1:
       type: string
       default: ""
@@ -162,7 +165,7 @@ aliases:
     service-memory-limit-1: 8Gi
     service-storage-size-1: 650Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:15c19ac
+    service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 24Gi
@@ -197,19 +200,19 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.11.5
+    service-image-1: ethereum/client-go:v1.11.6
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 32Gi
     service-storage-size-1: 2500Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.0.0
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.0.3
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 8Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:15c19ac
+    service-image-3: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
     service-memory-limit-3: 16Gi
@@ -227,6 +230,10 @@ aliases:
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
+    # “At 04:00 on Wednesday.”
+    stateful-service-backup: true
+    stateful-service-backup-schedule: "0 4 * * 3"
+    stateful-service-backup-count: 1
 
   - &cosmos
     assetName: cosmos
@@ -245,7 +252,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/cosmoshub:v9.0.0
+    service-image-1: shapeshiftdao/cosmoshub:v9.0.3
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 32Gi
@@ -281,7 +288,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/osmosis:v15.0.0
+    service-image-1: shapeshiftdao/osmosis:v15.1.0
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-request-1: 32Gi
@@ -316,13 +323,13 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: avaplatform/avalanchego:v1.9.16
+    service-image-1: avaplatform/avalanchego:v1.10.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
     service-storage-size-1: 4000Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:15c19ac
+    service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 6Gi
@@ -363,7 +370,7 @@ aliases:
     service-memory-limit-1: 4Gi
     service-storage-size-1: 250Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:15c19ac
+    service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 6Gi
@@ -404,7 +411,7 @@ aliases:
     service-memory-limit-1: 4Gi
     service-storage-size-1: 250Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:15c19ac
+    service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 8Gi
@@ -445,7 +452,7 @@ aliases:
     service-memory-limit-1: 4Gi
     service-storage-size-1: 250Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:15c19ac
+    service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 8Gi
@@ -480,7 +487,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:chaosnet-multichain-1.107.0
+    service-image-1: registry.gitlab.com/thorchain/thornode:chaosnet-multichain-1.108.3
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 8Gi
@@ -574,18 +581,17 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/bnb-smart-chain:v1.1.21
-    service-cpu-limit-1: "8"
-    service-cpu-request-1: "4"
+    service-image-1: shapeshiftdao/bnb-smart-chain:v1.1.23
+    service-cpu-limit-1: "16"
+    service-cpu-request-1: "8"
     service-memory-limit-1: 48Gi
     service-memory-request-1: 24Gi
     service-storage-size-1: 3000Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:15c19ac
-    service-cpu-limit-2: "2"
-    service-cpu-request-2: "1"
-    service-memory-limit-2: 24Gi
-    service-memory-request-2: 12Gi
+    service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
+    service-cpu-limit-2: "4"
+    service-cpu-request-2: "2"
+    service-memory-limit-2: 12Gi
     service-storage-size-2: 750Gi
 
   - &bnbsmartchain-dev
@@ -600,6 +606,60 @@ aliases:
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
+    stateful-service-backup: true
+    stateful-service-backup-schedule: "0 4 * * 3,6"
+    stateful-service-backup-count: 2
+
+  - &polygon
+    assetName: polygon
+    pulumi-stack: public-us-east-2
+    pulumi-dir: coinstacks/polygon/pulumi
+    rpc-url: http://polygon-svc.unchained.svc.cluster.local:8545
+    indexer-url: http://polygon-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://polygon-svc.unchained.svc.cluster.local:8001/websocket
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 6
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
+    api-cpu-threshold: 30
+    api-memory-limit: 500Mi
+    stateful-service-replicas: 2
+    service-name-1: daemon
+    service-image-1: 0xpolygon/bor:0.3.7
+    service-cpu-limit-1: "4"
+    service-cpu-request-1: "2"
+    service-memory-limit-1: 32Gi
+    service-storage-size-1: 3000Gi
+    service-name-2: heimdall
+    service-image-2: 0xpolygon/heimdall:0.3.3
+    service-cpu-limit-2: "2"
+    service-cpu-request-2: "1"
+    service-memory-limit-2: 2Gi
+    service-storage-size-2: 500Gi
+    service-name-3: indexer
+    service-image-3: shapeshiftdao/unchained-blockbook:polygon-e655dd8
+    service-cpu-limit-3: "4"
+    service-cpu-request-3: "2"
+    service-memory-limit-3: 12Gi
+    service-storage-size-3: 500Gi
+
+
+  - &polygon-dev
+    <<: *polygon
+    environment: dev
+    pulumi-stack: public-dev-us-east-2
+    rpc-url: http://polygon-svc.unchained-dev.svc.cluster.local:8545
+    indexer-url: http://polygon-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://polygon-svc.unchained-dev.svc.cluster.local:8001/websocket
+    api-replicas: 1
+    api-max-replicas: 2
+    api-cpu-limit: 300m
+    api-memory-limit: 250Mi
+    stateful-service-replicas: 1
+    stateful-service-backup: true
+    stateful-service-backup-schedule: "0 4 * * 3,6"
+    stateful-service-backup-count: 2
 
 commands:
   precheck:
@@ -635,8 +695,8 @@ commands:
             for file in $(git diff --name-only); do [[ $file == *"swagger.json" ]] && git add $file; done
             if [[ $(git diff --staged --name-only) ]]; then git commit -m "chore: update openapi spec [skip ci]"; git push origin $(git branch --show-current); fi
 
-  pulumi-dependencies:
-    description: set up pulumi dependencies
+  generic-dependencies:
+    description: setup misc tooling
     parameters:
       organization:
         type: string
@@ -650,7 +710,7 @@ commands:
           name: install tools
           command: |
             apt update
-            apt install wget unzip
+            apt install wget unzip -y
       - run:
           name: install aws-cli
           command: |
@@ -668,6 +728,42 @@ commands:
             wget -O kubectl "https://dl.k8s.io/release/v1.26.0/bin/linux/amd64/kubectl"
             chmod +x kubectl
             mv ./kubectl /usr/local/bin/kubectl
+      - run:
+          name: create aws credentials file
+          command: |
+            mkdir ~/.aws
+            echo [default] > ~/.aws/credentials
+            echo aws_access_key_id = $<< parameters.organization >>_AWS_ACCESS_KEY_ID >> ~/.aws/credentials
+            echo aws_secret_access_key = $<< parameters.organization >>_AWS_SECRET_ACCESS_KEY >> ~/.aws/credentials
+    
+  kube-prometheus-dependencies:
+    description: setup kube-prometheus
+    parameters:
+      organization:
+        type: string
+    steps:
+      - generic-dependencies:
+          organization: <<parameters.organization>>
+      - run:
+          name: Setup Jsonnet
+          working_directory: monitoring/my-kube-prometheus
+          command: |
+            go install github.com/google/go-jsonnet/cmd/jsonnet@latest
+            go install github.com/brancz/gojsontoyaml@latest
+            go install -a github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@latest
+            jb install
+      - run:
+          name: update kubeconfig
+          command: aws eks update-kubeconfig --region $AWS_REGION --name $UNCHAINED_EKS_CLUSTER
+        
+  pulumi-dependencies:
+    description: set up pulumi dependencies
+    parameters:
+      organization:
+        type: string
+    steps:
+      - generic-dependencies:
+          organization: <<parameters.organization>>
       - run:
           name: install helm charts
           command: |
@@ -689,13 +785,6 @@ commands:
             pulumi plugin install resource aws 5.29.1
             pulumi plugin install resource kubernetes 3.23.1
             pulumi plugin install resource eks 1.0.1
-      - run:
-          name: create aws credentials file
-          command: |
-            mkdir ~/.aws
-            echo [default] > ~/.aws/credentials
-            echo aws_access_key_id = $<< parameters.organization >>_AWS_ACCESS_KEY_ID >> ~/.aws/credentials
-            echo aws_secret_access_key = $<< parameters.organization >>_AWS_SECRET_ACCESS_KEY >> ~/.aws/credentials
 
 jobs:
   deploy-dependencies:
@@ -823,7 +912,7 @@ jobs:
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.memoryLimit << parameters.api-memory-limit >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.replicas << parameters.api-replicas >>
             [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:coinstack.statefulService.backup.count << parameters.stateful-service-backup-count >>
-            [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:coinstack.statefulService.backup.schedule << parameters.stateful-service-backup-schedule >>
+            [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:coinstack.statefulService.backup.schedule "<< parameters.stateful-service-backup-schedule >>"
             [ << parameters.stateful-service-replicas >> -gt 0 ] && pulumi config set --path unchained:coinstack.statefulService.replicas << parameters.stateful-service-replicas >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-name-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].name << parameters.service-name-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-image-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].image << parameters.service-image-1 >>
@@ -895,6 +984,8 @@ jobs:
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.cpuRequest << parameters.api-cpu-request >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.memoryLimit << parameters.api-memory-limit >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.replicas << parameters.api-replicas >>
+            [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:coinstack.statefulService.backup.count << parameters.stateful-service-backup-count >>
+            [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:coinstack.statefulService.backup.schedule "<< parameters.stateful-service-backup-schedule >>"
             [ << parameters.stateful-service-replicas >> -gt 0 ] && pulumi config set --path unchained:coinstack.statefulService.replicas << parameters.stateful-service-replicas >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-name-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].name << parameters.service-name-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-image-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].image << parameters.service-image-1 >>
@@ -919,7 +1010,7 @@ jobs:
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-size-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageSize << parameters.service-storage-size-3 >>
             pulumi << parameters.pulumi-command >> --suppress-outputs
 
-  deploy-monitoring:
+  deploy-monitoring-pulumi:
     description: deploy unchained monitoring stack
     executor: pulumi
     parameters:
@@ -942,10 +1033,68 @@ jobs:
             pulumi stack select $<< parameters.organization >>_PULUMI_ORG/prod-us-east-2
             pulumi config set --path unchained:monitoring.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies-us-east-2
             pulumi config set --path unchained:monitoring.environment monitoring
-            pulumi config set --path unchained:monitoring.githubOrg $<< parameters.organization>>_GITHUB_ORG
-            pulumi config set --path unchained:monitoring.githubOauthID $<< parameters.organization>>_GITHUB_OAUTH_ID
-            pulumi config set --path unchained:monitoring.githubOauthSecret $<< parameters.organization>>_GITHUB_OAUTH_SECRET --plaintext
             pulumi <<parameters.pulumi-command>> --suppress-outputs
+
+  preview-kube-prometheus:
+    description: preview kube-prometheus monitoring stack
+    executor: golang
+    parameters:
+      organization:
+        type: string
+    steps:
+      - setup_remote_docker:
+          version: 20.10.18
+      - attach_workspace:
+          at: ~/
+      - checkout
+      - kube-prometheus-dependencies:
+          organization: <<parameters.organization>>
+      - run:
+          name: setup kube-prometheus
+          working_directory: monitoring/my-kube-prometheus
+          command: |
+            ./build.sh unchained-kube-promstack.jsonnet
+      - run:
+          name: diff CRD
+          working_directory: monitoring/my-kube-prometheus
+          command: |
+            echo "CRD Changes: "
+            kubectl diff -f manifests/setup/ || true #For some reason this returns -1 in CI, no idea works locally
+      - run:
+          name: diff Kube prometheus
+          working_directory: monitoring/my-kube-prometheus
+          command: |
+            echo "Kube prometheus changes: "
+            kubectl diff -f manifests/ || true #For some reason this returns -1 in CI, no idea works locally
+
+
+  deploy-kube-prometheus:
+    description: deploy unchained monitoring stack
+    executor: golang
+    parameters:
+      organization:
+        type: string
+    steps:
+      - setup_remote_docker:
+          version: 20.10.18
+      - attach_workspace:
+          at: ~/
+      - checkout
+      - kube-prometheus-dependencies:
+          organization: <<parameters.organization>>
+      - run:
+          name: setup kube-prometheus
+          working_directory: monitoring/my-kube-prometheus
+          command: |
+            ./build.sh unchained-kube-promstack.jsonnet
+      - run:
+          name: deploy CRD
+          working_directory: monitoring/my-kube-prometheus
+          command: kubectl apply --server-side -f manifests/setup
+      - run:
+          name: deploy Kube prometheus
+          working_directory: monitoring/my-kube-prometheus
+          command: kubectl apply --server-side -f manifests/
 
   lint-and-test:
     description: lint and test project
@@ -1070,6 +1219,16 @@ workflows:
           <<: *bnbsmartchain-dev
           <<: *only-develop
 
+      - deploy-coinstack-node:
+          name: deploy polygon develop
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          etherscan-env-var: ETHERSCAN_API_KEY_POLYGON
+          requires:
+            - deploy dependencies
+          <<: *polygon-dev
+          <<: *only-develop
+
       - deploy-coinstack-go:
           name: deploy cosmos develop
           organization: TAXISTAKE
@@ -1110,8 +1269,15 @@ workflows:
             - approve monitoring workflow
           <<: *only-develop
 
-      - deploy-monitoring:
-          name: preview monitoring
+      - preview-kube-prometheus:
+          name: preview monitoring kube-prometheus
+          organization: TAXISTAKE
+          requires:
+            - lint and test project (persist to workplace)
+          <<: *only-develop
+
+      - deploy-monitoring-pulumi:
+          name: preview monitoring pulumi
           organization: TAXISTAKE
           pulumi-command: preview
           requires:
@@ -1122,11 +1288,19 @@ workflows:
           name: approve
           type: approval
           requires:
-            - preview monitoring
+            - preview monitoring kube-prometheus
+            - preview monitoring pulumi
           <<: *only-develop
 
-      - deploy-monitoring:
-          name: deploy monitoring
+      - deploy-kube-prometheus:
+          name: deploy monitoring kube-prometheus
+          organization: TAXISTAKE
+          requires:
+            - approve
+          <<: *only-develop
+
+      - deploy-monitoring-pulumi:
+          name: deploy monitoring pulumi
           organization: TAXISTAKE
           pulumi-command: up -f --yes
           requires:
@@ -1357,6 +1531,34 @@ workflows:
           requires:
             - approve bnbsmartchain coinstack
           <<: *bnbsmartchain
+          <<: *only-main
+
+      ####### POLYGON
+      - deploy-coinstack-node:
+          name: preview polygon
+          organization: TAXISTAKE
+          pulumi-command: preview
+          etherscan-env-var: ETHERSCAN_API_KEY_POLYGON
+          requires:
+            - validate dependencies
+          <<: *polygon
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve polygon coinstack
+          type: approval
+          requires:
+            - preview polygon
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy polygon
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          etherscan-env-var: ETHERSCAN_API_KEY_POLYGON
+          requires:
+            - approve polygon coinstack
+          <<: *polygon
           <<: *only-main
 
       ####### COSMOS

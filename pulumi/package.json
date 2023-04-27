@@ -9,7 +9,7 @@
     "clean": "rm -rf dist node_modules"
   },
   "dependencies": {
-    "@shapeshiftoss/cluster-launcher": "^0.16.0",
+    "@shapeshiftoss/cluster-launcher": "^0.17.0",
     "axios": "^0.27.2",
     "dotenv": "^16.0.3",
     "folder-hash": "^4.0.2",

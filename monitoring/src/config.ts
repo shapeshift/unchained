@@ -3,11 +3,6 @@ import * as pulumi from '@pulumi/pulumi'
 export interface MonitoringConfig {
   stack: string
   environment: string
-  githubOauthID: string
-  githubOauthSecret: string
-  githubOrg: string
-  alerting: boolean
-  opsgenieApiKey: string
 }
 
 export interface LoopConfig {
@@ -16,6 +11,7 @@ export interface LoopConfig {
   namespace: string
   domain: string
 }
+
 export const getConfig = async (): Promise<LoopConfig> => {
   let config: MonitoringConfig
   try {
@@ -30,27 +26,12 @@ export const getConfig = async (): Promise<LoopConfig> => {
   const kubeconfig = (await stackReference.getOutputValue('kubeconfig')) as string
   const namespaces = (await stackReference.getOutputValue('namespaces')) as Array<string>
   const defaultNamespace = (await stackReference.getOutputValue('defaultNamespace')) as string
-  const domain = (await stackReference.getOutputValue('rootDomainName')) as string
+  const domain = process.env.ADDITIONAL_ROOT_DOMAIN_NAME as string
 
   const namespace = config.environment ? `${defaultNamespace}-${config.environment}` : defaultNamespace
   if (!namespaces.includes(namespace)) {
     throw new Error(
       `Error: environment: ${config.environment} not found in cluster. Either remove to use default environment or verify environment exists`
-    )
-  }
-
-  const missingRequiredConfig: Array<string> = []
-
-  if (!config.stack) missingRequiredConfig.push('stack')
-  if (config.alerting) {
-    if (!config.opsgenieApiKey) missingRequiredConfig.push('opsgenieApiKey')
-  }
-
-  if (missingRequiredConfig.length) {
-    throw new Error(
-      `Missing the following configuration values from Pulumi.${pulumi.getStack()}.yaml: ${missingRequiredConfig.join(
-        ', '
-      )}`
     )
   }
 

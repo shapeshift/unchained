@@ -14,7 +14,7 @@ export = async (): Promise<Outputs> => {
 
   const { kubeconfig, config, namespace } = await getConfig()
 
-  const assetName = config.network !== 'mainnet' ? `${coinstack}-${config.network}` : coinstack
+  const assetName = config.network !== 'mainnet' ? `${config.assetName}-${config.network}` : config.assetName
   const outputs: Outputs = {}
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
   const snapshots = await new Snapper({ assetName, kubeconfig, namespace }).getSnapshots()
@@ -59,7 +59,7 @@ export = async (): Promise<Outputs> => {
         prev[service.name] = createService({
           assetName,
           config: service,
-          env: { SNAPSHOT: 'https://pub-c0627345c16f47ab858c9469133073a8.r2.dev/geth-20230326.tar.lz4' },
+          env: { SNAPSHOT: 'https://pub-c0627345c16f47ab858c9469133073a8.r2.dev/geth-20230409.tar.lz4' },
           ports: {
             'daemon-rpc': { port: 8545 },
             'daemon-ws': { port: 8546, pathPrefix: '/websocket', stripPathPrefix: true },
