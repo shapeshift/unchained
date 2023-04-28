@@ -2,7 +2,6 @@ import { readFileSync } from 'fs'
 import { deployCoinstack } from '../../../../pulumi/src/coinstack'
 import { CoinstackType } from '../../../../pulumi/src/hash'
 import { Outputs, ServiceInput } from '../../../../pulumi/src'
-import "
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
