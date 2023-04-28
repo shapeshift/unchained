@@ -10,7 +10,8 @@ export const deployCoinstack = async (
   coinstack: string,
   serviceInput: ServiceInput[],
   sampleEnv: Buffer,
-  coinstackType: CoinstackType
+  coinstackType: CoinstackType,
+  volumes?: Array<k8s.types.input.core.v1.Volume>
 ): Promise<Outputs> => {
   const { kubeconfig, config, namespace } = await getConfig()
 
@@ -38,7 +39,7 @@ export const deployCoinstack = async (
   const coinServices = aggregateCoinServiceInput(config.statefulService?.services || [], serviceInput)
     .map((cs) => enrichWithPulumiConfig(cs, namespace, coinstack, config))
     .map((cs) => createService(cs, assetName, snapshots))
-  await deployStatefulService(appName, assetName, provider, namespace, config, coinServices)
+  await deployStatefulService(appName, assetName, provider, namespace, config, coinServices, volumes)
   return {}
 }
 
