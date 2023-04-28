@@ -7,7 +7,7 @@ import { Outputs, ServiceInput } from '../../../../pulumi/src'
 export = async (): Promise<Outputs> => {
   const appName = 'unchained'
   const coinstack = 'cosmos'
-  const sampleEnv = readFileSync('../sample.env')
+  const sampleEnv = readFileSync('../../../cmd/cosmos/sample.env')
   const coinServiceInput: ServiceInput[] = [
     {
       coinServiceName: 'daemon',
