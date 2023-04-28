@@ -24,6 +24,9 @@ const handleError = (err: unknown): ApiError => {
   return new ApiError('Internal Server Error', 500, 'unknown error')
 }
 
+const exponentialDelay = async (retryCount: number) =>
+  new Promise((resolve) => setTimeout(resolve, axiosRetry.exponentialDelay(retryCount)))
+
 export interface ServiceArgs {
   blockbook: Blockbook
   explorerApiKey?: string
@@ -304,7 +307,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     }
   }
 
-  async handleBlock(hash: string): Promise<Array<BlockbookTx>> {
+  async handleBlock(hash: string, retryCount = 0): Promise<Array<BlockbookTx>> {
     const request: RPCRequest = {
       jsonrpc: '2.0',
       id: `eth_getBlockByHash-${hash}`,
@@ -315,7 +318,14 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     const { data } = await axios.post<RPCResponse>(this.rpcUrl, request)
 
     if (data.error) throw new Error(`failed to get block: ${hash}: ${data.error.message}`)
-    if (!data.result) throw new Error(`failed to get block: ${hash}: ${JSON.stringify(data)}`)
+
+    // retry if no results are returned, this typically means we queried a node that hasn't indexed the data yet
+    if (!data.result) {
+      if (retryCount >= 5) throw new Error(`failed to get block: ${hash}: ${JSON.stringify(data)}`)
+      retryCount++
+      await exponentialDelay(retryCount)
+      return this.handleBlock(hash, retryCount)
+    }
 
     const block = data.result as NodeBlock
 
@@ -386,7 +396,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     return t
   }
 
-  private async fetchInternalTxsTrace(txid: string): Promise<Array<InternalTx> | undefined> {
+  private async fetchInternalTxsTrace(txid: string, retryCount = 0): Promise<Array<InternalTx> | undefined> {
     const request: RPCRequest = {
       jsonrpc: '2.0',
       id: `traceTransaction${txid}`,
@@ -397,7 +407,14 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     const { data } = await axios.post<RPCResponse>(this.rpcUrl, request)
 
     if (data.error) throw new Error(`failed to get internalTransactions for txid: ${txid}: ${data.error.message}`)
-    if (!data.result) throw new Error(`failed to get internalTransactions for txid: ${txid}`)
+
+    // retry if no results are returned, this typically means we queried a node that hasn't indexed the data yet
+    if (!data.result) {
+      if (retryCount >= 5) throw new Error(`failed to get internalTransactions for txid: ${txid}`)
+      retryCount++
+      await exponentialDelay(retryCount)
+      return this.fetchInternalTxsTrace(txid, retryCount)
+    }
 
     const callStack = data.result as CallStack
 

@@ -18,10 +18,10 @@ if [ ! -d "$CHAINDATA_DIR" ]; then
     geth init --datadir $DATA_DIR genesis.json
 fi
 
-# replace peers
-PEERS=$(curl -s https://api.binance.org/v2/discovery/peers | jq -c .peers)
+# add static peers
+PEERS=$(curl -s https://api.binance.org/v1/discovery/peers | jq -r '.peers | @csv')
 if [[ -n "$PEERS" && "$PEERS" != "null" ]]; then
-  sed -i -e "s|StaticNodes.*|StaticNodes = $PEERS|" config.toml
+  sed -i -e "s|StaticNodes = \[|StaticNodes = [$PEERS,|" config.toml
 fi
 
 # hard reset existing peers
@@ -59,7 +59,7 @@ start() {
     --ws.api eth,net,web3,debug,txpool,parlia \
     --ws.origins '*' \
     --syncmode full \
-    --maxpeers 500 \
+    --maxpeers 200 \
     --rpc.allow-unprotected-txs \
     --txlookuplimit 0 \
     --cache 8000 \

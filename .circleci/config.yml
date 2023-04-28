@@ -628,8 +628,8 @@ aliases:
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: 0xpolygon/bor:0.3.7
-    service-cpu-limit-1: "4"
-    service-cpu-request-1: "2"
+    service-cpu-limit-1: "8"
+    service-cpu-request-1: "4"
     service-memory-limit-1: 32Gi
     service-storage-size-1: 3000Gi
     service-name-2: heimdall
@@ -829,8 +829,10 @@ jobs:
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[3] r6i.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[4] r6id.4xlarge
             pulumi config set --path unchained:common.eks.traefik.autoscaling.enabled true
-            pulumi config set --path unchained:common.eks.traefik.autoscaling.cpuThreshold 20
+            pulumi config set --path unchained:common.eks.traefik.autoscaling.memoryThreshold 50
+            pulumi config set --path unchained:common.eks.traefik.autoscaling.cpuThreshold 80
             pulumi config set --path unchained:common.eks.traefik.autoscaling.maxReplicas 20
+            pulumi config set --path unchained:common.eks.traefik.autoscaling.minReplicas 5
             pulumi config set --path unchained:common.eks.traefik.replicas 5
             pulumi config set --path unchained:common.eks.traefik.resources.cpu 300m
             pulumi config set --path unchained:common.eks.traefik.resources.memory 512Mi
