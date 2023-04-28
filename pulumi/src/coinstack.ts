@@ -49,10 +49,61 @@ const enrichWithPulumiConfig = (
   config: Config
 ): JointCoinServiceInput => {
   // TODO how to solve this elegantly so that we know what to apply to which service?
+
+  if (csi.coinServiceName == 'daemon' && coinstack == 'thorchain') {
+    csi.env = {
+      ...csi.env,
+      CHAIN_ID: `${coinstack}-${config.network}-v1`,
+      NET: config.network,
+    }
+  }
+
   if (csi.coinServiceName == 'daemon' && coinstack == 'ethereum') {
     csi.env = {
       ...csi.env,
       NETWORK: config.network,
+    }
+  }
+
+  if (csi.coinServiceName == 'daemon' && coinstack == 'bnbsmartchain') {
+    csi.env = {
+      ...csi.env,
+      SNAPSHOT: 'https://pub-c0627345c16f47ab858c9469133073a8.r2.dev/geth-20230409.tar.lz4',
+    }
+  }
+
+  if (csi.coinServiceName == 'daemon' && coinstack == 'dogecoin') {
+    csi.env = {
+      ...csi.env,
+      NETWORK: config.network,
+    }
+  }
+
+  if (csi.coinServiceName == 'daemon' && coinstack == 'bitcoin') {
+    csi.env = {
+      ...csi.env,
+      NETWORK: config.network,
+    }
+  }
+
+  if (csi.coinServiceName == 'daemon' && coinstack == 'bitcoincash') {
+    csi.env = {
+      ...csi.env,
+      NETWORK: config.network,
+    }
+  }
+
+  if (csi.coinServiceName == 'heimdall' && coinstack == 'polygon') {
+    csi.env = {
+      ...csi.env,
+      ETH_RPC_URL: `http://ethereum-svc.${namespace}.svc.cluster.local:8332`,
+    }
+  }
+
+  if (csi.coinServiceName == 'dtl' && coinstack == 'optimism') {
+    csi.env = {
+      ...csi.env,
+      L1_RPC_ENDPOINT: `http://ethereum-svc.${namespace}.svc.cluster.local:8332`,
     }
   }
 
