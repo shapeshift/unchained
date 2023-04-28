@@ -69,7 +69,7 @@ const getNodeCoinstackHash = async (coinstack: string, buildArgs: Record<string,
 // creates a hash of the content included in the final build image
 const getGoCoinstackHash = async (coinstack: string, buildArgs: Record<string, string>): Promise<string> => {
   const hash = createHash('sha1')
-  const goBasePath = '${__dirname}/../../go'
+  const goBasePath = `${__dirname}/../../go`
 
   // hash go module files
   const { hash: unchainedHash } = await hashElement(goBasePath, {
@@ -114,14 +114,14 @@ const getGoCoinstackHash = async (coinstack: string, buildArgs: Record<string, s
   hash.update(pkgHash)
 
   // hash contents of coinstack
-  const { hash: coinstackHash } = await hashElement(`${goBasePath}/${coinstack}`, {
+  const { hash: coinstackHash } = await hashElement(`${goBasePath}/coinstacks/${coinstack}`, {
     folders: { exclude: ['.*', '*'] },
     files: { include: ['*.go'] },
   })
   hash.update(coinstackHash)
 
   // hash contents of coinstack api
-  const { hash: coinstackApiHash } = await hashElement(`${goBasePath}/${coinstack}/api`, {
+  const { hash: coinstackApiHash } = await hashElement(`${goBasePath}/coinstacks/${coinstack}/api`, {
     folders: { include: ['**'], exclude: ['.*'] },
     files: { include: ['*.go', '*.json'] },
   })

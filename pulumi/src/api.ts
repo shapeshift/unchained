@@ -31,9 +31,10 @@ export interface DeployApiArgs {
 }
 
 const getbuildAndPushImageArgs = (coinstackType: CoinstackType) => {
+  console.log('Getting args')
   switch (coinstackType) {
     case CoinstackType.GO:
-      return { context: `../go`, dockerFile: `../build/Dockerfile` }
+      return { context: '../../../', dockerFile: '../../../build/Dockerfile' }
     case CoinstackType.NODE:
       return { context: `../api` }
   }
