@@ -6,7 +6,7 @@ import { Outputs, ServiceInput } from '../../../../pulumi/src'
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
   const appName = 'unchained'
-  const coinstack = 'litecoin'
+  const coinstack = 'ethereum'
   const sampleEnv = readFileSync('../sample.env')
   const coinServiceInput: ServiceInput[] = [
     {

@@ -108,11 +108,6 @@ const enrichWithPulumiConfig = (
     }
   }
 
-  csi.env = {
-    ...csi.env,
-    L1_RPC_ENDPOINT: `http://ethereum-svc.${namespace}.svc.cluster.local:8332`,
-  }
-
   return csi
 }
 
