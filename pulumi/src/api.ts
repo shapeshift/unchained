@@ -31,7 +31,6 @@ export interface DeployApiArgs {
 }
 
 const getbuildAndPushImageArgs = (coinstackType: CoinstackType) => {
-  console.log('Getting args')
   switch (coinstackType) {
     case CoinstackType.GO:
       return { context: '../../../', dockerFile: '../../../build/Dockerfile' }
@@ -83,8 +82,6 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
     if (baseImageName) cacheFroms.push(baseImageName)
 
     imageName = `${image}:${tag}` // configured dockerhub image
-
-    console.log(`ImageName: ${imageName}`)
 
     if (!(await hasTag(image, tag))) {
       console.log(`Building and pushing ${imageName}...`)
