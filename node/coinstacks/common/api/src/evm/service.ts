@@ -6,9 +6,10 @@ import { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
 import { ApiError, BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
 import { Account, API, TokenBalance, Tx, TxHistory, GasFees, InternalTx, GasEstimate } from './models'
-import { Cursor, NodeBlock, CallStack, ExplorerApiResponse, ExplorerInternalTx, FeeHistory } from './types'
+import { Cursor, NodeBlock, CallStack, ExplorerApiResponse, ExplorerInternalTx } from './types'
 import { formatAddress, handleError } from './utils'
 import { validatePageSize } from '../utils'
+import { GasOracle } from './gasOracle'
 
 axiosRetry(axios, { retries: 5, retryDelay: axiosRetry.exponentialDelay })
 
@@ -17,6 +18,7 @@ const exponentialDelay = async (retryCount: number) =>
 
 export interface ServiceArgs {
   blockbook: Blockbook
+  gasOracle: GasOracle
   explorerApiKey?: string
   explorerApiUrl: string
   logger: Logger
@@ -26,6 +28,7 @@ export interface ServiceArgs {
 
 export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   private readonly blockbook: Blockbook
+  private readonly gasOracle: GasOracle
   private readonly explorerApiKey?: string
   private readonly explorerApiUrl: string
   private readonly logger: Logger
@@ -34,11 +37,14 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
   constructor(args: ServiceArgs) {
     this.blockbook = args.blockbook
+    this.gasOracle = args.gasOracle
     this.explorerApiKey = args.explorerApiKey
     this.explorerApiUrl = args.explorerApiUrl
     this.logger = args.logger.child({ namespace: ['service'] })
     this.provider = args.provider
     this.rpcUrl = args.rpcUrl
+
+    this.gasOracle.start()
   }
 
   async getAccount(pubkey: string): Promise<Account> {
@@ -199,95 +205,116 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
   async getGasFees(): Promise<GasFees> {
     try {
-      // average fees over 20 blocks at the specified percentiles
-      const totalBlocks = 20
-
       // fetch legacy gas price estimate from the node
       const gasPrice = (await this.provider.send('eth_gasPrice', [])) as string
 
       // fetch maxPriorityFeePerGas estimate from the node
       const maxPriorityFeePerGas = (await this.provider.send('eth_maxPriorityFeePerGas', [])) as string
 
-      // get latest block to check for existence of baseFeePerGas to determine eip1559 support
-      const block = (await this.provider.send('eth_getBlockByNumber', ['pending', false])) as { baseFeePerGas?: string }
-
-      const eip1559Fees = await (async () => {
-        if (!block?.baseFeePerGas) return {}
-
-        // fetch fee history for the last 20 blocks and with maxPriorityFeePerGas reported at the 1st, 60th, and 90th percentiles (slow, average, fast)
-        const feeHistory = (await this.provider.send('eth_feeHistory', [
-          totalBlocks,
-          'latest',
-          [1, 60, 90],
-        ])) as FeeHistory
-
-        const oldestBlock = Number(feeHistory.oldestBlock)
-        const latestBlock = oldestBlock + totalBlocks
-
-        // hex -> big number
-        const blockHistory = []
-        for (let i = oldestBlock; i < latestBlock; i++) {
-          const index = i - oldestBlock
-          blockHistory.push({
-            number: i,
-            baseFeePerGas: new BigNumber(feeHistory.baseFeePerGas[index]),
-            gasUsedRatio: new BigNumber(feeHistory.gasUsedRatio[index]),
-            maxPriorityFeePerGas: feeHistory.reward[index].map((r) => new BigNumber(r)),
-          })
-          console.log(i, feeHistory.reward[index].length)
-        }
-
-        const baseFee = await (async () => {
-          try {
-            // avalanche returns the latest block for 'pending', use eth_baseFee instead for accurate base fee
-            const baseFee = (await this.provider.send('eth_baseFee', [])) as string
-            return baseFee
-          } catch (err) {
-            // no eth_baseFee support, use pending block
-            return
-          }
-        })()
-
-        // baseFeePerGas for pending block as determined by network
-        const baseFeePerGas = baseFee ? new BigNumber(baseFee) : new BigNumber(block.baseFeePerGas)
-
-        const avg = (arr: Array<BigNumber>): BigNumber => {
-          const sum = arr.reduce((a, b) => a.plus(b), new BigNumber(0))
-          return sum.div(arr.length).integerValue(BigNumber.ROUND_FLOOR)
-        }
-
-        const slowPriorityFee = avg(blockHistory.map((block) => block.maxPriorityFeePerGas[0]))
-        const averagePriorityFee = avg(blockHistory.map((block) => block.maxPriorityFeePerGas[1]))
-        const fastPriorityFee = avg(blockHistory.map((block) => block.maxPriorityFeePerGas[2]))
-
-        return {
-          baseFeePerGas: baseFeePerGas.toFixed(0),
-          slow: {
-            maxFeePerGas: slowPriorityFee.plus(baseFeePerGas).toFixed(0),
-            maxPriorityFeePerGas: slowPriorityFee.toFixed(0),
-          },
-          average: {
-            maxFeePerGas: averagePriorityFee.plus(baseFeePerGas).toFixed(0),
-            maxPriorityFeePerGas: averagePriorityFee.toFixed(0),
-          },
-          fast: {
-            maxFeePerGas: fastPriorityFee.plus(baseFeePerGas).toFixed(0),
-            maxPriorityFeePerGas: fastPriorityFee.toFixed(0),
-          },
-        }
-      })()
+      const estimatedFees = await this.gasOracle.estimateFees([1, 60, 90])
 
       return {
-        gasPrice: new BigNumber(gasPrice).toFixed(0),
-        baseFeePerGas: eip1559Fees.baseFeePerGas,
-        maxPriorityFeePerGas: new BigNumber(maxPriorityFeePerGas).toFixed(0),
-        slow: { ...eip1559Fees?.slow },
-        average: { ...eip1559Fees?.average },
-        fast: { ...eip1559Fees?.fast },
+        gasPrice: Number(gasPrice).toString(),
+        baseFeePerGas: this.gasOracle.getBaseFeePerGas(),
+        maxPriorityFeePerGas: Number(maxPriorityFeePerGas).toString(),
+        slow: estimatedFees['1'],
+        average: estimatedFees['60'],
+        fast: estimatedFees['90'],
       }
     } catch (err) {
       throw new ApiError('Internal Server Error', 500, JSON.stringify(err))
     }
+    //try {
+    //  // average fees over 20 blocks at the specified percentiles
+    //  const totalBlocks = 20
+
+    //  // fetch legacy gas price estimate from the node
+    //  const gasPrice = (await this.provider.send('eth_gasPrice', [])) as string
+
+    //  // fetch maxPriorityFeePerGas estimate from the node
+    //  const maxPriorityFeePerGas = (await this.provider.send('eth_maxPriorityFeePerGas', [])) as string
+
+    //  // get latest block to check for existence of baseFeePerGas to determine eip1559 support
+    //  const block = (await this.provider.send('eth_getBlockByNumber', ['pending', false])) as { baseFeePerGas?: string }
+
+    //  const eip1559Fees = await (async () => {
+    //    if (!block?.baseFeePerGas) return {}
+
+    //    // fetch fee history for the last 20 blocks and with maxPriorityFeePerGas reported at the 1st, 60th, and 90th percentiles (slow, average, fast)
+    //    const feeHistory = (await this.provider.send('eth_feeHistory', [
+    //      totalBlocks,
+    //      'latest',
+    //      [1, 60, 90],
+    //    ])) as FeeHistory
+
+    //    const oldestBlock = Number(feeHistory.oldestBlock)
+    //    const latestBlock = oldestBlock + totalBlocks
+
+    //    // hex -> big number
+    //    const blockHistory = []
+    //    for (let i = oldestBlock; i < latestBlock; i++) {
+    //      const index = i - oldestBlock
+    //      blockHistory.push({
+    //        number: i,
+    //        baseFeePerGas: new BigNumber(feeHistory.baseFeePerGas[index]),
+    //        gasUsedRatio: new BigNumber(feeHistory.gasUsedRatio[index]),
+    //        maxPriorityFeePerGas: feeHistory.reward[index].map((r) => new BigNumber(r)),
+    //      })
+    //    }
+
+    //    //console.log({ blockHistory })
+
+    //    const baseFee = await (async () => {
+    //      try {
+    //        // avalanche returns the latest block for 'pending', use eth_baseFee instead for accurate base fee
+    //        const baseFee = (await this.provider.send('eth_baseFee', [])) as string
+    //        return baseFee
+    //      } catch (err) {
+    //        // no eth_baseFee support, use pending block
+    //        return
+    //      }
+    //    })()
+
+    //    // baseFeePerGas for pending block as determined by network
+    //    const baseFeePerGas = baseFee ? new BigNumber(baseFee) : new BigNumber(block.baseFeePerGas)
+
+    //    const avg = (arr: Array<BigNumber>): BigNumber => {
+    //      const sum = arr.reduce((a, b) => a.plus(b), new BigNumber(0))
+    //      return sum.div(arr.length).integerValue(BigNumber.ROUND_FLOOR)
+    //    }
+
+    //    const slowPriorityFee = avg(blockHistory.map((block) => block.maxPriorityFeePerGas[0]))
+    //    const averagePriorityFee = avg(blockHistory.map((block) => block.maxPriorityFeePerGas[1]))
+    //    const fastPriorityFee = avg(blockHistory.map((block) => block.maxPriorityFeePerGas[2]))
+
+    //    return {
+    //      baseFeePerGas: baseFeePerGas.toFixed(0),
+    //      slow: {
+    //        maxFeePerGas: slowPriorityFee.plus(baseFeePerGas).toFixed(0),
+    //        maxPriorityFeePerGas: slowPriorityFee.toFixed(0),
+    //      },
+    //      average: {
+    //        maxFeePerGas: averagePriorityFee.plus(baseFeePerGas).toFixed(0),
+    //        maxPriorityFeePerGas: averagePriorityFee.toFixed(0),
+    //      },
+    //      fast: {
+    //        maxFeePerGas: fastPriorityFee.plus(baseFeePerGas).toFixed(0),
+    //        maxPriorityFeePerGas: fastPriorityFee.toFixed(0),
+    //      },
+    //    }
+    //  })()
+
+    //  return {
+    //    gasPrice: new BigNumber(gasPrice).toFixed(0),
+    //    baseFeePerGas: eip1559Fees.baseFeePerGas,
+    //    maxPriorityFeePerGas: new BigNumber(maxPriorityFeePerGas).toFixed(0),
+    //    slow: { ...eip1559Fees?.slow },
+    //    average: { ...eip1559Fees?.average },
+    //    fast: { ...eip1559Fees?.fast },
+    //  }
+    //} catch (err) {
+    //  throw new ApiError('Internal Server Error', 500, JSON.stringify(err))
+    //}
   }
 
   async sendTx(body: SendTxBody): Promise<string> {

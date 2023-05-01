@@ -12,6 +12,7 @@ import {
 } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { API, Account, GasFees, Tx, TxHistory, GasEstimate } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { Service } from '../../../common/api/src/evm/service'
+import { GasOracle } from '../../../common/api/src/evm/gasOracle'
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
@@ -30,11 +31,13 @@ export const logger = new Logger({
   level: process.env.LOG_LEVEL,
 })
 
-export const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
-export const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
+const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
+const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
+export const gasOracle = new GasOracle({ logger, provider })
 
 export const service = new Service({
   blockbook,
+  gasOracle,
   explorerApiKey: ETHERSCAN_API_KEY,
   explorerApiUrl: 'https://api.etherscan.io/api',
   provider,
@@ -204,21 +207,21 @@ export class Ethereum extends Controller implements BaseAPI, API {
    *
    * @returns {Promise<GasFees>} current fees specified in wei
    */
-  @Example<GasFees>({
-    gasPrice: '100000000000',
-    slow: {
-      maxFeePerGas: '95000000000',
-      maxPriorityFeePerGas: '40000000',
-    },
-    average: {
-      maxFeePerGas: '96000000000',
-      maxPriorityFeePerGas: '1000000000',
-    },
-    fast: {
-      maxFeePerGas: '100000000000',
-      maxPriorityFeePerGas: '5000000000',
-    },
-  })
+  //@Example<GasFees>({
+  //  gasPrice: '100000000000',
+  //  slow: {
+  //    maxFeePerGas: '95000000000',
+  //    maxPriorityFeePerGas: '40000000',
+  //  },
+  //  average: {
+  //    maxFeePerGas: '96000000000',
+  //    maxPriorityFeePerGas: '1000000000',
+  //  },
+  //  fast: {
+  //    maxFeePerGas: '100000000000',
+  //    maxPriorityFeePerGas: '5000000000',
+  //  },
+  //})
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
   async getGasFees(): Promise<GasFees> {

@@ -11,7 +11,7 @@ export interface GasEstimate {
  * Contains info about legacy and/or EIP-1559 fees
  */
 export interface Fees {
-  gasPrice?: string
+  gasPrice: string
   maxFeePerGas?: string
   maxPriorityFeePerGas?: string
 }

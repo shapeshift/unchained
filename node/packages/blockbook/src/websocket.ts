@@ -12,7 +12,7 @@ export interface Subscription {
 
 export interface Args {
   transactionHandler: TransactionHandler
-  blockHandler: BlockHandler
+  blockHandler: BlockHandler | Array<BlockHandler>
 }
 
 export interface Options {
@@ -30,7 +30,7 @@ export class WebsocketClient {
   private retries = 0
 
   private handleTransaction: TransactionHandler
-  private handleBlock: BlockHandler
+  private handleBlock: BlockHandler | Array<BlockHandler>
 
   private readonly pingInterval: number
   private readonly retryAttempts = 5
@@ -114,7 +114,14 @@ export class WebsocketClient {
       if (!res.data) return
 
       if (res.id === 'newBlock' && 'hash' in res.data) {
-        await this.handleBlock(res.data)
+        const newBlock = res.data
+        if (Array.isArray(this.handleBlock)) {
+          for (const handleBlock of this.handleBlock) {
+            await handleBlock(newBlock)
+          }
+        } else {
+          await this.handleBlock(res.data)
+        }
       }
 
       if (res.id === 'newTx' && 'txid' in res.data) {
