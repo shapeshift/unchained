@@ -30,8 +30,8 @@ export const logger = new Logger({
   level: process.env.LOG_LEVEL,
 })
 
-const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
-const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
+export const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
+export const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
 
 export const service = new Service({
   blockbook,

@@ -2,27 +2,15 @@ import axios from 'axios'
 import axiosRetry from 'axios-retry'
 import BigNumber from 'bignumber.js'
 import { ethers } from 'ethers'
-import { ApiError as BlockbookApiError, Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
+import { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
 import { ApiError, BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
 import { Account, API, TokenBalance, Tx, TxHistory, GasFees, InternalTx, GasEstimate } from './models'
 import { Cursor, NodeBlock, CallStack, ExplorerApiResponse, ExplorerInternalTx, FeeHistory } from './types'
-import { formatAddress } from './utils'
+import { formatAddress, handleError } from './utils'
 import { validatePageSize } from '../utils'
 
 axiosRetry(axios, { retries: 5, retryDelay: axiosRetry.exponentialDelay })
-
-const handleError = (err: unknown): ApiError => {
-  if (err instanceof BlockbookApiError) {
-    return new ApiError(err.response?.statusText ?? 'Internal Server Error', err.response?.status ?? 500, err.message)
-  }
-
-  if (err instanceof Error) {
-    return new ApiError('Internal Server Error', 500, err.message)
-  }
-
-  return new ApiError('Internal Server Error', 500, 'unknown error')
-}
 
 const exponentialDelay = async (retryCount: number) =>
   new Promise((resolve) => setTimeout(resolve, axiosRetry.exponentialDelay(retryCount)))
@@ -48,7 +36,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     this.blockbook = args.blockbook
     this.explorerApiKey = args.explorerApiKey
     this.explorerApiUrl = args.explorerApiUrl
-    this.logger = args.logger
+    this.logger = args.logger.child({ namespace: ['service'] })
     this.provider = args.provider
     this.rpcUrl = args.rpcUrl
   }
@@ -214,8 +202,11 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       // average fees over 20 blocks at the specified percentiles
       const totalBlocks = 20
 
-      // fetch legacy gas price
+      // fetch legacy gas price estimate from the node
       const gasPrice = (await this.provider.send('eth_gasPrice', [])) as string
+
+      // fetch maxPriorityFeePerGas estimate from the node
+      const maxPriorityFeePerGas = (await this.provider.send('eth_maxPriorityFeePerGas', [])) as string
 
       // get latest block to check for existence of baseFeePerGas to determine eip1559 support
       const block = (await this.provider.send('eth_getBlockByNumber', ['pending', false])) as { baseFeePerGas?: string }
@@ -243,6 +234,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
             gasUsedRatio: new BigNumber(feeHistory.gasUsedRatio[index]),
             maxPriorityFeePerGas: feeHistory.reward[index].map((r) => new BigNumber(r)),
           })
+          console.log(i, feeHistory.reward[index].length)
         }
 
         const baseFee = await (async () => {
@@ -269,6 +261,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
         const fastPriorityFee = avg(blockHistory.map((block) => block.maxPriorityFeePerGas[2]))
 
         return {
+          baseFeePerGas: baseFeePerGas.toFixed(0),
           slow: {
             maxFeePerGas: slowPriorityFee.plus(baseFeePerGas).toFixed(0),
             maxPriorityFeePerGas: slowPriorityFee.toFixed(0),
@@ -284,11 +277,10 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
         }
       })()
 
-      // TODO: percentile estimations for gasPrice
       return {
         gasPrice: new BigNumber(gasPrice).toFixed(0),
-        maxFeePerGas: eip1559Fees?.average?.maxFeePerGas,
-        maxPriorityFeePerGas: eip1559Fees?.average?.maxPriorityFeePerGas,
+        baseFeePerGas: eip1559Fees.baseFeePerGas,
+        maxPriorityFeePerGas: new BigNumber(maxPriorityFeePerGas).toFixed(0),
         slow: { ...eip1559Fees?.slow },
         average: { ...eip1559Fees?.average },
         fast: { ...eip1559Fees?.fast },

@@ -333,12 +333,12 @@
 				"additionalProperties": false
 			},
 			"GasFees": {
-				"description": "Contains info about current recommended fees to use in a transaction",
+				"description": "Contains info about current recommended fees to use in a transaction.\nEstimates for slow, average and fast confirmation speeds provided as well.",
 				"properties": {
 					"gasPrice": {
 						"type": "string"
 					},
-					"maxFeePerGas": {
+					"baseFeePerGas": {
 						"type": "string"
 					},
 					"maxPriorityFeePerGas": {
