@@ -329,16 +329,19 @@
 						"type": "string"
 					}
 				},
+				"required": [
+					"gasPrice"
+				],
 				"type": "object",
 				"additionalProperties": false
 			},
 			"GasFees": {
-				"description": "Contains info about current recommended fees to use in a transaction",
+				"description": "Contains info about current recommended fees to use in a transaction.\nEstimates for slow, average and fast confirmation speeds provided as well.",
 				"properties": {
 					"gasPrice": {
 						"type": "string"
 					},
-					"maxFeePerGas": {
+					"baseFeePerGas": {
 						"type": "string"
 					},
 					"maxPriorityFeePerGas": {
@@ -796,25 +799,6 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/GasFees"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"gasPrice": "27000000000",
-											"slow": {
-												"maxFeePerGas": "28000000000",
-												"maxPriorityFeePerGas": "1000000000"
-											},
-											"average": {
-												"maxFeePerGas": "30000000000",
-												"maxPriorityFeePerGas": "4500000000"
-											},
-											"fast": {
-												"maxFeePerGas": "33000000000",
-												"maxPriorityFeePerGas": "6300000000"
-											}
-										}
-									}
 								}
 							}
 						}

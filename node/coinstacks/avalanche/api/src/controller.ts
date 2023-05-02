@@ -10,7 +10,7 @@ import {
   SendTxBody,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { API, Account, GasFees, Tx, TxHistory, GasEstimate } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
+import { API, Account, GasFees, Tx, TxHistory, GasEstimate, GasOracle } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { Service } from '../../../common/api/src/evm/service'
 
 const INDEXER_URL = process.env.INDEXER_URL
@@ -30,9 +30,11 @@ export const logger = new Logger({
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
+export const gasOracle = new GasOracle({ logger, provider, coinstack: 'avalanche' })
 
 export const service = new Service({
   blockbook,
+  gasOracle,
   explorerApiUrl: 'https://api.snowtrace.io/api',
   provider,
   logger,
@@ -199,21 +201,21 @@ export class Avalanche extends Controller implements BaseAPI, API {
    *
    * @returns {Promise<GasFees>} current fees specified in wei
    */
-  @Example<GasFees>({
-    gasPrice: '27000000000',
-    slow: {
-      maxFeePerGas: '28000000000',
-      maxPriorityFeePerGas: '1000000000',
-    },
-    average: {
-      maxFeePerGas: '30000000000',
-      maxPriorityFeePerGas: '4500000000',
-    },
-    fast: {
-      maxFeePerGas: '33000000000',
-      maxPriorityFeePerGas: '6300000000',
-    },
-  })
+  //@Example<GasFees>({
+  //  gasPrice: '27000000000',
+  //  slow: {
+  //    maxFeePerGas: '28000000000',
+  //    maxPriorityFeePerGas: '1000000000',
+  //  },
+  //  average: {
+  //    maxFeePerGas: '30000000000',
+  //    maxPriorityFeePerGas: '4500000000',
+  //  },
+  //  fast: {
+  //    maxFeePerGas: '33000000000',
+  //    maxPriorityFeePerGas: '6300000000',
+  //  },
+  //})
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
   async getGasFees(): Promise<GasFees> {
