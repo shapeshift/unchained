@@ -65,8 +65,7 @@ export interface ServiceConfig {
   storageSize: string
 }
 
-export interface ServiceArgs {
-  coinServiceName: string
+export interface CoinServiceArgs extends ServiceConfig {
   ports?: Record<string, Port>
   command?: Array<string>
   args?: Array<string>

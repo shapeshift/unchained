@@ -1,11 +1,10 @@
 import * as k8s from '@pulumi/kubernetes'
 import { readFileSync } from 'fs'
-import { Config, Service } from '.'
+import { Config, Service, CoinServiceArgs } from '.'
 import { deployReaperCron } from './reaperCron'
 import { VolumeSnapshot } from './snapper'
-import { JointCoinServiceInput } from './coinstack'
 
-export function createService(config: JointCoinServiceInput, assetName: string, snapshots: VolumeSnapshot[]): Service {
+export function createCoinService(config: CoinServiceArgs, assetName: string, snapshots: VolumeSnapshot[]): Service {
   const name = `${assetName}-${config.name}`
 
   const ports = Object.entries(config.ports ?? []).map(([name, port]) => ({ name, ...port }))

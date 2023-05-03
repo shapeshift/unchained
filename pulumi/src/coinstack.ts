@@ -1,10 +1,8 @@
-import { Config, deployApi, Outputs, ServiceConfig, ServiceArgs, Snapper } from '.'
+import { CoinServiceArgs, Config, deployApi, Outputs, Snapper } from '.'
 import { parse } from 'dotenv'
-import { createService, deployStatefulService } from './statefulService'
+import { createCoinService, deployStatefulService } from './statefulService'
 import * as k8s from '@pulumi/kubernetes'
 import { CoinstackType } from './hash'
-
-export interface JointCoinServiceInput extends ServiceArgs, ServiceConfig {}
 
 export const deployCoinstack = async (
   kubeconfig: string,
@@ -12,7 +10,7 @@ export const deployCoinstack = async (
   namespace: string,
   appName: string,
   coinstack: string,
-  serviceArgs: ServiceArgs[],
+  coinServiceArgs: CoinServiceArgs[],
   sampleEnv: Buffer,
   coinstackType: CoinstackType,
   volumes?: Array<k8s.types.input.core.v1.Volume>
@@ -38,25 +36,9 @@ export const deployCoinstack = async (
     provider,
   })
 
-  const coinServices = aggregateCoinServiceInput(config.statefulService?.services || [], serviceArgs).map((cs) =>
-    createService(cs, assetName, snapshots)
-  )
+  const coinServices = coinServiceArgs.map((coinServiceArg) => createCoinService(coinServiceArg, assetName, snapshots))
   await deployStatefulService(appName, assetName, provider, namespace, config, coinServices, volumes)
   return {}
-}
-
-// Join the config set in the Pulumi config with the typescript input from the coinstack
-const aggregateCoinServiceInput = (
-  services: ServiceConfig[],
-  coinServiceInput: ServiceArgs[]
-): JointCoinServiceInput[] => {
-  return services.reduce<JointCoinServiceInput[]>((acc, configInput) => {
-    const serviceInput = coinServiceInput.find((svc) => svc.coinServiceName === configInput.name)
-    if (serviceInput) {
-      acc.push({ ...configInput, ...serviceInput })
-    }
-    return acc
-  }, [])
 }
 
 const getSecretData = (sampleEnv: Buffer): Record<string, string> => {
