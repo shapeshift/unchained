@@ -313,15 +313,9 @@ export async function deployStatefulService(
       { provider }
     )
 
-    const additionalRootDomainName = process.env.ADDITIONAL_ROOT_DOMAIN_NAME
-
     const match = (service: Service, prefix?: string) => {
       const pathPrefixMatch = prefix ? ` && PathPrefix(\`${prefix}\`)` : ''
-      const hostMatch = `(Host(\`${domain(service)}\`)${pathPrefixMatch})`
-      const additionalHostMatch = `(Host(\`${
-        config.environment ? `${config.environment}-${service}` : service
-      }.${assetName}.${additionalRootDomainName}\`)${pathPrefixMatch})`
-      return additionalRootDomainName ? `${hostMatch} || ${additionalHostMatch}` : hostMatch
+      return `(Host(\`${domain(service)}\`)${pathPrefixMatch})`
     }
 
     const middleware = new k8s.apiextensions.CustomResource(

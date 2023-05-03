@@ -65,7 +65,6 @@ get your pulumi access token
 
 ```
 ROOT_DOMAIN_NAME=**
-ADDITIONAL_ROOT_DOMAIN_NAME=**
 PULUMI_ORG=**
 PULUMI_ACCESS_TOKEN=**
 AWS_ACCESS_KEY_ID=**
