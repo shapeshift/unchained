@@ -14,6 +14,7 @@ export = async (): Promise<Outputs> => {
       case 'daemon':
         return {
           ...service,
+          dataDir: '/root',
           ports: {
             'daemon-api': { port: 1317, pathPrefix: '/lcd', stripPathPrefix: true },
             'daemon-rpc': { port: 26657, pathPrefix: '/rpc', stripPathPrefix: true },
@@ -22,7 +23,7 @@ export = async (): Promise<Outputs> => {
       default:
         throw new Error('coinService not supported')
     }
-  }) || []
+  })
 
-  return await deployCoinstack(kubeconfig, config, namespace, appName, coinstack, coinServiceArgs, sampleEnv, 'go')
+  return await deployCoinstack(kubeconfig, config, namespace, appName, coinstack, sampleEnv, 'go', coinServiceArgs)
 }

@@ -15,14 +15,14 @@ export = async (): Promise<Outputs> => {
         return {
           ...service,
           dataDir: '/root',
+          env: {
+            CHAIN_ID: `${coinstack}-${config.network}-v1`,
+            NET: config.network,
+          },
           ports: {
             'daemon-api': { port: 1317, pathPrefix: '/lcd', stripPathPrefix: true },
             'daemon-rpc': { port: 27147, pathPrefix: '/rpc', stripPathPrefix: true },
           },
-          env: {
-            CHAIN_ID: `${coinstack}-${config.network}-v1`,
-            NET: config.network,
-          }
         }
       case 'indexer':
         return {
@@ -49,9 +49,9 @@ export = async (): Promise<Outputs> => {
       default:
         throw new Error('coinService not supported')
     }
-  }) || []
+  })
 
   const volumes = [{ name: 'dshm', emptyDir: { medium: 'Memory', sizeLimit: '1Gi' } }]
 
-  return await deployCoinstack(kubeconfig, config, namespace, appName, coinstack, coinServiceArgs, sampleEnv, 'go', volumes)
+  return await deployCoinstack(kubeconfig, config, namespace, appName, coinstack, sampleEnv, 'go', volumes, coinServiceArgs)
 }

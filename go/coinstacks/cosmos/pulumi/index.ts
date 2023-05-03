@@ -23,7 +23,7 @@ export = async (): Promise<Outputs> => {
       default:
         throw new Error('coinService not supported')
     }
-  }) || []
+  })
 
-  return await deployCoinstack(kubeconfig, config, namespace, appName, coinstack, coinServiceArgs, sampleEnv, 'go')
+  return await deployCoinstack(kubeconfig, config, namespace, appName, coinstack, sampleEnv, 'go', coinServiceArgs)
 }

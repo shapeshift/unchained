@@ -10,10 +10,10 @@ export const deployCoinstack = async (
   namespace: string,
   appName: string,
   coinstack: string,
-  coinServiceArgs: CoinServiceArgs[],
   sampleEnv: Buffer,
   coinstackType: CoinstackType,
-  volumes?: Array<k8s.types.input.core.v1.Volume>
+  volumes?: Array<k8s.types.input.core.v1.Volume>,
+  coinServiceArgs?: CoinServiceArgs[]
 ): Promise<Outputs> => {
   const assetName = config.network !== 'mainnet' ? `${config.assetName}-${config.network}` : config.assetName
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
@@ -36,7 +36,8 @@ export const deployCoinstack = async (
     provider,
   })
 
-  const coinServices = coinServiceArgs.map((coinServiceArg) => createCoinService(coinServiceArg, assetName, snapshots))
+  const coinServices =
+    coinServiceArgs?.map((coinServiceArg) => createCoinService(coinServiceArg, assetName, snapshots)) || []
   await deployStatefulService(appName, assetName, provider, namespace, config, coinServices, volumes)
   return {}
 }
