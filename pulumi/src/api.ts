@@ -44,7 +44,7 @@ const getbuildAndPushImageArgs = (coinstackType: CoinstackType) => {
 const getContainer = (coinstackType: CoinstackType, coinstack: string) => {
   switch (coinstackType) {
     case 'go':
-      return { container: { args: ['-swagger', 'swagger.json'] } }
+      return { args: ['-swagger', 'swagger.json'] }
     case 'node':
       return { command: ['node', `dist/${coinstack}/api/src/app.js`] }
     default:
