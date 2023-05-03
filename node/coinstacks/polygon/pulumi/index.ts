@@ -1,12 +1,13 @@
 import { readFileSync } from 'fs'
 import { deployCoinstack } from '../../../../pulumi/src/coinstack'
-import { Outputs, ServiceArgs } from '../../../../pulumi/src'
+import { Outputs, ServiceArgs, getConfig } from '../../../../pulumi/src'
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
   const appName = 'unchained'
   const coinstack = 'polygon'
   const sampleEnv = readFileSync('../sample.env')
+  const { kubeconfig, config, namespace } = await getConfig()
 
   const coinServiceInput: ServiceArgs[] = [
     {
@@ -45,5 +46,5 @@ export = async (): Promise<Outputs> => {
     },
   ]
 
-  return await deployCoinstack(appName, coinstack, coinServiceInput, sampleEnv, 'node')
+  return await deployCoinstack(kubeconfig, config, namespace, appName, coinstack, coinServiceInput, sampleEnv, 'node')
 }

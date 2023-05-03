@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs'
 import { deployCoinstack } from '../../../../pulumi/src/coinstack'
-import { Outputs, ServiceArgs } from '../../../../pulumi/src'
+import { Outputs, ServiceArgs, getConfig } from '../../../../pulumi/src'
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
@@ -40,5 +40,5 @@ export = async (): Promise<Outputs> => {
 
   const volumes = [{ name: 'dshm', emptyDir: { medium: 'Memory', sizeLimit: '1Gi' } }]
 
-  return await deployCoinstack(appName, coinstack, coinServiceInput, sampleEnv, 'go', volumes)
+  return await deployCoinstack(kubeconfig, config, namespace, appName, coinstack, coinServiceInput, sampleEnv, 'go', volumes)
 }

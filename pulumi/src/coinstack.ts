@@ -1,11 +1,13 @@
 import { Config, deployApi, JointCoinServiceInput, Outputs, ServiceConfig, ServiceArgs, Snapper } from '.'
-import { getConfig } from './config'
 import { parse } from 'dotenv'
 import { createService, deployStatefulService } from './statefulService'
 import * as k8s from '@pulumi/kubernetes'
 import { CoinstackType } from './hash'
 
 export const deployCoinstack = async (
+  kubeconfig: string,
+  config: Config,
+  namespace: string,
   appName: string,
   coinstack: string,
   serviceArgs: ServiceArgs[],
@@ -13,8 +15,6 @@ export const deployCoinstack = async (
   coinstackType: CoinstackType,
   volumes?: Array<k8s.types.input.core.v1.Volume>
 ): Promise<Outputs> => {
-  const { kubeconfig, config, namespace } = await getConfig()
-
   const assetName = config.network !== 'mainnet' ? `${config.assetName}-${config.network}` : config.assetName
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
   const secretData = getSecretData(sampleEnv)
