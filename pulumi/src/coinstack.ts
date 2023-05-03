@@ -1,4 +1,4 @@
-import { Config, deployApi, JointCoinServiceInput, Outputs, ServiceConfig, ServiceArgs, Snapper } from '.'
+import { Config, deployApi, Outputs, ServiceConfig, ServiceArgs, Snapper } from '.'
 import { parse } from 'dotenv'
 import { createService, deployStatefulService } from './statefulService'
 import * as k8s from '@pulumi/kubernetes'
