@@ -7,6 +7,7 @@ export = async (): Promise<Outputs> => {
   const appName = 'unchained'
   const coinstack = 'thorchain'
   const sampleEnv = readFileSync('../../../cmd/thorchain/sample.env')
+  const { kubeconfig, config, namespace } = await getConfig()
   const coinServiceInput: ServiceArgs[] = [
     {
       coinServiceName: 'daemon',
@@ -15,6 +16,10 @@ export = async (): Promise<Outputs> => {
         'daemon-api': { port: 1317, pathPrefix: '/lcd', stripPathPrefix: true },
         'daemon-rpc': { port: 27147, pathPrefix: '/rpc', stripPathPrefix: true },
       },
+      env: {
+        CHAIN_ID: `${coinstack}-${config.network}-v1`,
+        NET: config.network,
+      }
     },
     {
       coinServiceName: 'indexer',

@@ -25,6 +25,9 @@ export = async (): Promise<Outputs> => {
         'heimdall-api': { port: 1317, pathPrefix: '/lcd', stripPathPrefix: true },
         'heimdall-rpc': { port: 26657, pathPrefix: '/rpc', stripPathPrefix: true },
       },
+      env: {
+        ETH_RPC_URL: `http://ethereum-svc.${namespace}.svc.cluster.local:8332`,
+      },
     },
     {
       coinServiceName: 'indexer',

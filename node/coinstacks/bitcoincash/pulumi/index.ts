@@ -12,6 +12,9 @@ export = async (): Promise<Outputs> => {
     {
       coinServiceName: 'daemon',
       ports: { 'daemon-rpc': { port: 8332 } },
+      env: {
+        NETWORK: config.network,
+      },
     },
     {
       coinServiceName: 'indexer',

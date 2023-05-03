@@ -17,6 +17,9 @@ export = async (): Promise<Outputs> => {
         'daemon-ws': { port: 8546, pathPrefix: '/websocket', stripPathPrefix: true },
       },
       readinessProbe: { initialDelaySeconds: 30, periodSeconds: 10, failureThreshold: 12 },
+      env: {
+        SNAPSHOT: 'https://pub-c0627345c16f47ab858c9469133073a8.r2.dev/geth-20230409.tar.lz4',
+      },
     },
     {
       coinServiceName: 'indexer',

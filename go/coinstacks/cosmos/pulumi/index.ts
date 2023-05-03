@@ -7,6 +7,7 @@ export = async (): Promise<Outputs> => {
   const appName = 'unchained'
   const coinstack = 'cosmos'
   const sampleEnv = readFileSync('../../../cmd/cosmos/sample.env')
+  const { kubeconfig, config, namespace } = await getConfig()
   const coinServiceInput: ServiceArgs[] = [
     {
       coinServiceName: 'daemon',

@@ -78,8 +78,6 @@ export interface ServiceArgs {
   livenessProbe?: k8s.types.input.core.v1.Probe
 }
 
-export interface JointCoinServiceInput extends ServiceArgs, ServiceConfig {}
-
 export interface Service {
   name: string
   ports: Array<
