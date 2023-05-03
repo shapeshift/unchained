@@ -18,5 +18,5 @@ export = async (): Promise<Outputs> => {
     },
   ]
 
-  return await deployCoinstack(appName, coinstack, coinServiceInput, sampleEnv, CoinstackType.GO)
+  return await deployCoinstack(appName, coinstack, coinServiceInput, sampleEnv, 'go')
 }

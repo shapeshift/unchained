@@ -40,5 +40,5 @@ export = async (): Promise<Outputs> => {
 
   const volumes = [{ name: 'dshm', emptyDir: { medium: 'Memory', sizeLimit: '1Gi' } }]
 
-  return await deployCoinstack(appName, coinstack, coinServiceInput, sampleEnv, CoinstackType.GO, volumes)
+  return await deployCoinstack(appName, coinstack, coinServiceInput, sampleEnv, 'go', volumes)
 }
