@@ -1,6 +1,5 @@
 import * as k8s from '@pulumi/kubernetes'
 import { ApiConfig } from './api'
-import * as pulumi from '@pulumi/pulumi'
 
 export * from './config'
 export * from './api'
@@ -93,7 +92,3 @@ export interface Service {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Outputs = Record<string, any>
-
-export type SecretData = pulumi.Input<{
-  [key: string]: pulumi.Input<string>
-}>

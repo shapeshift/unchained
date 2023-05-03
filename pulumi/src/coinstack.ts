@@ -1,4 +1,4 @@
-import { Config, deployApi, JointCoinServiceInput, Outputs, SecretData, ServiceConfig, ServiceArgs, Snapper } from '.'
+import { Config, deployApi, JointCoinServiceInput, Outputs, ServiceConfig, ServiceArgs, Snapper } from '.'
 import { getConfig } from './config'
 import { parse } from 'dotenv'
 import { createService, deployStatefulService } from './statefulService'
@@ -125,7 +125,7 @@ const aggregateCoinServiceInput = (
   }, [])
 }
 
-const getSecretData = (sampleEnv: Buffer): SecretData => {
+const getSecretData = (sampleEnv: Buffer): Record<string, string> => {
   const missingKeys: Array<string> = []
   const stringData = Object.keys(parse(sampleEnv)).reduce((prev, key) => {
     const value = process.env[key]
