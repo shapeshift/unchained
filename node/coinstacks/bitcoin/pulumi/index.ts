@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs'
 import { deployCoinstack } from '../../../../pulumi/src/coinstack'
-import { Outputs, ServiceArgs, getConfig } from '../../../../pulumi/src'
+import { CoinServiceArgs, Outputs, getConfig } from '../../../../pulumi/src'
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
@@ -9,7 +9,7 @@ export = async (): Promise<Outputs> => {
   const sampleEnv = readFileSync('../sample.env')
   const { kubeconfig, config, namespace } = await getConfig()
 
-  const serviceArgs = config.statefulService?.services?.map((service): ServiceArgs => {
+  const coinServiceArgs = config.statefulService?.services?.map((service): CoinServiceArgs => {
     switch (service.name) {
       case 'daemon':
         return {
@@ -43,5 +43,5 @@ export = async (): Promise<Outputs> => {
     }
   })
 
-  return await deployCoinstack(kubeconfig, config, namespace, appName, coinstack, sampleEnv, 'node', serviceArgs)
+  return await deployCoinstack(kubeconfig, config, namespace, appName, coinstack, sampleEnv, 'node', coinServiceArgs)
 }

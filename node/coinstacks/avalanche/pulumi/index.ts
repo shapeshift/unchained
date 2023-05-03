@@ -44,5 +44,5 @@ export = async (): Promise<Outputs> => {
     }
   })
 
-  return await deployCoinstack(kubeconfig, config, namespace, appName, coinstack, coinsampleEnv, 'node', serviceArgs)
+  return await deployCoinstack(kubeconfig, config, namespace, appName, coinstack, sampleEnv, 'node', coinServiceArgs)
 }
