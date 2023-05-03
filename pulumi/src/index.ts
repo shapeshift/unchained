@@ -66,9 +66,9 @@ export interface ServiceConfig {
   storageSize: string
 }
 
-export interface ServiceInput {
+export interface ServiceArgs {
   coinServiceName: string
-  ports: Record<string, Port>
+  ports?: Record<string, Port>
   command?: Array<string>
   args?: Array<string>
   env?: Record<string, string>
@@ -79,7 +79,7 @@ export interface ServiceInput {
   livenessProbe?: k8s.types.input.core.v1.Probe
 }
 
-export interface JointCoinServiceInput extends ServiceInput, ServiceConfig {}
+export interface JointCoinServiceInput extends ServiceArgs, ServiceConfig {}
 
 export interface Service {
   name: string

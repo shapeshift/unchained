@@ -6,6 +6,8 @@ import * as k8s from '@pulumi/kubernetes'
 
 export type CoinstackType = 'go' | 'node'
 
+const rootDir = `${__dirname}/../..`
+
 export const secretEnvs = (assetName: string, sampleEnv: Buffer) =>
   Object.keys(parse(sampleEnv)).map<k8s.types.input.core.v1.EnvVar>((key) => ({
     name: key,
@@ -30,12 +32,12 @@ export const getCoinstackHash = async (
 // creates a hash of the content included in the final build image
 const getNodeCoinstackApiHash = async (coinstack: string, buildArgs: Record<string, string>): Promise<string> => {
   const hash = createHash('sha1')
-  const nodeBasePath = `${__dirname}/../../node`
+  const nodeBasePath = `${rootDir}/node`
 
   // hash root level unchained files
-  const { hash: unchainedHash } = await hashElement(nodeBasePath, {
+  const { hash: unchainedHash } = await hashElement(rootDir, {
     folders: { exclude: ['.*', '*'] },
-    files: { include: ['package.json', 'lerna.json'] },
+    files: { include: ['package.json', 'lerna.json', 'yarn.lock', 'Dockerfile.node'] },
   })
   hash.update(unchainedHash)
 
@@ -68,7 +70,7 @@ const getNodeCoinstackApiHash = async (coinstack: string, buildArgs: Record<stri
 // creates a hash of the content included in the final build image
 const getGoCoinstackApiHash = async (coinstack: string, buildArgs: Record<string, string>): Promise<string> => {
   const hash = createHash('sha1')
-  const goBasePath = `${__dirname}/../../go`
+  const goBasePath = `${rootDir}/go`
 
   // hash go module files
   const { hash: unchainedHash } = await hashElement(goBasePath, {

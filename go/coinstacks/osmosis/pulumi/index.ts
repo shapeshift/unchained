@@ -1,14 +1,13 @@
 import { readFileSync } from 'fs'
 import { deployCoinstack } from '../../../../pulumi/src/coinstack'
-import { CoinstackType } from '../../../../pulumi/src/hash'
-import { Outputs, ServiceInput } from '../../../../pulumi/src'
+import { Outputs, ServiceArgs } from '../../../../pulumi/src'
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
   const appName = 'unchained'
   const coinstack = 'osmosis'
   const sampleEnv = readFileSync('../../../cmd/osmosis/sample.env')
-  const coinServiceInput: ServiceInput[] = [
+  const coinServiceInput: ServiceArgs[] = [
     {
       coinServiceName: 'daemon',
       ports: {
@@ -18,5 +17,5 @@ export = async (): Promise<Outputs> => {
     },
   ]
 
-  return await deployCoinstack(appName, coinstack, coinServiceInput, sampleEnv, CoinstackType.GO)
+  return await deployCoinstack(appName, coinstack, coinServiceInput, sampleEnv, 'go')
 }

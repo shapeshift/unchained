@@ -1,14 +1,13 @@
 import { readFileSync } from 'fs'
 import { deployCoinstack } from '../../../../pulumi/src/coinstack'
-import { CoinstackType } from '../../../../pulumi/src/hash'
-import { Outputs, ServiceInput } from '../../../../pulumi/src'
+import { Outputs, ServiceArgs } from '../../../../pulumi/src'
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
   const appName = 'unchained'
   const coinstack = 'bitcoin'
   const sampleEnv = readFileSync('../sample.env')
-  const coinServiceInput: ServiceInput[] = [
+  const coinServiceInput: ServiceArgs[] = [
     {
       coinServiceName: 'daemon',
       ports: { 'daemon-rpc': { port: 8332 } },
@@ -33,5 +32,5 @@ export = async (): Promise<Outputs> => {
     },
   ]
 
-  return await deployCoinstack(appName, coinstack, coinServiceInput, sampleEnv, CoinstackType.NODE)
+  return await deployCoinstack(appName, coinstack, coinServiceInput, sampleEnv, 'node')
 }
