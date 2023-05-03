@@ -4,17 +4,21 @@ import { createCoinService, deployStatefulService } from './statefulService'
 import * as k8s from '@pulumi/kubernetes'
 import { CoinstackType } from './hash'
 
-export const deployCoinstack = async (
-  kubeconfig: string,
-  config: Config,
-  namespace: string,
-  appName: string,
-  coinstack: string,
-  sampleEnv: Buffer,
-  coinstackType: CoinstackType,
-  volumes?: Array<k8s.types.input.core.v1.Volume>,
+export interface CoinstackArgs {
+  appName: string
   coinServiceArgs?: CoinServiceArgs[]
-): Promise<Outputs> => {
+  coinstack: string
+  coinstackType: CoinstackType
+  config: Config
+  kubeconfig: string
+  namespace: string
+  sampleEnv: Buffer
+  volumes?: Array<k8s.types.input.core.v1.Volume>
+}
+
+export const deployCoinstack = async (args: CoinstackArgs): Promise<Outputs> => {
+  const { appName, config, kubeconfig, namespace, sampleEnv, volumes, coinServiceArgs } = args
+
   const assetName = config.network !== 'mainnet' ? `${config.assetName}-${config.network}` : config.assetName
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
   const secretData = getSecretData(sampleEnv)
@@ -24,21 +28,12 @@ export const deployCoinstack = async (
   const baseImageName = 'shapeshiftdao/unchained-base:latest'
   const snapshots = await new Snapper({ assetName, kubeconfig, namespace }).getSnapshots()
 
-  await deployApi({
-    appName,
-    assetName,
-    coinstack,
-    coinstackType,
-    sampleEnv,
-    baseImageName,
-    config,
-    namespace,
-    provider,
-  })
+  await deployApi({ ...args, assetName, baseImageName, provider })
 
-  const coinServices =
-    coinServiceArgs?.map((coinServiceArg) => createCoinService(coinServiceArg, assetName, snapshots)) || []
+  const coinServices = (coinServiceArgs ?? []).map((_args) => createCoinService(_args, assetName, snapshots))
+
   await deployStatefulService(appName, assetName, provider, namespace, config, coinServices, volumes)
+
   return {}
 }
 

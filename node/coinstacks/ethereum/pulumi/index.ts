@@ -59,9 +59,18 @@ export = async (): Promise<Outputs> => {
           livenessProbe: { timeoutSeconds: 10, initialDelaySeconds: 60, periodSeconds: 15, failureThreshold: 4 },
         }
       default:
-        throw new Error('coinService not supported')
+        throw new Error(`no support for coin service: ${service.name}`)
     }
   })
 
-  return await deployCoinstack(kubeconfig, config, namespace, appName, coinstack, sampleEnv, 'node', coinServiceArgs)
+  return deployCoinstack({
+    appName,
+    coinServiceArgs,
+    coinstack,
+    coinstackType: 'node',
+    config,
+    kubeconfig,
+    namespace,
+    sampleEnv,
+  })
 }

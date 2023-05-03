@@ -39,13 +39,22 @@ export = async (): Promise<Outputs> => {
           ports: { public: { port: 8001 } },
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
           volumeMounts: [{ name: 'config-map', mountPath: '/config.json', subPath: 'indexer-config.json' }],
-          readinessProbe: { initialDelaySeconds: 20, periodSeconds: 5, failureThreshold: 12 },
+          readinessProbe: { initialDelaySeconds: 20, periodSeconds: 10, failureThreshold: 12 },
           livenessProbe: { timeoutSeconds: 10, initialDelaySeconds: 60, periodSeconds: 15, failureThreshold: 4 },
         }
       default:
-        throw new Error('coinService not supported')
+        throw new Error(`no support for coin service: ${service.name}`)
     }
   })
 
-  return await deployCoinstack(kubeconfig, config, namespace, appName, coinstack, sampleEnv, 'node', coinServiceArgs)
+  return deployCoinstack({
+    appName,
+    coinServiceArgs,
+    coinstack,
+    coinstackType: 'node',
+    config,
+    kubeconfig,
+    namespace,
+    sampleEnv,
+  })
 }

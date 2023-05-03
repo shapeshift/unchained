@@ -48,8 +48,7 @@ export interface Config extends BaseConfig {
   statefulService?: StatefulService
 }
 
-export interface Port {
-  port: number
+export interface Port extends k8s.types.input.core.v1.ServicePort {
   ingressRoute?: boolean
   pathPrefix?: string
   stripPathPrefix?: boolean
@@ -79,9 +78,7 @@ export interface CoinServiceArgs extends ServiceConfig {
 
 export interface Service {
   name: string
-  ports: Array<
-    k8s.types.input.core.v1.ServicePort & { ingressRoute?: boolean; pathPrefix?: string; stripPathPrefix?: boolean }
-  >
+  ports: Array<Port>
   configMapData: Record<string, string>
   containers: Array<k8s.types.input.core.v1.Container>
   volumeClaimTemplates: Array<k8s.types.input.core.v1.PersistentVolumeClaim>

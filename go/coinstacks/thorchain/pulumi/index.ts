@@ -8,7 +8,7 @@ export = async (): Promise<Outputs> => {
   const coinstack = 'thorchain'
   const sampleEnv = readFileSync('../../../cmd/thorchain/sample.env')
   const { kubeconfig, config, namespace } = await getConfig()
-  
+
   const coinServiceArgs = config.statefulService?.services?.map((service): CoinServiceArgs => {
     switch (service.name) {
       case 'daemon':
@@ -31,7 +31,7 @@ export = async (): Promise<Outputs> => {
           env: { MIDGARD_BLOCKSTORE_LOCAL: '/blockstore' },
           ports: { midgard: { port: 8080 } },
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
-          volumeMounts: [{ name: 'config-map', mountPath: '/config.json', subPath: 'indexer-config.json' }]
+          volumeMounts: [{ name: 'config-map', mountPath: '/config.json', subPath: 'indexer-config.json' }],
         }
       case 'timescaledb':
         return {
@@ -47,11 +47,21 @@ export = async (): Promise<Outputs> => {
           volumeMounts: [{ name: 'dshm', mountPath: '/dev/shm' }],
         }
       default:
-        throw new Error('coinService not supported')
+        throw new Error(`no support for coin service: ${service.name}`)
     }
   })
 
   const volumes = [{ name: 'dshm', emptyDir: { medium: 'Memory', sizeLimit: '1Gi' } }]
 
-  return await deployCoinstack(kubeconfig, config, namespace, appName, coinstack, sampleEnv, 'go', volumes, coinServiceArgs)
+  return deployCoinstack({
+    appName,
+    coinServiceArgs,
+    coinstack,
+    coinstackType: 'go',
+    config,
+    kubeconfig,
+    namespace,
+    sampleEnv,
+    volumes,
+  })
 }

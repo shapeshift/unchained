@@ -4,15 +4,15 @@ import { Config, Service, CoinServiceArgs } from '.'
 import { deployReaperCron } from './reaperCron'
 import { VolumeSnapshot } from './snapper'
 
-export function createCoinService(config: CoinServiceArgs, assetName: string, snapshots: VolumeSnapshot[]): Service {
-  const name = `${assetName}-${config.name}`
+export function createCoinService(args: CoinServiceArgs, assetName: string, snapshots: VolumeSnapshot[]): Service {
+  const name = `${assetName}-${args.name}`
 
-  const ports = Object.entries(config.ports ?? []).map(([name, port]) => ({ name, ...port }))
-  const env = Object.entries(config.env ?? []).map(([name, value]) => ({ name, value }))
+  const ports = Object.entries(args.ports ?? []).map(([name, port]) => ({ name, ...port }))
+  const env = Object.entries(args.env ?? []).map(([name, value]) => ({ name, value }))
 
   const init = (() => {
     try {
-      return readFileSync(`../${config.name}/init.sh`).toString()
+      return readFileSync(`../${args.name}/init.sh`).toString()
     } catch (err) {
       return ''
     }
@@ -20,7 +20,7 @@ export function createCoinService(config: CoinServiceArgs, assetName: string, sn
 
   const liveness = (() => {
     try {
-      return readFileSync(`../${config.name}/liveness.sh`).toString()
+      return readFileSync(`../${args.name}/liveness.sh`).toString()
     } catch (err) {
       return ''
     }
@@ -28,54 +28,54 @@ export function createCoinService(config: CoinServiceArgs, assetName: string, sn
 
   const readiness = (() => {
     try {
-      return readFileSync(`../${config.name}/readiness.sh`).toString()
+      return readFileSync(`../${args.name}/readiness.sh`).toString()
     } catch (err) {
       return ''
     }
   })()
 
   const configMapData = {
-    ...(Boolean(init) && { [`${config.name}-init.sh`]: init }),
-    ...(Boolean(liveness) && { [`${config.name}-liveness.sh`]: liveness }),
-    ...(Boolean(readiness) && { [`${config.name}-readiness.sh`]: readiness }),
-    ...(config.configMapData ?? {}),
+    ...(Boolean(init) && { [`${args.name}-init.sh`]: init }),
+    ...(Boolean(liveness) && { [`${args.name}-liveness.sh`]: liveness }),
+    ...(Boolean(readiness) && { [`${args.name}-readiness.sh`]: readiness }),
+    ...(args.configMapData ?? {}),
   }
 
   const containers: Array<k8s.types.input.core.v1.Container> = []
 
   const serviceContainer: k8s.types.input.core.v1.Container = {
     name,
-    image: config.image,
-    command: init && !config.command ? ['/init.sh'] : config.command,
-    args: config.args,
+    image: args.image,
+    command: init && !args.command ? ['/init.sh'] : args.command,
+    args: args.args,
     env,
     resources: {
       limits: {
-        ...(config.cpuLimit && { cpu: config.cpuLimit }),
-        ...(config.memoryLimit && { memory: config.memoryLimit }),
+        ...(args.cpuLimit && { cpu: args.cpuLimit }),
+        ...(args.memoryLimit && { memory: args.memoryLimit }),
       },
       requests: {
-        ...(config.cpuRequest && { cpu: config.cpuRequest }),
-        ...(config.memoryRequest && { memory: config.memoryRequest }),
+        ...(args.cpuRequest && { cpu: args.cpuRequest }),
+        ...(args.memoryRequest && { memory: args.memoryRequest }),
       },
     },
     ports: ports.map(({ port: containerPort, name }) => ({ containerPort, name })),
     securityContext: { runAsUser: 0 },
     volumeMounts: [
       {
-        name: `data-${config.name}`,
-        mountPath: config.dataDir ?? '/data',
+        name: `data-${args.name}`,
+        mountPath: args.dataDir ?? '/data',
       },
       ...(init
         ? [
             {
               name: 'config-map',
               mountPath: '/init.sh',
-              subPath: `${config.name}-init.sh`,
+              subPath: `${args.name}-init.sh`,
             },
           ]
         : []),
-      ...(config.volumeMounts ?? []),
+      ...(args.volumeMounts ?? []),
     ],
   }
 
@@ -92,7 +92,7 @@ export function createCoinService(config: CoinServiceArgs, assetName: string, sn
           },
           initialDelaySeconds: 30,
           periodSeconds: 10,
-          ...config.readinessProbe,
+          ...args.readinessProbe,
         },
       }),
       ...(liveness && {
@@ -102,7 +102,7 @@ export function createCoinService(config: CoinServiceArgs, assetName: string, sn
           },
           initialDelaySeconds: 30,
           periodSeconds: 10,
-          ...config.livenessProbe,
+          ...args.livenessProbe,
         },
       }),
       volumeMounts: [
@@ -111,7 +111,7 @@ export function createCoinService(config: CoinServiceArgs, assetName: string, sn
               {
                 name: 'config-map',
                 mountPath: '/readiness.sh',
-                subPath: `${config.name}-readiness.sh`,
+                subPath: `${args.name}-readiness.sh`,
               },
             ]
           : []),
@@ -120,7 +120,7 @@ export function createCoinService(config: CoinServiceArgs, assetName: string, sn
               {
                 name: 'config-map',
                 mountPath: '/liveness.sh',
-                subPath: `${config.name}-liveness.sh`,
+                subPath: `${args.name}-liveness.sh`,
               },
             ]
           : []),
@@ -131,20 +131,20 @@ export function createCoinService(config: CoinServiceArgs, assetName: string, sn
   }
 
   const snapshot = snapshots.filter(
-    (snapshot) => snapshot.metadata.name.includes(config.name) && !!snapshot.status?.readyToUse
+    (snapshot) => snapshot.metadata.name.includes(args.name) && !!snapshot.status?.readyToUse
   )[0]
 
   const volumeClaimTemplates = [
     {
       metadata: {
-        name: `data-${config.name}`,
+        name: `data-${args.name}`,
       },
       spec: {
         accessModes: ['ReadWriteOnce'],
         storageClassName: 'ebs-csi-gp2',
         resources: {
           requests: {
-            storage: config.storageSize,
+            storage: args.storageSize,
           },
         },
         ...(snapshot && {
@@ -159,7 +159,7 @@ export function createCoinService(config: CoinServiceArgs, assetName: string, sn
   ]
 
   return {
-    name: config.name,
+    name: args.name,
     configMapData,
     containers,
     ports,
@@ -319,7 +319,7 @@ export async function deployStatefulService(
       const pathPrefixMatch = prefix ? ` && PathPrefix(\`${prefix}\`)` : ''
       const hostMatch = `(Host(\`${domain(service)}\`)${pathPrefixMatch})`
       const additionalHostMatch = `(Host(\`${
-        config.environment ? `${config.environment}-${service}` : service
+        config.environment ? `${config.environment}-${service.name}` : service.name
       }.${assetName}.${additionalRootDomainName}\`)${pathPrefixMatch})`
       return additionalRootDomainName ? `${hostMatch} || ${additionalHostMatch}` : hostMatch
     }
@@ -360,12 +360,12 @@ export async function deployStatefulService(
         spec: {
           entryPoints: ['web', 'websecure'],
           routes: services
-            .map((serviceEntry) =>
-              serviceEntry.ports
+            .map((service) =>
+              service.ports
                 .filter(({ ingressRoute = true }) => ingressRoute)
                 .map(({ port, pathPrefix }) => ({
                   kind: 'Rule',
-                  match: match(serviceEntry, pathPrefix),
+                  match: match(service, pathPrefix),
                   ...(pathPrefix && {
                     middlewares: [{ name: middleware.metadata.name, namespace: svc.metadata.namespace }],
                   }),
@@ -382,7 +382,7 @@ export async function deployStatefulService(
             .flat(),
           tls: {
             secretName: secretName,
-            domains: services.map((serviceEntry) => ({ main: domain(serviceEntry) })),
+            domains: services.map((service) => ({ main: domain(service) })),
           },
         },
       },
