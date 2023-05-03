@@ -32,19 +32,23 @@ export interface DeployApiArgs {
 
 const getbuildAndPushImageArgs = (coinstackType: CoinstackType) => {
   switch (coinstackType) {
-    case CoinstackType.GO:
+    case 'go':
       return { context: '../../../', dockerFile: '../../../build/Dockerfile' }
-    case CoinstackType.NODE:
+    case 'node':
       return { context: `../api` }
+    default:
+      throw new Error('invalid coinstack type')
   }
 }
 
 const getContainer = (coinstackType: CoinstackType, coinstack: string) => {
   switch (coinstackType) {
-    case CoinstackType.GO:
+    case 'go':
       return { container: { args: ['-swagger', 'swagger.json'] } }
-    case CoinstackType.NODE:
+    case 'node':
       return { command: ['node', `dist/${coinstack}/api/src/app.js`] }
+    default:
+      throw new Error('invalid coinstack type')
   }
 }
 

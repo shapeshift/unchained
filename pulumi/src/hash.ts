@@ -4,10 +4,7 @@ import { hashElement } from 'folder-hash'
 import objectHash from 'object-hash'
 import * as k8s from '@pulumi/kubernetes'
 
-export enum CoinstackType {
-  GO,
-  NODE,
-}
+export type CoinstackType = 'go' | 'node'
 
 export const secretEnvs = (assetName: string, sampleEnv: Buffer) =>
   Object.keys(parse(sampleEnv)).map<k8s.types.input.core.v1.EnvVar>((key) => ({
@@ -21,15 +18,17 @@ export const getCoinstackHash = async (
   coinstackType: CoinstackType
 ): Promise<string> => {
   switch (coinstackType) {
-    case CoinstackType.NODE:
-      return await getNodeCoinstackHash(coinstack, buildArgs)
-    case CoinstackType.GO:
-      return await getGoCoinstackHash(coinstack, buildArgs)
+    case 'node':
+      return await getNodeCoinstackApiHash(coinstack, buildArgs)
+    case 'go':
+      return await getGoCoinstackApiHash(coinstack, buildArgs)
+    default:
+      throw new Error('invalid coinstack type')
   }
 }
 
 // creates a hash of the content included in the final build image
-const getNodeCoinstackHash = async (coinstack: string, buildArgs: Record<string, string>): Promise<string> => {
+const getNodeCoinstackApiHash = async (coinstack: string, buildArgs: Record<string, string>): Promise<string> => {
   const hash = createHash('sha1')
   const nodeBasePath = `${__dirname}/../../node`
 
@@ -67,7 +66,7 @@ const getNodeCoinstackHash = async (coinstack: string, buildArgs: Record<string,
 }
 
 // creates a hash of the content included in the final build image
-const getGoCoinstackHash = async (coinstack: string, buildArgs: Record<string, string>): Promise<string> => {
+const getGoCoinstackApiHash = async (coinstack: string, buildArgs: Record<string, string>): Promise<string> => {
   const hash = createHash('sha1')
   const goBasePath = `${__dirname}/../../go`
 
