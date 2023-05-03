@@ -705,6 +705,7 @@ commands:
       - run:
           name: add environment variables
           command: |
+            echo 'export ADDITIONAL_ROOT_DOMAIN_NAME=$<< parameters.organization >>_ADDITIONAL_ROOT_DOMAIN_NAME' >> $BASH_ENV
             echo 'export PULUMI_ACCESS_TOKEN=$<< parameters.organization >>_PULUMI_ACCESS_TOKEN' >> $BASH_ENV
       - run:
           name: install tools
@@ -1035,7 +1036,6 @@ jobs:
             pulumi stack select $<< parameters.organization >>_PULUMI_ORG/prod-us-east-2
             pulumi config set --path unchained:monitoring.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies-us-east-2
             pulumi config set --path unchained:monitoring.environment monitoring
-            pulumi config set --path unchained:monitoring.domainName $<< parameters.organization >>_ROOT_DOMAIN_NAME
             pulumi <<parameters.pulumi-command>> --suppress-outputs
 
   preview-kube-prometheus:

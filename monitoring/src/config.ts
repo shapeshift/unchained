@@ -3,13 +3,13 @@ import * as pulumi from '@pulumi/pulumi'
 export interface MonitoringConfig {
   stack: string
   environment: string
-  domainName: string
 }
 
 export interface LoopConfig {
   kubeconfig: string
   config: MonitoringConfig
   namespace: string
+  domain: string
 }
 
 export const getConfig = async (): Promise<LoopConfig> => {
@@ -26,6 +26,7 @@ export const getConfig = async (): Promise<LoopConfig> => {
   const kubeconfig = (await stackReference.getOutputValue('kubeconfig')) as string
   const namespaces = (await stackReference.getOutputValue('namespaces')) as Array<string>
   const defaultNamespace = (await stackReference.getOutputValue('defaultNamespace')) as string
+  const domain = process.env.ADDITIONAL_ROOT_DOMAIN_NAME as string
 
   const namespace = config.environment ? `${defaultNamespace}-${config.environment}` : defaultNamespace
   if (!namespaces.includes(namespace)) {
@@ -34,5 +35,5 @@ export const getConfig = async (): Promise<LoopConfig> => {
     )
   }
 
-  return { kubeconfig, config, namespace }
+  return { kubeconfig, config, namespace, domain }
 }

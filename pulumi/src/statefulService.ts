@@ -282,11 +282,6 @@ export async function deployStatefulService(
       return config.environment ? `${config.environment}.${baseDomain}` : baseDomain
     }
 
-    const match = (service: Service, prefix?: string) => {
-      const pathPrefixMatch = prefix ? ` && PathPrefix(\`${prefix}\`)` : ''
-      return `(Host(\`${domain(service)}\`)${pathPrefixMatch})`
-    }
-
     const secretName = `${assetName}-cert-secret`
 
     new k8s.apiextensions.CustomResource(
@@ -318,6 +313,17 @@ export async function deployStatefulService(
       },
       { provider }
     )
+
+    const additionalRootDomainName = process.env.ADDITIONAL_ROOT_DOMAIN_NAME
+
+    const match = (service: Service, prefix?: string) => {
+      const pathPrefixMatch = prefix ? ` && PathPrefix(\`${prefix}\`)` : ''
+      const hostMatch = `(Host(\`${domain(service)}\`)${pathPrefixMatch})`
+      const additionalHostMatch = `(Host(\`${
+        config.environment ? `${config.environment}-${service}` : service
+      }.${assetName}.${additionalRootDomainName}\`)${pathPrefixMatch})`
+      return additionalRootDomainName ? `${hostMatch} || ${additionalHostMatch}` : hostMatch
+    }
 
     const middleware = new k8s.apiextensions.CustomResource(
       `${assetName}-middleware`,
