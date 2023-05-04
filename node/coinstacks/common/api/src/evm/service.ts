@@ -297,15 +297,21 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       // fetch legacy gas price estimate from the node
       const gasPrice = (await this.provider.send('eth_gasPrice', [])) as string
 
-      // fetch maxPriorityFeePerGas estimate from the node
-      const maxPriorityFeePerGas = (await this.provider.send('eth_maxPriorityFeePerGas', [])) as string
+      const { baseFeePerGas, maxPriorityFeePerGas } = await (async () => {
+        const baseFeePerGas = this.gasOracle.getBaseFeePerGas()
+        if (!baseFeePerGas) return {}
+
+        // fetch maxPriorityFeePerGas estimate from the node
+        const maxPriorityFeePerGas = (await this.provider.send('eth_maxPriorityFeePerGas', [])) as string
+        return { baseFeePerGas, maxPriorityFeePerGas: Number(maxPriorityFeePerGas).toString() }
+      })()
 
       const estimatedFees = await this.gasOracle.estimateFees([1, 60, 90])
 
       return {
         gasPrice: Number(gasPrice).toString(),
-        baseFeePerGas: this.gasOracle.getBaseFeePerGas(),
-        maxPriorityFeePerGas: Number(maxPriorityFeePerGas).toString(),
+        baseFeePerGas,
+        maxPriorityFeePerGas,
         slow: estimatedFees['1'],
         average: estimatedFees['60'],
         fast: estimatedFees['90'],

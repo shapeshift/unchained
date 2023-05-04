@@ -333,6 +333,9 @@
 						"type": "string"
 					}
 				},
+				"required": [
+					"gasPrice"
+				],
 				"type": "object",
 				"additionalProperties": false
 			},
@@ -342,7 +345,7 @@
 					"gasPrice": {
 						"type": "string"
 					},
-					"maxFeePerGas": {
+					"baseFeePerGas": {
 						"type": "string"
 					},
 					"maxPriorityFeePerGas": {
@@ -830,17 +833,6 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/OptimismGasFees"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"l1GasPrice": "25000000000",
-											"gasPrice": "1000000",
-											"slow": {},
-											"average": {},
-											"fast": {}
-										}
-									}
 								}
 							}
 						}

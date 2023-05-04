@@ -3,6 +3,7 @@ import { ethers } from 'ethers'
 import { Logger } from '@shapeshiftoss/logger'
 import { Fees } from './models'
 import { NewBlock } from '@shapeshiftoss/blockbook'
+import { NodeBlock, NodeTransaction } from './types'
 
 export interface GasOracleArgs {
   logger: Logger
@@ -22,6 +23,8 @@ interface BlockFees extends TxFees {
 
 type EstimatedFees = Record<string, Fees>
 
+type BlockTag = 'latest' | 'pending'
+
 export class GasOracle {
   public readonly coinstack: string
 
@@ -29,6 +32,7 @@ export class GasOracle {
   private readonly logger: Logger
   private readonly provider: ethers.providers.JsonRpcProvider
 
+  private latestBlockTag: BlockTag
   private feesByBlock = new Map<string, BlockFees>()
   private baseFeePerGas?: string
 
@@ -36,14 +40,22 @@ export class GasOracle {
     this.logger = args.logger.child({ namespace: ['gasOracle'] })
     this.provider = args.provider
     this.coinstack = args.coinstack
+
+    switch (args.coinstack) {
+      case 'optimism':
+        this.latestBlockTag = 'latest'
+        break
+      default:
+        this.latestBlockTag = 'pending'
+    }
   }
 
   async start() {
     const height = await this.provider.getBlockNumber()
     const length = this.totalBlocks - 1
     const startingBlock = height - length
-    const blocks = Array.from<number, 'pending' | number>({ length }, (_, index) => index + 1 + startingBlock)
-    blocks.unshift('pending')
+    const blocks = Array.from<number, BlockTag | number>({ length }, (_, index) => index + startingBlock + 1)
+    blocks.unshift(this.latestBlockTag)
     await Promise.all(blocks.map(async (blockNumber) => this.update(blockNumber)))
   }
 
@@ -53,13 +65,8 @@ export class GasOracle {
 
   // estimate fees based on the current oracle state
   async estimateFees(percentiles: Array<number>): Promise<EstimatedFees> {
-    const { number } = (await this.provider.send('eth_getBlockByNumber', ['pending', false])) as {
-      number: string
-    }
-
-    // validate from pending block number to ensure accurate state before estimating
-    const latest = Number(number)
-    await this.validate(latest, true)
+    // validate oracle state and get back the latest block number
+    const latest = await this.validate()
 
     if (this.feesByBlock.size !== this.totalBlocks) {
       this.logger.error(`current blocks: ${this.feesByBlock.size}, expected blocks: ${this.totalBlocks}`)
@@ -70,14 +77,16 @@ export class GasOracle {
       this.logger.error(`oracle is out of sync...`)
     }
 
-    const estimatedFees = percentiles.reduce<EstimatedFees>((prev, percentile) => {
+    const estimatedFees = percentiles.reduce<EstimatedFees>((estimatedFees, percentile) => {
       const { gasPrice, maxPriorityFee } = this.averageAtPercentile(percentile)
-      prev[percentile.toString()] = {
+      estimatedFees[percentile.toString()] = {
         gasPrice: gasPrice.toFixed(0),
-        maxFeePerGas: (maxPriorityFee + Number(this.baseFeePerGas)).toFixed(0),
-        maxPriorityFeePerGas: maxPriorityFee.toFixed(0),
+        ...(this.baseFeePerGas && {
+          maxFeePerGas: (maxPriorityFee + Number(this.baseFeePerGas)).toFixed(0),
+          maxPriorityFeePerGas: maxPriorityFee.toFixed(0),
+        }),
       }
-      return prev
+      return estimatedFees
     }, {})
 
     return estimatedFees
@@ -86,51 +95,47 @@ export class GasOracle {
   // handle new block event over websocket
   async onBlock(newBlock: NewBlock): Promise<void> {
     try {
-      switch (this.coinstack) {
-        // avalanche returns the latest block for the pending tag
-        // pending tag is used to ensure baseFeePerGas is updated
-        // validate using newBlock height as no pending blocks are available
-        case 'avalanche': {
-          await this.update('pending')
-          this.validate(newBlock.height)
-          break
-        }
-        // update newBlock and pending block to ensure most accurate up to date state
-        // validate using newBlock height + 1, which is the pending block height
-        default: {
-          await Promise.all([this.update('pending'), this.update(newBlock.height)])
-          this.validate(newBlock.height + 1, true)
-        }
-      }
+      await this.update(this.latestBlockTag)
+      console.log(newBlock.height)
+      await this.validate(newBlock.height)
     } catch (err) {
-      this.logger.error(err, { block: newBlock }, 'failed to handleBlock')
+      this.logger.error(err, { block: newBlock }, 'failed to handle block')
     }
   }
 
   // update oracle state for the specified block
-  private async update(blockNumber: 'pending' | number) {
+  private async update(blockNumber: BlockTag | number) {
     if (this.feesByBlock.has(blockNumber.toString())) return
 
     try {
-      const block = await this.provider.getBlockWithTransactions(blockNumber)
+      //const block = await this.provider.getBlockWithTransactions(blockNumber)
+      const numOrTag =
+        blockNumber === this.latestBlockTag
+          ? blockNumber
+          : ethers.utils.hexStripZeros(ethers.utils.hexlify(blockNumber))
+      const block = (await this.provider.send('eth_getBlockByNumber', [numOrTag, true])) as NodeBlock<
+        Array<NodeTransaction>
+      >
 
-      const gasFees = block.transactions.reduce<TxFees>(
-        (prev, tx) => {
-          tx.gasPrice && prev.gasPrices.push(tx.gasPrice.toNumber())
-          tx.maxPriorityFeePerGas && prev.maxPriorityFees.push(tx.maxPriorityFeePerGas.toNumber())
-          return prev
+      if (!block) throw new Error('no block found')
+
+      const txFees = block.transactions.reduce<TxFees>(
+        (txFees, tx) => {
+          tx.gasPrice && txFees.gasPrices.push(Number(tx.gasPrice))
+          tx.maxPriorityFeePerGas && txFees.maxPriorityFees.push(Number(tx.maxPriorityFeePerGas))
+          return txFees
         },
         { gasPrices: [], maxPriorityFees: [] }
       )
 
-      this.feesByBlock.set(block.number.toString(), {
-        baseFeePerGas: block.baseFeePerGas?.toNumber(),
-        gasPrices: gasFees.gasPrices.sort((a, b) => a - b),
-        maxPriorityFees: gasFees.maxPriorityFees.sort((a, b) => a - b),
+      this.feesByBlock.set(Number(block.number).toString(), {
+        baseFeePerGas: block.baseFeePerGas ? Number(block.baseFeePerGas) : undefined,
+        gasPrices: txFees.gasPrices.sort((a, b) => a - b),
+        maxPriorityFees: txFees.maxPriorityFees.sort((a, b) => a - b),
       })
 
-      // keep track of current baseFeePerGas for pending block
-      if (blockNumber === 'pending') {
+      // keep track of current baseFeePerGas
+      if (blockNumber === this.latestBlockTag) {
         switch (this.coinstack) {
           // avalanche returns the latest block for 'pending', use eth_baseFee instead for accurate base fee
           case 'avalanche': {
@@ -139,44 +144,63 @@ export class GasOracle {
             break
           }
           default:
-            this.baseFeePerGas = block.baseFeePerGas?.toString()
+            this.baseFeePerGas = block.baseFeePerGas ? Number(block.baseFeePerGas).toString() : undefined
         }
       }
     } catch (err) {
-      this.logger.error(err, { blockNumber }, 'failed to updateBlocks')
+      this.logger.error(err, { blockNumber }, 'failed to update')
     }
   }
 
   // validate accurate oracle state by adding any missing blocks and pruning any excess blocks
-  private async validate(latest: number, isPending = false): Promise<void> {
+  private async validate(blockNumber?: number): Promise<number> {
     try {
+      const numOrTag = blockNumber ? ethers.utils.hexStripZeros(ethers.utils.hexlify(blockNumber)) : this.latestBlockTag
+
+      const { number } = (await this.provider.send('eth_getBlockByNumber', [numOrTag, false])) as {
+        number: string
+      }
+
       const length = this.totalBlocks
+      const latest = Number(number)
       const startingBlock = latest - length
       const blocks = Array.from({ length }, (_, index) => index + startingBlock + 1)
+
+      console.log('validate start', this.feesByBlock.size, latest)
 
       // ensure there are fees for all expected blocks
       await Promise.all(
         blocks.map(async (block) => {
           if (this.feesByBlock.has(block.toString())) return
+          console.log('adding missing block', block)
           // add fees for block if missing
-          await this.update(isPending && block === latest ? 'pending' : block)
+          await this.update(block === latest ? this.latestBlockTag : block)
         })
       )
 
       // get sorted list of current blocks in descending order
-      const sortedBlocks = Array.from(this.feesByBlock.keys()).sort((a, b) => {
+      const sortedFeesByBlock = Array.from(this.feesByBlock.keys()).sort((a, b) => {
         return Number(b) - Number(a)
       })
 
+      console.log({ sortedFeesByBlock })
+
       // find the index of what should be the oldest block stored
-      const oldestIndex = sortedBlocks.indexOf((latest - this.totalBlocks).toString())
+      const oldestIndex = sortedFeesByBlock.indexOf((latest - this.totalBlocks).toString())
+
+      console.log({ oldestIndex, keep: latest - this.totalBlocks })
 
       // prune any blocks older than the oldest block if found
       if (oldestIndex !== -1) {
-        sortedBlocks.slice(oldestIndex).forEach((block) => this.feesByBlock.delete(block.toString()))
+        console.log({ prune: sortedFeesByBlock.slice(oldestIndex) })
+        sortedFeesByBlock.slice(oldestIndex).forEach((block) => this.feesByBlock.delete(block.toString()))
       }
+
+      console.log('validate end', this.feesByBlock.size)
+      return latest
     } catch (err) {
-      this.logger.error(err, { latest }, 'failed to pruneBlocks')
+      this.logger.error(err, 'failed to validate')
+      return -1
     }
   }
 

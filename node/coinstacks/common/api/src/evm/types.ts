@@ -6,11 +6,12 @@ export interface Cursor {
   explorerTxid?: string
 }
 
-export interface NodeBlock {
+export interface NodeBlock<Transactions = Array<string>> {
   difficulty: string
   extraData: string
   gasLimit: string
   gasUsed: string
+  baseFeePerGas?: string
   hash: string
   logsBloom: string
   miner: string
@@ -24,9 +25,25 @@ export interface NodeBlock {
   stateRoot: string
   timestamp: string
   totalDifficulty: string
-  transactions: Array<string>
+  transactions: Transactions
   transactionsRoot: string
   uncles: Array<string>
+}
+
+export interface NodeTransaction {
+  blockHash: string
+  blockNumber: string
+  from: string
+  gas: string
+  gasPrice: string
+  maxPriorityFeePerGas?: string
+  hash: string
+  input: string
+  nonce: string
+  to: string
+  transactionIndex: string
+  value: string
+  type: string
 }
 
 export interface CallStack {

@@ -5,7 +5,6 @@ import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tag
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
 import { predeploys, getContractInterface } from '@eth-optimism/contracts'
-
 import {
   BadRequestError,
   BaseAPI,
@@ -16,6 +15,7 @@ import {
 } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { API, Account, Tx, TxHistory } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { Service } from '../../../common/api/src/evm/service'
+import { GasOracle } from '../../../common/api/src/evm/gasOracle'
 import { OptimismGasEstimate, OptimismGasFees } from './models'
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
@@ -37,10 +37,13 @@ export const logger = new Logger({
 
 const CHAIN_ID: Record<string, number> = { mainnet: 10 }
 
+const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
+export const gasOracle = new GasOracle({ logger, provider, coinstack: 'optimism' })
 
 export const service = new Service({
-  blockbook: new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL }),
+  blockbook,
+  gasOracle,
   explorerApiKey: ETHERSCAN_API_KEY,
   explorerApiUrl: 'https://api-optimistic.etherscan.io/api',
   provider,
@@ -250,13 +253,13 @@ export class Optimism extends Controller implements BaseAPI, API {
    *
    * @returns {Promise<OptimismGasFees>} current fees specified in wei
    */
-  @Example<OptimismGasFees>({
-    l1GasPrice: '25000000000',
-    gasPrice: '1000000',
-    slow: {},
-    average: {},
-    fast: {},
-  })
+  //@Example<OptimismGasFees>({
+  //  l1GasPrice: '25000000000',
+  //  gasPrice: '1000000',
+  //  slow: {},
+  //  average: {},
+  //  fast: {},
+  //})
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
   async getGasFees(): Promise<OptimismGasFees> {

@@ -207,21 +207,26 @@ export class Ethereum extends Controller implements BaseAPI, API {
    *
    * @returns {Promise<GasFees>} current fees specified in wei
    */
-  //@Example<GasFees>({
-  //  gasPrice: '100000000000',
-  //  slow: {
-  //    maxFeePerGas: '95000000000',
-  //    maxPriorityFeePerGas: '40000000',
-  //  },
-  //  average: {
-  //    maxFeePerGas: '96000000000',
-  //    maxPriorityFeePerGas: '1000000000',
-  //  },
-  //  fast: {
-  //    maxFeePerGas: '100000000000',
-  //    maxPriorityFeePerGas: '5000000000',
-  //  },
-  //})
+  @Example<GasFees>({
+    gasPrice: '77125288868',
+    baseFeePerGas: '77654025212',
+    maxPriorityFeePerGas: '94000001',
+    slow: {
+      gasPrice: '77109280451',
+      maxFeePerGas: '77744243213',
+      maxPriorityFeePerGas: '90218001',
+    },
+    average: {
+      gasPrice: '78637140239',
+      maxFeePerGas: '79158075213',
+      maxPriorityFeePerGas: '1504050001',
+    },
+    fast: {
+      gasPrice: '85079071846',
+      maxFeePerGas: '89883761218',
+      maxPriorityFeePerGas: '12229736006',
+    },
+  })
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
   async getGasFees(): Promise<GasFees> {

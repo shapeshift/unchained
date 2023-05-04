@@ -116,9 +116,7 @@ export class WebsocketClient {
       if (res.id === 'newBlock' && 'hash' in res.data) {
         const newBlock = res.data
         if (Array.isArray(this.handleBlock)) {
-          for (const handleBlock of this.handleBlock) {
-            await handleBlock(newBlock)
-          }
+          await Promise.all(this.handleBlock.map(async (handleBlock) => handleBlock(newBlock)))
         } else {
           await this.handleBlock(res.data)
         }

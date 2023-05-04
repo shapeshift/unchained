@@ -10,8 +10,9 @@ import {
   SendTxBody,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { API, Account, GasFees, Tx, TxHistory, GasEstimate, GasOracle } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
+import { API, Account, GasFees, Tx, TxHistory, GasEstimate } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { Service } from '../../../common/api/src/evm/service'
+import { GasOracle } from '../../../common/api/src/evm/gasOracle'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -201,21 +202,26 @@ export class Avalanche extends Controller implements BaseAPI, API {
    *
    * @returns {Promise<GasFees>} current fees specified in wei
    */
-  //@Example<GasFees>({
-  //  gasPrice: '27000000000',
-  //  slow: {
-  //    maxFeePerGas: '28000000000',
-  //    maxPriorityFeePerGas: '1000000000',
-  //  },
-  //  average: {
-  //    maxFeePerGas: '30000000000',
-  //    maxPriorityFeePerGas: '4500000000',
-  //  },
-  //  fast: {
-  //    maxFeePerGas: '33000000000',
-  //    maxPriorityFeePerGas: '6300000000',
-  //  },
-  //})
+  @Example<GasFees>({
+    gasPrice: '25000000000',
+    baseFeePerGas: '25000000000',
+    maxPriorityFeePerGas: '0',
+    slow: {
+      gasPrice: '26950000000',
+      maxFeePerGas: '29853671876',
+      maxPriorityFeePerGas: '4853671876',
+    },
+    average: {
+      gasPrice: '29933257920',
+      maxFeePerGas: '34429194369',
+      maxPriorityFeePerGas: '9429194369',
+    },
+    fast: {
+      gasPrice: '49823671876',
+      maxFeePerGas: '43037631869',
+      maxPriorityFeePerGas: '18037631869',
+    },
+  })
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
   async getGasFees(): Promise<GasFees> {

@@ -12,6 +12,7 @@ import {
 } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { API, Account, GasFees, Tx, TxHistory, GasEstimate } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { Service } from '../../../common/api/src/evm/service'
+import { GasOracle } from '../../../common/api/src/evm/gasOracle'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -30,9 +31,11 @@ export const logger = new Logger({
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
+export const gasOracle = new GasOracle({ logger, provider, coinstack: 'polygon' })
 
 export const service = new Service({
   blockbook,
+  gasOracle,
   explorerApiUrl: 'https://api.polygonscan.com/api',
   provider,
   logger,
@@ -228,21 +231,21 @@ export class Polygon extends Controller implements BaseAPI, API {
    *
    * @returns {Promise<GasFees>} current fees specified in wei
    */
-  @Example<GasFees>({
-    gasPrice: '250000000000',
-    slow: {
-      maxFeePerGas: '250000000000',
-      maxPriorityFeePerGas: '10000000000',
-    },
-    average: {
-      maxFeePerGas: '350000000000',
-      maxPriorityFeePerGas: '150000000000',
-    },
-    fast: {
-      maxFeePerGas: '450000000000',
-      maxPriorityFeePerGas: '250000000000',
-    },
-  })
+  //@Example<GasFees>({
+  //  gasPrice: '250000000000',
+  //  slow: {
+  //    maxFeePerGas: '250000000000',
+  //    maxPriorityFeePerGas: '10000000000',
+  //  },
+  //  average: {
+  //    maxFeePerGas: '350000000000',
+  //    maxPriorityFeePerGas: '150000000000',
+  //  },
+  //  fast: {
+  //    maxFeePerGas: '450000000000',
+  //    maxPriorityFeePerGas: '250000000000',
+  //  },
+  //})
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
   async getGasFees(): Promise<GasFees> {
