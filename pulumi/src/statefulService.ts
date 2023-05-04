@@ -131,7 +131,7 @@ export function createCoinService(args: CoinServiceArgs, assetName: string, snap
   }
 
   const snapshot = snapshots.filter(
-    (snapshot) => snapshot.metadata.name.includes(args.name) && !!snapshot.status?.readyToUse
+    (snapshot) => snapshot.metadata.name.startsWith(`data-${args.name}-${assetName}`) && !!snapshot.status?.readyToUse
   )[0]
 
   const volumeClaimTemplates = [
