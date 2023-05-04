@@ -21,7 +21,6 @@ aliases:
       branches:
         only:
           - develop
-          - coinstack-unify
 
   - &only-main
     filters:
@@ -1143,7 +1142,7 @@ workflows:
       - deploy-dependencies:
           name: deploy dependencies
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - lint and test project (persist to workspace)
           <<: *only-develop
@@ -1151,7 +1150,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy bitcoin develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies
           <<: *bitcoin-dev
@@ -1160,7 +1159,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy dogecoin develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies
           <<: *dogecoin-dev
@@ -1169,7 +1168,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy litecoin develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies
           <<: *litecoin-dev
@@ -1178,7 +1177,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy bitcoincash develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies
           <<: *bitcoincash-dev
@@ -1187,7 +1186,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy ethereum develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies
           <<: *ethereum-dev
@@ -1196,7 +1195,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy avalanche develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies
           <<: *avalanche-dev
@@ -1205,7 +1204,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy optimism develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           etherscan-env-var: ETHERSCAN_API_KEY_OPTIMISM
           requires:
             - deploy dependencies
@@ -1215,7 +1214,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy bnbsmartchain develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           etherscan-env-var: ETHERSCAN_API_KEY_BSC
           requires:
             - deploy dependencies
@@ -1225,7 +1224,7 @@ workflows:
       - deploy-coinstack-node:
           name: deploy polygon develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           etherscan-env-var: ETHERSCAN_API_KEY_POLYGON
           requires:
             - deploy dependencies
@@ -1235,7 +1234,7 @@ workflows:
       - deploy-coinstack-go:
           name: deploy cosmos develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies
           <<: *cosmos-dev
@@ -1244,7 +1243,7 @@ workflows:
       - deploy-coinstack-go:
           name: deploy osmosis develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies
           <<: *osmosis-dev
@@ -1253,7 +1252,7 @@ workflows:
       - deploy-coinstack-go:
           name: deploy thorchain develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies
           <<: *thorchain-dev
