@@ -365,7 +365,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
               return '1'
             case 'ERC1155':
             case 'BEP1155':
-              return tt.multiTokenValues?.[0].value ?? '0'
+              return tt.multiTokenValues?.[0]?.value ?? '0'
             default:
               return tt.value
           }
@@ -378,7 +378,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
               return tt.value
             case 'ERC1155':
             case 'BEP1155':
-              return tt.multiTokenValues?.[0].id
+              return tt.multiTokenValues?.[0]?.id
             default:
               return
           }

@@ -162,6 +162,10 @@
 					},
 					"value": {
 						"type": "string"
+					},
+					"id": {
+						"type": "string",
+						"description": "nft or multi token id"
 					}
 				},
 				"required": [
@@ -381,7 +385,7 @@
 	},
 	"info": {
 		"title": "@shapeshiftoss/polygon-api",
-		"version": "9.0.0",
+		"version": "9.1.0",
 		"license": {
 			"name": "MIT"
 		},
