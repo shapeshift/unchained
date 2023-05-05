@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/common-api",
-  "version": "9.0.0",
+  "version": "9.1.0",
   "license": "MIT",
   "main": "dist/index.js",
   "source": "src/index.ts",
@@ -14,7 +14,7 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@shapeshiftoss/blockbook": "^9.0.0",
+    "@shapeshiftoss/blockbook": "^9.1.0",
     "bignumber.js": "^9.1.1",
     "tsoa": "^4.1.0",
     "uuid": "^8.3.2",
