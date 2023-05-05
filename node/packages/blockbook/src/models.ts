@@ -180,6 +180,16 @@ export interface Token {
   balance?: string
   totalReceived?: string
   totalSent?: string
+  ids?: Array<string>
+  multiTokenValues?: Array<MultiTokenValue>
+}
+
+/**
+ * Contains info about a multi token
+ */
+export interface MultiTokenValue {
+  id: string
+  value: string
 }
 
 /**
@@ -194,6 +204,7 @@ export interface TokenTransfer {
   symbol: string
   decimals: number
   value: string
+  multiTokenValues?: Array<MultiTokenValue>
 }
 
 /**
