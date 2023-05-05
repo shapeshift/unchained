@@ -55,6 +55,8 @@ export interface TokenTransfer extends Token {
   from: string
   to: string
   value: string
+  /** nft or multi token id */
+  id?: string
 }
 
 /**

@@ -357,16 +357,45 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       gasUsed: tx.ethereumSpecific.gasUsed?.toString() ?? '0',
       gasPrice: tx.ethereumSpecific.gasPrice.toString(),
       inputData: inputData && inputData !== '0x' && inputData !== '0x0' ? inputData : undefined,
-      tokenTransfers: tx.tokenTransfers?.map((tt) => ({
-        contract: tt.contract,
-        decimals: tt.decimals,
-        name: tt.name,
-        symbol: tt.symbol,
-        type: tt.type,
-        from: tt.from,
-        to: tt.to,
-        value: tt.value,
-      })),
+      tokenTransfers: tx.tokenTransfers?.map((tt) => {
+        const value = (() => {
+          switch (tt.type) {
+            case 'ERC721':
+            case 'BEP721':
+              return '1'
+            case 'ERC1155':
+            case 'BEP1155':
+              return tt.multiTokenValues?.[0].value ?? '0'
+            default:
+              return tt.value
+          }
+        })()
+
+        const id = (() => {
+          switch (tt.type) {
+            case 'ERC721':
+            case 'BEP721':
+              return tt.value
+            case 'ERC1155':
+            case 'BEP1155':
+              return tt.multiTokenValues?.[0].id
+            default:
+              return
+          }
+        })()
+
+        return {
+          contract: tt.contract,
+          decimals: tt.decimals,
+          name: tt.name,
+          symbol: tt.symbol,
+          type: tt.type,
+          from: tt.from,
+          to: tt.to,
+          value,
+          id,
+        }
+      }),
     }
   }
 
