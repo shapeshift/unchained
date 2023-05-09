@@ -162,6 +162,10 @@
 					},
 					"value": {
 						"type": "string"
+					},
+					"id": {
+						"type": "string",
+						"description": "nft or multi token id"
 					}
 				},
 				"required": [
