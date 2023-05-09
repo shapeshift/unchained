@@ -429,7 +429,7 @@
 	},
 	"info": {
 		"title": "@shapeshiftoss/ethereum-api",
-		"version": "9.1.0",
+		"version": "9.2.0",
 		"license": {
 			"name": "MIT"
 		},

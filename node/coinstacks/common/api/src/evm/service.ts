@@ -23,6 +23,8 @@ import { validatePageSize } from '../utils'
 import { ERC1155_ABI } from './abi/erc1155'
 import { ERC721_ABI } from './abi/erc721'
 
+const axiosNoRetry = axios.create()
+
 axiosRetry(axios, { retries: 5, retryDelay: axiosRetry.exponentialDelay })
 
 const handleError = (err: unknown): ApiError => {
@@ -665,8 +667,9 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   }
 
   async getTokenMetadata(address: string, id: string, type: TokenType): Promise<TokenMetadata> {
-    const substitue = (data: string, id: string): string => {
+    const substitue = (data: string, id: string, hexEncoded: boolean): string => {
       if (!data.includes('{id}')) return data
+      if (!hexEncoded) return data.replace('{id}', id)
       return data.replace('{id}', new BigNumber(id).toString(16).padStart(64, '0').toLowerCase())
     }
 
@@ -683,19 +686,38 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       }
     })()) as string
 
-    const { data } = !uri.startsWith('ipfs://') ? await axios.get(substitue(uri, id)) : { data: {} }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const metadata = await (async () => {
+      if (uri.startsWith('ipfs://')) return {}
 
-    const mediaUrl = substitue(data.image ?? '', id)
+      try {
+        // attempt to get metadata using hex encoded id as per erc spec
+        const { data } = await axiosNoRetry.get(substitue(uri, id, true))
+        return data
+      } catch (err) {
+        try {
+          // not everyone follows the spec
+          // attempt to get metadata using id string
+          const { data } = await axiosNoRetry.get(substitue(uri, id, false))
+          return data
+        } catch (err) {
+          // swallow error and return empty object if unable to fetch metadata
+          return {}
+        }
+      }
+    })()
+
+    const mediaUrl = metadata.image ?? ''
 
     const mediaType = await (async () => {
       if (!mediaUrl || mediaUrl.startsWith('ipfs://')) return
-      const { headers } = await axios.head(mediaUrl)
+      const { headers } = await axiosNoRetry.head(mediaUrl)
       return headers['content-type']?.includes('video') ? 'video' : 'image'
     })()
 
     return {
-      name: data.name ?? '',
-      description: data.description ?? '',
+      name: metadata.name ?? '',
+      description: metadata.description ?? '',
       media: {
         url: mediaUrl,
         type: mediaType,

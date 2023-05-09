@@ -428,9 +428,7 @@
 				"type": "string",
 				"enum": [
 					"erc721",
-					"erc1155",
-					"bep721",
-					"bep1155"
+					"erc1155"
 				],
 				"description": "Supported token types for token metadata"
 			}
@@ -439,7 +437,7 @@
 	},
 	"info": {
 		"title": "@shapeshiftoss/optimism-api",
-		"version": "9.1.0",
+		"version": "9.2.0",
 		"license": {
 			"name": "MIT"
 		},
