@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/litecoin-api",
-  "version": "9.1.0",
+  "version": "9.2.0",
   "license": "MIT",
   "private": true,
   "files": [
@@ -12,8 +12,8 @@
     "generate": "tsoa spec-and-routes"
   },
   "dependencies": {
-    "@shapeshiftoss/blockbook": "^9.1.0",
-    "@shapeshiftoss/common-api": "^9.1.0",
+    "@shapeshiftoss/blockbook": "^9.2.0",
+    "@shapeshiftoss/common-api": "^9.2.0",
     "bech32": "^2.0.0"
   }
 }

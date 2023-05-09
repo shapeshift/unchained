@@ -42,6 +42,23 @@ export interface Token {
 }
 
 /**
+ * Supported token types for token metadata
+ */
+export type TokenType = 'erc721' | 'erc1155'
+
+/**
+ * Contains info about token metadata (ERC-721/ERC-1155)
+ */
+export interface TokenMetadata {
+  name: string
+  description: string
+  media: {
+    url: string
+    type?: 'image' | 'video'
+  }
+}
+
+/**
  * Contains info about a token including balance for an address
  */
 export interface TokenBalance extends Token {
@@ -136,4 +153,16 @@ export interface API {
    */
   // @Get('/gas/fees')
   getGasFees(): Promise<GasFees>
+
+  /**
+   * Get token metadata
+   *
+   * @param {string} contract contract address
+   * @param {string} id token identifier
+   * @param {TokenType} type token type (erc721 or erc1155)
+   *
+   * @returns {Promise<TokenMetadata>} token metadata
+   */
+  // @Get('/metadata/token')
+  getTokenMetadata(contract: string, id: string, type: string): Promise<TokenMetadata>
 }

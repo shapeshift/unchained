@@ -5,10 +5,23 @@ import { ethers } from 'ethers'
 import { ApiError as BlockbookApiError, Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
 import { ApiError, BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
-import { Account, API, TokenBalance, Tx, TxHistory, GasFees, InternalTx, GasEstimate } from './models'
+import {
+  Account,
+  API,
+  TokenBalance,
+  Tx,
+  TxHistory,
+  GasFees,
+  InternalTx,
+  GasEstimate,
+  TokenMetadata,
+  TokenType,
+} from './models'
 import { Cursor, NodeBlock, CallStack, ExplorerApiResponse, ExplorerInternalTx, FeeHistory } from './types'
 import { formatAddress } from './utils'
 import { validatePageSize } from '../utils'
+import { ERC1155_ABI } from './abi/erc1155'
+import { ERC721_ABI } from './abi/erc721'
 
 axiosRetry(axios, { retries: 5, retryDelay: axiosRetry.exponentialDelay })
 
@@ -43,6 +56,10 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   private readonly logger: Logger
   private readonly provider: ethers.providers.JsonRpcProvider
   private readonly rpcUrl: string
+  private readonly abiInterface: Record<TokenType, ethers.utils.Interface> = {
+    erc721: new ethers.utils.Interface(ERC721_ABI),
+    erc1155: new ethers.utils.Interface(ERC1155_ABI),
+  }
 
   constructor(args: ServiceArgs) {
     this.blockbook = args.blockbook
@@ -644,6 +661,45 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     return {
       hasMore: cursor.blockbookPage < (blockbookData.totalPages ?? -1) ? true : false,
       txs: blockbookTxs,
+    }
+  }
+
+  async getTokenMetadata(address: string, id: string, type: TokenType): Promise<TokenMetadata> {
+    const substitue = (data: string, id: string): string => {
+      if (!data.includes('{id}')) return data
+      return data.replace('{id}', new BigNumber(id).toString(16).padStart(64, '0').toLowerCase())
+    }
+
+    const contract = new ethers.Contract(address, this.abiInterface[type], this.provider)
+
+    const uri = (await (() => {
+      switch (type) {
+        case 'erc721':
+          return contract.tokenURI(id)
+        case 'erc1155':
+          return contract.uri(id)
+        default:
+          throw new Error(`invalid token type: ${type}`)
+      }
+    })()) as string
+
+    const { data } = !uri.startsWith('ipfs://') ? await axios.get(substitue(uri, id)) : { data: {} }
+
+    const mediaUrl = substitue(data.image ?? '', id)
+
+    const mediaType = await (async () => {
+      if (!mediaUrl || mediaUrl.startsWith('ipfs://')) return
+      const { headers } = await axios.head(mediaUrl)
+      return headers['content-type']?.includes('video') ? 'video' : 'image'
+    })()
+
+    return {
+      name: data.name ?? '',
+      description: data.description ?? '',
+      media: {
+        url: mediaUrl,
+        type: mediaType,
+      },
     }
   }
 }
