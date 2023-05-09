@@ -5,10 +5,20 @@ import { ethers } from 'ethers'
 import { ApiError as BlockbookApiError, Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
 import { ApiError, BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
-import { Account, API, TokenBalance, Tx, TxHistory, GasFees, InternalTx, GasEstimate } from './models'
-import { Cursor, NodeBlock, CallStack, ExplorerApiResponse, ExplorerInternalTx, FeeHistory } from './types'
+import { Account, API, TokenBalance, Tx, TxHistory, GasFees, InternalTx, GasEstimate, TokenMetadata } from './models'
+import {
+  Cursor,
+  NodeBlock,
+  CallStack,
+  ExplorerApiResponse,
+  ExplorerInternalTx,
+  FeeHistory,
+  Erc1155Metadata,
+} from './types'
 import { formatAddress } from './utils'
 import { validatePageSize } from '../utils'
+import { ERC1155_ABI } from './abi/erc1155'
+import { ERC721_ABI } from './abi/erc721'
 
 axiosRetry(axios, { retries: 5, retryDelay: axiosRetry.exponentialDelay })
 
@@ -27,6 +37,8 @@ const handleError = (err: unknown): ApiError => {
 const exponentialDelay = async (retryCount: number) =>
   new Promise((resolve) => setTimeout(resolve, axiosRetry.exponentialDelay(retryCount)))
 
+type TokenType = 'erc721' | 'erc1155'
+
 export interface ServiceArgs {
   blockbook: Blockbook
   explorerApiKey?: string
@@ -43,6 +55,10 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   private readonly logger: Logger
   private readonly provider: ethers.providers.JsonRpcProvider
   private readonly rpcUrl: string
+  private readonly abiInterface: Record<TokenType, ethers.utils.Interface> = {
+    erc721: new ethers.utils.Interface(ERC721_ABI),
+    erc1155: new ethers.utils.Interface(ERC1155_ABI),
+  }
 
   constructor(args: ServiceArgs) {
     this.blockbook = args.blockbook
@@ -644,6 +660,45 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     return {
       hasMore: cursor.blockbookPage < (blockbookData.totalPages ?? -1) ? true : false,
       txs: blockbookTxs,
+    }
+  }
+
+  async getTokenMetadata(address: string, id: string, type: TokenType): Promise<TokenMetadata> {
+    const substitue = (data: string, id: string): string => {
+      if (!data.includes('{id}')) return data
+      return data.replace('{id}', new BigNumber(id).toString(16).padStart(64, '0').toLowerCase())
+    }
+
+    const formatUrl = (url: string): string => {
+      if (!url.startsWith('ipfs')) return url
+      return `https://ipfs.io/ipfs/${url.replace(/^ipfs:\/\//, '')}`
+    }
+
+    const contract = new ethers.Contract(address, this.abiInterface[type], this.provider)
+    const uri = (await (() => {
+      switch (type) {
+        case 'erc721':
+          return contract.tokenURI(id)
+        case 'erc1155':
+          return contract.uri(id)
+        default:
+          throw new Error(`invalid token type: ${type}`)
+      }
+    })()) as string
+
+    const { data } = await axios.get<Erc1155Metadata>(formatUrl(substitue(uri, id)))
+
+    const imageUrl = formatUrl(substitue(data.image, id))
+
+    const { headers } = await axios.head(imageUrl)
+
+    return {
+      name: data.name,
+      description: data.description,
+      media: {
+        url: formatUrl(data.image),
+        type: headers['content-type']?.includes('video') ? 'video' : 'image',
+      },
     }
   }
 }

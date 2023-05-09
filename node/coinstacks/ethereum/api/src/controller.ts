@@ -10,7 +10,16 @@ import {
   SendTxBody,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { API, Account, GasFees, Tx, TxHistory, GasEstimate } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
+import {
+  API,
+  Account,
+  GasFees,
+  Tx,
+  TxHistory,
+  GasEstimate,
+  TokenMetadata,
+  TokenType,
+} from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { Service } from '../../../common/api/src/evm/service'
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
@@ -243,5 +252,38 @@ export class Ethereum extends Controller implements BaseAPI, API {
   @Post('send/')
   async sendTx(@Body() body: SendTxBody): Promise<string> {
     return service.sendTx(body)
+  }
+
+  /**
+  /**
+   * Get token metadata
+   *
+   * @param {string} contract contract address
+   * @param {string} id token identifier
+   * @param {TokenType} type token type (erc721 or erc1155)
+   *
+   * @returns {Promise<TokenMetadata>} token metadata
+   *
+   * @example contractAddress "0x4Db1f25D3d98600140dfc18dEb7515Be5Bd293Af"
+   * @example id "3150"
+   * @example type "erc721"
+   */
+  @Example<TokenMetadata>({
+    name: 'HAPE #3150',
+    description: '8192 next-generation, high-fashion HAPES.',
+    media: {
+      url: 'https://meta.hapeprime.com/3150.png',
+      type: 'image',
+    },
+  })
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Get('/metadata/token')
+  async getTokenMetadata(
+    @Query() contract: string,
+    @Query() id: string,
+    @Query() type: TokenType
+  ): Promise<TokenMetadata> {
+    return service.getTokenMetadata(contract, id, type)
   }
 }

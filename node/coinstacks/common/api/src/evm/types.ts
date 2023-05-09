@@ -70,3 +70,15 @@ export interface FeeHistory {
   gasUsedRatio: Array<number>
   reward: Array<Array<string>>
 }
+
+export interface Erc1155Metadata {
+  name: string
+  description: string
+  image: string
+}
+
+export interface Erc721Metadata {
+  name: string
+  description: string
+  image: string
+}
