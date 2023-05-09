@@ -403,7 +403,6 @@
 							}
 						},
 						"required": [
-							"type",
 							"url"
 						],
 						"type": "object"
@@ -1009,7 +1008,7 @@
 						}
 					}
 				},
-				"description": "/**\n  Get token metadata",
+				"description": "Get token metadata",
 				"tags": [
 					"v1"
 				],

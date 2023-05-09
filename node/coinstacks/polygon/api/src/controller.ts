@@ -10,7 +10,16 @@ import {
   SendTxBody,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { API, Account, GasFees, Tx, TxHistory, GasEstimate } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
+import {
+  API,
+  Account,
+  GasFees,
+  Tx,
+  TxHistory,
+  GasEstimate,
+  TokenMetadata,
+  TokenType,
+} from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { Service } from '../../../common/api/src/evm/service'
 
 const INDEXER_URL = process.env.INDEXER_URL
@@ -267,5 +276,37 @@ export class Polygon extends Controller implements BaseAPI, API {
   @Post('send/')
   async sendTx(@Body() body: SendTxBody): Promise<string> {
     return service.sendTx(body)
+  }
+
+  /**
+   * Get token metadata
+   *
+   * @param {string} contract contract address
+   * @param {string} id token identifier
+   * @param {TokenType} type token type (erc721 or erc1155)
+   *
+   * @returns {Promise<TokenMetadata>} token metadata
+   *
+   * @example contractAddress "0x495D897BE6a6e57432C954f3C381eaBfa4699795"
+   * @example id "5705"
+   * @example type "erc721"
+   */
+  @Example<TokenMetadata>({
+    name: 'On-chain Quest',
+    description: '',
+    media: {
+      url: 'https://cdn.galxe.com/galaxy/symbiosis/a9e5b6a0-6e72-4f09-8a96-bd9ca313411f.png',
+      type: 'image',
+    },
+  })
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Get('/metadata/token')
+  async getTokenMetadata(
+    @Query() contract: string,
+    @Query() id: string,
+    @Query() type: TokenType
+  ): Promise<TokenMetadata> {
+    return service.getTokenMetadata(contract, id, type)
   }
 }

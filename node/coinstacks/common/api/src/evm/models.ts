@@ -54,7 +54,7 @@ export interface TokenMetadata {
   description: string
   media: {
     url: string
-    type: 'image' | 'video'
+    type?: 'image' | 'video'
   }
 }
 

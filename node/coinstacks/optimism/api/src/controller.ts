@@ -14,7 +14,7 @@ import {
   SendTxBody,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { API, Account, Tx, TxHistory } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
+import { API, Account, TokenMetadata, TokenType, Tx, TxHistory } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { Service } from '../../../common/api/src/evm/service'
 import { OptimismGasEstimate, OptimismGasFees } from './models'
 
@@ -283,5 +283,37 @@ export class Optimism extends Controller implements BaseAPI, API {
   @Post('send/')
   async sendTx(@Body() body: SendTxBody): Promise<string> {
     return service.sendTx(body)
+  }
+
+  /**
+   * Get token metadata
+   *
+   * @param {string} contract contract address
+   * @param {string} id token identifier
+   * @param {TokenType} type token type (erc721 or erc1155)
+   *
+   * @returns {Promise<TokenMetadata>} token metadata
+   *
+   * @example contractAddress "0x081911b600Be8cf0E3545a0Ff9415C099C1b85fe"
+   * @example id "15976"
+   * @example type "erc721"
+   */
+  @Example<TokenMetadata>({
+    name: 'Fire 15976',
+    description: '',
+    media: {
+      url: 'https://dftqodalckck7.cloudfront.net/optimism/15976.svg',
+      type: 'image',
+    },
+  })
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Get('/metadata/token')
+  async getTokenMetadata(
+    @Query() contract: string,
+    @Query() id: string,
+    @Query() type: TokenType
+  ): Promise<TokenMetadata> {
+    return service.getTokenMetadata(contract, id, type)
   }
 }

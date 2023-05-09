@@ -255,7 +255,6 @@ export class Ethereum extends Controller implements BaseAPI, API {
   }
 
   /**
-  /**
    * Get token metadata
    *
    * @param {string} contract contract address

@@ -5,7 +5,18 @@ import { ethers } from 'ethers'
 import { ApiError as BlockbookApiError, Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
 import { ApiError, BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
-import { Account, API, TokenBalance, Tx, TxHistory, GasFees, InternalTx, GasEstimate, TokenMetadata } from './models'
+import {
+  Account,
+  API,
+  TokenBalance,
+  Tx,
+  TxHistory,
+  GasFees,
+  InternalTx,
+  GasEstimate,
+  TokenMetadata,
+  TokenType,
+} from './models'
 import {
   Cursor,
   NodeBlock,
@@ -36,8 +47,6 @@ const handleError = (err: unknown): ApiError => {
 
 const exponentialDelay = async (retryCount: number) =>
   new Promise((resolve) => setTimeout(resolve, axiosRetry.exponentialDelay(retryCount)))
-
-type TokenType = 'erc721' | 'erc1155'
 
 export interface ServiceArgs {
   blockbook: Blockbook
@@ -669,12 +678,8 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       return data.replace('{id}', new BigNumber(id).toString(16).padStart(64, '0').toLowerCase())
     }
 
-    const formatUrl = (url: string): string => {
-      if (!url.startsWith('ipfs')) return url
-      return `https://ipfs.io/ipfs/${url.replace(/^ipfs:\/\//, '')}`
-    }
-
     const contract = new ethers.Contract(address, this.abiInterface[type], this.provider)
+
     const uri = (await (() => {
       switch (type) {
         case 'erc721':
@@ -686,18 +691,24 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       }
     })()) as string
 
-    const { data } = await axios.get<Erc1155Metadata>(formatUrl(substitue(uri, id)))
+    const { data } = !uri.startsWith('ipfs://')
+      ? await axios.get<Erc1155Metadata>(substitue(uri, id))
+      : { data: {} as Erc1155Metadata }
 
-    const imageUrl = formatUrl(substitue(data.image, id))
+    const mediaUrl = substitue(data.image ?? '', id)
 
-    const { headers } = await axios.head(imageUrl)
+    const mediaType = await (async () => {
+      if (!mediaUrl || mediaUrl.startsWith('ipfs://')) return
+      const { headers } = await axios.head(mediaUrl)
+      return headers['content-type']?.includes('video') ? 'video' : 'image'
+    })()
 
     return {
-      name: data.name,
-      description: data.description,
+      name: data.name ?? '',
+      description: data.description ?? '',
       media: {
-        url: formatUrl(data.image),
-        type: headers['content-type']?.includes('video') ? 'video' : 'image',
+        url: mediaUrl,
+        type: mediaType,
       },
     }
   }

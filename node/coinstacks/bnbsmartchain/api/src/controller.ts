@@ -10,7 +10,16 @@ import {
   SendTxBody,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { API, Account, GasFees, Tx, TxHistory, GasEstimate } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
+import {
+  API,
+  Account,
+  GasFees,
+  Tx,
+  TxHistory,
+  GasEstimate,
+  TokenType,
+  TokenMetadata,
+} from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { Service } from '../../../common/api/src/evm/service'
 
 const INDEXER_URL = process.env.INDEXER_URL
@@ -226,5 +235,38 @@ export class BNBSmartChain extends Controller implements BaseAPI, API {
   @Post('send/')
   async sendTx(@Body() body: SendTxBody): Promise<string> {
     return service.sendTx(body)
+  }
+
+  /**
+  /**
+   * Get token metadata
+   *
+   * @param {string} contract contract address
+   * @param {string} id token identifier
+   * @param {TokenType} type token type (erc721 or erc1155)
+   *
+   * @returns {Promise<TokenMetadata>} token metadata
+   *
+   * @example contractAddress "0x5000Aecf70A935E49C5A1c8AC3469430A8d39072"
+   * @example id "47240"
+   * @example type "erc721"
+   */
+  @Example<TokenMetadata>({
+    name: 'Giant Squid zkGalxe Special NFT | Manta Network',
+    description: '',
+    media: {
+      url: 'https://cdn.galxe.com/galaxy/mantanetwork/54518748-d6e7-4ab4-9386-e941bfc42945.png',
+      type: 'image',
+    },
+  })
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Get('/metadata/token')
+  async getTokenMetadata(
+    @Query() contract: string,
+    @Query() id: string,
+    @Query() type: TokenType
+  ): Promise<TokenMetadata> {
+    return service.getTokenMetadata(contract, id, type)
   }
 }
