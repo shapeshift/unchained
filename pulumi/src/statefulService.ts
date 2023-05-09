@@ -59,6 +59,18 @@ export function createCoinService(args: CoinServiceArgs, assetName: string, snap
         ...(args.memoryRequest && { memory: args.memoryRequest }),
       },
     },
+    ...(args.readinessEndpoint && {
+      readinessProbe: {
+        httpGet: {
+          path: args.readinessEndpoint,
+          port: 8545,
+        },
+        initialDelaySeconds: 5,
+        periodSeconds: 10,
+        successThreshold: 1,
+        timeoutSeconds: 10,
+      },
+    }),
     ports: ports.map(({ port: containerPort, name }) => ({ containerPort, name })),
     securityContext: { runAsUser: 0 },
     volumeMounts: [

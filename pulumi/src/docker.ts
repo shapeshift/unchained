@@ -59,7 +59,9 @@ export const buildAndPushImage = async (args: BuildAndPushImageArgs): Promise<vo
 
   dockerBuildArgs.push(args.context)
 
-  execSync(`${envs} docker build --platform linux/amd64 ${dockerBuildArgs.join(' ')}`, { stdio: 'inherit' })
+  execSync(`${envs} docker build --platform linux/amd64 -o type=docker ${dockerBuildArgs.join(' ')}`, {
+    stdio: 'inherit',
+  })
 
   if (!pulumi.runtime.isDryRun()) {
     dockerTags.forEach((tag) => execSync(`docker push ${tag}`))
