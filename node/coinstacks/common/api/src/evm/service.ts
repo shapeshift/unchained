@@ -17,15 +17,7 @@ import {
   TokenMetadata,
   TokenType,
 } from './models'
-import {
-  Cursor,
-  NodeBlock,
-  CallStack,
-  ExplorerApiResponse,
-  ExplorerInternalTx,
-  FeeHistory,
-  Erc1155Metadata,
-} from './types'
+import { Cursor, NodeBlock, CallStack, ExplorerApiResponse, ExplorerInternalTx, FeeHistory } from './types'
 import { formatAddress } from './utils'
 import { validatePageSize } from '../utils'
 import { ERC1155_ABI } from './abi/erc1155'
@@ -691,9 +683,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       }
     })()) as string
 
-    const { data } = !uri.startsWith('ipfs://')
-      ? await axios.get<Erc1155Metadata>(substitue(uri, id))
-      : { data: {} as Erc1155Metadata }
+    const { data } = !uri.startsWith('ipfs://') ? await axios.get(substitue(uri, id)) : { data: {} }
 
     const mediaUrl = substitue(data.image ?? '', id)
 
