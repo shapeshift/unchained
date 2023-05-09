@@ -661,6 +661,52 @@ aliases:
     stateful-service-backup-schedule: "0 4 * * 3,6"
     stateful-service-backup-count: 2
 
+
+  - &gnosis
+    assetName: gnosis
+    pulumi-stack: public-us-east-2
+    pulumi-dir: coinstacks/gnosis/pulumi
+    rpc-url: http://gnosis-svc.unchained.svc.cluster.local:8545
+    indexer-url: http://gnosis-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://gnosis-svc.unchained.svc.cluster.local:8001/websocket
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 6
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
+    api-cpu-threshold: 30
+    api-memory-limit: 500Mi
+    stateful-service-replicas: 2
+    service-name-1: daemon
+    service-image-1: nethermind/nethermind:1.18.0
+    service-cpu-limit-1: "4"
+    service-cpu-request-1: "2"
+    service-memory-limit-1: 16Gi
+    service-storage-size-1: 1000Gi
+    service-name-2: daemon-beacon
+    service-image-2: sigp/lighthouse:v4.1.0
+    service-cpu-limit-2: "4"
+    service-cpu-request-2: "2"
+    service-memory-limit-2: 16Gi
+    service-storage-size-2: 500Gi
+
+
+  - &gnosis-dev
+    <<: *gnosis
+    environment: dev
+    pulumi-stack: public-dev-us-east-2
+    rpc-url: http://gnosis-svc.unchained-dev.svc.cluster.local:8545
+    indexer-url: http://gnosis-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://gnosis-svc.unchained-dev.svc.cluster.local:8001/websocket
+    # api-replicas: 1
+    # api-max-replicas: 2
+    # api-cpu-limit: 300m
+    # api-memory-limit: 250Mi
+    stateful-service-replicas: 1
+    stateful-service-backup: true
+    stateful-service-backup-schedule: "0 4 * * 3"
+    stateful-service-backup-count: 1
+
 commands:
   precheck:
     description: install dependencies
@@ -1229,6 +1275,16 @@ workflows:
           requires:
             - deploy dependencies
           <<: *polygon-dev
+          <<: *only-develop
+
+      - deploy-coinstack-node:
+          name: deploy gnosis develop
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          etherscan-env-var: ETHERSCAN_API_KEY_GNOSIS
+          requires:
+            - deploy dependencies
+          <<: *gnosis-dev
           <<: *only-develop
 
       - deploy-coinstack-go:
