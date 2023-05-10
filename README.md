@@ -113,7 +113,6 @@ Traefik routes requests based on host name. which includes the coinstack name. F
 
   This will trigger the security popup, allow the go process to make the network calls. Once you approve it, you can kill the process and restart `docker-compose`. The app should start immediately. 
 
-
 - Mac OS: once you start a coinstack you should be able to access unchained in the browser without further config, but for CLI access to work you need to modify `/etc/hosts` and add a valid DNS entry:
 
   ```sh
