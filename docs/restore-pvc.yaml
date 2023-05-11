@@ -1,26 +1,19 @@
-# Bootstrap Node from Snapshot
-
-1. Manually set statefulset replicas for the target coinstack to 0.
-2. Delete PVCs and PVs related to the coinstack.
- 
-```sh
-cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   finalizers:
   - kubernetes.io/pv-protection
   - external-attacher/ebs-csi-aws-com
-  name: data-indexer-ethereum-sts-0-pv
+  name: <data-xxx-sts-0-pv-dev>
 spec:
   accessModes:
     - ReadWriteOnce
   capacity:
-    storage: 500Gi
+    storage: 200Gi
   csi:
     driver: ebs.csi.aws.com
     fsType: ext4
-    volumeHandle: vol-xxxxxxxxxxxxxxxxx
+    volumeHandle: <vol-xxx>
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -28,7 +21,7 @@ spec:
         - key: topology.ebs.csi.aws.com/zone
           operator: In
           values:
-          - us-east-2a
+          - <us-east-2x>
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ebs-csi-gp2
   volumeMode: Filesystem
@@ -36,19 +29,17 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: data-indexer-ethereum-sts-0
-  namespace: unchained
+  name: <data-xxx-sts-0>
+  namespace: unchained-dev
   labels:
     app: unchained
-    asset: ethereum
+    asset: <assetname>
     tier: statefulservice
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 500Gi
+      storage: 200Gi
   storageClassName: ebs-csi-gp2
-  volumeName: data-indexer-ethereum-sts-0-pv
-EOF
-```
+  volumeName: data-xxx-sts-0-pv-dev
