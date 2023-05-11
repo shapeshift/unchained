@@ -30,7 +30,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: <data-xxx-sts-0>
-  namespace: unchained-dev
+  namespace: <namespace>
   labels:
     app: unchained
     asset: <assetname>
