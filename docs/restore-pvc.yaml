@@ -42,4 +42,4 @@ spec:
     requests:
       storage: 200Gi
   storageClassName: ebs-csi-gp2
-  volumeName: data-xxx-sts-0-pv-dev
+  volumeName: <data-xxx-sts-0-pv-dev>
