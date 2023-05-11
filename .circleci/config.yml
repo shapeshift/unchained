@@ -497,9 +497,9 @@ aliases:
     service-cpu-request-2: "2"
     service-cpu-limit-2: "4"
     service-memory-limit-2: 8Gi
-    service-storage-size-2: 200Gi
+    service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: registry.gitlab.com/thorchain/midgard:2.13.0
+    service-image-3: registry.gitlab.com/thorchain/midgard:2.14.3
     service-cpu-limit-3: 500m
     service-cpu-request-3: 250m
     service-memory-limit-3: 1Gi
