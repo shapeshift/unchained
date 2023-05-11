@@ -503,7 +503,7 @@ aliases:
     service-cpu-limit-3: 500m
     service-cpu-request-3: 250m
     service-memory-limit-3: 1Gi
-    service-storage-size-3: 50Gi
+    service-storage-size-3: 100Gi
 
   - &thorchain-dev
     <<: *thorchain
