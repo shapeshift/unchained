@@ -669,6 +669,7 @@ aliases:
     rpc-url: http://gnosis-svc.unchained.svc.cluster.local:8545
     indexer-url: http://gnosis-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://gnosis-svc.unchained.svc.cluster.local:8001/websocket
+    api: false
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -687,8 +688,14 @@ aliases:
     service-image-2: sigp/lighthouse:v4.1.0
     service-cpu-limit-2: "4"
     service-cpu-request-2: "2"
-    service-memory-limit-2: 16Gi
+    service-memory-limit-2: 8Gi
     service-storage-size-2: 500Gi
+    service-name-3: indexer
+    service-image-3: shapeshiftdao/unchained-blockbook:gnosis-9c25fc0
+    service-cpu-limit-3: "8"
+    service-cpu-request-3: "4"
+    service-memory-limit-3: 24Gi
+    service-storage-size-3: 500Gi
 
 
   - &gnosis-dev
@@ -698,7 +705,7 @@ aliases:
     rpc-url: http://gnosis-svc.unchained-dev.svc.cluster.local:8545
     indexer-url: http://gnosis-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://gnosis-svc.unchained-dev.svc.cluster.local:8001/websocket
-    api-replicas: 0
+    api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 300m
     api-memory-limit: 250Mi

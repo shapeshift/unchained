@@ -72,7 +72,6 @@ export interface CoinServiceArgs extends ServiceConfig {
   dataDir?: string
   configMapData?: Record<string, string>
   volumeMounts?: Array<k8s.types.input.core.v1.VolumeMount>
-  readinessEndpoint?: string
   readinessProbe?: k8s.types.input.core.v1.Probe
   livenessProbe?: k8s.types.input.core.v1.Probe
 }

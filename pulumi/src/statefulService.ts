@@ -10,7 +10,7 @@ export function createCoinService(args: CoinServiceArgs, assetName: string, snap
   const ports = Object.entries(args.ports ?? []).map(([name, port]) => ({ name, ...port }))
   const env = Object.entries(args.env ?? []).map(([name, value]) => ({ name, value }))
 
-  const init = (() => {
+  const initScript = (() => {
     try {
       return readFileSync(`../${args.name}/init.sh`).toString()
     } catch (err) {
@@ -18,7 +18,7 @@ export function createCoinService(args: CoinServiceArgs, assetName: string, snap
     }
   })()
 
-  const liveness = (() => {
+  const livenessScript = (() => {
     try {
       return readFileSync(`../${args.name}/liveness.sh`).toString()
     } catch (err) {
@@ -26,7 +26,7 @@ export function createCoinService(args: CoinServiceArgs, assetName: string, snap
     }
   })()
 
-  const readiness = (() => {
+  const readinessScript = (() => {
     try {
       return readFileSync(`../${args.name}/readiness.sh`).toString()
     } catch (err) {
@@ -35,9 +35,9 @@ export function createCoinService(args: CoinServiceArgs, assetName: string, snap
   })()
 
   const configMapData = {
-    ...(Boolean(init) && { [`${args.name}-init.sh`]: init }),
-    ...(Boolean(liveness) && { [`${args.name}-liveness.sh`]: liveness }),
-    ...(Boolean(readiness) && { [`${args.name}-readiness.sh`]: readiness }),
+    ...(Boolean(initScript) && { [`${args.name}-init.sh`]: initScript }),
+    ...(Boolean(livenessScript) && { [`${args.name}-liveness.sh`]: livenessScript }),
+    ...(Boolean(readinessScript) && { [`${args.name}-readiness.sh`]: readinessScript }),
     ...(args.configMapData ?? {}),
   }
 
@@ -46,7 +46,7 @@ export function createCoinService(args: CoinServiceArgs, assetName: string, snap
   const serviceContainer: k8s.types.input.core.v1.Container = {
     name,
     image: args.image,
-    command: init && !args.command ? ['/init.sh'] : args.command,
+    command: initScript && !args.command ? ['/init.sh'] : args.command,
     args: args.args,
     env,
     resources: {
@@ -59,18 +59,13 @@ export function createCoinService(args: CoinServiceArgs, assetName: string, snap
         ...(args.memoryRequest && { memory: args.memoryRequest }),
       },
     },
-    ...(args.readinessEndpoint && {
-      readinessProbe: {
-        httpGet: {
-          path: args.readinessEndpoint,
-          port: 8545,
+    ...(!readinessScript &&
+      args.readinessProbe && {
+        readinessProbe: {
+          initialDelaySeconds: 30,
+          ...args.readinessProbe,
         },
-        initialDelaySeconds: 5,
-        periodSeconds: 10,
-        successThreshold: 1,
-        timeoutSeconds: 10,
-      },
-    }),
+      }),
     ports: ports.map(({ port: containerPort, name }) => ({ containerPort, name })),
     securityContext: { runAsUser: 0 },
     volumeMounts: [
@@ -78,7 +73,7 @@ export function createCoinService(args: CoinServiceArgs, assetName: string, snap
         name: `data-${args.name}`,
         mountPath: args.dataDir ?? '/data',
       },
-      ...(init
+      ...(initScript
         ? [
             {
               name: 'config-map',
@@ -93,32 +88,30 @@ export function createCoinService(args: CoinServiceArgs, assetName: string, snap
 
   containers.push(serviceContainer)
 
-  if (readiness || liveness) {
+  if (readinessScript || livenessScript) {
     const monitorContainer: k8s.types.input.core.v1.Container = {
       name: `${name}-monitor`,
       image: 'shapeshiftdao/unchained-probe:1.0.0',
-      ...(readiness && {
+      ...(readinessScript && {
         readinessProbe: {
           exec: {
             command: ['/readiness.sh'],
           },
           initialDelaySeconds: 30,
-          periodSeconds: 10,
           ...args.readinessProbe,
         },
       }),
-      ...(liveness && {
+      ...(livenessScript && {
         livenessProbe: {
           exec: {
             command: ['/liveness.sh'],
           },
           initialDelaySeconds: 30,
-          periodSeconds: 10,
           ...args.livenessProbe,
         },
       }),
       volumeMounts: [
-        ...(readiness
+        ...(readinessScript
           ? [
               {
                 name: 'config-map',
@@ -127,7 +120,7 @@ export function createCoinService(args: CoinServiceArgs, assetName: string, snap
               },
             ]
           : []),
-        ...(liveness
+        ...(livenessScript
           ? [
               {
                 name: 'config-map',
