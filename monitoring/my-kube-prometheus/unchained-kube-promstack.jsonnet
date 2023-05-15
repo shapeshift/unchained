@@ -20,7 +20,10 @@ local kp =
             },
           },
         },
-      }
+      },
+      alertmanager+: {
+        config: importstr 'alertmanager-config.yaml',
+      },
     },
     kubeStateMetrics+:: {
       deployment+: {
