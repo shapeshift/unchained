@@ -15,9 +15,6 @@ local kp =
       grafana+:: {
         config: {
           sections: {
-            'auth.anonymous': {
-              enabled: true,
-            },
             security: {
               admin_password: grafana_admin_password,
             },
