@@ -18,7 +18,7 @@ export = async (): Promise<Outputs> => {
     name,
     {
       namespace: namespace,
-      rootDomain: domain,
+      domain: domain,
       additionalDomain: additionalDomain,
     },
     { provider }
