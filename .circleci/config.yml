@@ -586,7 +586,7 @@ aliases:
     service-cpu-request-1: "8"
     service-memory-limit-1: 48Gi
     service-memory-request-1: 24Gi
-    service-storage-size-1: 3000Gi
+    service-storage-size-1: 3500Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "4"
@@ -630,7 +630,7 @@ aliases:
     service-cpu-limit-1: "8"
     service-cpu-request-1: "4"
     service-memory-limit-1: 32Gi
-    service-storage-size-1: 3000Gi
+    service-storage-size-1: 3500Gi
     service-name-2: heimdall
     service-image-2: 0xpolygon/heimdall:0.3.3
     service-cpu-limit-2: "2"
