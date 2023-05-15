@@ -1,4 +1,5 @@
 local addArgs = (import './utils.libsonnet').addArgs;
+local grafana_admin_password = std.extVar('grafana_admin_password');
 
 local kp =
   (import 'kube-prometheus/main.libsonnet') +
@@ -11,6 +12,18 @@ local kp =
       prometheus+:: {
         namespaces+: ['unchained', 'unchained-dev', 'unchained-infra'],
       },
+      grafana+:: {
+        config: {
+          sections: {
+            'auth.anonymous': {
+              enabled: true,
+            },
+            security: {
+              admin_password: grafana_admin_password,
+            },
+          },
+        },
+      }
     },
     kubeStateMetrics+:: {
       deployment+: {

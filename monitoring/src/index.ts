@@ -7,7 +7,7 @@ type Outputs = Record<string, any>
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
-  const { kubeconfig, domain } = await getConfig()
+  const { kubeconfig, domain, additionalDomain } = await getConfig()
 
   const name = 'unchained'
   const namespace = `${name}-monitoring`
@@ -18,7 +18,8 @@ export = async (): Promise<Outputs> => {
     name,
     {
       namespace: namespace,
-      domain: domain,
+      rootDomain: domain,
+      additionalDomain: additionalDomain,
     },
     { provider }
   )
