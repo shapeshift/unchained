@@ -4,6 +4,7 @@ import * as pulumi from '@pulumi/pulumi'
 export interface deploymentArgs {
   namespace: pulumi.Input<string>
   domain: string
+  additionalDomain?: string
 }
 
 export class Ingress extends pulumi.ComponentResource {
@@ -41,6 +42,10 @@ export class Ingress extends pulumi.ComponentResource {
       { ...opts }
     )
 
+    const domains = args.additionalDomain
+      ? `Host(\`monitoring.${args.domain}\`)` || `Host(\`monitoring.${args.additionalDomain}\`)`
+      : `Host(\`monitoring.${args.domain}\`)`
+
     new k8s.apiextensions.CustomResource(
       `${name}-grafana-ingressroute`,
       {
@@ -53,7 +58,7 @@ export class Ingress extends pulumi.ComponentResource {
           entryPoints: ['web', 'websecure'],
           routes: [
             {
-              match: `Host(\`monitoring.${args.domain}\`)`,
+              match: domains,
               kind: 'Rule',
               services: [
                 {
