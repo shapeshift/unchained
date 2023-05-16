@@ -12,6 +12,7 @@ route:
     # catch alerts that are related to a list of services.
     - matchers:
         - alertname=~"KubePersistentVolumeFillingUp|KubeJobFailed"
+      receiver: discord
         
   
 receivers:
