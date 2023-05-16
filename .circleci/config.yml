@@ -1350,14 +1350,14 @@ workflows:
           requires:
             - preview monitoring kube-prometheus
             - preview monitoring pulumi
-          <<: *only-develop
+          # <<: *only-develop
 
       - deploy-kube-prometheus:
           name: deploy monitoring kube-prometheus
           organization: TAXISTAKE
           requires:
             - approve
-          <<: *only-develop
+          # <<: *only-develop
 
       - deploy-monitoring-pulumi:
           name: deploy monitoring pulumi
@@ -1365,7 +1365,7 @@ workflows:
           pulumi-command: up -f --yes
           requires:
             - approve
-          <<: *only-develop
+          # <<: *only-develop
 
   deploy-main:
     jobs:

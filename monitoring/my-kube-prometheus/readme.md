@@ -14,10 +14,12 @@ This setup works in tandem with the existing Pulumi config, and the Pulumi monit
 
 Install [goland](https://go.dev/)
 Install [jsonnet](https://github.com/google/jsonnet)
+Install [jsonnet](https://github.com/google/jsonnet)
 Install [jb](https://github.com/jsonnet-bundler/jsonnet-bundler#install)
 
-Run `jb install`
+`go install github.com/brancz/gojsontoyaml@latest`
 
+Run `jb install`
 
 # Usage
 

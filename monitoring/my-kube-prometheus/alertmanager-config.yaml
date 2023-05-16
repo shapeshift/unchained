@@ -4,11 +4,20 @@ route:
   group_wait: 30s
   group_interval: 5m
   repeat_interval: 5m
+  receiver: blackhole
 
-  receiver: discord
-
+  # The child route trees.
+  routes:
+    # This routes performs a regular expression match on alert labels to
+    # catch alerts that are related to a list of services.
+    - matchers:
+        - alertname=~"KubePersistentVolumeFillingUp|KubeJobFailed"
+        
+  
 receivers:
 - name: discord
   discord_configs:
   - webhook_url: https://discord.com/api/webhooks/1107675995386949652/l-Vy65m12PshmvobRdGcZiyfaDGUuWhjRWsNnFKvmCU1YLg3Q3OfA5qEcyjEafbFee1o
+
+- name: blackhole
   

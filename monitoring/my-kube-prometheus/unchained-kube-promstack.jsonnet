@@ -82,7 +82,7 @@ local kp =
 { 'prometheus-operator-serviceMonitor': kp.prometheusOperator.serviceMonitor } +
 { 'prometheus-operator-prometheusRule': kp.prometheusOperator.prometheusRule } +
 { 'kube-prometheus-prometheusRule': kp.kubePrometheus.prometheusRule } +
-// { ['alertmanager-' + name]: kp.alertmanager[name] for name in std.objectFields(kp.alertmanager) } +
+{ ['alertmanager-' + name]: kp.alertmanager[name] for name in std.objectFields(kp.alertmanager) } +
 // { ['blackbox-exporter-' + name]: kp.blackboxExporter[name] for name in std.objectFields(kp.blackboxExporter) } +
 { ['grafana-' + name]: kp.grafana[name] for name in std.objectFields(kp.grafana) } +
 // { ['pyrra-' + name]: kp.pyrra[name] for name in std.objectFields(kp.pyrra) if name != 'crd' } +
