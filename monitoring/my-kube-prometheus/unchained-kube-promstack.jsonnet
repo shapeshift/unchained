@@ -1,6 +1,17 @@
 local addArgs = (import "./utils.libsonnet").addArgs;
 local grafana_admin_password = std.extVar("grafana_admin_password");
 
+
+local configmap(name, namespace, data) = {
+  apiVersion: 'v1',
+  kind: 'ConfigMap',
+  metadata: {
+    name: name,
+    namespace: namespace,
+  },
+  data: data,
+};
+
 local kp =
   (import "kube-prometheus/main.libsonnet") +
   (import "kube-prometheus/addons/networkpolicies-disabled.libsonnet") +
@@ -24,6 +35,21 @@ local kp =
       alertmanager+: {
         config: importstr "alertmanager-config.yaml",
       },
+    },
+    alertmanager+:: {
+      alertmanager+: {
+        spec+: {
+          // the important field configmaps:
+          configMaps: ['default.tmpl'],  // goes to etc/alermanager/configmaps
+        },
+      },
+    },
+    configmap+:: {
+      'alert-templates': configmap(
+        'default.tmpl',
+        $.values.common.namespace,  // could be $._config.namespace to assign namespace once
+        { data: importstr 'default.tmpl' },
+      ),
     },
     kubeStateMetrics+:: {
       deployment+: {
@@ -86,4 +112,5 @@ local kp =
 { ["kubernetes-" + name]: kp.kubernetesControlPlane[name] for name in std.objectFields(kp.kubernetesControlPlane) } +
 { ["node-exporter-" + name]: kp.nodeExporter[name] for name in std.objectFields(kp.nodeExporter) } +
 { ["prometheus-" + name]: kp.prometheus[name] for name in std.objectFields(kp.prometheus) } +
-{ ["prometheus-adapter-" + name]: kp.prometheusAdapter[name] for name in std.objectFields(kp.prometheusAdapter) }
+{ ["prometheus-adapter-" + name]: kp.prometheusAdapter[name] for name in std.objectFields(kp.prometheusAdapter) } +
+{ [name + '-configmap']: kp.configmap[name] for name in std.objectFields(kp.configmap) }
