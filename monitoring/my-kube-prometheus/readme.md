@@ -10,6 +10,15 @@ The state is not kept in the repository, as it's a lot of generated yaml files.
 
 This setup works in tandem with the existing Pulumi config, and the Pulumi monitoring config should be applied directly after deploying the changes configured here.
 
+# Initial setup
+
+Install [goland](https://go.dev/)
+Install [jsonnet](https://github.com/google/jsonnet)
+Install [jb](https://github.com/jsonnet-bundler/jsonnet-bundler#install)
+
+Run `jb install`
+
+
 # Usage
 
 ```sh
