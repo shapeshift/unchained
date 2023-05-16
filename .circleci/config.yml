@@ -155,7 +155,7 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 30
+    api-cpu-threshold: 50
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
@@ -168,7 +168,7 @@ aliases:
     service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 24Gi
+    service-memory-limit-2: 32Gi
     service-storage-size-2: 500Gi
 
   - &bitcoin-dev
@@ -196,7 +196,7 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 30
+    api-cpu-threshold: 50
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
@@ -209,7 +209,7 @@ aliases:
     service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.0.3
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 8Gi
+    service-memory-limit-2: 12Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
     service-image-3: shapeshiftdao/unchained-blockbook:fdc2b86
@@ -248,11 +248,11 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 30
+    api-cpu-threshold: 50
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/cosmoshub:v9.0.3
+    service-image-1: shapeshiftdao/cosmoshub:v9.1.0
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 32Gi
@@ -284,7 +284,7 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 30
+    api-cpu-threshold: 50
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
@@ -319,11 +319,11 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 30
+    api-cpu-threshold: 50
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: avaplatform/avalanchego:v1.10.0
+    service-image-1: avaplatform/avalanchego:v1.10.1
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
@@ -360,7 +360,7 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 30
+    api-cpu-threshold: 50
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
@@ -401,7 +401,7 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 30
+    api-cpu-threshold: 50
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
@@ -442,7 +442,7 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 30
+    api-cpu-threshold: 50
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
@@ -483,27 +483,27 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 30
+    api-cpu-threshold: 50
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:chaosnet-multichain-1.108.3
+    service-image-1: registry.gitlab.com/thorchain/thornode:chaosnet-multichain-1.109.2
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 8Gi
-    service-storage-size-1: 2000Gi
+    service-storage-size-1: 2500Gi
     service-name-2: timescaledb
     service-image-2: timescale/timescaledb:2.2.0-pg13
     service-cpu-request-2: "2"
     service-cpu-limit-2: "4"
     service-memory-limit-2: 8Gi
-    service-storage-size-2: 200Gi
+    service-storage-size-2: 500Gi
     service-name-3: indexer
     service-image-3: registry.gitlab.com/thorchain/midgard:2.13.0
     service-cpu-limit-3: 500m
     service-cpu-request-3: 250m
     service-memory-limit-3: 1Gi
-    service-storage-size-3: 50Gi
+    service-storage-size-3: 100Gi
 
   - &thorchain-dev
     <<: *thorchain
@@ -530,7 +530,7 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 30
+    api-cpu-threshold: 50
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
@@ -577,7 +577,7 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 30
+    api-cpu-threshold: 50
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
@@ -586,12 +586,12 @@ aliases:
     service-cpu-request-1: "8"
     service-memory-limit-1: 48Gi
     service-memory-request-1: 24Gi
-    service-storage-size-1: 3000Gi
+    service-storage-size-1: 3500Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "4"
     service-cpu-request-2: "2"
-    service-memory-limit-2: 12Gi
+    service-memory-limit-2: 16Gi
     service-storage-size-2: 750Gi
 
   - &bnbsmartchain-dev
@@ -622,15 +622,15 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 30
+    api-cpu-threshold: 50
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: 0xpolygon/bor:0.3.7
+    service-image-1: 0xpolygon/bor:0.3.9
     service-cpu-limit-1: "8"
     service-cpu-request-1: "4"
     service-memory-limit-1: 32Gi
-    service-storage-size-1: 3000Gi
+    service-storage-size-1: 3500Gi
     service-name-2: heimdall
     service-image-2: 0xpolygon/heimdall:0.3.3
     service-cpu-limit-2: "2"
@@ -641,7 +641,7 @@ aliases:
     service-image-3: shapeshiftdao/unchained-blockbook:polygon-e655dd8
     service-cpu-limit-3: "4"
     service-cpu-request-3: "2"
-    service-memory-limit-3: 12Gi
+    service-memory-limit-3: 16Gi
     service-storage-size-3: 500Gi
 
 
@@ -660,6 +660,59 @@ aliases:
     stateful-service-backup: true
     stateful-service-backup-schedule: "0 4 * * 3,6"
     stateful-service-backup-count: 2
+
+
+  - &gnosis
+    assetName: gnosis
+    pulumi-stack: public-us-east-2
+    pulumi-dir: coinstacks/gnosis/pulumi
+    rpc-url: http://gnosis-svc.unchained.svc.cluster.local:8545
+    indexer-url: http://gnosis-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://gnosis-svc.unchained.svc.cluster.local:8001/websocket
+    api: false
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 6
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
+    api-cpu-threshold: 50
+    api-memory-limit: 500Mi
+    stateful-service-replicas: 2
+    service-name-1: daemon
+    service-image-1: nethermind/nethermind:1.18.0
+    service-cpu-limit-1: "4"
+    service-cpu-request-1: "2"
+    service-memory-limit-1: 16Gi
+    service-storage-size-1: 1000Gi
+    service-name-2: daemon-beacon
+    service-image-2: sigp/lighthouse:v4.1.0
+    service-cpu-limit-2: "4"
+    service-cpu-request-2: "2"
+    service-memory-limit-2: 8Gi
+    service-storage-size-2: 500Gi
+    service-name-3: indexer
+    service-image-3: shapeshiftdao/unchained-blockbook:gnosis-9c25fc0
+    service-cpu-limit-3: "8"
+    service-cpu-request-3: "4"
+    service-memory-limit-3: 24Gi
+    service-storage-size-3: 500Gi
+
+
+  - &gnosis-dev
+    <<: *gnosis
+    environment: dev
+    pulumi-stack: public-dev-us-east-2
+    rpc-url: http://gnosis-svc.unchained-dev.svc.cluster.local:8545
+    indexer-url: http://gnosis-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://gnosis-svc.unchained-dev.svc.cluster.local:8001/websocket
+    api-replicas: 1
+    api-max-replicas: 2
+    api-cpu-limit: 300m
+    api-memory-limit: 250Mi
+    stateful-service-replicas: 1
+    stateful-service-backup: true
+    stateful-service-backup-schedule: "0 4 * * 3"
+    stateful-service-backup-count: 1
 
 commands:
   precheck:
@@ -850,14 +903,9 @@ jobs:
             pulumi config set --path unchained:common.eks.traefik.whitelist[12] 104.24.0.0/14
             pulumi config set --path unchained:common.eks.traefik.whitelist[13] 172.64.0.0/13
             pulumi config set --path unchained:common.eks.traefik.whitelist[14] 131.0.72.0/22
-            pulumi config set --path unchained:common.eks.traefik.whitelist[15] $VPN_ADDRESS_0
-            pulumi config set --path unchained:common.eks.traefik.whitelist[16] $VPN_ADDRESS_1
-            pulumi config set --path unchained:common.eks.traefik.whitelist[17] $VPN_ADDRESS_2
-            pulumi config set --path unchained:common.eks.traefik.whitelist[18] $VPN_ADDRESS_3
-            pulumi config set --path unchained:common.eks.traefik.whitelist[19] $VPN_ADDRESS_4
-            pulumi config set --path unchained:common.eks.traefik.whitelist[20] $AWS_TAXISTAKE_NAT_ADDRESS_0
-            pulumi config set --path unchained:common.eks.traefik.whitelist[21] $AWS_TAXISTAKE_NAT_ADDRESS_1
-            pulumi config set --path unchained:common.eks.traefik.whitelist[22] $AWS_TAXISTAKE_NAT_ADDRESS_2
+            pulumi config set --path unchained:common.eks.traefik.whitelist[15] $AWS_TAXISTAKE_NAT_ADDRESS_0
+            pulumi config set --path unchained:common.eks.traefik.whitelist[16] $AWS_TAXISTAKE_NAT_ADDRESS_1
+            pulumi config set --path unchained:common.eks.traefik.whitelist[17] $AWS_TAXISTAKE_NAT_ADDRESS_2
             pulumi config set --path unchained:common.eks.volumeSize 100
             pulumi config set --path unchained:common.dockerhub.username $DOCKERHUB_USERNAME
             pulumi config set --path unchained:common.dockerhub.password $DOCKERHUB_PASSWORD --plaintext
@@ -1229,6 +1277,16 @@ workflows:
           requires:
             - deploy dependencies
           <<: *polygon-dev
+          <<: *only-develop
+
+      - deploy-coinstack-node:
+          name: deploy gnosis develop
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          etherscan-env-var: ETHERSCAN_API_KEY_GNOSIS
+          requires:
+            - deploy dependencies
+          <<: *gnosis-dev
           <<: *only-develop
 
       - deploy-coinstack-go:

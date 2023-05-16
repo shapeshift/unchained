@@ -5,11 +5,26 @@ import { ethers } from 'ethers'
 import { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
 import { ApiError, BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
-import { Account, API, TokenBalance, Tx, TxHistory, GasFees, InternalTx, GasEstimate } from './models'
+import {
+  Account,
+  API,
+  TokenBalance,
+  Tx,
+  TxHistory,
+  GasFees,
+  InternalTx,
+  GasEstimate,
+  TokenMetadata,
+  TokenType,
+} from './models'
 import { Cursor, NodeBlock, CallStack, ExplorerApiResponse, ExplorerInternalTx } from './types'
+import { GasOracle } from './gasOracle'
 import { formatAddress, handleError } from './utils'
 import { validatePageSize } from '../utils'
-import { GasOracle } from './gasOracle'
+import { ERC1155_ABI } from './abi/erc1155'
+import { ERC721_ABI } from './abi/erc721'
+
+const axiosNoRetry = axios.create()
 
 axiosRetry(axios, { retries: 5, retryDelay: axiosRetry.exponentialDelay })
 
@@ -34,6 +49,10 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   private readonly logger: Logger
   private readonly provider: ethers.providers.JsonRpcProvider
   private readonly rpcUrl: string
+  private readonly abiInterface: Record<TokenType, ethers.utils.Interface> = {
+    erc721: new ethers.utils.Interface(ERC721_ABI),
+    erc1155: new ethers.utils.Interface(ERC1155_ABI),
+  }
 
   constructor(args: ServiceArgs) {
     this.blockbook = args.blockbook
@@ -291,16 +310,45 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       gasUsed: tx.ethereumSpecific.gasUsed?.toString() ?? '0',
       gasPrice: tx.ethereumSpecific.gasPrice.toString(),
       inputData: inputData && inputData !== '0x' && inputData !== '0x0' ? inputData : undefined,
-      tokenTransfers: tx.tokenTransfers?.map((tt) => ({
-        contract: tt.contract,
-        decimals: tt.decimals,
-        name: tt.name,
-        symbol: tt.symbol,
-        type: tt.type,
-        from: tt.from,
-        to: tt.to,
-        value: tt.value,
-      })),
+      tokenTransfers: tx.tokenTransfers?.map((tt) => {
+        const value = (() => {
+          switch (tt.type) {
+            case 'ERC721':
+            case 'BEP721':
+              return '1'
+            case 'ERC1155':
+            case 'BEP1155':
+              return tt.multiTokenValues?.[0]?.value ?? '0'
+            default:
+              return tt.value
+          }
+        })()
+
+        const id = (() => {
+          switch (tt.type) {
+            case 'ERC721':
+            case 'BEP721':
+              return tt.value
+            case 'ERC1155':
+            case 'BEP1155':
+              return tt.multiTokenValues?.[0]?.id
+            default:
+              return
+          }
+        })()
+
+        return {
+          contract: tt.contract,
+          decimals: tt.decimals,
+          name: tt.name,
+          symbol: tt.symbol,
+          type: tt.type,
+          from: tt.from,
+          to: tt.to,
+          value,
+          id,
+        }
+      }),
     }
   }
 
@@ -549,6 +597,65 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     return {
       hasMore: cursor.blockbookPage < (blockbookData.totalPages ?? -1) ? true : false,
       txs: blockbookTxs,
+    }
+  }
+
+  async getTokenMetadata(address: string, id: string, type: TokenType): Promise<TokenMetadata> {
+    const substitue = (data: string, id: string, hexEncoded: boolean): string => {
+      if (!data.includes('{id}')) return data
+      if (!hexEncoded) return data.replace('{id}', id)
+      return data.replace('{id}', new BigNumber(id).toString(16).padStart(64, '0').toLowerCase())
+    }
+
+    const contract = new ethers.Contract(address, this.abiInterface[type], this.provider)
+
+    const uri = (await (() => {
+      switch (type) {
+        case 'erc721':
+          return contract.tokenURI(id)
+        case 'erc1155':
+          return contract.uri(id)
+        default:
+          throw new Error(`invalid token type: ${type}`)
+      }
+    })()) as string
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const metadata = await (async () => {
+      if (uri.startsWith('ipfs://')) return {}
+
+      try {
+        // attempt to get metadata using hex encoded id as per erc spec
+        const { data } = await axiosNoRetry.get(substitue(uri, id, true))
+        return data
+      } catch (err) {
+        try {
+          // not everyone follows the spec
+          // attempt to get metadata using id string
+          const { data } = await axiosNoRetry.get(substitue(uri, id, false))
+          return data
+        } catch (err) {
+          // swallow error and return empty object if unable to fetch metadata
+          return {}
+        }
+      }
+    })()
+
+    const mediaUrl = metadata.image ?? ''
+
+    const mediaType = await (async () => {
+      if (!mediaUrl || mediaUrl.startsWith('ipfs://')) return
+      const { headers } = await axiosNoRetry.head(mediaUrl)
+      return headers['content-type']?.includes('video') ? 'video' : 'image'
+    })()
+
+    return {
+      name: metadata.name ?? '',
+      description: metadata.description ?? '',
+      media: {
+        url: mediaUrl,
+        type: mediaType,
+      },
     }
   }
 }

@@ -1,0 +1,18 @@
+{
+  "name": "@shapeshiftoss/gnosis-api",
+  "version": "9.2.0",
+  "license": "MIT",
+  "private": true,
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "yarn generate && tsc",
+    "clean": "rm -rf dist node_modules src/routes.ts src/swagger.json",
+    "generate": "tsoa spec-and-routes"
+  },
+  "dependencies": {
+    "@shapeshiftoss/blockbook": "^9.2.0",
+    "@shapeshiftoss/common-api": "^9.2.0"
+  }
+}
