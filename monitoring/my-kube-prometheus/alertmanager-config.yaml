@@ -19,6 +19,8 @@ receivers:
 - name: discord
   discord_configs:
   - webhook_url: https://discord.com/api/webhooks/1107675995386949652/l-Vy65m12PshmvobRdGcZiyfaDGUuWhjRWsNnFKvmCU1YLg3Q3OfA5qEcyjEafbFee1o
+    title: "{{ range .Alerts }}{{ .Annotations.summary }}\n{{ end }}"
+    message: "{{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"
 
 - name: blackhole
   
