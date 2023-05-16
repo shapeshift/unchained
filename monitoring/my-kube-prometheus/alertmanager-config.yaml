@@ -19,11 +19,13 @@ receivers:
 - name: discord
   discord_configs:
   - webhook_url: https://discord.com/api/webhooks/1107675995386949652/l-Vy65m12PshmvobRdGcZiyfaDGUuWhjRWsNnFKvmCU1YLg3Q3OfA5qEcyjEafbFee1o
-    # title: "{{ range .Alerts }}{{ .Annotations.summary }}\n{{ end }}"
+    message: '{{ template "our.discord.message" . }}'
+    title: '{{ template "our.discord.title" . }}'
+    # title: "Running out of disk space: {{ range .Alerts }}{{ .Annotations.summary }}\n{{ end }}"
     # message: "{{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"
 
 - name: blackhole
   
 
-# templates:
-# - '/etc/alertmanager/configmaps/default.tmpl'
+templates:
+- '/etc/alertmanager/configmaps/default.tmpl/data'

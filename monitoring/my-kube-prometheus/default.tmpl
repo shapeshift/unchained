@@ -1,11 +1,19 @@
-{{ define "discord.default.title" }}{{ template "__subject" . }}{{ end }}
-{{ define "discord.default.message" }}
-{{ if gt (len .Alerts.Firing) 0 }}
-Alerts Firing:
-{{ template "__text_alert_list" .Alerts.Firing }}
+#See https://github.com/prometheus/alertmanager/issues/3310 for details
+
+{{ define "our.discord.title" }}
+    Fire! {{ .GroupLabels.SortedPairs.Values | join " " }}
 {{ end }}
-{{ if gt (len .Alerts.Resolved) 0 }}
-Alerts Resolved:
-{{ template "__text_alert_list" .Alerts.Resolved }}
-{{ end }}
+
+{{ define "our.discord.message" }}
+    {{ range .Alerts.Firing }}
+      Alert: **{{ printf "%.150s" .Annotations.summary }}** ({{ .Labels.severity }})
+      Description: {{ printf "%.150s" .Annotations.description }}
+      Alertname: {{ .Labels.alertname }}
+      Namespace: {{ .Labels.namespace }}
+      Service: {{ .Labels.service }}
+    {{ end }}
+
+    {{ if gt (len .Alerts.Resolved) 0 }}
+        Also {{ .Alerts.Resolved | len }} resolved alerts.
+    {{ end }}
 {{ end }}
