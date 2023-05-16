@@ -881,6 +881,23 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/OptimismGasFees"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"l1GasPrice": "68076217338",
+											"gasPrice": "1048154",
+											"slow": {
+												"gasPrice": "1082857"
+											},
+											"average": {
+												"gasPrice": "1082857"
+											},
+											"fast": {
+												"gasPrice": "1082857"
+											}
+										}
+									}
 								}
 							}
 						}

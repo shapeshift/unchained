@@ -216,19 +216,19 @@ export class Avalanche extends Controller implements BaseAPI, API {
     baseFeePerGas: '25000000000',
     maxPriorityFeePerGas: '0',
     slow: {
-      gasPrice: '26950000000',
-      maxFeePerGas: '29853671876',
-      maxPriorityFeePerGas: '4853671876',
+      gasPrice: '25757584186',
+      maxFeePerGas: '28394352138',
+      maxPriorityFeePerGas: '3394352138',
     },
     average: {
-      gasPrice: '29933257920',
-      maxFeePerGas: '34429194369',
-      maxPriorityFeePerGas: '9429194369',
+      gasPrice: '28228764956',
+      maxFeePerGas: '32489417391',
+      maxPriorityFeePerGas: '7489417391',
     },
     fast: {
-      gasPrice: '49823671876',
-      maxFeePerGas: '43037631869',
-      maxPriorityFeePerGas: '18037631869',
+      gasPrice: '38695403370',
+      maxFeePerGas: '47086501038',
+      maxPriorityFeePerGas: '22086501038',
     },
   })
   @Response<InternalServerError>(500, 'Internal Server Error')

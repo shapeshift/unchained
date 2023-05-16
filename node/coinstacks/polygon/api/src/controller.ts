@@ -240,21 +240,26 @@ export class Polygon extends Controller implements BaseAPI, API {
    *
    * @returns {Promise<GasFees>} current fees specified in wei
    */
-  //@Example<GasFees>({
-  //  gasPrice: '250000000000',
-  //  slow: {
-  //    maxFeePerGas: '250000000000',
-  //    maxPriorityFeePerGas: '10000000000',
-  //  },
-  //  average: {
-  //    maxFeePerGas: '350000000000',
-  //    maxPriorityFeePerGas: '150000000000',
-  //  },
-  //  fast: {
-  //    maxFeePerGas: '450000000000',
-  //    maxPriorityFeePerGas: '250000000000',
-  //  },
-  //})
+  @Example<GasFees>({
+    gasPrice: '142419538445',
+    baseFeePerGas: '112419538445',
+    maxPriorityFeePerGas: '30000000000',
+    slow: {
+      gasPrice: '131449097003',
+      maxFeePerGas: '140884315981',
+      maxPriorityFeePerGas: '29910015485',
+    },
+    average: {
+      gasPrice: '172389951405',
+      maxFeePerGas: '160734779396',
+      maxPriorityFeePerGas: '49760478900',
+    },
+    fast: {
+      gasPrice: '195530342545',
+      maxFeePerGas: '280530813993',
+      maxPriorityFeePerGas: '169556513497',
+    },
+  })
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
   async getGasFees(): Promise<GasFees> {

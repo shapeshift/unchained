@@ -21,6 +21,7 @@ import {
   TokenType,
 } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { Service } from '../../../common/api/src/evm/service'
+import { GasOracle } from '../../../common/api/src/evm/gasOracle'
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
@@ -41,9 +42,11 @@ export const logger = new Logger({
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
+export const gasOracle = new GasOracle({ logger, provider, coinstack: 'ethereum' })
 
 export const service = new Service({
   blockbook,
+  gasOracle,
   explorerApiKey: ETHERSCAN_API_KEY,
   explorerApiUrl: 'https://api.gnosisscan.io/api',
   provider,
@@ -216,14 +219,17 @@ export class Gnosis extends Controller implements BaseAPI, API {
   @Example<GasFees>({
     gasPrice: '100000000000',
     slow: {
+      gasPrice: '100000000000',
       maxFeePerGas: '95000000000',
       maxPriorityFeePerGas: '40000000',
     },
     average: {
+      gasPrice: '100000000000',
       maxFeePerGas: '96000000000',
       maxPriorityFeePerGas: '1000000000',
     },
     fast: {
+      gasPrice: '100000000000',
       maxFeePerGas: '100000000000',
       maxPriorityFeePerGas: '5000000000',
     },

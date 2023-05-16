@@ -874,6 +874,30 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/GasFees"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"gasPrice": "142419538445",
+											"baseFeePerGas": "112419538445",
+											"maxPriorityFeePerGas": "30000000000",
+											"slow": {
+												"gasPrice": "131449097003",
+												"maxFeePerGas": "140884315981",
+												"maxPriorityFeePerGas": "29910015485"
+											},
+											"average": {
+												"gasPrice": "172389951405",
+												"maxFeePerGas": "160734779396",
+												"maxPriorityFeePerGas": "49760478900"
+											},
+											"fast": {
+												"gasPrice": "195530342545",
+												"maxFeePerGas": "280530813993",
+												"maxPriorityFeePerGas": "169556513497"
+											}
+										}
+									}
 								}
 							}
 						}

@@ -253,13 +253,19 @@ export class Optimism extends Controller implements BaseAPI, API {
    *
    * @returns {Promise<OptimismGasFees>} current fees specified in wei
    */
-  //@Example<OptimismGasFees>({
-  //  l1GasPrice: '25000000000',
-  //  gasPrice: '1000000',
-  //  slow: {},
-  //  average: {},
-  //  fast: {},
-  //})
+  @Example<OptimismGasFees>({
+    l1GasPrice: '68076217338',
+    gasPrice: '1048154',
+    slow: {
+      gasPrice: '1082857',
+    },
+    average: {
+      gasPrice: '1082857',
+    },
+    fast: {
+      gasPrice: '1082857',
+    },
+  })
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
   async getGasFees(): Promise<OptimismGasFees> {
