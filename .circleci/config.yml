@@ -669,7 +669,7 @@ aliases:
     rpc-url: http://gnosis-svc.unchained.svc.cluster.local:8545
     indexer-url: http://gnosis-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://gnosis-svc.unchained.svc.cluster.local:8001/websocket
-    api: false
+    api: true
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
