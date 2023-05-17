@@ -327,7 +327,7 @@ aliases:
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
-    service-storage-size-1: 4000Gi
+    service-storage-size-1: 4500Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "2"
