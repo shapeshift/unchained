@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ethers } from 'ethers'
 import { Logger } from '@shapeshiftoss/logger'
 import { Fees } from './models'
@@ -48,10 +47,16 @@ export class GasOracle {
     switch (args.coinstack) {
       case 'avalanche':
       case 'optimism':
+      case 'gnosis':
         this.latestBlockTag = 'latest'
         break
-      default:
+      case 'ethereum':
+      case 'bnbsmartchain':
+      case 'polygon':
         this.latestBlockTag = 'pending'
+        break
+      default:
+        throw new Error(`no coinstack support for: ${args.coinstack}`)
     }
   }
 
@@ -136,11 +141,7 @@ export class GasOracle {
   // update oracle state for the specified block
   private async update(blockNumber: BlockTag | number) {
     try {
-      const numOrTag =
-        blockNumber === this.latestBlockTag
-          ? blockNumber
-          : ethers.utils.hexStripZeros(ethers.utils.hexlify(blockNumber))
-
+      const numOrTag = blockNumber === this.latestBlockTag ? blockNumber : ethers.utils.hexValue(blockNumber)
       const block = (await this.provider.send('eth_getBlockByNumber', [numOrTag, true])) as NodeBlock<
         Array<NodeTransaction>
       >
@@ -229,11 +230,14 @@ export class GasOracle {
       return value
     }
 
-    const sum = { gasPrice: 0, maxPriorityFee: 0 }
-    blockFees.forEach((fees) => {
-      sum.gasPrice += valueAtPercentile(fees.gasPrices)
-      sum.maxPriorityFee += valueAtPercentile(fees.maxPriorityFees)
-    })
+    const sum = blockFees.reduce(
+      (sum, fees) => {
+        sum.gasPrice += valueAtPercentile(fees.gasPrices)
+        sum.maxPriorityFee += valueAtPercentile(fees.maxPriorityFees)
+        return sum
+      },
+      { gasPrice: 0, maxPriorityFee: 0 }
+    )
 
     const avg = {
       gasPrice: Math.ceil(sum.gasPrice / blockFees.length),

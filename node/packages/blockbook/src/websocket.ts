@@ -29,7 +29,7 @@ export class WebsocketClient {
   private interval?: NodeJS.Timeout
   private retries = 0
 
-  private handleTransaction: TransactionHandler
+  private handleTransaction: TransactionHandler | Array<TransactionHandler>
   private handleBlock: BlockHandler | Array<BlockHandler>
 
   private readonly pingInterval: number
@@ -113,17 +113,27 @@ export class WebsocketClient {
 
       if (!res.data) return
 
-      if (res.id === 'newBlock' && 'hash' in res.data) {
-        const newBlock = res.data
-        if (Array.isArray(this.handleBlock)) {
-          await Promise.all(this.handleBlock.map(async (handleBlock) => handleBlock(newBlock)))
-        } else {
-          await this.handleBlock(res.data)
-        }
-      }
-
-      if (res.id === 'newTx' && 'txid' in res.data) {
-        await this.handleTransaction(res.data)
+      switch (res.id) {
+        case 'newBlock':
+          if ('hash' in res.data) {
+            const newBlock = res.data
+            if (Array.isArray(this.handleBlock)) {
+              await Promise.all(this.handleBlock.map(async (handleBlock) => handleBlock(newBlock)))
+            } else {
+              await this.handleBlock(newBlock)
+            }
+          }
+          return
+        case 'newTx':
+          if ('txid' in res.data) {
+            const newTx = res.data
+            if (Array.isArray(this.handleTransaction)) {
+              await Promise.all(this.handleTransaction.map(async (handleTransaction) => handleTransaction(newTx)))
+            } else {
+              await this.handleTransaction(newTx)
+            }
+          }
+          return
       }
     } catch (err) {
       this.logger.error(err, `failed to handle message: ${JSON.stringify(message)}`)
