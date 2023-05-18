@@ -673,10 +673,10 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 1Gi
+    api-cpu-limit: 1000m
     api-cpu-request: 500m
     api-cpu-threshold: 50
-    api-memory-limit: 500Mi
+    api-memory-limit: 2Gi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: nethermind/nethermind:1.18.0
@@ -707,8 +707,7 @@ aliases:
     indexer-ws-url: ws://gnosis-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 1Gi
-    api-memory-limit: 500m
+    api-memory-limit: 2Gi
     stateful-service-replicas: 1
     stateful-service-backup: true
     stateful-service-backup-schedule: "0 4 * * 3"
