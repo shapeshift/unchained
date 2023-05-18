@@ -1,5 +1,5 @@
 route:
-  group_by: ['alertname']
+  group_by: ['alertname', 'severity']
 
   group_wait: 30s
   group_interval: 5m
@@ -13,8 +13,38 @@ route:
     - matchers:
         - alertname=~"KubePersistentVolumeFillingUp|KubeJobFailed"
       receiver: discord
-        
+
+
+# TODO add send_resolved
+
+inhibit_rules:
+# - source_match:
+#     severity: 'warning'
+#   target_match:
+#     severity: 'critical'
+#   equal: ['alertname', 'instance', 'job']
+
+# - source_match:
+#     severity: 'warning'
+#   target_match:
+#     severity: 'warning'
+#   equal: ['alertname', 'instance', 'job']
+
+- source_match:
+    severity: 'critical'
+  target_match_re:
+    severity: '(warning|critical)'
+  equal: ['alertname', 'instance', 'job']
   
+
+# ^^ How this thing works - ChatGPT, may you live long and prosper: 
+# In the above configuration, we have defined three inhibit_rules that prevent alerts with certain severities from firing when a matching alert with a different severity is already active. Here's what each rule does:
+# The first inhibit_rules rule prevents a warning severity alert from firing if there is already a matching critical severity alert active for the same alertname, instance, and job.
+# The second rule prevents a warning severity alert from firing if there is already a matching warning severity alert active for the same alertname, instance, and job.
+# The third rule prevents a critical severity alert from firing if there is already a matching warning or critical severity alert active for the same alertname, instance, and job.
+
+
+
 receivers:
 - name: discord
   discord_configs:
