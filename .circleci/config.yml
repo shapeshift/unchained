@@ -676,7 +676,7 @@ aliases:
     api-cpu-limit: 500m
     api-cpu-request: 250m
     api-cpu-threshold: 50
-    api-memory-limit: 500Mi
+    api-memory-limit: 2Gi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: nethermind/nethermind:1.18.0
@@ -708,7 +708,7 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 300m
-    api-memory-limit: 250Mi
+    api-memory-limit: 2Gi
     stateful-service-replicas: 1
     stateful-service-backup: true
     stateful-service-backup-schedule: "0 4 * * 3"
