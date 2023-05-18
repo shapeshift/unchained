@@ -79,19 +79,19 @@ export class Gnosis extends Controller implements BaseAPI, API {
    *
    * @returns {Promise<Account>} account details
    *
-   * @example pubkey "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
+   * @example pubkey "0xBA7A4c521DfCD18fEB7cdA4B7CA182d739B7A6a0"
    */
   @Example<Account>({
-    balance: '284809805024198107',
+    balance: '400000000000000000',
     unconfirmedBalance: '0',
-    nonce: 1,
-    pubkey: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
+    nonce: 0,
+    pubkey: '0xBA7A4c521DfCD18fEB7cdA4B7CA182d739B7A6a0',
     tokens: [
       {
-        balance: '1337',
-        contract: '0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d',
+        balance: '1510000000000000000000',
+        contract: '0x21a42669643f45Bc0e086b8Fc2ed70c23D67509d',
         decimals: 18,
-        name: 'FOX',
+        name: 'FOX on xDai',
         symbol: 'FOX',
         type: 'ERC20',
       },
@@ -114,28 +114,27 @@ export class Gnosis extends Controller implements BaseAPI, API {
    *
    * @returns {Promise<TxHistory>} transaction history
    *
-   * @example pubkey "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
+   * @example pubkey "0xBA7A4c521DfCD18fEB7cdA4B7CA182d739B7A6a0"
    */
   @Example<TxHistory>({
-    pubkey: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
+    pubkey: '0xBA7A4c521DfCD18fEB7cdA4B7CA182d739B7A6a0',
     cursor:
-      'eyJibG9ja2Jvb2tQYWdlIjoxLCJldGhlcnNjYW5QYWdlIjoxLCJibG9ja2Jvb2tUeGlkIjoiMHhhZWU0MzJmODUzZmRjMTNhZDlmZjZjYWJlMmEzOTQwM2Q4N2RkZWUxODQyNDk2ODE4ZmNkODg3NDdmNjU2NmY5IiwiYmxvY2tIZWlnaHQiOjEzODUwMjEzfQ==',
+      'eyJibG9ja2Jvb2tQYWdlIjozLCJleHBsb3JlclBhZ2UiOjEsImJsb2NrYm9va1R4aWQiOiIweGNlZTEwY2ViNzAwZDJmOGI1ODQ2YzVhY2E5NTg5NjY2NGZjYzk2ZDQzYTdiODg2NzRiYjA3MzJjMDI4MGVhNGYiLCJibG9ja0hlaWdodCI6MjYyNDQ2MTJ9',
     txs: [
       {
-        txid: '0x8e3528c933483770a3c8377c2ee7e34f846908653168188fd0d90a20b295d002',
-        blockHash: '0x94228c1b7052720846e2d7b9f36de30acf45d9a06ec483bd4433c5c38c8673a8',
-        blockHeight: 12267105,
-        timestamp: 1618788849,
+        txid: '0xee248fabdd59f26d78ae37d311a34ce8a87ebcfc2251a11245647266f3518c2f',
+        blockHash: '0x7104073111b319c81ef45d2c76e82ca1a582eb1094fa5a3302b83ca40bf5ae6d',
+        blockHeight: 27990203,
+        timestamp: 1684334420,
         status: 1,
-        from: '0xB3DD70991aF983Cf82d95c46C24979ee98348ffa',
-        to: '0x642F4Bda144C63f6DC47EE0fDfbac0a193e2eDb7',
-        confirmations: 2088440,
-        value: '737092621690531649',
-        fee: '3180000000009000',
+        from: '0x9045A4d097F03f34f515A3b3e7B2fD889Dd2Abb7',
+        to: '0xBA7A4c521DfCD18fEB7cdA4B7CA182d739B7A6a0',
+        confirmations: 17368,
+        value: '400000000000000000',
+        fee: '31500000147000',
         gasLimit: '21000',
         gasUsed: '21000',
-        gasPrice: '151428571429',
-        inputData: '0x',
+        gasPrice: '1500000007',
       },
     ],
   })
@@ -152,25 +151,24 @@ export class Gnosis extends Controller implements BaseAPI, API {
    *
    * @param {string} txid transaction hash
    *
-   * @example txid "0x8825fe8d60e1aa8d990f150bffe1196adcab36d0c4e98bac76c691719103b79d"
+   * @example txid "0xee248fabdd59f26d78ae37d311a34ce8a87ebcfc2251a11245647266f3518c2f"
    *
    * @returns {Promise<Tx>} transaction payload
    */
   @Example<Tx>({
-    txid: '0x8825fe8d60e1aa8d990f150bffe1196adcab36d0c4e98bac76c691719103b79d',
-    blockHash: '0x122f1e1b594b797d96c1777ce9cdb68ddb69d262ac7f2ddc345909aba4ebabd7',
-    blockHeight: 14813163,
-    timestamp: 1653078780,
+    txid: '0xee248fabdd59f26d78ae37d311a34ce8a87ebcfc2251a11245647266f3518c2f',
+    blockHash: '0x7104073111b319c81ef45d2c76e82ca1a582eb1094fa5a3302b83ca40bf5ae6d',
+    blockHeight: 27990203,
+    timestamp: 1684334420,
     status: 1,
-    from: '0xEA674fdDe714fd979de3EdF0F56AA9716B898ec8',
-    to: '0x275C7d416c1DBfafa53A861EEc6F0AD6138ca4dD',
-    confirmations: 21,
-    value: '49396718157429775',
-    fee: '603633477678000',
-    gasLimit: '250000',
+    from: '0x9045A4d097F03f34f515A3b3e7B2fD889Dd2Abb7',
+    to: '0xBA7A4c521DfCD18fEB7cdA4B7CA182d739B7A6a0',
+    confirmations: 17385,
+    value: '400000000000000000',
+    fee: '31500000147000',
+    gasLimit: '21000',
     gasUsed: '21000',
-    gasPrice: '28744451318',
-    inputData: '0x',
+    gasPrice: '1500000007',
   })
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
@@ -192,10 +190,10 @@ export class Gnosis extends Controller implements BaseAPI, API {
    *
    * @example data "0x"
    * @example from "0x0000000000000000000000000000000000000000"
-   * @example to "0x642F4Bda144C63f6DC47EE0fDfbac0a193e2eDb7"
+   * @example to "0xBA7A4c521DfCD18fEB7cdA4B7CA182d739B7A6a0"
    * @example value "1337"
    */
-  @Example<GasEstimate>({ gasLimit: '26540' })
+  @Example<GasEstimate>({ gasLimit: '21000' })
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/estimate')
@@ -217,7 +215,8 @@ export class Gnosis extends Controller implements BaseAPI, API {
    * @returns {Promise<GasFees>} current fees specified in wei
    */
   @Example<GasFees>({
-    gasPrice: '100000000000',
+    gasPrice: '4330000000',
+    maxPriorityFeePerGas: '3625293899',
     slow: {
       gasPrice: '100000000000',
       maxFeePerGas: '95000000000',
@@ -269,15 +268,15 @@ export class Gnosis extends Controller implements BaseAPI, API {
    *
    * @returns {Promise<TokenMetadata>} token metadata
    *
-   * @example contractAddress "0x4Db1f25D3d98600140dfc18dEb7515Be5Bd293Af"
-   * @example id "3150"
+   * @example contractAddress "0xB7F00edD54533b61a39e6E3B7bE710725DffB9d8"
+   * @example id "285605"
    * @example type "erc721"
    */
   @Example<TokenMetadata>({
-    name: 'HAPE #3150',
-    description: '8192 next-generation, high-fashion HAPES.',
+    name: 'Loyalty Program',
+    description: 'Welcome to the zkBridge Loyalty Point Program.',
     media: {
-      url: 'https://meta.hapeprime.com/3150.png',
+      url: 'https://gateway.pinata.cloud/ipfs/QmVSiYEQaksNSR2vpKazf6vfe69xA2odJWurVEu4r53Cof',
       type: 'image',
     },
   })
