@@ -48,7 +48,7 @@ inhibit_rules:
 receivers:
 - name: discord
   discord_configs:
-  - webhook_url: https://discord.com/api/webhooks/1107675995386949652/l-Vy65m12PshmvobRdGcZiyfaDGUuWhjRWsNnFKvmCU1YLg3Q3OfA5qEcyjEafbFee1o
+  - webhook_url: <<discord_webhook_url>>
     message: '{{ template "our.discord.message" . }}'
     title: '{{ template "our.discord.title" . }}'
     # title: "Running out of disk space: {{ range .Alerts }}{{ .Annotations.summary }}\n{{ end }}"
