@@ -1,7 +1,7 @@
 #See https://github.com/prometheus/alertmanager/issues/3310 for details
 
 {{ define "our.discord.title" }}
-    Fire! {{ .GroupLabels.SortedPairs.Values | join " " }}
+    Unchained alert! {{ .GroupLabels.SortedPairs.Values | join " " }}
 {{ end }}
 
 {{ define "our.discord.message" }}

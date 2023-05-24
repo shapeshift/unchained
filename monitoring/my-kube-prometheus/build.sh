@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # This script uses arg $1 (name of *.jsonnet file to use) to generate the manifests/*.yaml files.
-set -e
+set -x
 # only exit with zero if all commands of the pipeline exit successfully
 set -o pipefail
 
@@ -14,13 +14,15 @@ mkdir -p manifests/setup
 
 echo "Injecting secrets"
 
+
+
 # Replace `<<discord_webhook_url>>` with the value of DISCORD_WEBHOOK_URL and create a new file
-sed "s/<<discord_webhook_url>>/$DISCORD_WEBHOOK_URL/g" "alertmanager-config.tmpl.yaml" > "alertmanager-config.yaml"
+sed "s|<<discord_webhook_url>>|$DISCORD_WEBHOOK_URL|g" "alertmanager-config.tmpl.yaml" > "alertmanager-config.yaml"
 
 echo "Generating manifests"
 
 # Calling gojsontoyaml is optional, but we would like to generate yaml, not json
-jsonnet -J vendor -m manifests "${1-example.jsonnet}" --ext-str grafana_admin_password=1234 | xargs -I{} sh -c 'cat {} | gojsontoyaml > {}.yaml' -- {}
+jsonnet -J vendor -m manifests "${1-example.jsonnet}" --ext-str grafana_admin_password=$GRAFANA_PASSWORD | xargs -I{} sh -c 'cat {} | gojsontoyaml > {}.yaml' -- {}
 
 echo "Cleaning up"
 
