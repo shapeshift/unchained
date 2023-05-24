@@ -1320,20 +1320,20 @@ workflows:
       - approve-monitoring-workflow:
           name: approve monitoring workflow
           type: approval
-          # <<: *only-develop
+          <<: *only-develop
 
       - lint-and-test-persist:
           name: lint and test project (persist to workplace)
           requires:
             - approve monitoring workflow
-          # <<: *only-develop
+          <<: *only-develop
 
       - preview-kube-prometheus:
           name: preview monitoring kube-prometheus
           organization: TAXISTAKE
           requires:
             - lint and test project (persist to workplace)
-          # <<: *only-develop
+          <<: *only-develop
 
       - deploy-monitoring-pulumi:
           name: preview monitoring pulumi
@@ -1341,7 +1341,7 @@ workflows:
           pulumi-command: preview
           requires:
             - lint and test project (persist to workplace)
-          # <<: *only-develop
+          <<: *only-develop
 
       - approve-monitoring:
           name: approve
@@ -1349,14 +1349,14 @@ workflows:
           requires:
             - preview monitoring kube-prometheus
             - preview monitoring pulumi
-          # <<: *only-develop
+          <<: *only-develop
 
       - deploy-kube-prometheus:
           name: deploy monitoring kube-prometheus
           organization: TAXISTAKE
           requires:
             - approve
-          # <<: *only-develop
+          <<: *only-develop
 
       - deploy-monitoring-pulumi:
           name: deploy monitoring pulumi
@@ -1364,7 +1364,7 @@ workflows:
           pulumi-command: up -f --yes
           requires:
             - approve
-          # <<: *only-develop
+          <<: *only-develop
 
   deploy-main:
     jobs:
