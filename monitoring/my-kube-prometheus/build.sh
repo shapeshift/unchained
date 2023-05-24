@@ -14,8 +14,6 @@ mkdir -p manifests/setup
 
 echo "Injecting secrets"
 
-
-
 # Replace `<<discord_webhook_url>>` with the value of DISCORD_WEBHOOK_URL and create a new file
 sed "s|<<discord_webhook_url>>|$DISCORD_WEBHOOK_URL|g" "alertmanager-config.tmpl.yaml" > "alertmanager-config.yaml"
 

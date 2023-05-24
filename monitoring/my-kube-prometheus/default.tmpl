@@ -10,7 +10,6 @@
       Description: {{ printf "%.150s" .Annotations.description }}
       Alertname: {{ .Labels.alertname }}
       Namespace: {{ .Labels.namespace }}
-      Service: {{ .Labels.service }}
     {{ end }}
 
     {{ if gt (len .Alerts.Resolved) 0 }}
