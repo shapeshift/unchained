@@ -77,6 +77,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       const data = await this.blockbook.getAddress(pubkey, undefined, undefined, undefined, undefined, 'tokenBalances')
 
       const tokens = (data.tokens ?? []).reduce<Array<TokenBalance>>((prev, token) => {
+        // erc20/bep20
         if (token.balance && token.contract) {
           prev.push({
             balance: token.balance,
@@ -87,6 +88,36 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
             type: token.type,
           })
         }
+
+        // erc721/bep721
+        token.ids?.forEach((id) => {
+          if (!token.contract) return
+
+          prev.push({
+            balance: '1',
+            contract: token.contract,
+            decimals: 0,
+            name: token.name,
+            symbol: token.symbol ?? '',
+            type: token.type,
+            id,
+          })
+        })
+
+        // erc721/bep721
+        token.multiTokenValues?.forEach((multiToken) => {
+          if (!token.contract) return
+
+          prev.push({
+            balance: multiToken.value,
+            contract: token.contract,
+            decimals: 0,
+            name: token.name,
+            symbol: token.symbol ?? '',
+            type: token.type,
+            id: multiToken.id,
+          })
+        })
 
         return prev
       }, [])
