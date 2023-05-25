@@ -31,6 +31,5 @@ receivers:
 
 - name: blackhole
   
-
 templates:
 - '/etc/alertmanager/configmaps/default.tmpl/data'
