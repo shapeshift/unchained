@@ -5,7 +5,7 @@ route:
   # Only send the same alerts every 12h
   group_interval: 12h
   repeat_interval: 12h
-  # We must deliver all alerts somewhere, so we use send them to a blackhole
+  # We must deliver all alerts somewhere, so we send them to a blackhole
   receiver: blackhole
 
   routes:
