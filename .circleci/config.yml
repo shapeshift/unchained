@@ -206,7 +206,7 @@ aliases:
     service-memory-limit-1: 32Gi
     service-storage-size-1: 2500Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.0.3
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.0.5
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 12Gi
@@ -323,7 +323,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: avaplatform/avalanchego:v1.10.1
+    service-image-1: avaplatform/avalanchego:v1.10.2
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
@@ -581,7 +581,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/bnb-smart-chain:v1.1.23
+    service-image-1: shapeshiftdao/bnb-smart-chain:v1.2.4
     service-cpu-limit-1: "16"
     service-cpu-request-1: "8"
     service-memory-limit-1: 48Gi
@@ -679,13 +679,13 @@ aliases:
     api-memory-limit: 2Gi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.18.0
+    service-image-1: nethermind/nethermind:1.18.1
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 32Gi
     service-storage-size-1: 1000Gi
     service-name-2: daemon-beacon
-    service-image-2: sigp/lighthouse:v4.1.0
+    service-image-2: sigp/lighthouse:v4.2.0
     service-cpu-limit-2: "4"
     service-cpu-request-2: "2"
     service-memory-limit-2: 8Gi
@@ -1618,6 +1618,32 @@ workflows:
           requires:
             - approve polygon coinstack
           <<: *polygon
+          <<: *only-main
+
+      ####### GNOSIS
+      - deploy-coinstack-node:
+          name: preview gnosis
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies
+          <<: *gnosis
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve gnosis coinstack
+          type: approval
+          requires:
+            - preview gnosis
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy gnosis
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve gnosis coinstack
+          <<: *gnosis
           <<: *only-main
 
       ####### COSMOS
