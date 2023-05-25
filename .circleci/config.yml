@@ -1620,6 +1620,32 @@ workflows:
           <<: *polygon
           <<: *only-main
 
+      ####### GNOSIS
+      - deploy-coinstack-node:
+          name: preview gnosis
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies
+          <<: *gnosis
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve gnosis coinstack
+          type: approval
+          requires:
+            - preview gnosis
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy gnosis
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve gnosis coinstack
+          <<: *gnosis
+          <<: *only-main
+
       ####### COSMOS
       - deploy-coinstack-go:
           name: preview cosmos
