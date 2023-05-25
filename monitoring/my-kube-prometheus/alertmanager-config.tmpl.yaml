@@ -14,7 +14,7 @@ route:
         - alertname=~"KubePersistentVolumeFillingUp|KubeJobFailed|CPUThrottlingHigh"
       receiver: discord
 
-# Prevert firing the same alerts with a lower level of severity
+# Prevent firing the same alerts with a lower level of severity
 inhibit_rules:
 - source_match:
     severity: 'critical'
