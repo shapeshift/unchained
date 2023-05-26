@@ -200,7 +200,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.11.6
+    service-image-1: ethereum/client-go:v1.12.0
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 32Gi
@@ -1620,6 +1620,32 @@ workflows:
           requires:
             - approve polygon coinstack
           <<: *polygon
+          <<: *only-main
+
+      ####### GNOSIS
+      - deploy-coinstack-node:
+          name: preview gnosis
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies
+          <<: *gnosis
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve gnosis coinstack
+          type: approval
+          requires:
+            - preview gnosis
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy gnosis
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve gnosis coinstack
+          <<: *gnosis
           <<: *only-main
 
       ####### COSMOS

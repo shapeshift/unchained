@@ -43,7 +43,7 @@ export class Ingress extends pulumi.ComponentResource {
     )
 
     const domains = args.additionalDomain
-      ? `Host(\`monitoring.${args.domain}\`)` || `Host(\`monitoring.${args.additionalDomain}\`)`
+      ? `Host(\`monitoring.${args.domain}\`) || Host(\`monitoring.${args.additionalDomain}\`)`
       : `Host(\`monitoring.${args.domain}\`)`
 
     new k8s.apiextensions.CustomResource(

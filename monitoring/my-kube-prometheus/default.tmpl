@@ -1,0 +1,18 @@
+#See https://github.com/prometheus/alertmanager/issues/3310 for details
+
+{{ define "our.discord.title" }}
+    Unchained alert! {{ .GroupLabels.SortedPairs.Values | join " " }}
+{{ end }}
+
+{{ define "our.discord.message" }}
+    {{ range .Alerts.Firing }}
+      Alert: **{{ printf "%.150s" .Annotations.summary }}** ({{ .Labels.severity }})
+      Description: {{ printf "%.150s" .Annotations.description }}
+      Alertname: {{ .Labels.alertname }}
+      Namespace: {{ .Labels.namespace }}
+    {{ end }}
+
+    {{ if gt (len .Alerts.Resolved) 0 }}
+        Also {{ .Alerts.Resolved | len }} resolved alerts.
+    {{ end }}
+{{ end }}
