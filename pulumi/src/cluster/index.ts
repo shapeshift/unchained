@@ -3,6 +3,7 @@ import { core, Provider } from '@pulumi/kubernetes'
 import { EKSClusterLauncher, EKSClusterLauncherArgs } from '@shapeshiftoss/cluster-launcher'
 import { BaseConfig } from '..'
 import { buildAndPushDockerImages } from './docker'
+import { deployIpfs } from '../ipfs/ipfs'
 
 interface Config extends BaseConfig {
   cluster: 'eks'
@@ -72,6 +73,13 @@ export = async (): Promise<Outputs> => {
 
   namespaces.forEach(async (namespace) => {
     new core.v1.Namespace(namespace, { metadata: { name: namespace } }, { provider })
+  })
+
+  deployIpfs({
+    namespace: 'unchained-infra',
+    domain: config.rootDomainName,
+    additionalDomain: process.env.ADDITIONAL_ROOT_DOMAIN_NAME,
+    provider,
   })
 
   outputs.cluster = config.cluster
