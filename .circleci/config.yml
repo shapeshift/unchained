@@ -168,7 +168,7 @@ aliases:
     service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 32Gi
+    service-memory-limit-2: 40Gi
     service-storage-size-2: 500Gi
 
   - &bitcoin-dev
@@ -373,7 +373,7 @@ aliases:
     service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 6Gi
+    service-memory-limit-2: 8Gi
     service-storage-size-2: 250Gi
 
   - &dogecoin-dev
@@ -414,7 +414,7 @@ aliases:
     service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 8Gi
+    service-memory-limit-2: 12Gi
     service-storage-size-2: 250Gi
 
   - &litecoin-dev
@@ -591,7 +591,7 @@ aliases:
     service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "4"
     service-cpu-request-2: "2"
-    service-memory-limit-2: 16Gi
+    service-memory-limit-2: 24Gi
     service-storage-size-2: 750Gi
 
   - &bnbsmartchain-dev
@@ -641,7 +641,7 @@ aliases:
     service-image-3: shapeshiftdao/unchained-blockbook:polygon-e655dd8
     service-cpu-limit-3: "4"
     service-cpu-request-3: "2"
-    service-memory-limit-3: 16Gi
+    service-memory-limit-3: 24Gi
     service-storage-size-3: 500Gi
 
 
