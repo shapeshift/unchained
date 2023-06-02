@@ -17,7 +17,15 @@ import {
   TokenMetadata,
   TokenType,
 } from './models'
-import { Cursor, NodeBlock, CallStack, ExplorerApiResponse, ExplorerInternalTx, FeeHistory } from './types'
+import {
+  Cursor,
+  NodeBlock,
+  DebugCallStack,
+  ExplorerApiResponse,
+  ExplorerInternalTx,
+  FeeHistory,
+  TraceCall,
+} from './types'
 import { formatAddress } from './utils'
 import { validatePageSize } from '../utils'
 import { ERC1155_ABI } from './abi/erc1155'
@@ -469,7 +477,11 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     // allow transaction to be handled even if we fail to get internal transactions (some better than none)
     const internalTxs = await (async () => {
       try {
-        return await this.fetchInternalTxsTrace(tx.txid, internalTxMethod)
+        if (internalTxMethod === 'trace_transaction') {
+          return await this.fetchInternalTxsTrace(tx.txid)
+        } else {
+          return await this.fetchInternalTxsDebug(tx.txid)
+        }
       } catch (err) {
         return undefined
       }
@@ -480,42 +492,93 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     return t
   }
 
-  private async fetchInternalTxsTrace(
-    txid: string,
-    internalTxMethod: InternalTxFetchMethod = 'debug_traceTransaction',
-    retryCount = 0
-  ): Promise<Array<InternalTx> | undefined> {
+  private async fetchInternalTxsTrace(txid: string, retryCount = 0): Promise<Array<InternalTx> | undefined> {
     const request: RPCRequest = {
       jsonrpc: '2.0',
-      id: `${internalTxMethod}${txid}`,
-      method: internalTxMethod,
+      id: `trace_transaction${txid}`,
+      method: 'trace_transaction',
+      params: [txid],
+    }
+
+    const { data } = await axios.post<RPCResponse>(this.rpcUrl, request)
+
+    if (data.error) {
+      console.log(data.error)
+      throw new Error(`failed to get internalTransactions for txid: ${txid}: ${data.error.message}`)
+    }
+
+    // retry if no results are returned, this typically means we queried a node that hasn't indexed the data yet
+    if (!data.result) {
+      if (retryCount >= 5) throw new Error(`failed to get internalTransactions for txid: ${txid}`)
+      retryCount++
+      await exponentialDelay(retryCount)
+      return this.fetchInternalTxsTrace(txid, retryCount)
+    }
+
+    const callStack = data.result as Array<TraceCall>
+
+    if (!callStack) {
+      return undefined
+    }
+
+    const txs: InternalTx[] = callStack
+      .map((call) => {
+        const value = new BigNumber(call.action.value ?? 0)
+        const gas = new BigNumber(call.action.gas)
+        if (value.gt(0) && gas.gt(0)) {
+          return {
+            from: formatAddress(call.action.from),
+            to: formatAddress(call.action.to),
+            value: value.toString(),
+          }
+        } else return undefined
+      })
+      .filter((tx) => tx !== undefined) as InternalTx[]
+
+    console.log(`Internal txs:`, txs)
+
+    return txs
+  }
+
+  private async fetchInternalTxsDebug(txid: string, retryCount = 0): Promise<Array<InternalTx> | undefined> {
+    const request: RPCRequest = {
+      jsonrpc: '2.0',
+      id: `debug_traceTransaction${txid}`,
+      method: 'debug_traceTransaction',
       params: [txid, { tracer: 'callTracer' }],
     }
 
     const { data } = await axios.post<RPCResponse>(this.rpcUrl, request)
 
-    if (data.error)
-      throw new Error(
-        `failed to get internalTransactions via ${internalTxMethod} for txid: ${txid}: ${data.error.message}`
-      )
+    if (data.error) {
+      console.log(data.error)
+      throw new Error(`failed to get internalTransactions for txid: ${txid}: ${data.error.message}`)
+    }
 
     // retry if no results are returned, this typically means we queried a node that hasn't indexed the data yet
     if (!data.result) {
-      if (retryCount >= 5)
-        throw new Error(`failed to get internalTransactions via ${internalTxMethod} for txid: ${txid}`)
+      if (retryCount >= 5) throw new Error(`failed to get internalTransactions for txid: ${txid}`)
       retryCount++
       await exponentialDelay(retryCount)
-      return this.fetchInternalTxsTrace(txid, internalTxMethod, retryCount)
+      return this.fetchInternalTxsDebug(txid, retryCount)
     }
 
-    const callStack = data.result as CallStack
+    console.log(`Internal txs:`, data.result)
 
-    const processCallStack = (calls?: Array<CallStack>, txs: Array<InternalTx> = []): Array<InternalTx> | undefined => {
+    const callStack = data.result as DebugCallStack
+
+    const processCallStack = (
+      calls?: Array<DebugCallStack>,
+      txs: Array<InternalTx> = []
+    ): Array<InternalTx> | undefined => {
       if (!calls) return
 
       calls.forEach((call) => {
         const value = new BigNumber(call.value ?? 0)
         const gas = new BigNumber(call.gas)
+
+        console.log(`Call values:`)
+        console.log(call.from, call.to, value.toString(), gas.toString())
 
         if (value.gt(0) && gas.gt(0)) {
           txs.push({
@@ -530,6 +593,8 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
       return txs.length ? txs : undefined
     }
+
+    console.log(`Call stack:`, callStack.calls?.length)
 
     return processCallStack(callStack.calls)
   }
