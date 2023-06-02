@@ -502,10 +502,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
     const { data } = await axios.post<RPCResponse>(this.rpcUrl, request)
 
-    if (data.error) {
-      console.log(data.error)
-      throw new Error(`failed to get internalTransactions for txid: ${txid}: ${data.error.message}`)
-    }
+    if (data.error) throw new Error(`failed to get internalTransactions for txid: ${txid}: ${data.error.message}`)
 
     // retry if no results are returned, this typically means we queried a node that hasn't indexed the data yet
     if (!data.result) {
@@ -517,26 +514,22 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
     const callStack = data.result as Array<TraceCall>
 
-    if (!callStack) {
-      return undefined
-    }
+    const txs = callStack.reduce<Array<InternalTx>>((prev, call) => {
+      const value = new BigNumber(call.action.value ?? 0)
+      const gas = new BigNumber(call.action.gas)
 
-    const txs: InternalTx[] = callStack
-      .map((call) => {
-        const value = new BigNumber(call.action.value ?? 0)
-        const gas = new BigNumber(call.action.gas)
-        if (value.gt(0) && gas.gt(0)) {
-          return {
-            from: formatAddress(call.action.from),
-            to: formatAddress(call.action.to),
-            value: value.toString(),
-          }
-        }
-        return null
-      })
-      .filter((tx): tx is InternalTx => tx !== null)
+      if (value.gt(0) && gas.gt(0)) {
+        prev.push({
+          from: formatAddress(call.action.from),
+          to: formatAddress(call.action.to),
+          value: value.toString(),
+        })
+      }
 
-    return txs
+      return prev
+    }, [])
+
+    return txs.length ? txs : undefined
   }
 
   private async fetchInternalTxsDebug(txid: string, retryCount = 0): Promise<Array<InternalTx> | undefined> {
@@ -549,10 +542,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
     const { data } = await axios.post<RPCResponse>(this.rpcUrl, request)
 
-    if (data.error) {
-      console.log(data.error)
-      throw new Error(`failed to get internalTransactions for txid: ${txid}: ${data.error.message}`)
-    }
+    if (data.error) throw new Error(`failed to get internalTransactions for txid: ${txid}: ${data.error.message}`)
 
     // retry if no results are returned, this typically means we queried a node that hasn't indexed the data yet
     if (!data.result) {
@@ -587,6 +577,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
       return txs.length ? txs : undefined
     }
+
     return processCallStack(callStack.calls)
   }
 
