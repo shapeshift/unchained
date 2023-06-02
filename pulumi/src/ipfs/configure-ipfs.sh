@@ -20,6 +20,12 @@ fi
 ipfs init --profile=server
 ipfs config Addresses.API /ip4/0.0.0.0/tcp/5001
 ipfs config Addresses.Gateway /ip4/0.0.0.0/tcp/8080
-ipfs config --json Swarm.ConnMgr.HighWater 2000
+ipfs config --json Swarm.ConnMgr.HighWater 10000
+ipfs config --json Swarm.ConnMgr.LowWater 2500
+ipfs config --json Swarm.ConnMgr.GracePeriod 20s
+ipfs config --json Internal.Bitswap.EngineBlockstoreWorkerCount 2500
+ipfs config --json Internal.Bitswap.EngineTaskWorkerCount 500
+ipfs config --json Internal.Bitswap.MaxOutstandingBytesPerPeer 1048576
+ipfs config --json Internal.Bitswap.TaskWorkerCount 500
 ipfs config --json Datastore.BloomFilterSize 1048576
 ipfs config Datastore.StorageMax 100GB
