@@ -531,11 +531,10 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
             to: formatAddress(call.action.to),
             value: value.toString(),
           }
-        } else return undefined
+        }
+        return null
       })
-      .filter((tx) => tx !== undefined) as InternalTx[]
-
-    console.log(`Internal txs:`, txs)
+      .filter((tx): tx is InternalTx => tx !== null)
 
     return txs
   }
@@ -563,8 +562,6 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       return this.fetchInternalTxsDebug(txid, retryCount)
     }
 
-    console.log(`Internal txs:`, data.result)
-
     const callStack = data.result as DebugCallStack
 
     const processCallStack = (
@@ -576,9 +573,6 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       calls.forEach((call) => {
         const value = new BigNumber(call.value ?? 0)
         const gas = new BigNumber(call.gas)
-
-        console.log(`Call values:`)
-        console.log(call.from, call.to, value.toString(), gas.toString())
 
         if (value.gt(0) && gas.gt(0)) {
           txs.push({
@@ -593,9 +587,6 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
       return txs.length ? txs : undefined
     }
-
-    console.log(`Call stack:`, callStack.calls?.length)
-
     return processCallStack(callStack.calls)
   }
 
