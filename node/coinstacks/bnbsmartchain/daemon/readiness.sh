@@ -4,9 +4,9 @@ SYNCING=$(curl -s -d '{"jsonrpc":"2.0", "id":1, "method":"eth_syncing", "params"
 PEER_COUNT=$(curl -s -d '{"jsonrpc":"2.0", "id":1, "method":"net_peerCount", "params":[]}' -H 'Content-Type:application/json;' http://localhost:8545 | jq -r .result)
 
 # check if node is reporting it is synced
-if [[ $SYNCING = "false" ]]; then
+if [[ $SYNCING == "false" ]]; then
   # make sure we have peers
-  if [[ $PEER_COUNT = "0" ]]; then
+  if [[ $PEER_COUNT == "0" ]]; then
     echo "node is synced, but has 0 peer connections"
     exit 1
   fi
