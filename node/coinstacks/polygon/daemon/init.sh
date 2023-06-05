@@ -13,21 +13,24 @@ function extract_files() {
       continue
     fi
     if echo "$line" | grep -q "bulk"; then
-      wget -c $line -O - | tar -I zstd -xf - -C $HOME_DIR/data
+      wget $line -O - | zstd -cd | tar -xf - -C $CHAINDATA_DIR
     else
-      wget -c $line -O - | tar -I zstd -xf - -C $HOME_DIR/data --strip-components=3
+      wget $line -O - | zstd -cd | tar -xf - -C $CHAINDATA_DIR --strip-components=3
     fi
   done < $1
 }
 
 # shapshots provided by: https://snapshot.polygon.technology/
-if [ -n "$SNAPSHOT" ] && [ ! -d "$CHAINDATA_DIR" ]; then
-  rm -rf $DATA_DIR/bor;
-  mkdir -p $CHAINDATA_DIR;
-  wget -c $SNAPSHOT
+if [ -n "$SNAPSHOT" ]; then
   filename=$(echo $SNAPSHOT | awk -F/ '{print $NF}')
-  extract_files $filename
-  rm $filename
+  if [ -f "$DATA_DIR/$filename" ] || [ ! -d "$CHAINDATA_DIR" ]; then
+    apk add zstd
+    rm -rf $DATA_DIR/bor;
+    mkdir -p $CHAINDATA_DIR;
+    wget $SNAPSHOT -O $DATA_DIR/$filename
+    extract_files $DATA_DIR/$filename
+    rm $DATA_DIR/$filename
+  fi
 fi
 
 if [ ! -f "$DATA_DIR/bor/genesis.json" ]; then
