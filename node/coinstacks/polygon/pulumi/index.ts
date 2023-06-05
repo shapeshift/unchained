@@ -14,7 +14,10 @@ export = async (): Promise<Outputs> => {
       case 'daemon':
         return {
           ...service,
-          env: { NETWORK: config.network },
+          env: {
+            NETWORK: config.network,
+            SNAPSHOT: 'https://snapshot-download.polygon.technology/bor-mainnet-incremental-compiled-files.txt',
+          },
           ports: {
             'daemon-rpc': { port: 8545 },
             'daemon-ws': { port: 8546, pathPrefix: '/websocket', stripPathPrefix: true },
@@ -31,6 +34,7 @@ export = async (): Promise<Outputs> => {
           },
           env: {
             ETH_RPC_URL: `http://ethereum-svc.${namespace}.svc.cluster.local:8332`,
+            SNAPSHOT: 'https://snapshot-download.polygon.technology/heimdall-mainnet-incremental-compiled-files.txt',
           },
         }
       case 'indexer':
