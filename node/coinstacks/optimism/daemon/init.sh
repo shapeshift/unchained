@@ -5,13 +5,13 @@ set -e
 DATA_DIR=/data
 CHAINDATA_DIR=$DATA_DIR/geth/chaindata
 
-if [[ -n "$SNAPSHOT" && ! -d "$CHAINDATA_DIR" ]]; then
+if [ -n "$SNAPSHOT" ] && [ ! -d "$CHAINDATA_DIR" ]; then
   wget -c $SNAPSHOT -O - | tar -xvf - -C $DATA_DIR
 fi
 
 start() {
   geth \
-    --$NETWORK \
+    --networkid 420 \
     --syncmode full \
     --datadir $DATA_DIR \
     --authrpc.jwtsecret /jwt.hex \
@@ -27,7 +27,7 @@ start() {
     --ws.port 8546 \
     --ws.api eth,net,web3,debug,txpool,engine \
     --ws.origins "*" \
-    --rollup.disabletxpoolgossip true \
+    --rollup.disabletxpoolgossip=true \
     --rollup.sequencerhttp https://goerli-sequencer.optimism.io \
     --txlookuplimit 0 \
     --cache 4096 \
