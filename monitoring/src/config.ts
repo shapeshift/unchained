@@ -3,11 +3,6 @@ import * as pulumi from '@pulumi/pulumi'
 export interface MonitoringConfig {
   stack: string
   environment: string
-  githubOauthID: string
-  githubOauthSecret: string
-  githubOrg: string
-  alerting: boolean
-  opsgenieApiKey: string
 }
 
 export interface LoopConfig {
@@ -15,7 +10,9 @@ export interface LoopConfig {
   config: MonitoringConfig
   namespace: string
   domain: string
+  additionalDomain?: string
 }
+
 export const getConfig = async (): Promise<LoopConfig> => {
   let config: MonitoringConfig
   try {
@@ -31,6 +28,7 @@ export const getConfig = async (): Promise<LoopConfig> => {
   const namespaces = (await stackReference.getOutputValue('namespaces')) as Array<string>
   const defaultNamespace = (await stackReference.getOutputValue('defaultNamespace')) as string
   const domain = (await stackReference.getOutputValue('rootDomainName')) as string
+  const additionalDomain = process.env.ADDITIONAL_ROOT_DOMAIN_NAME
 
   const namespace = config.environment ? `${defaultNamespace}-${config.environment}` : defaultNamespace
   if (!namespaces.includes(namespace)) {
@@ -39,20 +37,5 @@ export const getConfig = async (): Promise<LoopConfig> => {
     )
   }
 
-  const missingRequiredConfig: Array<string> = []
-
-  if (!config.stack) missingRequiredConfig.push('stack')
-  if (config.alerting) {
-    if (!config.opsgenieApiKey) missingRequiredConfig.push('opsgenieApiKey')
-  }
-
-  if (missingRequiredConfig.length) {
-    throw new Error(
-      `Missing the following configuration values from Pulumi.${pulumi.getStack()}.yaml: ${missingRequiredConfig.join(
-        ', '
-      )}`
-    )
-  }
-
-  return { kubeconfig, config, namespace, domain }
+  return { kubeconfig, config, namespace, domain, additionalDomain }
 }

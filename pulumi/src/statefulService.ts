@@ -1,62 +1,43 @@
 import * as k8s from '@pulumi/kubernetes'
 import { readFileSync } from 'fs'
-import { Config, Service, ServiceConfig } from '.'
+import { Config, Service, CoinServiceArgs } from '.'
 import { deployReaperCron } from './reaperCron'
+import { VolumeSnapshot } from './snapper'
 
-interface Port {
-  port: number
-  ingressRoute?: boolean
-  pathPrefix?: string
-  stripPathPrefix?: boolean
-}
+export function createCoinService(args: CoinServiceArgs, assetName: string, snapshots: VolumeSnapshot[]): Service {
+  const name = `${assetName}-${args.name}`
 
-export interface ServiceArgs {
-  asset: string
-  config: ServiceConfig
-  ports: Record<string, Port>
-  command?: Array<string>
-  args?: Array<string>
-  env?: Record<string, string>
-  dataDir?: string
-  configMapData?: Record<string, string>
-  volumeMounts?: Array<k8s.types.input.core.v1.VolumeMount>
-  readinessProbe?: k8s.types.input.core.v1.Probe
-  livenessProbe?: k8s.types.input.core.v1.Probe
-}
-
-export function createService(args: ServiceArgs): Service {
-  const name = `${args.asset}-${args.config.name}`
-  const ports = Object.entries(args.ports).map(([name, port]) => ({ name, ...port }))
+  const ports = Object.entries(args.ports ?? []).map(([name, port]) => ({ name, ...port }))
   const env = Object.entries(args.env ?? []).map(([name, value]) => ({ name, value }))
 
-  const init = (() => {
+  const initScript = (() => {
     try {
-      return readFileSync(`../${args.config.name}/init.sh`).toString()
+      return readFileSync(`../${args.name}/init.sh`).toString()
     } catch (err) {
       return ''
     }
   })()
 
-  const liveness = (() => {
+  const livenessScript = (() => {
     try {
-      return readFileSync(`../${args.config.name}/liveness.sh`).toString()
+      return readFileSync(`../${args.name}/liveness.sh`).toString()
     } catch (err) {
       return ''
     }
   })()
 
-  const readiness = (() => {
+  const readinessScript = (() => {
     try {
-      return readFileSync(`../${args.config.name}/readiness.sh`).toString()
+      return readFileSync(`../${args.name}/readiness.sh`).toString()
     } catch (err) {
       return ''
     }
   })()
 
   const configMapData = {
-    ...(Boolean(init) && { [`${args.config.name}-init.sh`]: init }),
-    ...(Boolean(liveness) && { [`${args.config.name}-liveness.sh`]: liveness }),
-    ...(Boolean(readiness) && { [`${args.config.name}-readiness.sh`]: readiness }),
+    ...(Boolean(initScript) && { [`${args.name}-init.sh`]: initScript }),
+    ...(Boolean(livenessScript) && { [`${args.name}-liveness.sh`]: livenessScript }),
+    ...(Boolean(readinessScript) && { [`${args.name}-readiness.sh`]: readinessScript }),
     ...(args.configMapData ?? {}),
   }
 
@@ -64,33 +45,40 @@ export function createService(args: ServiceArgs): Service {
 
   const serviceContainer: k8s.types.input.core.v1.Container = {
     name,
-    image: args.config.image,
-    command: init && !args.command ? ['/init.sh'] : args.command,
+    image: args.image,
+    command: initScript && !args.command ? ['/init.sh'] : args.command,
     args: args.args,
     env,
     resources: {
       limits: {
-        ...(args.config.cpuLimit && { cpu: args.config.cpuLimit }),
-        ...(args.config.memoryLimit && { memory: args.config.memoryLimit }),
+        ...(args.cpuLimit && { cpu: args.cpuLimit }),
+        ...(args.memoryLimit && { memory: args.memoryLimit }),
       },
       requests: {
-        ...(args.config.cpuRequest && { cpu: args.config.cpuRequest }),
-        ...(args.config.memoryRequest && { memory: args.config.memoryRequest }),
+        ...(args.cpuRequest && { cpu: args.cpuRequest }),
+        ...(args.memoryRequest && { memory: args.memoryRequest }),
       },
     },
+    ...(!readinessScript &&
+      args.readinessProbe && {
+        readinessProbe: {
+          initialDelaySeconds: 30,
+          ...args.readinessProbe,
+        },
+      }),
     ports: ports.map(({ port: containerPort, name }) => ({ containerPort, name })),
     securityContext: { runAsUser: 0 },
     volumeMounts: [
       {
-        name: `data-${args.config.name}`,
+        name: `data-${args.name}`,
         mountPath: args.dataDir ?? '/data',
       },
-      ...(init
+      ...(initScript
         ? [
             {
               name: 'config-map',
               mountPath: '/init.sh',
-              subPath: `${args.config.name}-init.sh`,
+              subPath: `${args.name}-init.sh`,
             },
           ]
         : []),
@@ -100,46 +88,44 @@ export function createService(args: ServiceArgs): Service {
 
   containers.push(serviceContainer)
 
-  if (readiness || liveness) {
+  if (readinessScript || livenessScript) {
     const monitorContainer: k8s.types.input.core.v1.Container = {
       name: `${name}-monitor`,
       image: 'shapeshiftdao/unchained-probe:1.0.0',
-      ...(readiness && {
+      ...(readinessScript && {
         readinessProbe: {
           exec: {
             command: ['/readiness.sh'],
           },
           initialDelaySeconds: 30,
-          periodSeconds: 10,
           ...args.readinessProbe,
         },
       }),
-      ...(liveness && {
+      ...(livenessScript && {
         livenessProbe: {
           exec: {
             command: ['/liveness.sh'],
           },
           initialDelaySeconds: 30,
-          periodSeconds: 10,
           ...args.livenessProbe,
         },
       }),
       volumeMounts: [
-        ...(readiness
+        ...(readinessScript
           ? [
               {
                 name: 'config-map',
                 mountPath: '/readiness.sh',
-                subPath: `${args.config.name}-readiness.sh`,
+                subPath: `${args.name}-readiness.sh`,
               },
             ]
           : []),
-        ...(liveness
+        ...(livenessScript
           ? [
               {
                 name: 'config-map',
                 mountPath: '/liveness.sh',
-                subPath: `${args.config.name}-liveness.sh`,
+                subPath: `${args.name}-liveness.sh`,
               },
             ]
           : []),
@@ -149,24 +135,36 @@ export function createService(args: ServiceArgs): Service {
     containers.push(monitorContainer)
   }
 
+  const snapshot = snapshots.filter(
+    (snapshot) => snapshot.metadata.name.startsWith(`data-${args.name}-${assetName}`) && !!snapshot.status?.readyToUse
+  )[0]
+
   const volumeClaimTemplates = [
     {
       metadata: {
-        name: `data-${args.config.name}`,
+        name: `data-${args.name}`,
       },
       spec: {
         accessModes: ['ReadWriteOnce'],
         storageClassName: 'ebs-csi-gp2',
         resources: {
           requests: {
-            storage: args.config.storageSize,
+            storage: args.storageSize,
           },
         },
+        ...(snapshot && {
+          dataSource: {
+            name: snapshot.metadata.name,
+            kind: snapshot.kind,
+            apiGroup: snapshot.apiVersion.split('/')[0],
+          },
+        }),
       },
     },
   ]
 
   return {
+    name: args.name,
     configMapData,
     containers,
     ports,
@@ -175,45 +173,45 @@ export function createService(args: ServiceArgs): Service {
 }
 
 export async function deployStatefulService(
-  app: string,
-  asset: string,
+  appName: string,
+  assetName: string,
   provider: k8s.Provider,
   namespace: string,
   config: Pick<Config, 'rootDomainName' | 'environment' | 'statefulService'>,
-  services: Record<string, Service>,
+  services: Service[],
   volumes?: Array<k8s.types.input.core.v1.Volume>
 ): Promise<void> {
   if (!config.statefulService) return
   if (config.statefulService.replicas <= 0) return
-  if (!Object.keys(services).length) return
+  if (!services.length) return
 
-  const labels = { app, asset, tier: 'statefulservice' }
+  const labels = { app: appName, asset: assetName, tier: 'statefulservice' }
 
-  const ports = Object.values(services).reduce<Array<k8s.types.input.core.v1.ServicePort>>(
+  const ports = services.reduce<Array<k8s.types.input.core.v1.ServicePort>>(
     (prev, { ports }) => [...prev, ...ports.map(({ name, port }) => ({ name, port }))],
     []
   )
 
-  const configMapData = Object.values(services).reduce<Record<string, string>>(
+  const configMapData = services.reduce<Record<string, string>>(
     (prev, { configMapData }) => ({ ...prev, ...configMapData }),
     {}
   )
 
-  const containers = Object.values(services).reduce<Array<k8s.types.input.core.v1.Container>>(
+  const containers = services.reduce<Array<k8s.types.input.core.v1.Container>>(
     (prev, { containers }) => prev.concat(...containers),
     []
   )
 
-  const volumeClaimTemplates = Object.values(services).reduce<Array<k8s.types.input.core.v1.PersistentVolumeClaim>>(
+  const volumeClaimTemplates = services.reduce<Array<k8s.types.input.core.v1.PersistentVolumeClaim>>(
     (prev, { volumeClaimTemplates }) => prev.concat(...volumeClaimTemplates),
     []
   )
 
   const svc = new k8s.core.v1.Service(
-    `${asset}-svc`,
+    `${assetName}-svc`,
     {
       metadata: {
-        name: `${asset}-svc`,
+        name: `${assetName}-svc`,
         namespace: namespace,
         labels: labels,
       },
@@ -227,7 +225,7 @@ export async function deployStatefulService(
   )
 
   const configMap = new k8s.core.v1.ConfigMap(
-    `${asset}-cm`,
+    `${assetName}-cm`,
     {
       metadata: {
         namespace: namespace,
@@ -255,21 +253,21 @@ export async function deployStatefulService(
         },
         ...(volumes ?? []),
       ],
-      terminationGracePeriodSeconds: 120,
+      terminationGracePeriodSeconds: 600,
     },
   }
 
   new k8s.apps.v1.StatefulSet(
-    `${asset}-sts`,
+    `${assetName}-sts`,
     {
       metadata: {
-        name: `${asset}-sts`,
+        name: `${assetName}-sts`,
         namespace: namespace,
         annotations: { 'pulumi.com/skipAwait': 'true' },
       },
       spec: {
         selector: { matchLabels: labels },
-        serviceName: `${asset}-svc`,
+        serviceName: `${assetName}-svc`,
         replicas: config.statefulService.replicas,
         podManagementPolicy: 'Parallel',
         updateStrategy: {
@@ -283,15 +281,15 @@ export async function deployStatefulService(
   )
 
   if (config.rootDomainName) {
-    const domain = (service: string) => {
-      const baseDomain = `${service}.${asset}.${config.rootDomainName}`
+    const domain = (service: Service) => {
+      const baseDomain = `${service.name}.${assetName}.${config.rootDomainName}`
       return config.environment ? `${config.environment}.${baseDomain}` : baseDomain
     }
 
-    const secretName = `${asset}-cert-secret`
+    const secretName = `${assetName}-cert-secret`
 
     new k8s.apiextensions.CustomResource(
-      `${asset}-cert`,
+      `${assetName}-cert`,
       {
         apiVersion: 'cert-manager.io/v1',
         kind: 'Certificate',
@@ -309,7 +307,7 @@ export async function deployStatefulService(
             encoding: 'PKCS1',
             size: 2048,
           },
-          dnsNames: Object.keys(services).map((service) => domain(service)),
+          dnsNames: services.map((service) => domain(service)),
           issuerRef: {
             name: 'lets-encrypt',
             kind: 'ClusterIssuer',
@@ -322,17 +320,17 @@ export async function deployStatefulService(
 
     const additionalRootDomainName = process.env.ADDITIONAL_ROOT_DOMAIN_NAME
 
-    const match = (service: string, prefix?: string) => {
+    const match = (service: Service, prefix?: string) => {
       const pathPrefixMatch = prefix ? ` && PathPrefix(\`${prefix}\`)` : ''
-      const hostMatch = `(Host(\`${domain(`${service}`)}\`)${pathPrefixMatch})`
+      const hostMatch = `(Host(\`${domain(service)}\`)${pathPrefixMatch})`
       const additionalHostMatch = `(Host(\`${
-        config.environment ? `${config.environment}-${service}` : service
-      }.${asset}.${additionalRootDomainName}\`)${pathPrefixMatch})`
+        config.environment ? `${config.environment}-${service.name}` : service.name
+      }.${assetName}.${additionalRootDomainName}\`)${pathPrefixMatch})`
       return additionalRootDomainName ? `${hostMatch} || ${additionalHostMatch}` : hostMatch
     }
 
     const middleware = new k8s.apiextensions.CustomResource(
-      `${asset}-middleware`,
+      `${assetName}-middleware`,
       {
         apiVersion: 'traefik.containo.us/v1alpha1',
         kind: 'Middleware',
@@ -342,7 +340,7 @@ export async function deployStatefulService(
         },
         spec: {
           stripPrefix: {
-            prefixes: Object.values(services).reduce<Array<string>>((prev, { ports }) => {
+            prefixes: services.reduce<Array<string>>((prev, { ports }) => {
               const prefixes = ports.reduce<Array<string>>((prev, { pathPrefix, stripPathPrefix }) => {
                 if (!pathPrefix || !stripPathPrefix) return prev
                 return [...prev, pathPrefix]
@@ -356,7 +354,7 @@ export async function deployStatefulService(
     )
 
     new k8s.apiextensions.CustomResource(
-      `${asset}-ingressroute`,
+      `${assetName}-ingressroute`,
       {
         apiVersion: 'traefik.containo.us/v1alpha1',
         kind: 'IngressRoute',
@@ -366,9 +364,9 @@ export async function deployStatefulService(
         },
         spec: {
           entryPoints: ['web', 'websecure'],
-          routes: Object.entries(services)
-            .map(([service, { ports }]) =>
-              ports
+          routes: services
+            .map((service) =>
+              service.ports
                 .filter(({ ingressRoute = true }) => ingressRoute)
                 .map(({ port, pathPrefix }) => ({
                   kind: 'Rule',
@@ -389,7 +387,7 @@ export async function deployStatefulService(
             .flat(),
           tls: {
             secretName: secretName,
-            domains: Object.keys(services).map((service) => ({ main: domain(service) })),
+            domains: services.map((service) => ({ main: domain(service) })),
           },
         },
       },
@@ -397,14 +395,14 @@ export async function deployStatefulService(
     )
 
     new k8s.networking.v1.Ingress(
-      `${asset}-ingress`,
+      `${assetName}-ingress`,
       {
         metadata: {
           namespace: namespace,
           labels: labels,
         },
         spec: {
-          rules: Object.keys(services).map((service) => ({ host: domain(service) })),
+          rules: services.map((service) => ({ host: domain(service) })),
         },
       },
       { provider }
@@ -412,6 +410,6 @@ export async function deployStatefulService(
   }
 
   if (namespace == 'unchained-dev') {
-    deployReaperCron(asset, config.statefulService, namespace, provider)
+    deployReaperCron(assetName, config.statefulService, namespace, provider)
   }
 }

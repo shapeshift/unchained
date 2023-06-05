@@ -10,7 +10,16 @@ import {
   SendTxBody,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { API, Account, GasFees, Tx, TxHistory, GasEstimate } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
+import {
+  API,
+  Account,
+  GasFees,
+  Tx,
+  TxHistory,
+  GasEstimate,
+  TokenMetadata,
+  TokenType,
+} from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { Service } from '../../../common/api/src/evm/service'
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
@@ -205,9 +214,19 @@ export class Ethereum extends Controller implements BaseAPI, API {
    * @returns {Promise<GasFees>} current fees specified in wei
    */
   @Example<GasFees>({
-    gasPrice: '172301756423',
-    maxFeePerGas: '342603512846',
-    maxPriorityFeePerGas: '1000000000',
+    gasPrice: '100000000000',
+    slow: {
+      maxFeePerGas: '95000000000',
+      maxPriorityFeePerGas: '40000000',
+    },
+    average: {
+      maxFeePerGas: '96000000000',
+      maxPriorityFeePerGas: '1000000000',
+    },
+    fast: {
+      maxFeePerGas: '100000000000',
+      maxPriorityFeePerGas: '5000000000',
+    },
   })
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
@@ -233,5 +252,37 @@ export class Ethereum extends Controller implements BaseAPI, API {
   @Post('send/')
   async sendTx(@Body() body: SendTxBody): Promise<string> {
     return service.sendTx(body)
+  }
+
+  /**
+   * Get token metadata
+   *
+   * @param {string} contract contract address
+   * @param {string} id token identifier
+   * @param {TokenType} type token type (erc721 or erc1155)
+   *
+   * @returns {Promise<TokenMetadata>} token metadata
+   *
+   * @example contractAddress "0x4Db1f25D3d98600140dfc18dEb7515Be5Bd293Af"
+   * @example id "3150"
+   * @example type "erc721"
+   */
+  @Example<TokenMetadata>({
+    name: 'HAPE #3150',
+    description: '8192 next-generation, high-fashion HAPES.',
+    media: {
+      url: 'https://meta.hapeprime.com/3150.png',
+      type: 'image',
+    },
+  })
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Get('/metadata/token')
+  async getTokenMetadata(
+    @Query() contract: string,
+    @Query() id: string,
+    @Query() type: TokenType
+  ): Promise<TokenMetadata> {
+    return service.getTokenMetadata(contract, id, type)
   }
 }

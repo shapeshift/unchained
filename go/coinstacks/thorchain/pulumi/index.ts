@@ -1,102 +1,71 @@
-import { parse } from 'dotenv'
 import { readFileSync } from 'fs'
-import * as k8s from '@pulumi/kubernetes'
-import { deployApi, createService, deployStatefulService, getConfig, Service } from '../../../../pulumi'
-import { api } from '../../../pulumi'
-
-type Outputs = Record<string, any>
+import { deployCoinstack } from '../../../../pulumi/src/coinstack'
+import { CoinServiceArgs, Outputs, getConfig } from '../../../../pulumi/src'
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
-  const name = 'unchained'
+  const appName = 'unchained'
   const coinstack = 'thorchain'
+  const sampleEnv = readFileSync('../../../cmd/thorchain/sample.env')
+  const { kubeconfig, config, namespace } = await getConfig()
 
-  const { kubeconfig, config, namespace } = await getConfig(coinstack)
-
-  const asset = config.network !== 'mainnet' ? `${coinstack}-${config.network}` : coinstack
-  const provider = new k8s.Provider('kube-provider', { kubeconfig })
-  const outputs: Outputs = {}
-
-  const missingKeys: Array<string> = []
-  const stringData = Object.keys(parse(readFileSync(`../../../cmd/${coinstack}/sample.env`))).reduce((prev, key) => {
-    const value = process.env[key]
-
-    if (!value) {
-      missingKeys.push(key)
-      return prev
-    }
-
-    return { ...prev, [key]: value }
-  }, {})
-
-  if (missingKeys.length) {
-    throw new Error(`Missing the following required environment variables: ${missingKeys.join(', ')}`)
-  }
-
-  new k8s.core.v1.Secret(asset, { metadata: { name: asset, namespace }, stringData }, { provider })
-
-  await deployApi({
-    app: name,
-    asset,
-    buildAndPushImageArgs: { context: '../../../../go', dockerFile: '../../../build/Dockerfile' },
-    config,
-    container: { args: ['-swagger', 'swagger.json'] },
-    getHash: api.getHash,
-    namespace,
-    provider,
-    secretEnvs: api.secretEnvs,
-  })
-
-  if (config.statefulService) {
-    const services = config.statefulService.services.reduce<Record<string, Service>>((prev, service) => {
-      if (service.name === 'daemon') {
-        prev[service.name] = createService({
-          asset,
-          config: service,
+  const coinServiceArgs = config.statefulService?.services?.map((service): CoinServiceArgs => {
+    switch (service.name) {
+      case 'daemon':
+        return {
+          ...service,
           dataDir: '/root',
-          env: { 'CHAIN_ID': `${coinstack}-${config.network}-v1`, 'NET': config.network },
+          env: {
+            CHAIN_ID: `${coinstack}-${config.network}-v1`,
+            NET: config.network,
+          },
           ports: {
             'daemon-api': { port: 1317, pathPrefix: '/lcd', stripPathPrefix: true },
-            'daemon-rpc': { port: 27147, pathPrefix: '/rpc', stripPathPrefix: true }
-          }
-        })
-      }
-
-      if (service.name === 'indexer') {
-        prev[service.name] = createService({
-          asset,
-          config: service,
+            'daemon-rpc': { port: 27147, pathPrefix: '/rpc', stripPathPrefix: true },
+          },
+        }
+      case 'indexer':
+        return {
+          ...service,
           dataDir: '/blockstore',
-          env: { 'MIDGARD_BLOCKSTORE_LOCAL': '/blockstore' },
-          ports: { 'midgard': { port: 8080 } },
+          env: {
+            MIDGARD_BLOCKSTORE_LOCAL: '/blockstore',
+            MIDGARD_BLOCKSTORE_REMOTE:
+              'https://storage.googleapis.com/public-snapshots-ninerealms/midgard-blockstore/mainnet/v2/',
+          },
+          ports: { midgard: { port: 8080 } },
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
-          volumeMounts: [{ name: 'config-map', 'mountPath': '/config.json', subPath: 'indexer-config.json' }]
-        })
-      }
-
-      if (service.name === 'timescaledb') {
-        prev[service.name] = createService({
-          asset,
-          config: service,
+          volumeMounts: [{ name: 'config-map', mountPath: '/config.json', subPath: 'indexer-config.json' }],
+        }
+      case 'timescaledb':
+        return {
+          ...service,
           dataDir: '/var/lib/postgresql/data',
           env: {
-            'POSTGRES_DB': 'midgard',
-            'POSTGRES_USER': 'midgard',
-            'POSTGRES_PASSWORD': 'password',
-            'PGDATA': '/var/lib/postgresql/data/pgdata'
+            POSTGRES_DB: 'midgard',
+            POSTGRES_USER: 'midgard',
+            POSTGRES_PASSWORD: 'password',
+            PGDATA: '/var/lib/postgresql/data/pgdata',
           },
-          ports: { 'postgres': { port: 5432 } },
-          volumeMounts: [{ name: 'dshm', mountPath: '/dev/shm' }]
-        })
-      }
+          ports: { postgres: { port: 5432 } },
+          volumeMounts: [{ name: 'dshm', mountPath: '/dev/shm' }],
+        }
+      default:
+        throw new Error(`no support for coin service: ${service.name}`)
+    }
+  })
 
-      return prev
-    }, {})
+  const volumes = [{ name: 'dshm', emptyDir: { medium: 'Memory', sizeLimit: '1Gi' } }]
 
-    const volumes = [{ name: 'dshm', emptyDir: { medium: 'Memory', sizeLimit: '1Gi' } }]
-
-    await deployStatefulService(name, asset, provider, namespace, config, services, volumes)
-  }
-
-  return outputs
+  return deployCoinstack({
+    appName,
+    coinServiceArgs,
+    coinstack,
+    coinstackType: 'go',
+    config,
+    kubeconfig,
+    namespace,
+    sampleEnv,
+    volumes,
+  })
 }

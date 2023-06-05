@@ -1,0 +1,15 @@
+.vscode
+coverage
+dist
+node_modules
+routes.ts
+swaggerui
+k6
+swagger.json
+generated
+lerna.json
+*.md
+*.yml
+*.yaml
+*.xml
+*.go

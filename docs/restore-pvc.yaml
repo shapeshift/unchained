@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  finalizers:
+  - kubernetes.io/pv-protection
+  - external-attacher/ebs-csi-aws-com
+  name: <data-xxx-sts-0-pv-dev>
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 200Gi
+  csi:
+    driver: ebs.csi.aws.com
+    fsType: ext4
+    volumeHandle: <vol-xxx>
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: topology.ebs.csi.aws.com/zone
+          operator: In
+          values:
+          - <us-east-2x>
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ebs-csi-gp2
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: <data-xxx-sts-0>
+  namespace: <namespace>
+  labels:
+    app: unchained
+    asset: <assetname>
+    tier: statefulservice
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 200Gi
+  storageClassName: ebs-csi-gp2
+  volumeName: <data-xxx-sts-0-pv-dev>

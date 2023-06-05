@@ -38,6 +38,10 @@
 					"type": {
 						"type": "string"
 					},
+					"id": {
+						"type": "string",
+						"description": "nft or multi token id"
+					},
 					"balance": {
 						"type": "string"
 					}
@@ -153,6 +157,10 @@
 					},
 					"type": {
 						"type": "string"
+					},
+					"id": {
+						"type": "string",
+						"description": "nft or multi token id"
 					},
 					"from": {
 						"type": "string"
@@ -316,8 +324,8 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"GasFees": {
-				"description": "Contains info about current recommended fees to use in a transaction",
+			"Fees": {
+				"description": "Contains info about legacy and/or EIP-1559 fees",
 				"properties": {
 					"gasPrice": {
 						"type": "string"
@@ -329,8 +337,36 @@
 						"type": "string"
 					}
 				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"GasFees": {
+				"description": "Contains info about current recommended fees to use in a transaction",
+				"properties": {
+					"gasPrice": {
+						"type": "string"
+					},
+					"maxFeePerGas": {
+						"type": "string"
+					},
+					"maxPriorityFeePerGas": {
+						"type": "string"
+					},
+					"slow": {
+						"$ref": "#/components/schemas/Fees"
+					},
+					"average": {
+						"$ref": "#/components/schemas/Fees"
+					},
+					"fast": {
+						"$ref": "#/components/schemas/Fees"
+					}
+				},
 				"required": [
-					"gasPrice"
+					"gasPrice",
+					"slow",
+					"average",
+					"fast"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -347,13 +383,57 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"TokenMetadata": {
+				"description": "Contains info about token metadata (ERC-721/ERC-1155)",
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"media": {
+						"properties": {
+							"type": {
+								"type": "string",
+								"enum": [
+									"image",
+									"video"
+								]
+							},
+							"url": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"url"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"name",
+					"description",
+					"media"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TokenType": {
+				"type": "string",
+				"enum": [
+					"erc721",
+					"erc1155"
+				],
+				"description": "Supported token types for token metadata"
 			}
 		},
 		"securitySchemes": {}
 	},
 	"info": {
 		"title": "@shapeshiftoss/ethereum-api",
-		"version": "8.3.0",
+		"version": "9.3.0",
 		"license": {
 			"name": "MIT"
 		},
@@ -774,9 +854,19 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"gasPrice": "172301756423",
-											"maxFeePerGas": "342603512846",
-											"maxPriorityFeePerGas": "1000000000"
+											"gasPrice": "100000000000",
+											"slow": {
+												"maxFeePerGas": "95000000000",
+												"maxPriorityFeePerGas": "40000000"
+											},
+											"average": {
+												"maxFeePerGas": "96000000000",
+												"maxPriorityFeePerGas": "1000000000"
+											},
+											"fast": {
+												"maxFeePerGas": "100000000000",
+												"maxPriorityFeePerGas": "5000000000"
+											}
 										}
 									}
 								}
@@ -873,6 +963,91 @@
 						}
 					}
 				}
+			}
+		},
+		"/api/v1/metadata/token": {
+			"get": {
+				"operationId": "GetTokenMetadata",
+				"responses": {
+					"200": {
+						"description": "token metadata",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TokenMetadata"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"name": "HAPE #3150",
+											"description": "8192 next-generation, high-fashion HAPES.",
+											"media": {
+												"url": "https://meta.hapeprime.com/3150.png",
+												"type": "image"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get token metadata",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "contract address",
+						"in": "query",
+						"name": "contract",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"example": "0x4Db1f25D3d98600140dfc18dEb7515Be5Bd293Af"
+					},
+					{
+						"description": "token identifier",
+						"in": "query",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"example": "3150"
+					},
+					{
+						"description": "token type (erc721 or erc1155)",
+						"in": "query",
+						"name": "type",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/TokenType"
+						}
+					}
+				]
 			}
 		}
 	},

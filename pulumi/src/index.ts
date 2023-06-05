@@ -5,6 +5,7 @@ export * from './config'
 export * from './api'
 export * from './docker'
 export * from './statefulService'
+export * from './snapper'
 export * from './hasher'
 
 export interface Dockerhub {
@@ -40,10 +41,17 @@ export interface StatefulService {
 
 export interface Config extends BaseConfig {
   stack: string
+  assetName: string
   network: string
   environment?: string
   api?: ApiConfig
   statefulService?: StatefulService
+}
+
+export interface Port extends k8s.types.input.core.v1.ServicePort {
+  ingressRoute?: boolean
+  pathPrefix?: string
+  stripPathPrefix?: boolean
 }
 
 export interface ServiceConfig {
@@ -56,11 +64,25 @@ export interface ServiceConfig {
   storageSize: string
 }
 
+export interface CoinServiceArgs extends ServiceConfig {
+  ports?: Record<string, Port>
+  command?: Array<string>
+  args?: Array<string>
+  env?: Record<string, string>
+  dataDir?: string
+  configMapData?: Record<string, string>
+  volumeMounts?: Array<k8s.types.input.core.v1.VolumeMount>
+  readinessProbe?: k8s.types.input.core.v1.Probe
+  livenessProbe?: k8s.types.input.core.v1.Probe
+}
+
 export interface Service {
-  ports: Array<
-    k8s.types.input.core.v1.ServicePort & { ingressRoute?: boolean; pathPrefix?: string; stripPathPrefix?: boolean }
-  >
+  name: string
+  ports: Array<Port>
   configMapData: Record<string, string>
   containers: Array<k8s.types.input.core.v1.Container>
   volumeClaimTemplates: Array<k8s.types.input.core.v1.PersistentVolumeClaim>
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Outputs = Record<string, any>

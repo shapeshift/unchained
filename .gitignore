@@ -97,6 +97,11 @@ out
 .nuxt
 dist
 
+# Monitoring external/generated files
+monitoring/my-kube-prometheus/vendor
+monitoring/my-kube-prometheus/manifests
+monitoring/my-kube-prometheus/alertmanager-config.yaml
+
 # Gatsby files
 .cache/
 # Comment in the public line in if your project uses Gatsby and not Next.js

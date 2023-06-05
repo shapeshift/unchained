@@ -29,7 +29,29 @@ export interface NodeBlock {
   uncles: Array<string>
 }
 
-export interface CallStack {
+export interface TraceCall {
+  action: {
+    callType: string
+    from: string
+    gas: string
+    input: string
+    to: string
+    value: string
+  }
+  blockHash: string
+  blockNumber: number
+  result: {
+    gasUsed: string
+    output: string
+  }
+  subtraces: number
+  traceAddress: Array<number>
+  transactionHash: string
+  transactionPosition: number
+  type: string
+}
+
+export interface DebugCallStack {
   type: string
   from: string
   to: string
@@ -38,7 +60,7 @@ export interface CallStack {
   gasUsed: string
   input: string
   output: string
-  calls?: Array<CallStack>
+  calls?: Array<DebugCallStack>
 }
 
 export interface ExplorerApiResponse<T> {
@@ -62,4 +84,11 @@ export interface ExplorerInternalTx {
   traceId: string
   isError: string
   errCode: string
+}
+
+export interface FeeHistory {
+  oldestBlock: string
+  baseFeePerGas: Array<string>
+  gasUsedRatio: Array<number>
+  reward: Array<Array<string>>
 }

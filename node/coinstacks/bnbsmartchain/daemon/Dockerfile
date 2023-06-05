@@ -1,9 +1,7 @@
-FROM debian:bullseye-slim
+FROM alpine:3.17
 
-RUN apt-get update -y \
-	&& apt-get install -y curl wget jq unzip lz4 \
-	&& apt-get clean \
-	&& rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN apk add --no-cache bash curl grep jq sed unzip wget \
+	&& rm -rf /var/cache/apk/*
 
 ARG VERSION
 

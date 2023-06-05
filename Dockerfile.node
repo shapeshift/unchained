@@ -1,0 +1,12 @@
+FROM node:18.12.1-alpine
+
+WORKDIR /app
+
+# Include build artifacts
+COPY package.json ./package.json
+COPY lerna.json ./lerna.json
+COPY node_modules ./node_modules
+
+# Include common node packages
+COPY node/packages node/packages/
+COPY node/coinstacks/common node/coinstacks/common/

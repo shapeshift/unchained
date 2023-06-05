@@ -8,12 +8,26 @@ export interface GasEstimate {
 }
 
 /**
+ * Contains info about legacy and/or EIP-1559 fees
+ */
+export interface Fees {
+  gasPrice?: string
+  maxFeePerGas?: string
+  maxPriorityFeePerGas?: string
+}
+
+/**
  * Contains info about current recommended fees to use in a transaction
  */
 export interface GasFees {
   gasPrice: string
+  // @deprecated
   maxFeePerGas?: string
+  // @deprecated
   maxPriorityFeePerGas?: string
+  slow: Fees
+  average: Fees
+  fast: Fees
 }
 
 /**
@@ -25,6 +39,25 @@ export interface Token {
   name: string
   symbol: string
   type: string
+  /** nft or multi token id */
+  id?: string
+}
+
+/**
+ * Supported token types for token metadata
+ */
+export type TokenType = 'erc721' | 'erc1155'
+
+/**
+ * Contains info about token metadata (ERC-721/ERC-1155)
+ */
+export interface TokenMetadata {
+  name: string
+  description: string
+  media: {
+    url: string
+    type?: 'image' | 'video'
+  }
 }
 
 /**
@@ -41,6 +74,8 @@ export interface TokenTransfer extends Token {
   from: string
   to: string
   value: string
+  /** nft or multi token id */
+  id?: string
 }
 
 /**
@@ -120,4 +155,16 @@ export interface API {
    */
   // @Get('/gas/fees')
   getGasFees(): Promise<GasFees>
+
+  /**
+   * Get token metadata
+   *
+   * @param {string} contract contract address
+   * @param {string} id token identifier
+   * @param {TokenType} type token type (erc721 or erc1155)
+   *
+   * @returns {Promise<TokenMetadata>} token metadata
+   */
+  // @Get('/metadata/token')
+  getTokenMetadata(contract: string, id: string, type: string): Promise<TokenMetadata>
 }

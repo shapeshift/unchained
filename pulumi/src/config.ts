@@ -9,10 +9,10 @@ export interface Config {
   namespace: string
 }
 
-export const getConfig = async (coinstack: string): Promise<Config> => {
+export const getConfig = async (): Promise<Config> => {
   const config = (() => {
     try {
-      return new pulumi.Config('unchained').requireObject<BaseConfig>(coinstack)
+      return new pulumi.Config('unchained').requireObject<BaseConfig>('coinstack')
     } catch (e) {
       throw new pulumi.RunError('Could not find required configuration file')
     }
@@ -34,6 +34,8 @@ export const getConfig = async (coinstack: string): Promise<Config> => {
   config.rootDomainName = (await stackReference.getOutputValue('rootDomainName')) as string
 
   const missingRequiredConfig: Array<string> = []
+
+  if (!config.assetName) missingRequiredConfig.push('assetName')
 
   if (!config.stack) missingRequiredConfig.push('stack')
 
@@ -58,7 +60,8 @@ export const getConfig = async (coinstack: string): Promise<Config> => {
     if (config.statefulService?.replicas === undefined) missingRequiredConfig.push('statefulService.replicas')
 
     if (config.statefulService?.backup) {
-      if (config.statefulService?.backup?.count === undefined) missingRequiredConfig.push('statefulService.backup.count')
+      if (config.statefulService?.backup?.count === undefined)
+        missingRequiredConfig.push('statefulService.backup.count')
       if (config.statefulService?.backup?.schedule === undefined)
         missingRequiredConfig.push('statefulService.backup.schedule')
     }

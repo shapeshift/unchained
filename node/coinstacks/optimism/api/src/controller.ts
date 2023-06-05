@@ -1,6 +1,6 @@
 import { serialize } from '@ethersproject/transactions'
+import bn from 'bignumber.js'
 import { ethers, Contract, BigNumber } from 'ethers'
-import { BigNumber as bn } from 'bignumber.js'
 import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
@@ -14,7 +14,7 @@ import {
   SendTxBody,
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { API, Account, Tx, TxHistory } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
+import { API, Account, TokenMetadata, TokenType, Tx, TxHistory } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { Service } from '../../../common/api/src/evm/service'
 import { OptimismGasEstimate, OptimismGasFees } from './models'
 
@@ -237,6 +237,7 @@ export class Optimism extends Controller implements BaseAPI, API {
       chainId: CHAIN_ID[NETWORK as string],
       nonce: await provider.getTransactionCount(from),
     })
+
     const l1GasLimit = ((await gpo.getL1GasUsed(unsignedTxHash)) as BigNumber).toString()
 
     return { gasLimit, l1GasLimit }
@@ -250,25 +251,18 @@ export class Optimism extends Controller implements BaseAPI, API {
    * @returns {Promise<OptimismGasFees>} current fees specified in wei
    */
   @Example<OptimismGasFees>({
-    gasPrice: '1000000',
     l1GasPrice: '25000000000',
+    gasPrice: '1000000',
+    slow: {},
+    average: {},
+    fast: {},
   })
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
   async getGasFees(): Promise<OptimismGasFees> {
-    // ethers bignumber values read from contract are stringified to be used with bignumber.js which handles floats for scalar math
-    const l1BaseFee = ((await gpo.l1BaseFee()) as BigNumber).toString()
-    const baseScalar = ((await gpo.scalar()) as BigNumber).toString()
-    const decimals = ((await gpo.decimals()) as BigNumber).toString()
-
-    // l1 gas price
-    const scalar = bn(baseScalar).div(bn(10).pow(decimals)).toFixed()
-    const l1GasPrice = bn(l1BaseFee).times(scalar).toFixed(0)
-
-    // l2 gas price
-    const { gasPrice } = await service.getGasFees()
-
-    return { gasPrice, l1GasPrice }
+    const { l1GasPrice } = (await provider.send('rollup_gasPrices', [])) as { l1GasPrice: string }
+    const gasFees = await service.getGasFees()
+    return { l1GasPrice: new bn(l1GasPrice).toFixed(0), ...gasFees }
   }
 
   /**
@@ -289,5 +283,37 @@ export class Optimism extends Controller implements BaseAPI, API {
   @Post('send/')
   async sendTx(@Body() body: SendTxBody): Promise<string> {
     return service.sendTx(body)
+  }
+
+  /**
+   * Get token metadata
+   *
+   * @param {string} contract contract address
+   * @param {string} id token identifier
+   * @param {TokenType} type token type (erc721 or erc1155)
+   *
+   * @returns {Promise<TokenMetadata>} token metadata
+   *
+   * @example contractAddress "0x081911b600Be8cf0E3545a0Ff9415C099C1b85fe"
+   * @example id "15976"
+   * @example type "erc721"
+   */
+  @Example<TokenMetadata>({
+    name: 'Fire 15976',
+    description: '',
+    media: {
+      url: 'https://dftqodalckck7.cloudfront.net/optimism/15976.svg',
+      type: 'image',
+    },
+  })
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Get('/metadata/token')
+  async getTokenMetadata(
+    @Query() contract: string,
+    @Query() id: string,
+    @Query() type: TokenType
+  ): Promise<TokenMetadata> {
+    return service.getTokenMetadata(contract, id, type)
   }
 }

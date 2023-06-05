@@ -18,11 +18,31 @@ if [ ! -d "$CHAINDATA_DIR" ]; then
     geth init --datadir $DATA_DIR genesis.json
 fi
 
-# replace peers
-PEERS=$(curl -s https://api.binance.org/v2/discovery/peers | jq -c .peers)
+# add static peers
+PEERS=$(curl -s https://api.binance.org/v1/discovery/peers | jq -r '.peers | @csv')
 if [[ -n "$PEERS" && "$PEERS" != "null" ]]; then
-  sed -i -e "s|StaticNodes.*|StaticNodes = $PEERS|" config.toml
+  sed -i -e "s|StaticNodes = \[|StaticNodes = [$PEERS,|" config.toml
 fi
+
+# hard reset existing peers
+hard_reset_peers() {
+  while true; do
+    if [[ -e "/data/geth.ipc" ]]; then
+      geth --exec '
+        for (i=0; i<admin.peers.length; i++) {
+          const enode = admin.peers[i].enode
+          if (admin.removePeer(enode)) {
+            console.log("sucessfully removed peer: ", enode)
+          } else {
+            console.log("failed to remove peer: ", enode)
+          }
+        }' attach /data/geth.ipc
+      break
+    else
+      sleep 1
+    fi
+  done
+}
 
 start() {
   geth \
@@ -39,13 +59,14 @@ start() {
     --ws.api eth,net,web3,debug,txpool,parlia \
     --ws.origins '*' \
     --syncmode full \
-    --maxpeers 100 \
+    --maxpeers 200 \
     --rpc.allow-unprotected-txs \
     --txlookuplimit 0 \
     --cache 8000 \
-    --ipcdisable \
     --nat none &
   PID="$!"
+
+  hard_reset_peers &
 }
 
 stop() {

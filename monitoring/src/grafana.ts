@@ -4,12 +4,10 @@ import * as pulumi from '@pulumi/pulumi'
 export interface deploymentArgs {
   namespace: pulumi.Input<string>
   domain: string
-  githubOrg: string
-  githubOauthID: string
-  githubOauthSecret: string
+  additionalDomain?: string
 }
 
-export class Deployment extends pulumi.ComponentResource {
+export class Ingress extends pulumi.ComponentResource {
   constructor(name: string, args: deploymentArgs, opts?: pulumi.ComponentResourceOptions) {
     super('grafana', name, {}, opts)
 
@@ -33,7 +31,7 @@ export class Deployment extends pulumi.ComponentResource {
             encoding: 'PKCS1',
             size: 2048,
           },
-          dnsNames: [`grafana.${args.domain}`],
+          dnsNames: [`monitoring.${args.domain}`],
           issuerRef: {
             name: 'lets-encrypt',
             kind: 'ClusterIssuer',
@@ -43,6 +41,10 @@ export class Deployment extends pulumi.ComponentResource {
       },
       { ...opts }
     )
+
+    const domains = args.additionalDomain
+      ? `Host(\`monitoring.${args.domain}\`) || Host(\`monitoring.${args.additionalDomain}\`)`
+      : `Host(\`monitoring.${args.domain}\`)`
 
     new k8s.apiextensions.CustomResource(
       `${name}-grafana-ingressroute`,
@@ -56,13 +58,13 @@ export class Deployment extends pulumi.ComponentResource {
           entryPoints: ['web', 'websecure'],
           routes: [
             {
-              match: `Host(\`grafana.${args.domain}\`)`,
+              match: domains,
               kind: 'Rule',
               services: [
                 {
                   kind: 'Service',
-                  name: `${name}-grafana`,
-                  port: 80,
+                  name: `grafana`,
+                  port: 3000,
                   namespace: `${name}-monitoring`,
                 },
               ],
@@ -70,7 +72,7 @@ export class Deployment extends pulumi.ComponentResource {
           ],
           tls: {
             secretName: secretName,
-            domains: [{ main: `grafana.${args.domain}` }],
+            domains: [{ main: `monitoring.${args.domain}` }],
           },
         },
       },
@@ -84,71 +86,7 @@ export class Deployment extends pulumi.ComponentResource {
           namespace: args.namespace,
         },
         spec: {
-          rules: [{ host: `grafana.${args.domain}` }],
-        },
-      },
-      { ...opts }
-    )
-
-    new k8s.helm.v3.Chart(
-      `${name}-grafana`,
-      {
-        // https://github.com/grafana/helm-charts/tree/main/charts/grafana
-        chart: 'grafana',
-        repo: 'grafana',
-        namespace: args.namespace,
-        version: '6.17.6',
-        values: {
-          datasources: {
-            'datasources.yaml': {
-              apiVersion: 1,
-              datasources: [
-                {
-                  name: 'Loki',
-                  type: 'loki',
-                  url: `http://${name}-loki:3100`,
-                  access: 'proxy',
-                },
-                {
-                  name: 'Prometheus',
-                  type: 'prometheus',
-                  url: `http://${name}-prometheus-server:80`,
-                  access: 'proxy',
-                },
-              ],
-            },
-          },
-          'grafana.ini': {
-            'auth.github': {
-              enabled: true,
-              allow_sign_up: true,
-              scopes: 'user:email,read:org',
-              auth_url: 'https://github.com/login/oauth/authorize',
-              token_url: 'https://github.com/login/oauth/access_token',
-              api_url: 'https://api.github.com/user',
-              allowed_organizations: args.githubOrg,
-              client_id: args.githubOauthID,
-              client_secret: args.githubOauthSecret,
-            },
-            server: {
-              root_url: `https://grafana.${args.domain}`,
-            },
-          },
-          persistence: {
-            type: 'statefulset',
-            enabled: true,
-            size: '5Gi',
-          },
-          resources: {
-            limits: {
-              cpu: '500m',
-              memory: '1Gi',
-            },
-            requests: {
-              cpu: '500m',
-              memory: '1Gi',
-            },
-          },
+          rules: [{ host: `monitoring.${args.domain}` }],
         },
       },
       { ...opts }

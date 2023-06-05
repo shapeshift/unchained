@@ -5,10 +5,35 @@ import { ethers } from 'ethers'
 import { ApiError as BlockbookApiError, Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
 import { ApiError, BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
-import { Account, API, TokenBalance, Tx, TxHistory, GasFees, InternalTx, GasEstimate } from './models'
-import { Cursor, NodeBlock, CallStack, ExplorerApiResponse, ExplorerInternalTx } from './types'
+import {
+  Account,
+  API,
+  TokenBalance,
+  Tx,
+  TxHistory,
+  GasFees,
+  InternalTx,
+  GasEstimate,
+  TokenMetadata,
+  TokenType,
+} from './models'
+import {
+  Cursor,
+  NodeBlock,
+  DebugCallStack,
+  ExplorerApiResponse,
+  ExplorerInternalTx,
+  FeeHistory,
+  TraceCall,
+} from './types'
 import { formatAddress } from './utils'
 import { validatePageSize } from '../utils'
+import { ERC1155_ABI } from './abi/erc1155'
+import { ERC721_ABI } from './abi/erc721'
+
+const axiosNoRetry = axios.create()
+
+type InternalTxFetchMethod = 'trace_transaction' | 'debug_traceTransaction'
 
 axiosRetry(axios, { retries: 5, retryDelay: axiosRetry.exponentialDelay })
 
@@ -23,6 +48,9 @@ const handleError = (err: unknown): ApiError => {
 
   return new ApiError('Internal Server Error', 500, 'unknown error')
 }
+
+const exponentialDelay = async (retryCount: number) =>
+  new Promise((resolve) => setTimeout(resolve, axiosRetry.exponentialDelay(retryCount)))
 
 export interface ServiceArgs {
   blockbook: Blockbook
@@ -40,6 +68,10 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   private readonly logger: Logger
   private readonly provider: ethers.providers.JsonRpcProvider
   private readonly rpcUrl: string
+  private readonly abiInterface: Record<TokenType, ethers.utils.Interface> = {
+    erc721: new ethers.utils.Interface(ERC721_ABI),
+    erc1155: new ethers.utils.Interface(ERC1155_ABI),
+  }
 
   constructor(args: ServiceArgs) {
     this.blockbook = args.blockbook
@@ -55,6 +87,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       const data = await this.blockbook.getAddress(pubkey, undefined, undefined, undefined, undefined, 'tokenBalances')
 
       const tokens = (data.tokens ?? []).reduce<Array<TokenBalance>>((prev, token) => {
+        // erc20/bep20
         if (token.balance && token.contract) {
           prev.push({
             balance: token.balance,
@@ -65,6 +98,36 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
             type: token.type,
           })
         }
+
+        // erc721/bep721
+        token.ids?.forEach((id) => {
+          if (!token.contract) return
+
+          prev.push({
+            balance: '1',
+            contract: token.contract,
+            decimals: 0,
+            name: token.name,
+            symbol: token.symbol ?? '',
+            type: token.type,
+            id,
+          })
+        })
+
+        // erc721/bep721
+        token.multiTokenValues?.forEach((multiToken) => {
+          if (!token.contract) return
+
+          prev.push({
+            balance: multiToken.value,
+            contract: token.contract,
+            decimals: 0,
+            name: token.name,
+            symbol: token.symbol ?? '',
+            type: token.type,
+            id: multiToken.id,
+          })
+        })
 
         return prev
       }, [])
@@ -208,14 +271,87 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
   async getGasFees(): Promise<GasFees> {
     try {
-      const feeData = await this.provider.getFeeData()
+      // average fees over 20 blocks at the specified percentiles
+      const totalBlocks = 20
 
-      if (!feeData.gasPrice) throw { message: 'no fee data returned from node' }
+      // fetch legacy gas price
+      const gasPrice = (await this.provider.send('eth_gasPrice', [])) as string
 
+      // get latest block to check for existence of baseFeePerGas to determine eip1559 support
+      const block = (await this.provider.send('eth_getBlockByNumber', ['pending', false])) as { baseFeePerGas?: string }
+
+      const eip1559Fees = await (async () => {
+        if (!block?.baseFeePerGas) return {}
+
+        // fetch fee history for the last 20 blocks and with maxPriorityFeePerGas reported at the 1st, 60th, and 90th percentiles (slow, average, fast)
+        const feeHistory = (await this.provider.send('eth_feeHistory', [
+          totalBlocks,
+          'latest',
+          [1, 60, 90],
+        ])) as FeeHistory
+
+        const oldestBlock = Number(feeHistory.oldestBlock)
+        const latestBlock = oldestBlock + totalBlocks
+
+        // hex -> big number
+        const blockHistory = []
+        for (let i = oldestBlock; i < latestBlock; i++) {
+          const index = i - oldestBlock
+          blockHistory.push({
+            number: i,
+            baseFeePerGas: new BigNumber(feeHistory.baseFeePerGas[index]),
+            gasUsedRatio: new BigNumber(feeHistory.gasUsedRatio[index]),
+            maxPriorityFeePerGas: feeHistory.reward[index].map((r) => new BigNumber(r)),
+          })
+        }
+
+        const baseFee = await (async () => {
+          try {
+            // avalanche returns the latest block for 'pending', use eth_baseFee instead for accurate base fee
+            const baseFee = (await this.provider.send('eth_baseFee', [])) as string
+            return baseFee
+          } catch (err) {
+            // no eth_baseFee support, use pending block
+            return
+          }
+        })()
+
+        // baseFeePerGas for pending block as determined by network
+        const baseFeePerGas = baseFee ? new BigNumber(baseFee) : new BigNumber(block.baseFeePerGas)
+
+        const avg = (arr: Array<BigNumber>): BigNumber => {
+          const sum = arr.reduce((a, b) => a.plus(b), new BigNumber(0))
+          return sum.div(arr.length).integerValue(BigNumber.ROUND_FLOOR)
+        }
+
+        const slowPriorityFee = avg(blockHistory.map((block) => block.maxPriorityFeePerGas[0]))
+        const averagePriorityFee = avg(blockHistory.map((block) => block.maxPriorityFeePerGas[1]))
+        const fastPriorityFee = avg(blockHistory.map((block) => block.maxPriorityFeePerGas[2]))
+
+        return {
+          slow: {
+            maxFeePerGas: slowPriorityFee.plus(baseFeePerGas).toFixed(0),
+            maxPriorityFeePerGas: slowPriorityFee.toFixed(0),
+          },
+          average: {
+            maxFeePerGas: averagePriorityFee.plus(baseFeePerGas).toFixed(0),
+            maxPriorityFeePerGas: averagePriorityFee.toFixed(0),
+          },
+          fast: {
+            maxFeePerGas: fastPriorityFee.plus(baseFeePerGas).toFixed(0),
+            maxPriorityFeePerGas: fastPriorityFee.toFixed(0),
+          },
+        }
+      })()
+
+      // TODO: percentile estimations for gasPrice
       return {
-        gasPrice: feeData.gasPrice.toString(),
-        maxFeePerGas: feeData.maxFeePerGas?.toString(),
-        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas?.toString(),
+        gasPrice: new BigNumber(gasPrice).toFixed(0),
+        maxFeePerGas: eip1559Fees?.average?.maxFeePerGas,
+        maxPriorityFeePerGas: eip1559Fees?.average?.maxPriorityFeePerGas,
+        slow: { ...eip1559Fees?.slow },
+        average: { ...eip1559Fees?.average },
+        fast: { ...eip1559Fees?.fast },
       }
     } catch (err) {
       throw new ApiError('Internal Server Error', 500, JSON.stringify(err))
@@ -231,7 +367,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     }
   }
 
-  async handleBlock(hash: string): Promise<Array<BlockbookTx>> {
+  async handleBlock(hash: string, retryCount = 0): Promise<Array<BlockbookTx>> {
     const request: RPCRequest = {
       jsonrpc: '2.0',
       id: `eth_getBlockByHash-${hash}`,
@@ -242,7 +378,14 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     const { data } = await axios.post<RPCResponse>(this.rpcUrl, request)
 
     if (data.error) throw new Error(`failed to get block: ${hash}: ${data.error.message}`)
-    if (!data.result) throw new Error(`failed to get block: ${hash}: ${JSON.stringify(data)}`)
+
+    // retry if no results are returned, this typically means we queried a node that hasn't indexed the data yet
+    if (!data.result) {
+      if (retryCount >= 5) throw new Error(`failed to get block: ${hash}: ${JSON.stringify(data)}`)
+      retryCount++
+      await exponentialDelay(retryCount)
+      return this.handleBlock(hash, retryCount)
+    }
 
     const block = data.result as NodeBlock
 
@@ -274,16 +417,45 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       gasUsed: tx.ethereumSpecific.gasUsed?.toString() ?? '0',
       gasPrice: tx.ethereumSpecific.gasPrice.toString(),
       inputData: inputData && inputData !== '0x' && inputData !== '0x0' ? inputData : undefined,
-      tokenTransfers: tx.tokenTransfers?.map((tt) => ({
-        contract: tt.contract,
-        decimals: tt.decimals,
-        name: tt.name,
-        symbol: tt.symbol,
-        type: tt.type,
-        from: tt.from,
-        to: tt.to,
-        value: tt.value,
-      })),
+      tokenTransfers: tx.tokenTransfers?.map((tt) => {
+        const value = (() => {
+          switch (tt.type) {
+            case 'ERC721':
+            case 'BEP721':
+              return '1'
+            case 'ERC1155':
+            case 'BEP1155':
+              return tt.multiTokenValues?.[0]?.value ?? '0'
+            default:
+              return tt.value
+          }
+        })()
+
+        const id = (() => {
+          switch (tt.type) {
+            case 'ERC721':
+            case 'BEP721':
+              return tt.value
+            case 'ERC1155':
+            case 'BEP1155':
+              return tt.multiTokenValues?.[0]?.id
+            default:
+              return
+          }
+        })()
+
+        return {
+          contract: tt.contract,
+          decimals: tt.decimals,
+          name: tt.name,
+          symbol: tt.symbol,
+          type: tt.type,
+          from: tt.from,
+          to: tt.to,
+          value,
+          id,
+        }
+      }),
     }
   }
 
@@ -292,7 +464,10 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
    *
    * __not suitable for use on historical transactions when using a full node as the evm state is purged__
    */
-  async handleTransactionWithInternalTrace(tx: BlockbookTx): Promise<Tx> {
+  async handleTransactionWithInternalTrace(
+    tx: BlockbookTx,
+    internalTxMethod: InternalTxFetchMethod = 'debug_traceTransaction'
+  ): Promise<Tx> {
     const t = this.handleTransaction(tx)
 
     // don't trace pending transactions as they have no committed state to trace
@@ -302,7 +477,11 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     // allow transaction to be handled even if we fail to get internal transactions (some better than none)
     const internalTxs = await (async () => {
       try {
-        return await this.fetchInternalTxsTrace(tx.txid)
+        if (internalTxMethod === 'trace_transaction') {
+          return await this.fetchInternalTxsTrace(tx.txid)
+        } else {
+          return await this.fetchInternalTxsDebug(tx.txid)
+        }
       } catch (err) {
         return undefined
       }
@@ -313,10 +492,50 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     return t
   }
 
-  private async fetchInternalTxsTrace(txid: string): Promise<Array<InternalTx> | undefined> {
+  private async fetchInternalTxsTrace(txid: string, retryCount = 0): Promise<Array<InternalTx> | undefined> {
     const request: RPCRequest = {
       jsonrpc: '2.0',
-      id: `traceTransaction${txid}`,
+      id: `trace_transaction${txid}`,
+      method: 'trace_transaction',
+      params: [txid],
+    }
+
+    const { data } = await axios.post<RPCResponse>(this.rpcUrl, request)
+
+    if (data.error) throw new Error(`failed to get internalTransactions for txid: ${txid}: ${data.error.message}`)
+
+    // retry if no results are returned, this typically means we queried a node that hasn't indexed the data yet
+    if (!data.result) {
+      if (retryCount >= 5) throw new Error(`failed to get internalTransactions for txid: ${txid}`)
+      retryCount++
+      await exponentialDelay(retryCount)
+      return this.fetchInternalTxsTrace(txid, retryCount)
+    }
+
+    const callStack = data.result as Array<TraceCall>
+
+    const txs = callStack.reduce<Array<InternalTx>>((prev, call) => {
+      const value = new BigNumber(call.action.value ?? 0)
+      const gas = new BigNumber(call.action.gas)
+
+      if (value.gt(0) && gas.gt(0)) {
+        prev.push({
+          from: formatAddress(call.action.from),
+          to: formatAddress(call.action.to),
+          value: value.toString(),
+        })
+      }
+
+      return prev
+    }, [])
+
+    return txs.length ? txs : undefined
+  }
+
+  private async fetchInternalTxsDebug(txid: string, retryCount = 0): Promise<Array<InternalTx> | undefined> {
+    const request: RPCRequest = {
+      jsonrpc: '2.0',
+      id: `debug_traceTransaction${txid}`,
       method: 'debug_traceTransaction',
       params: [txid, { tracer: 'callTracer' }],
     }
@@ -324,11 +543,21 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     const { data } = await axios.post<RPCResponse>(this.rpcUrl, request)
 
     if (data.error) throw new Error(`failed to get internalTransactions for txid: ${txid}: ${data.error.message}`)
-    if (!data.result) throw new Error(`failed to get internalTransactions for txid: ${txid}`)
 
-    const callStack = data.result as CallStack
+    // retry if no results are returned, this typically means we queried a node that hasn't indexed the data yet
+    if (!data.result) {
+      if (retryCount >= 5) throw new Error(`failed to get internalTransactions for txid: ${txid}`)
+      retryCount++
+      await exponentialDelay(retryCount)
+      return this.fetchInternalTxsDebug(txid, retryCount)
+    }
 
-    const processCallStack = (calls?: Array<CallStack>, txs: Array<InternalTx> = []): Array<InternalTx> | undefined => {
+    const callStack = data.result as DebugCallStack
+
+    const processCallStack = (
+      calls?: Array<DebugCallStack>,
+      txs: Array<InternalTx> = []
+    ): Array<InternalTx> | undefined => {
       if (!calls) return
 
       calls.forEach((call) => {
@@ -525,6 +754,65 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     return {
       hasMore: cursor.blockbookPage < (blockbookData.totalPages ?? -1) ? true : false,
       txs: blockbookTxs,
+    }
+  }
+
+  async getTokenMetadata(address: string, id: string, type: TokenType): Promise<TokenMetadata> {
+    const substitue = (data: string, id: string, hexEncoded: boolean): string => {
+      if (!data.includes('{id}')) return data
+      if (!hexEncoded) return data.replace('{id}', id)
+      return data.replace('{id}', new BigNumber(id).toString(16).padStart(64, '0').toLowerCase())
+    }
+
+    const contract = new ethers.Contract(address, this.abiInterface[type], this.provider)
+
+    const uri = (await (() => {
+      switch (type) {
+        case 'erc721':
+          return contract.tokenURI(id)
+        case 'erc1155':
+          return contract.uri(id)
+        default:
+          throw new Error(`invalid token type: ${type}`)
+      }
+    })()) as string
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const metadata = await (async () => {
+      if (uri.startsWith('ipfs://')) return {}
+
+      try {
+        // attempt to get metadata using hex encoded id as per erc spec
+        const { data } = await axiosNoRetry.get(substitue(uri, id, true))
+        return data
+      } catch (err) {
+        try {
+          // not everyone follows the spec
+          // attempt to get metadata using id string
+          const { data } = await axiosNoRetry.get(substitue(uri, id, false))
+          return data
+        } catch (err) {
+          // swallow error and return empty object if unable to fetch metadata
+          return {}
+        }
+      }
+    })()
+
+    const mediaUrl = metadata.image ?? ''
+
+    const mediaType = await (async () => {
+      if (!mediaUrl || mediaUrl.startsWith('ipfs://')) return
+      const { headers } = await axiosNoRetry.head(mediaUrl)
+      return headers['content-type']?.includes('video') ? 'video' : 'image'
+    })()
+
+    return {
+      name: metadata.name ?? '',
+      description: metadata.description ?? '',
+      media: {
+        url: mediaUrl,
+        type: mediaType,
+      },
     }
   }
 }

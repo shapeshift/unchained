@@ -2,6 +2,5 @@
 . "$(dirname "$0")/_/husky.sh"
 
 # have to use yarn instead of npx because of npx's weird behavior
-cd node
 FORCE_COLOR=1 yarn lint-staged --allow-empty
-FORCE_COLOR=1 yarn lint-staged --allow-empty --cwd ../go
+FORCE_COLOR=1 yarn lint-staged --allow-empty --cwd ./go
