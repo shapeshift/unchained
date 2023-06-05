@@ -7,11 +7,27 @@ set -e
 HOME_DIR=/root/.heimdalld
 CONFIG_DIR=$HOME_DIR/config
 
+function extract_files() {
+  while read -r line; do
+    if echo "$line" | grep -q checksum; then
+      continue
+    fi
+    if echo "$line" | grep -q "bulk"; then
+      wget -c $line -O - | tar -I zstd -xf - -C $HOME_DIR/data
+    else
+      wget -c $line -O - | tar -I zstd -xf - -C $HOME_DIR/data --strip-components=3
+    fi
+  done < $1
+}
+
 # shapshots provided by: https://snapshot.polygon.technology/
 if [ -n "$SNAPSHOT" ] && [ ! -f "$HOME_DIR/data/priv_validator_state.json" ]; then
   rm -rf $HOME_DIR/data;
   mkdir -p $HOME_DIR/data;
-  wget -c $SNAPSHOT -O - | tar -xzf - -C $HOME_DIR/data
+  wget -c $SNAPSHOT
+  filename=$(echo $SNAPSHOT | awk -F/ '{print $NF}')
+  extract_files $filename
+  rm $filename
 fi
 
 if [ ! -d "$CONFIG_DIR" ]; then

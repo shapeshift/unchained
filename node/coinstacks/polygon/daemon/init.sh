@@ -7,11 +7,27 @@ set -e
 DATA_DIR=/data
 CHAINDATA_DIR=$DATA_DIR/bor/chaindata
 
+function extract_files() {
+  while read -r line; do
+    if echo "$line" | grep -q checksum; then
+      continue
+    fi
+    if echo "$line" | grep -q "bulk"; then
+      wget -c $line -O - | tar -I zstd -xf - -C $HOME_DIR/data
+    else
+      wget -c $line -O - | tar -I zstd -xf - -C $HOME_DIR/data --strip-components=3
+    fi
+  done < $1
+}
+
 # shapshots provided by: https://snapshot.polygon.technology/
 if [ -n "$SNAPSHOT" ] && [ ! -d "$CHAINDATA_DIR" ]; then
   rm -rf $DATA_DIR/bor;
   mkdir -p $CHAINDATA_DIR;
-  wget -c $SNAPSHOT -O - | tar -xzf - -C $CHAINDATA_DIR
+  wget -c $SNAPSHOT
+  filename=$(echo $SNAPSHOT | awk -F/ '{print $NF}')
+  extract_files $filename
+  rm $filename
 fi
 
 if [ ! -f "$DATA_DIR/bor/genesis.json" ]; then
