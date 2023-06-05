@@ -253,7 +253,7 @@ export async function deployStatefulService(
         },
         ...(volumes ?? []),
       ],
-      terminationGracePeriodSeconds: 120,
+      terminationGracePeriodSeconds: 600,
     },
   }
 

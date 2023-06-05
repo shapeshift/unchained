@@ -2,19 +2,19 @@
 
 set -e
 
-[ "$DEBUG" == "true" ] && set -x
+[ "$DEBUG" = "true" ] && set -x
 
 HOME_DIR=/root/.heimdalld
 CONFIG_DIR=$HOME_DIR/config
 
 # shapshots provided by: https://snapshot.polygon.technology/
-if [[ -n $SNAPSHOT && ! -f "$HOME_DIR/data/priv_validator_state.json" ]]; then
+if [ -n "$SNAPSHOT" ] && [ ! -f "$HOME_DIR/data/priv_validator_state.json" ]; then
   rm -rf $HOME_DIR/data;
   mkdir -p $HOME_DIR/data;
   wget -c $SNAPSHOT -O - | tar -xzf - -C $HOME_DIR/data
 fi
 
-if [[ ! -d "$CONFIG_DIR" ]]; then
+if [ ! -d "$CONFIG_DIR" ]; then
   # init chain
   heimdalld init --home $HOME_DIR
 

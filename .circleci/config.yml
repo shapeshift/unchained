@@ -586,7 +586,7 @@ aliases:
     service-cpu-request-1: "8"
     service-memory-limit-1: 48Gi
     service-memory-request-1: 24Gi
-    service-storage-size-1: 3500Gi
+    service-storage-size-1: 4000Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "4"
@@ -627,10 +627,11 @@ aliases:
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: 0xpolygon/bor:0.3.9
-    service-cpu-limit-1: "8"
-    service-cpu-request-1: "4"
-    service-memory-limit-1: 32Gi
-    service-storage-size-1: 3500Gi
+    service-cpu-limit-1: "16"
+    service-cpu-request-1: "8"
+    service-memory-request-1: 32Gi
+    service-memory-limit-1: 48Gi
+    service-storage-size-1: 4000Gi
     service-name-2: heimdall
     service-image-2: 0xpolygon/heimdall:0.3.3
     service-cpu-limit-2: "2"
@@ -688,7 +689,7 @@ aliases:
     service-image-2: sigp/lighthouse:v4.2.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 8Gi
+    service-memory-limit-2: 4Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
     service-image-3: shapeshiftdao/unchained-blockbook:gnosis-9c25fc0
