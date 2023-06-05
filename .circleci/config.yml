@@ -534,17 +534,17 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereumoptimism/l2geth:0.5.31
-    service-cpu-limit-1: "4"
-    service-cpu-request-1: "2"
+    service-image-1: #OP_GETH IMAGE
+    service-cpu-limit-1: "8"
+    service-cpu-request-1: "4"
     service-memory-limit-1: 24Gi
     service-storage-size-1: 500Gi
-    service-name-2: dtl
-    service-image-2: ethereumoptimism/data-transport-layer:0.5.50
+    service-name-2: op-node
+    service-image-2: #OP_NODE IMAGE
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 2Gi
-    service-storage-size-2: 500Gi
+    service-storage-size-2: 100Gi
     service-name-3: indexer
     service-image-3: shapeshiftdao/unchained-blockbook:optimism-b0f2fc9
     service-cpu-limit-3: "2"

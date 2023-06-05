@@ -9,36 +9,29 @@ if [[ -n "$SNAPSHOT" && ! -d "$CHAINDATA_DIR" ]]; then
   wget -c $SNAPSHOT -O - | tar -xvf - -C $DATA_DIR
 fi
 
-if [[ -n "$GENESIS" && ! -d "$CHAINDATA_DIR" ]]; then
-  geth init --datadir=$DATA_DIR $GENESIS
-fi
-
 start() {
   geth \
-    --datadir=$DATA_DIR \
-    --networkid=420 \
-    --authrpc.addr=localhost \
-    --authrpc.jwtsecret=/jwt.hex \
-    --authrpc.port=8551 \
-    --authrpc.vhosts="*" \
+    --$NETWORK \
+    --syncmode full \
+    --datadir $DATA_DIR \
+    --authrpc.jwtsecret /jwt.hex \
+    --authrpc.port 8551 \
     --http \
-    --http.port=8545 \
-    --http.addr=0.0.0.0 \
-    --http.api=eth,net,web3,debug,txpool,engine \
-    --http.vhosts="*" \
-    --http.corsdomain="*" \
+    --http.addr 0.0.0.0 \
+    --http.port 8545 \
+    --http.api eth,net,web3,debug,txpool,engine \
+    --http.vhosts "*" \
+    --http.corsdomain "*" \
     --ws \
-    --ws.port=8546 \
-    --ws.addr=0.0.0.0 \
-    --ws.api=eth,net,web3,debug,txpool,engine \
-    --ws.origins="*" \
-    --rollup.historicalrpc=http://localhost:7545 \
-    --rollup.disabletxpoolgossip=true \
-    --rollup.sequencerhttp=https://goerli-sequencer.optimism.io \
-    --cache=4096 \
-    --syncmode=full \
-    --gcmode=full \
-    --maxpeers=0 \
+    --ws.addr 0.0.0.0 \
+    --ws.port 8546 \
+    --ws.api eth,net,web3,debug,txpool,engine \
+    --ws.origins "*" \
+    --rollup.disabletxpoolgossip true \
+    --rollup.sequencerhttp https://goerli-sequencer.optimism.io \
+    --txlookuplimit 0 \
+    --cache 4096 \
+    --maxpeers 0 \
     --nodiscover &
   PID="$!"
 }

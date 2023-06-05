@@ -4,14 +4,14 @@ set -e
 
 start() {
   op-node \
-    --network=$NETWORK \
-    --l1=$L1_RPC_ENDPOINT \
+    --network $NETWORK \
+    --rpc.addr 0.0.0.0 \
+    --rpc.port 9545 \
+    --l1 $L1_RPC_ENDPOINT \
     --l1.trustrpc \
     --l1.rpckind=basic \
-    --l2=http://localhost:8551 \
-    --rpc.addr=0.0.0.0 \
-    --rpc.port=9545 \
-    --l2.jwt-secret=/jwt.hex &
+    --l2 http://localhost:8551 \
+    --l2.jwt-secret /jwt.hex &
   PID="$!"
 }
 
