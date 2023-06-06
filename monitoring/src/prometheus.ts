@@ -15,10 +15,10 @@ export class Ingress extends pulumi.ComponentResource {
     const secretName = 'prometheus-cert-secret'
 
     new k8s.core.v1.Secret(
-      `${name}-auth-secret`,
+      `${name}-prometheus-auth-secret`,
       {
         metadata: {
-          name: `${name}-auth-secret`,
+          name: `${name}-prometheus-auth-secret`,
           namespace: args.namespace,
         },
         stringData: {
@@ -29,7 +29,7 @@ export class Ingress extends pulumi.ComponentResource {
     )
 
     new k8s.apiextensions.CustomResource(
-      `${name}-cert`,
+      `${name}-prometheus-cert`,
       {
         apiVersion: 'cert-manager.io/v1',
         kind: 'Certificate',
@@ -62,17 +62,17 @@ export class Ingress extends pulumi.ComponentResource {
       : `Host(\`prometheus.${args.domain}\`)`
 
     new k8s.apiextensions.CustomResource(
-      `${name}-ingress-auth`,
+      `${name}-prometheus-ingress-auth`,
       {
         apiVersion: 'traefik.containo.us/v1alpha1',
         kind: 'Middleware',
         metadata: {
-          name: `${name}-ingress-auth`,
+          name: `${name}-prometheus-ingress-auth`,
           namespace: args.namespace,
         },
         spec: {
           basicAuth: {
-            secret: `${name}-auth-secret`,
+            secret: `${name}-prometheus-auth-secret`,
             removeHeader: true,
           },
         },
@@ -81,7 +81,7 @@ export class Ingress extends pulumi.ComponentResource {
     )
 
     new k8s.apiextensions.CustomResource(
-      `${name}-ingressroute`,
+      `${name}-prometheus-ingressroute`,
       {
         apiVersion: 'traefik.containo.us/v1alpha1',
         kind: 'IngressRoute',
@@ -96,7 +96,7 @@ export class Ingress extends pulumi.ComponentResource {
               kind: 'Rule',
               middlewares: [
                 {
-                  name: `${name}-ingress-auth`,
+                  name: `${name}-prometheus-ingress-auth`,
                   namespace: args.namespace,
                 },
               ],
@@ -120,7 +120,7 @@ export class Ingress extends pulumi.ComponentResource {
     )
 
     new k8s.networking.v1.Ingress(
-      `${name}-ingress`,
+      `${name}-prometheus-ingress`,
       {
         metadata: {
           namespace: args.namespace,
