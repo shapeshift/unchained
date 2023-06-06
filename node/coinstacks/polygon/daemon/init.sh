@@ -13,9 +13,9 @@ function extract_files() {
       continue
     fi
     if echo "$line" | grep -q "bulk"; then
-      wget $line -O - | zstd -cd | tar -xf - -C $CHAINDATA_DIR
+      wget -nc --timeout 0 --retry-connrefused --tries 0 $line -O - | zstd -cd | tar -xf - -C $CHAINDATA_DIR
     else
-      wget $line -O - | zstd -cd | tar -xf - -C $CHAINDATA_DIR --strip-components=3
+      wget -nc --timeout 0 --retry-connrefused --tries 0 $line -O - | zstd -cd | tar -xf - -C $CHAINDATA_DIR --strip-components=3
     fi
   done < $1
 }
@@ -24,7 +24,7 @@ function extract_files() {
 if [ -n "$SNAPSHOT" ]; then
   filename=$(echo $SNAPSHOT | awk -F/ '{print $NF}')
   if [ -f "$DATA_DIR/$filename" ] || [ ! -d "$CHAINDATA_DIR" ]; then
-    apk add zstd
+    apk add wget zstd
     rm -rf $DATA_DIR/bor;
     mkdir -p $CHAINDATA_DIR;
     wget $SNAPSHOT -O $DATA_DIR/$filename

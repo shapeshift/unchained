@@ -13,9 +13,9 @@ function extract_files() {
       continue
     fi
     if echo "$line" | grep -q "bulk"; then
-      wget $line -O - | zstd -cd | tar -xf - -C $HOME_DIR/data
+      wget -nc --timeout 0 --retry-connrefused --tries 0 $line -O - | zstd -cd | tar -xf - -C $HOME_DIR/data
     else
-      wget $line -O - | zstd -cd | tar -xf - -C $HOME_DIR/data --strip-components=3
+      wget -nc --timeout 0 --retry-connrefused --tries 0 $line -O - | zstd -cd | tar -xf - -C $HOME_DIR/data --strip-components=3
     fi
   done < $1
 }
@@ -24,7 +24,7 @@ function extract_files() {
 if [ -n "$SNAPSHOT" ]; then
   filename=$(echo $SNAPSHOT | awk -F/ '{print $NF}')
   if [ -f "$HOME_DIR/$filename" ] || [ ! -f "$HOME_DIR/data/priv_validator_state.json" ]; then
-    apk add zstd
+    apk add wget zstd
     rm -rf $HOME_DIR/data;
     mkdir -p $HOME_DIR/data;
     wget $SNAPSHOT -O $HOME_DIR/$filename
