@@ -14,7 +14,7 @@ export = async (): Promise<Outputs> => {
       case 'daemon':
         return {
           ...service,
-          env: { SNAPSHOT: '' },
+          env: { SNAPSHOT: 'https://storage.googleapis.com/oplabs-mainnet-data/mainnet-bedrock.tar' },
           ports: {
             'daemon-rpc': { port: 8545 },
             'daemon-ws': { port: 8546, pathPrefix: '/websocket', stripPathPrefix: true },
