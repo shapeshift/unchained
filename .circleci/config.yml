@@ -534,13 +534,13 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: #OP_GETH IMAGE
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101105.2
     service-cpu-limit-1: "8"
     service-cpu-request-1: "4"
     service-memory-limit-1: 24Gi
     service-storage-size-1: 500Gi
     service-name-2: op-node
-    service-image-2: #OP_NODE IMAGE
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.1.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 2Gi
