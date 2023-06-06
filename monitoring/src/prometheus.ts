@@ -103,9 +103,9 @@ export class Ingress extends pulumi.ComponentResource {
               services: [
                 {
                   kind: 'Service',
-                  name: `prometheus`,
+                  name: `prometheus-k8s`,
                   port: 9090,
-                  namespace: `${name}-prometheus`,
+                  namespace: `${name}-monitoring`,
                 },
               ],
             },
