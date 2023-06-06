@@ -12,6 +12,6 @@ stop() {
   while $(kill -0 $PID 2>/dev/null); do sleep 1; done
 }
 
-trap 'stop' SIGTERM SIGINT
+trap 'stop' TERM INT
 start
 wait $PID

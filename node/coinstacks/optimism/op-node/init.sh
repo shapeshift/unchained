@@ -9,7 +9,7 @@ start() {
     --rpc.port 9545 \
     --l1 $L1_RPC_ENDPOINT \
     --l1.trustrpc \
-    --l1.rpckind basic \
+    --l1.rpckind debug_geth \
     --l2 http://localhost:8551 \
     --l2.jwt-secret /jwt.hex &
   PID="$!"
