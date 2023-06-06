@@ -11,7 +11,7 @@ fi
 
 start() {
   geth \
-    --networkid 420 \
+    --networkid 10 \
     --syncmode full \
     --datadir $DATA_DIR \
     --authrpc.jwtsecret /jwt.hex \
@@ -28,7 +28,7 @@ start() {
     --ws.api eth,net,web3,debug,txpool,engine \
     --ws.origins "*" \
     --rollup.disabletxpoolgossip=true \
-    --rollup.sequencerhttp https://goerli-sequencer.optimism.io \
+    --rollup.sequencerhttp https://sequencer.optimism.io \
     --txlookuplimit 0 \
     --cache 4096 \
     --maxpeers 0 \

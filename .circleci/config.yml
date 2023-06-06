@@ -546,10 +546,10 @@ aliases:
     service-memory-limit-2: 2Gi
     service-storage-size-2: 100Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:optimism-b0f2fc9
+    service-image-3: shapeshiftdao/unchained-blockbook:optimism-bedrock-3c86cce
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
-    service-memory-limit-3: 6Gi
+    service-memory-limit-3: 12Gi
     service-storage-size-3: 500Gi
 
   - &optimism-dev

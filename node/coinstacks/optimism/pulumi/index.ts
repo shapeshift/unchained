@@ -14,10 +14,7 @@ export = async (): Promise<Outputs> => {
       case 'daemon':
         return {
           ...service,
-          env: {
-            NETWORK: config.network,
-            SNAPSHOT: 'https://storage.googleapis.com/oplabs-goerli-data/goerli-bedrock.tar', // TODO FINAL SNAPSHOT ENDPOINT
-          },
+          env: { SNAPSHOT: '' },
           ports: {
             'daemon-rpc': { port: 8545 },
             'daemon-ws': { port: 8546, pathPrefix: '/websocket', stripPathPrefix: true },
@@ -32,8 +29,7 @@ export = async (): Promise<Outputs> => {
           ...service,
           env: {
             NETWORK: config.network,
-            //L1_RPC_ENDPOINT: `http://ethereum-svc.${namespace}.svc.cluster.local:8332`,
-            L1_RPC_ENDPOINT: 'https://eth-goerli.g.alchemy.com/v2/AIYxhjifvuCKmIgcmpr4oTZybTtUNiv4',
+            L1_RPC_ENDPOINT: `http://ethereum-svc.${namespace}.svc.cluster.local:8332`,
           },
           ports: { 'op-node-rpc': { port: 9545 } },
           volumeMounts: [{ name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' }],
