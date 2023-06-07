@@ -13,9 +13,9 @@ function extract_files() {
       continue
     fi
     if echo "$line" | grep -q "bulk"; then
-      wget -nc --timeout 0 --retry-connrefused --tries 0 $line -O - | zstd -cd | tar -xf - -C $CHAINDATA_DIR
+      wget -nc --timeout 0 --retry-connrefused --tries 0 $line -O - | zstd -cd | tar -xvkf - -C $CHAINDATA_DIR
     else
-      wget -nc --timeout 0 --retry-connrefused --tries 0 $line -O - | zstd -cd | tar -xf - -C $CHAINDATA_DIR --strip-components=3
+      wget -nc --timeout 0 --retry-connrefused --tries 0 $line -O - | zstd -cd | tar -xvkf - -C $CHAINDATA_DIR --strip-components=3
     fi
   done < $1
 }
@@ -23,10 +23,13 @@ function extract_files() {
 # shapshots provided by: https://snapshot.polygon.technology/
 if [ -n "$SNAPSHOT" ]; then
   filename=$(echo $SNAPSHOT | awk -F/ '{print $NF}')
-  if [ -f "$DATA_DIR/$filename" ] || [ ! -d "$CHAINDATA_DIR" ]; then
-    apk add wget zstd
+  if [ ! -f "$DATA_DIR/$filename" ] && [ ! -d "$CHAINDATA_DIR" ]; then
     rm -rf $DATA_DIR/bor;
     mkdir -p $CHAINDATA_DIR;
+  fi
+
+  if [ -f "$DATA_DIR/$filename" ] || [ ! -d "$CHAINDATA_DIR" ]; then
+    apk add wget zstd
     wget $SNAPSHOT -O $DATA_DIR/$filename
     extract_files $DATA_DIR/$filename
     rm $DATA_DIR/$filename
