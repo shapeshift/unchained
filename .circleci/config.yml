@@ -680,7 +680,7 @@ aliases:
     api-memory-limit: 2Gi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: nethermind/nethermind:v1.19.1
+    service-image-1: nethermind/nethermind:1.19.1
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 16Gi
