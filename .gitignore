@@ -100,6 +100,7 @@ dist
 # Monitoring external/generated files
 monitoring/my-kube-prometheus/vendor
 monitoring/my-kube-prometheus/manifests
+monitoring/my-kube-prometheus/alertmanager-config.yaml
 
 # Gatsby files
 .cache/
