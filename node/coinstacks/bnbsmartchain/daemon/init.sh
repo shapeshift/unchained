@@ -1,8 +1,9 @@
-#!/bin/bash
+#!/bin/bash -x
 
-set -e
-
-[ "$DEBUG" == "true" ] && set -x
+# Download the config
+wget   $(curl -s https://api.github.com/repos/bnb-chain/bsc/releases/latest |grep browser_ |grep mainnet |cut -d\" -f4)
+unzip mainnet.zip
+rm mainnet.zip
 
 DATA_DIR=/data
 CHAINDATA_DIR=$DATA_DIR/geth/chaindata
@@ -18,52 +19,25 @@ if [ ! -d "$CHAINDATA_DIR" ]; then
     geth init --datadir $DATA_DIR genesis.json
 fi
 
-# add static peers
-PEERS=$(curl -s https://api.binance.org/v1/discovery/peers | jq -r '.peers | @csv')
-if [[ -n "$PEERS" && "$PEERS" != "null" ]]; then
-  sed -i -e "s|StaticNodes = \[|StaticNodes = [$PEERS,|" config.toml
-fi
-
-# hard reset existing peers
-hard_reset_peers() {
-  while true; do
-    if [[ -e "/data/geth.ipc" ]]; then
-      geth --exec '
-        for (i=0; i<admin.peers.length; i++) {
-          const enode = admin.peers[i].enode
-          if (admin.removePeer(enode)) {
-            console.log("sucessfully removed peer: ", enode)
-          } else {
-            console.log("failed to remove peer: ", enode)
-          }
-        }' attach /data/geth.ipc
-      break
-    else
-      sleep 1
-    fi
-  done
-}
 
 start() {
-  geth \
-    --config config.toml \
-    --datadir $DATA_DIR \
-    --http \
-    --http.addr 0.0.0.0 \
-    --http.port 8545 \
-    --http.api eth,net,web3,debug,txpool,parlia \
-    --http.vhosts '*' \
-    --http.corsdomain '*' \
-    --ws \
-    --ws.port 8546 \
-    --ws.api eth,net,web3,debug,txpool,parlia \
-    --ws.origins '*' \
-    --syncmode full \
-    --maxpeers 200 \
-    --rpc.allow-unprotected-txs \
-    --txlookuplimit 0 \
-    --cache 8000 \
-    --nat none &
+  geth --tries-verify-mode none --config ./config.toml \
+  --datadir $DATA_DIR \
+  --syncmode snap \
+  --http \
+  --http.addr 0.0.0.0 \
+  --http.port 8545 \
+  --http.api eth,net,web3,debug,txpool,parlia \
+  --http.vhosts '*' \
+  --http.corsdomain '*' \
+  --ws \
+  --ws.port 8546 \
+  --ws.api eth,net,web3,debug,txpool,parlia \
+  --ws.origins '*' \
+  --rpc.allow-unprotected-txs \
+  --txlookuplimit 0 \
+  --cache 8000 \
+  --nat none &
   PID="$!"
 
   hard_reset_peers &
