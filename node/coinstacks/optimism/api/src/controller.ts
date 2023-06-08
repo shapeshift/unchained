@@ -1,10 +1,9 @@
 import { serialize } from '@ethersproject/transactions'
-import bn from 'bignumber.js'
 import { ethers, Contract, BigNumber } from 'ethers'
 import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
-import { predeploys, getContractInterface } from '@eth-optimism/contracts'
+import { predeploys, getContractInterface } from '@eth-optimism/contracts-bedrock'
 
 import {
   BadRequestError,
@@ -49,7 +48,7 @@ export const service = new Service({
 })
 
 // gas price oracle contract to query current l1 and l2 values
-const gpo = new Contract(predeploys.OVM_GasPriceOracle, getContractInterface('OVM_GasPriceOracle'), provider)
+const gpo = new Contract(predeploys.GasPriceOracle, getContractInterface('GasPriceOracle'), provider)
 
 @Route('api/v1')
 @Tags('v1')
@@ -260,9 +259,9 @@ export class Optimism extends Controller implements BaseAPI, API {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
   async getGasFees(): Promise<OptimismGasFees> {
-    const { l1GasPrice } = (await provider.send('rollup_gasPrices', [])) as { l1GasPrice: string }
+    const l1GasPrice = (await gpo.l1BaseFee()) as BigNumber
     const gasFees = await service.getGasFees()
-    return { l1GasPrice: new bn(l1GasPrice).toFixed(0), ...gasFees }
+    return { l1GasPrice: l1GasPrice.toString(), ...gasFees }
   }
 
   /**
