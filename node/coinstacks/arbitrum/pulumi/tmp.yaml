@@ -1,0 +1,33 @@
+config:
+  unchained:coinstack:
+    assetName: arbitrum
+    stack: unchained/common/dependencies-us-east-2
+    network: mainnet
+    environment: dev
+    # api:
+    #   autoscaling:
+    #     cpuThreshold: 30
+    #     enabled: true
+    #     maxReplicas: 6
+    #   cpuLimit: 500m
+    #   cpuRequest: 250m
+    #   memoryLimit: 500Mi
+    #   replicas: 1
+    # statefulService:
+    #   replicas: 1
+    #   backup: 
+    #     count: 1,
+    #     schedule: "0 4 * * 3"
+      services:
+      - cpuLimit: "4"
+        cpuRequest: "2"
+        image: offchainlabs/nitro-node:v2.0.14-2baa834
+        memoryLimit: 16Gi
+        name: daemon
+        storageSize: 2000Gi
+      # - cpuLimit: "8"
+      #   cpuRequest: "4"
+      #   name: indexer
+      #   image: shapeshiftdao/unchained-blockbook:gnosis-9c25fc0
+      #   memoryLimit: 24Gi
+      #   storageSize: 500Gi
