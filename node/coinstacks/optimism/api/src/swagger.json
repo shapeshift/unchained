@@ -38,6 +38,10 @@
 					"type": {
 						"type": "string"
 					},
+					"id": {
+						"type": "string",
+						"description": "nft or multi token id"
+					},
 					"balance": {
 						"type": "string"
 					}
@@ -154,6 +158,10 @@
 					"type": {
 						"type": "string"
 					},
+					"id": {
+						"type": "string",
+						"description": "nft or multi token id"
+					},
 					"from": {
 						"type": "string"
 					},
@@ -162,10 +170,6 @@
 					},
 					"value": {
 						"type": "string"
-					},
-					"id": {
-						"type": "string",
-						"description": "nft or multi token id"
 					}
 				},
 				"required": [
@@ -440,7 +444,7 @@
 	},
 	"info": {
 		"title": "@shapeshiftoss/optimism-api",
-		"version": "9.2.0",
+		"version": "9.3.0",
 		"license": {
 			"name": "MIT"
 		},

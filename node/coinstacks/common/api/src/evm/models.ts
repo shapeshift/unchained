@@ -44,6 +44,8 @@ export interface Token {
   name: string
   symbol: string
   type: string
+  /** nft or multi token id */
+  id?: string
 }
 
 /**

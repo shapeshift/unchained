@@ -92,6 +92,7 @@ export function createCoinService(args: CoinServiceArgs, assetName: string, snap
     const monitorContainer: k8s.types.input.core.v1.Container = {
       name: `${name}-monitor`,
       image: 'shapeshiftdao/unchained-probe:1.0.0',
+      env,
       ...(readinessScript && {
         readinessProbe: {
           exec: {
@@ -253,7 +254,7 @@ export async function deployStatefulService(
         },
         ...(volumes ?? []),
       ],
-      terminationGracePeriodSeconds: 120,
+      terminationGracePeriodSeconds: 600,
     },
   }
 

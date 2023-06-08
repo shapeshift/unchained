@@ -159,7 +159,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/bitcoin-core:24.0.1
+    service-image-1: shapeshiftdao/bitcoin-core:25.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 8Gi
@@ -168,7 +168,7 @@ aliases:
     service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 32Gi
+    service-memory-limit-2: 40Gi
     service-storage-size-2: 500Gi
 
   - &bitcoin-dev
@@ -200,13 +200,13 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.11.6
+    service-image-1: ethereum/client-go:v1.12.0
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 32Gi
     service-storage-size-1: 2500Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.0.3
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.0.5
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 12Gi
@@ -252,7 +252,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/cosmoshub:v9.1.0
+    service-image-1: shapeshiftdao/cosmoshub:v9.1.1
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 32Gi
@@ -323,7 +323,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: avaplatform/avalanchego:v1.10.1
+    service-image-1: avaplatform/avalanchego:v1.10.2
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
@@ -373,7 +373,7 @@ aliases:
     service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 6Gi
+    service-memory-limit-2: 12Gi
     service-storage-size-2: 250Gi
 
   - &dogecoin-dev
@@ -414,7 +414,7 @@ aliases:
     service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 8Gi
+    service-memory-limit-2: 12Gi
     service-storage-size-2: 250Gi
 
   - &litecoin-dev
@@ -487,7 +487,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:chaosnet-multichain-1.110.0
+    service-image-1: registry.gitlab.com/thorchain/thornode:chaosnet-multichain-1.111.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 8Gi
@@ -534,22 +534,22 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereumoptimism/l2geth:0.5.31
-    service-cpu-limit-1: "4"
-    service-cpu-request-1: "2"
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101105.2
+    service-cpu-limit-1: "8"
+    service-cpu-request-1: "4"
     service-memory-limit-1: 24Gi
     service-storage-size-1: 500Gi
-    service-name-2: dtl
-    service-image-2: ethereumoptimism/data-transport-layer:0.5.50
+    service-name-2: op-node
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.1.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 2Gi
-    service-storage-size-2: 500Gi
+    service-storage-size-2: 100Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:optimism-b0f2fc9
+    service-image-3: shapeshiftdao/unchained-blockbook:optimism-bedrock-3c86cce
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
-    service-memory-limit-3: 6Gi
+    service-memory-limit-3: 12Gi
     service-storage-size-3: 500Gi
 
   - &optimism-dev
@@ -581,17 +581,17 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/bnb-smart-chain:v1.1.23
+    service-image-1: shapeshiftdao/bnb-smart-chain:v1.2.4
     service-cpu-limit-1: "16"
     service-cpu-request-1: "8"
     service-memory-limit-1: 48Gi
     service-memory-request-1: 24Gi
-    service-storage-size-1: 3500Gi
+    service-storage-size-1: 4000Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "4"
     service-cpu-request-2: "2"
-    service-memory-limit-2: 16Gi
+    service-memory-limit-2: 24Gi
     service-storage-size-2: 750Gi
 
   - &bnbsmartchain-dev
@@ -627,10 +627,11 @@ aliases:
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: 0xpolygon/bor:0.3.9
-    service-cpu-limit-1: "8"
-    service-cpu-request-1: "4"
-    service-memory-limit-1: 32Gi
-    service-storage-size-1: 3500Gi
+    service-cpu-limit-1: "16"
+    service-cpu-request-1: "8"
+    service-memory-request-1: 32Gi
+    service-memory-limit-1: 48Gi
+    service-storage-size-1: 4000Gi
     service-name-2: heimdall
     service-image-2: 0xpolygon/heimdall:0.3.3
     service-cpu-limit-2: "2"
@@ -641,7 +642,7 @@ aliases:
     service-image-3: shapeshiftdao/unchained-blockbook:polygon-e655dd8
     service-cpu-limit-3: "4"
     service-cpu-request-3: "2"
-    service-memory-limit-3: 16Gi
+    service-memory-limit-3: 24Gi
     service-storage-size-3: 500Gi
 
 
@@ -679,21 +680,21 @@ aliases:
     api-memory-limit: 2Gi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.18.0
-    service-cpu-limit-1: "4"
-    service-cpu-request-1: "2"
-    service-memory-limit-1: 32Gi
+    service-image-1: nethermind/nethermind:1.19.1
+    service-cpu-limit-1: "2"
+    service-cpu-request-1: "1"
+    service-memory-limit-1: 16Gi
     service-storage-size-1: 1000Gi
     service-name-2: daemon-beacon
-    service-image-2: sigp/lighthouse:v4.1.0
-    service-cpu-limit-2: "4"
-    service-cpu-request-2: "2"
-    service-memory-limit-2: 8Gi
+    service-image-2: sigp/lighthouse:v4.2.0
+    service-cpu-limit-2: "2"
+    service-cpu-request-2: "1"
+    service-memory-limit-2: 4Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
     service-image-3: shapeshiftdao/unchained-blockbook:gnosis-9c25fc0
-    service-cpu-limit-3: "8"
-    service-cpu-request-3: "4"
+    service-cpu-limit-3: "2"
+    service-cpu-request-3: "1"
     service-memory-limit-3: 24Gi
     service-storage-size-3: 500Gi
 
@@ -758,6 +759,8 @@ commands:
           command: |
             echo 'export ADDITIONAL_ROOT_DOMAIN_NAME=$<< parameters.organization >>_ADDITIONAL_ROOT_DOMAIN_NAME' >> $BASH_ENV
             echo 'export PULUMI_ACCESS_TOKEN=$<< parameters.organization >>_PULUMI_ACCESS_TOKEN' >> $BASH_ENV
+            echo 'export IPFS_CLUSTER_SECRET=$IPFS_CLUSTER_SECRET' >> $BASH_ENV
+            echo 'export IPFS_CLUSTER_PRIV_KEY=$IPFS_CLUSTER_PRIV_KEY' >> $BASH_ENV
       - run:
           name: install tools
           command: |
@@ -871,8 +874,8 @@ jobs:
             pulumi config set --path unchained:common.eks.cidrBlock 10.0.0.0/16
             pulumi config set --path unchained:common.eks.nodeGroups[0].name spot
             pulumi config set --path unchained:common.eks.nodeGroups[0].type SPOT
-            pulumi config set --path unchained:common.eks.nodeGroups[0].desired 5
-            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 5
+            pulumi config set --path unchained:common.eks.nodeGroups[0].desired 6
+            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 6
             pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 8
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[0] r6in.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r6idn.4xlarge
@@ -1618,6 +1621,32 @@ workflows:
           requires:
             - approve polygon coinstack
           <<: *polygon
+          <<: *only-main
+
+      ####### GNOSIS
+      - deploy-coinstack-node:
+          name: preview gnosis
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies
+          <<: *gnosis
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve gnosis coinstack
+          type: approval
+          requires:
+            - preview gnosis
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy gnosis
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve gnosis coinstack
+          <<: *gnosis
           <<: *only-main
 
       ####### COSMOS

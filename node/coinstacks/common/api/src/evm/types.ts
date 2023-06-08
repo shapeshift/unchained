@@ -46,7 +46,29 @@ export interface NodeTransaction {
   type: string
 }
 
-export interface CallStack {
+export interface TraceCall {
+  action: {
+    callType: string
+    from: string
+    gas: string
+    input: string
+    to: string
+    value: string
+  }
+  blockHash: string
+  blockNumber: number
+  result: {
+    gasUsed: string
+    output: string
+  }
+  subtraces: number
+  traceAddress: Array<number>
+  transactionHash: string
+  transactionPosition: number
+  type: string
+}
+
+export interface DebugCallStack {
   type: string
   from: string
   to: string
@@ -55,7 +77,7 @@ export interface CallStack {
   gasUsed: string
   input: string
   output: string
-  calls?: Array<CallStack>
+  calls?: Array<DebugCallStack>
 }
 
 export interface ExplorerApiResponse<T> {

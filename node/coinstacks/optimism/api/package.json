@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/optimism-api",
-  "version": "9.2.0",
+  "version": "9.3.0",
   "license": "MIT",
   "private": true,
   "files": [
@@ -12,9 +12,9 @@
     "generate": "tsoa spec-and-routes"
   },
   "dependencies": {
-    "@eth-optimism/contracts": "^0.5.40",
-    "@shapeshiftoss/blockbook": "^9.2.0",
-    "@shapeshiftoss/common-api": "^9.2.0",
+    "@eth-optimism/contracts-bedrock": "^0.14.0",
+    "@shapeshiftoss/blockbook": "^9.3.0",
+    "@shapeshiftoss/common-api": "^9.3.0",
     "bignumber.js": "^9.1.1"
   }
 }

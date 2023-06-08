@@ -61,7 +61,7 @@ const blockHandler: BlockHandler<NewBlock, Array<BlockbookTx>> = async (block) =
 }
 
 const transactionHandler: TransactionHandler<BlockbookTx, evm.Tx> = async (blockbookTx) => {
-  const tx = await service.handleTransactionWithInternalTrace(blockbookTx)
+  const tx = await service.handleTransactionWithInternalTrace(blockbookTx, 'trace_transaction')
   const internalAddresses = (tx.internalTxs ?? []).reduce<Array<string>>((prev, tx) => [...prev, tx.to, tx.from], [])
   const addresses = [...new Set([...getAddresses(blockbookTx), ...internalAddresses])]
 
