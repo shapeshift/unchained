@@ -13,18 +13,18 @@ DATA_DIR=/data
 CHAINDATA_DIR=$DATA_DIR/geth/chaindata
 
 # shapshots provided by: https://github.com/bnb-chain/bsc-snapshots
-if [[ -n $SNAPSHOT && ! -d "$CHAINDATA_DIR" ]]; then
-  apk add lz4
-  rm -rf $DATA_DIR/geth;
-  wget -nc --timeout 0 --retry-connrefused --tries 0 $SNAPSHOT -O - | zstd -cd | tar -xf - -C $DATA_DIR
-  mv /data/server/data-seed/geth $DATA_DIR/geth
-fi
+# if [[ -n $SNAPSHOT && ! -d "$CHAINDATA_DIR" ]]; then
+#   apk add lz4
+#   rm -rf $DATA_DIR/geth;
+#   wget -nc --timeout 0 --retry-connrefused --tries 0 $SNAPSHOT -O - | lz4 -cd | tar -xf - -C $DATA_DIR
+#   mv /data/server/data-seed/geth $DATA_DIR/geth
+# fi
 
-if [ ! -d "$CHAINDATA_DIR" ]; then
-    geth init --datadir $DATA_DIR genesis.json
-fi
+# if [ ! -d "$CHAINDATA_DIR" ]; then
+#     geth init --datadir $DATA_DIR genesis.json
+# fi
 
-geth snapshot insecure-prune-all --datadir $DATA_DIR ./genesis.json
+# geth snapshot insecure-prune-all --datadir $DATA_DIR ./genesis.json
 
 start() {
   geth \
