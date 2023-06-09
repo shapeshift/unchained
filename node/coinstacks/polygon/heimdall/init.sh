@@ -13,9 +13,9 @@ function extract_files() {
       continue
     fi
     if echo "$line" | grep -q "bulk"; then
-      wget -nc --timeout 0 --retry-connrefused --tries 0 $line -O - | zstd -cd | tar -xf - -C $HOME_DIR/data
+      wget -nc --timeout 0 --retry-connrefused --tries 0 $line -O - | zstd -cd | tar -xvkf - -C $HOME_DIR/data
     else
-      wget -nc --timeout 0 --retry-connrefused --tries 0 $line -O - | zstd -cd | tar -xf - -C $HOME_DIR/data --strip-components=3
+      wget -nc --timeout 0 --retry-connrefused --tries 0 $line -O - | zstd -cd | tar -xvkf - -C $HOME_DIR/data --strip-components=3
     fi
   done < $1
 }
@@ -23,10 +23,14 @@ function extract_files() {
 # shapshots provided by: https://snapshot.polygon.technology/
 if [ -n "$SNAPSHOT" ]; then
   filename=$(echo $SNAPSHOT | awk -F/ '{print $NF}')
-  if [ -f "$HOME_DIR/$filename" ] || [ ! -f "$HOME_DIR/data/priv_validator_state.json" ]; then
-    apk add wget zstd
+
+  if [ ! -f "$HOME_DIR/$filename" ] && [ ! -f "$HOME_DIR/data/priv_validator_state.json" ]; then
     rm -rf $HOME_DIR/data;
     mkdir -p $HOME_DIR/data;
+  fi
+
+  if [ -f "$HOME_DIR/$filename" ] || [ ! -f "$HOME_DIR/data/priv_validator_state.json" ]; then
+    apk add wget zstd
     wget $SNAPSHOT -O $HOME_DIR/$filename
     extract_files $HOME_DIR/$filename
     rm $HOME_DIR/$filename
