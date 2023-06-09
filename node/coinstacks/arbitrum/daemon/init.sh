@@ -12,11 +12,12 @@ if [ -n "$SNAPSHOT_FILE" ]; then
   curl -o $SNAPSHOT_FILE -L -O --retry 999 --retry-max-time 0 -C - $SNAPSHOT_URL
 fi
 
-ACTUAL_CHECKSUM=$(md5sum "$SNAPSHOT_FILE" | awk '{ print $1 }')
+# TODO skip this part if the node was already bootstrapped
+ACTUAL_CHECKSUM=$(sha256sum "$SNAPSHOT_FILE" | awk '{ print $1 }')
 while [ "$ACTUAL_CHECKSUM" != "$EXPECTED_CHECKSUM" ]; do
   echo "Invalid checksum, redownloading the snapshot"
   curl -o $SNAPSHOT_FILE -L -O --retry 999 --retry-max-time 0 -C - $SNAPSHOT_URL
-  ACTUAL_CHECKSUM=$(md5sum "$SNAPSHOT_FILE" | awk '{ print $1 }')
+  ACTUAL_CHECKSUM=$(sha256sum "$SNAPSHOT_FILE" | awk '{ print $1 }')
 done
 
 echo "Snaphot is valid"
