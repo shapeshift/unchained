@@ -3,24 +3,19 @@
 set -x
 
 SNAPSHOT_URL="https://snapshot.arbitrum.io/mainnet/nitro.tar"
-SNAPSHOT_FILE="/home/user/nitro.tar"
+SNAPSHOT_FILE="/home/user/.arbitrum/nitro.tar"
 EXPECTED_CHECKSUM="a609773c6103435b8a04d32c63f42bb5fa0dc8fc38a2acee4d2ab2d05880205c"
-
-function downloadSnapshot() {
-    wget -nc --timeout 0 --retry-connrefused $SNAPSHOT_URL -O $SNAPSHOT_FILE
-}
 
 # If the file doesn't exist
 if [ -n "$SNAPSHOT_FILE" ]; then
-  downloadSnapshot
+  curl -o $SNAPSHOT_FILE -L -O --retry 999 --retry-max-time 0 -C - $SNAPSHOT_URL
 fi
 
 # If the checksum doesn't match, redownload the file
 ACTUAL_CHECKSUM=$(md5sum "$SNAPSHOT_FILE" | awk '{ print $1 }')
-if [ "$ACTUAL_CHECKSUM" != "$EXPECTED_CHECKSUM" ]; then
+while [ "$ACTUAL_CHECKSUM" != "$EXPECTED_CHECKSUM" ]; then
   echo "Invalid checksum, redownloading the snapshot"
-  rm -f $SNAPSHOT_FILE
-  downloadSnapshot
+  curl -o $SNAPSHOT_FILE -L -O --retry 999 --retry-max-time 0 -C - $SNAPSHOT_URL
 else
   echo "File is valid"
 fi
@@ -33,14 +28,16 @@ start() {
   --init.url="file://${SNAPSHOT_FILE}" \
   --http.addr 0.0.0.0 \
   --http.port 8545 \
-  --http.api eth,net,web3,debug,txpool,parlia \
+  --http.api eth,net,web3,debug,txpool,arb,parlia \
   --http.vhosts '*' \
   --http.corsdomain '*' \
-  --l1.url http://ethereum-svc.unchained-dev.svc.cluster.local:8332 \
+  --l1.url $L1_RPC_ENDPOINT \
   --l2.chain-id=42161 \
-  --http.api=net,web3,eth,debug \
-  --http.corsdomain=* \
-  --http.addr=0.0.0.0 \
+  --healthcheck.enable \
+  --ws \
+  --ws.addr 0.0.0.0 \
+  --ws.api eth,net,web3,debug,txpool,bor \
+  --ws.origins '*' \
   --http.vhosts=* &
 }
 
