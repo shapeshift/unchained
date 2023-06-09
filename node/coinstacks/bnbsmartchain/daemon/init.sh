@@ -29,9 +29,9 @@ CHAINDATA_DIR=$DATA_DIR/geth/chaindata
 start() {
   geth \
     --tries-verify-mode none \
-    --syncmode snap \
-    --config config.toml \
+    --config /config.toml \
     --datadir $DATA_DIR \
+    --syncmode snap \
     --http \
     --http.addr 0.0.0.0 \
     --http.port 8545 \
@@ -42,15 +42,12 @@ start() {
     --ws.port 8546 \
     --ws.api eth,net,web3,debug,txpool,parlia \
     --ws.origins '*' \
-    --syncmode full \
-    --maxpeers 200 \
     --rpc.allow-unprotected-txs \
     --txlookuplimit 0 \
     --cache 8000 \
     --nat none &
   PID="$!"
 
-  hard_reset_peers &
 }
 
 stop() {

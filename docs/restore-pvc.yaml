@@ -1,31 +1,31 @@
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  finalizers:
-  - kubernetes.io/pv-protection
-  - external-attacher/ebs-csi-aws-com
-  name: data-daemon-bnblight-sts-0-pv-dev
-spec:
-  accessModes:
-    - ReadWriteOnce
-  capacity:
-    storage: 4000Gi
-  csi:
-    driver: ebs.csi.aws.com
-    fsType: ext4
-    volumeHandle: vol-0b5088651369c5ca3
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: topology.ebs.csi.aws.com/zone
-          operator: In
-          values:
-          - us-east-2a
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: ebs-csi-gp2
-  volumeMode: Filesystem
----
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   finalizers:
+#   - kubernetes.io/pv-protection
+#   - external-attacher/ebs-csi-aws-com
+#   name: data-daemon-bnblight-sts-0-pv-dev
+# spec:
+#   accessModes:
+#     - ReadWriteOnce
+#   capacity:
+#     storage: 4000Gi
+#   csi:
+#     driver: ebs.csi.aws.com
+#     fsType: ext4
+#     volumeHandle: vol-0b5088651369c5ca3
+#   nodeAffinity:
+#     required:
+#       nodeSelectorTerms:
+#       - matchExpressions:
+#         - key: topology.ebs.csi.aws.com/zone
+#           operator: In
+#           values:
+#           - us-east-2a
+#   persistentVolumeReclaimPolicy: Retain
+#   storageClassName: ebs-csi-gp2
+#   volumeMode: Filesystem
+# ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -42,4 +42,4 @@ spec:
     requests:
       storage: 4000Gi
   storageClassName: ebs-csi-gp2
-  volumeName: data-daemon-bnblight-sts-0-pv-dev
+  volumeName: pvc-d224063b-66d1-4197-aca8-0941920bf78f
