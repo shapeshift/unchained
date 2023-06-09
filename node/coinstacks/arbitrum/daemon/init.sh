@@ -14,13 +14,12 @@ fi
 
 # If the checksum doesn't match, redownload the file
 ACTUAL_CHECKSUM=$(md5sum "$SNAPSHOT_FILE" | awk '{ print $1 }')
-while [ "$ACTUAL_CHECKSUM" != "$EXPECTED_CHECKSUM" ]; then
+while [ "$ACTUAL_CHECKSUM" != "$EXPECTED_CHECKSUM" ]; do
   echo "Invalid checksum, redownloading the snapshot"
   curl -o $SNAPSHOT_FILE -L -O --retry 999 --retry-max-time 0 -C - $SNAPSHOT_URL
-else
-  echo "File is valid"
-fi
+done
 
+echo "Snaphot is valid"
 
 # docker run --rm -it  -v /some/local/dir/arbitrum:/home/user/.arbitrum -p 0.0.0.0:8547:8547 -p 0.0.0.0:8548:8548 offchainlabs/nitro-node:v2.0.14-2baa834 --l1.url https://l1-node:8545 --l2.chain-id=<L2ChainId> --http.api=net,web3,eth,debug --http.corsdomain=* --http.addr=0.0.0.0 --http.vhosts=*
 
@@ -37,7 +36,7 @@ start() {
   --healthcheck.enable \
   --ws \
   --ws.addr 0.0.0.0 \
-  --ws.api eth,net,web3,debug,txpool,bor \
+  --ws.api eth,net,web3,debug,txpool \
   --ws.origins '*' \
   --http.vhosts=* &
 }

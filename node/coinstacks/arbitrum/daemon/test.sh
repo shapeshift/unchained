@@ -21,10 +21,9 @@ fi
 
 # If the checksum doesn't match, redownload the file
 ACTUAL_CHECKSUM=$(md5sum "$SNAPSHOT_FILE" | awk '{ print $1 }')
-if [ "$ACTUAL_CHECKSUM" != "$EXPECTED_CHECKSUM" ]; then
-  echo "Invalid checksum"
-  rm -f $SNAPSHOT_FILE
-  downloadSnapshot
-else
-  echo "File is valid"
-fi
+while [ "$ACTUAL_CHECKSUM" != "$EXPECTED_CHECKSUM" ]; do
+  echo "Invalid checksum, redownloading the snapshot"
+  curl -o $SNAPSHOT_FILE -L -O --retry 999 --retry-max-time 0 -C - $SNAPSHOT_URL
+done
+
+echo "Snaphot is valid"
