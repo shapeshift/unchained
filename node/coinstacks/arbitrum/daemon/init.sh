@@ -1,6 +1,7 @@
 #!/bin/sh
 
 set -x
+set -e
 
 SNAPSHOT_URL="https://snapshot.arbitrum.io/mainnet/nitro.tar"
 SNAPSHOT_FILE="/home/user/.arbitrum/nitro.tar"
