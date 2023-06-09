@@ -2,26 +2,35 @@
 
 set -x
 
-# shapshots provided by: https://snapshot.polygon.technology/
-if [ -n "$SNAPSHOT" ]; then
-  filename=$(echo $SNAPSHOT | awk -F/ '{print $NF}')
-  if [ -f "$DATA_DIR/$filename" ] || [ ! -d "$CHAINDATA_DIR" ]; then
-    apk add wget zstd
-    rm -rf $DATA_DIR/bor;
-    mkdir -p $CHAINDATA_DIR;
-    wget $SNAPSHOT -O $DATA_DIR/$filename
-    extract_files $DATA_DIR/$filename
-    rm $DATA_DIR/$filename
-  fi
+SNAPSHOT_URL="https://snapshot.arbitrum.io/mainnet/nitro.tar"
+SNAPSHOT_FILE="/home/user/nitro.tar"
+EXPECTED_CHECKSUM="a609773c6103435b8a04d32c63f42bb5fa0dc8fc38a2acee4d2ab2d05880205c"
+
+function downloadSnapshot() {
+    wget -nc --timeout 0 --retry-connrefused $SNAPSHOT_URL -O $SNAPSHOT_FILE
+}
+
+# If the file doesn't exist
+if [ -n "$SNAPSHOT_FILE" ]; then
+  downloadSnapshot
 fi
 
---init.url="file:///path/to/snapshot/in/container/nitro.tar"
+# If the checksum doesn't match, redownload the file
+ACTUAL_CHECKSUM=$(md5sum "$SNAPSHOT_FILE" | awk '{ print $1 }')
+if [ "$ACTUAL_CHECKSUM" != "$EXPECTED_CHECKSUM" ]; then
+  echo "Invalid checksum, redownloading the snapshot"
+  rm -f $SNAPSHOT_FILE
+  downloadSnapshot
+else
+  echo "File is valid"
+fi
+
 
 # docker run --rm -it  -v /some/local/dir/arbitrum:/home/user/.arbitrum -p 0.0.0.0:8547:8547 -p 0.0.0.0:8548:8548 offchainlabs/nitro-node:v2.0.14-2baa834 --l1.url https://l1-node:8545 --l2.chain-id=<L2ChainId> --http.api=net,web3,eth,debug --http.corsdomain=* --http.addr=0.0.0.0 --http.vhosts=*
 
 start() {
   /usr/local/bin/nitro \
-  --init.url="https://snapshot.arbitrum.io/mainnet/nitro.tar" \
+  --init.url="file://${SNAPSHOT_FILE}" \
   --http.addr 0.0.0.0 \
   --http.port 8545 \
   --http.api eth,net,web3,debug,txpool,parlia \
