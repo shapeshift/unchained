@@ -18,6 +18,8 @@ config:
     #   backup: 
     #     count: 1,
     #     schedule: "0 4 * * 3"
+    statefulService:
+      replicas: 1
       services:
       - cpuLimit: "4"
         cpuRequest: "2"

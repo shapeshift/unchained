@@ -18,9 +18,12 @@ export = async (): Promise<Outputs> => {
             'daemon-http': { port: 8545 },
             'daemon-ws': { port: 8546, pathPrefix: '/websocket', stripPathPrefix: true },
           },
-          configMapData: { 'jwt.hex': readFileSync('../daemon/jwt.hex').toString() },
+          dataDir: '/home/user/.arbitrum',
+          configMapData: { jwtsecret: readFileSync('../daemon/jwt.hex').toString() },
           readinessProbe: { httpGet: { path: '/health', port: 8545 }, timeoutSeconds: 5 },
-          volumeMounts: [{ name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' }],
+          volumeMounts: [
+            { name: 'config-map', mountPath: '/root/.arbitrum/arb1/nitro/jwtsecret', subPath: 'jwtsecret' },
+          ],
         }
       // case 'indexer':
       //   return {
