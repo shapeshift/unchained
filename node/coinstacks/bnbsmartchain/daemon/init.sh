@@ -6,7 +6,7 @@ set -e
 
 # Download the config
 wget   $(curl -s https://api.github.com/repos/bnb-chain/bsc/releases/latest |grep browser_ |grep mainnet |cut -d\" -f4)
-unzip mainnet.zip
+unzip -o mainnet.zip
 rm mainnet.zip
 
 DATA_DIR=/data
