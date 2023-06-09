@@ -1,0 +1,32 @@
+config:
+  unchained:coinstack:
+    assetName: bnb-light
+    stack: unchained/common/dependencies-us-east-2
+    network: mainnet
+    environment: dev
+    api:
+      replicas: 1
+      cpuLimit: "2"
+      cpuRequest: "1"
+      memoryLimit: 4Gi
+      memoryRequest: 2Gi
+      autoscaling:
+        enabled: true
+        maxReplicas: 3
+        minReplicas: 1
+        cpuThreshold: 80
+    statefulService:
+      replicas: 1
+      services:
+      - cpuLimit: "8"
+        cpuRequest: "4"
+        image: shapeshiftdao/bnb-smart-chain:v1.2.4
+        memoryLimit: 32Gi
+        name: daemon
+        storageSize: 4000Gi
+      - cpuLimit: "4"
+        cpuRequest: "2"
+        image: shapeshiftdao/unchained-blockbook:fdc2b86
+        memoryLimit: 24Gi
+        name: indexer
+        storageSize: 750Gi
