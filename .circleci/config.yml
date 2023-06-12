@@ -364,7 +364,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: greenbigfrog/dogecoin:1.14.5
+    service-image-1: shapeshiftdao/dogecoin:1.14.6
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 4Gi
@@ -373,7 +373,7 @@ aliases:
     service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 12Gi
+    service-memory-limit-2: 16Gi
     service-storage-size-2: 250Gi
 
   - &dogecoin-dev
