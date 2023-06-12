@@ -21,7 +21,7 @@ export = async (): Promise<Outputs> => {
           env: {
             L1_RPC_ENDPOINT: `http://ethereum-svc.${namespace}.svc.cluster.local:8332`,
           },
-          dataDir: '/home/user/.arbitrum',
+          dataDir: '/root/.arbitrum',
           configMapData: { 'jwt.hex': readFileSync('../daemon/jwt.hex').toString() },
           readinessProbe: { httpGet: { path: '/health', port: 8545 }, timeoutSeconds: 5 },
           volumeMounts: [{ name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' }],

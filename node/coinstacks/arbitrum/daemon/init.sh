@@ -27,6 +27,7 @@ fi
 start() {
   /usr/local/bin/nitro \
   --init.url="file://${SNAPSHOT_FILE}" \
+  --auth.jwtsecret "/jwt.hex" \
   --http.addr 0.0.0.0 \
   --http.port 8545 \
   --http.api eth,net,web3,debug,txpool,arb,parlia \
@@ -34,8 +35,6 @@ start() {
   --http.corsdomain '*' \
   --l1.url $L1_RPC_ENDPOINT \
   --l2.chain-id=42161 \
-  --healthcheck.enable=true \
-  --ws \
   --ws.addr 0.0.0.0 \
   --ws.api eth,net,web3,debug,txpool \
   --ws.origins '*' \
