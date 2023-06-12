@@ -1,32 +1,12 @@
 #!/bin/sh
 
-set -x
 set -e
 
-SNAPSHOT_URL="https://snapshot.arbitrum.io/mainnet/nitro.tar"
-SNAPSHOT_FILE="/root/.arbitrum/nitro.tar"
-EXPECTED_CHECKSUM="823cbce507ca31816f46b05ce7e146cce00115e9a60c0f646da1fe00d2b0b8a4"
-
-# If the file doesn't exist
-if [ -n "$SNAPSHOT_FILE" ]; then
-  curl -o $SNAPSHOT_FILE -L -O --retry 999 --retry-max-time 0 -C - $SNAPSHOT_URL
-fi
-
-# TODO skip this part if the node was already bootstrapped
-# ACTUAL_CHECKSUM=$(sha256sum "$SNAPSHOT_FILE" | awk '{ print $1 }')
-# while [ "$ACTUAL_CHECKSUM" != "$EXPECTED_CHECKSUM" ]; do
-  # echo "Invalid checksum, redownloading the snapshot"
-  curl -o $SNAPSHOT_FILE -L -O --retry 999 --retry-max-time 0 -C - $SNAPSHOT_URL
-  # ACTUAL_CHECKSUM=$(sha256sum "$SNAPSHOT_FILE" | awk '{ print $1 }')
-# done
-
-# echo "Snaphot is valid"
-
-# docker run --rm -it  -v /some/local/dir/arbitrum:/home/user/.arbitrum -p 0.0.0.0:8547:8547 -p 0.0.0.0:8548:8548 offchainlabs/nitro-node:v2.0.14-2baa834 --l1.url https://l1-node:8545 --l2.chain-id=<L2ChainId> --http.api=net,web3,eth,debug --http.corsdomain=* --http.addr=0.0.0.0 --http.vhosts=*
+[ "$DEBUG" = "true" ] && set -x
 
 start() {
   /usr/local/bin/nitro \
-  --init.url="file://${SNAPSHOT_FILE}" \
+  --init.url="https://snapshot.arbitrum.io/mainnet/nitro.tar" \
   --auth.jwtsecret "/jwt.hex" \
   --http.addr 0.0.0.0 \
   --http.port 8545 \

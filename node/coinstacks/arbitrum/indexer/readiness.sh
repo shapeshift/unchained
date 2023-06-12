@@ -1,1 +1,0 @@
-../../../packages/blockbook/scripts/readiness.sh
