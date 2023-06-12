@@ -4,7 +4,7 @@ set -x
 set -e
 
 SNAPSHOT_URL="https://snapshot.arbitrum.io/mainnet/nitro.tar"
-SNAPSHOT_FILE="/home/user/.arbitrum/nitro.tar"
+SNAPSHOT_FILE="/root/.arbitrum/nitro.tar"
 EXPECTED_CHECKSUM="823cbce507ca31816f46b05ce7e146cce00115e9a60c0f646da1fe00d2b0b8a4"
 
 # If the file doesn't exist
