@@ -34,7 +34,7 @@ start() {
   --http.corsdomain '*' \
   --l1.url $L1_RPC_ENDPOINT \
   --l2.chain-id=42161 \
-  --healthcheck.enable \
+  --healthcheck.enable=true \
   --ws \
   --ws.addr 0.0.0.0 \
   --ws.api eth,net,web3,debug,txpool \
