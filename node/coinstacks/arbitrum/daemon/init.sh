@@ -11,15 +11,15 @@ start() {
   --auth.jwtsecret "/jwt.hex" \
   --http.addr 0.0.0.0 \
   --http.port 8545 \
-  --http.api eth,net,web3,debug,txpool,arb,parlia \
+  --http.api eth,net,web3,debug,txpool,arb \
   --http.vhosts '*' \
   --http.corsdomain '*' \
   --l1.url $L1_RPC_ENDPOINT \
   --l2.chain-id=42161 \
   --ws.addr 0.0.0.0 \
-  --ws.api eth,net,web3,debug,txpool \
-  --ws.origins '*' \
-  --http.vhosts=* &
+  --ws.api eth,net,web3,debug,txpool,arb \
+  --ws.port 8546 \
+  --ws.origins '*' &
 }
 
 stop() {
