@@ -662,7 +662,6 @@ aliases:
     stateful-service-backup-schedule: "0 4 * * 3,6"
     stateful-service-backup-count: 2
 
-
   - &gnosis
     assetName: gnosis
     pulumi-stack: public-us-east-2
@@ -698,7 +697,6 @@ aliases:
     service-memory-limit-3: 24Gi
     service-storage-size-3: 500Gi
 
-
   - &gnosis-dev
     <<: *gnosis
     environment: dev
@@ -706,6 +704,45 @@ aliases:
     rpc-url: http://gnosis-svc.unchained-dev.svc.cluster.local:8545
     indexer-url: http://gnosis-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://gnosis-svc.unchained-dev.svc.cluster.local:8001/websocket
+    api-replicas: 1
+    api-max-replicas: 2
+    api-memory-limit: 2Gi
+    stateful-service-replicas: 1
+    stateful-service-backup: true
+    stateful-service-backup-schedule: "0 4 * * 3"
+    stateful-service-backup-count: 1
+
+  - &arbitrum
+    assetName: arbitrum
+    pulumi-stack: public-us-east-2
+    pulumi-dir: coinstacks/arbitrum/pulumi
+    rpc-url: http://arbitrum-svc.unchained.svc.cluster.local:8545
+    indexer-url: http://arbitrum-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://arbitrum-svc.unchained.svc.cluster.local:8001/websocket
+    api: false
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 6
+    api-cpu-limit: 1000m
+    api-cpu-request: 500m
+    api-cpu-threshold: 50
+    api-memory-limit: 2Gi
+    stateful-service-replicas: 2
+    service-name-1: daemon
+    service-image-1: offchainlabs/nitro-node:v2.0.14-2baa834
+    service-cpu-limit-1: "4"
+    service-cpu-request-1: "2"
+    service-memory-limit-1: 16Gi
+    service-storage-size-1: 2000Gi
+
+
+  - &arbitrum-dev
+    <<: *arbitrum
+    environment: dev
+    pulumi-stack: public-dev-us-east-2
+    rpc-url: http://arbitrum-svc.unchained-dev.svc.cluster.local:8545
+    indexer-url: http://arbitrum-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://arbitrum-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 2Gi
@@ -1291,6 +1328,16 @@ workflows:
           <<: *gnosis-dev
           <<: *only-develop
 
+      - deploy-coinstack-node:
+          name: deploy arbitrum develop
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          etherscan-env-var: ETHERSCAN_API_KEY_ARBITRUM
+          requires:
+            - deploy dependencies
+          <<: *arbitrum-dev
+          <<: *only-develop
+
       - deploy-coinstack-go:
           name: deploy cosmos develop
           organization: TAXISTAKE
@@ -1647,6 +1694,32 @@ workflows:
           requires:
             - approve gnosis coinstack
           <<: *gnosis
+          <<: *only-main
+
+      ####### ARBITRUM
+      - deploy-coinstack-node:
+          name: preview arbitrum
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies
+          <<: *arbitrum
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve arbitrum coinstack
+          type: approval
+          requires:
+            - preview arbitrum
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy arbitrum
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve arbitrum coinstack
+          <<: *arbitrum
           <<: *only-main
 
       ####### COSMOS
