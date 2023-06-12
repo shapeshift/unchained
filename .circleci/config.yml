@@ -288,7 +288,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/osmosis:v15.1.0
+    service-image-1: shapeshiftdao/osmosis:v15.1.2
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-request-1: 32Gi
@@ -446,7 +446,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: zquestz/bitcoin-cash-node:26.0.0
+    service-image-1: shapeshiftdao/bitcoin-cash-node:26.1.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 4Gi
@@ -581,7 +581,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/bnb-smart-chain:v1.2.4
+    service-image-1: shapeshiftdao/bnb-smart-chain:v1.2.5
     service-cpu-limit-1: "16"
     service-cpu-request-1: "8"
     service-memory-limit-1: 48Gi
@@ -679,7 +679,7 @@ aliases:
     api-memory-limit: 2Gi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.19.1
+    service-image-1: nethermind/nethermind:1.19.2
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 16Gi
