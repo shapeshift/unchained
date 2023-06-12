@@ -7,6 +7,7 @@ set -e
 start() {
   /usr/local/bin/nitro \
   --init.url="https://snapshot.arbitrum.io/mainnet/nitro.tar" \
+  --init.download-path="/root/.arbitrum" \
   --auth.jwtsecret "/jwt.hex" \
   --http.addr 0.0.0.0 \
   --http.port 8545 \
