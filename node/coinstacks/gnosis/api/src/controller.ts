@@ -21,6 +21,7 @@ import {
   TokenType,
 } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { Service } from '../../../common/api/src/evm/service'
+import { GasOracle } from '../../../common/api/src/evm/gasOracle'
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
@@ -41,9 +42,11 @@ export const logger = new Logger({
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
+export const gasOracle = new GasOracle({ logger, provider, coinstack: 'ethereum' })
 
 export const service = new Service({
   blockbook,
+  gasOracle,
   explorerApiKey: ETHERSCAN_API_KEY,
   explorerApiUrl: 'https://api.gnosisscan.io/api',
   provider,
@@ -212,20 +215,23 @@ export class Gnosis extends Controller implements BaseAPI, API {
    * @returns {Promise<GasFees>} current fees specified in wei
    */
   @Example<GasFees>({
-    gasPrice: '4330000000',
-    maxFeePerGas: '3625293906',
-    maxPriorityFeePerGas: '3625293899',
+    gasPrice: '3000000000',
+    baseFeePerGas: '7',
+    maxPriorityFeePerGas: '2250000003',
     slow: {
-      maxFeePerGas: '3110445001',
-      maxPriorityFeePerGas: '3110444994',
+      gasPrice: '1967447305',
+      maxFeePerGas: '1554947308',
+      maxPriorityFeePerGas: '1554947301',
     },
     average: {
-      maxFeePerGas: '3625293906',
-      maxPriorityFeePerGas: '3625293899',
+      gasPrice: '2545383854',
+      maxFeePerGas: '2055458056',
+      maxPriorityFeePerGas: '2055458049',
     },
     fast: {
-      maxFeePerGas: '5906365719',
-      maxPriorityFeePerGas: '5906365712',
+      gasPrice: '2927445852',
+      maxFeePerGas: '2245520056',
+      maxPriorityFeePerGas: '2245520049',
     },
   })
   @Response<InternalServerError>(500, 'Internal Server Error')
