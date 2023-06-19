@@ -14,7 +14,7 @@ export class Ingress extends pulumi.ComponentResource {
 
     const secretName = 'prometheus-cert-secret'
 
-    new k8s.core.v1.Secret(
+    const secret = new k8s.core.v1.Secret(
       `${name}-prometheus-auth-secret`,
       {
         metadata: {
@@ -61,18 +61,18 @@ export class Ingress extends pulumi.ComponentResource {
       ? `Host(\`prometheus.${args.domain}\`) || Host(\`prometheus.${args.additionalDomain}\`)`
       : `Host(\`prometheus.${args.domain}\`)`
 
-    new k8s.apiextensions.CustomResource(
-      `${name}-prometheus-ingress-auth`,
+    const authMiddleware = new k8s.apiextensions.CustomResource(
+      `${name}-prometheus-auth-middleware`,
       {
         apiVersion: 'traefik.containo.us/v1alpha1',
         kind: 'Middleware',
         metadata: {
-          name: `${name}-prometheus-ingress-auth`,
+          name: `${name}-prometheus-auth-middleware`,
           namespace: args.namespace,
         },
         spec: {
           basicAuth: {
-            secret: `${name}-prometheus-auth-secret`,
+            secret: secret.metadata.name,
             removeHeader: true,
           },
         },
@@ -96,7 +96,7 @@ export class Ingress extends pulumi.ComponentResource {
               kind: 'Rule',
               middlewares: [
                 {
-                  name: `${name}-prometheus-ingress-auth`,
+                  name: authMiddleware.metadata.name,
                   namespace: args.namespace,
                 },
               ],
@@ -105,7 +105,7 @@ export class Ingress extends pulumi.ComponentResource {
                   kind: 'Service',
                   name: `prometheus-k8s`,
                   port: 9090,
-                  namespace: `${name}-monitoring`,
+                  namespace: args.namespace,
                 },
               ],
             },
