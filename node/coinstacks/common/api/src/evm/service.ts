@@ -791,7 +791,6 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
         }
       })()) as string
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const metadata = await (async () => {
         // handle base64 encoded metadata
         if (uri.startsWith('data:application/json;base64')) {
@@ -804,11 +803,11 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
           const { data } = await axiosNoRetry.get(makeUrl(substitue(uri, id, true)))
           return data
         } catch (err) {
+          // don't retry on timeout, assume host is offline
           if (err instanceof AxiosError && err.code === AxiosError.ECONNABORTED) return {}
-          console.log({ err })
+
           try {
-            // not everyone follows the spec
-            // attempt to get metadata using id string
+            // not everyone follows the spec, attempt to get metadata using id string
             const { data } = await axiosNoRetry.get(makeUrl(substitue(uri, id, false)))
             return data
           } catch (err) {
@@ -818,11 +817,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
         }
       })()
 
-      if (!metadata.image) {
-        console.log({ uri, metadata })
-      }
-
-      const mediaUrl = metadata.image ? makeUrl(metadata.image) : ''
+      const mediaUrl = metadata?.image ? makeUrl(metadata.image) : ''
 
       const mediaType = await (async () => {
         if (!mediaUrl) return
@@ -831,14 +826,13 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
           const { headers } = await axiosNoRetry.head(mediaUrl)
           return headers['content-type']?.includes('video') ? 'video' : 'image'
         } catch (err) {
-          this.logger.debug(err, 'failed to get media content type')
           return
         }
       })()
 
       return {
-        name: metadata.name ?? '',
-        description: metadata.description ?? '',
+        name: metadata?.name ?? '',
+        description: metadata?.description ?? '',
         media: {
           url: mediaUrl,
           type: mediaType,
@@ -846,6 +840,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       }
     } catch (err) {
       this.logger.error(err, 'failed to fetch token metadata')
+
       return {
         name: '',
         description: '',
