@@ -13,7 +13,7 @@ import {
 } from '@shapeshiftoss/common-api'
 import { Tx as BlockbookTx, WebsocketClient, getAddresses, NewBlock } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
-import { service } from './controller'
+import { gasOracle, service } from './controller'
 import { RegisterRoutes } from './routes'
 
 const PORT = process.env.PORT ?? 3000
@@ -76,6 +76,6 @@ const wsServer = new Server({ server })
 wsServer.on('connection', (connection) => ConnectionHandler.start(connection, registry))
 
 new WebsocketClient(INDEXER_WS_URL, {
-  blockHandler: registry.onBlock.bind(registry),
+  blockHandler: [registry.onBlock.bind(registry), gasOracle.onBlock.bind(gasOracle)],
   transactionHandler: registry.onTransaction.bind(registry),
 })
