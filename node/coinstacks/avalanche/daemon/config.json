@@ -11,5 +11,6 @@
     "internal-tx-pool",
     "internal-debug"
   ],
-  "pruning-enabled": false
+  "pruning-enabled": false,
+  "allow-unfinalized-queries": true
 }
