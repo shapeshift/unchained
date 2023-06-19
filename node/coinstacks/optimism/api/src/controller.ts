@@ -1,10 +1,9 @@
 import { serialize } from '@ethersproject/transactions'
-import bn from 'bignumber.js'
 import { ethers, Contract, BigNumber } from 'ethers'
 import { Body, Controller, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
-import { predeploys, getContractInterface } from '@eth-optimism/contracts'
+import { predeploys, getContractInterface } from '@eth-optimism/contracts-bedrock'
 
 import {
   BadRequestError,
@@ -16,6 +15,7 @@ import {
 } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { API, Account, TokenMetadata, TokenType, Tx, TxHistory } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { Service } from '../../../common/api/src/evm/service'
+import { GasOracle } from '../../../common/api/src/evm/gasOracle'
 import { OptimismGasEstimate, OptimismGasFees } from './models'
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
@@ -37,10 +37,13 @@ export const logger = new Logger({
 
 const CHAIN_ID: Record<string, number> = { mainnet: 10 }
 
+const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
+export const gasOracle = new GasOracle({ logger, provider, coinstack: 'optimism' })
 
 export const service = new Service({
-  blockbook: new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL }),
+  blockbook,
+  gasOracle,
   explorerApiKey: ETHERSCAN_API_KEY,
   explorerApiUrl: 'https://api-optimistic.etherscan.io/api',
   provider,
@@ -49,7 +52,7 @@ export const service = new Service({
 })
 
 // gas price oracle contract to query current l1 and l2 values
-const gpo = new Contract(predeploys.OVM_GasPriceOracle, getContractInterface('OVM_GasPriceOracle'), provider)
+const gpo = new Contract(predeploys.GasPriceOracle, getContractInterface('GasPriceOracle'), provider)
 
 @Route('api/v1')
 @Tags('v1')
@@ -251,18 +254,24 @@ export class Optimism extends Controller implements BaseAPI, API {
    * @returns {Promise<OptimismGasFees>} current fees specified in wei
    */
   @Example<OptimismGasFees>({
-    l1GasPrice: '25000000000',
-    gasPrice: '1000000',
-    slow: {},
-    average: {},
-    fast: {},
+    l1GasPrice: '68076217338',
+    gasPrice: '1048154',
+    slow: {
+      gasPrice: '1082857',
+    },
+    average: {
+      gasPrice: '1082857',
+    },
+    fast: {
+      gasPrice: '1082857',
+    },
   })
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
   async getGasFees(): Promise<OptimismGasFees> {
-    const { l1GasPrice } = (await provider.send('rollup_gasPrices', [])) as { l1GasPrice: string }
+    const l1GasPrice = (await gpo.l1BaseFee()) as BigNumber
     const gasFees = await service.getGasFees()
-    return { l1GasPrice: new bn(l1GasPrice).toFixed(0), ...gasFees }
+    return { l1GasPrice: l1GasPrice.toString(), ...gasFees }
   }
 
   /**

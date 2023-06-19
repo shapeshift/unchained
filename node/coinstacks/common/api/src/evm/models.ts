@@ -11,22 +11,27 @@ export interface GasEstimate {
  * Contains info about legacy and/or EIP-1559 fees
  */
 export interface Fees {
-  gasPrice?: string
+  gasPrice: string
   maxFeePerGas?: string
   maxPriorityFeePerGas?: string
 }
 
 /**
- * Contains info about current recommended fees to use in a transaction
+ * Contains info about current recommended fees to use in a transaction.
+ * Estimates for slow, average and fast confirmation speeds provided as well.
  */
 export interface GasFees {
+  // legacy gasPrice recommended by the node
   gasPrice: string
-  // @deprecated
-  maxFeePerGas?: string
-  // @deprecated
+  // baseFeePerGas for the pending block
+  baseFeePerGas?: string
+  // maxPriorityFeePerGas recommended by the node
   maxPriorityFeePerGas?: string
+  // slow confirmation speed estimation
   slow: Fees
+  // average confirmation speed estimation
   average: Fees
+  // average confirmation speed estimation
   fast: Fees
 }
 

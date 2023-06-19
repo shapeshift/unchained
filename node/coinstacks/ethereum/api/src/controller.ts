@@ -21,6 +21,7 @@ import {
   TokenType,
 } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { Service } from '../../../common/api/src/evm/service'
+import { GasOracle } from '../../../common/api/src/evm/gasOracle'
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
@@ -41,9 +42,11 @@ export const logger = new Logger({
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
+export const gasOracle = new GasOracle({ logger, provider, coinstack: 'ethereum' })
 
 export const service = new Service({
   blockbook,
+  gasOracle,
   explorerApiKey: ETHERSCAN_API_KEY,
   explorerApiUrl: 'https://api.etherscan.io/api',
   provider,
@@ -214,18 +217,23 @@ export class Ethereum extends Controller implements BaseAPI, API {
    * @returns {Promise<GasFees>} current fees specified in wei
    */
   @Example<GasFees>({
-    gasPrice: '100000000000',
+    gasPrice: '77125288868',
+    baseFeePerGas: '77654025212',
+    maxPriorityFeePerGas: '94000001',
     slow: {
-      maxFeePerGas: '95000000000',
-      maxPriorityFeePerGas: '40000000',
+      gasPrice: '77109280451',
+      maxFeePerGas: '77744243213',
+      maxPriorityFeePerGas: '90218001',
     },
     average: {
-      maxFeePerGas: '96000000000',
-      maxPriorityFeePerGas: '1000000000',
+      gasPrice: '78637140239',
+      maxFeePerGas: '79158075213',
+      maxPriorityFeePerGas: '1504050001',
     },
     fast: {
-      maxFeePerGas: '100000000000',
-      maxPriorityFeePerGas: '5000000000',
+      gasPrice: '85079071846',
+      maxFeePerGas: '89883761218',
+      maxPriorityFeePerGas: '12229736006',
     },
   })
   @Response<InternalServerError>(500, 'Internal Server Error')

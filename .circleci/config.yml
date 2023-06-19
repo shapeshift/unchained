@@ -206,7 +206,7 @@ aliases:
     service-memory-limit-1: 32Gi
     service-storage-size-1: 2500Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.0.5
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.0.6
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 12Gi
@@ -256,7 +256,7 @@ aliases:
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 32Gi
-    service-storage-size-1: 3000Gi
+    service-storage-size-1: 3500Gi
 
   - &cosmos-dev
     <<: *cosmos
@@ -288,7 +288,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/osmosis:v15.1.0
+    service-image-1: shapeshiftdao/osmosis:v15.1.2
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-request-1: 32Gi
@@ -323,7 +323,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: avaplatform/avalanchego:v1.10.2
+    service-image-1: avaplatform/avalanchego:v1.10.3
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
@@ -364,7 +364,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: greenbigfrog/dogecoin:1.14.5
+    service-image-1: shapeshiftdao/dogecoin:1.14.6
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 4Gi
@@ -373,7 +373,7 @@ aliases:
     service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 8Gi
+    service-memory-limit-2: 16Gi
     service-storage-size-2: 250Gi
 
   - &dogecoin-dev
@@ -446,7 +446,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: zquestz/bitcoin-cash-node:26.0.0
+    service-image-1: shapeshiftdao/bitcoin-cash-node:26.1.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 4Gi
@@ -487,7 +487,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:chaosnet-multichain-1.111.0
+    service-image-1: registry.gitlab.com/thorchain/thornode:chaosnet-multichain-1.113.1
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 8Gi
@@ -534,7 +534,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101105.2
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101105.3
     service-cpu-limit-1: "8"
     service-cpu-request-1: "4"
     service-memory-limit-1: 24Gi
@@ -581,11 +581,11 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/bnb-smart-chain:v1.2.4
+    service-image-1: shapeshiftdao/bnb-smart-chain:v1.2.5
     service-cpu-limit-1: "16"
     service-cpu-request-1: "8"
-    service-memory-limit-1: 48Gi
-    service-memory-request-1: 24Gi
+    service-memory-limit-1: 72Gi
+    service-memory-request-1: 48Gi
     service-storage-size-1: 4000Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
@@ -633,7 +633,7 @@ aliases:
     service-memory-limit-1: 48Gi
     service-storage-size-1: 4000Gi
     service-name-2: heimdall
-    service-image-2: 0xpolygon/heimdall:0.3.3
+    service-image-2: 0xpolygon/heimdall:0.3.4
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 2Gi
@@ -680,7 +680,7 @@ aliases:
     api-memory-limit: 2Gi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.19.1
+    service-image-1: nethermind/nethermind:1.19.2
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 16Gi

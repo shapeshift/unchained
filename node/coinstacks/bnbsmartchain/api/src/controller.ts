@@ -21,6 +21,7 @@ import {
   TokenMetadata,
 } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { Service } from '../../../common/api/src/evm/service'
+import { GasOracle } from '../../../common/api/src/evm/gasOracle'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
@@ -39,9 +40,11 @@ export const logger = new Logger({
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
+export const gasOracle = new GasOracle({ logger, provider, coinstack: 'bnbsmartchain' })
 
 export const service = new Service({
   blockbook,
+  gasOracle,
   explorerApiUrl: 'https://api.bscscan.com/api',
   provider,
   logger,
@@ -206,10 +209,16 @@ export class BNBSmartChain extends Controller implements BaseAPI, API {
    * @returns {Promise<GasFees>} current fees specified in wei
    */
   @Example<GasFees>({
-    gasPrice: '5000000000',
-    slow: {},
-    average: {},
-    fast: {},
+    gasPrice: '3000000000',
+    slow: {
+      gasPrice: '1950000000',
+    },
+    average: {
+      gasPrice: '3005600001',
+    },
+    fast: {
+      gasPrice: '6082233092',
+    },
   })
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')

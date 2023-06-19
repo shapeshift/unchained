@@ -2,7 +2,7 @@ import axios from 'axios'
 import axiosRetry from 'axios-retry'
 import BigNumber from 'bignumber.js'
 import { ethers } from 'ethers'
-import { ApiError as BlockbookApiError, Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
+import { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
 import { ApiError, BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
 import {
@@ -17,16 +17,9 @@ import {
   TokenMetadata,
   TokenType,
 } from './models'
-import {
-  Cursor,
-  NodeBlock,
-  DebugCallStack,
-  ExplorerApiResponse,
-  ExplorerInternalTx,
-  FeeHistory,
-  TraceCall,
-} from './types'
-import { formatAddress } from './utils'
+import { Cursor, NodeBlock, DebugCallStack, ExplorerApiResponse, ExplorerInternalTx, TraceCall } from './types'
+import { GasOracle } from './gasOracle'
+import { formatAddress, handleError } from './utils'
 import { validatePageSize } from '../utils'
 import { ERC1155_ABI } from './abi/erc1155'
 import { ERC721_ABI } from './abi/erc721'
@@ -38,23 +31,12 @@ type InternalTxFetchMethod = 'trace_transaction' | 'debug_traceTransaction'
 
 axiosRetry(axios, { retries: 5, retryDelay: axiosRetry.exponentialDelay })
 
-const handleError = (err: unknown): ApiError => {
-  if (err instanceof BlockbookApiError) {
-    return new ApiError(err.response?.statusText ?? 'Internal Server Error', err.response?.status ?? 500, err.message)
-  }
-
-  if (err instanceof Error) {
-    return new ApiError('Internal Server Error', 500, err.message)
-  }
-
-  return new ApiError('Internal Server Error', 500, 'unknown error')
-}
-
 const exponentialDelay = async (retryCount: number) =>
   new Promise((resolve) => setTimeout(resolve, axiosRetry.exponentialDelay(retryCount)))
 
 export interface ServiceArgs {
   blockbook: Blockbook
+  gasOracle: GasOracle
   explorerApiKey?: string
   explorerApiUrl: string
   logger: Logger
@@ -64,6 +46,7 @@ export interface ServiceArgs {
 
 export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   private readonly blockbook: Blockbook
+  private readonly gasOracle: GasOracle
   private readonly explorerApiKey?: string
   private readonly explorerApiUrl: string
   private readonly logger: Logger
@@ -76,11 +59,14 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
   constructor(args: ServiceArgs) {
     this.blockbook = args.blockbook
+    this.gasOracle = args.gasOracle
     this.explorerApiKey = args.explorerApiKey
     this.explorerApiUrl = args.explorerApiUrl
-    this.logger = args.logger
+    this.logger = args.logger.child({ namespace: ['service'] })
     this.provider = args.provider
     this.rpcUrl = args.rpcUrl
+
+    this.gasOracle.start()
   }
 
   async getAccount(pubkey: string): Promise<Account> {
@@ -272,87 +258,27 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
   async getGasFees(): Promise<GasFees> {
     try {
-      // average fees over 20 blocks at the specified percentiles
-      const totalBlocks = 20
-
-      // fetch legacy gas price
+      // fetch legacy gas price estimate from the node
       const gasPrice = (await this.provider.send('eth_gasPrice', [])) as string
 
-      // get latest block to check for existence of baseFeePerGas to determine eip1559 support
-      const block = (await this.provider.send('eth_getBlockByNumber', ['pending', false])) as { baseFeePerGas?: string }
+      const { baseFeePerGas, maxPriorityFeePerGas } = await (async () => {
+        const baseFeePerGas = this.gasOracle.getBaseFeePerGas()
+        if (!baseFeePerGas) return {}
 
-      const eip1559Fees = await (async () => {
-        if (!block?.baseFeePerGas) return {}
-
-        // fetch fee history for the last 20 blocks and with maxPriorityFeePerGas reported at the 1st, 60th, and 90th percentiles (slow, average, fast)
-        const feeHistory = (await this.provider.send('eth_feeHistory', [
-          totalBlocks,
-          'latest',
-          [1, 60, 90],
-        ])) as FeeHistory
-
-        const oldestBlock = Number(feeHistory.oldestBlock)
-        const latestBlock = oldestBlock + totalBlocks
-
-        // hex -> big number
-        const blockHistory = []
-        for (let i = oldestBlock; i < latestBlock; i++) {
-          const index = i - oldestBlock
-          blockHistory.push({
-            number: i,
-            baseFeePerGas: new BigNumber(feeHistory.baseFeePerGas[index]),
-            gasUsedRatio: new BigNumber(feeHistory.gasUsedRatio[index]),
-            maxPriorityFeePerGas: feeHistory.reward[index].map((r) => new BigNumber(r)),
-          })
-        }
-
-        const baseFee = await (async () => {
-          try {
-            // avalanche returns the latest block for 'pending', use eth_baseFee instead for accurate base fee
-            const baseFee = (await this.provider.send('eth_baseFee', [])) as string
-            return baseFee
-          } catch (err) {
-            // no eth_baseFee support, use pending block
-            return
-          }
-        })()
-
-        // baseFeePerGas for pending block as determined by network
-        const baseFeePerGas = baseFee ? new BigNumber(baseFee) : new BigNumber(block.baseFeePerGas)
-
-        const avg = (arr: Array<BigNumber>): BigNumber => {
-          const sum = arr.reduce((a, b) => a.plus(b), new BigNumber(0))
-          return sum.div(arr.length).integerValue(BigNumber.ROUND_FLOOR)
-        }
-
-        const slowPriorityFee = avg(blockHistory.map((block) => block.maxPriorityFeePerGas[0]))
-        const averagePriorityFee = avg(blockHistory.map((block) => block.maxPriorityFeePerGas[1]))
-        const fastPriorityFee = avg(blockHistory.map((block) => block.maxPriorityFeePerGas[2]))
-
-        return {
-          slow: {
-            maxFeePerGas: slowPriorityFee.plus(baseFeePerGas).toFixed(0),
-            maxPriorityFeePerGas: slowPriorityFee.toFixed(0),
-          },
-          average: {
-            maxFeePerGas: averagePriorityFee.plus(baseFeePerGas).toFixed(0),
-            maxPriorityFeePerGas: averagePriorityFee.toFixed(0),
-          },
-          fast: {
-            maxFeePerGas: fastPriorityFee.plus(baseFeePerGas).toFixed(0),
-            maxPriorityFeePerGas: fastPriorityFee.toFixed(0),
-          },
-        }
+        // fetch maxPriorityFeePerGas estimate from the node
+        const maxPriorityFeePerGas = (await this.provider.send('eth_maxPriorityFeePerGas', [])) as string
+        return { baseFeePerGas, maxPriorityFeePerGas: Number(maxPriorityFeePerGas).toString() }
       })()
 
-      // TODO: percentile estimations for gasPrice
+      const estimatedFees = await this.gasOracle.estimateFees([1, 60, 90])
+
       return {
-        gasPrice: new BigNumber(gasPrice).toFixed(0),
-        maxFeePerGas: eip1559Fees?.average?.maxFeePerGas,
-        maxPriorityFeePerGas: eip1559Fees?.average?.maxPriorityFeePerGas,
-        slow: { ...eip1559Fees?.slow },
-        average: { ...eip1559Fees?.average },
-        fast: { ...eip1559Fees?.fast },
+        gasPrice: Number(gasPrice).toString(),
+        baseFeePerGas,
+        maxPriorityFeePerGas,
+        slow: estimatedFees['1'],
+        average: estimatedFees['60'],
+        fast: estimatedFees['90'],
       }
     } catch (err) {
       throw new ApiError('Internal Server Error', 500, JSON.stringify(err))
