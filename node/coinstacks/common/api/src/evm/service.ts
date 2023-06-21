@@ -23,8 +23,9 @@ import { formatAddress, handleError } from './utils'
 import { validatePageSize } from '../utils'
 import { ERC1155_ABI } from './abi/erc1155'
 import { ERC721_ABI } from './abi/erc721'
+import { AxiosError } from 'axios'
 
-const axiosNoRetry = axios.create()
+const axiosNoRetry = axios.create({ timeout: 5000 })
 
 type InternalTxFetchMethod = 'trace_transaction' | 'debug_traceTransaction'
 
@@ -690,55 +691,87 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       return data.replace('{id}', new BigNumber(id).toString(16).padStart(64, '0').toLowerCase())
     }
 
-    const contract = new ethers.Contract(address, this.abiInterface[type], this.provider)
-
-    const uri = (await (() => {
-      switch (type) {
-        case 'erc721':
-          return contract.tokenURI(id)
-        case 'erc1155':
-          return contract.uri(id)
-        default:
-          throw new Error(`invalid token type: ${type}`)
+    const makeUrl = (url: string): string => {
+      if (url.startsWith('ipfs://')) {
+        return url.replace('ipfs://', 'https://gateway.shapeshift.com/ipfs/')
       }
-    })()) as string
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const metadata = await (async () => {
-      if (uri.startsWith('ipfs://')) return {}
+      if (url.startsWith('ipns://')) {
+        return url.replace('ipns://', 'https://gateway.shapeshift.com/ipns/')
+      }
 
-      try {
-        // attempt to get metadata using hex encoded id as per erc spec
-        const { data } = await axiosNoRetry.get(substitue(uri, id, true))
-        return data
-      } catch (err) {
+      return url
+    }
+
+    try {
+      const contract = new ethers.Contract(address, this.abiInterface[type], this.provider)
+
+      const uri = (await (() => {
+        switch (type) {
+          case 'erc721':
+            return contract.tokenURI(id)
+          case 'erc1155':
+            return contract.uri(id)
+          default:
+            throw new Error(`invalid token type: ${type}`)
+        }
+      })()) as string
+
+      const metadata = await (async () => {
+        // handle base64 encoded metadata
+        if (uri.startsWith('data:application/json;base64')) {
+          const [, b64] = uri.split(',')
+          return JSON.parse(Buffer.from(b64, 'base64').toString())
+        }
+
         try {
-          // not everyone follows the spec
-          // attempt to get metadata using id string
-          const { data } = await axiosNoRetry.get(substitue(uri, id, false))
+          // attempt to get metadata using hex encoded id as per erc spec
+          const { data } = await axiosNoRetry.get(makeUrl(substitue(uri, id, true)))
           return data
         } catch (err) {
-          // swallow error and return empty object if unable to fetch metadata
-          return {}
+          // don't retry on timeout, assume host is offline
+          if (err instanceof AxiosError && err.code === AxiosError.ECONNABORTED) return {}
+
+          try {
+            // not everyone follows the spec, attempt to get metadata using id string
+            const { data } = await axiosNoRetry.get(makeUrl(substitue(uri, id, false)))
+            return data
+          } catch (err) {
+            // swallow error and return empty object if unable to fetch metadata
+            return {}
+          }
         }
+      })()
+
+      const mediaUrl = metadata?.image ? makeUrl(metadata.image) : ''
+
+      const mediaType = await (async () => {
+        if (!mediaUrl) return
+
+        try {
+          const { headers } = await axiosNoRetry.head(mediaUrl)
+          return headers['content-type']?.includes('video') ? 'video' : 'image'
+        } catch (err) {
+          return
+        }
+      })()
+
+      return {
+        name: metadata?.name ?? '',
+        description: metadata?.description ?? '',
+        media: {
+          url: mediaUrl,
+          type: mediaType,
+        },
       }
-    })()
+    } catch (err) {
+      this.logger.error(err, 'failed to fetch token metadata')
 
-    const mediaUrl = metadata.image ?? ''
-
-    const mediaType = await (async () => {
-      if (!mediaUrl || mediaUrl.startsWith('ipfs://')) return
-      const { headers } = await axiosNoRetry.head(mediaUrl)
-      return headers['content-type']?.includes('video') ? 'video' : 'image'
-    })()
-
-    return {
-      name: metadata.name ?? '',
-      description: metadata.description ?? '',
-      media: {
-        url: mediaUrl,
-        type: mediaType,
-      },
+      return {
+        name: '',
+        description: '',
+        media: { url: '' },
+      }
     }
   }
 }
