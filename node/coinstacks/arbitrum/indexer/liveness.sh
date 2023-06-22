@@ -1,0 +1,1 @@
+../../../packages/blockbook/scripts/liveness.sh
