@@ -94,8 +94,8 @@ export function deployIpfs({ namespace, provider, domain, additionalDomain }: Ip
           ],
           resources: {
             limits: {
-              cpu: '100m',
-              memory: '128Mi',
+              cpu: '250m',
+              memory: '512Mi',
             },
           },
         },

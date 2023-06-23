@@ -885,11 +885,11 @@ jobs:
             pulumi config set --path unchained:common.eks.traefik.autoscaling.enabled true
             pulumi config set --path unchained:common.eks.traefik.autoscaling.memoryThreshold 50
             pulumi config set --path unchained:common.eks.traefik.autoscaling.cpuThreshold 80
-            pulumi config set --path unchained:common.eks.traefik.autoscaling.maxReplicas 20
+            pulumi config set --path unchained:common.eks.traefik.autoscaling.maxReplicas 25
             pulumi config set --path unchained:common.eks.traefik.autoscaling.minReplicas 5
             pulumi config set --path unchained:common.eks.traefik.replicas 5
             pulumi config set --path unchained:common.eks.traefik.resources.cpu 300m
-            pulumi config set --path unchained:common.eks.traefik.resources.memory 512Mi
+            pulumi config set --path unchained:common.eks.traefik.resources.memory 1Gi
             pulumi config set --path unchained:common.eks.traefik.whitelist[0] 173.245.48.0/20
             pulumi config set --path unchained:common.eks.traefik.whitelist[1] 103.21.244.0/22
             pulumi config set --path unchained:common.eks.traefik.whitelist[2] 103.22.200.0/22
