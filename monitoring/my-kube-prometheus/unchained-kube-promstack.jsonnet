@@ -52,6 +52,14 @@ local kp =
       ),
     },
     kubeStateMetrics+:: {
+      _config+: {
+        kubeRbacProxyMain:: {
+          resources+: {
+            limits+: { cpu: '100m' },
+            requests+: { cpu: '50m' },
+          }
+        }
+      },
       deployment+: {
         spec+: {
           template+: {
