@@ -2,9 +2,8 @@ import * as k8s from '@pulumi/kubernetes'
 import { readFileSync } from 'fs'
 import { Config, Service, CoinServiceArgs } from '.'
 import { deployReaperCron } from './reaperCron'
-import { VolumeSnapshot } from './snapper'
 
-export function createCoinService(args: CoinServiceArgs, assetName: string, snapshots: VolumeSnapshot[]): Service {
+export function createCoinService(args: CoinServiceArgs, assetName: string): Service {
   const name = `${assetName}-${args.name}`
 
   const ports = Object.entries(args.ports ?? []).map(([name, port]) => ({ name, ...port }))
@@ -136,10 +135,6 @@ export function createCoinService(args: CoinServiceArgs, assetName: string, snap
     containers.push(monitorContainer)
   }
 
-  const snapshot = snapshots.filter(
-    (snapshot) => snapshot.metadata.name.startsWith(`data-${args.name}-${assetName}`) && !!snapshot.status?.readyToUse
-  )[0]
-
   const volumeClaimTemplates = [
     {
       metadata: {
@@ -153,13 +148,6 @@ export function createCoinService(args: CoinServiceArgs, assetName: string, snap
             storage: args.storageSize,
           },
         },
-        ...(snapshot && {
-          dataSource: {
-            name: snapshot.metadata.name,
-            kind: snapshot.kind,
-            apiGroup: snapshot.apiVersion.split('/')[0],
-          },
-        }),
       },
     },
   ]
