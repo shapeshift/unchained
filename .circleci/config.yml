@@ -626,7 +626,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: 0xpolygon/bor:0.3.9
+    service-image-1: 0xpolygon/bor:0.4.0
     service-cpu-limit-1: "16"
     service-cpu-request-1: "8"
     service-memory-request-1: 32Gi
