@@ -1,4 +1,4 @@
-import { CoinServiceArgs, Config, deployApi, Outputs, Snapper } from '.'
+import { CoinServiceArgs, Config, deployApi, Outputs } from '.'
 import { parse } from 'dotenv'
 import { createCoinService, deployStatefulService } from './statefulService'
 import * as k8s from '@pulumi/kubernetes'
@@ -26,11 +26,10 @@ export const deployCoinstack = async (args: CoinstackArgs): Promise<Outputs> => 
   new k8s.core.v1.Secret(assetName, { metadata: { name: assetName, namespace }, stringData: secretData }, { provider })
 
   const baseImageName = 'shapeshiftdao/unchained-base:latest'
-  const snapshots = await new Snapper({ assetName, kubeconfig, namespace }).getSnapshots()
 
   await deployApi({ ...args, assetName, baseImageName, provider })
 
-  const coinServices = (coinServiceArgs ?? []).map((_args) => createCoinService(_args, assetName, snapshots))
+  const coinServices = (coinServiceArgs ?? []).map((_args) => createCoinService(_args, assetName))
 
   await deployStatefulService(appName, assetName, provider, namespace, config, coinServices, volumes)
 
