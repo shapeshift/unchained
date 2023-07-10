@@ -253,7 +253,7 @@ func (a *API) SendTx(w http.ResponseWriter, r *http.Request) {
 //
 // responses:
 //
-//	200: TransactionHash
+//	200: GasAmount
 //	400: BadRequestError
 //	500: InternalServerError
 func (a *API) EstimateGas(w http.ResponseWriter, r *http.Request) {
