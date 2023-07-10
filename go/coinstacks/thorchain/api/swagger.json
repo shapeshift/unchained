@@ -150,9 +150,9 @@
         ],
         "responses": {
           "200": {
-            "description": "TransactionHash",
+            "description": "GasAmount",
             "schema": {
-              "$ref": "#/definitions/TransactionHash"
+              "$ref": "#/definitions/GasAmount"
             }
           },
           "400": {
