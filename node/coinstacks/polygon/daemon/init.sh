@@ -23,14 +23,15 @@ function extract_files() {
 # shapshots provided by: https://snapshot.polygon.technology/
 if [ -n "$SNAPSHOT" ]; then
   filename=$(echo $SNAPSHOT | awk -F/ '{print $NF}')
+
   if [ ! -f "$DATA_DIR/$filename" ] && [ ! -d "$CHAINDATA_DIR" ]; then
     rm -rf $DATA_DIR/bor;
     mkdir -p $CHAINDATA_DIR;
+    wget $SNAPSHOT -O $DATA_DIR/$filename
   fi
 
-  if [ -f "$DATA_DIR/$filename" ] || [ ! -d "$CHAINDATA_DIR" ]; then
+  if [ -f "$DATA_DIR/$filename" ]; then
     apk add wget zstd
-    wget $SNAPSHOT -O $DATA_DIR/$filename
     extract_files $DATA_DIR/$filename
     rm $DATA_DIR/$filename
   fi
