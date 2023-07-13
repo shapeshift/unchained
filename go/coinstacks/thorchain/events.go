@@ -88,11 +88,12 @@ func ParseBlockEvents(events []abci.Event) (cosmos.EventsByMsgIndex, []TypedEven
 func TypedEventsToMessages(events []TypedEvent) []cosmos.Message {
 	messages := []cosmos.Message{}
 
-	for _, event := range events {
+	for i, event := range events {
 		switch v := event.(type) {
 		case *EventOutbound:
 			message := cosmos.Message{
 				Addresses: []string{v.From, v.To},
+				Index:     strconv.Itoa(i),
 				Origin:    v.From,
 				From:      v.From,
 				To:        v.To,

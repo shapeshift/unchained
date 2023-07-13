@@ -23,6 +23,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 		case *lockuptypes.MsgLockTokens:
 			message := cosmos.Message{
 				Addresses: []string{v.Owner},
+				Index:     strconv.Itoa(i),
 				From:      v.Owner,
 				Type:      v.Type(),
 				Value:     cosmos.CoinToValue(&v.Coins[0]),
@@ -36,6 +37,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 				// token in 0
 				{
 					Addresses: []string{v.Sender},
+					Index:     strconv.Itoa(i),
 					Origin:    v.Sender,
 					From:      v.Sender,
 					Type:      v.Type(),
@@ -44,6 +46,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 				// token in 1
 				{
 					Addresses: []string{v.Sender},
+					Index:     strconv.Itoa(i),
 					Origin:    v.Sender,
 					From:      v.Sender,
 					Type:      v.Type(),
@@ -52,6 +55,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 				// token out (lp token)
 				{
 					Addresses: []string{v.Sender},
+					Index:     strconv.Itoa(i),
 					Origin:    v.Sender,
 					From:      events[strconv.Itoa(i)]["transfer"]["sender"],
 					To:        v.Sender,
@@ -67,6 +71,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 				// token out 0
 				{
 					Addresses: []string{v.Sender},
+					Index:     strconv.Itoa(i),
 					Origin:    v.Sender,
 					To:        v.Sender,
 					Type:      v.Type(),
@@ -75,6 +80,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 				// token out 1
 				{
 					Addresses: []string{v.Sender},
+					Index:     strconv.Itoa(i),
 					Origin:    v.Sender,
 					To:        v.Sender,
 					Type:      v.Type(),
@@ -83,6 +89,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 				// token in (lp token)
 				{
 					Addresses: []string{v.Sender},
+					Index:     strconv.Itoa(i),
 					Origin:    v.Sender,
 					From:      v.Sender,
 					To:        events[strconv.Itoa(i)]["transfer"]["recipient"],
@@ -111,6 +118,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 				// token in (sell)
 				{
 					Addresses: []string{v.Sender, recipient},
+					Index:     strconv.Itoa(i),
 					Origin:    v.Sender,
 					From:      v.Sender,
 					To:        recipient,
@@ -120,6 +128,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 				// token out (buy)
 				{
 					Addresses: []string{v.Sender, recipient},
+					Index:     strconv.Itoa(i),
 					Origin:    v.Sender,
 					From:      recipient,
 					To:        v.Sender,
