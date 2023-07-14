@@ -576,6 +576,7 @@
       "description": "Contains info about a transaction message",
       "type": "object",
       "required": [
+        "index",
         "origin",
         "from",
         "to",
@@ -586,6 +587,10 @@
         "from": {
           "type": "string",
           "x-go-name": "From"
+        },
+        "index": {
+          "type": "string",
+          "x-go-name": "Index"
         },
         "origin": {
           "type": "string",
