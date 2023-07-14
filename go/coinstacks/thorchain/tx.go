@@ -35,6 +35,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 		case *thorchaintypes.MsgSend:
 			message := cosmos.Message{
 				Addresses: []string{v.FromAddress.String(), v.ToAddress.String()},
+				Index:     strconv.Itoa(i),
 				Origin:    v.FromAddress.String(),
 				From:      v.FromAddress.String(),
 				To:        v.ToAddress.String(),
@@ -48,6 +49,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 
 			message := cosmos.Message{
 				Addresses: []string{v.Signer.String(), to},
+				Index:     strconv.Itoa(i),
 				Origin:    v.Signer.String(),
 				From:      v.Signer.String(),
 				To:        to,
