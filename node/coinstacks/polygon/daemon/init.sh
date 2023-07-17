@@ -12,11 +12,14 @@ function extract_files() {
     if echo "$line" | grep -q checksum; then
       continue
     fi
+
     if echo "$line" | grep -q "bulk"; then
-      wget -nc --timeout 0 --retry-connrefused --tries 0 $line -O - | zstd -cd | tar -xvkf - -C $CHAINDATA_DIR
+      wget -nc --timeout 0 --retry-connrefused --tries 0 $line -O - | zstd -cd | tar -xvf - --skip-old-files -C $CHAINDATA_DIR
     else
-      wget -nc --timeout 0 --retry-connrefused --tries 0 $line -O - | zstd -cd | tar -xvkf - -C $CHAINDATA_DIR --strip-components=3
+      wget -nc --timeout 0 --retry-connrefused --tries 0 $line -O - | zstd -cd | tar -xvf - --skip-old-files -C $CHAINDATA_DIR --strip-components=3
     fi
+
+    sed -i -e "\|$line|,+1d" $DATA_DIR/$filename
   done < $1
 }
 
@@ -31,7 +34,7 @@ if [ -n "$SNAPSHOT" ]; then
   fi
 
   if [ -f "$DATA_DIR/$filename" ]; then
-    apk add wget zstd
+    apk add wget zstd tar
     extract_files $DATA_DIR/$filename
     rm $DATA_DIR/$filename
   fi
