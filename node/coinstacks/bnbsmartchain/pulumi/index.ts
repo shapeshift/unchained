@@ -20,7 +20,7 @@ export = async (): Promise<Outputs> => {
           },
           readinessProbe: { initialDelaySeconds: 30, periodSeconds: 10, failureThreshold: 12 },
           env: {
-            SNAPSHOT: 'https://pub-c0627345c16f47ab858c9469133073a8.r2.dev/geth-20230409.tar.lz4',
+            SNAPSHOT: 'https://snapshots.48.club/geth.full.30042876.tar.zst',
           },
         }
       case 'indexer':
