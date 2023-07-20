@@ -1,8 +1,12 @@
+import axiosRetry from 'axios-retry'
 import { ethers } from 'ethers'
 import { Logger } from '@shapeshiftoss/logger'
 import { Fees } from './models'
 import { NewBlock } from '@shapeshiftoss/blockbook'
 import { NodeBlock, NodeTransaction } from './types'
+
+const exponentialDelay = async (retryCount: number) =>
+  new Promise((resolve) => setTimeout(resolve, axiosRetry.exponentialDelay(retryCount)))
 
 export interface GasOracleArgs {
   logger: Logger
@@ -139,14 +143,19 @@ export class GasOracle {
   }
 
   // update oracle state for the specified block
-  private async update(blockNumber: BlockTag | number) {
+  private async update(blockNumber: BlockTag | number, retryCount = 0): Promise<void> {
     try {
       const numOrTag = blockNumber === this.latestBlockTag ? blockNumber : ethers.utils.hexValue(blockNumber)
       const block = (await this.provider.send('eth_getBlockByNumber', [numOrTag, true])) as NodeBlock<
         Array<NodeTransaction>
       >
 
-      if (!block) throw new Error('no block found')
+      if (!block) {
+        if (retryCount >= 5) throw new Error('block not found')
+        retryCount++
+        await exponentialDelay(retryCount)
+        return this.update(blockNumber, retryCount)
+      }
 
       const txFees = block.transactions.reduce<TxFees>(
         (txFees, tx) => {
