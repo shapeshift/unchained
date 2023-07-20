@@ -12,3 +12,10 @@ services:
     command: yarn nodemon
     volumes:
       - ../../..:/app
+    networks:
+      - bitcoin
+
+networks:
+  bitcoin:
+    name: bitcoin_default
+    external: true
