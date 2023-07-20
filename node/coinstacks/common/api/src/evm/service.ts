@@ -559,6 +559,8 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
     let doneFiltering = false
     const filteredInternalTxs = internalTxs.reduce((prev, internalTx) => {
+      if (!internalTx.value || internalTx.value === '0') return prev
+
       if (!doneFiltering && cursor.blockHeight && cursor.explorerTxid) {
         // skip any transactions from blocks that we have already returned
         if (Number(internalTx.blockNumber) > cursor.blockHeight) return prev
