@@ -4,16 +4,16 @@ metadata:
   finalizers:
   - kubernetes.io/pv-protection
   - external-attacher/ebs-csi-aws-com
-  name: <data-xxx-sts-0-pv-dev>
+  name: data-daemon-thorchain-sts-1-pv
 spec:
   accessModes:
     - ReadWriteOnce
   capacity:
-    storage: 200Gi
+    storage: 2000Gi
   csi:
     driver: ebs.csi.aws.com
     fsType: ext4
-    volumeHandle: <vol-xxx>
+    volumeHandle: vol-08e46eb80cd69b1e3
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -21,7 +21,7 @@ spec:
         - key: topology.ebs.csi.aws.com/zone
           operator: In
           values:
-          - <us-east-2x>
+          - us-east-2c
   persistentVolumeReclaimPolicy: Retain
   storageClassName: ebs-csi-gp2
   volumeMode: Filesystem
@@ -29,17 +29,17 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: <data-xxx-sts-0>
-  namespace: <namespace>
+  name: data-daemon-thorchain-sts-1
+  namespace: unchained
   labels:
     app: unchained
-    asset: <assetname>
+    asset: thorchain
     tier: statefulservice
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 200Gi
+      storage: 2000Gi
   storageClassName: ebs-csi-gp2
-  volumeName: <data-xxx-sts-0-pv-dev>
+  volumeName: data-daemon-thorchain-sts-1-pv
