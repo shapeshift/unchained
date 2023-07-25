@@ -1303,7 +1303,7 @@ workflows:
       - deploy-coinstack-go:
           name: deploy osmosis develop
           organization: TAXISTAKE
-          pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies
           <<: *osmosis-dev
@@ -1312,7 +1312,7 @@ workflows:
       - deploy-coinstack-go:
           name: deploy thorchain develop
           organization: TAXISTAKE
-          pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
             - deploy dependencies
           <<: *thorchain-dev
