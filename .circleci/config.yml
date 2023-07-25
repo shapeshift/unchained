@@ -920,7 +920,7 @@ jobs:
     executor: pulumi
     environment:
       DOCKER_BUILDKIT: 1
-      LOG_LEVEL: debug
+      LOG_LEVEL: info
     parameters:
       <<: *params
       indexer-url:
