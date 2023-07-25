@@ -37,6 +37,7 @@ export class GasOracle {
   private readonly provider: ethers.providers.JsonRpcProvider
 
   private latestBlockTag: BlockTag
+  private canQueryPendingBlockByHeight: boolean
   private feesByBlock = new Map<string, BlockFees>()
   private newBlocksQueue: Array<NewBlock> = []
   private baseFeePerGas?: string
@@ -50,14 +51,28 @@ export class GasOracle {
     // specify latestBlockTag as supported by the coinstack node
     switch (args.coinstack) {
       case 'avalanche':
+        this.latestBlockTag = 'latest'
+        this.canQueryPendingBlockByHeight = true
+        break
       case 'optimism':
+        this.latestBlockTag = 'latest'
+        this.canQueryPendingBlockByHeight = true
+        break
       case 'gnosis':
         this.latestBlockTag = 'latest'
+        this.canQueryPendingBlockByHeight = true
         break
       case 'ethereum':
+        this.latestBlockTag = 'pending'
+        this.canQueryPendingBlockByHeight = false
+        break
       case 'bnbsmartchain':
+        this.latestBlockTag = 'pending'
+        this.canQueryPendingBlockByHeight = true
+        break
       case 'polygon':
         this.latestBlockTag = 'pending'
+        this.canQueryPendingBlockByHeight = true
         break
       default:
         throw new Error(`no coinstack support for: ${args.coinstack}`)
@@ -65,16 +80,23 @@ export class GasOracle {
   }
 
   async start() {
-    const height = await this.provider.getBlockNumber()
+    const [height, latestBlock] = await Promise.all([
+      this.provider.getBlockNumber(),
+      this.provider.send('eth_getBlockByNumber', [this.latestBlockTag, false]) as Promise<NodeBlock>,
+    ])
+
     const length = this.latestBlockTag === 'pending' ? this.totalBlocks - 1 : this.totalBlocks
     const startingBlock = height - length
-    const blocks = Array.from<number, BlockTag | number>({ length }, (_, index) => index + startingBlock + 1)
+    const blocks = Array.from<number, number>({ length }, (_, index) => index + startingBlock + 1)
+    const latest = Number(latestBlock.number)
 
-    // add pending block tag if supported
-    this.latestBlockTag === 'pending' && blocks.unshift(this.latestBlockTag)
+    // add pending block if supported
+    this.latestBlockTag === 'pending' && blocks.unshift(latest)
 
     // populate initial blocks
-    await Promise.all(blocks.map(async (blockNumber) => this.update(blockNumber)))
+    await Promise.all(
+      blocks.map(async (block) => this.update(block, block === latest ? this.latestBlockTag : undefined))
+    )
 
     // start process blocks thread
     this.processBlocks()
@@ -143,9 +165,11 @@ export class GasOracle {
   }
 
   // update oracle state for the specified block
-  private async update(blockNumber: BlockTag | number, retryCount = 0): Promise<void> {
+  private async update(blockNumber: number, blockTag?: BlockTag, retryCount = 0): Promise<void> {
     try {
-      const numOrTag = blockNumber === this.latestBlockTag ? blockNumber : ethers.utils.hexValue(blockNumber)
+      const numOrTag =
+        !this.canQueryPendingBlockByHeight && blockTag === 'pending' ? blockTag : ethers.utils.hexValue(blockNumber)
+
       const block = (await this.provider.send('eth_getBlockByNumber', [numOrTag, true])) as NodeBlock<
         Array<NodeTransaction>
       >
@@ -154,7 +178,7 @@ export class GasOracle {
         if (retryCount >= 5) throw new Error('block not found')
         retryCount++
         await exponentialDelay(retryCount)
-        return this.update(blockNumber, retryCount)
+        return this.update(blockNumber, blockTag, retryCount)
       }
 
       const txFees = block.transactions.reduce<TxFees>(
@@ -167,14 +191,14 @@ export class GasOracle {
       )
 
       this.feesByBlock.set(Number(block.number).toString(), {
-        pending: blockNumber === 'pending',
+        pending: blockTag === 'pending',
         baseFeePerGas: block.baseFeePerGas ? Number(block.baseFeePerGas) : undefined,
         gasPrices: txFees.gasPrices.sort((a, b) => a - b),
         maxPriorityFees: txFees.maxPriorityFees.sort((a, b) => a - b),
       })
 
       // keep track of current baseFeePerGas for latest block tag
-      if (blockNumber === this.latestBlockTag) {
+      if (blockTag === this.latestBlockTag) {
         switch (this.coinstack) {
           // avalanche exposes baseFeePerGas at a different rpc endpoint
           case 'avalanche': {
@@ -187,7 +211,7 @@ export class GasOracle {
         }
       }
     } catch (err) {
-      this.logger.error(err, { blockNumber }, 'failed to update')
+      this.logger.error(err, { blockNumber, blockTag, retryCount }, 'failed to update')
     }
   }
 
@@ -205,9 +229,15 @@ export class GasOracle {
       await Promise.all(
         blocks.map(async (block) => {
           const fees = this.feesByBlock.get(block.toString())
+
           if (fees && (!fees.pending || (this.latestBlockTag === 'pending' && block === latest))) return
+
           // add fees for any missing blocks or a pending block that has been confirmed
-          await this.update(block === latest ? this.latestBlockTag : block)
+          if (block === latest) {
+            await this.update(block, this.latestBlockTag)
+          } else {
+            await this.update(block)
+          }
         })
       )
 
