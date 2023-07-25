@@ -80,22 +80,16 @@ export class GasOracle {
   }
 
   async start() {
-    const [height, latestBlock] = await Promise.all([
-      this.provider.getBlockNumber(),
-      this.provider.send('eth_getBlockByNumber', [this.latestBlockTag, false]) as Promise<NodeBlock>,
-    ])
+    const { number } = (await this.provider.send('eth_getBlockByNumber', [this.latestBlockTag, false])) as NodeBlock
 
-    const length = this.latestBlockTag === 'pending' ? this.totalBlocks - 1 : this.totalBlocks
+    const height = Number(number)
+    const length = this.totalBlocks
     const startingBlock = height - length
     const blocks = Array.from<number, number>({ length }, (_, index) => index + startingBlock + 1)
-    const latest = Number(latestBlock.number)
-
-    // add pending block if supported
-    this.latestBlockTag === 'pending' && blocks.unshift(latest)
 
     // populate initial blocks
     await Promise.all(
-      blocks.map(async (block) => this.update(block, block === latest ? this.latestBlockTag : undefined))
+      blocks.map(async (block) => this.update(block, block === height ? this.latestBlockTag : undefined))
     )
 
     // start process blocks thread
