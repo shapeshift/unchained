@@ -3,6 +3,11 @@
 
 Automated backup can be configured via nodestack config. Alternatively, manual snapshots can be taken either with the use of `VolumeSnapshot` k8s crd's, or via the EC2 Volume Snapshot mechanism.
 
+## Requirements
+- kubectl
+- k9s
+- aws credentials
+
 ## Manual Snapshot
 1. Manually scale the statefulset of the target coinstack down in k9s
 	- Select desired namespace with: `:ns` and highlighting the namespace and pressing enter  
@@ -44,10 +49,11 @@ Automated backup can be configured via nodestack config. Alternatively, manual s
 	- Delete the pvc with `ctrl+d` and select `OK`  
 	![](pvc-delete.png)
 1. Delete the pv associated with pvc deleted above
+	- Note:
+		- `RECLAIM POLICY` indicates whether the pv and associated ebs volume will be `Retain` or `Delete` upon deletion of the pvc. If the pv is not shown after deleting the pvc, this would imply it was set for the `Delete` policy
+		- `STATUS` indicates whether the pv is `Bound` (pvc exists) or is `Released` (pvc has been deleted)
 	- Select desired pv with `:pv` and highlighting the pv (ex. `data-daemon-ethereum-sts-0-pv`)  
 	![](pv.png)
-		- `RECLAIM POLICY` indicates whether the pv and associated ebs volume will be `Retain` or `Delete` upon deletion of the pvc
-		- `STATUS` indicates whether the pv is `Bound` (pvc exists) or is `Released` (pvc has been deleted)
 	- Take note of the `CLAIM` name as another way to see what pvc is associated (format is `{namespace}/{pvc_name}`)
 	![](pv-claim-name.png)
 	- Take note of what availability zone the pv is in before deleting (needed for creating the new volume in the correct AZ)
@@ -64,7 +70,8 @@ Automated backup can be configured via nodestack config. Alternatively, manual s
 	![](aws-snapshots-create-volume-details-az.png)
 	- Add a `Name` tag for the specific volume being created in the form of `data-{service}-{coinstack}-sts-{replicaNumber}` and add `-dev` suffix if it is a coinstack in the `unchained-dev` namespace  
 	![](aws-snapshots-create-volume-details-tags.png)
-1. Update the [retore-pvc.yaml](./restore-pvc.yaml)
+	- Click `Create volume`
+1. Edit the [restore-pvc.yaml](./restore-pvc.yaml). This will be used to apply the new kubernetes resources (pvc + pv)
 	- Replace all `<items>` with the appropriate data
 	- `PersistentVolume.metadata.name` is suffixed with `-pv` (or `-pv-dev` for `unchained-dev` namespace)
 	- `PersistentVolume.spec.capacity.storage` must match the size of the EBS volume
@@ -79,7 +86,7 @@ Automated backup can be configured via nodestack config. Alternatively, manual s
 	- `PersistentVolumeClaim.spec.volumeName` must match `PersistentVolume.metadata.name`
 	- Example:  
 	![](restore-pvc-example.png)
-	- Write the file (don't check in changes after restore is complete)
+	- Write the file (**don't check in changes after restore is complete**)
 1. Apply the yaml to create the new pvc and pv
 	- Verify you are pointing at the correct kube context: `kubectl config current-context`
 		- View all available contexts: `kubectl config get-contexts`
