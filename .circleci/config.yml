@@ -406,7 +406,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: uphold/litecoin-core:0.21
+    service-image-1: shapeshiftdao/litecoin-core:0.21.2.2
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 4Gi
