@@ -187,7 +187,7 @@ export function createCoinService(args: CoinServiceArgs, assetName: string): Ser
   return {
     name: args.name,
     configMapData,
-    containers: [serviceContainer],
+    containers,
     ports,
     volumeClaimTemplates,
   }
