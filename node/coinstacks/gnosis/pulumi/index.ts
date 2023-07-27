@@ -39,6 +39,7 @@ export = async (): Promise<Outputs> => {
           ],
           configMapData: { 'jwt.hex': readFileSync('../daemon/jwt.hex').toString() },
           volumeMounts: [{ name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' }],
+          useMonitorContainer: true,
         }
       case 'indexer':
         return {

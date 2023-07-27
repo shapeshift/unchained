@@ -36,6 +36,7 @@ export = async (): Promise<Outputs> => {
           ports: { midgard: { port: 8080 } },
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
           volumeMounts: [{ name: 'config-map', mountPath: '/config.json', subPath: 'indexer-config.json' }],
+          useMonitorContainer: true,
         }
       case 'timescaledb':
         return {

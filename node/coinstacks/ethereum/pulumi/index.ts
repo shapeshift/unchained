@@ -38,6 +38,7 @@ export = async (): Promise<Outputs> => {
             '--accept-terms-of-use',
           ],
           volumeMounts: [{ name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' }],
+          useMonitorContainer: true,
         }
       case 'indexer':
         return {
