@@ -2,6 +2,8 @@
 
 set -e
 
+apk add bash
+
 start_coin() {
   /scripts/fullnode.sh thornode start \
     --p2p.laddr=tcp://0.0.0.0:27146 \
