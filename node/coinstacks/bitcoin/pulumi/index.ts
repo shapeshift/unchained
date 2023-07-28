@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs'
 import { deployCoinstack } from '../../../../pulumi/src/coinstack'
 import { CoinServiceArgs, Outputs, getConfig } from '../../../../pulumi/src'
-import { defaultCoinServiceArgs } from '../../../packages/blockbook/src/constants'
+import { defaultBlockbookServiceArgs } from '../../../packages/blockbook/src/constants'
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
@@ -24,7 +24,7 @@ export = async (): Promise<Outputs> => {
       case 'indexer':
         return {
           ...service,
-          ...defaultCoinServiceArgs,
+          ...defaultBlockbookServiceArgs,
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
         }
       default:

@@ -9,7 +9,6 @@ PEERS=$(echo $CONNECTION_COUNT | jq -r '.result')
 NODE_LATEST_BLOCK_HEIGHT=$(echo $BLOCKCHAIN_INFO | jq -r '.result.blocks')
 NETWORK_LATEST_BLOCK_HEIGHT=$(echo $BLOCKCHAIN_INFO | jq -r '.result.headers')
 
-
 NOMINAL_BLOCKS=$(( $NETWORK_LATEST_BLOCK_HEIGHT - $TOLERANCE ))
 
 if (( $NODE_LATEST_BLOCK_HEIGHT >= $NOMINAL_BLOCKS )); then

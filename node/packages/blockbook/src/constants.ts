@@ -1,4 +1,4 @@
-export const defaultCoinServiceArgs = {
+export const defaultBlockbookServiceArgs = {
   command: [
     '/bin/blockbook',
     '-blockchaincfg=/config.json',
