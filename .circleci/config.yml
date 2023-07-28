@@ -572,7 +572,7 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: "1"
+    api-cpu-limit: 1000m
     api-cpu-request: 500m
     api-cpu-threshold: 50
     api-memory-limit: 1Gi
@@ -614,7 +614,7 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: "1"
+    api-cpu-limit: 1000m
     api-cpu-request: 500m
     api-cpu-threshold: 50
     api-memory-limit: 1Gi
