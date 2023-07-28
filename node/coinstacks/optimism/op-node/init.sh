@@ -2,6 +2,8 @@
 
 set -e
 
+apk add curl jq
+
 start() {
   op-node \
     --network $NETWORK \
