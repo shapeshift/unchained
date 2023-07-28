@@ -165,7 +165,7 @@ aliases:
     service-memory-limit-1: 8Gi
     service-storage-size-1: 650Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:6b022bb
+    service-image-2: shapeshiftdao/unchained-blockbook:4f7d8f0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 32Gi
@@ -212,7 +212,7 @@ aliases:
     service-memory-limit-2: 12Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:6b022bb
+    service-image-3: shapeshiftdao/unchained-blockbook:4f7d8f0
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
     service-memory-limit-3: 16Gi
@@ -230,10 +230,6 @@ aliases:
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
-    # “At 04:00 on Wednesday.”
-    stateful-service-backup: true
-    stateful-service-backup-schedule: "0 4 * * 3"
-    stateful-service-backup-count: 1
 
   - &cosmos
     assetName: cosmos
@@ -292,6 +288,7 @@ aliases:
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-request-1: 32Gi
+    service-memory-limit-1: 48Gi
     service-storage-size-1: 1500Gi
 
   - &osmosis-dev
@@ -329,7 +326,7 @@ aliases:
     service-memory-limit-1: 12Gi
     service-storage-size-1: 4500Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:6b022bb
+    service-image-2: shapeshiftdao/unchained-blockbook:4f7d8f0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 6Gi
@@ -370,7 +367,7 @@ aliases:
     service-memory-limit-1: 4Gi
     service-storage-size-1: 250Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:6b022bb
+    service-image-2: shapeshiftdao/unchained-blockbook:4f7d8f0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 16Gi
@@ -405,13 +402,13 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: uphold/litecoin-core:0.21
+    service-image-1: shapeshiftdao/litecoin-core:v0.21.2.2
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 4Gi
     service-storage-size-1: 250Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:6b022bb
+    service-image-2: shapeshiftdao/unchained-blockbook:4f7d8f0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 12Gi
@@ -452,7 +449,7 @@ aliases:
     service-memory-limit-1: 4Gi
     service-storage-size-1: 250Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:6b022bb
+    service-image-2: shapeshiftdao/unchained-blockbook:4f7d8f0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 8Gi
@@ -499,7 +496,7 @@ aliases:
     service-memory-limit-2: 8Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: registry.gitlab.com/thorchain/midgard:2.13.0
+    service-image-3: registry.gitlab.com/thorchain/midgard:2.16.1
     service-cpu-limit-3: 500m
     service-cpu-request-3: 250m
     service-memory-limit-3: 1Gi
@@ -546,7 +543,7 @@ aliases:
     service-memory-limit-2: 2Gi
     service-storage-size-2: 100Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:optimism-bedrock-3c86cce
+    service-image-3: shapeshiftdao/unchained-blockbook:optimism-7c8d054
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
     service-memory-limit-3: 12Gi
@@ -575,10 +572,10 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
+    api-cpu-limit: "1"
+    api-cpu-request: 500m
     api-cpu-threshold: 50
-    api-memory-limit: 500Mi
+    api-memory-limit: 1Gi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: shapeshiftdao/bnb-smart-chain:v1.2.8
@@ -588,7 +585,7 @@ aliases:
     service-memory-request-1: 48Gi
     service-storage-size-1: 4000Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:6b022bb
+    service-image-2: shapeshiftdao/unchained-blockbook:4f7d8f0
     service-cpu-limit-2: "4"
     service-cpu-request-2: "2"
     service-memory-limit-2: 24Gi
@@ -606,9 +603,6 @@ aliases:
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
-    stateful-service-backup: true
-    stateful-service-backup-schedule: "0 4 * * 3,6"
-    stateful-service-backup-count: 2
 
   - &polygon
     assetName: polygon
@@ -620,10 +614,10 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
+    api-cpu-limit: "1"
+    api-cpu-request: 500m
     api-cpu-threshold: 50
-    api-memory-limit: 500Mi
+    api-memory-limit: 1Gi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: 0xpolygon/bor:0.4.0
@@ -639,12 +633,11 @@ aliases:
     service-memory-limit-2: 2Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:6b022bb
+    service-image-3: shapeshiftdao/unchained-blockbook:4f7d8f0
     service-cpu-limit-3: "4"
     service-cpu-request-3: "2"
     service-memory-limit-3: 24Gi
     service-storage-size-3: 500Gi
-
 
   - &polygon-dev
     <<: *polygon
@@ -658,10 +651,6 @@ aliases:
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
-    stateful-service-backup: true
-    stateful-service-backup-schedule: "0 4 * * 3,6"
-    stateful-service-backup-count: 2
-
 
   - &gnosis
     assetName: gnosis
@@ -692,12 +681,11 @@ aliases:
     service-memory-limit-2: 4Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:gnosis-9c25fc0
+    service-image-3: shapeshiftdao/unchained-blockbook:gnosis-7fc9809
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
     service-memory-limit-3: 24Gi
     service-storage-size-3: 500Gi
-
 
   - &gnosis-dev
     <<: *gnosis
@@ -710,9 +698,6 @@ aliases:
     api-max-replicas: 2
     api-memory-limit: 2Gi
     stateful-service-replicas: 1
-    stateful-service-backup: true
-    stateful-service-backup-schedule: "0 4 * * 3"
-    stateful-service-backup-count: 1
 
 commands:
   precheck:
@@ -1312,7 +1297,7 @@ workflows:
       - deploy-coinstack-go:
           name: deploy thorchain develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies
           <<: *thorchain-dev
