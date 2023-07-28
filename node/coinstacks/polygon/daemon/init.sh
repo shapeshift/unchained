@@ -2,6 +2,8 @@
 
 set -e
 
+apk add bash curl jq wget zstd tar
+
 [ "$DEBUG" = "true" ] && set -x
 
 DATA_DIR=/data
@@ -34,7 +36,6 @@ if [ -n "$SNAPSHOT" ]; then
   fi
 
   if [ -f "$DATA_DIR/$filename" ]; then
-    apk add wget zstd tar
     extract_files $DATA_DIR/$filename
     rm $DATA_DIR/$filename
   fi

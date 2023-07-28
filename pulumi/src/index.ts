@@ -75,6 +75,7 @@ export interface CoinServiceArgs extends ServiceConfig {
   startupProbe?: k8s.types.input.core.v1.Probe
   livenessProbe?: k8s.types.input.core.v1.Probe
   readinessProbe?: k8s.types.input.core.v1.Probe
+  useMonitorContainer?: boolean
 }
 
 export interface Service {

@@ -2,6 +2,8 @@
 
 set -e
 
+apt update && apt install -y curl jq
+
 start() {
   /avalanchego/build/avalanchego \
     --data-dir /data \

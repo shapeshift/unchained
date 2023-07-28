@@ -3,9 +3,8 @@ FROM debian:11
 # install dependencies
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y build-essential git wget pkg-config lxc-dev libzmq3-dev \
-    libgflags-dev libsnappy-dev zlib1g-dev libbz2-dev \
-    libzstd-dev liblz4-dev graphviz && \
+    apt-get install -y build-essential git wget pkg-config lxc-dev curl jq \
+    libzmq3-dev libgflags-dev libsnappy-dev zlib1g-dev libbz2-dev libzstd-dev liblz4-dev graphviz && \
     apt-get clean
 
 ENV GOLANG_VERSION=go1.19.2.linux-amd64
@@ -25,7 +24,7 @@ RUN cd /opt && git clone -b $ROCKSDB_VERSION --depth 1 https://github.com/facebo
 RUN cd /opt/rocksdb && CFLAGS=-fPIC CXXFLAGS=-fPIC PORTABLE=$PORTABLE_ROCKSDB make -j 4 static_lib
 
 ENV BLOCKBOOK_VERSION=master
-ENV BLOCKBOOK_COMMIT=6b022bb
+ENV BLOCKBOOK_COMMIT=4f7d8f0
 ENV BLOCKBOOK_URL=https://github.com/trezor/blockbook.git
 
 # set up blockbook

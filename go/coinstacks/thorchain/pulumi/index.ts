@@ -23,6 +23,7 @@ export = async (): Promise<Outputs> => {
             'daemon-api': { port: 1317, pathPrefix: '/lcd', stripPathPrefix: true },
             'daemon-rpc': { port: 27147, pathPrefix: '/rpc', stripPathPrefix: true },
           },
+          readinessProbe: { periodSeconds: 30, failureThreshold: 10 },
         }
       case 'indexer':
         return {
@@ -36,6 +37,8 @@ export = async (): Promise<Outputs> => {
           ports: { midgard: { port: 8080 } },
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
           volumeMounts: [{ name: 'config-map', mountPath: '/config.json', subPath: 'indexer-config.json' }],
+          useMonitorContainer: true,
+          readinessProbe: { periodSeconds: 30, failureThreshold: 10 },
         }
       case 'timescaledb':
         return {
@@ -49,6 +52,22 @@ export = async (): Promise<Outputs> => {
           },
           ports: { postgres: { port: 5432 } },
           volumeMounts: [{ name: 'dshm', mountPath: '/dev/shm' }],
+          startupProbe: {
+            exec: { command: ['pg_isready', '-U', '$POSTGRES_USER'] },
+            periodSeconds: 30,
+            failureThreshold: 10,
+            timeoutSeconds: 5,
+          },
+          livenessProbe: {
+            exec: { command: ['pg_isready', '-U', '$POSTGRES_USER'] },
+            periodSeconds: 30,
+            timeoutSeconds: 5,
+          },
+          readinessProbe: {
+            exec: { command: ['pg_isready', '-U', '$POSTGRES_USER'] },
+            periodSeconds: 30,
+            timeoutSeconds: 5,
+          },
         }
       default:
         throw new Error(`no support for coin service: ${service.name}`)

@@ -2,6 +2,8 @@
 
 set -e
 
+apk add bash curl jq wget zstd
+
 [ "$DEBUG" = "true" ] && set -x
 
 HOME_DIR=/root/.heimdalld

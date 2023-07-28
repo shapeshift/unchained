@@ -49,7 +49,9 @@ export function createCoinService(args: CoinServiceArgs, assetName: string): Ser
     ...(args.configMapData ?? {}),
   }
 
-  const container: k8s.types.input.core.v1.Container = {
+  const containers: Array<k8s.types.input.core.v1.Container> = []
+
+  const serviceContainer: k8s.types.input.core.v1.Container = {
     name,
     image: args.image,
     command: initScript && !args.command ? ['/init.sh'] : args.command,
@@ -69,21 +71,20 @@ export function createCoinService(args: CoinServiceArgs, assetName: string): Ser
     securityContext: { runAsUser: 0 },
     ...((startupProbe || args.startupProbe) && {
       startupProbe: {
-        ...(startupProbe && { exec: { command: ['/startup.sh'] }, initialDelaySeconds: 30 }),
+        ...(startupProbe && { exec: { command: ['/startup.sh'] } }),
         ...args.startupProbe,
       },
     }),
-    ...((livenessProbe || args.livenessProbe) &&
-      args.livenessProbe && {
-        livenessProbe: {
-          ...(livenessProbe && { exec: { command: ['/liveness.sh'] }, initialDelaySeconds: 30 }),
-          ...args.livenessProbe,
-        },
-      }),
-    ...((readinessProbe || args.readinessProbe) &&
-      args.readinessProbe && {
+    ...((livenessProbe || args.livenessProbe) && {
+      livenessProbe: {
+        ...(livenessProbe && { exec: { command: ['/liveness.sh'] } }),
+        ...args.livenessProbe,
+      },
+    }),
+    ...(!args.useMonitorContainer &&
+      (readinessProbe || args.readinessProbe) && {
         readinessProbe: {
-          ...(readinessProbe && { exec: { command: ['/readiness.sh'] }, initialDelaySeconds: 30 }),
+          ...(readinessProbe && { exec: { command: ['/readiness.sh'] } }),
           ...args.readinessProbe,
         },
       }),
@@ -132,6 +133,38 @@ export function createCoinService(args: CoinServiceArgs, assetName: string): Ser
     ],
   }
 
+  containers.push(serviceContainer)
+
+  if (args.useMonitorContainer && readinessProbe) {
+    const monitorContainer: k8s.types.input.core.v1.Container = {
+      name: `${name}-monitor`,
+      image: 'shapeshiftdao/unchained-probe:1.0.0',
+      env,
+      ...(readinessProbe && {
+        readinessProbe: {
+          exec: {
+            command: ['/readiness.sh'],
+          },
+          initialDelaySeconds: 30,
+          ...args.readinessProbe,
+        },
+      }),
+      volumeMounts: [
+        ...(readinessProbe
+          ? [
+              {
+                name: 'config-map',
+                mountPath: '/readiness.sh',
+                subPath: `${args.name}-readiness.sh`,
+              },
+            ]
+          : []),
+      ],
+    }
+
+    containers.push(monitorContainer)
+  }
+
   const volumeClaimTemplates = [
     {
       metadata: {
@@ -152,7 +185,7 @@ export function createCoinService(args: CoinServiceArgs, assetName: string): Ser
   return {
     name: args.name,
     configMapData,
-    containers: [container],
+    containers,
     ports,
     volumeClaimTemplates,
   }

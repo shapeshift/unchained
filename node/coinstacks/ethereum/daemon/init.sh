@@ -2,6 +2,8 @@
 
 set -e
 
+apk add bash curl jq
+
 start_coin_bg() {
   geth \
     --$NETWORK \
