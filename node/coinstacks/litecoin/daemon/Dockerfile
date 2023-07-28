@@ -7,7 +7,6 @@ RUN apt-get update -y \
 
 ARG VERSION
 
-
 RUN wget https://github.com/litecoin-project/litecoin/releases/download/v${VERSION}/litecoin-${VERSION}-x86_64-linux-gnu.tar.gz \
 	&& tar -xzf litecoin-${VERSION}-x86_64-linux-gnu.tar.gz \
 	&& mv litecoin-${VERSION}/bin/litecoind /usr/local/bin/litecoind
