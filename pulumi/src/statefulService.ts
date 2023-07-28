@@ -71,22 +71,20 @@ export function createCoinService(args: CoinServiceArgs, assetName: string): Ser
     securityContext: { runAsUser: 0 },
     ...((startupProbe || args.startupProbe) && {
       startupProbe: {
-        ...(startupProbe && { exec: { command: ['/startup.sh'] }, initialDelaySeconds: 30 }),
+        ...(startupProbe && { exec: { command: ['/startup.sh'] } }),
         ...args.startupProbe,
       },
     }),
-    ...((livenessProbe || args.livenessProbe) &&
-      args.livenessProbe && {
-        livenessProbe: {
-          ...(livenessProbe && { exec: { command: ['/liveness.sh'] }, initialDelaySeconds: 30 }),
-          ...args.livenessProbe,
-        },
-      }),
+    ...((livenessProbe || args.livenessProbe) && {
+      livenessProbe: {
+        ...(livenessProbe && { exec: { command: ['/liveness.sh'] } }),
+        ...args.livenessProbe,
+      },
+    }),
     ...(!args.useMonitorContainer &&
-      (readinessProbe || args.readinessProbe) &&
-      args.readinessProbe && {
+      (readinessProbe || args.readinessProbe) && {
         readinessProbe: {
-          ...(readinessProbe && { exec: { command: ['/readiness.sh'] }, initialDelaySeconds: 30 }),
+          ...(readinessProbe && { exec: { command: ['/readiness.sh'] } }),
           ...args.readinessProbe,
         },
       }),
