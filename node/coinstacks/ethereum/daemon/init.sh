@@ -2,7 +2,7 @@
 
 set -e
 
-apk add curl jq
+apk add bash curl jq
 
 start_coin_bg() {
   geth \

@@ -2,7 +2,7 @@
 
 set -e
 
-apk add curl jq wget zstd tar
+apk add bash curl jq wget zstd tar
 
 [ "$DEBUG" = "true" ] && set -x
 
