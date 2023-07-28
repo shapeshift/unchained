@@ -19,6 +19,7 @@ export = async (): Promise<Outputs> => {
             'daemon-api': { port: 1317, pathPrefix: '/lcd', stripPathPrefix: true },
             'daemon-rpc': { port: 26657, pathPrefix: '/rpc', stripPathPrefix: true },
           },
+          readinessProbe: { periodSeconds: 30, failureThreshold: 10 },
         }
       default:
         throw new Error(`no support for coin service: ${service.name}`)
