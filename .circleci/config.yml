@@ -230,10 +230,6 @@ aliases:
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
-    # “At 04:00 on Wednesday.”
-    stateful-service-backup: true
-    stateful-service-backup-schedule: "0 4 * * 3"
-    stateful-service-backup-count: 1
 
   - &cosmos
     assetName: cosmos
@@ -607,9 +603,6 @@ aliases:
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
-    stateful-service-backup: true
-    stateful-service-backup-schedule: "0 4 * * 3,6"
-    stateful-service-backup-count: 2
 
   - &polygon
     assetName: polygon
@@ -646,7 +639,6 @@ aliases:
     service-memory-limit-3: 24Gi
     service-storage-size-3: 500Gi
 
-
   - &polygon-dev
     <<: *polygon
     environment: dev
@@ -659,10 +651,6 @@ aliases:
     api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
-    stateful-service-backup: true
-    stateful-service-backup-schedule: "0 4 * * 3,6"
-    stateful-service-backup-count: 2
-
 
   - &gnosis
     assetName: gnosis
@@ -699,7 +687,6 @@ aliases:
     service-memory-limit-3: 24Gi
     service-storage-size-3: 500Gi
 
-
   - &gnosis-dev
     <<: *gnosis
     environment: dev
@@ -711,9 +698,6 @@ aliases:
     api-max-replicas: 2
     api-memory-limit: 2Gi
     stateful-service-replicas: 1
-    stateful-service-backup: true
-    stateful-service-backup-schedule: "0 4 * * 3"
-    stateful-service-backup-count: 1
 
 commands:
   precheck:
