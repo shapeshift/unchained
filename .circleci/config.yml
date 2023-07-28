@@ -572,8 +572,8 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: "2"
-    api-cpu-request: "1"
+    api-cpu-limit: 1000m
+    api-cpu-request: 500m
     api-cpu-threshold: 50
     api-memory-limit: 1Gi
     stateful-service-replicas: 2
@@ -600,7 +600,8 @@ aliases:
     indexer-ws-url: ws://bnbsmartchain-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
@@ -614,8 +615,8 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: "2"
-    api-cpu-request: "1"
+    api-cpu-limit: 1000m
+    api-cpu-request: 500m
     api-cpu-threshold: 50
     api-memory-limit: 1Gi
     stateful-service-replicas: 2
@@ -648,7 +649,8 @@ aliases:
     indexer-ws-url: ws://polygon-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
