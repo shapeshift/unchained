@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BLOCK_HEIGHT_BUFFER=5
+BLOCK_HEIGHT_TOLERANCE=5
 
 SYNCING=$(curl -sf http://localhost:1317/syncing) || exit 1
 NET_INFO=$(curl -sf http://localhost:26657/net_info) || exit 1
@@ -19,7 +19,7 @@ get_best_block_height() {
     if [[ $status != "" ]]; then
       local latest_block_height=$(echo $status | jq -r '.result.sync_info.latest_block_height')
 
-      if (( latest_block_height > best_block_height )); then
+      if (( $latest_block_height > $best_block_height )); then
         best_block_height=$latest_block_height
       fi
     fi
@@ -29,20 +29,20 @@ get_best_block_height() {
 }
 
 reference_validation() {
-  BEST_BLOCK_HEIGHT=$(get_best_block_height https://rpc.osmosis.zone/status https://rpc-osmosis.keplr.app/status)
-  LATEST_BLOCK_HEIGHT=$(echo $STATUS | jq -r '.result.sync_info.latest_block_height')
+  local best_block_height=$(get_best_block_height https://rpc.osmosis.zone/status https://rpc-osmosis.keplr.app/status)
+  local latest_block_height=$(echo $STATUS | jq -r '.result.sync_info.latest_block_height')
 
-  if (( BEST_BLOCK_HEIGHT > 0 )); then
-    BEST_BLOCK_HEIGHT_WITH_BUFFER=$(( BEST_BLOCK_HEIGHT - BLOCK_HEIGHT_BUFFER ))
+  if (( $best_block_height > 0 )); then
+    local nominal_block_height=$(( $best_block_height - $BLOCK_HEIGHT_TOLERANCE ))
 
-    if (( LATEST_BLOCK_HEIGHT >= BEST_BLOCK_HEIGHT_WITH_BUFFER )); then
-      echo "node is synced with $NUM_PEERS and within safe buffer of reference node"
+    if (( $latest_block_height >= $nominal_block_height )); then
+      echo "node is synced with $NUM_PEERS and within block height tolerance of reference node"
       exit 0
     fi
 
-    echo "node is synced with $NUM_PEERS peers, but not within safe buffer of reference node"
+    echo "node is synced with $NUM_PEERS peers, but not within block height tolerance of reference node"
     exit 1
-  fi 
+  fi
 }
 
 if [[ $IS_SYNCING == false && $CATCHING_UP == false ]]; then

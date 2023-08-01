@@ -11,13 +11,12 @@ if [[ ! -f "$FILE" ]]; then
   exit 1
 fi
 
-PREV_LATEST_BLOCK_HEIGHT=$(cat $FILE)
+PREVIOUS_BLOCK_HEIGHT=$(cat $FILE)
 echo $LATEST_BLOCK_HEIGHT > $FILE
 
-if [[ $LATEST_BLOCK_HEIGHT -gt $PREV_LATEST_BLOCK_HEIGHT ]]; then
+if (( $LATEST_BLOCK_HEIGHT > $PREVIOUS_BLOCK_HEIGHT )); then
   exit 0
 fi
 
 echo "node is stalled..."
-
 exit 1
