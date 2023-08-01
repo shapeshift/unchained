@@ -23,7 +23,9 @@ export = async (): Promise<Outputs> => {
             'daemon-rpc': { port: 8545 },
             'daemon-ws': { port: 8546, pathPrefix: '/websocket', stripPathPrefix: true },
           },
-          readinessProbe: { periodSeconds: 30, failureThreshold: 10 },
+          startupProbe: { periodSeconds: 30, failureThreshold: 60, timeoutSeconds: 10 },
+          livenessProbe: { periodSeconds: 30, timeoutSeconds: 10 },
+          readinessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
         }
       case 'heimdall':
         return {
@@ -37,6 +39,13 @@ export = async (): Promise<Outputs> => {
             ETH_RPC_URL: `http://ethereum-svc.${namespace}.svc.cluster.local:8332`,
             SNAPSHOT: 'https://snapshot-download.polygon.technology/heimdall-mainnet-incremental-compiled-files.txt',
           },
+          startupProbe: {
+            httpGet: { path: '/status', port: 26657 },
+            periodSeconds: 30,
+            failureThreshold: 60,
+            timeoutSeconds: 10,
+          },
+          livenessProbe: { periodSeconds: 30, timeoutSeconds: 10 },
           readinessProbe: { periodSeconds: 30, failureThreshold: 10 },
         }
       case 'indexer':
