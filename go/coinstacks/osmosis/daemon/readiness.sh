@@ -6,7 +6,7 @@ SYNCING=$(curl -sf http://localhost:1317/syncing) || exit 1
 NET_INFO=$(curl -sf http://localhost:26657/net_info) || exit 1
 STATUS=$(curl -sf http://localhost:26657/status) || exit 1
 
-IS_SYNCING=$(echo $SYNCING | jq -r .syncing)
+IS_SYNCING=$(echo $SYNCING | jq -r '.syncing')
 CATCHING_UP=$(echo $STATUS | jq -r '.result.sync_info.catching_up')
 NUM_PEERS=$(echo $NET_INFO | jq -r '.result.n_peers')
 
