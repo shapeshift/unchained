@@ -55,7 +55,7 @@ if [[ $IS_SYNCING == false && $CATCHING_UP == false ]]; then
   fi
 
   echo "node is synced, but has no peers"
-  exit 0
+  exit 1
 fi
 
 echo "node is still syncing"

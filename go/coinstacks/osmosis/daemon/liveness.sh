@@ -18,6 +18,6 @@ if [[ $LATEST_BLOCK_HEIGHT -gt $PREV_LATEST_BLOCK_HEIGHT ]]; then
   exit 0
 fi
 
-echo "node is stalled... (PREV_LATEST_BLOCK_HEIGHT: $PREV_LATEST_BLOCK_HEIGHT, LATEST_BLOCK_HEIGHT: $LATEST_BLOCK_HEIGHT)"
+echo "node is stalled..."
 
 exit 1

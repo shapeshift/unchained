@@ -5,6 +5,7 @@ set -e
 start() {
   MONIKER=unchained \
   CHAIN_JSON=https://raw.githubusercontent.com/cosmos/chain-registry/master/osmosis/chain.json \
+  SNAPSHOT_QUICKSYNC=https://dl2.quicksync.io/json/osmosis.json \
   P2P_POLKACHU=true \
   run.sh osmosisd start \
     --rpc.laddr tcp://0.0.0.0:26657 \
