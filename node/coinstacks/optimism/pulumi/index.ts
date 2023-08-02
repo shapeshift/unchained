@@ -23,6 +23,9 @@ export = async (): Promise<Outputs> => {
           },
           configMapData: { 'jwt.hex': readFileSync('../daemon/jwt.hex').toString() },
           volumeMounts: [{ name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' }],
+          startupProbe: { periodSeconds: 30, failureThreshold: 60, timeoutSeconds: 10 },
+          livenessProbe: { periodSeconds: 30, timeoutSeconds: 10 },
+          readinessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
         }
 
       case 'op-node':
