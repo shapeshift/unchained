@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FILE=/root/.osmosisd/.latest_block_height
+FILE=/root/.heimdalld/.latest_block_height
 
 STATUS=$(curl -sf http://localhost:26657/status) || exit 1
 
@@ -18,5 +18,5 @@ if (( $LATEST_BLOCK_HEIGHT > $PREVIOUS_BLOCK_HEIGHT )); then
   exit 0
 fi
 
-echo "daemon is stalled..."
+echo "node is stalled..."
 exit 1

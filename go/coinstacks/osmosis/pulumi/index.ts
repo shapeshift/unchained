@@ -26,7 +26,7 @@ export = async (): Promise<Outputs> => {
             timeoutSeconds: 10,
           },
           livenessProbe: { periodSeconds: 30, timeoutSeconds: 10 },
-          readinessProbe: { periodSeconds: 30, failureThreshold: 10 },
+          readinessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
         }
       default:
         throw new Error(`no support for coin service: ${service.name}`)
