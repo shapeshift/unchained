@@ -39,7 +39,7 @@ reference_validation() {
     local nominal_block_number=$(( $best_block_number - $BLOCK_HEIGHT_TOLERANCE ))
 
     if (( $current_block_number >= $nominal_block_number )); then
-      echo "daemon is synced with $PEER_COUNT and within block height tolerance of reference node"
+      echo "daemon is synced with $PEER_COUNT peers, and within block height tolerance of reference node"
       exit 0
     fi
 
