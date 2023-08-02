@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FILE=/data/bor/.block_number
+FILE=/data/.block_number
 
 ETH_BLOCK_NUMBER=$(curl -sf -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' http://localhost:8545 -H 'Content-Type: application/json') || exit 1
 

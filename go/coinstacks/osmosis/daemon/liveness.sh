@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FILE=/root/.osmosisd/.latest_block_height
+FILE=/root/.latest_block_height
 
 STATUS=$(curl -sf http://localhost:26657/status) || exit 1
 
