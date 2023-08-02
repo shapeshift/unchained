@@ -1,35 +1,65 @@
 #!/bin/bash
 
-SYNCING=$(curl -s -d '{"jsonrpc":"2.0", "id":1, "method":"eth_syncing", "params":[]}' -H 'Content-Type:application/json;' http://localhost:8545 | jq -r .result)
-PEER_COUNT=$(curl -s -d '{"jsonrpc":"2.0", "id":1, "method":"net_peerCount", "params":[]}' -H 'Content-Type:application/json;' http://localhost:8545 | jq -r .result)
+BLOCK_HEIGHT_TOLERANCE=15
 
-# check if node is reporting it is synced
-if [[ $SYNCING == "false" ]]; then
-  # make sure we have peers
-  if [[ $PEER_COUNT == "0" ]]; then
-    echo "node is synced, but has 0 peer connections"
+ETH_SYNCING=$(curl -sf -d '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}' http://localhost:8545 -H 'Content-Type: application/json') || exit 1
+NET_PEER_COUNT=$(curl -sf -d '{"jsonrpc":"2.0","method":"net_peerCount","params":[],"id":1}' http://localhost:8545 -H 'Content-Type: application/json') || exit 1
+
+SYNCING=$(echo $ETH_SYNCING | jq -r '.result')
+PEER_COUNT_HEX=$(echo $NET_PEER_COUNT | jq -r '.result')
+PEER_COUNT=$(($PEER_COUNT_HEX))
+
+get_best_block_number() {
+  local best_block_number=0
+
+  for reference_url in "$@"; do
+    local eth_blockNumber=$(curl -sf -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' -H 'Content-Type: application/json' $reference_url)
+
+    if [[ $eth_blockNumber != "" ]]; then
+      local current_block_number_hex=$(echo $eth_blockNumber | jq -r '.result')
+      local current_block_number=$(($current_block_number_hex))
+
+      if (( $current_block_number > $best_block_number )); then
+        best_block_number=$current_block_number
+      fi
+    fi
+  done
+
+  echo $best_block_number
+}
+
+reference_validation() {
+  # budget load balance across available public node replicas: https://docs.bscscan.com/misc-tools-and-utilities/public-rpc-nodes
+  local best_block_number=$(get_best_block_number https://bsc-dataseed$(((RANDOM%4)+1)).binance.org https://bsc-dataseed$(((RANDOM%4)+1)).defibit.io https://bsc-dataseed$(((RANDOM%4)+1)).ninicoin.io)
+  local eth_blockNumber=$(curl -sf -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' -H 'Content-Type: application/json' http://localhost:8545) || exit 1
+  local current_block_number_hex=$(echo $eth_blockNumber | jq -r '.result')
+  local current_block_number=$(($current_block_number_hex))
+
+  if (( $best_block_number > 0 )); then
+    local nominal_block_number=$(( $best_block_number - $BLOCK_HEIGHT_TOLERANCE ))
+
+    if (( $current_block_number >= $nominal_block_number )); then
+      echo "daemon is synced with $PEER_COUNT peers, and within block height tolerance of reference node"
+      exit 0
+    fi
+
+    echo "daemon is synced with $PEER_COUNT peers, but not within block height tolerance of reference node"
     exit 1
   fi
+}
 
-  # budget load balance across available public nodes: https://docs.bscscan.com/misc-tools-and-utilities/public-rpc-nodes
-  NODE=$(((RANDOM % 4)+1))
+if [[ $SYNCING == false ]]; then
+  if (( $PEER_COUNT > 0 )); then
+    # if node is reporting synced, double check against reference nodes
+    reference_validation
 
-  TARGET_HEIGHT_HEX=$(curl -s -d '{"jsonrpc":"2.0", "id":1, "method":"eth_blockNumber", "params":[]}' -H 'Content-Type:application/json;' https://bsc-dataseed$NODE.binance.org/ | jq -r .result)
-  TARGET_HEIGHT=$(echo $(($TARGET_HEIGHT_HEX)))
-  LOCAL_HEIGHT_HEX=$(curl -s -d '{"jsonrpc":"2.0", "id":1, "method":"eth_blockNumber", "params":[]}' -H 'Content-Type:application/json;' http://localhost:8545 | jq -r .result)
-  LOCAL_HEIGHT=$(echo $(($LOCAL_HEIGHT_HEX)))
-  NOMINAL_HEIGHT=$((TARGET_HEIGHT-5))
-
-  # the node can incorrectly report it is synced after catch up, but then falling back out of sync
-  # validate against a public reference node to confirm sync status
-  if [[ $LOCAL_HEIGHT -ge $NOMINAL_HEIGHT ]]; then
-    echo "node is synced, with $PEER_COUNT peers"
+    echo "daemon is synced, with $PEER_COUNT peers"
     exit 0
-  else
-    echo "node is reporting synced, with $PEER_COUNT peers, but is behind public reference node (Local: $LOCAL_HEIGHT, Reference: $TARGET_HEIGHT)"
-    exit 1
   fi
+
+  echo "daemon is synced, but has no peers"
+  exit 1
 fi
 
-echo "node is still syncing"
+echo "daemon is still syncing"
 exit 1
