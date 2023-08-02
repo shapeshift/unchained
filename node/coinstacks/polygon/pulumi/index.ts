@@ -24,7 +24,7 @@ export = async (): Promise<Outputs> => {
             'daemon-ws': { port: 8546, pathPrefix: '/websocket', stripPathPrefix: true },
           },
           startupProbe: { periodSeconds: 30, failureThreshold: 60, timeoutSeconds: 10 },
-          livenessProbe: { periodSeconds: 30, timeoutSeconds: 10 },
+          livenessProbe: { periodSeconds: 30, failureThreshold: 5, timeoutSeconds: 10 },
           readinessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
         }
       case 'heimdall':
