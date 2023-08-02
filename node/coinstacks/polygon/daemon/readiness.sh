@@ -38,11 +38,11 @@ reference_validation() {
     local nominal_block_number=$(( $best_block_number - $BLOCK_HEIGHT_TOLERANCE ))
 
     if (( $current_block_number >= $nominal_block_number )); then
-      echo "node is synced with $PEER_COUNT and within block height tolerance of reference node"
+      echo "daemon is synced with $PEER_COUNT and within block height tolerance of reference node"
       exit 0
     fi
 
-    echo "node is synced with $PEER_COUNT peers, but not within block height tolerance of reference node"
+    echo "daemon is synced with $PEER_COUNT peers, but not within block height tolerance of reference node"
     exit 1
   fi
 }
@@ -52,13 +52,13 @@ if [[ $SYNCING == false ]]; then
     # if node is reporting synced, double check against reference nodes
     reference_validation
 
-    echo "node is synced, with $PEER_COUNT peers"
+    echo "daemon is synced, with $PEER_COUNT peers"
     exit 0
   fi
 
-  echo "node is synced, but has no peers"
+  echo "daemon is synced, but has no peers"
   exit 1
 fi
 
-echo "node is still syncing"
+echo "daemon is still syncing"
 exit 1

@@ -10,13 +10,13 @@ NUM_PEERS=$(echo $NET_INFO | jq -r '.result.n_peers')
 
 if [[ $IS_SYNCING == false && $CATCHING_UP == false ]]; then
   if (( $NUM_PEERS > 0 )); then
-    echo "node is synced with $NUM_PEERS peers"
+    echo "heimdall is synced with $NUM_PEERS peers"
     exit 0
   fi
 
-  echo "node is synced, but has no peers"
+  echo "heimdall is synced, but has no peers"
   exit 1
 fi
 
-echo "node is still syncing"
+echo "heimdall is still syncing"
 exit 1

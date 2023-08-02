@@ -19,5 +19,5 @@ if (( $CURRENT_BLOCK_NUMBER > $PREVIOUS_BLOCK_NUMBER )); then
   exit 0
 fi
 
-echo "node is stalled..."
+echo "daemon is stalled..."
 exit 1

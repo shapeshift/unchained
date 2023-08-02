@@ -18,5 +18,5 @@ if (( $LATEST_BLOCK_HEIGHT > $PREVIOUS_BLOCK_HEIGHT )); then
   exit 0
 fi
 
-echo "node is stalled..."
+echo "daemon is stalled..."
 exit 1
