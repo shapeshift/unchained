@@ -34,7 +34,6 @@ start() {
     --txlookuplimit 0 \
     --cache 4096 \
     --maxpeers 0 \
-    --snapshot='false' \
     --nodiscover &
   PID="$!"
 }
