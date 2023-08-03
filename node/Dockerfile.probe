@@ -2,6 +2,6 @@ FROM node:18.12.1-alpine
 
 RUN apk add --no-cache curl jq bash
 
-COPY ./probe.sh /probe.sh
+COPY ./scripts/probe.sh /probe.sh
 
 CMD /probe.sh
