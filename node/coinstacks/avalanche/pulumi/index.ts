@@ -16,10 +16,16 @@ export = async (): Promise<Outputs> => {
         return {
           ...service,
           ports: { 'daemon-rpc': { port: 9650 } },
-          configMapData: { 'c-chain-config.json': readFileSync('../daemon/config.json').toString() },
+          configMapData: {
+            'c-chain-config.json': readFileSync('../daemon/config.json').toString(),
+            'evm.sh': readFileSync('../../../scripts/evm.sh').toString(),
+          },
           volumeMounts: [
             { name: 'config-map', mountPath: '/configs/chains/C/config.json', subPath: 'c-chain-config.json' },
+            { name: 'config-map', mountPath: '/evm.sh', subPath: 'evm.sh' },
           ],
+          startupProbe: { periodSeconds: 30, failureThreshold: 60, timeoutSeconds: 10 },
+          livenessProbe: { periodSeconds: 30, timeoutSeconds: 10 },
           readinessProbe: { periodSeconds: 30, failureThreshold: 10 },
         }
       case 'indexer':
