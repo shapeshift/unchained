@@ -22,6 +22,8 @@ export = async (): Promise<Outputs> => {
           env: {
             SNAPSHOT: 'https://pub-c0627345c16f47ab858c9469133073a8.r2.dev/geth-20230719.tar.lz4',
           },
+          configMapData: { 'evm.sh': readFileSync('../../../scripts/evm.sh').toString() },
+          volumeMounts: [{ name: 'config-map', mountPath: '/evm.sh', subPath: 'evm.sh' }],
           startupProbe: { periodSeconds: 30, failureThreshold: 60, timeoutSeconds: 10 },
           livenessProbe: { periodSeconds: 30, timeoutSeconds: 10 },
           readinessProbe: { periodSeconds: 30, failureThreshold: 10 },
