@@ -4,8 +4,8 @@ source /evm.sh
 
 BLOCK_HEIGHT_TOLERANCE=15
 
-ETH_SYNCING=$(curl -sf -d '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}' http://localhost:8545 -H 'Content-Type: application/json') || exit 1
-NET_PEER_COUNT=$(curl -sf -d '{"jsonrpc":"2.0","method":"net_peerCount","params":[],"id":1}' http://localhost:8545 -H 'Content-Type: application/json') || exit 1
+ETH_SYNCING=$(curl -sf -d '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}' -H 'Content-Type: application/json' http://localhost:8545) || exit 1
+NET_PEER_COUNT=$(curl -sf -d '{"jsonrpc":"2.0","method":"net_peerCount","params":[],"id":1}' -H 'Content-Type: application/json' http://localhost:8545) || exit 1
 
 SYNCING=$(echo $ETH_SYNCING | jq -r '.result')
 PEER_COUNT_HEX=$(echo $NET_PEER_COUNT | jq -r '.result')

@@ -2,7 +2,7 @@
 
 FILE=/data/.block_number
 
-SYNC_STATUS=$(curl -sf -d '{"jsonrpc":"2.0","method":"optimism_syncStatus","params":[],"id":1}' http://localhost:9545 -H 'Content-Type: application/json') || exit 1
+SYNC_STATUS=$(curl -sf -d '{"jsonrpc":"2.0","method":"optimism_syncStatus","params":[],"id":1}' -H 'Content-Type: application/json' http://localhost:9545) || exit 1
 
 CURRENT_L1_BLOCK_NUMBER=$(echo $SYNC_STATUS | jq -r .result.current_l1.number)
 CURRENT_L2_BLOCK_NUMBER=$(echo $SYNC_STATUS | jq -r .result.unsafe_l2.number)

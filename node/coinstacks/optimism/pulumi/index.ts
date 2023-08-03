@@ -30,7 +30,7 @@ export = async (): Promise<Outputs> => {
             { name: 'config-map', mountPath: '/evm.sh', subPath: 'evm.sh' },
           ],
           startupProbe: { periodSeconds: 30, failureThreshold: 60, timeoutSeconds: 10 },
-          livenessProbe: { periodSeconds: 30, failureThreshold: 5, timeoutSeconds: 10 },
+          livenessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
           readinessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
         }
 
@@ -48,7 +48,7 @@ export = async (): Promise<Outputs> => {
             { name: 'config-map', mountPath: '/evm.sh', subPath: 'evm.sh' },
           ],
           startupProbe: { periodSeconds: 30, failureThreshold: 60, timeoutSeconds: 10 },
-          livenessProbe: { periodSeconds: 30, failureThreshold: 5, timeoutSeconds: 10 },
+          livenessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
           readinessProbe: { periodSeconds: 30, failureThreshold: 10 },
         }
       case 'indexer':

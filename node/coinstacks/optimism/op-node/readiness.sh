@@ -4,7 +4,7 @@ source /evm.sh
 
 BLOCK_HEIGHT_TOLERANCE=5
 
-SYNC_STATUS=$(curl -s -d '{"jsonrpc":"2.0","method":"optimism_syncStatus","params":[],"id":1}' http://localhost:9545 -H 'Content-Type: application/json')
+SYNC_STATUS=$(curl -s -d '{"jsonrpc":"2.0","method":"optimism_syncStatus","params":[],"id":1}'-H 'Content-Type: application/json' http://localhost:9545 )
 
 QUEUED_UNSAFE_L2_HEIGHT=$(echo $SYNC_STATUS | jq -r .result.queued_unsafe_l2.number)
 
