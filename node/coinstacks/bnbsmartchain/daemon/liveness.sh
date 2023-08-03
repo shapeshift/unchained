@@ -16,8 +16,9 @@ PREVIOUS_BLOCK_NUMBER=$(cat $FILE)
 echo $CURRENT_BLOCK_NUMBER > $FILE
 
 if (( $CURRENT_BLOCK_NUMBER > $PREVIOUS_BLOCK_NUMBER )); then
+  echo "daemon is running"
   exit 0
 fi
 
-echo "daemon is stalled..."
+echo "daemon is stalled"
 exit 1

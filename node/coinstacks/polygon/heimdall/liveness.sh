@@ -15,8 +15,9 @@ PREVIOUS_BLOCK_HEIGHT=$(cat $FILE)
 echo $LATEST_BLOCK_HEIGHT > $FILE
 
 if (( $LATEST_BLOCK_HEIGHT > $PREVIOUS_BLOCK_HEIGHT )); then
+  echo "heimdall is running"
   exit 0
 fi
 
-echo "node is stalled..."
+echo "heimdall is stalled"
 exit 1
