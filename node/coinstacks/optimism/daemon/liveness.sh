@@ -2,7 +2,7 @@
 
 FILE=/data/block_number
 
-ETH_BLOCK_NUMBER=$(curl -sf -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' http://localhost:8545 -H 'Content-Type: application/json') || exit 1
+ETH_BLOCK_NUMBER=$(curl -sf -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' -H 'Content-Type: application/json' http://localhost:8545) || exit 1
 
 CURRENT_BLOCK_NUMBER_HEX=$(echo $ETH_BLOCK_NUMBER | jq -r '.result')
 CURRENT_BLOCK_NUMBER=$(($CURRENT_BLOCK_NUMBER_HEX))

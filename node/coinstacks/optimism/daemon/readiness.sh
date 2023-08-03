@@ -4,7 +4,7 @@ source /evm.sh
 
 BLOCK_HEIGHT_TOLERANCE=25
 
-ETH_SYNCING=$(curl -sf -d '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}' http://localhost:8545 -H 'Content-Type: application/json') || exit 1
+ETH_SYNCING=$(curl -sf -d '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}' -H 'Content-Type: application/json' http://localhost:8545) || exit 1
 
 SYNCING=$(echo $ETH_SYNCING | jq -r '.result')
 
