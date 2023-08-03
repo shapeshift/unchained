@@ -1,19 +1,22 @@
 #!/bin/bash
 
-# ethereum block height
-L1_HEIGHT_HEX=$(curl -s -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' $L1_RPC_ENDPOINT -H 'Content-Type: application/json' | jq -r .result)
-L1_HEIGHT=$(echo $(($L1_HEIGHT_HEX)))
+source /evm.sh
+
+BLOCK_HEIGHT_TOLERANCE=5
 
 SYNC_STATUS=$(curl -s -d '{"jsonrpc":"2.0","method":"optimism_syncStatus","params":[],"id":1}' http://localhost:9545 -H 'Content-Type: application/json')
-# op-node L1 block height
-CURRENT_L1_HEIGHT=$(echo $SYNC_STATUS | jq -r .result.current_l1.number)
-# op-node l2 blocks still left to sync
+
 QUEUED_UNSAFE_L2_HEIGHT=$(echo $SYNC_STATUS | jq -r .result.queued_unsafe_l2.number)
 
-if [[ $L1_HEIGHT -eq $CURRENT_L1_HEIGHT && QUEUED_UNSAFE_L2_HEIGHT -eq 0 ]]; then
-  echo "node is synced"
+if (( $QUEUED_UNSAFE_L2_HEIGHT == 0 )); then
+  current_l1_block_number=$(echo $SYNC_STATUS | jq -r .result.current_l1.number)
+  best_reference_block_number=$(get_best_reference_block_number $L1_RPC_ENDPOINT https://ethereum.publicnode.com https://eth-mainnet.g.alchemy.com/v2/demo)
+
+  reference_validation op-node $current_l1_block_number $best_reference_block_number $BLOCK_HEIGHT_TOLERANCE
+
+  echo "op-node is synced"
   exit 0
 fi
 
-echo "node is still syncing"
+echo "op-node is still syncing"
 exit 1
