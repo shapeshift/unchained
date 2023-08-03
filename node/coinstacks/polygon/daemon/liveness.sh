@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FILE=/data/bor/.block_number
+FILE=/data/.block_number
 
 ETH_BLOCK_NUMBER=$(curl -sf -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' http://localhost:8545 -H 'Content-Type: application/json') || exit 1
 
@@ -16,8 +16,9 @@ PREVIOUS_BLOCK_NUMBER=$(cat $FILE)
 echo $CURRENT_BLOCK_NUMBER > $FILE
 
 if (( $CURRENT_BLOCK_NUMBER > $PREVIOUS_BLOCK_NUMBER )); then
+  echo "daemon is running"
   exit 0
 fi
 
-echo "daemon is stalled..."
+echo "daemon is stalled"
 exit 1
