@@ -47,7 +47,7 @@ export = async (): Promise<Outputs> => {
             failureThreshold: 60,
             timeoutSeconds: 10,
           },
-          livenessProbe: { periodSeconds: 30, timeoutSeconds: 10 },
+          livenessProbe: { periodSeconds: 30, failureThreshold: 5, timeoutSeconds: 10 },
           readinessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
         }
       case 'indexer':
