@@ -11,12 +11,12 @@ start_coin_bg() {
     --datadir /data \
     --http \
     --http.addr 0.0.0.0 \
-    --http.port 8332 \
+    --http.port 8545 \
     --http.api eth,net,web3,debug,txpool,engine \
     --http.vhosts '*' \
     --http.corsdomain '*' \
     --ws \
-    --ws.port 8333 \
+    --ws.port 8546 \
     --ws.api eth,net,web3,debug,txpool,engine \
     --ws.origins '*' \
     --syncmode full \

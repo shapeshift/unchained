@@ -188,7 +188,7 @@ aliases:
     assetName: ethereum
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/ethereum/pulumi
-    rpc-url: http://ethereum-svc.unchained.svc.cluster.local:8332
+    rpc-url: http://ethereum-svc.unchained.svc.cluster.local:8545
     indexer-url: http://ethereum-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-svc.unchained.svc.cluster.local:8001/websocket
     api-autoscaling: true
@@ -222,7 +222,7 @@ aliases:
     <<: *ethereum
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    rpc-url: http://ethereum-svc.unchained-dev.svc.cluster.local:8332
+    rpc-url: http://ethereum-svc.unchained-dev.svc.cluster.local:8545
     indexer-url: http://ethereum-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
