@@ -1,4 +1,5 @@
 import { NextFunction, Response, Request } from 'express'
+import morgan from 'morgan'
 import { ValidateError } from 'tsoa'
 import { ApiError, NotFoundError } from '.'
 
@@ -44,3 +45,7 @@ export function notFoundHandler(_req: Request, res: Response): void {
 
   res.status(404).send(err)
 }
+
+export const requestLogger = morgan('short', {
+  skip: (req) => ['/', '/health'].includes(req.url ?? ''),
+})
