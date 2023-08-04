@@ -38,7 +38,7 @@ export = async (): Promise<Outputs> => {
             'heimdall-rpc': { port: 26657, pathPrefix: '/rpc', stripPathPrefix: true },
           },
           env: {
-            ETH_RPC_URL: `http://ethereum-svc.${namespace}.svc.cluster.local:8332`,
+            ETH_RPC_URL: `http://ethereum-svc.${namespace}.svc.cluster.local:8545`,
             SNAPSHOT: 'https://snapshot-download.polygon.technology/heimdall-mainnet-incremental-compiled-files.txt',
           },
           startupProbe: {
