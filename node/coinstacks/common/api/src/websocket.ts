@@ -88,7 +88,7 @@ export class ConnectionHandler {
     }
 
     this.pingTimeout = setTimeout(() => {
-      this.logger.warn({ fn: 'pingTimeout' }, 'heartbeat failed')
+      this.logger.debug({ fn: 'pingTimeout' }, 'heartbeat failed')
       this.websocket.terminate()
     }, this.pingInterval + 1000)
   }
