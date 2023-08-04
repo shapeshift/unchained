@@ -2,6 +2,7 @@ import express, { json, urlencoded } from 'express'
 import cors from 'cors'
 import { join } from 'path'
 import { Server } from 'ws'
+import morgan from 'morgan'
 import swaggerUi from 'swagger-ui-express'
 import {
   evm,
@@ -31,6 +32,7 @@ const app = express()
 app.use(json())
 app.use(urlencoded({ extended: true }))
 app.use(cors())
+app.use(morgan('short'))
 
 app.get('/health', async (_, res) => res.json({ status: 'up', asset: 'ethereum', connections: wsServer.clients.size }))
 
