@@ -1290,7 +1290,7 @@ workflows:
       - deploy-coinstack-go:
           name: deploy osmosis develop
           organization: TAXISTAKE
-          pulumi-command: preview
+          pulumi-command: up -f --yes
           requires:
             - deploy dependencies
           <<: *osmosis-dev
