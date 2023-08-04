@@ -16,16 +16,24 @@ export = async (): Promise<Outputs> => {
         return {
           ...service,
           ports: {
-            'daemon-rpc': { port: 8332 },
-            'daemon-ws': { port: 8333, pathPrefix: '/websocket', stripPathPrefix: true },
+            'daemon-rpc': { port: 8545 },
+            'daemon-ws': { port: 8546, pathPrefix: '/websocket', stripPathPrefix: true },
             'daemon-beacon': { port: 8551, ingressRoute: false },
           },
-          configMapData: { 'jwt.hex': readFileSync('../daemon/jwt.hex').toString() },
-          volumeMounts: [{ name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' }],
+          configMapData: {
+            'jwt.hex': readFileSync('../daemon/jwt.hex').toString(),
+            'evm.sh': readFileSync('../../../scripts/evm.sh').toString(),
+          },
+          volumeMounts: [
+            { name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' },
+            { name: 'config-map', mountPath: '/evm.sh', subPath: 'evm.sh' },
+          ],
           env: {
             NETWORK: config.network,
           },
-          readinessProbe: { periodSeconds: 30, failureThreshold: 10 },
+          startupProbe: { periodSeconds: 30, failureThreshold: 60, timeoutSeconds: 10 },
+          livenessProbe: { periodSeconds: 30, failureThreshold: 5, timeoutSeconds: 10 },
+          readinessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
         }
       case 'daemon-beacon':
         return {
