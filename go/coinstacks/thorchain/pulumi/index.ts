@@ -23,7 +23,16 @@ export = async (): Promise<Outputs> => {
             'daemon-api': { port: 1317, pathPrefix: '/lcd', stripPathPrefix: true },
             'daemon-rpc': { port: 27147, pathPrefix: '/rpc', stripPathPrefix: true },
           },
-          readinessProbe: { periodSeconds: 30, failureThreshold: 10 },
+          configMapData: { 'tendermint.sh': readFileSync('../../../scripts/tendermint.sh').toString() },
+          volumeMounts: [ { name: 'config-map', mountPath: '/tendermint.sh', subPath: 'tendermint.sh' } ],
+          startupProbe: {
+            httpGet: { path: '/status', port: 27147 },
+            periodSeconds: 30,
+            failureThreshold: 60,
+            timeoutSeconds: 10,
+          },
+          livenessProbe: { periodSeconds: 30, failureThreshold: 5, timeoutSeconds: 10 },
+          readinessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
         }
       case 'indexer':
         return {
@@ -38,7 +47,9 @@ export = async (): Promise<Outputs> => {
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
           volumeMounts: [{ name: 'config-map', mountPath: '/config.json', subPath: 'indexer-config.json' }],
           useMonitorContainer: true,
-          readinessProbe: { periodSeconds: 30, failureThreshold: 10 },
+          startupProbe: { tcpSocket: { port: 8080 }, periodSeconds: 30, failureThreshold: 60, timeoutSeconds: 10 },
+          livenessProbe: { tcpSocket: { port: 8080 }, periodSeconds: 30, failureThreshold: 5, timeoutSeconds: 10 },
+          readinessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
         }
       case 'timescaledb':
         return {

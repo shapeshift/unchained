@@ -1,11 +1,13 @@
 #!/bin/bash
 
-IN_SYNC=$(curl -s http://localhost:8080/v2/health | jq .inSync)
+HEALTH=$(curl -sf http://localhost:8080/v2/health) || exit 1
 
-if [[ $IN_SYNC != "true" ]]; then
-  echo "midgard is still syncing"
-  exit 1
+IN_SYNC=$(echo $HEALTH | jq -r '.inSync')
+
+if [[ $IN_SYNC == true ]]; then
+  echo "midgard is synced"
+  exit 0
 fi
 
-echo "midgard is synced"
-exit 0
+echo "midgard is still syncing"
+exit 1
