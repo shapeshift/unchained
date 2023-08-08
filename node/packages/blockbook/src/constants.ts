@@ -7,7 +7,6 @@ export const defaultBlockbookServiceArgs = {
     '-public=:8001',
     '-enablesubnewtx',
     '-logtostderr',
-    '-debug',
   ],
   ports: { public: { port: 8001 } },
   volumeMounts: [{ name: 'config-map', mountPath: '/config.json', subPath: 'indexer-config.json' }],
