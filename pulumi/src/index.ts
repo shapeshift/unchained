@@ -55,10 +55,10 @@ export interface Port extends k8s.types.input.core.v1.ServicePort {
 }
 
 export interface ServiceConfig {
-  cpuLimit?: string
+  cpuLimit: string
   cpuRequest?: string
   image: string
-  memoryLimit?: string
+  memoryLimit: string
   memoryRequest?: string
   name: string
   storageSize: string

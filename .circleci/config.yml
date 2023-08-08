@@ -63,8 +63,12 @@ aliases:
       type: string
     api-cpu-request:
       type: string
+      default: ""
     api-memory-limit:
       type: string
+    api-memory-request:
+      type: string
+      default: ""
     api-replicas:
       type: integer
     stateful-service-replicas:
@@ -153,10 +157,11 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-limit: 300m
+    api-cpu-request: 150m
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: shapeshiftdao/bitcoin-core:25.0
@@ -180,7 +185,6 @@ aliases:
     indexer-ws-url: ws://bitcoin-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
@@ -194,10 +198,11 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-limit: 300m
+    api-cpu-request: 150m
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: ethereum/client-go:v1.12.0
@@ -227,7 +232,6 @@ aliases:
     indexer-ws-url: ws://ethereum-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
@@ -242,10 +246,11 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-limit: 300m
+    api-cpu-request: 150m
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: shapeshiftdao/cosmoshub:v10.0.2
@@ -264,7 +269,6 @@ aliases:
     ws-url: ws://cosmos-svc.unchained-dev.svc.cluster.local:26657
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
@@ -278,10 +282,11 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-limit: 300m
+    api-cpu-request: 150m
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: shapeshiftdao/osmosis:v16.1.1
@@ -300,7 +305,6 @@ aliases:
     ws-url: ws://osmosis-svc.unchained-dev.svc.cluster.local:26657
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
@@ -314,10 +318,11 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-limit: 300m
+    api-cpu-request: 150m
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: avaplatform/avalanchego:v1.10.7
@@ -341,7 +346,6 @@ aliases:
     indexer-ws-url: ws://avalanche-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
@@ -355,10 +359,11 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-limit: 300m
+    api-cpu-request: 150m
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: shapeshiftdao/dogecoin:1.14.6
@@ -382,7 +387,6 @@ aliases:
     indexer-ws-url: ws://dogecoin-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
@@ -396,10 +400,11 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-limit: 300m
+    api-cpu-request: 150m
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: shapeshiftdao/litecoin-core:v0.21.2.2
@@ -423,7 +428,6 @@ aliases:
     indexer-ws-url: ws://litecoin-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
@@ -437,10 +441,11 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-limit: 300m
+    api-cpu-request: 150m
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: shapeshiftdao/bitcoin-cash-node:26.1.0
@@ -464,7 +469,6 @@ aliases:
     indexer-ws-url: ws://bitcoincash-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
@@ -478,10 +482,11 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-limit: 300m
+    api-cpu-request: 150m
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.117.0
@@ -511,7 +516,6 @@ aliases:
     ws-url: ws://thorchain-svc.unchained-dev.svc.cluster.local:27147
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
@@ -525,10 +529,11 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-limit: 300m
+    api-cpu-request: 150m
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101106.0
@@ -546,7 +551,7 @@ aliases:
     service-image-3: shapeshiftdao/unchained-blockbook:optimism-7c8d054
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
-    service-memory-limit-3: 12Gi
+    service-memory-limit-3: 8Gi
     service-storage-size-3: 500Gi
 
   - &optimism-dev
@@ -558,7 +563,6 @@ aliases:
     indexer-ws-url: ws://optimism-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
@@ -572,10 +576,11 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 1000m
-    api-cpu-request: 500m
-    api-cpu-threshold: 50
-    api-memory-limit: 1Gi
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
+    api-cpu-threshold: 75
+    api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: shapeshiftdao/bnb-smart-chain:v1.2.10
@@ -600,8 +605,7 @@ aliases:
     indexer-ws-url: ws://bnbsmartchain-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
+    api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
@@ -615,10 +619,11 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 1000m
-    api-cpu-request: 500m
-    api-cpu-threshold: 50
-    api-memory-limit: 1Gi
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
+    api-cpu-threshold: 75
+    api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: 0xpolygon/bor:0.4.0
@@ -649,8 +654,7 @@ aliases:
     indexer-ws-url: ws://polygon-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
+    api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
@@ -661,20 +665,20 @@ aliases:
     rpc-url: http://gnosis-svc.unchained.svc.cluster.local:8545
     indexer-url: http://gnosis-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://gnosis-svc.unchained.svc.cluster.local:8001/websocket
-    api: true
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 1000m
-    api-cpu-request: 500m
-    api-cpu-threshold: 50
-    api-memory-limit: 2Gi
+    api-cpu-limit: 300m
+    api-cpu-request: 150m
+    api-cpu-threshold: 75
+    api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: nethermind/nethermind:1.20.1
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
-    service-memory-limit-1: 16Gi
+    service-memory-limit-1: 6Gi
     service-storage-size-1: 1000Gi
     service-name-2: daemon-beacon
     service-image-2: sigp/lighthouse:v4.3.0
@@ -698,7 +702,7 @@ aliases:
     indexer-ws-url: ws://gnosis-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 2Gi
+    api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
 commands:
@@ -946,8 +950,9 @@ jobs:
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.autoscaling.enabled << parameters.api-autoscaling >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.autoscaling.cpuThreshold << parameters.api-cpu-threshold >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.autoscaling.maxReplicas << parameters.api-max-replicas >>
+            [ "<< parameters.api >>" = true ] && [ -n "<< parameters.api-cpu-request >>" ] && pulumi config set --path unchained:coinstack.api.cpuRequest << parameters.api-cpu-request >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.cpuLimit << parameters.api-cpu-limit >>
-            [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.cpuRequest << parameters.api-cpu-request >>
+            [ "<< parameters.api >>" = true ] && [ -n "<< parameters.api-memory-request >>" ] && pulumi config set --path unchained:coinstack.api.memoryRequest << parameters.api-memory-request >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.memoryLimit << parameters.api-memory-limit >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.replicas << parameters.api-replicas >>
             [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:coinstack.statefulService.backup.count << parameters.stateful-service-backup-count >>
@@ -1019,8 +1024,9 @@ jobs:
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.autoscaling.enabled << parameters.api-autoscaling >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.autoscaling.cpuThreshold << parameters.api-cpu-threshold >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.autoscaling.maxReplicas << parameters.api-max-replicas >>
+            [ "<< parameters.api >>" = true ] && [ -n "<< parameters.api-cpu-request >>" ] && pulumi config set --path unchained:coinstack.api.cpuRequest << parameters.api-cpu-request >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.cpuLimit << parameters.api-cpu-limit >>
-            [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.cpuRequest << parameters.api-cpu-request >>
+            [ "<< parameters.api >>" = true ] && [ -n "<< parameters.api-memory-request >>" ] && pulumi config set --path unchained:coinstack.api.memoryRequest << parameters.api-memory-request >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.memoryLimit << parameters.api-memory-limit >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.replicas << parameters.api-replicas >>
             [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:coinstack.statefulService.backup.count << parameters.stateful-service-backup-count >>
