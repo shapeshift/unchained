@@ -59,8 +59,8 @@ export function createCoinService(args: CoinServiceArgs, assetName: string): Ser
     env,
     resources: {
       limits: {
-        ...(args.cpuLimit && { cpu: args.cpuLimit }),
-        ...(args.memoryLimit && { memory: args.memoryLimit }),
+        cpu: args.cpuLimit,
+        memory: args.memoryLimit,
       },
       requests: {
         ...(args.cpuRequest && { cpu: args.cpuRequest }),
