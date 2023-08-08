@@ -63,8 +63,12 @@ aliases:
       type: string
     api-cpu-request:
       type: string
+      default: ""
     api-memory-limit:
       type: string
+    api-memory-request:
+      type: string
+      default: ""
     api-replicas:
       type: integer
     stateful-service-replicas:
@@ -155,7 +159,7 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 300m
     api-cpu-request: 150m
-    api-cpu-threshold: 50
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
     stateful-service-replicas: 2
@@ -196,7 +200,7 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 300m
     api-cpu-request: 150m
-    api-cpu-threshold: 50
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
     stateful-service-replicas: 2
@@ -244,7 +248,7 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 300m
     api-cpu-request: 150m
-    api-cpu-threshold: 50
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
     stateful-service-replicas: 2
@@ -280,7 +284,7 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 300m
     api-cpu-request: 150m
-    api-cpu-threshold: 50
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
     stateful-service-replicas: 2
@@ -316,7 +320,7 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 300m
     api-cpu-request: 150m
-    api-cpu-threshold: 50
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
     stateful-service-replicas: 2
@@ -357,7 +361,7 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 300m
     api-cpu-request: 150m
-    api-cpu-threshold: 50
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
     stateful-service-replicas: 2
@@ -398,7 +402,7 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 300m
     api-cpu-request: 150m
-    api-cpu-threshold: 50
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
     stateful-service-replicas: 2
@@ -439,7 +443,7 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 300m
     api-cpu-request: 150m
-    api-cpu-threshold: 50
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
     stateful-service-replicas: 2
@@ -480,7 +484,7 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 300m
     api-cpu-request: 150m
-    api-cpu-threshold: 50
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
     stateful-service-replicas: 2
@@ -527,7 +531,7 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 300m
     api-cpu-request: 150m
-    api-cpu-threshold: 50
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
     stateful-service-replicas: 2
@@ -574,7 +578,7 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
     stateful-service-replicas: 2
@@ -617,7 +621,7 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
     stateful-service-replicas: 2
@@ -666,7 +670,7 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 300m
     api-cpu-request: 150m
-    api-cpu-threshold: 50
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
     stateful-service-replicas: 2
@@ -946,8 +950,9 @@ jobs:
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.autoscaling.enabled << parameters.api-autoscaling >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.autoscaling.cpuThreshold << parameters.api-cpu-threshold >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.autoscaling.maxReplicas << parameters.api-max-replicas >>
+            [ "<< parameters.api >>" = true ] && [ -n "<< parameters.api-cpu-request >>" ] && pulumi config set --path unchained:coinstack.api.cpuRequest << parameters.api-cpu-request >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.cpuLimit << parameters.api-cpu-limit >>
-            [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.cpuRequest << parameters.api-cpu-request >>
+            [ "<< parameters.api >>" = true ] && [ -n "<< parameters.api-memory-request >>" ] && pulumi config set --path unchained:coinstack.api.memoryRequest << parameters.api-memory-request >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.memoryLimit << parameters.api-memory-limit >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.replicas << parameters.api-replicas >>
             [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:coinstack.statefulService.backup.count << parameters.stateful-service-backup-count >>
@@ -1019,8 +1024,9 @@ jobs:
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.autoscaling.enabled << parameters.api-autoscaling >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.autoscaling.cpuThreshold << parameters.api-cpu-threshold >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.autoscaling.maxReplicas << parameters.api-max-replicas >>
+            [ "<< parameters.api >>" = true ] && [ -n "<< parameters.api-cpu-request >>" ] && pulumi config set --path unchained:coinstack.api.cpuRequest << parameters.api-cpu-request >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.cpuLimit << parameters.api-cpu-limit >>
-            [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.cpuRequest << parameters.api-cpu-request >>
+            [ "<< parameters.api >>" = true ] && [ -n "<< parameters.api-memory-request >>" ] && pulumi config set --path unchained:coinstack.api.memoryRequest << parameters.api-memory-request >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.memoryLimit << parameters.api-memory-limit >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.replicas << parameters.api-replicas >>
             [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:coinstack.statefulService.backup.count << parameters.stateful-service-backup-count >>
