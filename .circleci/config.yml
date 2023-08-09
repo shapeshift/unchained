@@ -1185,7 +1185,7 @@ workflows:
       - deploy-dependencies:
           name: deploy dependencies
           organization: TAXISTAKE
-          pulumi-command: up -f --yes
+          pulumi-command: up --refresh -f --yes
           requires:
             - lint and test project (persist to workspace)
           <<: *only-develop
