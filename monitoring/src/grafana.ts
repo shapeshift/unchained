@@ -64,7 +64,7 @@ export class Ingress extends pulumi.ComponentResource {
                 {
                   kind: 'Service',
                   name: `${name}-grafana`,
-                  port: 3000,
+                  port: 80,
                   namespace: `${name}-monitoring`,
                 },
               ],

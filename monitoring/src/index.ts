@@ -16,14 +16,17 @@ export = async (): Promise<Outputs> => {
   const outputs: Outputs = {}
   const provider = new k8s.Provider('kube-provider', { kubeconfig })
 
-  new k8s.helm.v3.Chart(
+  // https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
+  new k8s.helm.v3.Release(
     name,
     {
-      // https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
-      repo: 'prometheus-community',
+      name,
       chart: 'kube-prometheus-stack',
-      namespace,
       version: '48.3.1',
+      repositoryOpts: {
+        repo: 'https://prometheus-community.github.io/helm-charts',
+      },
+      namespace,
       values: {
         kubeControllerManager: { enabled: false },
         kubeEtcd: { enabled: false },
@@ -66,23 +69,23 @@ export = async (): Promise<Outputs> => {
           },
           dashboards: {
             default: {
-              overview: { json: readFileSync('./dashboards/overview.json').toJSON() },
+              overview: { json: readFileSync('./dashboards/overview.json').toString() },
             },
           },
-          //'grafana.ini': {
-          //  server: { root_url: `https://monitoring.${additionalDomain ?? domain}` },
-          //  'auth.github': {
-          //    enabled: true,
-          //    allow_sign_up: true,
-          //    scopes: 'user:email,read:org',
-          //    auth_url: 'https://github.com/login/oauth/authorize',
-          //    token_url: 'https://github.com/login/oauth/access_token',
-          //    api_url: 'https://api.github.com/user',
-          //    allowed_organizations: process.env.GITHUB_ORG,
-          //    client_id: process.env.GITHUB_OAUTH_CLIENT_ID,
-          //    client_secret: process.env.GITHUB_OAUTH_SECRET,
-          //  },
-          //},
+          'grafana.ini': {
+            server: { root_url: `https://monitoring.${additionalDomain ?? domain}` },
+            'auth.github': {
+              enabled: true,
+              allow_sign_up: true,
+              scopes: 'user:email,read:org',
+              auth_url: 'https://github.com/login/oauth/authorize',
+              token_url: 'https://github.com/login/oauth/access_token',
+              api_url: 'https://api.github.com/user',
+              allowed_organizations: process.env.GITHUB_ORG,
+              client_id: process.env.GITHUB_OAUTH_CLIENT_ID,
+              client_secret: process.env.GITHUB_OAUTH_SECRET,
+            },
+          },
         },
       },
     },
