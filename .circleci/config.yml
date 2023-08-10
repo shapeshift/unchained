@@ -782,26 +782,6 @@ commands:
             echo aws_access_key_id = $<< parameters.organization >>_AWS_ACCESS_KEY_ID >> ~/.aws/credentials
             echo aws_secret_access_key = $<< parameters.organization >>_AWS_SECRET_ACCESS_KEY >> ~/.aws/credentials
     
-  kube-prometheus-dependencies:
-    description: setup kube-prometheus
-    parameters:
-      organization:
-        type: string
-    steps:
-      - generic-dependencies:
-          organization: <<parameters.organization>>
-      - run:
-          name: Setup Jsonnet
-          working_directory: monitoring/my-kube-prometheus
-          command: |
-            go install github.com/google/go-jsonnet/cmd/jsonnet@latest
-            go install github.com/brancz/gojsontoyaml@latest
-            go install -a github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@latest
-            jb install
-      - run:
-          name: update kubeconfig
-          command: aws eks update-kubeconfig --region $AWS_REGION --name $UNCHAINED_EKS_CLUSTER
-        
   pulumi-dependencies:
     description: set up pulumi dependencies
     parameters:
@@ -1080,67 +1060,6 @@ jobs:
             pulumi config set --path unchained:monitoring.environment monitoring
             pulumi <<parameters.pulumi-command>> --suppress-outputs
 
-  preview-kube-prometheus:
-    description: preview kube-prometheus monitoring stack
-    executor: golang
-    parameters:
-      organization:
-        type: string
-    steps:
-      - setup_remote_docker:
-          version: 20.10.18
-      - attach_workspace:
-          at: ~/
-      - checkout
-      - kube-prometheus-dependencies:
-          organization: <<parameters.organization>>
-      - run:
-          name: setup kube-prometheus
-          working_directory: monitoring/my-kube-prometheus
-          command: |
-            ./build.sh unchained-kube-promstack.jsonnet
-      - run:
-          name: diff CRD
-          working_directory: monitoring/my-kube-prometheus
-          command: |
-            echo "CRD Changes: "
-            kubectl diff -f manifests/setup/ || true #For some reason this returns -1 in CI, no idea works locally
-      - run:
-          name: diff Kube prometheus
-          working_directory: monitoring/my-kube-prometheus
-          command: |
-            echo "Kube prometheus changes: "
-            kubectl diff -f manifests/ || true #For some reason this returns -1 in CI, no idea works locally
-
-
-  deploy-kube-prometheus:
-    description: deploy unchained monitoring stack
-    executor: golang
-    parameters:
-      organization:
-        type: string
-    steps:
-      - setup_remote_docker:
-          version: 20.10.18
-      - attach_workspace:
-          at: ~/
-      - checkout
-      - kube-prometheus-dependencies:
-          organization: <<parameters.organization>>
-      - run:
-          name: setup kube-prometheus
-          working_directory: monitoring/my-kube-prometheus
-          command: |
-            ./build.sh unchained-kube-promstack.jsonnet
-      - run:
-          name: deploy CRD
-          working_directory: monitoring/my-kube-prometheus
-          command: kubectl apply --server-side -f manifests/setup
-      - run:
-          name: deploy Kube prometheus
-          working_directory: monitoring/my-kube-prometheus
-          command: kubectl apply --server-side -f manifests/
-
   lint-and-test:
     description: lint and test project
     machine:
@@ -1185,7 +1104,7 @@ workflows:
       - deploy-dependencies:
           name: deploy dependencies
           organization: TAXISTAKE
-          pulumi-command: up --refresh -f --yes
+          pulumi-command: up -f --yes
           requires:
             - lint and test project (persist to workspace)
           <<: *only-develop
@@ -1324,13 +1243,6 @@ workflows:
             - approve monitoring workflow
           <<: *only-develop
 
-      - preview-kube-prometheus:
-          name: preview monitoring kube-prometheus
-          organization: TAXISTAKE
-          requires:
-            - lint and test project (persist to workplace)
-          <<: *only-develop
-
       - deploy-monitoring-pulumi:
           name: preview monitoring pulumi
           organization: TAXISTAKE
@@ -1343,15 +1255,7 @@ workflows:
           name: approve
           type: approval
           requires:
-            - preview monitoring kube-prometheus
             - preview monitoring pulumi
-          <<: *only-develop
-
-      - deploy-kube-prometheus:
-          name: deploy monitoring kube-prometheus
-          organization: TAXISTAKE
-          requires:
-            - approve
           <<: *only-develop
 
       - deploy-monitoring-pulumi:
