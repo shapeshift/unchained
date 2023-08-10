@@ -5,7 +5,6 @@ export interface deploymentArgs {
   namespace: pulumi.Input<string>
   domain: string
   additionalDomain?: string
-  prometheusCreds: string
 }
 
 export class Ingress extends pulumi.ComponentResource {
@@ -22,7 +21,7 @@ export class Ingress extends pulumi.ComponentResource {
           namespace: args.namespace,
         },
         stringData: {
-          users: args.prometheusCreds,
+          users: process.env.PROMETHEUS_CREDS ?? '',
         },
       },
       { ...opts }
@@ -103,7 +102,7 @@ export class Ingress extends pulumi.ComponentResource {
               services: [
                 {
                   kind: 'Service',
-                  name: `prometheus-k8s`,
+                  name: `${name}-kube-prometheus-prometheus`,
                   port: 9090,
                   namespace: args.namespace,
                 },
