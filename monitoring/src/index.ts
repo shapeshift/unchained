@@ -1,6 +1,5 @@
 import * as k8s from '@pulumi/kubernetes'
 import { getConfig } from './config'
-import * as prometheus from './prometheus'
 import * as grafana from './grafana'
 import { readFileSync } from 'fs'
 
@@ -93,16 +92,6 @@ export = async (): Promise<Outputs> => {
   )
 
   new grafana.Ingress(
-    name,
-    {
-      namespace: namespace,
-      domain: domain,
-      additionalDomain: additionalDomain,
-    },
-    { provider }
-  )
-
-  new prometheus.Ingress(
     name,
     {
       namespace: namespace,

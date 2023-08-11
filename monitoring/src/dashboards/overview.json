@@ -231,7 +231,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"$namespace\",pod=~\".*$coinstack-.*\"}[5m])) by (pod, container) / sum(kube_pod_container_resource_limits{namespace=\"$namespace\",pod=~\".*$coinstack-.*\",resource=\"cpu\"}) by (pod, container) * 100",
+          "expr": "avg(rate(container_cpu_usage_seconds_total{namespace=\"$namespace\",pod=~\".*$coinstack-.*\"}[5m])) by (pod, container) / avg(kube_pod_container_resource_limits{namespace=\"$namespace\",pod=~\".*$coinstack-.*\",resource=\"cpu\"}) by (pod, container) * 100",
           "instant": false,
           "legendFormat": "{{pod}}-{{container}}",
           "range": true,
@@ -403,8 +403,8 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 16,
-        "w": 12,
+        "h": 12,
+        "w": 24,
         "x": 0,
         "y": 33
       },
@@ -447,7 +447,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 49
+        "y": 45
       },
       "id": 32,
       "panels": [
@@ -510,7 +510,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 50
+            "y": 46
           },
           "id": 45,
           "options": {
@@ -606,7 +606,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 50
+            "y": 46
           },
           "id": 46,
           "interval": "1m",
@@ -687,7 +687,7 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 57
+            "y": 53
           },
           "id": 122,
           "options": {
@@ -769,7 +769,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 50
+        "y": 46
       },
       "id": 3,
       "panels": [
@@ -1088,7 +1088,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 51
+        "y": 47
       },
       "id": 47,
       "panels": [
@@ -1407,7 +1407,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 52
+        "y": 48
       },
       "id": 62,
       "panels": [
@@ -1726,7 +1726,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 53
+        "y": 49
       },
       "id": 77,
       "panels": [
@@ -2034,7 +2034,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 54
+        "y": 50
       },
       "id": 80,
       "panels": [
@@ -2353,7 +2353,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 55
+        "y": 51
       },
       "id": 83,
       "panels": [
@@ -2685,7 +2685,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 56
+        "y": 52
       },
       "id": 86,
       "panels": [
@@ -3017,7 +3017,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 57
+        "y": 53
       },
       "id": 89,
       "panels": [
@@ -3336,7 +3336,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 58
+        "y": 54
       },
       "id": 92,
       "panels": [
@@ -3668,7 +3668,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 59
+        "y": 55
       },
       "id": 95,
       "panels": [
@@ -3976,7 +3976,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 60
+        "y": 56
       },
       "id": 98,
       "panels": [
@@ -4308,7 +4308,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 61
+        "y": 57
       },
       "id": 101,
       "panels": [
@@ -4760,7 +4760,7 @@
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
