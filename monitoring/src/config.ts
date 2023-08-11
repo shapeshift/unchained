@@ -10,7 +10,6 @@ export interface LoopConfig {
   config: MonitoringConfig
   namespace: string
   domain: string
-  prometheusCreds: string
   additionalDomain?: string
 }
 
@@ -30,7 +29,6 @@ export const getConfig = async (): Promise<LoopConfig> => {
   const defaultNamespace = (await stackReference.getOutputValue('defaultNamespace')) as string
   const domain = (await stackReference.getOutputValue('rootDomainName')) as string
   const additionalDomain = process.env.ADDITIONAL_ROOT_DOMAIN_NAME
-  const prometheusCreds = process.env.PROMETHEUS_CREDS || ''
 
   const namespace = config.environment ? `${defaultNamespace}-${config.environment}` : defaultNamespace
   if (!namespaces.includes(namespace)) {
@@ -39,5 +37,5 @@ export const getConfig = async (): Promise<LoopConfig> => {
     )
   }
 
-  return { kubeconfig, config, namespace, domain, additionalDomain, prometheusCreds }
+  return { kubeconfig, config, namespace, domain, additionalDomain }
 }
