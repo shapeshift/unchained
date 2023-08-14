@@ -28,6 +28,7 @@ export interface DeployApiArgs {
   deployDependencies?: Input<Array<Resource>>
   namespace: string
   provider: k8s.Provider
+  port?: number
 }
 
 const getbuildAndPushImageArgs = (coinstackType: CoinstackType) => {
@@ -64,6 +65,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
     deployDependencies = [],
     namespace,
     provider,
+    port = 3000,
   } = args
 
   if (config.api === undefined) return
@@ -115,12 +117,26 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
       },
       spec: {
         selector: labels,
-        ports: [{ port: 3000, protocol: 'TCP', name: 'http' }],
+        ports: [{ port, protocol: 'TCP', name: 'http' }],
         type: 'ClusterIP',
       },
     },
     { provider, deleteBeforeReplace: true }
   )
+
+  new k8s.apiextensions.CustomResource(`${name}-service-monitor`, {
+    apiVersion: 'monitoring.coreos.com/v1',
+    kind: 'ServiceMonitor',
+    metadata: {
+      name: `${name}-service-monitor`,
+      namespace,
+      labels,
+    },
+    spec: {
+      selector: { matchLabels: labels },
+      endpoints: [{ port: 'http' }],
+    },
+  })
 
   if (config.rootDomainName) {
     const subdomain = config.environment ? `${config.environment}.api.${assetName}` : `api.${assetName}`
@@ -223,7 +239,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
         {
           name: tier,
           image: imageName,
-          ports: [{ containerPort: 3000, name: 'http' }],
+          ports: [{ containerPort: port, name: 'http' }],
           env: [...secretEnvs(coinstack, sampleEnv)],
           resources: {
             limits: {
@@ -237,14 +253,14 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
             }),
           },
           readinessProbe: {
-            httpGet: { path: '/health', port: 3000 },
+            httpGet: { path: '/health', port },
             initialDelaySeconds: 10,
             periodSeconds: 5,
             failureThreshold: 3,
             successThreshold: 1,
           },
           livenessProbe: {
-            httpGet: { path: '/health', port: 3000 },
+            httpGet: { path: '/health', port },
             initialDelaySeconds: 30,
             periodSeconds: 5,
             failureThreshold: 3,

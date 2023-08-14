@@ -4,7 +4,14 @@ import { join } from 'path'
 import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
 import { Logger } from '@shapeshiftoss/logger'
-import { middleware, ConnectionHandler, Registry, BlockHandler, TransactionHandler } from '@shapeshiftoss/common-api'
+import {
+  middleware,
+  ConnectionHandler,
+  Registry,
+  BlockHandler,
+  TransactionHandler,
+  Prometheus,
+} from '@shapeshiftoss/common-api'
 import { getAddresses, NewBlock, Tx as BlockbookTx, WebsocketClient } from '@shapeshiftoss/blockbook'
 import { utxo } from '@shapeshiftoss/common-api'
 import { service, formatAddress } from './controller'
@@ -20,15 +27,20 @@ const logger = new Logger({
   level: process.env.LOG_LEVEL,
 })
 
+const prometheus = new Prometheus({ coinstack: 'litecoin' })
+
 const app = express()
 
-app.use(json())
-app.use(urlencoded({ extended: true }))
-app.use(cors())
+app.use(json(), urlencoded({ extended: true }), cors(), middleware.requestLogger, middleware.metrics(prometheus))
 
 app.get('/health', async (_, res) =>
   res.json({ status: 'up', network: 'litecoin', connections: wsServer.clients.size })
 )
+
+app.get('/metrics', async (_, res) => {
+  res.setHeader('Content-Type', prometheus.register.contentType)
+  res.send(await prometheus.register.metrics())
+})
 
 const options = {
   customCss: '.swagger-ui .topbar { display: none }',
@@ -48,9 +60,7 @@ app.get('/', async (_, res) => {
   res.redirect('/docs')
 })
 
-app.use(middleware.requestLogger)
-app.use(middleware.errorHandler)
-app.use(middleware.notFoundHandler)
+app.use(middleware.errorHandler, middleware.notFoundHandler)
 
 const blockHandler: BlockHandler<NewBlock, Array<BlockbookTx>> = async (block) => {
   const txs = await service.handleBlock(block.hash)
@@ -68,7 +78,9 @@ const registry = new Registry({ addressFormatter: formatAddress, blockHandler, t
 const server = app.listen(PORT, () => logger.info('Server started'))
 const wsServer = new Server({ server })
 
-wsServer.on('connection', (connection) => ConnectionHandler.start(connection, registry))
+wsServer.on('connection', (connection) => {
+  ConnectionHandler.start(connection, registry, prometheus)
+})
 
 new WebsocketClient(INDEXER_WS_URL, {
   blockHandler: registry.onBlock.bind(registry),

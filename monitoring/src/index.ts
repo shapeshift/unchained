@@ -47,6 +47,7 @@ export = async (): Promise<Outputs> => {
         },
         grafana: {
           adminPassword: process.env.GRAFANA_ADMIN_PASSWORD ?? 'unchained',
+          deploymentStrategy: { type: 'Recreate' },
           persistence: { enabled: true, size: '10Gi', storageClassName: 'ebs-csi-gp2' },
           dashboardProviders: {
             'dashboardProviders.yaml': {

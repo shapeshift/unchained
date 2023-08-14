@@ -1,7 +1,8 @@
-import { NextFunction, Response, Request } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import morgan from 'morgan'
 import { ValidateError } from 'tsoa'
 import { ApiError, NotFoundError } from '.'
+import { Prometheus } from './prometheus'
 
 export function errorHandler(err: Error, req: Request, res: Response, next: NextFunction): Response | void {
   if (err.constructor.name === ValidateError.prototype.constructor.name) {
@@ -47,5 +48,20 @@ export function notFoundHandler(_req: Request, res: Response): void {
 }
 
 export const requestLogger = morgan('short', {
-  skip: (req) => ['/', '/health'].includes(req.url ?? ''),
+  skip: (req, res) => ['/', '/health'].includes(req.url ?? '') || res.statusCode === 404,
 })
+
+export const metrics =
+  (prometheus: Prometheus) =>
+  (req: Request, res: Response, next: NextFunction): void => {
+    const end = prometheus.metrics.httpRequestDurationSeconds.startTimer()
+
+    prometheus.metrics.httpRequestCounter.inc(
+      { method: req.method, route: req.originalUrl ?? req.url, statusCode: res.statusCode },
+      1
+    )
+
+    res.on('finish', () => end({ method: req.method, route: req.originalUrl ?? req.url, statusCode: res.statusCode }))
+
+    next()
+  }

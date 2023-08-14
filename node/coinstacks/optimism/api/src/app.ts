@@ -11,6 +11,7 @@ import {
   AddressFormatter,
   BlockHandler,
   TransactionHandler,
+  Prometheus,
 } from '@shapeshiftoss/common-api'
 import { Tx as BlockbookTx, WebsocketClient, getAddresses, NewBlock } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
@@ -27,13 +28,18 @@ export const logger = new Logger({
   level: process.env.LOG_LEVEL,
 })
 
+const prometheus = new Prometheus({ coinstack: 'optimism' })
+
 const app = express()
 
-app.use(json())
-app.use(urlencoded({ extended: true }))
-app.use(cors())
+app.use(json(), urlencoded({ extended: true }), cors(), middleware.requestLogger, middleware.metrics(prometheus))
 
 app.get('/health', async (_, res) => res.json({ status: 'up', asset: 'optimism', connections: wsServer.clients.size }))
+
+app.get('/metrics', async (_, res) => {
+  res.setHeader('Content-Type', prometheus.register.contentType)
+  res.send(await prometheus.register.metrics())
+})
 
 const options: swaggerUi.SwaggerUiOptions = {
   customCss: '.swagger-ui .topbar { display: none }',
@@ -53,9 +59,7 @@ app.get('/', async (_, res) => {
   res.redirect('/docs')
 })
 
-app.use(middleware.requestLogger)
-app.use(middleware.errorHandler)
-app.use(middleware.notFoundHandler)
+app.use(middleware.errorHandler, middleware.notFoundHandler)
 
 const addressFormatter: AddressFormatter = (address) => evm.formatAddress(address)
 
@@ -77,7 +81,9 @@ const registry = new Registry({ addressFormatter, blockHandler, transactionHandl
 const server = app.listen(PORT, () => logger.info('Server started'))
 const wsServer = new Server({ server })
 
-wsServer.on('connection', (connection) => ConnectionHandler.start(connection, registry))
+wsServer.on('connection', (connection) => {
+  ConnectionHandler.start(connection, registry, prometheus)
+})
 
 new WebsocketClient(INDEXER_WS_URL, {
   blockHandler: [registry.onBlock.bind(registry), gasOracle.onBlock.bind(gasOracle)],
