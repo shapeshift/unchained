@@ -124,19 +124,23 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
     { provider, deleteBeforeReplace: true }
   )
 
-  new k8s.apiextensions.CustomResource(`${name}-service-monitor`, {
-    apiVersion: 'monitoring.coreos.com/v1',
-    kind: 'ServiceMonitor',
-    metadata: {
-      name: `${name}-service-monitor`,
-      namespace,
-      labels,
+  new k8s.apiextensions.CustomResource(
+    `${name}-service-monitor`,
+    {
+      apiVersion: 'monitoring.coreos.com/v1',
+      kind: 'ServiceMonitor',
+      metadata: {
+        name: `${name}-service-monitor`,
+        namespace,
+        labels,
+      },
+      spec: {
+        selector: { matchLabels: labels },
+        endpoints: [{ port: 'http' }],
+      },
     },
-    spec: {
-      selector: { matchLabels: labels },
-      endpoints: [{ port: 'http' }],
-    },
-  })
+    { provider }
+  )
 
   if (config.rootDomainName) {
     const subdomain = config.environment ? `${config.environment}.api.${assetName}` : `api.${assetName}`
