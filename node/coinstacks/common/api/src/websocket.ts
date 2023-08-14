@@ -2,6 +2,7 @@ import WebSocket from 'ws'
 import { v4 } from 'uuid'
 import { Logger } from '@shapeshiftoss/logger'
 import { Registry } from './registry'
+import { Prometheus } from './prometheus'
 
 export interface RequestPayload {
   subscriptionId: string
@@ -40,6 +41,7 @@ export class ConnectionHandler {
 
   private readonly websocket: WebSocket
   private readonly registry: Registry
+  private readonly prometheus: Prometheus
   private readonly routes: Record<Topics, Methods>
   private readonly pingInterval = 10000
 
@@ -48,9 +50,10 @@ export class ConnectionHandler {
 
   private logger = new Logger({ namespace: ['unchained', 'coinstacks', 'common', 'api'], level: process.env.LOG_LEVEL })
 
-  private constructor(websocket: WebSocket, registry: Registry) {
+  private constructor(websocket: WebSocket, registry: Registry, prometheus: Prometheus) {
     this.clientId = v4()
     this.registry = registry
+    this.prometheus = prometheus
     this.routes = {
       txs: {
         subscribe: (subscriptionId: string, data?: TxsTopicData) => this.handleSubscribeTxs(subscriptionId, data),
@@ -70,6 +73,7 @@ export class ConnectionHandler {
       this.close(interval)
     }
     this.websocket.onclose = ({ code, reason }) => {
+      this.prometheus.metrics.websocketCount.dec()
       this.logger.debug({ clientId: this.clientId, code, reason, fn: 'ws.close' }, 'websocket closed')
       this.close(interval)
     }
@@ -78,8 +82,9 @@ export class ConnectionHandler {
     this.websocket.onmessage = (event) => this.onMessage(event)
   }
 
-  static start(websocket: WebSocket, registry: Registry): void {
-    new ConnectionHandler(websocket, registry)
+  static start(websocket: WebSocket, registry: Registry, prometheus: Prometheus): void {
+    prometheus.metrics.websocketCount.inc()
+    new ConnectionHandler(websocket, registry, prometheus)
   }
 
   private heartbeat(): void {
