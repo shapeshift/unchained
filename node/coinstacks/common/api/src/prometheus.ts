@@ -26,7 +26,7 @@ export class Prometheus {
 
   constructor({ coinstack }: PrometheusArgs) {
     this.register = new client.Registry()
-    this.register.setDefaultLabels({ asset: coinstack })
+    this.register.setDefaultLabels({ coinstack })
 
     client.collectDefaultMetrics({ register: this.register })
 

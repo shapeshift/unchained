@@ -74,6 +74,17 @@
                 "to": 99
               },
               "type": "range"
+            },
+            {
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "color": "red",
+                  "index": 3,
+                  "text": "Down"
+                }
+              },
+              "type": "special"
             }
           ],
           "thresholds": {
@@ -160,8 +171,8 @@
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
-            "fillOpacity": 25,
-            "gradientMode": "none",
+            "fillOpacity": 10,
+            "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
@@ -258,8 +269,8 @@
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
-            "fillOpacity": 25,
-            "gradientMode": "none",
+            "fillOpacity": 10,
+            "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
@@ -442,7 +453,7 @@
       "type": "timeseries"
     },
     {
-      "collapsed": true,
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -450,6 +461,592 @@
         "y": 45
       },
       "id": 32,
+      "panels": [],
+      "title": "Avalanche",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 3,
+        "x": 0,
+        "y": 46
+      },
+      "id": 184,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "unchained_ws_client_count{asset=\"avalanche\", namespace=\"$namespace\"}",
+          "instant": false,
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "WS Connection Count",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "custom": {
+            "neutral": 0
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 0,
+                  "text": "Down"
+                },
+                "100": {
+                  "color": "green",
+                  "index": 1,
+                  "text": "Healthy"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "result": {
+                  "color": "orange",
+                  "index": 2,
+                  "text": "Degraded"
+                },
+                "to": 99
+              },
+              "type": "range"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 9,
+        "x": 3,
+        "y": 46
+      },
+      "id": 45,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": false,
+        "text": {}
+      },
+      "pluginVersion": "10.0.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "(kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"avalanche-api-.*\"} / kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"avalanche-api-.*\"}) * 100",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "API",
+          "range": false,
+          "refId": "API"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "(kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=~\"avalanche-sts\"} / kube_statefulset_replicas{namespace=\"$namespace\", statefulset=~\"avalanche-sts\"}) * 100",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "STS",
+          "range": false,
+          "refId": "Coinstack"
+        }
+      ],
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 12,
+        "y": 46
+      },
+      "id": 197,
+      "options": {
+        "legend": {
+          "calcs": ["last", "mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(label_replace(unchained_http_request_count{namespace=\"$namespace\", asset=\"avalanche\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint)",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "{{endpoint}}",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Requests Per Second",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "noValue": "-",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 9,
+        "x": 3,
+        "y": 53
+      },
+      "id": 122,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"avalanche-api-.*\"}",
+          "instant": false,
+          "legendFormat": "Available",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"avalanche-api-.*\"}",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "Total",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=\"avalanche-sts\"}",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "Available",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "kube_statefulset_replicas{namespace=\"$namespace\", statefulset=\"avalanche-sts\"}",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "Total",
+          "range": true,
+          "refId": "D"
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "rgba(50, 172, 45, 0.97)",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 80
+              },
+              {
+                "color": "rgba(245, 54, 54, 0.9)",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 0,
+        "y": 58
+      },
+      "id": 46,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "10.0.3",
+      "targets": [
+        {
+          "datasource": {
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=~\"data-daemon-avalanche-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-avalanche-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-avalanche-sts-0\"})\n* 100)\n",
+          "format": "time_series",
+          "instant": true,
+          "intervalFactor": 1,
+          "legendFormat": "Daemon",
+          "range": false,
+          "refId": "Daemon"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-avalanche-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-avalanche-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-avalanche-sts-0\"})\n* 100)",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "Indexer",
+          "range": true,
+          "refId": "Indexer"
+        }
+      ],
+      "title": "Volume Space Usage",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Seconds",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null+nan",
+                "result": {
+                  "index": 0,
+                  "text": "0"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 12,
+        "y": 58
+      },
+      "id": 210,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.0.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", asset=\"avalanche\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", asset=\"avalanche\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint))",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "{{label_name}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Requests Duration",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 70
+      },
+      "id": 62,
       "panels": [
         {
           "datasource": {
@@ -510,9 +1107,9 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 46
+            "y": 71
           },
-          "id": 45,
+          "id": 75,
           "options": {
             "orientation": "auto",
             "reduceOptions": {
@@ -533,7 +1130,7 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"avalanche-api-.*\"} / kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"avalanche-api-.*\"}) * 100",
+              "expr": "(kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"bnbsmartchain-api-.*\"} / kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"bnbsmartchain-api-.*\"}) * 100",
               "hide": false,
               "instant": true,
               "legendFormat": "API",
@@ -547,7 +1144,7 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=~\"avalanche-sts\"} / kube_statefulset_replicas{namespace=\"$namespace\", statefulset=~\"avalanche-sts\"}) * 100",
+              "expr": "(kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=~\"bnbsmartchain-sts\"} / kube_statefulset_replicas{namespace=\"$namespace\", statefulset=~\"bnbsmartchain-sts\"}) * 100",
               "hide": false,
               "instant": true,
               "legendFormat": "STS",
@@ -606,9 +1203,9 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 46
+            "y": 71
           },
-          "id": 46,
+          "id": 76,
           "interval": "1m",
           "links": [],
           "maxDataPoints": 100,
@@ -630,7 +1227,7 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=~\"data-daemon-avalanche-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-avalanche-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-avalanche-sts-0\"})\n* 100)\n",
+              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=~\"data-daemon-bnbsmartchain-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-bnbsmartchain-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-bnbsmartchain-sts-0\"})\n* 100)\n",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -644,7 +1241,7 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-avalanche-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-avalanche-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-avalanche-sts-0\"})\n* 100)",
+              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bnbsmartchain-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bnbsmartchain-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bnbsmartchain-sts-0\"})\n* 100)",
               "hide": false,
               "instant": false,
               "legendFormat": "Indexer",
@@ -687,9 +1284,9 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 53
+            "y": 78
           },
-          "id": 122,
+          "id": 137,
           "options": {
             "colorMode": "none",
             "graphMode": "none",
@@ -711,7 +1308,7 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"avalanche-api-.*\"}",
+              "expr": "kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"bnbsmartchain-api-.*\"}",
               "instant": false,
               "legendFormat": "Available",
               "range": true,
@@ -723,7 +1320,7 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"avalanche-api-.*\"}",
+              "expr": "kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"bnbsmartchain-api-.*\"}",
               "hide": false,
               "instant": false,
               "legendFormat": "Total",
@@ -736,7 +1333,7 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=\"avalanche-sts\"}",
+              "expr": "kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=\"bnbsmartchain-sts\"}",
               "hide": false,
               "instant": false,
               "legendFormat": "Available",
@@ -749,7 +1346,7 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "kube_statefulset_replicas{namespace=\"$namespace\", statefulset=\"avalanche-sts\"}",
+              "expr": "kube_statefulset_replicas{namespace=\"$namespace\", statefulset=\"bnbsmartchain-sts\"}",
               "hide": false,
               "instant": false,
               "legendFormat": "Total",
@@ -760,7 +1357,7 @@
           "type": "stat"
         }
       ],
-      "title": "Avalanche",
+      "title": "BNB Smart Chain",
       "type": "row"
     },
     {
@@ -769,7 +1366,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 46
+        "y": 71
       },
       "id": 3,
       "panels": [
@@ -831,7 +1428,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 39
+            "y": 55
           },
           "id": 5,
           "options": {
@@ -926,7 +1523,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 39
+            "y": 55
           },
           "id": 2,
           "interval": "1m",
@@ -1006,7 +1603,7 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 46
+            "y": 62
           },
           "id": 123,
           "options": {
@@ -1088,7 +1685,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 47
+        "y": 72
       },
       "id": 47,
       "panels": [
@@ -1150,7 +1747,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 40
+            "y": 56
           },
           "id": 60,
           "options": {
@@ -1245,7 +1842,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 40
+            "y": 56
           },
           "id": 61,
           "interval": "1m",
@@ -1325,7 +1922,7 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 47
+            "y": 63
           },
           "id": 136,
           "options": {
@@ -1407,326 +2004,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 48
-      },
-      "id": 62,
-      "panels": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "continuous-GrYlRd"
-              },
-              "custom": {
-                "neutral": 0
-              },
-              "mappings": [
-                {
-                  "options": {
-                    "0": {
-                      "color": "red",
-                      "index": 0,
-                      "text": "Down"
-                    },
-                    "100": {
-                      "color": "green",
-                      "index": 1,
-                      "text": "Healthy"
-                    }
-                  },
-                  "type": "value"
-                },
-                {
-                  "options": {
-                    "from": 1,
-                    "result": {
-                      "color": "orange",
-                      "index": 2,
-                      "text": "Degraded"
-                    },
-                    "to": 99
-                  },
-                  "type": "range"
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  }
-                ]
-              },
-              "unit": "percent"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 7,
-            "w": 12,
-            "x": 0,
-            "y": 41
-          },
-          "id": 75,
-          "options": {
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": ["lastNotNull"],
-              "fields": "",
-              "values": false
-            },
-            "showThresholdLabels": false,
-            "showThresholdMarkers": false,
-            "text": {}
-          },
-          "pluginVersion": "10.0.3",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "(kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"bnbsmartchain-api-.*\"} / kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"bnbsmartchain-api-.*\"}) * 100",
-              "hide": false,
-              "instant": true,
-              "legendFormat": "API",
-              "range": false,
-              "refId": "API"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "(kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=~\"bnbsmartchain-sts\"} / kube_statefulset_replicas{namespace=\"$namespace\", statefulset=~\"bnbsmartchain-sts\"}) * 100",
-              "hide": false,
-              "instant": true,
-              "legendFormat": "STS",
-              "range": false,
-              "refId": "Coinstack"
-            }
-          ],
-          "type": "gauge"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "description": "",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [
-                {
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "N/A"
-                    }
-                  },
-                  "type": "special"
-                }
-              ],
-              "max": 100,
-              "min": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "rgba(50, 172, 45, 0.97)"
-                  },
-                  {
-                    "color": "rgba(237, 129, 40, 0.89)",
-                    "value": 80
-                  },
-                  {
-                    "color": "rgba(245, 54, 54, 0.9)",
-                    "value": 90
-                  }
-                ]
-              },
-              "unit": "percent"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 12,
-            "w": 12,
-            "x": 12,
-            "y": 41
-          },
-          "id": 76,
-          "interval": "1m",
-          "links": [],
-          "maxDataPoints": 100,
-          "options": {
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": ["lastNotNull"],
-              "fields": "",
-              "values": false
-            },
-            "showThresholdLabels": false,
-            "showThresholdMarkers": true
-          },
-          "pluginVersion": "10.0.3",
-          "targets": [
-            {
-              "datasource": {
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=~\"data-daemon-bnbsmartchain-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-bnbsmartchain-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-bnbsmartchain-sts-0\"})\n* 100)\n",
-              "format": "time_series",
-              "instant": true,
-              "intervalFactor": 1,
-              "legendFormat": "Daemon",
-              "range": false,
-              "refId": "Daemon"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bnbsmartchain-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bnbsmartchain-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bnbsmartchain-sts-0\"})\n* 100)",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Indexer",
-              "range": true,
-              "refId": "Indexer"
-            }
-          ],
-          "title": "Volume Space Usage",
-          "type": "gauge"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "fixed"
-              },
-              "mappings": [],
-              "noValue": "-",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 12,
-            "x": 0,
-            "y": 48
-          },
-          "id": 137,
-          "options": {
-            "colorMode": "none",
-            "graphMode": "none",
-            "justifyMode": "center",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": ["lastNotNull"],
-              "fields": "",
-              "values": false
-            },
-            "text": {},
-            "textMode": "auto"
-          },
-          "pluginVersion": "10.0.3",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"bnbsmartchain-api-.*\"}",
-              "instant": false,
-              "legendFormat": "Available",
-              "range": true,
-              "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"bnbsmartchain-api-.*\"}",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Total",
-              "range": true,
-              "refId": "B"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=\"bnbsmartchain-sts\"}",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Available",
-              "range": true,
-              "refId": "C"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "kube_statefulset_replicas{namespace=\"$namespace\", statefulset=\"bnbsmartchain-sts\"}",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Total",
-              "range": true,
-              "refId": "D"
-            }
-          ],
-          "type": "stat"
-        }
-      ],
-      "title": "BNB Smart Chain",
-      "type": "row"
-    },
-    {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 49
+        "y": 73
       },
       "id": 77,
       "panels": [
@@ -1788,7 +2066,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 42
+            "y": 58
           },
           "id": 78,
           "options": {
@@ -1883,7 +2161,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 42
+            "y": 58
           },
           "id": 79,
           "interval": "1m",
@@ -1952,7 +2230,7 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 49
+            "y": 65
           },
           "id": 138,
           "options": {
@@ -2034,7 +2312,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 50
+        "y": 74
       },
       "id": 80,
       "panels": [
@@ -2096,7 +2374,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 43
+            "y": 59
           },
           "id": 81,
           "options": {
@@ -2191,7 +2469,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 43
+            "y": 59
           },
           "id": 82,
           "interval": "1m",
@@ -2271,7 +2549,7 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 50
+            "y": 66
           },
           "id": 139,
           "options": {
@@ -2353,7 +2631,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 51
+        "y": 75
       },
       "id": 83,
       "panels": [
@@ -2415,7 +2693,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 44
+            "y": 60
           },
           "id": 84,
           "options": {
@@ -2510,7 +2788,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 44
+            "y": 60
           },
           "id": 85,
           "interval": "1m",
@@ -2603,7 +2881,7 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 51
+            "y": 67
           },
           "id": 140,
           "options": {
@@ -2685,7 +2963,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 52
+        "y": 76
       },
       "id": 86,
       "panels": [
@@ -2735,7 +3013,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               },
@@ -2747,7 +3026,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 45
+            "y": 77
           },
           "id": 87,
           "options": {
@@ -2822,7 +3101,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)"
+                    "color": "rgba(50, 172, 45, 0.97)",
+                    "value": null
                   },
                   {
                     "color": "rgba(237, 129, 40, 0.89)",
@@ -2842,7 +3122,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 45
+            "y": 77
           },
           "id": 88,
           "interval": "1m",
@@ -2920,7 +3200,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -2935,7 +3216,7 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 52
+            "y": 84
           },
           "id": 141,
           "options": {
@@ -3017,7 +3298,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 53
+        "y": 77
       },
       "id": 89,
       "panels": [
@@ -3079,7 +3360,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 46
+            "y": 62
           },
           "id": 90,
           "options": {
@@ -3174,7 +3455,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 46
+            "y": 62
           },
           "id": 91,
           "interval": "1m",
@@ -3254,7 +3535,7 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 53
+            "y": 69
           },
           "id": 142,
           "options": {
@@ -3336,7 +3617,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 54
+        "y": 78
       },
       "id": 92,
       "panels": [
@@ -3398,7 +3679,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 47
+            "y": 63
           },
           "id": 93,
           "options": {
@@ -3493,7 +3774,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 47
+            "y": 63
           },
           "id": 94,
           "interval": "1m",
@@ -3586,7 +3867,7 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 54
+            "y": 70
           },
           "id": 143,
           "options": {
@@ -3668,7 +3949,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 55
+        "y": 79
       },
       "id": 95,
       "panels": [
@@ -3730,7 +4011,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 48
+            "y": 64
           },
           "id": 96,
           "options": {
@@ -3825,7 +4106,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 48
+            "y": 64
           },
           "id": 97,
           "interval": "1m",
@@ -3894,7 +4175,7 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 55
+            "y": 71
           },
           "id": 121,
           "options": {
@@ -3976,7 +4257,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 56
+        "y": 80
       },
       "id": 98,
       "panels": [
@@ -4038,7 +4319,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 49
+            "y": 65
           },
           "id": 99,
           "options": {
@@ -4133,7 +4414,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 49
+            "y": 65
           },
           "id": 100,
           "interval": "1m",
@@ -4226,7 +4507,7 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 56
+            "y": 72
           },
           "id": 117,
           "options": {
@@ -4308,7 +4589,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 57
+        "y": 81
       },
       "id": 101,
       "panels": [
@@ -4370,7 +4651,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 50
+            "y": 66
           },
           "id": 102,
           "options": {
@@ -4465,7 +4746,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 50
+            "y": 66
           },
           "id": 103,
           "interval": "1m",
@@ -4558,7 +4839,7 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 57
+            "y": 73
           },
           "id": 144,
           "options": {
@@ -4635,7 +4916,7 @@
       "type": "row"
     }
   ],
-  "refresh": "",
+  "refresh": "5s",
   "schemaVersion": 38,
   "style": "dark",
   "tags": [],
@@ -4644,8 +4925,8 @@
       {
         "current": {
           "selected": true,
-          "text": "unchained",
-          "value": "unchained"
+          "text": "unchained-dev",
+          "value": "unchained-dev"
         },
         "hide": 0,
         "includeAll": false,
@@ -4654,12 +4935,12 @@
         "name": "namespace",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "unchained",
             "value": "unchained"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "unchained-dev",
             "value": "unchained-dev"
           }
@@ -4760,13 +5041,13 @@
     ]
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "General Overview",
   "uid": "a579a982-6ac3-4779-a90c-31deb123c4f8",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }

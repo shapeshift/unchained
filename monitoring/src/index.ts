@@ -31,8 +31,10 @@ export = async (): Promise<Outputs> => {
         kubeEtcd: { enabled: false },
         kubeScheduler: { enabled: false },
         alertManager: { enabled: false },
+        commonLabels: { app: name },
         prometheus: {
           prometheusSpec: {
+            serviceMonitorSelector: { app: name },
             retention: '60d',
             storageSpec: {
               volumeClaimTemplate: {

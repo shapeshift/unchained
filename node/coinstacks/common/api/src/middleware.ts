@@ -48,7 +48,7 @@ export function notFoundHandler(_req: Request, res: Response): void {
 }
 
 export const requestLogger = morgan('short', {
-  skip: (req, res) => ['/', '/health'].includes(req.url ?? '') || res.statusCode === 404,
+  skip: (req, res) => !req.url?.startsWith('/api/v1') || res.statusCode === 404,
 })
 
 export const metrics =
@@ -56,12 +56,14 @@ export const metrics =
   (req: Request, res: Response, next: NextFunction): void => {
     const end = prometheus.metrics.httpRequestDurationSeconds.startTimer()
 
-    prometheus.metrics.httpRequestCounter.inc(
-      { method: req.method, route: req.originalUrl ?? req.url, statusCode: res.statusCode },
-      1
-    )
+    res.on('finish', () => {
+      prometheus.metrics.httpRequestCounter.inc(
+        { method: req.method, route: req.originalUrl ?? req.url, statusCode: res.statusCode },
+        1
+      )
 
-    res.on('finish', () => end({ method: req.method, route: req.originalUrl ?? req.url, statusCode: res.statusCode }))
+      end({ method: req.method, route: req.originalUrl ?? req.url, statusCode: res.statusCode })
+    })
 
     next()
   }
