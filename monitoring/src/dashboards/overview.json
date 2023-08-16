@@ -453,7 +453,7 @@
       "type": "timeseries"
     },
     {
-      "collapsed": false,
+      "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -461,593 +461,66 @@
         "y": 45
       },
       "id": 32,
-      "panels": [],
-      "title": "Avalanche",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "text",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 3,
-        "x": 0,
-        "y": 46
-      },
-      "id": 184,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": ["lastNotNull"],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "10.0.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "unchained_ws_client_count{asset=\"avalanche\", namespace=\"$namespace\"}",
-          "instant": false,
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "WS Connection Count",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "continuous-GrYlRd"
-          },
-          "custom": {
-            "neutral": 0
-          },
-          "mappings": [
-            {
-              "options": {
-                "0": {
-                  "color": "red",
-                  "index": 0,
-                  "text": "Down"
-                },
-                "100": {
-                  "color": "green",
-                  "index": 1,
-                  "text": "Healthy"
-                }
-              },
-              "type": "value"
-            },
-            {
-              "options": {
-                "from": 1,
-                "result": {
-                  "color": "orange",
-                  "index": 2,
-                  "text": "Degraded"
-                },
-                "to": 99
-              },
-              "type": "range"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "percent"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 9,
-        "x": 3,
-        "y": 46
-      },
-      "id": 45,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": ["lastNotNull"],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": false,
-        "text": {}
-      },
-      "pluginVersion": "10.0.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "(kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"avalanche-api-.*\"} / kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"avalanche-api-.*\"}) * 100",
-          "hide": false,
-          "instant": true,
-          "legendFormat": "API",
-          "range": false,
-          "refId": "API"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "(kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=~\"avalanche-sts\"} / kube_statefulset_replicas{namespace=\"$namespace\", statefulset=~\"avalanche-sts\"}) * 100",
-          "hide": false,
-          "instant": true,
-          "legendFormat": "STS",
-          "range": false,
-          "refId": "Coinstack"
-        }
-      ],
-      "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 12,
-        "x": 12,
-        "y": 46
-      },
-      "id": 197,
-      "options": {
-        "legend": {
-          "calcs": ["last", "mean", "max"],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "sum(rate(label_replace(unchained_http_request_count{namespace=\"$namespace\", asset=\"avalanche\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint)",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "{{endpoint}}",
-          "range": true,
-          "refId": "B"
-        }
-      ],
-      "title": "Requests Per Second",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "fixed"
-          },
-          "mappings": [],
-          "noValue": "-",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 9,
-        "x": 3,
-        "y": 53
-      },
-      "id": 122,
-      "options": {
-        "colorMode": "none",
-        "graphMode": "area",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": ["lastNotNull"],
-          "fields": "",
-          "values": false
-        },
-        "text": {},
-        "textMode": "auto"
-      },
-      "pluginVersion": "10.0.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"avalanche-api-.*\"}",
-          "instant": false,
-          "legendFormat": "Available",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"avalanche-api-.*\"}",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "Total",
-          "range": true,
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=\"avalanche-sts\"}",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "Available",
-          "range": true,
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "kube_statefulset_replicas{namespace=\"$namespace\", statefulset=\"avalanche-sts\"}",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "Total",
-          "range": true,
-          "refId": "D"
-        }
-      ],
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "N/A"
-                }
-              },
-              "type": "special"
-            }
-          ],
-          "max": 100,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "rgba(50, 172, 45, 0.97)",
-                "value": null
-              },
-              {
-                "color": "rgba(237, 129, 40, 0.89)",
-                "value": 80
-              },
-              {
-                "color": "rgba(245, 54, 54, 0.9)",
-                "value": 90
-              }
-            ]
-          },
-          "unit": "percent"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 12,
-        "x": 0,
-        "y": 58
-      },
-      "id": 46,
-      "interval": "1m",
-      "links": [],
-      "maxDataPoints": 100,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": ["lastNotNull"],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
-      },
-      "pluginVersion": "10.0.3",
-      "targets": [
-        {
-          "datasource": {
-            "uid": "$datasource"
-          },
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=~\"data-daemon-avalanche-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-avalanche-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-avalanche-sts-0\"})\n* 100)\n",
-          "format": "time_series",
-          "instant": true,
-          "intervalFactor": 1,
-          "legendFormat": "Daemon",
-          "range": false,
-          "refId": "Daemon"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-avalanche-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-avalanche-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-avalanche-sts-0\"})\n* 100)",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "Indexer",
-          "range": true,
-          "refId": "Indexer"
-        }
-      ],
-      "title": "Volume Space Usage",
-      "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "Seconds",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
-            "lineStyle": {
-              "fill": "solid"
-            },
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [
-            {
-              "options": {
-                "match": "null+nan",
-                "result": {
-                  "index": 0,
-                  "text": "0"
-                }
-              },
-              "type": "special"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 12,
-        "x": 12,
-        "y": 58
-      },
-      "id": 210,
-      "options": {
-        "legend": {
-          "calcs": ["mean", "max"],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "10.0.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", asset=\"avalanche\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", asset=\"avalanche\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint))",
-          "format": "time_series",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "{{label_name}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Requests Duration",
-      "type": "timeseries"
-    },
-    {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 70
-      },
-      "id": 62,
       "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 3,
+            "x": 0,
+            "y": 46
+          },
+          "id": 184,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(unchained_ws_client_count{coinstack=\"avalanche\", namespace=\"$namespace\"})",
+              "instant": false,
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "WS Connection Count",
+          "type": "stat"
+        },
         {
           "datasource": {
             "type": "prometheus",
@@ -1105,9 +578,597 @@
           },
           "gridPos": {
             "h": 7,
+            "w": 9,
+            "x": 3,
+            "y": 46
+          },
+          "id": 45,
+          "options": {
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": false,
+            "text": {}
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"avalanche-api-.*\"} / kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"avalanche-api-.*\"}) * 100",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "API",
+              "range": false,
+              "refId": "API"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=~\"avalanche-sts\"} / kube_statefulset_replicas{namespace=\"$namespace\", statefulset=~\"avalanche-sts\"}) * 100",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "STS",
+              "range": false,
+              "refId": "Coinstack"
+            }
+          ],
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 12,
+            "y": 46
+          },
+          "id": 197,
+          "options": {
+            "legend": {
+              "calcs": ["last", "mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(rate(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"avalanche\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "Requests Per Second",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "fixed"
+              },
+              "mappings": [],
+              "noValue": "-",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 9,
+            "x": 3,
+            "y": 53
+          },
+          "id": 122,
+          "options": {
+            "colorMode": "none",
+            "graphMode": "area",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"avalanche-api-.*\"}",
+              "instant": false,
+              "legendFormat": "Available",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"avalanche-api-.*\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Total",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=\"avalanche-sts\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Available",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_statefulset_replicas{namespace=\"$namespace\", statefulset=\"avalanche-sts\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Total",
+              "range": true,
+              "refId": "D"
+            }
+          ],
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "rgba(50, 172, 45, 0.97)",
+                    "value": null
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 80
+                  },
+                  {
+                    "color": "rgba(245, 54, 54, 0.9)",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
             "w": 12,
             "x": 0,
-            "y": 71
+            "y": 58
+          },
+          "id": 46,
+          "interval": "1m",
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=~\"data-daemon-avalanche-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-avalanche-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-avalanche-sts-0\"})\n* 100)\n",
+              "format": "time_series",
+              "instant": true,
+              "intervalFactor": 1,
+              "legendFormat": "Daemon",
+              "range": false,
+              "refId": "Daemon"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-avalanche-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-avalanche-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-avalanche-sts-0\"})\n* 100)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Indexer",
+              "range": true,
+              "refId": "Indexer"
+            }
+          ],
+          "title": "Volume Space Usage",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "Seconds",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 12,
+            "y": 58
+          },
+          "id": 225,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"avalanche\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"avalanche\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Requests Duration",
+          "type": "timeseries"
+        }
+      ],
+      "title": "Avalanche",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 46
+      },
+      "id": 62,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 3,
+            "x": 0,
+            "y": 47
+          },
+          "id": 223,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(unchained_ws_client_count{coinstack=\"bnbsmartchain\", namespace=\"$namespace\"})",
+              "hide": false,
+              "instant": false,
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "WS Connection Count",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "continuous-GrYlRd"
+              },
+              "custom": {
+                "neutral": 0
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "color": "red",
+                      "index": 0,
+                      "text": "Down"
+                    },
+                    "100": {
+                      "color": "green",
+                      "index": 1,
+                      "text": "Healthy"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "from": 1,
+                    "result": {
+                      "color": "orange",
+                      "index": 2,
+                      "text": "Degraded"
+                    },
+                    "to": 99
+                  },
+                  "type": "range"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 9,
+            "x": 3,
+            "y": 47
           },
           "id": 75,
           "options": {
@@ -1159,43 +1220,56 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "",
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "thresholds"
+                "mode": "palette-classic"
               },
-              "mappings": [
-                {
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "N/A"
-                    }
-                  },
-                  "type": "special"
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
                 }
-              ],
-              "max": 100,
-              "min": 0,
+              },
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)",
+                    "color": "green",
                     "value": null
                   },
                   {
-                    "color": "rgba(237, 129, 40, 0.89)",
+                    "color": "red",
                     "value": 80
-                  },
-                  {
-                    "color": "rgba(245, 54, 54, 0.9)",
-                    "value": 90
                   }
                 ]
               },
-              "unit": "percent"
+              "unit": "none"
             },
             "overrides": []
           },
@@ -1203,54 +1277,38 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 71
+            "y": 47
           },
-          "id": 76,
-          "interval": "1m",
-          "links": [],
-          "maxDataPoints": 100,
+          "id": 224,
           "options": {
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": ["lastNotNull"],
-              "fields": "",
-              "values": false
+            "legend": {
+              "calcs": ["last", "mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
             },
-            "showThresholdLabels": false,
-            "showThresholdMarkers": true
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
           },
-          "pluginVersion": "10.0.3",
           "targets": [
-            {
-              "datasource": {
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=~\"data-daemon-bnbsmartchain-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-bnbsmartchain-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-bnbsmartchain-sts-0\"})\n* 100)\n",
-              "format": "time_series",
-              "instant": true,
-              "intervalFactor": 1,
-              "legendFormat": "Daemon",
-              "range": false,
-              "refId": "Daemon"
-            },
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bnbsmartchain-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bnbsmartchain-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bnbsmartchain-sts-0\"})\n* 100)",
+              "expr": "sum(rate(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint)",
               "hide": false,
               "instant": false,
-              "legendFormat": "Indexer",
+              "legendFormat": "{{endpoint}}",
               "range": true,
-              "refId": "Indexer"
+              "refId": "B"
             }
           ],
-          "title": "Volume Space Usage",
-          "type": "gauge"
+          "title": "Requests Per Second",
+          "type": "timeseries"
         },
         {
           "datasource": {
@@ -1282,14 +1340,14 @@
           },
           "gridPos": {
             "h": 5,
-            "w": 12,
-            "x": 0,
-            "y": 78
+            "w": 9,
+            "x": 3,
+            "y": 54
           },
           "id": 137,
           "options": {
             "colorMode": "none",
-            "graphMode": "none",
+            "graphMode": "area",
             "justifyMode": "center",
             "orientation": "auto",
             "reduceOptions": {
@@ -1355,6 +1413,215 @@
             }
           ],
           "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "rgba(50, 172, 45, 0.97)",
+                    "value": null
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 80
+                  },
+                  {
+                    "color": "rgba(245, 54, 54, 0.9)",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 0,
+            "y": 59
+          },
+          "id": 76,
+          "interval": "1m",
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=~\"data-daemon-bnbsmartchain-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-bnbsmartchain-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-bnbsmartchain-sts-0\"})\n* 100)\n",
+              "format": "time_series",
+              "instant": true,
+              "intervalFactor": 1,
+              "legendFormat": "Daemon",
+              "range": false,
+              "refId": "Daemon"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bnbsmartchain-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bnbsmartchain-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bnbsmartchain-sts-0\"})\n* 100)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Indexer",
+              "range": true,
+              "refId": "Indexer"
+            }
+          ],
+          "title": "Volume Space Usage",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "Seconds",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 12,
+            "y": 59
+          },
+          "id": 210,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Requests Duration",
+          "type": "timeseries"
         }
       ],
       "title": "BNB Smart Chain",
@@ -1366,10 +1633,70 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 71
+        "y": 47
       },
       "id": 3,
       "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 3,
+            "x": 0,
+            "y": 48
+          },
+          "id": 251,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(unchained_ws_client_count{coinstack=\"bitcoin\", namespace=\"$namespace\"})",
+              "hide": false,
+              "instant": false,
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "WS Connection Count",
+          "type": "stat"
+        },
         {
           "datasource": {
             "type": "prometheus",
@@ -1416,7 +1743,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               },
@@ -1426,9 +1754,9 @@
           },
           "gridPos": {
             "h": 7,
-            "w": 12,
-            "x": 0,
-            "y": 55
+            "w": 9,
+            "x": 3,
+            "y": 48
           },
           "id": 5,
           "options": {
@@ -1480,42 +1808,56 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "",
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "thresholds"
+                "mode": "palette-classic"
               },
-              "mappings": [
-                {
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "N/A"
-                    }
-                  },
-                  "type": "special"
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
                 }
-              ],
-              "max": 100,
-              "min": 0,
+              },
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)"
+                    "color": "green",
+                    "value": null
                   },
                   {
-                    "color": "rgba(237, 129, 40, 0.89)",
+                    "color": "red",
                     "value": 80
-                  },
-                  {
-                    "color": "rgba(245, 54, 54, 0.9)",
-                    "value": 90
                   }
                 ]
               },
-              "unit": "percent"
+              "unit": "none"
             },
             "overrides": []
           },
@@ -1523,54 +1865,38 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 55
+            "y": 48
           },
-          "id": 2,
-          "interval": "1m",
-          "links": [],
-          "maxDataPoints": 100,
+          "id": 252,
           "options": {
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": ["lastNotNull"],
-              "fields": "",
-              "values": false
+            "legend": {
+              "calcs": ["last", "mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
             },
-            "showThresholdLabels": false,
-            "showThresholdMarkers": true
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
           },
-          "pluginVersion": "10.0.3",
           "targets": [
-            {
-              "datasource": {
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=~\"data-daemon-bitcoin-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-bitcoin-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-bitcoin-sts-0\"})\n* 100)\n",
-              "format": "time_series",
-              "instant": true,
-              "intervalFactor": 1,
-              "legendFormat": "Daemon",
-              "range": false,
-              "refId": "Daemon"
-            },
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bitcoin-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bitcoin-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bitcoin-sts-0\"})\n* 100)",
+              "expr": "sum(rate(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"bitcoin\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.pub.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint)",
               "hide": false,
               "instant": false,
-              "legendFormat": "Indexer",
+              "legendFormat": "{{endpoint}}",
               "range": true,
-              "refId": "Indexer"
+              "refId": "B"
             }
           ],
-          "title": "Volume Space Usage",
-          "type": "gauge"
+          "title": "Requests Per Second",
+          "type": "timeseries"
         },
         {
           "datasource": {
@@ -1588,7 +1914,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -1601,14 +1928,14 @@
           },
           "gridPos": {
             "h": 5,
-            "w": 12,
-            "x": 0,
-            "y": 62
+            "w": 9,
+            "x": 3,
+            "y": 55
           },
           "id": 123,
           "options": {
             "colorMode": "none",
-            "graphMode": "none",
+            "graphMode": "area",
             "justifyMode": "center",
             "orientation": "auto",
             "reduceOptions": {
@@ -1674,6 +2001,215 @@
             }
           ],
           "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "rgba(50, 172, 45, 0.97)",
+                    "value": null
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 80
+                  },
+                  {
+                    "color": "rgba(245, 54, 54, 0.9)",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 0,
+            "y": 60
+          },
+          "id": 2,
+          "interval": "1m",
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=~\"data-daemon-bitcoin-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-bitcoin-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-bitcoin-sts-0\"})\n* 100)\n",
+              "format": "time_series",
+              "instant": true,
+              "intervalFactor": 1,
+              "legendFormat": "Daemon",
+              "range": false,
+              "refId": "Daemon"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bitcoin-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bitcoin-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bitcoin-sts-0\"})\n* 100)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Indexer",
+              "range": true,
+              "refId": "Indexer"
+            }
+          ],
+          "title": "Volume Space Usage",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "Seconds",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 12,
+            "y": 60
+          },
+          "id": 253,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"bitcoin\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.pub.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"bitcoin\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.pub.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Requests Duration",
+          "type": "timeseries"
         }
       ],
       "title": "Bitcoin",
@@ -1685,10 +2221,70 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 72
+        "y": 48
       },
       "id": 47,
       "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 3,
+            "x": 0,
+            "y": 49
+          },
+          "id": 254,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(unchained_ws_client_count{coinstack=\"bitcoincash\", namespace=\"$namespace\"})",
+              "hide": false,
+              "instant": false,
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "WS Connection Count",
+          "type": "stat"
+        },
         {
           "datasource": {
             "type": "prometheus",
@@ -1735,7 +2331,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               },
@@ -1745,9 +2342,9 @@
           },
           "gridPos": {
             "h": 7,
-            "w": 12,
-            "x": 0,
-            "y": 56
+            "w": 9,
+            "x": 3,
+            "y": 49
           },
           "id": 60,
           "options": {
@@ -1799,42 +2396,56 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "",
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "thresholds"
+                "mode": "palette-classic"
               },
-              "mappings": [
-                {
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "N/A"
-                    }
-                  },
-                  "type": "special"
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
                 }
-              ],
-              "max": 100,
-              "min": 0,
+              },
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)"
+                    "color": "green",
+                    "value": null
                   },
                   {
-                    "color": "rgba(237, 129, 40, 0.89)",
+                    "color": "red",
                     "value": 80
-                  },
-                  {
-                    "color": "rgba(245, 54, 54, 0.9)",
-                    "value": 90
                   }
                 ]
               },
-              "unit": "percent"
+              "unit": "none"
             },
             "overrides": []
           },
@@ -1842,54 +2453,38 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 56
+            "y": 49
           },
-          "id": 61,
-          "interval": "1m",
-          "links": [],
-          "maxDataPoints": 100,
+          "id": 255,
           "options": {
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": ["lastNotNull"],
-              "fields": "",
-              "values": false
+            "legend": {
+              "calcs": ["last", "mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
             },
-            "showThresholdLabels": false,
-            "showThresholdMarkers": true
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
           },
-          "pluginVersion": "10.0.3",
           "targets": [
-            {
-              "datasource": {
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=~\"data-daemon-bitcoincash-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-bitcoincash-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-bitcoincash-sts-0\"})\n* 100)\n",
-              "format": "time_series",
-              "instant": true,
-              "intervalFactor": 1,
-              "legendFormat": "Daemon",
-              "range": false,
-              "refId": "Daemon"
-            },
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bitcoincash-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bitcoincash-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bitcoincash-sts-0\"})\n* 100)",
+              "expr": "sum(rate(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"bitcoincash\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.pub.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint)",
               "hide": false,
               "instant": false,
-              "legendFormat": "Indexer",
+              "legendFormat": "{{endpoint}}",
               "range": true,
-              "refId": "Indexer"
+              "refId": "B"
             }
           ],
-          "title": "Volume Space Usage",
-          "type": "gauge"
+          "title": "Requests Per Second",
+          "type": "timeseries"
         },
         {
           "datasource": {
@@ -1907,7 +2502,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -1920,14 +2516,14 @@
           },
           "gridPos": {
             "h": 5,
-            "w": 12,
-            "x": 0,
-            "y": 63
+            "w": 9,
+            "x": 3,
+            "y": 56
           },
           "id": 136,
           "options": {
             "colorMode": "none",
-            "graphMode": "none",
+            "graphMode": "area",
             "justifyMode": "center",
             "orientation": "auto",
             "reduceOptions": {
@@ -1993,6 +2589,215 @@
             }
           ],
           "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "rgba(50, 172, 45, 0.97)",
+                    "value": null
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 80
+                  },
+                  {
+                    "color": "rgba(245, 54, 54, 0.9)",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 0,
+            "y": 61
+          },
+          "id": 61,
+          "interval": "1m",
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=~\"data-daemon-bitcoincash-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-bitcoincash-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-bitcoincash-sts-0\"})\n* 100)\n",
+              "format": "time_series",
+              "instant": true,
+              "intervalFactor": 1,
+              "legendFormat": "Daemon",
+              "range": false,
+              "refId": "Daemon"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bitcoincash-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bitcoincash-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bitcoincash-sts-0\"})\n* 100)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Indexer",
+              "range": true,
+              "refId": "Indexer"
+            }
+          ],
+          "title": "Volume Space Usage",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "Seconds",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 12,
+            "y": 61
+          },
+          "id": 256,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"bitcoincash\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.pub.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"bitcoincash\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.pub.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Requests Duration",
+          "type": "timeseries"
         }
       ],
       "title": "Bitcoin Cash",
@@ -2004,7 +2809,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 73
+        "y": 49
       },
       "id": 77,
       "panels": [
@@ -2054,7 +2859,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               },
@@ -2066,7 +2872,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 58
+            "y": 74
           },
           "id": 78,
           "options": {
@@ -2141,7 +2947,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)"
+                    "color": "rgba(50, 172, 45, 0.97)",
+                    "value": null
                   },
                   {
                     "color": "rgba(237, 129, 40, 0.89)",
@@ -2161,7 +2968,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 58
+            "y": 74
           },
           "id": 79,
           "interval": "1m",
@@ -2215,7 +3022,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -2230,7 +3038,7 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 65
+            "y": 81
           },
           "id": 138,
           "options": {
@@ -2312,10 +3120,70 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 74
+        "y": 50
       },
       "id": 80,
       "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 3,
+            "x": 0,
+            "y": 75
+          },
+          "id": 257,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(unchained_ws_client_count{coinstack=\"dogecoin\", namespace=\"$namespace\"})",
+              "hide": false,
+              "instant": false,
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "WS Connection Count",
+          "type": "stat"
+        },
         {
           "datasource": {
             "type": "prometheus",
@@ -2362,7 +3230,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               },
@@ -2372,9 +3241,9 @@
           },
           "gridPos": {
             "h": 7,
-            "w": 12,
-            "x": 0,
-            "y": 59
+            "w": 9,
+            "x": 3,
+            "y": 75
           },
           "id": 81,
           "options": {
@@ -2426,42 +3295,56 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "",
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "thresholds"
+                "mode": "palette-classic"
               },
-              "mappings": [
-                {
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "N/A"
-                    }
-                  },
-                  "type": "special"
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
                 }
-              ],
-              "max": 100,
-              "min": 0,
+              },
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)"
+                    "color": "green",
+                    "value": null
                   },
                   {
-                    "color": "rgba(237, 129, 40, 0.89)",
+                    "color": "red",
                     "value": 80
-                  },
-                  {
-                    "color": "rgba(245, 54, 54, 0.9)",
-                    "value": 90
                   }
                 ]
               },
-              "unit": "percent"
+              "unit": "none"
             },
             "overrides": []
           },
@@ -2469,54 +3352,38 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 59
+            "y": 75
           },
-          "id": 82,
-          "interval": "1m",
-          "links": [],
-          "maxDataPoints": 100,
+          "id": 258,
           "options": {
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": ["lastNotNull"],
-              "fields": "",
-              "values": false
+            "legend": {
+              "calcs": ["last", "mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
             },
-            "showThresholdLabels": false,
-            "showThresholdMarkers": true
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
           },
-          "pluginVersion": "10.0.3",
           "targets": [
-            {
-              "datasource": {
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=~\"data-daemon-dogecoin-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-dogecoin-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-dogecoin-sts-0\"})\n* 100)\n",
-              "format": "time_series",
-              "instant": true,
-              "intervalFactor": 1,
-              "legendFormat": "Daemon",
-              "range": false,
-              "refId": "Daemon"
-            },
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-dogecoin-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-dogecoin-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-dogecoin-sts-0\"})\n* 100)",
+              "expr": "sum(rate(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"dogecoin\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.gub.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint)",
               "hide": false,
               "instant": false,
-              "legendFormat": "Indexer",
+              "legendFormat": "{{endpoint}}",
               "range": true,
-              "refId": "Indexer"
+              "refId": "B"
             }
           ],
-          "title": "Volume Space Usage",
-          "type": "gauge"
+          "title": "Requests Per Second",
+          "type": "timeseries"
         },
         {
           "datasource": {
@@ -2534,7 +3401,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -2547,14 +3415,14 @@
           },
           "gridPos": {
             "h": 5,
-            "w": 12,
-            "x": 0,
-            "y": 66
+            "w": 9,
+            "x": 3,
+            "y": 82
           },
           "id": 139,
           "options": {
             "colorMode": "none",
-            "graphMode": "none",
+            "graphMode": "area",
             "justifyMode": "center",
             "orientation": "auto",
             "reduceOptions": {
@@ -2620,6 +3488,215 @@
             }
           ],
           "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "rgba(50, 172, 45, 0.97)",
+                    "value": null
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 80
+                  },
+                  {
+                    "color": "rgba(245, 54, 54, 0.9)",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 0,
+            "y": 87
+          },
+          "id": 82,
+          "interval": "1m",
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=~\"data-daemon-dogecoin-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-dogecoin-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-dogecoin-sts-0\"})\n* 100)\n",
+              "format": "time_series",
+              "instant": true,
+              "intervalFactor": 1,
+              "legendFormat": "Daemon",
+              "range": false,
+              "refId": "Daemon"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-dogecoin-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-dogecoin-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-dogecoin-sts-0\"})\n* 100)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Indexer",
+              "range": true,
+              "refId": "Indexer"
+            }
+          ],
+          "title": "Volume Space Usage",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "Seconds",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 12,
+            "y": 87
+          },
+          "id": 259,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"dogecoin\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.gub.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"dogecoin\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.gub.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Requests Duration",
+          "type": "timeseries"
         }
       ],
       "title": "Dogecoin",
@@ -2631,10 +3708,70 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 75
+        "y": 51
       },
       "id": 83,
       "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 3,
+            "x": 0,
+            "y": 76
+          },
+          "id": 239,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(unchained_ws_client_count{coinstack=\"bnbsmartchain\", namespace=\"$namespace\"})",
+              "hide": false,
+              "instant": false,
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "WS Connection Count",
+          "type": "stat"
+        },
         {
           "datasource": {
             "type": "prometheus",
@@ -2681,7 +3818,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               },
@@ -2691,9 +3829,9 @@
           },
           "gridPos": {
             "h": 7,
-            "w": 12,
-            "x": 0,
-            "y": 60
+            "w": 9,
+            "x": 3,
+            "y": 76
           },
           "id": 84,
           "options": {
@@ -2745,6 +3883,205 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 12,
+            "y": 76
+          },
+          "id": 240,
+          "options": {
+            "legend": {
+              "calcs": ["last", "mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(rate(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"ethereum\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "Requests Per Second",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "fixed"
+              },
+              "mappings": [],
+              "noValue": "-",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 9,
+            "x": 3,
+            "y": 83
+          },
+          "id": 140,
+          "options": {
+            "colorMode": "none",
+            "graphMode": "area",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"ethereum-api-.*\"}",
+              "instant": false,
+              "legendFormat": "Available",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"ethereum-api-.*\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Total",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=\"ethereum-sts\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Available",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_statefulset_replicas{namespace=\"$namespace\", statefulset=\"ethereum-sts\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Total",
+              "range": true,
+              "refId": "D"
+            }
+          ],
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "description": "",
           "fieldConfig": {
             "defaults": {
@@ -2768,7 +4105,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)"
+                    "color": "rgba(50, 172, 45, 0.97)",
+                    "value": null
                   },
                   {
                     "color": "rgba(237, 129, 40, 0.89)",
@@ -2787,8 +4125,8 @@
           "gridPos": {
             "h": 12,
             "w": 12,
-            "x": 12,
-            "y": 60
+            "x": 0,
+            "y": 88
           },
           "id": 85,
           "interval": "1m",
@@ -2858,15 +4196,59 @@
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "fixed"
+                "mode": "palette-classic"
               },
-              "mappings": [],
-              "noValue": "-",
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "Seconds",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -2878,24 +4260,23 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
+            "h": 12,
             "w": 12,
-            "x": 0,
-            "y": 67
+            "x": 12,
+            "y": 88
           },
-          "id": 140,
+          "id": 241,
           "options": {
-            "colorMode": "none",
-            "graphMode": "none",
-            "justifyMode": "center",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": ["lastNotNull"],
-              "fields": "",
-              "values": false
+            "legend": {
+              "calcs": ["mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
             },
-            "text": {},
-            "textMode": "auto"
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
           },
           "pluginVersion": "10.0.3",
           "targets": [
@@ -2905,53 +4286,18 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"ethereum-api-.*\"}",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"ethereum\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"ethereum\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
               "instant": false,
-              "legendFormat": "Available",
+              "legendFormat": "{{label_name}}",
               "range": true,
               "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"ethereum-api-.*\"}",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Total",
-              "range": true,
-              "refId": "B"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=\"ethereum-sts\"}",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Available",
-              "range": true,
-              "refId": "C"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "kube_statefulset_replicas{namespace=\"$namespace\", statefulset=\"ethereum-sts\"}",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Total",
-              "range": true,
-              "refId": "D"
             }
           ],
-          "type": "stat"
+          "title": "Requests Duration",
+          "type": "timeseries"
         }
       ],
       "title": "Ethereum",
@@ -2963,10 +4309,70 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 76
+        "y": 52
       },
       "id": 86,
       "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 3,
+            "x": 0,
+            "y": 77
+          },
+          "id": 242,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(unchained_ws_client_count{coinstack=\"gnosis\", namespace=\"$namespace\"})",
+              "hide": false,
+              "instant": false,
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "WS Connection Count",
+          "type": "stat"
+        },
         {
           "datasource": {
             "type": "prometheus",
@@ -3024,8 +4430,8 @@
           },
           "gridPos": {
             "h": 7,
-            "w": 12,
-            "x": 0,
+            "w": 9,
+            "x": 3,
             "y": 77
           },
           "id": 87,
@@ -3078,6 +4484,205 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 12,
+            "y": 77
+          },
+          "id": 243,
+          "options": {
+            "legend": {
+              "calcs": ["last", "mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(rate(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"gnosis\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "Requests Per Second",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "fixed"
+              },
+              "mappings": [],
+              "noValue": "-",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 9,
+            "x": 3,
+            "y": 84
+          },
+          "id": 141,
+          "options": {
+            "colorMode": "none",
+            "graphMode": "area",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"gnosis-api-.*\"}",
+              "instant": false,
+              "legendFormat": "Available",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"gnosis-api-.*\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Total",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=\"gnosis-sts\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Available",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_statefulset_replicas{namespace=\"$namespace\", statefulset=\"gnosis-sts\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Total",
+              "range": true,
+              "refId": "D"
+            }
+          ],
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "description": "",
           "fieldConfig": {
             "defaults": {
@@ -3121,8 +4726,8 @@
           "gridPos": {
             "h": 12,
             "w": 12,
-            "x": 12,
-            "y": 77
+            "x": 0,
+            "y": 89
           },
           "id": 88,
           "interval": "1m",
@@ -3192,10 +4797,53 @@
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "fixed"
+                "mode": "palette-classic"
               },
-              "mappings": [],
-              "noValue": "-",
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "Seconds",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -3213,24 +4861,23 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
+            "h": 12,
             "w": 12,
-            "x": 0,
-            "y": 84
+            "x": 12,
+            "y": 89
           },
-          "id": 141,
+          "id": 244,
           "options": {
-            "colorMode": "none",
-            "graphMode": "none",
-            "justifyMode": "center",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": ["lastNotNull"],
-              "fields": "",
-              "values": false
+            "legend": {
+              "calcs": ["mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
             },
-            "text": {},
-            "textMode": "auto"
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
           },
           "pluginVersion": "10.0.3",
           "targets": [
@@ -3240,53 +4887,18 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"gnosis-api-.*\"}",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"gnosis\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"gnosis\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
               "instant": false,
-              "legendFormat": "Available",
+              "legendFormat": "{{label_name}}",
               "range": true,
               "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"gnosis-api-.*\"}",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Total",
-              "range": true,
-              "refId": "B"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=\"gnosis-sts\"}",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Available",
-              "range": true,
-              "refId": "C"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "kube_statefulset_replicas{namespace=\"$namespace\", statefulset=\"gnosis-sts\"}",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Total",
-              "range": true,
-              "refId": "D"
             }
           ],
-          "type": "stat"
+          "title": "Requests Duration",
+          "type": "timeseries"
         }
       ],
       "title": "Gnosis",
@@ -3298,10 +4910,70 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 77
+        "y": 53
       },
       "id": 89,
       "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 3,
+            "x": 0,
+            "y": 78
+          },
+          "id": 260,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(unchained_ws_client_count{coinstack=\"litecoin\", namespace=\"$namespace\"})",
+              "hide": false,
+              "instant": false,
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "WS Connection Count",
+          "type": "stat"
+        },
         {
           "datasource": {
             "type": "prometheus",
@@ -3348,7 +5020,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               },
@@ -3358,9 +5031,9 @@
           },
           "gridPos": {
             "h": 7,
-            "w": 12,
-            "x": 0,
-            "y": 62
+            "w": 9,
+            "x": 3,
+            "y": 78
           },
           "id": 90,
           "options": {
@@ -3412,42 +5085,56 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "",
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "thresholds"
+                "mode": "palette-classic"
               },
-              "mappings": [
-                {
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "N/A"
-                    }
-                  },
-                  "type": "special"
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
                 }
-              ],
-              "max": 100,
-              "min": 0,
+              },
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)"
+                    "color": "green",
+                    "value": null
                   },
                   {
-                    "color": "rgba(237, 129, 40, 0.89)",
+                    "color": "red",
                     "value": 80
-                  },
-                  {
-                    "color": "rgba(245, 54, 54, 0.9)",
-                    "value": 90
                   }
                 ]
               },
-              "unit": "percent"
+              "unit": "none"
             },
             "overrides": []
           },
@@ -3455,54 +5142,38 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 62
+            "y": 78
           },
-          "id": 91,
-          "interval": "1m",
-          "links": [],
-          "maxDataPoints": 100,
+          "id": 261,
           "options": {
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": ["lastNotNull"],
-              "fields": "",
-              "values": false
+            "legend": {
+              "calcs": ["last", "mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
             },
-            "showThresholdLabels": false,
-            "showThresholdMarkers": true
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
           },
-          "pluginVersion": "10.0.3",
           "targets": [
-            {
-              "datasource": {
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=~\"data-daemon-litecoin-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-litecoin-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-litecoin-sts-0\"})\n* 100)\n",
-              "format": "time_series",
-              "instant": true,
-              "intervalFactor": 1,
-              "legendFormat": "Daemon",
-              "range": false,
-              "refId": "Daemon"
-            },
             {
               "datasource": {
                 "type": "prometheus",
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-litecoin-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-litecoin-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-litecoin-sts-0\"})\n* 100)",
+              "expr": "sum(rate(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"litecoin\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.(?:tub|pub).*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint)",
               "hide": false,
               "instant": false,
-              "legendFormat": "Indexer",
+              "legendFormat": "{{endpoint}}",
               "range": true,
-              "refId": "Indexer"
+              "refId": "B"
             }
           ],
-          "title": "Volume Space Usage",
-          "type": "gauge"
+          "title": "Requests Per Second",
+          "type": "timeseries"
         },
         {
           "datasource": {
@@ -3520,7 +5191,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -3533,14 +5205,14 @@
           },
           "gridPos": {
             "h": 5,
-            "w": 12,
-            "x": 0,
-            "y": 69
+            "w": 9,
+            "x": 3,
+            "y": 85
           },
           "id": 142,
           "options": {
             "colorMode": "none",
-            "graphMode": "none",
+            "graphMode": "area",
             "justifyMode": "center",
             "orientation": "auto",
             "reduceOptions": {
@@ -3606,6 +5278,215 @@
             }
           ],
           "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "rgba(50, 172, 45, 0.97)",
+                    "value": null
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 80
+                  },
+                  {
+                    "color": "rgba(245, 54, 54, 0.9)",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 0,
+            "y": 90
+          },
+          "id": 91,
+          "interval": "1m",
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=~\"data-daemon-litecoin-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-litecoin-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-litecoin-sts-0\"})\n* 100)\n",
+              "format": "time_series",
+              "instant": true,
+              "intervalFactor": 1,
+              "legendFormat": "Daemon",
+              "range": false,
+              "refId": "Daemon"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-litecoin-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-litecoin-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-litecoin-sts-0\"})\n* 100)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Indexer",
+              "range": true,
+              "refId": "Indexer"
+            }
+          ],
+          "title": "Volume Space Usage",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "Seconds",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 12,
+            "y": 90
+          },
+          "id": 262,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"litecoin\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.(?:tub|pub).*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"litecoin\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.(?:tub|pub).*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Requests Duration",
+          "type": "timeseries"
         }
       ],
       "title": "Litecoin",
@@ -3617,10 +5498,70 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 78
+        "y": 54
       },
       "id": 92,
       "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 3,
+            "x": 0,
+            "y": 55
+          },
+          "id": 245,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(unchained_ws_client_count{coinstack=\"gnosis\", namespace=\"$namespace\"})",
+              "hide": false,
+              "instant": false,
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "WS Connection Count",
+          "type": "stat"
+        },
         {
           "datasource": {
             "type": "prometheus",
@@ -3667,7 +5608,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               },
@@ -3677,9 +5619,9 @@
           },
           "gridPos": {
             "h": 7,
-            "w": 12,
-            "x": 0,
-            "y": 63
+            "w": 9,
+            "x": 3,
+            "y": 55
           },
           "id": 93,
           "options": {
@@ -3731,6 +5673,205 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 12,
+            "y": 55
+          },
+          "id": 246,
+          "options": {
+            "legend": {
+              "calcs": ["last", "mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(rate(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"optimism\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "Requests Per Second",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "fixed"
+              },
+              "mappings": [],
+              "noValue": "-",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 9,
+            "x": 3,
+            "y": 62
+          },
+          "id": 143,
+          "options": {
+            "colorMode": "none",
+            "graphMode": "area",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"optimism-api-.*\"}",
+              "instant": false,
+              "legendFormat": "Available",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"optimism-api-.*\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Total",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=\"optimism-sts\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Available",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_statefulset_replicas{namespace=\"$namespace\", statefulset=\"optimism-sts\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Total",
+              "range": true,
+              "refId": "D"
+            }
+          ],
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "description": "",
           "fieldConfig": {
             "defaults": {
@@ -3754,7 +5895,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)"
+                    "color": "rgba(50, 172, 45, 0.97)",
+                    "value": null
                   },
                   {
                     "color": "rgba(237, 129, 40, 0.89)",
@@ -3773,8 +5915,8 @@
           "gridPos": {
             "h": 12,
             "w": 12,
-            "x": 12,
-            "y": 63
+            "x": 0,
+            "y": 67
           },
           "id": 94,
           "interval": "1m",
@@ -3844,15 +5986,59 @@
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "fixed"
+                "mode": "palette-classic"
               },
-              "mappings": [],
-              "noValue": "-",
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "Seconds",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -3864,24 +6050,23 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
+            "h": 12,
             "w": 12,
-            "x": 0,
-            "y": 70
+            "x": 12,
+            "y": 67
           },
-          "id": 143,
+          "id": 247,
           "options": {
-            "colorMode": "none",
-            "graphMode": "none",
-            "justifyMode": "center",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": ["lastNotNull"],
-              "fields": "",
-              "values": false
+            "legend": {
+              "calcs": ["mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
             },
-            "text": {},
-            "textMode": "auto"
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
           },
           "pluginVersion": "10.0.3",
           "targets": [
@@ -3891,53 +6076,18 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"optimism-api-.*\"}",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"optimism\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"optimism\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
               "instant": false,
-              "legendFormat": "Available",
+              "legendFormat": "{{label_name}}",
               "range": true,
               "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"optimism-api-.*\"}",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Total",
-              "range": true,
-              "refId": "B"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=\"optimism-sts\"}",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Available",
-              "range": true,
-              "refId": "C"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "kube_statefulset_replicas{namespace=\"$namespace\", statefulset=\"optimism-sts\"}",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Total",
-              "range": true,
-              "refId": "D"
             }
           ],
-          "type": "stat"
+          "title": "Requests Duration",
+          "type": "timeseries"
         }
       ],
       "title": "Optimism",
@@ -3949,7 +6099,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 79
+        "y": 55
       },
       "id": 95,
       "panels": [
@@ -4257,10 +6407,70 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 80
+        "y": 56
       },
       "id": 98,
       "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 3,
+            "x": 0,
+            "y": 57
+          },
+          "id": 248,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(unchained_ws_client_count{coinstack=\"polygon\", namespace=\"$namespace\"})",
+              "hide": false,
+              "instant": false,
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "WS Connection Count",
+          "type": "stat"
+        },
         {
           "datasource": {
             "type": "prometheus",
@@ -4307,7 +6517,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               },
@@ -4317,9 +6528,9 @@
           },
           "gridPos": {
             "h": 7,
-            "w": 12,
-            "x": 0,
-            "y": 65
+            "w": 9,
+            "x": 3,
+            "y": 57
           },
           "id": 99,
           "options": {
@@ -4371,6 +6582,205 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 12,
+            "y": 57
+          },
+          "id": 249,
+          "options": {
+            "legend": {
+              "calcs": ["last", "mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(rate(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"polygon\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "Requests Per Second",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "fixed"
+              },
+              "mappings": [],
+              "noValue": "-",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 9,
+            "x": 3,
+            "y": 64
+          },
+          "id": 117,
+          "options": {
+            "colorMode": "none",
+            "graphMode": "area",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"polygon-api-.*\"}",
+              "instant": false,
+              "legendFormat": "Available",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"polygon-api-.*\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Total",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=\"polygon-sts\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Available",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_statefulset_replicas{namespace=\"$namespace\", statefulset=\"polygon-sts\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Total",
+              "range": true,
+              "refId": "D"
+            }
+          ],
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "description": "",
           "fieldConfig": {
             "defaults": {
@@ -4394,7 +6804,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)"
+                    "color": "rgba(50, 172, 45, 0.97)",
+                    "value": null
                   },
                   {
                     "color": "rgba(237, 129, 40, 0.89)",
@@ -4413,8 +6824,8 @@
           "gridPos": {
             "h": 12,
             "w": 12,
-            "x": 12,
-            "y": 65
+            "x": 0,
+            "y": 69
           },
           "id": 100,
           "interval": "1m",
@@ -4484,15 +6895,59 @@
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "fixed"
+                "mode": "palette-classic"
               },
-              "mappings": [],
-              "noValue": "-",
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "Seconds",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": true,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -4504,24 +6959,23 @@
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
+            "h": 12,
             "w": 12,
-            "x": 0,
-            "y": 72
+            "x": 12,
+            "y": 69
           },
-          "id": 117,
+          "id": 250,
           "options": {
-            "colorMode": "none",
-            "graphMode": "none",
-            "justifyMode": "center",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": ["lastNotNull"],
-              "fields": "",
-              "values": false
+            "legend": {
+              "calcs": ["mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
             },
-            "text": {},
-            "textMode": "auto"
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
           },
           "pluginVersion": "10.0.3",
           "targets": [
@@ -4531,53 +6985,18 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"polygon-api-.*\"}",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"polygon\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"polygon\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
               "instant": false,
-              "legendFormat": "Available",
+              "legendFormat": "{{label_name}}",
               "range": true,
               "refId": "A"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"polygon-api-.*\"}",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Total",
-              "range": true,
-              "refId": "B"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=\"polygon-sts\"}",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Available",
-              "range": true,
-              "refId": "C"
-            },
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "kube_statefulset_replicas{namespace=\"$namespace\", statefulset=\"polygon-sts\"}",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "Total",
-              "range": true,
-              "refId": "D"
             }
           ],
-          "type": "stat"
+          "title": "Requests Duration",
+          "type": "timeseries"
         }
       ],
       "title": "Polygon",
@@ -4589,7 +7008,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 81
+        "y": 57
       },
       "id": 101,
       "panels": [
@@ -4916,7 +7335,7 @@
       "type": "row"
     }
   ],
-  "refresh": "5s",
+  "refresh": "",
   "schemaVersion": 38,
   "style": "dark",
   "tags": [],
@@ -5048,6 +7467,6 @@
   "timezone": "",
   "title": "General Overview",
   "uid": "a579a982-6ac3-4779-a90c-31deb123c4f8",
-  "version": 2,
+  "version": 3,
   "weekStart": ""
 }
