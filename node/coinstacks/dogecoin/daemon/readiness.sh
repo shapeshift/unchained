@@ -1,5 +1,12 @@
 #!/bin/bash
 
+DISABLE_READINESS_PROBE=/data/disable_readiness
+
+if [[ ! -f "$DISABLE_READINESS_PROBE" ]]; then
+  echo "readiness probe disabled"
+  exit 0
+fi
+
 TOLERANCE=1
 
 CONNECTION_COUNT=$(curl -sf -H 'content-type: application/json' -u user:password -d '{ "jsonrpc": "2.0", "id": "probe", "method": "getconnectioncount", "params": [] }' http://localhost:8332) || exit 1

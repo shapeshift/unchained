@@ -1,5 +1,12 @@
 #!/bin/bash
 
+DISABLE_READINESS_PROBE=/root/disable_readiness
+
+if [[ ! -f "$DISABLE_READINESS_PROBE" ]]; then
+  echo "readiness probe disabled"
+  exit 0
+fi
+
 SYNCING=$(curl -sf http://localhost:1317/syncing) || exit 1
 NET_INFO=$(curl -sf http://localhost:26657/net_info) || exit 1
 STATUS=$(curl -sf http://localhost:26657/status) || exit 1

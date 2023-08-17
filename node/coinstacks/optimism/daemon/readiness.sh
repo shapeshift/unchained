@@ -1,5 +1,12 @@
 #!/bin/bash
 
+DISABLE_READINESS_PROBE=/data/disable_readiness
+
+if [[ ! -f "$DISABLE_READINESS_PROBE" ]]; then
+  echo "readiness probe disabled"
+  exit 0
+fi
+
 source /evm.sh
 
 BLOCK_HEIGHT_TOLERANCE=25

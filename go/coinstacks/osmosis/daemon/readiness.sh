@@ -1,5 +1,12 @@
 #!/bin/bash
 
+DISABLE_READINESS_PROBE=/root/disable_readiness
+
+if [[ ! -f "$DISABLE_READINESS_PROBE" ]]; then
+  echo "readiness probe disabled"
+  exit 0
+fi
+
 source /tendermint.sh
 
 BLOCK_HEIGHT_TOLERANCE=5
