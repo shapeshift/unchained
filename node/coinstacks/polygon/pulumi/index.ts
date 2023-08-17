@@ -41,12 +41,7 @@ export = async (): Promise<Outputs> => {
             ETH_RPC_URL: `http://ethereum-svc.${namespace}.svc.cluster.local:8545`,
             SNAPSHOT: 'https://snapshot-download.polygon.technology/heimdall-mainnet-incremental-compiled-files.txt',
           },
-          startupProbe: {
-            httpGet: { path: '/status', port: 26657 },
-            periodSeconds: 30,
-            failureThreshold: 60,
-            timeoutSeconds: 10,
-          },
+          startupProbe: { periodSeconds: 30, failureThreshold: 60, timeoutSeconds: 10 },
           livenessProbe: { periodSeconds: 30, failureThreshold: 5, timeoutSeconds: 10 },
           readinessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
         }

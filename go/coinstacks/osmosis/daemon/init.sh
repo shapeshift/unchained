@@ -14,7 +14,7 @@ start() {
 }
 
 stop() {
-  echo "Catching signal and sending to PID: $PID" && kill $PID
+  echo "Catching signal and sending to PID: $PID" && kill -2 $PID
   while $(kill -0 $PID 2>/dev/null); do sleep 1; done
 }
 

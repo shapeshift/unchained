@@ -23,12 +23,7 @@ export = async (): Promise<Outputs> => {
           configMapData: { 'jwt.hex': readFileSync('../daemon/jwt.hex').toString() },
           startupProbe: { periodSeconds: 30, failureThreshold: 60, timeoutSeconds: 10 },
           livenessProbe: { periodSeconds: 30, failureThreshold: 5, timeoutSeconds: 10 },
-          readinessProbe: {
-            httpGet: { path: '/health', port: 8545 },
-            periodSeconds: 30,
-            failureThreshold: 10,
-            timeoutSeconds: 10,
-          },
+          readinessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
           volumeMounts: [{ name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' }],
         }
       case 'daemon-beacon':
