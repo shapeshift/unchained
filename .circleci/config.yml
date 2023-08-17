@@ -157,8 +157,8 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 300m
-    api-cpu-request: 150m
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
@@ -198,8 +198,8 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 300m
-    api-cpu-request: 150m
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
@@ -246,8 +246,8 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 300m
-    api-cpu-request: 150m
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
@@ -282,8 +282,8 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 300m
-    api-cpu-request: 150m
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
@@ -318,8 +318,8 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 300m
-    api-cpu-request: 150m
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
@@ -359,8 +359,8 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 300m
-    api-cpu-request: 150m
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
@@ -400,8 +400,8 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 300m
-    api-cpu-request: 150m
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
@@ -441,8 +441,8 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 300m
-    api-cpu-request: 150m
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
@@ -482,8 +482,8 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 300m
-    api-cpu-request: 150m
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
@@ -501,7 +501,7 @@ aliases:
     service-memory-limit-2: 8Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: registry.gitlab.com/thorchain/midgard:2.16.2
+    service-image-3: registry.gitlab.com/thorchain/midgard:2.16.1
     service-cpu-limit-3: 500m
     service-cpu-request-3: 250m
     service-memory-limit-3: 1Gi
@@ -529,8 +529,8 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 300m
-    api-cpu-request: 150m
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
@@ -576,8 +576,8 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
+    api-cpu-limit: "1"
+    api-cpu-request: 500m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
@@ -605,8 +605,8 @@ aliases:
     indexer-ws-url: ws://bnbsmartchain-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
-    api-memory-limit: 250Mi
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     stateful-service-replicas: 1
 
   - &polygon
@@ -619,8 +619,8 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
+    api-cpu-limit: "1"
+    api-cpu-request: 500m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
@@ -654,8 +654,8 @@ aliases:
     indexer-ws-url: ws://polygon-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
-    api-memory-limit: 250Mi
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     stateful-service-replicas: 1
 
   - &gnosis
@@ -668,8 +668,8 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 300m
-    api-cpu-request: 150m
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi

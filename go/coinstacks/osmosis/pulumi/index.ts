@@ -21,12 +21,7 @@ export = async (): Promise<Outputs> => {
           },
           configMapData: { 'tendermint.sh': readFileSync('../../../scripts/tendermint.sh').toString() },
           volumeMounts: [ { name: 'config-map', mountPath: '/tendermint.sh', subPath: 'tendermint.sh' } ],
-          startupProbe: {
-            httpGet: { path: '/status', port: 26657 },
-            periodSeconds: 30,
-            failureThreshold: 60,
-            timeoutSeconds: 10,
-          },
+          startupProbe: { periodSeconds: 30, failureThreshold: 60, timeoutSeconds: 10 },
           livenessProbe: { periodSeconds: 30, failureThreshold: 5, timeoutSeconds: 10 },
           readinessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
         }

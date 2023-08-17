@@ -1,5 +1,12 @@
 #!/bin/bash
 
+DISABLE_LIVENESS_PROBE=/root/disable_liveness
+
+if [[ -f "$DISABLE_LIVENESS_PROBE" ]]; then
+  echo "liveness probe disabled"
+  exit 0
+fi
+
 FILE=/root/.latest_block_height
 
 STATUS=$(curl -sf http://localhost:27147/status) || exit 1
