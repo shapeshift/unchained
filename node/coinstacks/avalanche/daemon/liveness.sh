@@ -2,7 +2,7 @@
 
 DISABLE_LIVENESS_PROBE=/data/disable_liveness
 
-if [[ ! -f "$DISABLE_LIVENESS_PROBE" ]]; then
+if [[ -f "$DISABLE_LIVENESS_PROBE" ]]; then
   echo "liveness probe disabled"
   exit 0
 fi

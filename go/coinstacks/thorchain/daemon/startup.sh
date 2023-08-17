@@ -2,7 +2,7 @@
 
 DISABLE_STARTUP_PROBE=/root/disable_startup
 
-if [[ ! -f "$DISABLE_STARTUP_PROBE" ]]; then
+if [[ -f "$DISABLE_STARTUP_PROBE" ]]; then
   echo "startup probe disabled"
   exit 0
 fi
