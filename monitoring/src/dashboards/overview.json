@@ -441,7 +441,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum(kube_pod_container_status_restarts_total{namespace=\"$namespace\", pod=~\".*$coinstack-.*\"}) by (pod, container)",
+          "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=\"$namespace\", pod=~\".*$coinstack-.*\"}[$__rate_interval])) by (pod, container)",
           "format": "time_series",
           "instant": false,
           "legendFormat": "{{pod}}-{{container}}",
@@ -652,13 +652,13 @@
                   "viz": false
                 },
                 "lineInterpolation": "linear",
-                "lineWidth": 2,
+                "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "spanNulls": false,
+                "spanNulls": 3600000,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
@@ -667,17 +667,24 @@
                   "mode": "off"
                 }
               },
-              "mappings": [],
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
                     "color": "green",
                     "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
                   }
                 ]
               },
@@ -694,7 +701,7 @@
           "id": 197,
           "options": {
             "legend": {
-              "calcs": ["last", "mean", "max"],
+              "calcs": ["mean", "max"],
               "displayMode": "table",
               "placement": "bottom",
               "showLegend": true
@@ -711,15 +718,50 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(rate(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"avalanche\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint)",
+              "exemplar": false,
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"avalanche\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
+              "format": "time_series",
               "hide": false,
               "instant": false,
+              "interval": "",
               "legendFormat": "{{endpoint}}",
               "range": true,
-              "refId": "B"
+              "refId": "common"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"avalanche\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "/account"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"avalanche\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "/tx"
             }
           ],
-          "title": "Requests Per Second",
+          "title": "Request Count",
           "type": "timeseries"
         },
         {
@@ -952,13 +994,13 @@
                 "lineStyle": {
                   "fill": "solid"
                 },
-                "lineWidth": 2,
+                "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "spanNulls": true,
+                "spanNulls": 3600000,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
@@ -1023,16 +1065,46 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"avalanche\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"avalanche\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint))",
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"avalanche\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"avalanche\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
               "format": "time_series",
               "hide": false,
               "instant": false,
               "legendFormat": "{{label_name}}",
               "range": true,
-              "refId": "A"
+              "refId": "common"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"avalanche\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"avalanche\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "/account"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"avalanche\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"avalanche\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "/tx"
             }
           ],
-          "title": "Requests Duration",
+          "title": "Average Request Duration",
           "type": "timeseries"
         }
       ],
@@ -1240,13 +1312,13 @@
                   "viz": false
                 },
                 "lineInterpolation": "linear",
-                "lineWidth": 2,
+                "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "spanNulls": false,
+                "spanNulls": 3600000,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
@@ -1255,17 +1327,24 @@
                   "mode": "off"
                 }
               },
-              "mappings": [],
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
                     "color": "green",
                     "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
                   }
                 ]
               },
@@ -1279,10 +1358,10 @@
             "x": 12,
             "y": 47
           },
-          "id": 224,
+          "id": 275,
           "options": {
             "legend": {
-              "calcs": ["last", "mean", "max"],
+              "calcs": ["mean", "max"],
               "displayMode": "table",
               "placement": "bottom",
               "showLegend": true
@@ -1299,15 +1378,50 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(rate(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint)",
+              "exemplar": false,
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
+              "format": "time_series",
               "hide": false,
               "instant": false,
+              "interval": "",
               "legendFormat": "{{endpoint}}",
               "range": true,
-              "refId": "B"
+              "refId": "common"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "/account"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "/tx"
             }
           ],
-          "title": "Requests Per Second",
+          "title": "Request Count",
           "type": "timeseries"
         },
         {
@@ -1540,13 +1654,13 @@
                 "lineStyle": {
                   "fill": "solid"
                 },
-                "lineWidth": 2,
+                "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "spanNulls": true,
+                "spanNulls": 3600000,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
@@ -1589,7 +1703,7 @@
             "x": 12,
             "y": 59
           },
-          "id": 210,
+          "id": 276,
           "options": {
             "legend": {
               "calcs": ["mean", "max"],
@@ -1611,16 +1725,46 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint))",
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
               "format": "time_series",
               "hide": false,
               "instant": false,
               "legendFormat": "{{label_name}}",
               "range": true,
-              "refId": "A"
+              "refId": "common"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "/account"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "/tx"
             }
           ],
-          "title": "Requests Duration",
+          "title": "Average Request Duration",
           "type": "timeseries"
         }
       ],
@@ -1828,13 +1972,13 @@
                   "viz": false
                 },
                 "lineInterpolation": "linear",
-                "lineWidth": 2,
+                "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "spanNulls": false,
+                "spanNulls": 3600000,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
@@ -1843,7 +1987,18 @@
                   "mode": "off"
                 }
               },
-              "mappings": [],
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -1870,7 +2025,7 @@
           "id": 252,
           "options": {
             "legend": {
-              "calcs": ["last", "mean", "max"],
+              "calcs": ["mean", "max"],
               "displayMode": "table",
               "placement": "bottom",
               "showLegend": true
@@ -1887,15 +2042,41 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(rate(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"bitcoin\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.pub.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint)",
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"bitcoin\", statusCode!=\"404\", route=~\"/api/v1/(info|fees|send).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
               "hide": false,
               "instant": false,
               "legendFormat": "{{endpoint}}",
               "range": true,
-              "refId": "B"
+              "refId": "common"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"bitcoin\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "/account"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"bitcoin\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "/tx"
             }
           ],
-          "title": "Requests Per Second",
+          "title": "Request Count",
           "type": "timeseries"
         },
         {
@@ -2128,13 +2309,13 @@
                 "lineStyle": {
                   "fill": "solid"
                 },
-                "lineWidth": 2,
+                "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "spanNulls": true,
+                "spanNulls": 3600000,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
@@ -2199,16 +2380,46 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"bitcoin\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.pub.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"bitcoin\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.pub.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint))",
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"bitcoin\", statusCode!=\"404\", route=~\"/api/v1/(info|fees|send).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"bitcoin\", statusCode!=\"404\", route=~\"/api/v1/(info|fees|send).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
               "format": "time_series",
               "hide": false,
               "instant": false,
               "legendFormat": "{{label_name}}",
               "range": true,
-              "refId": "A"
+              "refId": "common"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"bitcoin\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"bitcoin\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "/account"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"bitcoin\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"bitcoin\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "/tx"
             }
           ],
-          "title": "Requests Duration",
+          "title": "Average Request Duration",
           "type": "timeseries"
         }
       ],
@@ -2416,13 +2627,13 @@
                   "viz": false
                 },
                 "lineInterpolation": "linear",
-                "lineWidth": 2,
+                "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "spanNulls": false,
+                "spanNulls": 3600000,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
@@ -2431,7 +2642,18 @@
                   "mode": "off"
                 }
               },
-              "mappings": [],
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -2455,10 +2677,10 @@
             "x": 12,
             "y": 49
           },
-          "id": 255,
+          "id": 285,
           "options": {
             "legend": {
-              "calcs": ["last", "mean", "max"],
+              "calcs": ["mean", "max"],
               "displayMode": "table",
               "placement": "bottom",
               "showLegend": true
@@ -2475,15 +2697,41 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(rate(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"bitcoincash\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.pub.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint)",
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"bitcoincash\", statusCode!=\"404\", route=~\"/api/v1/(info|fees|send).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
               "hide": false,
               "instant": false,
               "legendFormat": "{{endpoint}}",
               "range": true,
-              "refId": "B"
+              "refId": "common"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"bitcoincash\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "/account"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"bitcoincash\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "/tx"
             }
           ],
-          "title": "Requests Per Second",
+          "title": "Request Count",
           "type": "timeseries"
         },
         {
@@ -2716,13 +2964,13 @@
                 "lineStyle": {
                   "fill": "solid"
                 },
-                "lineWidth": 2,
+                "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "spanNulls": true,
+                "spanNulls": 3600000,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
@@ -2765,7 +3013,7 @@
             "x": 12,
             "y": 61
           },
-          "id": 256,
+          "id": 286,
           "options": {
             "legend": {
               "calcs": ["mean", "max"],
@@ -2787,16 +3035,46 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"bitcoincash\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.pub.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"bitcoincash\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.pub.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint))",
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"bitcoincash\", statusCode!=\"404\", route=~\"/api/v1/(info|fees|send).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"bitcoincash\", statusCode!=\"404\", route=~\"/api/v1/(info|fees|send).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
               "format": "time_series",
               "hide": false,
               "instant": false,
               "legendFormat": "{{label_name}}",
               "range": true,
-              "refId": "A"
+              "refId": "common"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"bitcoincash\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"bitcoincash\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "/account"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"bitcoincash\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"bitcoincash\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "/tx"
             }
           ],
-          "title": "Requests Duration",
+          "title": "Average Request Duration",
           "type": "timeseries"
         }
       ],
@@ -2859,8 +3137,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -2947,8 +3224,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)",
-                    "value": null
+                    "color": "rgba(50, 172, 45, 0.97)"
                   },
                   {
                     "color": "rgba(237, 129, 40, 0.89)",
@@ -3022,8 +3298,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -3151,7 +3426,7 @@
             "h": 12,
             "w": 3,
             "x": 0,
-            "y": 75
+            "y": 51
           },
           "id": 257,
           "options": {
@@ -3243,7 +3518,7 @@
             "h": 7,
             "w": 9,
             "x": 3,
-            "y": 75
+            "y": 51
           },
           "id": 81,
           "options": {
@@ -3315,13 +3590,13 @@
                   "viz": false
                 },
                 "lineInterpolation": "linear",
-                "lineWidth": 2,
+                "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "spanNulls": false,
+                "spanNulls": 3600000,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
@@ -3330,7 +3605,18 @@
                   "mode": "off"
                 }
               },
-              "mappings": [],
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -3352,12 +3638,12 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 75
+            "y": 51
           },
-          "id": 258,
+          "id": 287,
           "options": {
             "legend": {
-              "calcs": ["last", "mean", "max"],
+              "calcs": ["mean", "max"],
               "displayMode": "table",
               "placement": "bottom",
               "showLegend": true
@@ -3374,15 +3660,41 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(rate(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"dogecoin\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.gub.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint)",
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"dogecoin\", statusCode!=\"404\", route=~\"/api/v1/(info|fees|send).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
               "hide": false,
               "instant": false,
               "legendFormat": "{{endpoint}}",
               "range": true,
-              "refId": "B"
+              "refId": "common"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"dogecoin\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "/account"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"dogecoin\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "/tx"
             }
           ],
-          "title": "Requests Per Second",
+          "title": "Request Count",
           "type": "timeseries"
         },
         {
@@ -3417,7 +3729,7 @@
             "h": 5,
             "w": 9,
             "x": 3,
-            "y": 82
+            "y": 58
           },
           "id": 139,
           "options": {
@@ -3538,7 +3850,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 87
+            "y": 63
           },
           "id": 82,
           "interval": "1m",
@@ -3615,13 +3927,13 @@
                 "lineStyle": {
                   "fill": "solid"
                 },
-                "lineWidth": 2,
+                "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "spanNulls": true,
+                "spanNulls": 3600000,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
@@ -3662,9 +3974,9 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 87
+            "y": 63
           },
-          "id": 259,
+          "id": 288,
           "options": {
             "legend": {
               "calcs": ["mean", "max"],
@@ -3686,16 +3998,46 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"dogecoin\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.gub.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"dogecoin\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.gub.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint))",
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"dogecoin\", statusCode!=\"404\", route=~\"/api/v1/(info|fees|send).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"dogecoin\", statusCode!=\"404\", route=~\"/api/v1/(info|fees|send).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
               "format": "time_series",
               "hide": false,
               "instant": false,
               "legendFormat": "{{label_name}}",
               "range": true,
-              "refId": "A"
+              "refId": "common"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"dogecoin\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"dogecoin\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "/account"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"dogecoin\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"dogecoin\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "/tx"
             }
           ],
-          "title": "Requests Duration",
+          "title": "Average Request Duration",
           "type": "timeseries"
         }
       ],
@@ -3739,7 +4081,7 @@
             "h": 12,
             "w": 3,
             "x": 0,
-            "y": 76
+            "y": 52
           },
           "id": 239,
           "options": {
@@ -3831,7 +4173,7 @@
             "h": 7,
             "w": 9,
             "x": 3,
-            "y": 76
+            "y": 52
           },
           "id": 84,
           "options": {
@@ -3903,13 +4245,13 @@
                   "viz": false
                 },
                 "lineInterpolation": "linear",
-                "lineWidth": 2,
+                "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "spanNulls": false,
+                "spanNulls": 3600000,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
@@ -3918,17 +4260,24 @@
                   "mode": "off"
                 }
               },
-              "mappings": [],
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
                     "color": "green",
                     "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
                   }
                 ]
               },
@@ -3940,12 +4289,12 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 76
+            "y": 52
           },
-          "id": 240,
+          "id": 277,
           "options": {
             "legend": {
-              "calcs": ["last", "mean", "max"],
+              "calcs": ["mean", "max"],
               "displayMode": "table",
               "placement": "bottom",
               "showLegend": true
@@ -3962,15 +4311,50 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(rate(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"ethereum\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint)",
+              "exemplar": false,
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"ethereum\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
+              "format": "time_series",
               "hide": false,
               "instant": false,
+              "interval": "",
               "legendFormat": "{{endpoint}}",
               "range": true,
-              "refId": "B"
+              "refId": "common"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"ethereum\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "/account"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"ethereum\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "/tx"
             }
           ],
-          "title": "Requests Per Second",
+          "title": "Request Count",
           "type": "timeseries"
         },
         {
@@ -4005,7 +4389,7 @@
             "h": 5,
             "w": 9,
             "x": 3,
-            "y": 83
+            "y": 59
           },
           "id": 140,
           "options": {
@@ -4126,7 +4510,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 88
+            "y": 64
           },
           "id": 85,
           "interval": "1m",
@@ -4216,13 +4600,13 @@
                 "lineStyle": {
                   "fill": "solid"
                 },
-                "lineWidth": 2,
+                "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "spanNulls": true,
+                "spanNulls": 3600000,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
@@ -4263,9 +4647,9 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 88
+            "y": 64
           },
-          "id": 241,
+          "id": 278,
           "options": {
             "legend": {
               "calcs": ["mean", "max"],
@@ -4287,16 +4671,46 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"ethereum\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"ethereum\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint))",
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"ethereum\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"ethereum\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
               "format": "time_series",
               "hide": false,
               "instant": false,
               "legendFormat": "{{label_name}}",
               "range": true,
-              "refId": "A"
+              "refId": "common"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"ethereum\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"ethereum\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "/account"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"ethereum\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"ethereum\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "/tx"
             }
           ],
-          "title": "Requests Duration",
+          "title": "Average Request Duration",
           "type": "timeseries"
         }
       ],
@@ -4340,7 +4754,7 @@
             "h": 12,
             "w": 3,
             "x": 0,
-            "y": 77
+            "y": 53
           },
           "id": 242,
           "options": {
@@ -4432,7 +4846,7 @@
             "h": 7,
             "w": 9,
             "x": 3,
-            "y": 77
+            "y": 53
           },
           "id": 87,
           "options": {
@@ -4504,13 +4918,13 @@
                   "viz": false
                 },
                 "lineInterpolation": "linear",
-                "lineWidth": 2,
+                "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "spanNulls": false,
+                "spanNulls": 3600000,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
@@ -4519,17 +4933,24 @@
                   "mode": "off"
                 }
               },
-              "mappings": [],
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
                     "color": "green",
                     "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
                   }
                 ]
               },
@@ -4541,12 +4962,12 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 77
+            "y": 53
           },
-          "id": 243,
+          "id": 279,
           "options": {
             "legend": {
-              "calcs": ["last", "mean", "max"],
+              "calcs": ["mean", "max"],
               "displayMode": "table",
               "placement": "bottom",
               "showLegend": true
@@ -4563,15 +4984,50 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(rate(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"gnosis\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint)",
+              "exemplar": false,
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"gnosis\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
+              "format": "time_series",
               "hide": false,
               "instant": false,
+              "interval": "",
               "legendFormat": "{{endpoint}}",
               "range": true,
-              "refId": "B"
+              "refId": "common"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"gnosis\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "/account"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"gnosis\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "/tx"
             }
           ],
-          "title": "Requests Per Second",
+          "title": "Request Count",
           "type": "timeseries"
         },
         {
@@ -4606,7 +5062,7 @@
             "h": 5,
             "w": 9,
             "x": 3,
-            "y": 84
+            "y": 60
           },
           "id": 141,
           "options": {
@@ -4727,7 +5183,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 89
+            "y": 65
           },
           "id": 88,
           "interval": "1m",
@@ -4817,13 +5273,13 @@
                 "lineStyle": {
                   "fill": "solid"
                 },
-                "lineWidth": 2,
+                "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "spanNulls": true,
+                "spanNulls": 3600000,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
@@ -4864,9 +5320,9 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 89
+            "y": 65
           },
-          "id": 244,
+          "id": 280,
           "options": {
             "legend": {
               "calcs": ["mean", "max"],
@@ -4888,16 +5344,46 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"gnosis\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"gnosis\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint))",
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"gnosis\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"gnosis\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
               "format": "time_series",
               "hide": false,
               "instant": false,
               "legendFormat": "{{label_name}}",
               "range": true,
-              "refId": "A"
+              "refId": "common"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"gnosis\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"gnosis\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "/account"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"gnosis\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"gnosis\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "/tx"
             }
           ],
-          "title": "Requests Duration",
+          "title": "Average Request Duration",
           "type": "timeseries"
         }
       ],
@@ -5105,13 +5591,13 @@
                   "viz": false
                 },
                 "lineInterpolation": "linear",
-                "lineWidth": 2,
+                "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "spanNulls": false,
+                "spanNulls": 3600000,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
@@ -5120,7 +5606,18 @@
                   "mode": "off"
                 }
               },
-              "mappings": [],
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -5144,10 +5641,10 @@
             "x": 12,
             "y": 78
           },
-          "id": 261,
+          "id": 289,
           "options": {
             "legend": {
-              "calcs": ["last", "mean", "max"],
+              "calcs": ["mean", "max"],
               "displayMode": "table",
               "placement": "bottom",
               "showLegend": true
@@ -5164,15 +5661,41 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(rate(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"litecoin\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.(?:tub|pub).*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint)",
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"litecoin\", statusCode!=\"404\", route=~\"/api/v1/(info|fees|send).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
               "hide": false,
               "instant": false,
               "legendFormat": "{{endpoint}}",
               "range": true,
-              "refId": "B"
+              "refId": "common"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"litecoin\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "/account"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"litecoin\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "/tx"
             }
           ],
-          "title": "Requests Per Second",
+          "title": "Request Count",
           "type": "timeseries"
         },
         {
@@ -5405,13 +5928,13 @@
                 "lineStyle": {
                   "fill": "solid"
                 },
-                "lineWidth": 2,
+                "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "spanNulls": true,
+                "spanNulls": 3600000,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
@@ -5454,7 +5977,7 @@
             "x": 12,
             "y": 90
           },
-          "id": 262,
+          "id": 290,
           "options": {
             "legend": {
               "calcs": ["mean", "max"],
@@ -5476,16 +5999,46 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"litecoin\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.(?:tub|pub).*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"litecoin\", route=~\"/api/v1/(info|account|tx|fees|send).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/.(?:tub|pub).*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint))",
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"litecoin\", statusCode!=\"404\", route=~\"/api/v1/(info|fees|send).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"litecoin\", statusCode!=\"404\", route=~\"/api/v1/(info|fees|send).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
               "format": "time_series",
               "hide": false,
               "instant": false,
               "legendFormat": "{{label_name}}",
               "range": true,
-              "refId": "A"
+              "refId": "common"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"litecoin\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"litecoin\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "/account"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"litecoin\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"litecoin\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "/tx"
             }
           ],
-          "title": "Requests Duration",
+          "title": "Average Request Duration",
           "type": "timeseries"
         }
       ],
@@ -5693,13 +6246,13 @@
                   "viz": false
                 },
                 "lineInterpolation": "linear",
-                "lineWidth": 2,
+                "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "spanNulls": false,
+                "spanNulls": 3600000,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
@@ -5708,17 +6261,24 @@
                   "mode": "off"
                 }
               },
-              "mappings": [],
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
                     "color": "green",
                     "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
                   }
                 ]
               },
@@ -5732,10 +6292,10 @@
             "x": 12,
             "y": 55
           },
-          "id": 246,
+          "id": 281,
           "options": {
             "legend": {
-              "calcs": ["last", "mean", "max"],
+              "calcs": ["mean", "max"],
               "displayMode": "table",
               "placement": "bottom",
               "showLegend": true
@@ -5752,15 +6312,50 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(rate(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"optimism\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint)",
+              "exemplar": false,
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"optimism\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
+              "format": "time_series",
               "hide": false,
               "instant": false,
+              "interval": "",
               "legendFormat": "{{endpoint}}",
               "range": true,
-              "refId": "B"
+              "refId": "common"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"optimism\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "/account"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"optimism\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "/tx"
             }
           ],
-          "title": "Requests Per Second",
+          "title": "Request Count",
           "type": "timeseries"
         },
         {
@@ -6006,13 +6601,13 @@
                 "lineStyle": {
                   "fill": "solid"
                 },
-                "lineWidth": 2,
+                "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "spanNulls": true,
+                "spanNulls": 3600000,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
@@ -6055,7 +6650,7 @@
             "x": 12,
             "y": 67
           },
-          "id": 247,
+          "id": 282,
           "options": {
             "legend": {
               "calcs": ["mean", "max"],
@@ -6077,16 +6672,46 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"optimism\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"optimism\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint))",
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"optimism\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"optimism\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
               "format": "time_series",
               "hide": false,
               "instant": false,
               "legendFormat": "{{label_name}}",
               "range": true,
-              "refId": "A"
+              "refId": "common"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"optimism\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"optimism\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "/account"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"optimism\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"optimism\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "/tx"
             }
           ],
-          "title": "Requests Duration",
+          "title": "Average Request Duration",
           "type": "timeseries"
         }
       ],
@@ -6438,7 +7063,7 @@
             "h": 12,
             "w": 3,
             "x": 0,
-            "y": 57
+            "y": 81
           },
           "id": 248,
           "options": {
@@ -6530,7 +7155,7 @@
             "h": 7,
             "w": 9,
             "x": 3,
-            "y": 57
+            "y": 81
           },
           "id": 99,
           "options": {
@@ -6602,13 +7227,13 @@
                   "viz": false
                 },
                 "lineInterpolation": "linear",
-                "lineWidth": 2,
+                "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "spanNulls": false,
+                "spanNulls": 3600000,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
@@ -6617,17 +7242,24 @@
                   "mode": "off"
                 }
               },
-              "mappings": [],
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
                     "color": "green",
                     "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
                   }
                 ]
               },
@@ -6639,12 +7271,12 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 57
+            "y": 81
           },
-          "id": 249,
+          "id": 283,
           "options": {
             "legend": {
-              "calcs": ["last", "mean", "max"],
+              "calcs": ["mean", "max"],
               "displayMode": "table",
               "placement": "bottom",
               "showLegend": true
@@ -6661,15 +7293,50 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(rate(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"polygon\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint)",
+              "exemplar": false,
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"polygon\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
+              "format": "time_series",
               "hide": false,
               "instant": false,
+              "interval": "",
               "legendFormat": "{{endpoint}}",
               "range": true,
-              "refId": "B"
+              "refId": "common"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"polygon\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "/account"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"polygon\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "/tx"
             }
           ],
-          "title": "Requests Per Second",
+          "title": "Request Count",
           "type": "timeseries"
         },
         {
@@ -6704,7 +7371,7 @@
             "h": 5,
             "w": 9,
             "x": 3,
-            "y": 64
+            "y": 88
           },
           "id": 117,
           "options": {
@@ -6825,7 +7492,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 69
+            "y": 93
           },
           "id": 100,
           "interval": "1m",
@@ -6915,13 +7582,13 @@
                 "lineStyle": {
                   "fill": "solid"
                 },
-                "lineWidth": 2,
+                "lineWidth": 1,
                 "pointSize": 5,
                 "scaleDistribution": {
                   "type": "linear"
                 },
                 "showPoints": "never",
-                "spanNulls": true,
+                "spanNulls": 3600000,
                 "stacking": {
                   "group": "A",
                   "mode": "none"
@@ -6962,9 +7629,9 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 69
+            "y": 93
           },
-          "id": 250,
+          "id": 284,
           "options": {
             "legend": {
               "calcs": ["mean", "max"],
@@ -6986,16 +7653,46 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"polygon\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"polygon\", route=~\"/api/v1/(info|account|tx|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\/0x.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[5m:])) by (endpoint))",
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"polygon\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"polygon\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
               "format": "time_series",
               "hide": false,
               "instant": false,
               "legendFormat": "{{label_name}}",
               "range": true,
-              "refId": "A"
+              "refId": "common"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"polygon\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"polygon\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "/account"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"polygon\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"polygon\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "/tx"
             }
           ],
-          "title": "Requests Duration",
+          "title": "Average Request Duration",
           "type": "timeseries"
         }
       ],
@@ -7335,7 +8032,7 @@
       "type": "row"
     }
   ],
-  "refresh": "",
+  "refresh": "5s",
   "schemaVersion": 38,
   "style": "dark",
   "tags": [],
@@ -7343,9 +8040,9 @@
     "list": [
       {
         "current": {
-          "selected": true,
-          "text": "unchained-dev",
-          "value": "unchained-dev"
+          "selected": false,
+          "text": "unchained",
+          "value": "unchained"
         },
         "hide": 0,
         "includeAll": false,
@@ -7354,12 +8051,12 @@
         "name": "namespace",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "unchained",
             "value": "unchained"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "unchained-dev",
             "value": "unchained-dev"
           }
@@ -7371,7 +8068,7 @@
       },
       {
         "current": {
-          "selected": true,
+          "selected": false,
           "text": ["All"],
           "value": ["$__all"]
         },
@@ -7467,6 +8164,6 @@
   "timezone": "",
   "title": "General Overview",
   "uid": "a579a982-6ac3-4779-a90c-31deb123c4f8",
-  "version": 3,
+  "version": 5,
   "weekStart": ""
 }
