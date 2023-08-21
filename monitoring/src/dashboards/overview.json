@@ -3137,7 +3137,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               },
@@ -3149,7 +3150,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 74
+            "y": 50
           },
           "id": 78,
           "options": {
@@ -3224,7 +3225,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)"
+                    "color": "rgba(50, 172, 45, 0.97)",
+                    "value": null
                   },
                   {
                     "color": "rgba(237, 129, 40, 0.89)",
@@ -3244,7 +3246,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 74
+            "y": 50
           },
           "id": 79,
           "interval": "1m",
@@ -3298,7 +3300,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -3313,7 +3316,7 @@
             "h": 5,
             "w": 12,
             "x": 0,
-            "y": 81
+            "y": 57
           },
           "id": 138,
           "options": {
