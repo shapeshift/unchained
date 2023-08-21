@@ -1,4 +1,4 @@
-IMAGE=loadimpact/k6
+IMAGE=grafana/k6
 USER=$(shell id -u):$(shell id -g)
 TEST_FILE="test.js"
 

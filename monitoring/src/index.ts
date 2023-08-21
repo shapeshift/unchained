@@ -40,7 +40,7 @@ export = async (): Promise<Outputs> => {
                 spec: {
                   storageClassName: 'ebs-csi-gp2',
                   accessModes: ['ReadWriteOnce'],
-                  resources: { requests: { storage: '10Gi' } },
+                  resources: { requests: { storage: '100Gi' } },
                 },
               },
             },
