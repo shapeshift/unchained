@@ -3,10 +3,13 @@ package api
 import (
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/shapeshift/unchained/internal/log"
+	"github.com/shapeshift/unchained/pkg/metrics"
 )
 
 type statusWriter struct {
@@ -23,33 +26,41 @@ func (w *statusWriter) WriteHeader(status int) {
 	w.ResponseWriter.WriteHeader(status)
 }
 
-// Logger middleware for request details
-func Logger(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// Logger middleware for request details and metrics
+func Logger(prometheus *metrics.Prometheus) mux.MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			sw := newStatusWriter(w)
 
-		sw := newStatusWriter(w)
+			t := time.Now().UTC()
 
-		t := time.Now().UTC()
+			// do not write status header for logging on websocket upgrade requests as headers can only be written once by the websocket upgrader
+			if r.Header.Get("Upgrade") == "websocket" {
+				next.ServeHTTP(w, r)
+				return
+			} else {
+				next.ServeHTTP(sw, r)
+			}
 
-		// do not write status header for logging on websocket upgrade requests as headers can only be written once by the websocket upgrader
-		if r.Header.Get("Upgrade") == "websocket" {
-			next.ServeHTTP(w, r)
-			return
-		} else {
-			next.ServeHTTP(sw, r)
-		}
+			duration := time.Since(t)
 
-		statusLogger := log.WithFields(log.Fields{"method": r.Method, "statusCode": sw.status, "responseTime": time.Since(t).String()})
+			statusLogger := log.WithFields(log.Fields{"method": r.Method, "statusCode": sw.status, "responseTime": duration.String()})
 
-		if sw.status < http.StatusOK || sw.status >= http.StatusBadRequest {
-			statusLogger.Errorf("%s", r.RequestURI)
-			return
-		}
+			labels := metrics.Labels{"method": r.Method, "route": r.RequestURI, "statusCode": strconv.Itoa(sw.status)}
 
-		if !strings.Contains(r.RequestURI, "/health") {
-			statusLogger.Infof("%s from %s", r.RequestURI, r.RemoteAddr)
-		}
-	})
+			prometheus.Metrics.HTTPRequestCounter.With(labels).Inc()
+			prometheus.Metrics.HTTPRequestDurationSeconds.With(labels).Observe(duration.Seconds())
+
+			if sw.status < http.StatusOK || sw.status >= http.StatusBadRequest {
+				statusLogger.Errorf("%s", r.RequestURI)
+				return
+			}
+
+			if !strings.Contains(r.RequestURI, "/health") {
+				statusLogger.Infof("%s from %s", r.RequestURI, r.RemoteAddr)
+			}
+		})
+	}
 }
 
 func Scheme(next http.Handler) http.Handler {
