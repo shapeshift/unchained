@@ -59,7 +59,7 @@ func main() {
 		WSURL:             conf.WSURL,
 	}
 
-	prometheus := metrics.NewPrometheus("cosmos")
+	prometheus := metrics.NewPrometheus("thorchain")
 
 	httpClient, err := cosmos.NewHTTPClient(cfg)
 	if err != nil {
