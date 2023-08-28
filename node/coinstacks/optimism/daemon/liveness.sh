@@ -7,7 +7,7 @@ if [[ -f "$DISABLE_LIVENESS_PROBE" ]]; then
   exit 0
 fi
 
-FILE=/data/block_number
+FILE=/data/.block_number
 
 ETH_BLOCK_NUMBER=$(curl -sf -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' -H 'Content-Type: application/json' http://localhost:8545) || exit 1
 
