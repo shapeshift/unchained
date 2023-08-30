@@ -216,8 +216,8 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 16,
-        "w": 12,
+        "h": 13,
+        "w": 24,
         "x": 0,
         "y": 17
       },
@@ -314,10 +314,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 16,
-        "w": 12,
-        "x": 12,
-        "y": 17
+        "h": 15,
+        "w": 24,
+        "x": 0,
+        "y": 30
       },
       "id": 158,
       "options": {
@@ -417,7 +417,7 @@
         "h": 12,
         "w": 24,
         "x": 0,
-        "y": 33
+        "y": 45
       },
       "id": 171,
       "options": {
@@ -458,7 +458,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 45
+        "y": 57
       },
       "id": 32,
       "panels": [
@@ -477,8 +477,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text",
-                    "value": null
+                    "color": "text"
                   }
                 ]
               }
@@ -489,7 +488,7 @@
             "h": 12,
             "w": 3,
             "x": 0,
-            "y": 46
+            "y": 54
           },
           "id": 184,
           "options": {
@@ -567,8 +566,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -580,7 +578,7 @@
             "h": 7,
             "w": 9,
             "x": 3,
-            "y": 46
+            "y": 54
           },
           "id": 45,
           "options": {
@@ -683,8 +681,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -696,7 +693,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 46
+            "y": 54
           },
           "id": 197,
           "options": {
@@ -780,8 +777,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -796,7 +792,7 @@
             "h": 5,
             "w": 9,
             "x": 3,
-            "y": 53
+            "y": 61
           },
           "id": 122,
           "options": {
@@ -896,8 +892,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)",
-                    "value": null
+                    "color": "rgba(50, 172, 45, 0.97)"
                   },
                   {
                     "color": "rgba(237, 129, 40, 0.89)",
@@ -917,7 +912,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 58
+            "y": 66
           },
           "id": 46,
           "interval": "1m",
@@ -1025,8 +1020,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1041,7 +1035,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 58
+            "y": 66
           },
           "id": 225,
           "options": {
@@ -1117,7 +1111,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 46
+        "y": 58
       },
       "id": 62,
       "panels": [
@@ -1136,8 +1130,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text",
-                    "value": null
+                    "color": "text"
                   }
                 ]
               }
@@ -1148,7 +1141,7 @@
             "h": 12,
             "w": 3,
             "x": 0,
-            "y": 47
+            "y": 55
           },
           "id": 223,
           "options": {
@@ -1227,8 +1220,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -1240,7 +1232,7 @@
             "h": 7,
             "w": 9,
             "x": 3,
-            "y": 47
+            "y": 55
           },
           "id": 75,
           "options": {
@@ -1343,8 +1335,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -1356,7 +1347,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 47
+            "y": 55
           },
           "id": 275,
           "options": {
@@ -1440,8 +1431,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1456,7 +1446,7 @@
             "h": 5,
             "w": 9,
             "x": 3,
-            "y": 54
+            "y": 62
           },
           "id": 137,
           "options": {
@@ -1556,8 +1546,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)",
-                    "value": null
+                    "color": "rgba(50, 172, 45, 0.97)"
                   },
                   {
                     "color": "rgba(237, 129, 40, 0.89)",
@@ -1577,7 +1566,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 59
+            "y": 67
           },
           "id": 76,
           "interval": "1m",
@@ -1685,8 +1674,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1701,7 +1689,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 59
+            "y": 67
           },
           "id": 276,
           "options": {
@@ -1777,7 +1765,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 47
+        "y": 59
       },
       "id": 3,
       "panels": [
@@ -1796,8 +1784,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text",
-                    "value": null
+                    "color": "text"
                   }
                 ]
               }
@@ -1808,7 +1795,7 @@
             "h": 12,
             "w": 3,
             "x": 0,
-            "y": 48
+            "y": 56
           },
           "id": 251,
           "options": {
@@ -1887,8 +1874,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -1900,7 +1886,7 @@
             "h": 7,
             "w": 9,
             "x": 3,
-            "y": 48
+            "y": 56
           },
           "id": 5,
           "options": {
@@ -2003,8 +1989,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -2020,7 +2005,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 48
+            "y": 56
           },
           "id": 252,
           "options": {
@@ -2095,8 +2080,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -2111,7 +2095,7 @@
             "h": 5,
             "w": 9,
             "x": 3,
-            "y": 55
+            "y": 63
           },
           "id": 123,
           "options": {
@@ -2211,8 +2195,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)",
-                    "value": null
+                    "color": "rgba(50, 172, 45, 0.97)"
                   },
                   {
                     "color": "rgba(237, 129, 40, 0.89)",
@@ -2232,7 +2215,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 60
+            "y": 68
           },
           "id": 2,
           "interval": "1m",
@@ -2340,8 +2323,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -2356,7 +2338,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 60
+            "y": 68
           },
           "id": 253,
           "options": {
@@ -2432,7 +2414,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 48
+        "y": 60
       },
       "id": 47,
       "panels": [
@@ -2451,8 +2433,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text",
-                    "value": null
+                    "color": "text"
                   }
                 ]
               }
@@ -2463,7 +2444,7 @@
             "h": 12,
             "w": 3,
             "x": 0,
-            "y": 49
+            "y": 57
           },
           "id": 254,
           "options": {
@@ -2542,8 +2523,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -2555,7 +2535,7 @@
             "h": 7,
             "w": 9,
             "x": 3,
-            "y": 49
+            "y": 57
           },
           "id": 60,
           "options": {
@@ -2658,8 +2638,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -2675,7 +2654,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 49
+            "y": 57
           },
           "id": 285,
           "options": {
@@ -2750,8 +2729,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -2766,7 +2744,7 @@
             "h": 5,
             "w": 9,
             "x": 3,
-            "y": 56
+            "y": 64
           },
           "id": 136,
           "options": {
@@ -2866,8 +2844,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)",
-                    "value": null
+                    "color": "rgba(50, 172, 45, 0.97)"
                   },
                   {
                     "color": "rgba(237, 129, 40, 0.89)",
@@ -2887,7 +2864,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 61
+            "y": 69
           },
           "id": 61,
           "interval": "1m",
@@ -2995,8 +2972,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -3011,7 +2987,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 61
+            "y": 69
           },
           "id": 286,
           "options": {
@@ -3087,7 +3063,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 49
+        "y": 61
       },
       "id": 77,
       "panels": [
@@ -3106,8 +3082,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text",
-                    "value": null
+                    "color": "text"
                   }
                 ]
               }
@@ -3118,7 +3093,7 @@
             "h": 12,
             "w": 3,
             "x": 0,
-            "y": 74
+            "y": 82
           },
           "id": 291,
           "options": {
@@ -3196,8 +3171,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -3209,7 +3183,7 @@
             "h": 7,
             "w": 9,
             "x": 3,
-            "y": 74
+            "y": 82
           },
           "id": 78,
           "options": {
@@ -3312,8 +3286,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -3325,7 +3298,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 74
+            "y": 82
           },
           "id": 292,
           "options": {
@@ -3409,8 +3382,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -3425,7 +3397,7 @@
             "h": 5,
             "w": 9,
             "x": 3,
-            "y": 81
+            "y": 89
           },
           "id": 138,
           "options": {
@@ -3525,8 +3497,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)",
-                    "value": null
+                    "color": "rgba(50, 172, 45, 0.97)"
                   },
                   {
                     "color": "rgba(237, 129, 40, 0.89)",
@@ -3546,7 +3517,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 86
+            "y": 94
           },
           "id": 79,
           "interval": "1m",
@@ -3643,8 +3614,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -3659,7 +3629,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 86
+            "y": 94
           },
           "id": 293,
           "options": {
@@ -3735,7 +3705,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 50
+        "y": 62
       },
       "id": 80,
       "panels": [
@@ -3754,8 +3724,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text",
-                    "value": null
+                    "color": "text"
                   }
                 ]
               }
@@ -3766,7 +3735,7 @@
             "h": 12,
             "w": 3,
             "x": 0,
-            "y": 51
+            "y": 59
           },
           "id": 257,
           "options": {
@@ -3845,8 +3814,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -3858,7 +3826,7 @@
             "h": 7,
             "w": 9,
             "x": 3,
-            "y": 51
+            "y": 59
           },
           "id": 81,
           "options": {
@@ -3961,8 +3929,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -3978,7 +3945,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 51
+            "y": 59
           },
           "id": 287,
           "options": {
@@ -4053,8 +4020,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -4069,7 +4035,7 @@
             "h": 5,
             "w": 9,
             "x": 3,
-            "y": 58
+            "y": 66
           },
           "id": 139,
           "options": {
@@ -4169,8 +4135,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)",
-                    "value": null
+                    "color": "rgba(50, 172, 45, 0.97)"
                   },
                   {
                     "color": "rgba(237, 129, 40, 0.89)",
@@ -4190,7 +4155,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 63
+            "y": 71
           },
           "id": 82,
           "interval": "1m",
@@ -4298,8 +4263,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -4314,7 +4278,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 63
+            "y": 71
           },
           "id": 288,
           "options": {
@@ -4390,7 +4354,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 51
+        "y": 63
       },
       "id": 83,
       "panels": [
@@ -4409,8 +4373,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text",
-                    "value": null
+                    "color": "text"
                   }
                 ]
               }
@@ -4421,7 +4384,7 @@
             "h": 12,
             "w": 3,
             "x": 0,
-            "y": 52
+            "y": 60
           },
           "id": 239,
           "options": {
@@ -4500,8 +4463,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -4513,7 +4475,7 @@
             "h": 7,
             "w": 9,
             "x": 3,
-            "y": 52
+            "y": 60
           },
           "id": 84,
           "options": {
@@ -4616,8 +4578,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -4629,7 +4590,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 52
+            "y": 60
           },
           "id": 277,
           "options": {
@@ -4713,8 +4674,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -4729,7 +4689,7 @@
             "h": 5,
             "w": 9,
             "x": 3,
-            "y": 59
+            "y": 67
           },
           "id": 140,
           "options": {
@@ -4829,8 +4789,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)",
-                    "value": null
+                    "color": "rgba(50, 172, 45, 0.97)"
                   },
                   {
                     "color": "rgba(237, 129, 40, 0.89)",
@@ -4850,7 +4809,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 64
+            "y": 72
           },
           "id": 85,
           "interval": "1m",
@@ -4971,8 +4930,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -4987,7 +4945,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 64
+            "y": 72
           },
           "id": 278,
           "options": {
@@ -5063,7 +5021,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 52
+        "y": 64
       },
       "id": 86,
       "panels": [
@@ -5082,8 +5040,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text",
-                    "value": null
+                    "color": "text"
                   }
                 ]
               }
@@ -5094,7 +5051,7 @@
             "h": 12,
             "w": 3,
             "x": 0,
-            "y": 53
+            "y": 61
           },
           "id": 242,
           "options": {
@@ -5173,8 +5130,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -5186,7 +5142,7 @@
             "h": 7,
             "w": 9,
             "x": 3,
-            "y": 53
+            "y": 61
           },
           "id": 87,
           "options": {
@@ -5289,8 +5245,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -5302,7 +5257,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 53
+            "y": 61
           },
           "id": 279,
           "options": {
@@ -5386,8 +5341,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -5402,7 +5356,7 @@
             "h": 5,
             "w": 9,
             "x": 3,
-            "y": 60
+            "y": 68
           },
           "id": 141,
           "options": {
@@ -5502,8 +5456,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)",
-                    "value": null
+                    "color": "rgba(50, 172, 45, 0.97)"
                   },
                   {
                     "color": "rgba(237, 129, 40, 0.89)",
@@ -5523,7 +5476,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 65
+            "y": 73
           },
           "id": 88,
           "interval": "1m",
@@ -5644,8 +5597,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -5660,7 +5612,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 65
+            "y": 73
           },
           "id": 280,
           "options": {
@@ -5736,7 +5688,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 53
+        "y": 65
       },
       "id": 89,
       "panels": [
@@ -5755,8 +5707,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text",
-                    "value": null
+                    "color": "text"
                   }
                 ]
               }
@@ -5767,7 +5718,7 @@
             "h": 12,
             "w": 3,
             "x": 0,
-            "y": 78
+            "y": 86
           },
           "id": 260,
           "options": {
@@ -5846,8 +5797,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -5859,7 +5809,7 @@
             "h": 7,
             "w": 9,
             "x": 3,
-            "y": 78
+            "y": 86
           },
           "id": 90,
           "options": {
@@ -5962,8 +5912,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -5979,7 +5928,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 78
+            "y": 86
           },
           "id": 289,
           "options": {
@@ -6054,8 +6003,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -6070,7 +6018,7 @@
             "h": 5,
             "w": 9,
             "x": 3,
-            "y": 85
+            "y": 93
           },
           "id": 142,
           "options": {
@@ -6170,8 +6118,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)",
-                    "value": null
+                    "color": "rgba(50, 172, 45, 0.97)"
                   },
                   {
                     "color": "rgba(237, 129, 40, 0.89)",
@@ -6191,7 +6138,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 90
+            "y": 98
           },
           "id": 91,
           "interval": "1m",
@@ -6299,8 +6246,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -6315,7 +6261,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 90
+            "y": 98
           },
           "id": 290,
           "options": {
@@ -6391,7 +6337,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 54
+        "y": 66
       },
       "id": 92,
       "panels": [
@@ -6410,8 +6356,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text",
-                    "value": null
+                    "color": "text"
                   }
                 ]
               }
@@ -6422,7 +6367,7 @@
             "h": 12,
             "w": 3,
             "x": 0,
-            "y": 55
+            "y": 63
           },
           "id": 245,
           "options": {
@@ -6501,8 +6446,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -6514,7 +6458,7 @@
             "h": 7,
             "w": 9,
             "x": 3,
-            "y": 55
+            "y": 63
           },
           "id": 93,
           "options": {
@@ -6617,8 +6561,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -6630,7 +6573,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 55
+            "y": 63
           },
           "id": 281,
           "options": {
@@ -6714,8 +6657,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -6730,7 +6672,7 @@
             "h": 5,
             "w": 9,
             "x": 3,
-            "y": 62
+            "y": 70
           },
           "id": 143,
           "options": {
@@ -6830,8 +6772,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)",
-                    "value": null
+                    "color": "rgba(50, 172, 45, 0.97)"
                   },
                   {
                     "color": "rgba(237, 129, 40, 0.89)",
@@ -6851,7 +6792,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 67
+            "y": 75
           },
           "id": 94,
           "interval": "1m",
@@ -6972,8 +6913,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -6988,7 +6928,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 67
+            "y": 75
           },
           "id": 282,
           "options": {
@@ -7064,7 +7004,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 55
+        "y": 67
       },
       "id": 98,
       "panels": [
@@ -7083,8 +7023,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text",
-                    "value": null
+                    "color": "text"
                   }
                 ]
               }
@@ -7095,7 +7034,7 @@
             "h": 12,
             "w": 3,
             "x": 0,
-            "y": 81
+            "y": 89
           },
           "id": 248,
           "options": {
@@ -7174,8 +7113,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -7187,7 +7125,7 @@
             "h": 7,
             "w": 9,
             "x": 3,
-            "y": 81
+            "y": 89
           },
           "id": 99,
           "options": {
@@ -7290,8 +7228,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -7303,7 +7240,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 81
+            "y": 89
           },
           "id": 283,
           "options": {
@@ -7387,8 +7324,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -7403,7 +7339,7 @@
             "h": 5,
             "w": 9,
             "x": 3,
-            "y": 88
+            "y": 96
           },
           "id": 117,
           "options": {
@@ -7503,8 +7439,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)",
-                    "value": null
+                    "color": "rgba(50, 172, 45, 0.97)"
                   },
                   {
                     "color": "rgba(237, 129, 40, 0.89)",
@@ -7524,7 +7459,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 93
+            "y": 101
           },
           "id": 100,
           "interval": "1m",
@@ -7645,8 +7580,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -7661,7 +7595,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 93
+            "y": 101
           },
           "id": 284,
           "options": {
@@ -7737,7 +7671,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 56
+        "y": 68
       },
       "id": 101,
       "panels": [
@@ -7756,8 +7690,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text",
-                    "value": null
+                    "color": "text"
                   }
                 ]
               }
@@ -7768,7 +7701,7 @@
             "h": 12,
             "w": 3,
             "x": 0,
-            "y": 106
+            "y": 114
           },
           "id": 295,
           "options": {
@@ -7846,8 +7779,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -7859,7 +7791,7 @@
             "h": 7,
             "w": 9,
             "x": 3,
-            "y": 106
+            "y": 114
           },
           "id": 102,
           "options": {
@@ -7962,8 +7894,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -7975,7 +7906,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 106
+            "y": 114
           },
           "id": 294,
           "options": {
@@ -8059,8 +7990,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -8075,7 +8005,7 @@
             "h": 5,
             "w": 9,
             "x": 3,
-            "y": 113
+            "y": 121
           },
           "id": 144,
           "options": {
@@ -8175,8 +8105,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)",
-                    "value": null
+                    "color": "rgba(50, 172, 45, 0.97)"
                   },
                   {
                     "color": "rgba(237, 129, 40, 0.89)",
@@ -8196,7 +8125,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 118
+            "y": 126
           },
           "id": 103,
           "interval": "1m",
@@ -8317,8 +8246,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -8333,7 +8261,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 118
+            "y": 126
           },
           "id": 296,
           "options": {
@@ -8440,7 +8368,7 @@
       },
       {
         "current": {
-          "selected": false,
+          "selected": true,
           "text": ["All"],
           "value": ["$__all"]
         },
@@ -8507,11 +8435,6 @@
           },
           {
             "selected": false,
-            "text": "osmosis",
-            "value": "osmosis"
-          },
-          {
-            "selected": false,
             "text": "polygon",
             "value": "polygon"
           },
@@ -8521,7 +8444,7 @@
             "value": "thorchain"
           }
         ],
-        "query": "avalanche,bitcoin,bitcoincash,bnbsmartchain,cosmos,dogecoin,ethereum,gnosis,litecoin,optimism,osmosis,polygon,thorchain",
+        "query": "avalanche,bitcoin,bitcoincash,bnbsmartchain,cosmos,dogecoin,ethereum,gnosis,litecoin,optimism,polygon,thorchain",
         "queryValue": "",
         "skipUrlSync": false,
         "type": "custom"
@@ -8536,6 +8459,6 @@
   "timezone": "",
   "title": "General Overview",
   "uid": "a579a982-6ac3-4779-a90c-31deb123c4f8",
-  "version": 5,
+  "version": 8,
   "weekStart": ""
 }
