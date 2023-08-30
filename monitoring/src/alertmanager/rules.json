@@ -7,7 +7,7 @@
           "alert": "UnchainedStatefulSetDown",
           "annotations": {
             "summary": "Unchained stateful set is currently down",
-            "description": "Service {{ $labels.statefulset }} has been down for more than 5 minutes"
+            "description": "Service {{ $labels.statefulset }} has been down for more than 15 minutes"
           },
           "expr": "kube_statefulset_status_replicas_available == 0",
           "for": "5m",
@@ -19,7 +19,7 @@
           "alert": "UnchainedDeploymentDown",
           "annotations": {
             "summary": "Unchained deployment is currently down",
-            "description": "Deployment {{ $labels.deployment }} has been down for more than 5 minutes"
+            "description": "Deployment {{ $labels.deployment }} has been down for more than 15 minutes"
           },
           "expr": "kube_deployment_status_replicas_available == 0",
           "for": "5m",

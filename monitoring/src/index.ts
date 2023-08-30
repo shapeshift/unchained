@@ -30,7 +30,6 @@ export = async (): Promise<Outputs> => {
         kubeControllerManager: { enabled: false },
         kubeEtcd: { enabled: false },
         kubeScheduler: { enabled: false },
-        alertManager: { enabled: false },
         prometheus: {
           prometheusSpec: {
             serviceMonitorSelectorNilUsesHelmValues: false,
@@ -87,6 +86,34 @@ export = async (): Promise<Outputs> => {
               client_secret: process.env.GITHUB_OAUTH_SECRET,
             },
           },
+        },
+        alertmanager: {
+          alertmanagerSpec: {
+            storage: {
+              volumeClaimTemplate: {
+                spec: {
+                  storageClassName: 'ebs-csi-gp2',
+                  accessModes: ['ReadWriteOnce'],
+                  resources: { requests: { storage: '50Gi' } },
+                },
+              },
+            },
+          },
+          stringConfig: readFileSync('./alertmanager/config.yaml')
+            .toString()
+            .replace('<<DISCORD_WEBHOOK_URL_CRITICAL>>', process.env.DISCORD_WEBHOOK_URL_CRITICAL ?? '')
+            .replace('<<DISCORD_WEBHOOK_URL_WARNING>>', process.env.DISCORD_WEBHOOK_URL_WARNING ?? '')
+            .replace('<<DISCORD_WEBHOOK_URL_DEV>>', process.env.DISCORD_WEBHOOK_URL_DEV ?? ''),
+          tplConfig: true,
+          templateFiles: {
+            'discord.tmpl': readFileSync('./alertmanager/discord.tmpl').toString(),
+          },
+        },
+        additionalPrometheusRulesMap: {
+          unchained: JSON.parse(readFileSync('./alertmanager/rules.json').toString()),
+        },
+        'kube-state-metrics': {
+          metricLabelsAllowlist: ['pods=[*],deployments=[*],statefulsets=[*]'],
         },
       },
     },
