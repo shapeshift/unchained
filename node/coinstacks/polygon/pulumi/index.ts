@@ -17,7 +17,7 @@ export = async (): Promise<Outputs> => {
           ...service,
           env: {
             NETWORK: config.network,
-            SNAPSHOT: 'https://snapshot-download.polygon.technology/bor-mainnet-incremental-compiled-files.txt',
+            SNAPSHOT: 'https://snapshot-download.polygon.technology/snapdown.sh',
           },
           ports: {
             'daemon-rpc': { port: 8545 },
@@ -39,7 +39,7 @@ export = async (): Promise<Outputs> => {
           },
           env: {
             ETH_RPC_URL: `http://ethereum-svc.${namespace}.svc.cluster.local:8545`,
-            SNAPSHOT: 'https://snapshot-download.polygon.technology/heimdall-mainnet-incremental-compiled-files.txt',
+            SNAPSHOT: 'https://snapshot-download.polygon.technology/snapdown.sh',
           },
           startupProbe: { periodSeconds: 30, failureThreshold: 60, timeoutSeconds: 10 },
           livenessProbe: { periodSeconds: 30, failureThreshold: 5, timeoutSeconds: 10 },
