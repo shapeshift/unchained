@@ -1,0 +1,70 @@
+{
+  "groups": [
+    {
+      "name": "general",
+      "rules": [
+        {
+          "alert": "UnchainedStatefulSetDown",
+          "annotations": {
+            "summary": "Unchained stateful set is currently down",
+            "description": "Service {{ $labels.statefulset }} has been down for more than 15 minutes"
+          },
+          "expr": "kube_statefulset_status_replicas_available == 0",
+          "for": "5m",
+          "labels": {
+            "severity": "critical"
+          }
+        },
+        {
+          "alert": "UnchainedDeploymentDown",
+          "annotations": {
+            "summary": "Unchained deployment is currently down",
+            "description": "Deployment {{ $labels.deployment }} has been down for more than 15 minutes"
+          },
+          "expr": "kube_deployment_status_replicas_available == 0",
+          "for": "5m",
+          "labels": {
+            "severity": "critical"
+          }
+        },
+        {
+          "alert": "UnchainedHighPodRestartCount",
+          "annotations": {
+            "summary": "High number of pod restarts",
+            "description": "Pod {{ $labels.pod }} has restarted more than 5 times in the last 15 minutes"
+          },
+          "expr": "increase(kube_pod_container_status_restarts_total[15m]) >= 5",
+          "for": "1m",
+          "labels": {
+            "severity": "warning"
+          }
+        }
+      ]
+    },
+    {
+      "name": "api",
+      "rules": [
+        {
+          "record": "namespace_coinstack:unchained_http_request_count:sum_rate",
+          "expr": "sum(rate(unchained_http_request_count[5m])) by (namespace, coinstack)"
+        },
+        {
+          "record": "namespace_coinstack:unchained_http_request_count_5xx:sum_rate",
+          "expr": "sum(rate(unchained_http_request_count{statusCode=~\"5.*\"}[5m])) by (namespace, coinstack)"
+        },
+        {
+          "alert": "UnchainedHigh5xxApiErrorRate",
+          "annotations": {
+            "summary": "High 5xx API error rate",
+            "description": "The {{ $labels.coinstack }} coinstack is experiencing a high 5xx api error rate of {{ $value }}%"
+          },
+          "expr": "namespace_coinstack:unchained_http_request_count_5xx:sum_rate / namespace_coinstack:unchained_http_request_count:sum_rate * 100 >= 1",
+          "for": "15m",
+          "labels": {
+            "severity": "warning"
+          }
+        }
+      ]
+    }
+  ]
+}

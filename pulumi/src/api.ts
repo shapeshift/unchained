@@ -281,6 +281,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
     {
       metadata: {
         namespace: namespace,
+        labels: labels,
       },
       spec: {
         selector: { matchLabels: labels },

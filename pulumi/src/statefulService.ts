@@ -282,6 +282,7 @@ export async function deployStatefulService(
       metadata: {
         name: `${assetName}-sts`,
         namespace: namespace,
+        labels: labels,
         annotations: { 'pulumi.com/skipAwait': 'true' },
       },
       spec: {
