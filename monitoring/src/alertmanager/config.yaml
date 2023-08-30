@@ -1,0 +1,75 @@
+global:
+  resolve_timeout: 5m
+inhibit_rules:
+  - source_matchers:
+      - "severity = critical"
+    target_matchers:
+      - "severity =~ warning|info"
+    equal:
+      - "namespace"
+      - "alertname"
+  - source_matchers:
+      - "severity = warning"
+    target_matchers:
+      - "severity = info"
+    equal:
+      - "namespace"
+      - "alertname"
+  - source_matchers:
+      - "alertname = InfoInhibitor"
+    target_matchers:
+      - "severity = info"
+    equal:
+      - "namespace"
+route:
+  group_by: ["alertname", "namespace", "statefulset", "deployment", "pod", "persistentvolumeclaim", "coinstack"]
+  group_wait: 30s
+  group_interval: 15m
+  repeat_interval: 12h
+  receiver: "null"
+  routes:
+    - receiver: "discord_critical"
+      matchers:
+        - alertname =~ "KubePersistentVolumeFillingUp|UnchainedStatefulSetDown|UnchainedDeploymentDown"
+        - namespace = "unchained"
+        - severity = "critical"
+    - receiver: "discord_warning"
+      matchers:
+        - alertname =~ "KubePodCrashLooping|KubeDeploymentReplicasMismatch|KubeStatefulSetReplicasMismatch|KubeHpaMaxedOut|UnchainedHighPodRestartCount|UnchainedHigh5xxApiErrorRate"
+        - namespace = "unchained"
+        - severity = "warning"
+    - receiver: "discord_dev"
+      matchers:
+        - alertname =~ "KubePersistentVolumeFillingUp|UnchainedStatefulSetDown|UnchainedDeploymentDown"
+        - namespace = "unchained-dev"
+        - severity = "critical"
+    - receiver: "discord_dev"
+      matchers:
+        - alertname =~ "KubePodCrashLooping|KubeDeploymentReplicasMismatch|KubeStatefulSetReplicasMismatch|UnchainedHighPodRestartCount|UnchainedHigh5xxApiErrorRate"
+        - namespace = "unchained-dev"
+        - severity = "warning"
+receivers:
+  - name: "null"
+  - name: discord_critical
+    discord_configs:
+      - webhook_url: <<DISCORD_WEBHOOK_URL_CRITICAL>>
+        title: |-
+          {{ `{{ template "discord.title" . }}` }}
+        message: |-
+          {{ `{{ template "discord.message" . }}` }}
+  - name: discord_warning
+    discord_configs:
+      - webhook_url: <<DISCORD_WEBHOOK_URL_WARNING>>
+        title: |-
+          {{ `{{ template "discord.title" . }}` }}
+        message: |-
+          {{ `{{ template "discord.message" . }}` }}
+  - name: discord_dev
+    discord_configs:
+      - webhook_url: <<DISCORD_WEBHOOK_URL_DEV>>
+        title: |-
+          {{ `{{ template "discord.title" . }}` }}
+        message: |-
+          {{ `{{ template "discord.message" . }}` }}
+templates:
+  - "/etc/alertmanager/config/*.tmpl"
