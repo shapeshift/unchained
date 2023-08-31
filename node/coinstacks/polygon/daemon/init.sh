@@ -2,43 +2,18 @@
 
 set -e
 
-apk add bash curl jq wget zstd tar
+apk add bash curl jq wget zstd tar pv
 
 [ "$DEBUG" = "true" ] && set -x
 
 DATA_DIR=/data
 CHAINDATA_DIR=$DATA_DIR/bor/chaindata
 
-function extract_files() {
-  while read -r line; do
-    if echo "$line" | grep -q checksum; then
-      continue
-    fi
-
-    if echo "$line" | grep -q "bulk"; then
-      wget -nc --timeout 0 --retry-connrefused --tries 0 $line -O - | zstd -cd | tar -xvf - --skip-old-files -C $CHAINDATA_DIR
-    else
-      wget -nc --timeout 0 --retry-connrefused --tries 0 $line -O - | zstd -cd | tar -xvf - --skip-old-files -C $CHAINDATA_DIR --strip-components=3
-    fi
-
-    sed -i -e "\|$line|,+1d" $DATA_DIR/$filename
-  done < $1
-}
-
 # shapshots provided by: https://snapshot.polygon.technology/
-if [ -n "$SNAPSHOT" ]; then
-  filename=$(echo $SNAPSHOT | awk -F/ '{print $NF}')
-
-  if [ ! -f "$DATA_DIR/$filename" ] && [ ! -d "$CHAINDATA_DIR" ]; then
-    rm -rf $DATA_DIR/bor;
-    mkdir -p $CHAINDATA_DIR;
-    wget $SNAPSHOT -O $DATA_DIR/$filename
-  fi
-
-  if [ -f "$DATA_DIR/$filename" ]; then
-    extract_files $DATA_DIR/$filename
-    rm $DATA_DIR/$filename
-  fi
+if [ -n "$SNAPSHOT" ] && [ ! -d "$CHAINDATA_DIR" ]; then
+  rm -rf $DATA_DIR/bor;
+  mkdir -p $CHAINDATA_DIR;
+  curl -L $SNAPSHOT | bash -s -- --network mainnet --client bor --extract-dir $CHAINDATA_DIR --validate-checksum true
 fi
 
 if [ ! -f "$DATA_DIR/bor/genesis.json" ]; then

@@ -2,41 +2,18 @@
 
 set -e
 
-apk add bash curl jq wget zstd
+apk add bash curl jq wget zstd pv
 
 [ "$DEBUG" = "true" ] && set -x
 
 HOME_DIR=/root/.heimdalld
 CONFIG_DIR=$HOME_DIR/config
 
-function extract_files() {
-  while read -r line; do
-    if echo "$line" | grep -q checksum; then
-      continue
-    fi
-    if echo "$line" | grep -q "bulk"; then
-      wget -nc --timeout 0 --retry-connrefused --tries 0 $line -O - | zstd -cd | tar -xvkf - -C $HOME_DIR/data
-    else
-      wget -nc --timeout 0 --retry-connrefused --tries 0 $line -O - | zstd -cd | tar -xvkf - -C $HOME_DIR/data --strip-components=3
-    fi
-  done < $1
-}
-
 # shapshots provided by: https://snapshot.polygon.technology/
-if [ -n "$SNAPSHOT" ]; then
-  filename=$(echo $SNAPSHOT | awk -F/ '{print $NF}')
-
-  if [ ! -f "$HOME_DIR/$filename" ] && [ ! -f "$HOME_DIR/data/priv_validator_state.json" ]; then
-    rm -rf $HOME_DIR/data;
-    mkdir -p $HOME_DIR/data;
-  fi
-
-  if [ -f "$HOME_DIR/$filename" ] || [ ! -f "$HOME_DIR/data/priv_validator_state.json" ]; then
-    apk add wget zstd
-    wget $SNAPSHOT -O $HOME_DIR/$filename
-    extract_files $HOME_DIR/$filename
-    rm $HOME_DIR/$filename
-  fi
+if [ -n "$SNAPSHOT" ] && [ ! -f "$HOME_DIR/data/priv_validator_state.json" ]; then
+  rm -rf $HOME_DIR/data;
+  mkdir -p $HOME_DIR/data;
+  curl -L $SNAPSHOT | bash -s -- --network mainnet --client heimdall --extract-dir $HOME_DIR/data --validate-checksum true
 fi
 
 if [ ! -d "$CONFIG_DIR" ]; then
