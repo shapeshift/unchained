@@ -450,7 +450,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.120.0
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.120.1
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
@@ -801,14 +801,14 @@ jobs:
             pulumi config set --path unchained:common.additionalEnvironments[0] dev
             pulumi config set --path unchained:common.additionalEnvironments[1] monitoring
             pulumi config set --path unchained:common.eks.allAZs true
-            pulumi config set --path unchained:common.eks.autoscaling true
+            pulumi config set --path unchained:common.eks.autoscaling false
             pulumi config set --path unchained:common.eks.region $AWS_REGION
             pulumi config set --path unchained:common.eks.cidrBlock 10.0.0.0/16
             pulumi config set --path unchained:common.eks.nodeGroups[0].name spot
             pulumi config set --path unchained:common.eks.nodeGroups[0].type SPOT
             pulumi config set --path unchained:common.eks.nodeGroups[0].desired 6
             pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 6
-            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 8
+            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 6
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[0] r6in.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r6idn.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r6a.4xlarge
