@@ -24,7 +24,7 @@ RUN cd /opt && git clone -b $ROCKSDB_VERSION --depth 1 https://github.com/facebo
 RUN cd /opt/rocksdb && CFLAGS=-fPIC CXXFLAGS=-fPIC PORTABLE=$PORTABLE_ROCKSDB make -j 4 static_lib
 
 ENV BLOCKBOOK_VERSION=master
-ENV BLOCKBOOK_COMMIT=4f7d8f0
+ENV BLOCKBOOK_COMMIT=95ee9b5
 ENV BLOCKBOOK_URL=https://github.com/trezor/blockbook.git
 
 # set up blockbook
