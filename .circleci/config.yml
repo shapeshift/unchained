@@ -159,7 +159,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 2
+    stateful-service-replicas: 3
     service-name-1: daemon
     service-image-1: shapeshiftdao/bitcoin-core:25.0
     service-cpu-limit-1: "2"
@@ -284,13 +284,13 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 2
+    stateful-service-replicas: 3
     service-name-1: daemon
     service-image-1: avaplatform/avalanchego:v1.10.9
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
-    service-storage-size-1: 4500Gi
+    service-storage-size-1: 500Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:95ee9b5
     service-cpu-limit-2: "2"
@@ -325,7 +325,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 2
+    stateful-service-replicas: 3
     service-name-1: daemon
     service-image-1: shapeshiftdao/dogecoin:1.14.6
     service-cpu-limit-1: "2"
@@ -366,7 +366,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 2
+    stateful-service-replicas: 3
     service-name-1: daemon
     service-image-1: shapeshiftdao/litecoin-core:v0.21.2.2
     service-cpu-limit-1: "2"
@@ -407,7 +407,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 2
+    stateful-service-replicas: 3
     service-name-1: daemon
     service-image-1: shapeshiftdao/bitcoin-cash-node:26.1.0
     service-cpu-limit-1: "2"
@@ -806,9 +806,9 @@ jobs:
             pulumi config set --path unchained:common.eks.cidrBlock 10.0.0.0/16
             pulumi config set --path unchained:common.eks.nodeGroups[0].name spot
             pulumi config set --path unchained:common.eks.nodeGroups[0].type SPOT
-            pulumi config set --path unchained:common.eks.nodeGroups[0].desired 7
-            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 7
-            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 7
+            pulumi config set --path unchained:common.eks.nodeGroups[0].desired 8
+            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 8
+            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 8
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[0] r6in.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r6idn.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r6a.4xlarge
