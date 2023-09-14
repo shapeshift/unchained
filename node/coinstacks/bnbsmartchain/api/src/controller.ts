@@ -210,14 +210,22 @@ export class BNBSmartChain extends Controller implements BaseAPI, API {
    */
   @Example<GasFees>({
     gasPrice: '3000000000',
+    baseFeePerGas: '0',
+    maxPriorityFeePerGas: '3000000000',
     slow: {
-      gasPrice: '1950000000',
+      gasPrice: '1800000000',
+      maxFeePerGas: '2200000000',
+      maxPriorityFeePerGas: '2200000000',
     },
     average: {
-      gasPrice: '3005600001',
+      gasPrice: '3039050000',
+      maxFeePerGas: '2925000000',
+      maxPriorityFeePerGas: '2925000000',
     },
     fast: {
-      gasPrice: '6082233092',
+      gasPrice: '5187055981',
+      maxFeePerGas: '3524000000',
+      maxPriorityFeePerGas: '3524000000',
     },
   })
   @Response<InternalServerError>(500, 'Internal Server Error')
