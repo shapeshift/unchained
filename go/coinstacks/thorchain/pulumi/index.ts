@@ -59,18 +59,18 @@ export = async (): Promise<Outputs> => {
           ports: { postgres: { port: 5432 } },
           volumeMounts: [{ name: 'dshm', mountPath: '/dev/shm' }],
           startupProbe: {
-            exec: { command: ['pg_isready', '-U', '$POSTGRES_USER'] },
+            exec: { command: ['pg_isready', '-U', 'midgard'] },
             periodSeconds: 30,
             failureThreshold: 10,
             timeoutSeconds: 5,
           },
           livenessProbe: {
-            exec: { command: ['pg_isready', '-U', '$POSTGRES_USER'] },
+            exec: { command: ['pg_isready', '-U', 'midgard'] },
             periodSeconds: 30,
             timeoutSeconds: 5,
           },
           readinessProbe: {
-            exec: { command: ['pg_isready', '-U', '$POSTGRES_USER'] },
+            exec: { command: ['pg_isready', '-U', 'midgard'] },
             periodSeconds: 30,
             timeoutSeconds: 5,
           },
