@@ -30,6 +30,7 @@ start() {
     --ws.api eth,net,web3,debug,txpool,engine \
     --ws.origins "*" \
     --rollup.disabletxpoolgossip=true \
+    --rollup.allowpendingtxfilters \
     --rollup.sequencerhttp https://mainnet-sequencer.optimism.io \
     --txlookuplimit 0 \
     --cache 4096 \
