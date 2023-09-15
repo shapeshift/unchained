@@ -198,6 +198,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 		case *banktypes.MsgSend:
 			message := Message{
 				Addresses: []string{v.FromAddress, v.ToAddress},
+				Index:     strconv.Itoa(i),
 				Origin:    v.FromAddress,
 				From:      v.FromAddress,
 				To:        v.ToAddress,
@@ -208,6 +209,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 		case *stakingtypes.MsgDelegate:
 			message := Message{
 				Addresses: []string{v.DelegatorAddress, v.ValidatorAddress},
+				Index:     strconv.Itoa(i),
 				Origin:    v.DelegatorAddress,
 				From:      v.DelegatorAddress,
 				To:        v.ValidatorAddress,
@@ -218,6 +220,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 		case *stakingtypes.MsgUndelegate:
 			message := Message{
 				Addresses: []string{v.DelegatorAddress, v.ValidatorAddress},
+				Index:     strconv.Itoa(i),
 				Origin:    v.DelegatorAddress,
 				From:      v.ValidatorAddress,
 				To:        v.DelegatorAddress,
@@ -228,6 +231,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 		case *stakingtypes.MsgBeginRedelegate:
 			message := Message{
 				Addresses: []string{v.DelegatorAddress, v.ValidatorSrcAddress, v.ValidatorDstAddress},
+				Index:     strconv.Itoa(i),
 				Origin:    v.DelegatorAddress,
 				From:      v.ValidatorSrcAddress,
 				To:        v.ValidatorDstAddress,
@@ -245,6 +249,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 
 			message := Message{
 				Addresses: []string{v.DelegatorAddress, v.ValidatorAddress},
+				Index:     strconv.Itoa(i),
 				Origin:    v.DelegatorAddress,
 				From:      v.ValidatorAddress,
 				To:        v.DelegatorAddress,
@@ -255,6 +260,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 		case *ibctransfertypes.MsgTransfer:
 			message := Message{
 				Addresses: []string{v.Sender, v.Receiver},
+				Index:     strconv.Itoa(i),
 				Origin:    v.Sender,
 				From:      v.Sender,
 				To:        v.Receiver,
@@ -290,6 +296,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 
 			message := Message{
 				Addresses: []string{d.Sender, d.Receiver},
+				Index:     strconv.Itoa(i),
 				Origin:    d.Sender,
 				From:      d.Sender,
 				To:        d.Receiver,

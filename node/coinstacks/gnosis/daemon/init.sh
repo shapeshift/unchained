@@ -1,9 +1,22 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
+apt update && apt install -y curl jq
+
 start() {
-  ./Nethermind.Runner --config gnosis --datadir /data/gnosis --JsonRpc.Host=0.0.0.0 --JsonRpc.Port=8545 --JsonRpc.JwtSecretFile=/jwt.hex --JsonRpc.EnabledModules=eth,net,web3,trace,subscribe,txpool,health,rpc --Init.WebSocketsEnabled=true --JsonRpc.WebSocketsPort=8546 --JsonRpc.EnginePort 8551 --HealthChecks.Enabled=true --Metrics.CountersEnabled=true &
+  ./Nethermind.Runner \
+    --config gnosis \
+    --datadir /data/gnosis \
+    --JsonRpc.Host=0.0.0.0 \
+    --JsonRpc.Port=8545 \
+    --JsonRpc.JwtSecretFile=/jwt.hex \
+    --JsonRpc.EnabledModules=eth,net,web3,trace,subscribe,txpool,health,rpc \
+    --JsonRpc.WebSocketsPort=8546 \
+    --JsonRpc.EnginePort 8551 \
+    --Init.WebSocketsEnabled=true \
+    --HealthChecks.Enabled=true \
+    --Metrics.CountersEnabled=true &
   PID="$!"
 }
 

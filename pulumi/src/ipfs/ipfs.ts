@@ -67,7 +67,7 @@ export function deployIpfs({ namespace, provider, domain, additionalDomain }: Ip
         {
           name: 'ipfs',
           image: 'ipfs/go-ipfs:latest',
-          env: [{ name: 'IPFS_FD_MAX', value: '4096' }],
+          env: [{ name: 'IPFS_FD_MAX', value: '8192' }],
           ports: [
             { name: 'swarm', containerPort: 4001, protocol: 'TCP' },
             { name: 'swarm-udp', containerPort: 4002, protocol: 'UDP' },
@@ -94,8 +94,8 @@ export function deployIpfs({ namespace, provider, domain, additionalDomain }: Ip
           ],
           resources: {
             limits: {
-              cpu: '100m',
-              memory: '128Mi',
+              cpu: '250m',
+              memory: '512Mi',
             },
           },
         },

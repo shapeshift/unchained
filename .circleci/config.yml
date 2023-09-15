@@ -4,9 +4,6 @@ executors:
   pulumi:
     docker:
       - image: pulumi/pulumi-nodejs:3.50.2
-  golang:
-    docker:
-      - image: golang:1.20.3-bullseye
 
 aliases:
   - &only-feature
@@ -63,8 +60,12 @@ aliases:
       type: string
     api-cpu-request:
       type: string
+      default: ""
     api-memory-limit:
       type: string
+    api-memory-request:
+      type: string
+      default: ""
     api-replicas:
       type: integer
     stateful-service-replicas:
@@ -155,8 +156,9 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: shapeshiftdao/bitcoin-core:25.0
@@ -165,10 +167,10 @@ aliases:
     service-memory-limit-1: 8Gi
     service-storage-size-1: 650Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
+    service-image-2: shapeshiftdao/unchained-blockbook:95ee9b5
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 40Gi
+    service-memory-limit-2: 32Gi
     service-storage-size-2: 500Gi
 
   - &bitcoin-dev
@@ -180,7 +182,6 @@ aliases:
     indexer-ws-url: ws://bitcoin-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
@@ -188,7 +189,7 @@ aliases:
     assetName: ethereum
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/ethereum/pulumi
-    rpc-url: http://ethereum-svc.unchained.svc.cluster.local:8332
+    rpc-url: http://ethereum-svc.unchained.svc.cluster.local:8545
     indexer-url: http://ethereum-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-svc.unchained.svc.cluster.local:8001/websocket
     api-autoscaling: true
@@ -196,23 +197,24 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.12.0
-    service-cpu-limit-1: "4"
-    service-cpu-request-1: "2"
+    service-image-1: ethereum/client-go:v1.13.0
+    service-cpu-limit-1: "2"
+    service-cpu-request-1: "1"
     service-memory-limit-1: 32Gi
-    service-storage-size-1: 2500Gi
+    service-storage-size-1: 3000Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.0.5
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.0.8
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 12Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:fdc2b86
+    service-image-3: shapeshiftdao/unchained-blockbook:95ee9b5
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
     service-memory-limit-3: 16Gi
@@ -222,18 +224,13 @@ aliases:
     <<: *ethereum
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    rpc-url: http://ethereum-svc.unchained-dev.svc.cluster.local:8332
+    rpc-url: http://ethereum-svc.unchained-dev.svc.cluster.local:8545
     indexer-url: http://ethereum-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://ethereum-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
-    # “At 04:00 on Wednesday.”
-    stateful-service-backup: true
-    stateful-service-backup-schedule: "0 4 * * 3"
-    stateful-service-backup-count: 1
 
   - &cosmos
     assetName: cosmos
@@ -248,15 +245,16 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/cosmoshub:v9.1.1
-    service-cpu-limit-1: "4"
-    service-cpu-request-1: "2"
+    service-image-1: shapeshiftdao/cosmoshub:v12.0.0
+    service-cpu-limit-1: "2"
+    service-cpu-request-1: "1"
     service-memory-limit-1: 32Gi
-    service-storage-size-1: 3000Gi
+    service-storage-size-1: 3500Gi
 
   - &cosmos-dev
     <<: *cosmos
@@ -268,42 +266,6 @@ aliases:
     ws-url: ws://cosmos-svc.unchained-dev.svc.cluster.local:26657
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
-    api-memory-limit: 250Mi
-    stateful-service-replicas: 1
-
-  - &osmosis
-    assetName: osmosis
-    pulumi-stack: public-us-east-2
-    pulumi-dir: coinstacks/osmosis/pulumi
-    lcd-url: http://osmosis-svc.unchained.svc.cluster.local:1317
-    rpc-url: http://osmosis-svc.unchained.svc.cluster.local:26657
-    ws-url: ws://osmosis-svc.unchained.svc.cluster.local:26657
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
-    api-cpu-threshold: 50
-    api-memory-limit: 500Mi
-    stateful-service-replicas: 2
-    service-name-1: daemon
-    service-image-1: shapeshiftdao/osmosis:v15.1.2
-    service-cpu-limit-1: "4"
-    service-cpu-request-1: "2"
-    service-memory-request-1: 32Gi
-    service-storage-size-1: 1000Gi
-
-  - &osmosis-dev
-    <<: *osmosis
-    environment: dev
-    pulumi-stack: public-dev-us-east-2
-    lcd-url: http://osmosis-svc.unchained-dev.svc.cluster.local:1317
-    rpc-url: http://osmosis-svc.unchained-dev.svc.cluster.local:26657
-    ws-url: ws://osmosis-svc.unchained-dev.svc.cluster.local:26657
-    api-replicas: 1
-    api-max-replicas: 2
-    api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
@@ -319,17 +281,18 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: avaplatform/avalanchego:v1.10.2
+    service-image-1: avaplatform/avalanchego:v1.10.9
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
-    service-storage-size-1: 4500Gi
+    service-storage-size-1: 500Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
+    service-image-2: shapeshiftdao/unchained-blockbook:95ee9b5
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 6Gi
@@ -344,7 +307,6 @@ aliases:
     indexer-ws-url: ws://avalanche-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
@@ -360,8 +322,9 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: shapeshiftdao/dogecoin:1.14.6
@@ -370,7 +333,7 @@ aliases:
     service-memory-limit-1: 4Gi
     service-storage-size-1: 250Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
+    service-image-2: shapeshiftdao/unchained-blockbook:95ee9b5
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 16Gi
@@ -385,7 +348,6 @@ aliases:
     indexer-ws-url: ws://dogecoin-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
@@ -401,17 +363,18 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: uphold/litecoin-core:0.21
+    service-image-1: shapeshiftdao/litecoin-core:v0.21.2.2
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 4Gi
     service-storage-size-1: 250Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
+    service-image-2: shapeshiftdao/unchained-blockbook:95ee9b5
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 12Gi
@@ -426,7 +389,6 @@ aliases:
     indexer-ws-url: ws://litecoin-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
@@ -442,8 +404,9 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: shapeshiftdao/bitcoin-cash-node:26.1.0
@@ -452,7 +415,7 @@ aliases:
     service-memory-limit-1: 4Gi
     service-storage-size-1: 250Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
+    service-image-2: shapeshiftdao/unchained-blockbook:95ee9b5
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 8Gi
@@ -467,7 +430,6 @@ aliases:
     indexer-ws-url: ws://bitcoincash-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
@@ -483,23 +445,24 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:chaosnet-multichain-1.111.1
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.120.2
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
-    service-memory-limit-1: 8Gi
+    service-memory-limit-1: 12Gi
     service-storage-size-1: 2500Gi
     service-name-2: timescaledb
     service-image-2: timescale/timescaledb:2.2.0-pg13
-    service-cpu-request-2: "2"
-    service-cpu-limit-2: "4"
+    service-cpu-request-2: "1"
+    service-cpu-limit-2: "2"
     service-memory-limit-2: 8Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: registry.gitlab.com/thorchain/midgard:2.13.0
+    service-image-3: registry.gitlab.com/thorchain/midgard:2.16.1
     service-cpu-limit-3: 500m
     service-cpu-request-3: 250m
     service-memory-limit-3: 1Gi
@@ -514,7 +477,6 @@ aliases:
     ws-url: ws://thorchain-svc.unchained-dev.svc.cluster.local:27147
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
@@ -530,26 +492,27 @@ aliases:
     api-max-replicas: 6
     api-cpu-limit: 500m
     api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101105.3
-    service-cpu-limit-1: "8"
-    service-cpu-request-1: "4"
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101200.1
+    service-cpu-limit-1: "4"
+    service-cpu-request-1: "2"
     service-memory-limit-1: 24Gi
-    service-storage-size-1: 500Gi
+    service-storage-size-1: 1000Gi
     service-name-2: op-node
-    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.1.0
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.1.4
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 2Gi
     service-storage-size-2: 100Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:optimism-bedrock-3c86cce
+    service-image-3: shapeshiftdao/unchained-blockbook:optimism-bf8a472
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
-    service-memory-limit-3: 12Gi
+    service-memory-limit-3: 8Gi
     service-storage-size-3: 500Gi
 
   - &optimism-dev
@@ -561,7 +524,6 @@ aliases:
     indexer-ws-url: ws://optimism-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
@@ -575,24 +537,25 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-limit: "1"
+    api-cpu-request: 500m
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/bnb-smart-chain:v1.2.5
-    service-cpu-limit-1: "16"
-    service-cpu-request-1: "8"
+    service-image-1: shapeshiftdao/bnb-smart-chain:v1.2.12
+    service-cpu-limit-1: "8"
+    service-cpu-request-1: "4"
     service-memory-limit-1: 72Gi
     service-memory-request-1: 48Gi
-    service-storage-size-1: 4000Gi
+    service-storage-size-1: 4500Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:fdc2b86
+    service-image-2: shapeshiftdao/unchained-blockbook:95ee9b5
     service-cpu-limit-2: "4"
     service-cpu-request-2: "2"
     service-memory-limit-2: 24Gi
-    service-storage-size-2: 750Gi
+    service-storage-size-2: 1000Gi
 
   - &bnbsmartchain-dev
     <<: *bnbsmartchain
@@ -603,12 +566,9 @@ aliases:
     indexer-ws-url: ws://bnbsmartchain-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
-    api-memory-limit: 250Mi
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     stateful-service-replicas: 1
-    stateful-service-backup: true
-    stateful-service-backup-schedule: "0 4 * * 3,6"
-    stateful-service-backup-count: 2
 
   - &polygon
     assetName: polygon
@@ -620,31 +580,31 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
-    api-cpu-threshold: 50
+    api-cpu-limit: "1"
+    api-cpu-request: 500m
+    api-cpu-threshold: 75
     api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: 0xpolygon/bor:0.3.9
-    service-cpu-limit-1: "16"
-    service-cpu-request-1: "8"
+    service-image-1: 0xpolygon/bor:0.5.0
+    service-cpu-limit-1: "8"
+    service-cpu-request-1: "4"
     service-memory-request-1: 32Gi
     service-memory-limit-1: 48Gi
     service-storage-size-1: 4000Gi
     service-name-2: heimdall
-    service-image-2: 0xpolygon/heimdall:0.3.4-beta
+    service-image-2: 0xpolygon/heimdall:0.3.5
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 2Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:polygon-e655dd8
+    service-image-3: shapeshiftdao/unchained-blockbook:95ee9b5
     service-cpu-limit-3: "4"
     service-cpu-request-3: "2"
     service-memory-limit-3: 24Gi
-    service-storage-size-3: 500Gi
-
+    service-storage-size-3: 750Gi
 
   - &polygon-dev
     <<: *polygon
@@ -655,12 +615,9 @@ aliases:
     indexer-ws-url: ws://polygon-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 300m
-    api-memory-limit: 250Mi
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     stateful-service-replicas: 1
-    stateful-service-backup: true
-    stateful-service-backup-schedule: "0 4 * * 3,6"
-    stateful-service-backup-count: 2
 
   - &gnosis
     assetName: gnosis
@@ -669,29 +626,29 @@ aliases:
     rpc-url: http://gnosis-svc.unchained.svc.cluster.local:8545
     indexer-url: http://gnosis-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://gnosis-svc.unchained.svc.cluster.local:8001/websocket
-    api: true
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 1000m
-    api-cpu-request: 500m
-    api-cpu-threshold: 50
-    api-memory-limit: 2Gi
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
+    api-cpu-threshold: 75
+    api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.19.2
+    service-image-1: nethermind/nethermind:1.20.3
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
-    service-memory-limit-1: 16Gi
+    service-memory-limit-1: 6Gi
     service-storage-size-1: 1000Gi
     service-name-2: daemon-beacon
-    service-image-2: sigp/lighthouse:v4.2.0
+    service-image-2: sigp/lighthouse:v4.4.1
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 4Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:gnosis-9c25fc0
+    service-image-3: shapeshiftdao/unchained-blockbook:gnosis-f0ab749
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
     service-memory-limit-3: 24Gi
@@ -706,11 +663,8 @@ aliases:
     indexer-ws-url: ws://gnosis-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 2Gi
+    api-memory-limit: 250Mi
     stateful-service-replicas: 1
-    stateful-service-backup: true
-    stateful-service-backup-schedule: "0 4 * * 3"
-    stateful-service-backup-count: 1
 
   - &arbitrum
     assetName: arbitrum
@@ -834,26 +788,6 @@ commands:
             echo aws_access_key_id = $<< parameters.organization >>_AWS_ACCESS_KEY_ID >> ~/.aws/credentials
             echo aws_secret_access_key = $<< parameters.organization >>_AWS_SECRET_ACCESS_KEY >> ~/.aws/credentials
     
-  kube-prometheus-dependencies:
-    description: setup kube-prometheus
-    parameters:
-      organization:
-        type: string
-    steps:
-      - generic-dependencies:
-          organization: <<parameters.organization>>
-      - run:
-          name: Setup Jsonnet
-          working_directory: monitoring/my-kube-prometheus
-          command: |
-            go install github.com/google/go-jsonnet/cmd/jsonnet@latest
-            go install github.com/brancz/gojsontoyaml@latest
-            go install -a github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@latest
-            jb install
-      - run:
-          name: update kubeconfig
-          command: aws eks update-kubeconfig --region $AWS_REGION --name $UNCHAINED_EKS_CLUSTER
-        
   pulumi-dependencies:
     description: set up pulumi dependencies
     parameters:
@@ -912,13 +846,13 @@ jobs:
             pulumi config set --path unchained:common.additionalEnvironments[0] dev
             pulumi config set --path unchained:common.additionalEnvironments[1] monitoring
             pulumi config set --path unchained:common.eks.allAZs true
-            pulumi config set --path unchained:common.eks.autoscaling true
+            pulumi config set --path unchained:common.eks.autoscaling false
             pulumi config set --path unchained:common.eks.region $AWS_REGION
             pulumi config set --path unchained:common.eks.cidrBlock 10.0.0.0/16
             pulumi config set --path unchained:common.eks.nodeGroups[0].name spot
             pulumi config set --path unchained:common.eks.nodeGroups[0].type SPOT
-            pulumi config set --path unchained:common.eks.nodeGroups[0].desired 6
-            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 6
+            pulumi config set --path unchained:common.eks.nodeGroups[0].desired 8
+            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 8
             pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 8
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[0] r6in.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r6idn.4xlarge
@@ -928,11 +862,11 @@ jobs:
             pulumi config set --path unchained:common.eks.traefik.autoscaling.enabled true
             pulumi config set --path unchained:common.eks.traefik.autoscaling.memoryThreshold 50
             pulumi config set --path unchained:common.eks.traefik.autoscaling.cpuThreshold 80
-            pulumi config set --path unchained:common.eks.traefik.autoscaling.maxReplicas 20
+            pulumi config set --path unchained:common.eks.traefik.autoscaling.maxReplicas 25
             pulumi config set --path unchained:common.eks.traefik.autoscaling.minReplicas 5
             pulumi config set --path unchained:common.eks.traefik.replicas 5
             pulumi config set --path unchained:common.eks.traefik.resources.cpu 300m
-            pulumi config set --path unchained:common.eks.traefik.resources.memory 512Mi
+            pulumi config set --path unchained:common.eks.traefik.resources.memory 1Gi
             pulumi config set --path unchained:common.eks.traefik.whitelist[0] 173.245.48.0/20
             pulumi config set --path unchained:common.eks.traefik.whitelist[1] 103.21.244.0/22
             pulumi config set --path unchained:common.eks.traefik.whitelist[2] 103.22.200.0/22
@@ -963,7 +897,7 @@ jobs:
     executor: pulumi
     environment:
       DOCKER_BUILDKIT: 1
-      LOG_LEVEL: debug
+      LOG_LEVEL: info
     parameters:
       <<: *params
       indexer-url:
@@ -1002,8 +936,9 @@ jobs:
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.autoscaling.enabled << parameters.api-autoscaling >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.autoscaling.cpuThreshold << parameters.api-cpu-threshold >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.autoscaling.maxReplicas << parameters.api-max-replicas >>
+            [ "<< parameters.api >>" = true ] && [ -n "<< parameters.api-cpu-request >>" ] && pulumi config set --path unchained:coinstack.api.cpuRequest << parameters.api-cpu-request >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.cpuLimit << parameters.api-cpu-limit >>
-            [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.cpuRequest << parameters.api-cpu-request >>
+            [ "<< parameters.api >>" = true ] && [ -n "<< parameters.api-memory-request >>" ] && pulumi config set --path unchained:coinstack.api.memoryRequest << parameters.api-memory-request >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.memoryLimit << parameters.api-memory-limit >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.replicas << parameters.api-replicas >>
             [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:coinstack.statefulService.backup.count << parameters.stateful-service-backup-count >>
@@ -1075,8 +1010,9 @@ jobs:
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.autoscaling.enabled << parameters.api-autoscaling >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.autoscaling.cpuThreshold << parameters.api-cpu-threshold >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.autoscaling.maxReplicas << parameters.api-max-replicas >>
+            [ "<< parameters.api >>" = true ] && [ -n "<< parameters.api-cpu-request >>" ] && pulumi config set --path unchained:coinstack.api.cpuRequest << parameters.api-cpu-request >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.cpuLimit << parameters.api-cpu-limit >>
-            [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.cpuRequest << parameters.api-cpu-request >>
+            [ "<< parameters.api >>" = true ] && [ -n "<< parameters.api-memory-request >>" ] && pulumi config set --path unchained:coinstack.api.memoryRequest << parameters.api-memory-request >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.memoryLimit << parameters.api-memory-limit >>
             [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.replicas << parameters.api-replicas >>
             [ "<< parameters.stateful-service-backup >>" = true ] && pulumi config set --path unchained:coinstack.statefulService.backup.count << parameters.stateful-service-backup-count >>
@@ -1129,67 +1065,6 @@ jobs:
             pulumi config set --path unchained:monitoring.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies-us-east-2
             pulumi config set --path unchained:monitoring.environment monitoring
             pulumi <<parameters.pulumi-command>> --suppress-outputs
-
-  preview-kube-prometheus:
-    description: preview kube-prometheus monitoring stack
-    executor: golang
-    parameters:
-      organization:
-        type: string
-    steps:
-      - setup_remote_docker:
-          version: 20.10.18
-      - attach_workspace:
-          at: ~/
-      - checkout
-      - kube-prometheus-dependencies:
-          organization: <<parameters.organization>>
-      - run:
-          name: setup kube-prometheus
-          working_directory: monitoring/my-kube-prometheus
-          command: |
-            ./build.sh unchained-kube-promstack.jsonnet
-      - run:
-          name: diff CRD
-          working_directory: monitoring/my-kube-prometheus
-          command: |
-            echo "CRD Changes: "
-            kubectl diff -f manifests/setup/ || true #For some reason this returns -1 in CI, no idea works locally
-      - run:
-          name: diff Kube prometheus
-          working_directory: monitoring/my-kube-prometheus
-          command: |
-            echo "Kube prometheus changes: "
-            kubectl diff -f manifests/ || true #For some reason this returns -1 in CI, no idea works locally
-
-
-  deploy-kube-prometheus:
-    description: deploy unchained monitoring stack
-    executor: golang
-    parameters:
-      organization:
-        type: string
-    steps:
-      - setup_remote_docker:
-          version: 20.10.18
-      - attach_workspace:
-          at: ~/
-      - checkout
-      - kube-prometheus-dependencies:
-          organization: <<parameters.organization>>
-      - run:
-          name: setup kube-prometheus
-          working_directory: monitoring/my-kube-prometheus
-          command: |
-            ./build.sh unchained-kube-promstack.jsonnet
-      - run:
-          name: deploy CRD
-          working_directory: monitoring/my-kube-prometheus
-          command: kubectl apply --server-side -f manifests/setup
-      - run:
-          name: deploy Kube prometheus
-          working_directory: monitoring/my-kube-prometheus
-          command: kubectl apply --server-side -f manifests/
 
   lint-and-test:
     description: lint and test project
@@ -1354,15 +1229,6 @@ workflows:
           <<: *only-develop
 
       - deploy-coinstack-go:
-          name: deploy osmosis develop
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - deploy dependencies
-          <<: *osmosis-dev
-          <<: *only-develop
-
-      - deploy-coinstack-go:
           name: deploy thorchain develop
           organization: TAXISTAKE
           pulumi-command: up -f --yes
@@ -1371,55 +1237,12 @@ workflows:
           <<: *thorchain-dev
           <<: *only-develop
 
-  deploy-monitoring:
-    jobs:
-      - approve-monitoring-workflow:
-          name: approve monitoring workflow
-          type: approval
-          <<: *only-develop
-
-      - lint-and-test-persist:
-          name: lint and test project (persist to workplace)
-          requires:
-            - approve monitoring workflow
-          <<: *only-develop
-
-      - preview-kube-prometheus:
-          name: preview monitoring kube-prometheus
-          organization: TAXISTAKE
-          requires:
-            - lint and test project (persist to workplace)
-          <<: *only-develop
-
-      - deploy-monitoring-pulumi:
-          name: preview monitoring pulumi
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - lint and test project (persist to workplace)
-          <<: *only-develop
-
-      - approve-monitoring:
-          name: approve
-          type: approval
-          requires:
-            - preview monitoring kube-prometheus
-            - preview monitoring pulumi
-          <<: *only-develop
-
-      - deploy-kube-prometheus:
-          name: deploy monitoring kube-prometheus
-          organization: TAXISTAKE
-          requires:
-            - approve
-          <<: *only-develop
-
       - deploy-monitoring-pulumi:
           name: deploy monitoring pulumi
           organization: TAXISTAKE
           pulumi-command: up -f --yes
           requires:
-            - approve
+            - deploy dependencies
           <<: *only-develop
 
   deploy-main:
@@ -1752,32 +1575,6 @@ workflows:
           requires:
             - approve cosmos coinstack
           <<: *cosmos
-          <<: *only-main
-
-      ####### OSMOSIS
-      - deploy-coinstack-go:
-          name: preview osmosis
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - validate dependencies
-          <<: *osmosis
-          <<: *only-main
-
-      - approve-coinstack:
-          name: approve osmosis coinstack
-          type: approval
-          requires:
-            - preview osmosis
-          <<: *only-main
-
-      - deploy-coinstack-go:
-          name: deploy osmosis
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve osmosis coinstack
-          <<: *osmosis
           <<: *only-main
 
       ####### THORCHAIN

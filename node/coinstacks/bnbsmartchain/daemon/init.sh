@@ -7,15 +7,30 @@ set -e
 DATA_DIR=/data
 CHAINDATA_DIR=$DATA_DIR/geth/chaindata
 
-# shapshots provided by: https://github.com/bnb-chain/bsc-snapshots
 if [[ -n $SNAPSHOT && ! -d "$CHAINDATA_DIR" ]]; then
+  echo "restoring from snapshot: $SNAPSHOT"
+
+  apk add zstd
   rm -rf $DATA_DIR/geth;
-  wget -c $SNAPSHOT -O - | lz4 -cd | tar xf - -C $DATA_DIR
-  mv /data/server/data-seed/geth $DATA_DIR/geth
+
+  # extract with lz4 (https://github.com/bnb-chain/bsc-snapshots)
+  if echo "$SNAPSHOT" | grep -q "tar\.lz4$"; then
+    wget -c $SNAPSHOT -O - | lz4 -cd | tar xf - -C $DATA_DIR
+    mv /data/server/data-seed/geth $DATA_DIR/geth
+  fi
+
+  # extract with zstd (https://github.com/48Club/bsc-snapshots)
+  if echo "$SNAPSHOT" | grep -q "tar\.zst$"; then
+    baseName=$(basename "$SNAPSHOT" .tar.zst)
+    dirName=$(echo "$baseName" | sed 's/\.[^.]*$//')
+    wget -c $SNAPSHOT -O - | zstd -cd | tar xf - -C $DATA_DIR
+    mv /data/$dirName/geth $DATA_DIR/geth
+  fi
 fi
 
+
 if [ ! -d "$CHAINDATA_DIR" ]; then
-    geth init --datadir $DATA_DIR genesis.json
+  geth init --datadir $DATA_DIR genesis.json
 fi
 
 # add static peers
@@ -55,12 +70,14 @@ start() {
     --http.vhosts '*' \
     --http.corsdomain '*' \
     --ws \
+    --ws.addr 0.0.0.0 \
     --ws.port 8546 \
     --ws.api eth,net,web3,debug,txpool,parlia \
     --ws.origins '*' \
     --syncmode full \
     --maxpeers 200 \
     --rpc.allow-unprotected-txs \
+    --txpool.pricelimit 1 \
     --txlookuplimit 0 \
     --cache 8000 \
     --nat none &

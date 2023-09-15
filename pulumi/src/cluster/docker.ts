@@ -1,4 +1,3 @@
-import { hashElement } from 'folder-hash'
 import { hasTag, buildAndPushImage } from '../docker'
 import { getBaseHash, getVolumeReaperHash } from '../hasher'
 import { Dockerhub } from '..'
@@ -17,21 +16,6 @@ export const buildAndPushDockerImages = async (dockerhub: Dockerhub, name: strin
       env: { DOCKER_BUILDKIT: '1' },
       tags: [baseTag],
       cacheFroms: [`${baseImage}:${baseTag}`, `${baseImage}:latest`],
-    })
-  }
-
-  const blockbookImage = `${dockerhub.username}/${name}-blockbook`
-  const { hash: blockbookTag } = await hashElement(`../../..//node/packages/blockbook/Dockerfile`, { encoding: 'hex' })
-
-  if (!(await hasTag(blockbookImage, blockbookTag))) {
-    await buildAndPushImage({
-      image: blockbookImage,
-      context: '../../../node/packages/blockbook',
-      auth: dockerhub,
-      buildArgs: { BUILDKIT_INLINE_CACHE: '1' },
-      env: { DOCKER_BUILDKIT: '1' },
-      tags: [blockbookTag],
-      cacheFroms: [`${blockbookImage}:${blockbookTag}`, `${blockbookImage}:latest`],
     })
   }
 

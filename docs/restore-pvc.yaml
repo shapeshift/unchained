@@ -9,7 +9,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   capacity:
-    storage: 200Gi
+    storage: <200Gi>
   csi:
     driver: ebs.csi.aws.com
     fsType: ext4
@@ -40,6 +40,6 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 200Gi
+      storage: <200Gi>
   storageClassName: ebs-csi-gp2
   volumeName: <data-xxx-sts-0-pv-dev>

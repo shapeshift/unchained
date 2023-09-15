@@ -55,10 +55,10 @@ export interface Port extends k8s.types.input.core.v1.ServicePort {
 }
 
 export interface ServiceConfig {
-  cpuLimit?: string
+  cpuLimit: string
   cpuRequest?: string
   image: string
-  memoryLimit?: string
+  memoryLimit: string
   memoryRequest?: string
   name: string
   storageSize: string
@@ -72,8 +72,10 @@ export interface CoinServiceArgs extends ServiceConfig {
   dataDir?: string
   configMapData?: Record<string, string>
   volumeMounts?: Array<k8s.types.input.core.v1.VolumeMount>
-  readinessProbe?: k8s.types.input.core.v1.Probe
+  startupProbe?: k8s.types.input.core.v1.Probe
   livenessProbe?: k8s.types.input.core.v1.Probe
+  readinessProbe?: k8s.types.input.core.v1.Probe
+  useMonitorContainer?: boolean
 }
 
 export interface Service {

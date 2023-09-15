@@ -10,6 +10,7 @@ import (
 	"github.com/shapeshift/unchained/internal/config"
 	"github.com/shapeshift/unchained/internal/log"
 	"github.com/shapeshift/unchained/pkg/cosmos"
+	"github.com/shapeshift/unchained/pkg/metrics"
 
 	thortypes "gitlab.com/thorchain/thornode/x/thorchain/types"
 )
@@ -58,6 +59,8 @@ func main() {
 		WSURL:             conf.WSURL,
 	}
 
+	prometheus := metrics.NewPrometheus("thorchain")
+
 	httpClient, err := cosmos.NewHTTPClient(cfg)
 	if err != nil {
 		logger.Panicf("failed to create new http client: %+v", err)
@@ -73,7 +76,7 @@ func main() {
 		logger.Panicf("failed to create new websocket client: %+v", err)
 	}
 
-	api := api.New(httpClient, wsClient, blockService, *swaggerPath)
+	api := api.New(httpClient, wsClient, blockService, *swaggerPath, prometheus)
 	defer api.Shutdown()
 
 	go api.Serve(errChan)

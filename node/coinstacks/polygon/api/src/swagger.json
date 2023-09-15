@@ -337,16 +337,19 @@
 						"type": "string"
 					}
 				},
+				"required": [
+					"gasPrice"
+				],
 				"type": "object",
 				"additionalProperties": false
 			},
 			"GasFees": {
-				"description": "Contains info about current recommended fees to use in a transaction",
+				"description": "Contains info about current recommended fees to use in a transaction.\nEstimates for slow, average and fast confirmation speeds provided as well.",
 				"properties": {
 					"gasPrice": {
 						"type": "string"
 					},
-					"maxFeePerGas": {
+					"baseFeePerGas": {
 						"type": "string"
 					},
 					"maxPriorityFeePerGas": {
@@ -879,18 +882,23 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"gasPrice": "250000000000",
+											"gasPrice": "142419538445",
+											"baseFeePerGas": "112419538445",
+											"maxPriorityFeePerGas": "30000000000",
 											"slow": {
-												"maxFeePerGas": "250000000000",
-												"maxPriorityFeePerGas": "10000000000"
+												"gasPrice": "131449097003",
+												"maxFeePerGas": "140884315981",
+												"maxPriorityFeePerGas": "29910015485"
 											},
 											"average": {
-												"maxFeePerGas": "350000000000",
-												"maxPriorityFeePerGas": "150000000000"
+												"gasPrice": "172389951405",
+												"maxFeePerGas": "160734779396",
+												"maxPriorityFeePerGas": "49760478900"
 											},
 											"fast": {
-												"maxFeePerGas": "450000000000",
-												"maxPriorityFeePerGas": "250000000000"
+												"gasPrice": "195530342545",
+												"maxFeePerGas": "280530813993",
+												"maxPriorityFeePerGas": "169556513497"
 											}
 										}
 									}

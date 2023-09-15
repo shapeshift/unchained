@@ -2,7 +2,7 @@ import axios from 'axios'
 import axiosRetry from 'axios-retry'
 import BigNumber from 'bignumber.js'
 import { ethers } from 'ethers'
-import { ApiError as BlockbookApiError, Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
+import { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
 import { ApiError, BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
 import {
@@ -17,43 +17,26 @@ import {
   TokenMetadata,
   TokenType,
 } from './models'
-import {
-  Cursor,
-  NodeBlock,
-  DebugCallStack,
-  ExplorerApiResponse,
-  ExplorerInternalTx,
-  FeeHistory,
-  TraceCall,
-} from './types'
-import { formatAddress } from './utils'
+import { Cursor, NodeBlock, DebugCallStack, ExplorerApiResponse, ExplorerInternalTx, TraceCall } from './types'
+import { GasOracle } from './gasOracle'
+import { formatAddress, handleError } from './utils'
 import { validatePageSize } from '../utils'
 import { ERC1155_ABI } from './abi/erc1155'
 import { ERC721_ABI } from './abi/erc721'
+import { AxiosError } from 'axios'
 
-const axiosNoRetry = axios.create()
+const axiosNoRetry = axios.create({ timeout: 5000 })
 
 type InternalTxFetchMethod = 'trace_transaction' | 'debug_traceTransaction'
 
 axiosRetry(axios, { retries: 5, retryDelay: axiosRetry.exponentialDelay })
-
-const handleError = (err: unknown): ApiError => {
-  if (err instanceof BlockbookApiError) {
-    return new ApiError(err.response?.statusText ?? 'Internal Server Error', err.response?.status ?? 500, err.message)
-  }
-
-  if (err instanceof Error) {
-    return new ApiError('Internal Server Error', 500, err.message)
-  }
-
-  return new ApiError('Internal Server Error', 500, 'unknown error')
-}
 
 const exponentialDelay = async (retryCount: number) =>
   new Promise((resolve) => setTimeout(resolve, axiosRetry.exponentialDelay(retryCount)))
 
 export interface ServiceArgs {
   blockbook: Blockbook
+  gasOracle: GasOracle
   explorerApiKey?: string
   explorerApiUrl: string
   logger: Logger
@@ -63,6 +46,7 @@ export interface ServiceArgs {
 
 export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   private readonly blockbook: Blockbook
+  private readonly gasOracle: GasOracle
   private readonly explorerApiKey?: string
   private readonly explorerApiUrl: string
   private readonly logger: Logger
@@ -75,11 +59,14 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
   constructor(args: ServiceArgs) {
     this.blockbook = args.blockbook
+    this.gasOracle = args.gasOracle
     this.explorerApiKey = args.explorerApiKey
     this.explorerApiUrl = args.explorerApiUrl
-    this.logger = args.logger
+    this.logger = args.logger.child({ namespace: ['service'] })
     this.provider = args.provider
     this.rpcUrl = args.rpcUrl
+
+    this.gasOracle.start()
   }
 
   async getAccount(pubkey: string): Promise<Account> {
@@ -271,87 +258,27 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
   async getGasFees(): Promise<GasFees> {
     try {
-      // average fees over 20 blocks at the specified percentiles
-      const totalBlocks = 20
-
-      // fetch legacy gas price
+      // fetch legacy gas price estimate from the node
       const gasPrice = (await this.provider.send('eth_gasPrice', [])) as string
 
-      // get latest block to check for existence of baseFeePerGas to determine eip1559 support
-      const block = (await this.provider.send('eth_getBlockByNumber', ['pending', false])) as { baseFeePerGas?: string }
+      const { baseFeePerGas, maxPriorityFeePerGas } = await (async () => {
+        const baseFeePerGas = this.gasOracle.getBaseFeePerGas()
+        if (!baseFeePerGas) return {}
 
-      const eip1559Fees = await (async () => {
-        if (!block?.baseFeePerGas) return {}
-
-        // fetch fee history for the last 20 blocks and with maxPriorityFeePerGas reported at the 1st, 60th, and 90th percentiles (slow, average, fast)
-        const feeHistory = (await this.provider.send('eth_feeHistory', [
-          totalBlocks,
-          'latest',
-          [1, 60, 90],
-        ])) as FeeHistory
-
-        const oldestBlock = Number(feeHistory.oldestBlock)
-        const latestBlock = oldestBlock + totalBlocks
-
-        // hex -> big number
-        const blockHistory = []
-        for (let i = oldestBlock; i < latestBlock; i++) {
-          const index = i - oldestBlock
-          blockHistory.push({
-            number: i,
-            baseFeePerGas: new BigNumber(feeHistory.baseFeePerGas[index]),
-            gasUsedRatio: new BigNumber(feeHistory.gasUsedRatio[index]),
-            maxPriorityFeePerGas: feeHistory.reward[index].map((r) => new BigNumber(r)),
-          })
-        }
-
-        const baseFee = await (async () => {
-          try {
-            // avalanche returns the latest block for 'pending', use eth_baseFee instead for accurate base fee
-            const baseFee = (await this.provider.send('eth_baseFee', [])) as string
-            return baseFee
-          } catch (err) {
-            // no eth_baseFee support, use pending block
-            return
-          }
-        })()
-
-        // baseFeePerGas for pending block as determined by network
-        const baseFeePerGas = baseFee ? new BigNumber(baseFee) : new BigNumber(block.baseFeePerGas)
-
-        const avg = (arr: Array<BigNumber>): BigNumber => {
-          const sum = arr.reduce((a, b) => a.plus(b), new BigNumber(0))
-          return sum.div(arr.length).integerValue(BigNumber.ROUND_FLOOR)
-        }
-
-        const slowPriorityFee = avg(blockHistory.map((block) => block.maxPriorityFeePerGas[0]))
-        const averagePriorityFee = avg(blockHistory.map((block) => block.maxPriorityFeePerGas[1]))
-        const fastPriorityFee = avg(blockHistory.map((block) => block.maxPriorityFeePerGas[2]))
-
-        return {
-          slow: {
-            maxFeePerGas: slowPriorityFee.plus(baseFeePerGas).toFixed(0),
-            maxPriorityFeePerGas: slowPriorityFee.toFixed(0),
-          },
-          average: {
-            maxFeePerGas: averagePriorityFee.plus(baseFeePerGas).toFixed(0),
-            maxPriorityFeePerGas: averagePriorityFee.toFixed(0),
-          },
-          fast: {
-            maxFeePerGas: fastPriorityFee.plus(baseFeePerGas).toFixed(0),
-            maxPriorityFeePerGas: fastPriorityFee.toFixed(0),
-          },
-        }
+        // fetch maxPriorityFeePerGas estimate from the node
+        const maxPriorityFeePerGas = (await this.provider.send('eth_maxPriorityFeePerGas', [])) as string
+        return { baseFeePerGas, maxPriorityFeePerGas: Number(maxPriorityFeePerGas).toString() }
       })()
 
-      // TODO: percentile estimations for gasPrice
+      const estimatedFees = await this.gasOracle.estimateFees([1, 60, 90])
+
       return {
-        gasPrice: new BigNumber(gasPrice).toFixed(0),
-        maxFeePerGas: eip1559Fees?.average?.maxFeePerGas,
-        maxPriorityFeePerGas: eip1559Fees?.average?.maxPriorityFeePerGas,
-        slow: { ...eip1559Fees?.slow },
-        average: { ...eip1559Fees?.average },
-        fast: { ...eip1559Fees?.fast },
+        gasPrice: Number(gasPrice).toString(),
+        baseFeePerGas,
+        maxPriorityFeePerGas,
+        slow: estimatedFees['1'],
+        average: estimatedFees['60'],
+        fast: estimatedFees['90'],
       }
     } catch (err) {
       throw new ApiError('Internal Server Error', 500, JSON.stringify(err))
@@ -632,6 +559,8 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
     let doneFiltering = false
     const filteredInternalTxs = internalTxs.reduce((prev, internalTx) => {
+      if (!internalTx.value || internalTx.value === '0') return prev
+
       if (!doneFiltering && cursor.blockHeight && cursor.explorerTxid) {
         // skip any transactions from blocks that we have already returned
         if (Number(internalTx.blockNumber) > cursor.blockHeight) return prev
@@ -764,55 +693,87 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       return data.replace('{id}', new BigNumber(id).toString(16).padStart(64, '0').toLowerCase())
     }
 
-    const contract = new ethers.Contract(address, this.abiInterface[type], this.provider)
-
-    const uri = (await (() => {
-      switch (type) {
-        case 'erc721':
-          return contract.tokenURI(id)
-        case 'erc1155':
-          return contract.uri(id)
-        default:
-          throw new Error(`invalid token type: ${type}`)
+    const makeUrl = (url: string): string => {
+      if (url.startsWith('ipfs://')) {
+        return url.replace('ipfs://', 'https://gateway.shapeshift.com/ipfs/')
       }
-    })()) as string
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const metadata = await (async () => {
-      if (uri.startsWith('ipfs://')) return {}
+      if (url.startsWith('ipns://')) {
+        return url.replace('ipns://', 'https://gateway.shapeshift.com/ipns/')
+      }
 
-      try {
-        // attempt to get metadata using hex encoded id as per erc spec
-        const { data } = await axiosNoRetry.get(substitue(uri, id, true))
-        return data
-      } catch (err) {
+      return url
+    }
+
+    try {
+      const contract = new ethers.Contract(address, this.abiInterface[type], this.provider)
+
+      const uri = (await (() => {
+        switch (type) {
+          case 'erc721':
+            return contract.tokenURI(id)
+          case 'erc1155':
+            return contract.uri(id)
+          default:
+            throw new Error(`invalid token type: ${type}`)
+        }
+      })()) as string
+
+      const metadata = await (async () => {
+        // handle base64 encoded metadata
+        if (uri.startsWith('data:application/json;base64')) {
+          const [, b64] = uri.split(',')
+          return JSON.parse(Buffer.from(b64, 'base64').toString())
+        }
+
         try {
-          // not everyone follows the spec
-          // attempt to get metadata using id string
-          const { data } = await axiosNoRetry.get(substitue(uri, id, false))
+          // attempt to get metadata using hex encoded id as per erc spec
+          const { data } = await axiosNoRetry.get(makeUrl(substitue(uri, id, true)))
           return data
         } catch (err) {
-          // swallow error and return empty object if unable to fetch metadata
-          return {}
+          // don't retry on timeout, assume host is offline
+          if (err instanceof AxiosError && err.code === AxiosError.ECONNABORTED) return {}
+
+          try {
+            // not everyone follows the spec, attempt to get metadata using id string
+            const { data } = await axiosNoRetry.get(makeUrl(substitue(uri, id, false)))
+            return data
+          } catch (err) {
+            // swallow error and return empty object if unable to fetch metadata
+            return {}
+          }
         }
+      })()
+
+      const mediaUrl = metadata?.image ? makeUrl(metadata.image) : ''
+
+      const mediaType = await (async () => {
+        if (!mediaUrl) return
+
+        try {
+          const { headers } = await axiosNoRetry.head(mediaUrl)
+          return headers['content-type']?.includes('video') ? 'video' : 'image'
+        } catch (err) {
+          return
+        }
+      })()
+
+      return {
+        name: metadata?.name ?? '',
+        description: metadata?.description ?? '',
+        media: {
+          url: mediaUrl,
+          type: mediaType,
+        },
       }
-    })()
+    } catch (err) {
+      this.logger.error(err, 'failed to fetch token metadata')
 
-    const mediaUrl = metadata.image ?? ''
-
-    const mediaType = await (async () => {
-      if (!mediaUrl || mediaUrl.startsWith('ipfs://')) return
-      const { headers } = await axiosNoRetry.head(mediaUrl)
-      return headers['content-type']?.includes('video') ? 'video' : 'image'
-    })()
-
-    return {
-      name: metadata.name ?? '',
-      description: metadata.description ?? '',
-      media: {
-        url: mediaUrl,
-        type: mediaType,
-      },
+      return {
+        name: '',
+        description: '',
+        media: { url: '' },
+      }
     }
   }
 }

@@ -5,6 +5,7 @@ export * as middleware from './middleware'
 export * from './websocket'
 export * from './registry'
 export * from './types'
+export * from './prometheus'
 
 export * as evm from './evm'
 export * as utxo from './utxo'

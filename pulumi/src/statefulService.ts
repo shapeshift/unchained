@@ -2,9 +2,8 @@ import * as k8s from '@pulumi/kubernetes'
 import { readFileSync } from 'fs'
 import { Config, Service, CoinServiceArgs } from '.'
 import { deployReaperCron } from './reaperCron'
-import { VolumeSnapshot } from './snapper'
 
-export function createCoinService(args: CoinServiceArgs, assetName: string, snapshots: VolumeSnapshot[]): Service {
+export function createCoinService(args: CoinServiceArgs, assetName: string): Service {
   const name = `${assetName}-${args.name}`
 
   const ports = Object.entries(args.ports ?? []).map(([name, port]) => ({ name, ...port }))
@@ -18,7 +17,15 @@ export function createCoinService(args: CoinServiceArgs, assetName: string, snap
     }
   })()
 
-  const livenessScript = (() => {
+  const startupProbe = (() => {
+    try {
+      return readFileSync(`../${args.name}/startup.sh`).toString()
+    } catch (err) {
+      return ''
+    }
+  })()
+
+  const livenessProbe = (() => {
     try {
       return readFileSync(`../${args.name}/liveness.sh`).toString()
     } catch (err) {
@@ -26,7 +33,7 @@ export function createCoinService(args: CoinServiceArgs, assetName: string, snap
     }
   })()
 
-  const readinessScript = (() => {
+  const readinessProbe = (() => {
     try {
       return readFileSync(`../${args.name}/readiness.sh`).toString()
     } catch (err) {
@@ -36,8 +43,9 @@ export function createCoinService(args: CoinServiceArgs, assetName: string, snap
 
   const configMapData = {
     ...(Boolean(initScript) && { [`${args.name}-init.sh`]: initScript }),
-    ...(Boolean(livenessScript) && { [`${args.name}-liveness.sh`]: livenessScript }),
-    ...(Boolean(readinessScript) && { [`${args.name}-readiness.sh`]: readinessScript }),
+    ...(Boolean(startupProbe) && { [`${args.name}-startup.sh`]: startupProbe }),
+    ...(Boolean(livenessProbe) && { [`${args.name}-liveness.sh`]: livenessProbe }),
+    ...(Boolean(readinessProbe) && { [`${args.name}-readiness.sh`]: readinessProbe }),
     ...(args.configMapData ?? {}),
   }
 
@@ -51,23 +59,35 @@ export function createCoinService(args: CoinServiceArgs, assetName: string, snap
     env,
     resources: {
       limits: {
-        ...(args.cpuLimit && { cpu: args.cpuLimit }),
-        ...(args.memoryLimit && { memory: args.memoryLimit }),
+        cpu: args.cpuLimit,
+        memory: args.memoryLimit,
       },
       requests: {
         ...(args.cpuRequest && { cpu: args.cpuRequest }),
         ...(args.memoryRequest && { memory: args.memoryRequest }),
       },
     },
-    ...(!readinessScript &&
-      args.readinessProbe && {
+    ports: ports.map(({ port: containerPort, name }) => ({ containerPort, name })),
+    securityContext: { runAsUser: 0 },
+    ...((startupProbe || args.startupProbe) && {
+      startupProbe: {
+        ...(startupProbe && { exec: { command: ['/startup.sh'] } }),
+        ...args.startupProbe,
+      },
+    }),
+    ...((livenessProbe || args.livenessProbe) && {
+      livenessProbe: {
+        ...(livenessProbe && { exec: { command: ['/liveness.sh'] } }),
+        ...args.livenessProbe,
+      },
+    }),
+    ...(!args.useMonitorContainer &&
+      (readinessProbe || args.readinessProbe) && {
         readinessProbe: {
-          initialDelaySeconds: 30,
+          ...(readinessProbe && { exec: { command: ['/readiness.sh'] } }),
           ...args.readinessProbe,
         },
       }),
-    ports: ports.map(({ port: containerPort, name }) => ({ containerPort, name })),
-    securityContext: { runAsUser: 0 },
     volumeMounts: [
       {
         name: `data-${args.name}`,
@@ -82,18 +102,45 @@ export function createCoinService(args: CoinServiceArgs, assetName: string, snap
             },
           ]
         : []),
+      ...(startupProbe
+        ? [
+            {
+              name: 'config-map',
+              mountPath: '/startup.sh',
+              subPath: `${args.name}-startup.sh`,
+            },
+          ]
+        : []),
+      ...(livenessProbe
+        ? [
+            {
+              name: 'config-map',
+              mountPath: '/liveness.sh',
+              subPath: `${args.name}-liveness.sh`,
+            },
+          ]
+        : []),
+      ...(readinessProbe
+        ? [
+            {
+              name: 'config-map',
+              mountPath: '/readiness.sh',
+              subPath: `${args.name}-readiness.sh`,
+            },
+          ]
+        : []),
       ...(args.volumeMounts ?? []),
     ],
   }
 
   containers.push(serviceContainer)
 
-  if (readinessScript || livenessScript) {
+  if (args.useMonitorContainer && readinessProbe) {
     const monitorContainer: k8s.types.input.core.v1.Container = {
       name: `${name}-monitor`,
       image: 'shapeshiftdao/unchained-probe:1.0.0',
       env,
-      ...(readinessScript && {
+      ...(readinessProbe && {
         readinessProbe: {
           exec: {
             command: ['/readiness.sh'],
@@ -102,17 +149,8 @@ export function createCoinService(args: CoinServiceArgs, assetName: string, snap
           ...args.readinessProbe,
         },
       }),
-      ...(livenessScript && {
-        livenessProbe: {
-          exec: {
-            command: ['/liveness.sh'],
-          },
-          initialDelaySeconds: 30,
-          ...args.livenessProbe,
-        },
-      }),
       volumeMounts: [
-        ...(readinessScript
+        ...(readinessProbe
           ? [
               {
                 name: 'config-map',
@@ -121,24 +159,11 @@ export function createCoinService(args: CoinServiceArgs, assetName: string, snap
               },
             ]
           : []),
-        ...(livenessScript
-          ? [
-              {
-                name: 'config-map',
-                mountPath: '/liveness.sh',
-                subPath: `${args.name}-liveness.sh`,
-              },
-            ]
-          : []),
       ],
     }
 
     containers.push(monitorContainer)
   }
-
-  const snapshot = snapshots.filter(
-    (snapshot) => snapshot.metadata.name.startsWith(`data-${args.name}-${assetName}`) && !!snapshot.status?.readyToUse
-  )[0]
 
   const volumeClaimTemplates = [
     {
@@ -153,13 +178,6 @@ export function createCoinService(args: CoinServiceArgs, assetName: string, snap
             storage: args.storageSize,
           },
         },
-        ...(snapshot && {
-          dataSource: {
-            name: snapshot.metadata.name,
-            kind: snapshot.kind,
-            apiGroup: snapshot.apiVersion.split('/')[0],
-          },
-        }),
       },
     },
   ]
@@ -264,6 +282,7 @@ export async function deployStatefulService(
       metadata: {
         name: `${assetName}-sts`,
         namespace: namespace,
+        labels: labels,
         annotations: { 'pulumi.com/skipAwait': 'true' },
       },
       spec: {

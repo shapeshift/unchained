@@ -1748,6 +1748,7 @@
 													"value": "4950000000000000000",
 													"fees": "1050000000000000",
 													"ethereumSpecific": {
+														"status": -2,
 														"nonce": 16522,
 														"gasLimit": 41000,
 														"gasUsed": 21000,

@@ -2,6 +2,8 @@
 
 set -e
 
+apk add bash curl jq
+
 DATA_DIR=/data
 CHAINDATA_DIR=$DATA_DIR/geth/chaindata
 
@@ -28,6 +30,7 @@ start() {
     --ws.api eth,net,web3,debug,txpool,engine \
     --ws.origins "*" \
     --rollup.disabletxpoolgossip=true \
+    --rollup.allowpendingtxfilters \
     --rollup.sequencerhttp https://mainnet-sequencer.optimism.io \
     --txlookuplimit 0 \
     --cache 4096 \

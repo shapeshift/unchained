@@ -22,10 +22,12 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/cors"
 	"github.com/shapeshift/unchained/internal/log"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
+	"github.com/shapeshift/unchained/pkg/metrics"
 	"github.com/shapeshift/unchained/pkg/websocket"
 )
 
@@ -45,7 +47,7 @@ type API struct {
 	handler *Handler
 }
 
-func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, swaggerPath string) *API {
+func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, swaggerPath string, prometheus *metrics.Prometheus) *API {
 	r := mux.NewRouter()
 
 	handler := &Handler{
@@ -57,7 +59,7 @@ func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService 
 		},
 	}
 
-	manager := websocket.NewManager()
+	manager := websocket.NewManager(prometheus)
 
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", PORT),
@@ -86,14 +88,15 @@ func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService 
 		logger.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", PPROF_PORT), http.DefaultServeMux))
 	}()
 
-	r.Use(api.Scheme)
-	r.Use(api.Logger)
+	r.Use(api.Scheme, api.Logger(prometheus))
 
 	r.HandleFunc("/", a.Root).Methods("GET")
 
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		api.HandleResponse(w, http.StatusOK, map[string]string{"status": "up", "coinstack": "thorchain", "connections": strconv.Itoa(manager.ConnectionCount())})
 	}).Methods("GET")
+
+	r.Handle("/metrics", promhttp.HandlerFor(prometheus.Registry, promhttp.HandlerOpts{}))
 
 	r.HandleFunc("/swagger", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.FromSlash(swaggerPath))

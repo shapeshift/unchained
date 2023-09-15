@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs'
 import { deployCoinstack } from '../../../../pulumi/src/coinstack'
 import { Outputs, CoinServiceArgs, getConfig } from '../../../../pulumi/src'
+import { defaultBlockbookServiceArgs } from '../../../packages/blockbook/src/constants'
 
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
@@ -20,7 +21,9 @@ export = async (): Promise<Outputs> => {
             'daemon-beacon': { port: 8551, ingressRoute: false },
           },
           configMapData: { 'jwt.hex': readFileSync('../daemon/jwt.hex').toString() },
-          readinessProbe: { httpGet: { path: '/health', port: 8545 }, timeoutSeconds: 5 },
+          startupProbe: { periodSeconds: 30, failureThreshold: 60, timeoutSeconds: 10 },
+          livenessProbe: { periodSeconds: 30, failureThreshold: 5, timeoutSeconds: 10 },
+          readinessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
           volumeMounts: [{ name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' }],
         }
       case 'daemon-beacon':
@@ -39,25 +42,15 @@ export = async (): Promise<Outputs> => {
           ],
           configMapData: { 'jwt.hex': readFileSync('../daemon/jwt.hex').toString() },
           volumeMounts: [{ name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' }],
+          useMonitorContainer: true,
+          readinessProbe: { periodSeconds: 30, failureThreshold: 10 },
         }
       case 'indexer':
         return {
           ...service,
-          command: [
-            '/bin/blockbook',
-            '-blockchaincfg=/config.json',
-            '-datadir=/data',
-            '-sync',
-            '-public=:8001',
-            '-enablesubnewtx',
-            '-logtostderr',
-            '-debug',
-          ],
-          ports: { public: { port: 8001 } },
+          ...defaultBlockbookServiceArgs,
+          command: defaultBlockbookServiceArgs.command,
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
-          volumeMounts: [{ name: 'config-map', mountPath: '/config.json', subPath: 'indexer-config.json' }],
-          readinessProbe: { initialDelaySeconds: 20, periodSeconds: 5, failureThreshold: 12 },
-          livenessProbe: { timeoutSeconds: 10, initialDelaySeconds: 60, periodSeconds: 15, failureThreshold: 4 },
         }
       default:
         throw new Error(`no support for coin service: ${service.name}`)

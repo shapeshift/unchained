@@ -1,0 +1,15 @@
+{{ define "discord.title" }}
+Unchained Alert {{ .Status | title }}: {{ .GroupLabels.alertname }}
+{{ end }}
+
+{{ define "discord.message" }}
+{{ range .Alerts }}
+**{{ .Labels.severity | toUpper }}**
+
+**Alert:** {{ .Annotations.summary }}
+**Description:** {{ .Annotations.description }}
+
+**Details:**
+{{ range .Labels.SortedPairs }}{{ printf "- %s: %s\n" .Name .Value }}{{ end }}
+{{ end }}
+{{ end }}

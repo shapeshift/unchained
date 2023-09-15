@@ -1,0 +1,165 @@
+global:
+  resolve_timeout: 30m
+inhibit_rules:
+  - source_matchers:
+      - "severity = critical"
+    target_matchers:
+      - "severity =~ warning|info"
+    equal:
+      - "namespace"
+      - "alertname"
+  - source_matchers:
+      - "severity = warning"
+    target_matchers:
+      - "severity = info"
+    equal:
+      - "namespace"
+      - "alertname"
+  - source_matchers:
+      - "alertname = InfoInhibitor"
+    target_matchers:
+      - "severity = info"
+    equal:
+      - "namespace"
+  ### ALERT SPECIFIC ###
+  - source_matchers:
+      - "alertname =~ UnchainedStatefulSetDown|UnchainedDeploymentDown"
+    target_matchers:
+      - "alertname =~ KubeStatefulSetReplicasMismatch|KubeDeploymentReplicasMismatch"
+    equal:
+      - "namespace"
+route:
+  group_by: ["alertname", "namespace"]
+  group_wait: 5m
+  group_interval: 15m
+  repeat_interval: 1h
+  receiver: "null"
+  routes:
+    ### CRITICAL ###
+    - receiver: "discord_critical"
+      group_by: ["alertname", "namespace", "persistentvolumeclaim"]
+      group_wait: 1h
+      group_interval: 12h
+      repeat_interval: 24h
+      matchers:
+        - alertname = "KubePersistentVolumeFillingUp"
+        - namespace = "unchained"
+        - severity = "critical"
+    - receiver: "discord_critical"
+      group_by: ["alertname", "namespace", "statefulset"]
+      group_wait: 5m
+      group_interval: 30m
+      repeat_interval: 1h
+      matchers:
+        - alertname = "UnchainedStatefulSetDown"
+        - namespace = "unchained"
+        - severity = "critical"
+    - receiver: "discord_critical"
+      group_by: ["alertname", "namespace", "deployment"]
+      group_wait: 5m
+      group_interval: 30m
+      repeat_interval: 1h
+      matchers:
+        - alertname = "UnchainedDeploymentDown"
+        - namespace = "unchained"
+        - severity = "critical"
+    ### WARNING ###
+    - receiver: "discord_warning"
+      group_by: ["alertname", "namespace", "pod"]
+      matchers:
+        - alertname = "KubePodCrashLooping"
+        - namespace = "unchained"
+        - severity = "warning"
+    - receiver: "discord_warning"
+      group_by: ["alertname", "namespace", "deployment"]
+      matchers:
+        - alertname = "KubeDeploymentReplicasMismatch"
+        - namespace = "unchained"
+        - severity = "warning"
+    - receiver: "discord_warning"
+      group_by: ["alertname", "namespace", "statefulset"]
+      matchers:
+        - alertname = "KubeStatefulSetReplicasMismatch"
+        - namespace = "unchained"
+        - severity = "warning"
+    - receiver: "discord_warning"
+      group_by: ["alertname", "namespace", "horizontalpodautoscaler"]
+      matchers:
+        - alertname = "KubeHpaMaxedOut"
+        - namespace = "unchained"
+        - severity = "warning"
+    - receiver: "discord_warning"
+      group_by: ["alertname", "namespace", "pod"]
+      matchers:
+        - alertname = "UnchainedHighPodRestartCount"
+        - namespace = "unchained"
+        - severity = "warning"
+    - receiver: "discord_warning"
+      group_by: ["alertname", "namespace", "coinstack"]
+      matchers:
+        - alertname = "UnchainedHigh5xxApiErrorRate"
+        - namespace = "unchained"
+        - severity = "warning"
+    ### DEV CRITICAL ###
+    - receiver: "discord_dev"
+      group_by: ["alertname", "namespace", "persistentvolumeclaim"]
+      group_wait: 1h
+      group_interval: 12h
+      repeat_interval: 24h
+      matchers:
+        - alertname = "KubePersistentVolumeFillingUp"
+        - namespace = "unchained-dev"
+        - severity = "critical"
+    - receiver: "discord_dev"
+      group_by: ["alertname", "namespace", "statefulset"]
+      group_wait: 15m
+      group_interval: 1h
+      repeat_interval: 6h
+      matchers:
+        - alertname = "UnchainedStatefulSetDown"
+        - namespace = "unchained-dev"
+        - severity = "critical"
+    - receiver: "discord_dev"
+      group_by: ["alertname", "namespace", "deployment"]
+      group_wait: 15m
+      group_interval: 1h
+      repeat_interval: 6h
+      matchers:
+        - alertname = "UnchainedDeploymentDown"
+        - namespace = "unchained-dev"
+        - severity = "critical"
+    ### DEV WARNING ###
+    - receiver: "discord_dev"
+      group_by: ["alertname", "namespace", "statefulset", "deployment", "pod", "persistentvolumeclaim", "coinstack", "horizontalpodautoscaler"]
+      group_wait: 5m
+      group_interval: 30m
+      repeat_interval: 2h
+      matchers:
+        - alertname =~ "KubePodCrashLooping|KubeDeploymentReplicasMismatch|KubeStatefulSetReplicasMismatch|UnchainedHighPodRestartCount|UnchainedHigh5xxApiErrorRate"
+        - namespace = "unchained-dev"
+        - severity = "warning"
+receivers:
+  - name: "null"
+  - name: discord_critical
+    discord_configs:
+      - webhook_url: <<DISCORD_WEBHOOK_URL_CRITICAL>>
+        title: |-
+          {{ `{{ template "discord.title" . }}` }}
+        message: |-
+          {{ `{{ template "discord.message" . }}` }}
+  - name: discord_warning
+    discord_configs:
+      - webhook_url: <<DISCORD_WEBHOOK_URL_WARNING>>
+        title: |-
+          {{ `{{ template "discord.title" . }}` }}
+        message: |-
+          {{ `{{ template "discord.message" . }}` }}
+  - name: discord_dev
+    discord_configs:
+      - webhook_url: <<DISCORD_WEBHOOK_URL_DEV>>
+        title: |-
+          {{ `{{ template "discord.title" . }}` }}
+        message: |-
+          {{ `{{ template "discord.message" . }}` }}
+templates:
+  - "/etc/alertmanager/config/*.tmpl"

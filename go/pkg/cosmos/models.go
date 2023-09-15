@@ -77,6 +77,8 @@ type Info struct {
 type Message struct {
 	Addresses []string `json:"-"`
 	// required: true
+	Index string `json:"index"`
+	// required: true
 	Origin string `json:"origin"`
 	// required: true
 	From string `json:"from"`
