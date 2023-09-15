@@ -27,7 +27,7 @@ export = async (): Promise<Outputs> => {
           volumeMounts: [{ name: 'config-map', mountPath: '/evm.sh', subPath: 'evm.sh' }],
           startupProbe: { periodSeconds: 30, failureThreshold: 60, timeoutSeconds: 10 },
           livenessProbe: { periodSeconds: 30, failureThreshold: 30, timeoutSeconds: 10 },
-          readinessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
+          readinessProbe: { periodSeconds: 30, failureThreshold: 20, timeoutSeconds: 10 },
         }
       case 'heimdall':
         return {
@@ -49,7 +49,7 @@ export = async (): Promise<Outputs> => {
         return {
           ...service,
           ...defaultBlockbookServiceArgs,
-          command: [...defaultBlockbookServiceArgs.command, '-workers=1'],
+          command: defaultBlockbookServiceArgs.command,
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
         }
       default:

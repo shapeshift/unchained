@@ -159,7 +159,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 3
+    stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: shapeshiftdao/bitcoin-core:25.0
     service-cpu-limit-1: "2"
@@ -200,7 +200,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 3
+    stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: ethereum/client-go:v1.13.0
     service-cpu-limit-1: "2"
@@ -248,7 +248,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 3
+    stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: shapeshiftdao/cosmoshub:v12.0.0
     service-cpu-limit-1: "2"
@@ -284,7 +284,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 3
+    stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: avaplatform/avalanchego:v1.10.9
     service-cpu-limit-1: "2"
@@ -325,7 +325,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 3
+    stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: shapeshiftdao/dogecoin:1.14.6
     service-cpu-limit-1: "2"
@@ -366,7 +366,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 3
+    stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: shapeshiftdao/litecoin-core:v0.21.2.2
     service-cpu-limit-1: "2"
@@ -407,7 +407,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 3
+    stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: shapeshiftdao/bitcoin-cash-node:26.1.0
     service-cpu-limit-1: "2"
@@ -448,7 +448,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 3
+    stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.120.1
     service-cpu-limit-1: "2"
@@ -495,7 +495,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 3
+    stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101200.1
     service-cpu-limit-1: "4"
@@ -542,7 +542,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 3
+    stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: shapeshiftdao/bnb-smart-chain:v1.2.12
     service-cpu-limit-1: "8"
@@ -585,7 +585,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 3
+    stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: 0xpolygon/bor:0.5.0
     service-cpu-limit-1: "8"
@@ -634,7 +634,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 3
+    stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: nethermind/nethermind:1.20.3
     service-cpu-limit-1: "2"

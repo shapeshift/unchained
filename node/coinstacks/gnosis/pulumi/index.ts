@@ -49,7 +49,7 @@ export = async (): Promise<Outputs> => {
         return {
           ...service,
           ...defaultBlockbookServiceArgs,
-          command: [...defaultBlockbookServiceArgs.command, '-workers=1'],
+          command: defaultBlockbookServiceArgs.command,
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
         }
       default:
