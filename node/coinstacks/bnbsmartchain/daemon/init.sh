@@ -77,6 +77,7 @@ start() {
     --syncmode full \
     --maxpeers 200 \
     --rpc.allow-unprotected-txs \
+    --txpool.pricelimit 1 \
     --txlookuplimit 0 \
     --cache 8000 \
     --nat none &

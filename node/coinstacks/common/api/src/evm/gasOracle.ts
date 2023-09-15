@@ -177,8 +177,10 @@ export class GasOracle {
 
       const txFees = block.transactions.reduce<TxFees>(
         (txFees, tx) => {
-          tx.gasPrice && txFees.gasPrices.push(Number(tx.gasPrice))
-          tx.maxPriorityFeePerGas && txFees.maxPriorityFees.push(Number(tx.maxPriorityFeePerGas))
+          tx.gasPrice && Number(tx.gasPrice) && txFees.gasPrices.push(Number(tx.gasPrice))
+          tx.maxPriorityFeePerGas &&
+            Number(tx.maxPriorityFeePerGas) &&
+            txFees.maxPriorityFees.push(Number(tx.maxPriorityFeePerGas))
           return txFees
         },
         { gasPrices: [], maxPriorityFees: [] }
