@@ -673,26 +673,26 @@ aliases:
     rpc-url: http://arbitrum-svc.unchained.svc.cluster.local:8545
     indexer-url: http://arbitrum-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://arbitrum-svc.unchained.svc.cluster.local:8001/websocket
-    api: false
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 1000m
-    api-cpu-request: 500m
-    api-cpu-threshold: 50
-    api-memory-limit: 2Gi
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
+    api-cpu-threshold: 75
+    api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: offchainlabs/nitro-node:v2.0.14-2baa834
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
-    service-memory-limit-1: 16Gi
-    service-storage-size-1: 2000Gi
+    service-memory-limit-1: 24Gi
+    service-storage-size-1: 1500Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:arbitrum-933b7ec
+    service-image-2: shapeshiftdao/unchained-blockbook:arbitrum-e21ed51
     service-cpu-limit-2: "4"
     service-cpu-request-2: "2"
-    service-memory-limit-2: 16Gi
+    service-memory-limit-2: 24Gi
     service-storage-size-2: 500Gi
 
 
@@ -705,11 +705,8 @@ aliases:
     indexer-ws-url: ws://arbitrum-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 2Gi
+    api-memory-limit: 250Mi
     stateful-service-replicas: 1
-    stateful-service-backup: true
-    stateful-service-backup-schedule: "0 4 * * 3"
-    stateful-service-backup-count: 1
 
 commands:
   precheck:

@@ -15,13 +15,13 @@ export = async (): Promise<Outputs> => {
         return {
           ...service,
           ports: {
-            'daemon-http': { port: 8545 },
-            'daemon-ws': { port: 8546, pathPrefix: '/websocket', stripPathPrefix: true },
+            'daemon-http': { port: 8547 },
+            'daemon-ws': { port: 8548, pathPrefix: '/websocket', stripPathPrefix: true },
           },
           env: {
-            L1_RPC_ENDPOINT: `http://ethereum-svc.${namespace}.svc.cluster.local:8332`,
+            L1_RPC_ENDPOINT: `http://ethereum-svc.${namespace}.svc.cluster.local:8545`,
           },
-          dataDir: '/root/.arbitrum',
+          dataDir: '/data',
           configMapData: { 'jwt.hex': readFileSync('../daemon/jwt.hex').toString() },
           volumeMounts: [{ name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' }],
         }

@@ -6,20 +6,24 @@ set -e
 
 start() {
   /usr/local/bin/nitro \
-  --init.url="https://snapshot.arbitrum.io/mainnet/nitro.tar" \
-  --init.download-path="/root/.arbitrum" \
-  --auth.jwtsecret "/jwt.hex" \
+  --init.url 'https://snapshot.arbitrum.foundation/arb1/nitro-genesis.tar' \
+  --init.download-path /data/tmp \
+  --persistent.chain /data \
+  --init.prune full \
+  --auth.jwtsecret /jwt.hex \
   --http.addr 0.0.0.0 \
-  --http.port 8545 \
+  --http.port 8547 \
   --http.api eth,net,web3,debug,txpool,arb \
   --http.vhosts '*' \
   --http.corsdomain '*' \
-  --l1.url $L1_RPC_ENDPOINT \
-  --l2.chain-id=42161 \
   --ws.addr 0.0.0.0 \
+  --ws.port 8548 \
   --ws.api eth,net,web3,debug,txpool,arb \
-  --ws.port 8546 \
-  --ws.origins '*' &
+  --ws.origins '*' \
+  --l1.url $L1_RPC_ENDPOINT \
+  --l2.chain-id 42161 \
+  --node.staker.enable='false' \
+  --node.tx-lookup-limit 0 &
 }
 
 stop() {

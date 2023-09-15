@@ -74,6 +74,10 @@ export class GasOracle {
         this.latestBlockTag = 'pending'
         this.canQueryPendingBlockByHeight = true
         break
+      case 'arbitrum':
+        this.latestBlockTag = 'pending'
+        this.canQueryPendingBlockByHeight = true
+        break
       default:
         throw new Error(`no coinstack support for: ${args.coinstack}`)
     }
