@@ -6,7 +6,7 @@ set -e
 
 start() {
   /usr/local/bin/nitro \
-  --init.url 'https://snapshot.arbitrum.foundation/arb1/nitro-genesis.tar' \
+  --init.url 'https://snapshot.arbitrum.foundation/arb1/nitro-pruned.tar' \
   --init.download-path /data/tmp \
   --persistent.chain /data \
   --init.prune full \
