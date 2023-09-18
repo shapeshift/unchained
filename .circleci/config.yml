@@ -202,7 +202,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.13.0
+    service-image-1: ethereum/client-go:v1.13.1
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 32Gi
@@ -254,7 +254,7 @@ aliases:
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 32Gi
-    service-storage-size-1: 3500Gi
+    service-storage-size-1: 4000Gi
 
   - &cosmos-dev
     <<: *cosmos
@@ -454,7 +454,7 @@ aliases:
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
-    service-storage-size-1: 2500Gi
+    service-storage-size-1: 3000Gi
     service-name-2: timescaledb
     service-image-2: timescale/timescaledb:2.2.0-pg13
     service-cpu-request-2: "1"
@@ -587,7 +587,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: 0xpolygon/bor:0.5.0
+    service-image-1: 0xpolygon/bor:0.4.0
     service-cpu-limit-1: "8"
     service-cpu-request-1: "4"
     service-memory-request-1: 32Gi
