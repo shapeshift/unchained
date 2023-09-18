@@ -79,17 +79,25 @@ export class Arbitrum extends Controller implements BaseAPI, API {
    * @example pubkey "0x9D1170D30944F2E30664Be502aC57F6096fB5366"
    */
   @Example<Account>({
-    balance: '183750000000000',
+    balance: '25865025000000',
     unconfirmedBalance: '0',
-    nonce: 322,
+    nonce: 5,
     pubkey: '0x9D1170D30944F2E30664Be502aC57F6096fB5366',
     tokens: [
       {
-        balance: '1337',
-        contract: '0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB',
+        balance: '0',
+        contract: '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1',
         decimals: 18,
-        name: 'Wrapped Ether',
-        symbol: 'WETH.e',
+        name: 'Dai Stablecoin',
+        symbol: 'DAI',
+        type: 'ERC20',
+      },
+      {
+        balance: '0',
+        contract: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
+        decimals: 6,
+        name: 'Tether USD',
+        symbol: 'USDT',
         type: 'ERC20',
       },
     ],

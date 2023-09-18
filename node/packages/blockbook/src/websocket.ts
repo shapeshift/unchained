@@ -5,9 +5,8 @@ import { NewBlock, WebsocketRepsonse } from '.'
 
 export interface Subscription {
   id: string
-  jsonrpc: string
   method: string
-  params?: Array<string>
+  params?: Record<string, string>
 }
 
 export interface Args {
@@ -93,14 +92,14 @@ export class WebsocketClient {
 
     const newBlock: Subscription = {
       id: 'newBlock',
-      jsonrpc: '2.0',
       method: 'subscribeNewBlock',
+      params: {},
     }
 
     const newTx: Subscription = {
       id: 'newTx',
-      jsonrpc: '2.0',
       method: 'subscribeNewTransaction',
+      params: {},
     }
 
     this.socket.send(JSON.stringify(newBlock))
