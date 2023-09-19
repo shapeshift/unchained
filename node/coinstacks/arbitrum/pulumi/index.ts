@@ -22,10 +22,17 @@ export = async (): Promise<Outputs> => {
           env: {
             L1_RPC_ENDPOINT: `http://ethereum-svc.${namespace}.svc.cluster.local:8545`,
           },
-          dataDir: '/data',
-          configMapData: { 'jwt.hex': readFileSync('../daemon/jwt.hex').toString() },
-          volumeMounts: [{ name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' }],
-          readinessProbe: { periodSeconds: 30, failureThreshold: 10 },
+          configMapData: {
+            'jwt.hex': readFileSync('../daemon/jwt.hex').toString(),
+            'evm.sh': readFileSync('../../../scripts/evm.sh').toString(),
+          },
+          volumeMounts: [
+            { name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' },
+            { name: 'config-map', mountPath: '/evm.sh', subPath: 'evm.sh' },
+          ],
+          startupProbe: { periodSeconds: 30, failureThreshold: 60, timeoutSeconds: 10 },
+          livenessProbe: { periodSeconds: 30, failureThreshold: 5, timeoutSeconds: 10 },
+          readinessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
         }
       case 'indexer':
         return {
