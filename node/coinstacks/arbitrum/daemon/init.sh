@@ -24,6 +24,7 @@ start() {
   --l2.chain-id 42161 \
   --node.staker.enable='false' \
   --node.tx-lookup-limit 0 &
+  PID="$!"
 }
 
 stop() {
