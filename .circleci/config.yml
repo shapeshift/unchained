@@ -202,7 +202,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.13.0
+    service-image-1: ethereum/client-go:v1.13.2
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 32Gi
@@ -254,7 +254,7 @@ aliases:
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 32Gi
-    service-storage-size-1: 3500Gi
+    service-storage-size-1: 4000Gi
 
   - &cosmos-dev
     <<: *cosmos
@@ -286,10 +286,10 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: avaplatform/avalanchego:v1.10.9
+    service-image-1: avaplatform/avalanchego:v1.10.11
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
-    service-memory-limit-1: 12Gi
+    service-memory-limit-1: 8Gi
     service-storage-size-1: 500Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:95ee9b5
@@ -336,7 +336,7 @@ aliases:
     service-image-2: shapeshiftdao/unchained-blockbook:95ee9b5
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 16Gi
+    service-memory-limit-2: 12Gi
     service-storage-size-2: 250Gi
 
   - &dogecoin-dev
@@ -450,11 +450,11 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.120.2
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.121.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
-    service-storage-size-1: 2500Gi
+    service-storage-size-1: 3000Gi
     service-name-2: timescaledb
     service-image-2: timescale/timescaledb:2.2.0-pg13
     service-cpu-request-2: "1"
@@ -462,7 +462,7 @@ aliases:
     service-memory-limit-2: 8Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: registry.gitlab.com/thorchain/midgard:2.16.1
+    service-image-3: registry.gitlab.com/thorchain/midgard:2.17.1
     service-cpu-limit-3: 500m
     service-cpu-request-3: 250m
     service-memory-limit-3: 1Gi
@@ -587,7 +587,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: 0xpolygon/bor:0.5.0
+    service-image-1: 0xpolygon/bor:1.0.4
     service-cpu-limit-1: "8"
     service-cpu-request-1: "4"
     service-memory-request-1: 32Gi
@@ -636,13 +636,13 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.20.3
+    service-image-1: nethermind/nethermind:1.21.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 6Gi
     service-storage-size-1: 1000Gi
     service-name-2: daemon-beacon
-    service-image-2: sigp/lighthouse:v4.4.1
+    service-image-2: sigp/lighthouse:v4.5.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 4Gi
@@ -651,7 +651,7 @@ aliases:
     service-image-3: shapeshiftdao/unchained-blockbook:gnosis-f0ab749
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
-    service-memory-limit-3: 24Gi
+    service-memory-limit-3: 16Gi
     service-storage-size-3: 500Gi
 
   - &gnosis-dev
