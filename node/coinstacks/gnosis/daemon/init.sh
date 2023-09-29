@@ -5,7 +5,7 @@ set -e
 apt update && apt install -y curl jq
 
 start() {
-  ./Nethermind.Runner \
+  ./nethermind \
     --config gnosis \
     --datadir /data/gnosis \
     --JsonRpc.Host=0.0.0.0 \
