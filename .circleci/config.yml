@@ -670,7 +670,7 @@ aliases:
     assetName: arbitrum
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/arbitrum/pulumi
-    rpc-url: http://arbitrum-svc.unchained.svc.cluster.local:8545
+    rpc-url: http://arbitrum-svc.unchained.svc.cluster.local:8547
     indexer-url: http://arbitrum-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://arbitrum-svc.unchained.svc.cluster.local:8001/websocket
     api-autoscaling: true
@@ -683,7 +683,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: offchainlabs/nitro-node:v2.0.14-2baa834
+    service-image-1: offchainlabs/nitro-node:v2.1.0-72ccc0c
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
@@ -700,7 +700,7 @@ aliases:
     <<: *arbitrum
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    rpc-url: http://arbitrum-svc.unchained-dev.svc.cluster.local:8545
+    rpc-url: http://arbitrum-svc.unchained-dev.svc.cluster.local:8547
     indexer-url: http://arbitrum-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://arbitrum-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
