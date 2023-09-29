@@ -9,7 +9,6 @@ start() {
   --init.url 'https://snapshot.arbitrum.foundation/arb1/nitro-pruned.tar' \
   --init.download-path /data/tmp \
   --persistent.chain /data \
-  --init.prune full \
   --auth.jwtsecret /jwt.hex \
   --http.addr 0.0.0.0 \
   --http.port 8547 \
