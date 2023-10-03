@@ -683,7 +683,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: offchainlabs/nitro-node:v2.1.0-72ccc0c
+    service-image-1: offchainlabs/nitro-node:v2.1.1-e9d8842
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi

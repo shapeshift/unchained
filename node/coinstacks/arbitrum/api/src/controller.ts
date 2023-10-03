@@ -124,22 +124,22 @@ export class Arbitrum extends Controller implements BaseAPI, API {
   @Example<TxHistory>({
     pubkey: '0x9D1170D30944F2E30664Be502aC57F6096fB5366',
     cursor:
-      'eyJibG9ja2Jvb2tQYWdlIjoyLCJleHBsb3JlclBhZ2UiOjEsImJsb2NrYm9va1R4aWQiOiIweDE0YTZlYTA4MWRhYWI1OWI1ZGQ3YTE3NjQ4YTAwNGU5Y2EzNzdhNWVkMmE5N2E4NGUyYWQ4MDVkZjJlMjUzM2QiLCJibG9ja0hlaWdodCI6MTc1MTIxNjR9',
+      'eyJibG9ja2Jvb2tQYWdlIjoyLCJleHBsb3JlclBhZ2UiOjEsImJsb2NrYm9va1R4aWQiOiIweGRhYjE2ODcyNWViMzYyMmQ2MTNkNWRhZWRiZmE5MTdiZWFjNGZhNTJhNWZhYzg2MDk5ZDg1ZmI3MWI1OTYyYTUiLCJibG9ja0hlaWdodCI6NzcyOTExMDV9',
     txs: [
       {
-        txid: '0x14a6ea081daab59b5dd7a17648a004e9ca377a5ed2a97a84e2ad805df2e2533d',
-        blockHash: '0x748fff248d4a033c28cb6cc45b78ad7f471ac4d958971570e3e3afe4e0f84c1f',
-        blockHeight: 17512164,
-        timestamp: 1658197214,
+        txid: '0xdab168725eb3622d613d5daedbfa917beac4fa52a5fac86099d85fb71b5962a5',
+        blockHash: '0x332643127493036faba7de88a6fb7d5e8b150d64526c1908fddbeb99fec2c674',
+        blockHeight: 77291105,
+        timestamp: 1680697466,
         status: 1,
-        from: '0xa3682Fe8fD73B90A7564585A436EC2D2AEb612eE',
-        to: '0x9D1170D30944F2E30664Be502aC57F6096fB5366',
-        confirmations: 119004,
-        value: '410000000000000000',
-        fee: '525000000000000',
-        gasLimit: '21000',
-        gasUsed: '21000',
-        gasPrice: '25000000000',
+        from: '0x9D1170D30944F2E30664Be502aC57F6096fB5366',
+        to: '0xc0ef185cC29A3D9f36977BfA92862f833AD59e95',
+        confirmations: 59521378,
+        value: '4159598947212301',
+        fee: '34455000000000',
+        gasLimit: '446815',
+        gasUsed: '344550',
+        gasPrice: '100000000',
       },
     ],
   })
@@ -156,24 +156,24 @@ export class Arbitrum extends Controller implements BaseAPI, API {
    *
    * @param {string} txid transaction hash
    *
-   * @example txid "0x14a6ea081daab59b5dd7a17648a004e9ca377a5ed2a97a84e2ad805df2e2533d"
+   * @example txid "0xdab168725eb3622d613d5daedbfa917beac4fa52a5fac86099d85fb71b5962a5"
    *
    * @returns {Promise<Tx>} transaction payload
    */
   @Example<Tx>({
-    txid: '0x14a6ea081daab59b5dd7a17648a004e9ca377a5ed2a97a84e2ad805df2e2533d',
-    blockHash: '0x748fff248d4a033c28cb6cc45b78ad7f471ac4d958971570e3e3afe4e0f84c1f',
-    blockHeight: 17512164,
-    timestamp: 1658197214,
+    txid: '0xdab168725eb3622d613d5daedbfa917beac4fa52a5fac86099d85fb71b5962a5',
+    blockHash: '0x332643127493036faba7de88a6fb7d5e8b150d64526c1908fddbeb99fec2c674',
+    blockHeight: 77291105,
+    timestamp: 1680697466,
     status: 1,
-    from: '0xa3682Fe8fD73B90A7564585A436EC2D2AEb612eE',
-    to: '0x9D1170D30944F2E30664Be502aC57F6096fB5366',
-    confirmations: 119004,
-    value: '410000000000000000',
-    fee: '525000000000000',
-    gasLimit: '21000',
-    gasUsed: '21000',
-    gasPrice: '25000000000',
+    from: '0x9D1170D30944F2E30664Be502aC57F6096fB5366',
+    to: '0xc0ef185cC29A3D9f36977BfA92862f833AD59e95',
+    confirmations: 59521508,
+    value: '4159598947212301',
+    fee: '34455000000000',
+    gasLimit: '446815',
+    gasUsed: '344550',
+    gasPrice: '100000000',
   })
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
@@ -198,7 +198,7 @@ export class Arbitrum extends Controller implements BaseAPI, API {
    * @example to "0x9D1170D30944F2E30664Be502aC57F6096fB5366"
    * @example value "1337"
    */
-  @Example<GasEstimate>({ gasLimit: '21000' })
+  @Example<GasEstimate>({ gasLimit: '374764' })
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/estimate')
@@ -220,23 +220,23 @@ export class Arbitrum extends Controller implements BaseAPI, API {
    * @returns {Promise<GasFees>} current fees specified in wei
    */
   @Example<GasFees>({
-    gasPrice: '25000000000',
-    baseFeePerGas: '25000000000',
+    gasPrice: '100000000',
+    baseFeePerGas: '100000000',
     maxPriorityFeePerGas: '0',
     slow: {
-      gasPrice: '25757584186',
-      maxFeePerGas: '28394352138',
-      maxPriorityFeePerGas: '3394352138',
+      gasPrice: '184334277',
+      maxFeePerGas: '190000001',
+      maxPriorityFeePerGas: '90000001',
     },
     average: {
-      gasPrice: '28228764956',
-      maxFeePerGas: '32489417391',
-      maxPriorityFeePerGas: '7489417391',
+      gasPrice: '187859277',
+      maxFeePerGas: '205000001',
+      maxPriorityFeePerGas: '105000001',
     },
     fast: {
-      gasPrice: '38695403370',
-      maxFeePerGas: '47086501038',
-      maxPriorityFeePerGas: '22086501038',
+      gasPrice: '199001183',
+      maxFeePerGas: '290000001',
+      maxPriorityFeePerGas: '190000001',
     },
   })
   @Response<InternalServerError>(500, 'Internal Server Error')
@@ -274,16 +274,15 @@ export class Arbitrum extends Controller implements BaseAPI, API {
    *
    * @returns {Promise<TokenMetadata>} token metadata
    *
-   * @example contractAddress "0x3025C5c2aA6eb7364555aAC0074292195701bBD6"
-   * @example id "4525"
+   * @example contractAddress "0x1E3E1ed17A8Df57C215b45f00c2eC4717B33a93D"
+   * @example id "1000143"
    * @example type "erc721"
    */
   @Example<TokenMetadata>({
-    name: 'MadSkullz #5136',
-    description:
-      'MadSkullz #5136 is one of the 6666 NFTs from MadSkullz Collection that are joining SkullzCity to fight for Freedomz.',
+    name: 'Dragon 30',
+    description: '',
     media: {
-      url: 'https://cdn.madskullz.io/madskullz/images/5136.png',
+      url: 'https://img.momoworld.io/dragon/52.png',
       type: 'image',
     },
   })
