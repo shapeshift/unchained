@@ -2,7 +2,7 @@
 
 set -e
 
-apk add bash curl jq wget zstd pv
+apk add bash curl jq wget zstd tar pv
 
 [ "$DEBUG" = "true" ] && set -x
 
@@ -27,6 +27,7 @@ fi
 start() {
   heimdalld start \
     --home $HOME_DIR \
+    --chain mainnet \
     --rpc.laddr tcp://0.0.0.0:26657 \
     --bor_rpc_url http://localhost:8545 \
     --eth_rpc_url $ETH_RPC_URL \
