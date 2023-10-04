@@ -666,6 +666,48 @@ aliases:
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
+  - &arbitrum
+    assetName: arbitrum
+    pulumi-stack: public-us-east-2
+    pulumi-dir: coinstacks/arbitrum/pulumi
+    rpc-url: http://arbitrum-svc.unchained.svc.cluster.local:8547
+    indexer-url: http://arbitrum-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://arbitrum-svc.unchained.svc.cluster.local:8001/websocket
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 6
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
+    api-cpu-threshold: 75
+    api-memory-limit: 500Mi
+    api-memory-request: 250Mi
+    stateful-service-replicas: 2
+    service-name-1: daemon
+    service-image-1: offchainlabs/nitro-node:v2.1.1-e9d8842
+    service-cpu-limit-1: "2"
+    service-cpu-request-1: "1"
+    service-memory-limit-1: 24Gi
+    service-storage-size-1: 1000Gi
+    service-name-2: indexer
+    service-image-2: shapeshiftdao/unchained-blockbook:arbitrum-e21ed51
+    service-cpu-limit-2: "2"
+    service-cpu-request-2: "1"
+    service-memory-limit-2: 16Gi
+    service-storage-size-2: 500Gi
+
+
+  - &arbitrum-dev
+    <<: *arbitrum
+    environment: dev
+    pulumi-stack: public-dev-us-east-2
+    rpc-url: http://arbitrum-svc.unchained-dev.svc.cluster.local:8547
+    indexer-url: http://arbitrum-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://arbitrum-svc.unchained-dev.svc.cluster.local:8001/websocket
+    api-replicas: 1
+    api-max-replicas: 2
+    api-memory-limit: 250Mi
+    stateful-service-replicas: 1
+
 commands:
   precheck:
     description: install dependencies
@@ -1164,6 +1206,16 @@ workflows:
           <<: *gnosis-dev
           <<: *only-develop
 
+      - deploy-coinstack-node:
+          name: deploy arbitrum develop
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          etherscan-env-var: ETHERSCAN_API_KEY_ARBITRUM
+          requires:
+            - deploy dependencies
+          <<: *arbitrum-dev
+          <<: *only-develop
+
       - deploy-coinstack-go:
           name: deploy cosmos develop
           organization: TAXISTAKE
@@ -1468,6 +1520,32 @@ workflows:
           requires:
             - approve gnosis coinstack
           <<: *gnosis
+          <<: *only-main
+
+      ####### ARBITRUM
+      - deploy-coinstack-node:
+          name: preview arbitrum
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies
+          <<: *arbitrum
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve arbitrum coinstack
+          type: approval
+          requires:
+            - preview arbitrum
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy arbitrum
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve arbitrum coinstack
+          <<: *arbitrum
           <<: *only-main
 
       ####### COSMOS

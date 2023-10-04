@@ -74,6 +74,10 @@ export class GasOracle {
         this.latestBlockTag = 'pending'
         this.canQueryPendingBlockByHeight = true
         break
+      case 'arbitrum':
+        this.latestBlockTag = 'pending'
+        this.canQueryPendingBlockByHeight = true
+        break
       default:
         throw new Error(`no coinstack support for: ${args.coinstack}`)
     }
@@ -177,10 +181,10 @@ export class GasOracle {
 
       const txFees = block.transactions.reduce<TxFees>(
         (txFees, tx) => {
-          tx.gasPrice && Number(tx.gasPrice) && txFees.gasPrices.push(Number(tx.gasPrice))
-          tx.maxPriorityFeePerGas &&
-            Number(tx.maxPriorityFeePerGas) &&
-            txFees.maxPriorityFees.push(Number(tx.maxPriorityFeePerGas))
+          // omit non standard tx types that pays no gas
+          if (Number(tx.type) > 2 && Number(tx.gasPrice) === 0) return txFees
+          tx.gasPrice && txFees.gasPrices.push(Number(tx.gasPrice))
+          tx.maxPriorityFeePerGas && txFees.maxPriorityFees.push(Number(tx.maxPriorityFeePerGas))
           return txFees
         },
         { gasPrices: [], maxPriorityFees: [] }
