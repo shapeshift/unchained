@@ -686,7 +686,7 @@ aliases:
     service-image-1: offchainlabs/nitro-node:v2.1.1-e9d8842
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
-    service-memory-limit-1: 12Gi
+    service-memory-limit-1: 24Gi
     service-storage-size-1: 1000Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:arbitrum-e21ed51
