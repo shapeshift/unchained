@@ -594,7 +594,7 @@ aliases:
     service-memory-limit-1: 48Gi
     service-storage-size-1: 4000Gi
     service-name-2: heimdall
-    service-image-2: 0xpolygon/heimdall:0.3.5
+    service-image-2: 0xpolygon/heimdall:1.0.1
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 2Gi
