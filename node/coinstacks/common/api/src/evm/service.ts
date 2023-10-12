@@ -131,7 +131,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     }
   }
 
-  async getTxHistory(pubkey: string, cursor?: string, pageSize = 10): Promise<TxHistory> {
+  async getTxHistory(pubkey: string, cursor?: string, pageSize = 10, from?: number, to?: number): Promise<TxHistory> {
     validatePageSize(pageSize)
 
     const curCursor = ((): Cursor => {
@@ -146,8 +146,14 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     })()
 
     try {
-      let { hasMore: hasMoreBlockbookTxs, txs: blockbookTxs } = await this.getTxs(pubkey, pageSize, curCursor)
-      let { hasMore: hasMoreInternalTxs, internalTxs } = await this.getInternalTxs(pubkey, pageSize, curCursor)
+      let { hasMore: hasMoreBlockbookTxs, txs: blockbookTxs } = await this.getTxs(pubkey, pageSize, curCursor, from, to)
+      let { hasMore: hasMoreInternalTxs, internalTxs } = await this.getInternalTxs(
+        pubkey,
+        pageSize,
+        curCursor,
+        from,
+        to
+      )
 
       if (!blockbookTxs.size && !internalTxs.size) {
         return {
@@ -160,12 +166,24 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       for (let i = 0; i < pageSize; i++) {
         if (!blockbookTxs.size && hasMoreBlockbookTxs) {
           curCursor.blockbookPage++
-          ;({ hasMore: hasMoreBlockbookTxs, txs: blockbookTxs } = await this.getTxs(pubkey, pageSize, curCursor))
+          ;({ hasMore: hasMoreBlockbookTxs, txs: blockbookTxs } = await this.getTxs(
+            pubkey,
+            pageSize,
+            curCursor,
+            from,
+            to
+          ))
         }
 
         if (!internalTxs.size && hasMoreInternalTxs) {
           curCursor.explorerPage++
-          ;({ hasMore: hasMoreInternalTxs, internalTxs } = await this.getInternalTxs(pubkey, pageSize, curCursor))
+          ;({ hasMore: hasMoreInternalTxs, internalTxs } = await this.getInternalTxs(
+            pubkey,
+            pageSize,
+            curCursor,
+            from,
+            to
+          ))
         }
 
         if (!internalTxs.size && !blockbookTxs.size) break
@@ -179,6 +197,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
           txs.push({ ...blockbookTx })
           blockbookTxs.delete(blockbookTx.txid)
           curCursor.blockbookTxid = blockbookTx.txid
+          curCursor.blockHeight = blockbookTx.blockHeight
         } else if (blockbookTx && blockbookTx.blockHeight >= (internalTx?.blockHeight ?? -2)) {
           // process transactions in descending order prioritizing confirmed, include associated internal txs
 
@@ -186,6 +205,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
           blockbookTxs.delete(blockbookTx.txid)
           curCursor.blockbookTxid = blockbookTx.txid
+          curCursor.blockHeight = blockbookTx.blockHeight
 
           // if there was a matching internal tx, delete it and track as last internal txid seen
           if (internalTxs.has(blockbookTx.txid)) {
@@ -207,6 +227,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
           internalTxs.delete(internalTx.txid)
           curCursor.explorerTxid = internalTx.txid
+          curCursor.blockHeight = internalTx.blockHeight
 
           // if there was a matching blockbook tx, delete it and track as last blockbook txid seen
           if (blockbookTxs.has(internalTx.txid)) {
@@ -218,7 +239,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
       // if we processed through the whole set of transactions, increase the page number for next fetch
       if (!blockbookTxs.size) curCursor.blockbookPage++
-      if (!internalTxs.size) curCursor.blockbookPage++
+      if (!internalTxs.size) curCursor.explorerPage++
 
       curCursor.blockHeight = txs[txs.length - 1]?.blockHeight
 
@@ -546,12 +567,14 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   private async getInternalTxs(
     address: string,
     pageSize: number,
-    cursor: Cursor
+    cursor: Cursor,
+    from?: number,
+    to?: number
   ): Promise<{
     hasMore: boolean
     internalTxs: Map<string, { blockHeight: number; txid: string; txs: Array<InternalTx> }>
   }> {
-    const internalTxs = await this.fetchInternalTxsByAddress(address, cursor.explorerPage, pageSize)
+    const internalTxs = await this.fetchInternalTxsByAddress(address, cursor.explorerPage, pageSize, from, to)
 
     const data = new Map<string, { blockHeight: number; txid: string; txs: Array<InternalTx> }>()
 
@@ -593,7 +616,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     // if no txs exist after filtering out already seen transactions, fetch the next page
     if (!filteredInternalTxs.size) {
       cursor.explorerPage++
-      return this.getInternalTxs(address, pageSize, cursor)
+      return this.getInternalTxs(address, pageSize, cursor, from, to)
     }
 
     return {
@@ -605,10 +628,12 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   private async fetchInternalTxsByAddress(
     address: string,
     page: number,
-    pageSize: number
+    pageSize: number,
+    from?: number,
+    to?: number
   ): Promise<Array<ExplorerInternalTx> | undefined> {
     const { data } = await axios.get<ExplorerApiResponse<Array<ExplorerInternalTx>>>(
-      `${this.explorerApiUrl}?module=account&action=txlistinternal&address=${address}&page=${page}&offset=${pageSize}&sort=desc&apikey=${this.explorerApiKey}`
+      `${this.explorerApiUrl}?module=account&action=txlistinternal&address=${address}&page=${page}&offset=${pageSize}&startblock=${from}&endblock=${to}&sort=desc&apikey=${this.explorerApiKey}`
     )
 
     if (data.status === '0') return []
@@ -619,20 +644,23 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   private async getTxs(
     address: string,
     pageSize: number,
-    cursor: Cursor
+    cursor: Cursor,
+    from?: number,
+    to?: number
   ): Promise<{ hasMore: boolean; txs: Map<string, Tx> }> {
-    const blockbookData = await this.blockbook.getAddress(
-      address,
-      cursor.blockbookPage,
-      pageSize,
-      undefined,
-      undefined,
-      'txs'
-    )
+    const blockbookData = await this.blockbook.getAddress(address, cursor.blockbookPage, pageSize, from, to, 'txs')
 
     const data = new Map<string, Tx>()
 
-    if (!blockbookData?.transactions?.length || cursor.blockbookPage > (blockbookData.totalPages ?? -1)) {
+    const rangeQuery = from || to
+
+    if (
+      !blockbookData?.transactions?.length ||
+      // page will not increment past the last page for all queries, we can use this to detect "totalPages" for range queries
+      (blockbookData.page && cursor.blockbookPage > blockbookData.page) ||
+      // blockbook does not provide total pages for range queries
+      (!rangeQuery && cursor.blockbookPage > (blockbookData.totalPages ?? -1))
+    ) {
       return { hasMore: false, txs: data }
     }
 
@@ -677,11 +705,17 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     // if no txs exist after filtering out already seen transactions, fetch the next page
     if (!blockbookTxs.size) {
       cursor.blockbookPage++
-      return this.getTxs(address, pageSize, cursor)
+      return this.getTxs(address, pageSize, cursor, from, to)
     }
 
     return {
-      hasMore: cursor.blockbookPage < (blockbookData.totalPages ?? -1) ? true : false,
+      hasMore:
+        // use total pages for non range queries
+        (!rangeQuery && cursor.blockbookPage < (blockbookData.totalPages ?? -1)) ||
+        // use page for range queries which should exists (if this is not enough, we can look at blockbook.Txs.length)
+        (rangeQuery && blockbookData.page && cursor.blockbookPage <= blockbookData.page)
+          ? true
+          : false,
       txs: blockbookTxs,
     }
   }

@@ -676,6 +676,26 @@
 							"format": "double",
 							"type": "number"
 						}
+					},
+					{
+						"description": "from block number (0 by default)",
+						"in": "query",
+						"name": "from",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"description": "to block number (pending by default)",
+						"in": "query",
+						"name": "to",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
 					}
 				]
 			}

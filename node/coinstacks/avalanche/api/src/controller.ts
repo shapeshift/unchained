@@ -108,6 +108,8 @@ export class Avalanche extends Controller implements BaseAPI, API {
    * @param {string} pubkey account address
    * @param {string} [cursor] the cursor returned in previous query (base64 encoded json object with a 'page' property)
    * @param {number} [pageSize] page size (10 by default)
+   * @param {number} [from] from block number (0 by default)
+   * @param {number} [to] to block number (pending by default)
    *
    * @returns {Promise<TxHistory>} transaction history
    *
@@ -139,8 +141,14 @@ export class Avalanche extends Controller implements BaseAPI, API {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}/txs')
-  async getTxHistory(@Path() pubkey: string, @Query() cursor?: string, @Query() pageSize = 10): Promise<TxHistory> {
-    return service.getTxHistory(pubkey, cursor, pageSize)
+  async getTxHistory(
+    @Path() pubkey: string,
+    @Query() cursor?: string,
+    @Query() pageSize = 10,
+    @Query() from?: number,
+    @Query() to?: number
+  ): Promise<TxHistory> {
+    return service.getTxHistory(pubkey, cursor, pageSize, from, to)
   }
 
   /**
