@@ -161,7 +161,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/bitcoin-core:25.0
+    service-image-1: shapeshiftdao/bitcoin-core:25.1
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 8Gi
@@ -202,13 +202,13 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.13.3
+    service-image-1: ethereum/client-go:v1.13.4
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 32Gi
     service-storage-size-1: 3000Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.0.8
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.1.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 12Gi
@@ -286,7 +286,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: avaplatform/avalanchego:v1.10.12
+    service-image-1: avaplatform/avalanchego:v1.10.13
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 8Gi
@@ -497,13 +497,13 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101200.1
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101301.1
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 24Gi
     service-storage-size-1: 1000Gi
     service-name-2: op-node
-    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.1.4
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.2.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 2Gi
@@ -549,7 +549,7 @@ aliases:
     service-cpu-request-1: "4"
     service-memory-limit-1: 72Gi
     service-memory-request-1: 48Gi
-    service-storage-size-1: 4500Gi
+    service-storage-size-1: 5000Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:95ee9b5
     service-cpu-limit-2: "4"
