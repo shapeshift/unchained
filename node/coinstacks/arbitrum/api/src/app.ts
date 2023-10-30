@@ -42,7 +42,7 @@ app.get('/metrics', async (_, res) => {
 
 const options: swaggerUi.SwaggerUiOptions = {
   customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'ShapeShift Arbitrum API Docs',
+  customSiteTitle: 'ShapeShift Arbitrum One API Docs',
   customfavIcon: '/public/favi-blue.png',
   swaggerUrl: '/swagger.json',
 }
