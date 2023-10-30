@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  api:
+    image: unchained-local-node
+    env_file: .env
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.arbitrum-nova-api.rule=Host(`api.arbitrum-nova.localhost`)'
+      - 'traefik.http.services.arbitrum-nova-api.loadbalancer.server.port=3000'
+    working_dir: /app/node/coinstacks/arbitrum-nova/api
+    command: yarn nodemon
+    volumes:
+      - ../../..:/app
+    networks:
+      - arbitrum-nova
+
+networks:
+  arbitrum-nova:
+    name: arbitrum-nova_default
+    external: true

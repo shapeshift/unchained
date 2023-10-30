@@ -34,6 +34,7 @@ services:
       - "--providers.docker.exposedbydefault=false"
     networks:
       - arbitrum_default
+      - arbitrum-nova_default
       - avalanche_default
       - bitcoin_default
       - bitcoincash_default
@@ -58,6 +59,8 @@ services:
 networks:
   arbitrum_default:
     name: arbitrum_default
+  arbitrum-nova_default:
+    name: arbitrum-nova_default
   avalanche_default:
     name: avalanche_default
   bitcoin_default:

@@ -75,6 +75,7 @@ export class GasOracle {
         this.canQueryPendingBlockByHeight = true
         break
       case 'arbitrum':
+      case 'arbitrum-nova':
         this.latestBlockTag = 'pending'
         this.canQueryPendingBlockByHeight = true
         break

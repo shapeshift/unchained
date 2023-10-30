@@ -1,0 +1,21 @@
+{
+  "fiat_rates": "coingecko",
+  "fiat_rates_params": "{\"url\": \"https://api.coingecko.com/api/v3\", \"coin\": \"ethereum\",\"platformIdentifier\": \"ethereum\",\"platformVsCurrency\": \"eth\",\"periodSeconds\": 900}",
+  "fiat_rates_vs_currencies": "AED,ARS,AUD,BDT,BHD,BMD,BRL,CAD,CHF,CLP,CNY,CZK,DKK,EUR,GBP,HKD,HUF,IDR,ILS,INR,JPY,KRW,KWD,LKR,MMK,MXN,MYR,NGN,NOK,NZD,PHP,PKR,PLN,RUB,SAR,SEK,SGD,THB,TRY,TWD,UAH,USD,VEF,VND,ZAR,BTC,ETH",
+  "mempoolTxTimeoutHours": 24,
+  "queryBackendOnMempoolResync": false,
+  "coin_name": "Arbitrum",
+  "coin_shortcut": "ETH",
+  "coin_label": "Arbitrum Nova",
+  "rpc_url": "ws://localhost:8548",
+  "rpc_user": "",
+  "rpc_pass": "",
+  "rpc_timeout": 25,
+  "parse": true,
+  "message_queue_binding": "",
+  "subversion": "",
+  "address_format": "",
+  "mempool_workers": 8,
+  "mempool_sub_workers": 2,
+  "block_addresses_to_keep": 300
+}

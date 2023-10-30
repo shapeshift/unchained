@@ -23,17 +23,19 @@ const INDEXER_WS_URL = process.env.INDEXER_WS_URL
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 
 export const logger = new Logger({
-  namespace: ['unchained', 'coinstacks', 'arbitrum', 'api'],
+  namespace: ['unchained', 'coinstacks', 'arbitrum-nova', 'api'],
   level: process.env.LOG_LEVEL,
 })
 
-const prometheus = new Prometheus({ coinstack: 'arbitrum' })
+const prometheus = new Prometheus({ coinstack: 'arbitrum-nova' })
 
 const app = express()
 
 app.use(json(), urlencoded({ extended: true }), cors(), middleware.requestLogger, middleware.metrics(prometheus))
 
-app.get('/health', async (_, res) => res.json({ status: 'up', asset: 'arbitrum', connections: wsServer.clients.size }))
+app.get('/health', async (_, res) =>
+  res.json({ status: 'up', asset: 'arbitrum-nova', connections: wsServer.clients.size })
+)
 
 app.get('/metrics', async (_, res) => {
   res.setHeader('Content-Type', prometheus.register.contentType)
@@ -42,7 +44,7 @@ app.get('/metrics', async (_, res) => {
 
 const options: swaggerUi.SwaggerUiOptions = {
   customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'ShapeShift Arbitrum One API Docs',
+  customSiteTitle: 'ShapeShift Arbitrum Nova API Docs',
   customfavIcon: '/public/favi-blue.png',
   swaggerUrl: '/swagger.json',
 }
