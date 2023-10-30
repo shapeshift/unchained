@@ -689,12 +689,11 @@ aliases:
     service-memory-limit-1: 24Gi
     service-storage-size-1: 1000Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:arbitrum-e21ed51
+    service-image-2: shapeshiftdao/unchained-blockbook:arbitrum-92a5619
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 16Gi
     service-storage-size-2: 500Gi
-
 
   - &arbitrum-dev
     <<: *arbitrum
@@ -703,6 +702,47 @@ aliases:
     rpc-url: http://arbitrum-svc.unchained-dev.svc.cluster.local:8547
     indexer-url: http://arbitrum-svc.unchained-dev.svc.cluster.local:8001
     indexer-ws-url: ws://arbitrum-svc.unchained-dev.svc.cluster.local:8001/websocket
+    api-replicas: 1
+    api-max-replicas: 2
+    api-memory-limit: 250Mi
+    stateful-service-replicas: 1
+
+  - &arbitrum-nova
+    assetName: arbitrum-nova
+    pulumi-stack: public-us-east-2
+    pulumi-dir: coinstacks/arbitrum/pulumi
+    rpc-url: http://arbitrum-nova-svc.unchained.svc.cluster.local:8547
+    indexer-url: http://arbitrum-nova-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://arbitrum-nova-svc.unchained.svc.cluster.local:8001/websocket
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 6
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
+    api-cpu-threshold: 75
+    api-memory-limit: 500Mi
+    api-memory-request: 250Mi
+    stateful-service-replicas: 2
+    service-name-1: daemon
+    service-image-1: offchainlabs/nitro-node:v2.1.1-e9d8842
+    service-cpu-limit-1: "2"
+    service-cpu-request-1: "1"
+    service-memory-limit-1: 24Gi
+    service-storage-size-1: 500Gi
+    service-name-2: indexer
+    service-image-2: shapeshiftdao/unchained-blockbook:arbitrum-92a5619
+    service-cpu-limit-2: "2"
+    service-cpu-request-2: "1"
+    service-memory-limit-2: 8Gi
+    service-storage-size-2: 500Gi
+
+  - &arbitrum-nova-dev
+    <<: *arbitrum-nova
+    environment: dev
+    pulumi-stack: public-dev-us-east-2
+    rpc-url: http://arbitrum-nova-svc.unchained-dev.svc.cluster.local:8547
+    indexer-url: http://arbitrum-nova-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://arbitrum-nova-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 250Mi
@@ -1216,6 +1256,16 @@ workflows:
           <<: *arbitrum-dev
           <<: *only-develop
 
+      - deploy-coinstack-node:
+          name: deploy arbitrum nova develop
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          etherscan-env-var: ETHERSCAN_API_KEY_ARBITRUM_NOVA
+          requires:
+            - deploy dependencies
+          <<: *arbitrum-nova-dev
+          <<: *only-develop
+
       - deploy-coinstack-go:
           name: deploy cosmos develop
           organization: TAXISTAKE
@@ -1546,6 +1596,32 @@ workflows:
           requires:
             - approve arbitrum coinstack
           <<: *arbitrum
+          <<: *only-main
+
+      ####### ARBITRUM NOVA
+      - deploy-coinstack-node:
+          name: preview arbitrum nova
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies
+          <<: *arbitrum-nova
+          <<: *only-main
+
+      - approve-coinstack:
+          name: approve arbitrum nova coinstack
+          type: approval
+          requires:
+            - preview arbitrum nova
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy arbitrum nova
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve arbitrum nova coinstack
+          <<: *arbitrum-nova
           <<: *only-main
 
       ####### COSMOS
