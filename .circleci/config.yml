@@ -710,7 +710,7 @@ aliases:
   - &arbitrum-nova
     assetName: arbitrum-nova
     pulumi-stack: public-us-east-2
-    pulumi-dir: coinstacks/arbitrum/pulumi
+    pulumi-dir: coinstacks/arbitrum-nova/pulumi
     rpc-url: http://arbitrum-nova-svc.unchained.svc.cluster.local:8547
     indexer-url: http://arbitrum-nova-svc.unchained.svc.cluster.local:8001
     indexer-ws-url: ws://arbitrum-nova-svc.unchained.svc.cluster.local:8001/websocket
@@ -724,16 +724,16 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: offchainlabs/nitro-node:v2.1.1-e9d8842
+    service-image-1: offchainlabs/nitro-node:v2.1.2-4c55843
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
-    service-memory-limit-1: 24Gi
+    service-memory-limit-1: 16Gi
     service-storage-size-1: 500Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:arbitrum-92a5619
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 8Gi
+    service-memory-limit-2: 12Gi
     service-storage-size-2: 500Gi
 
   - &arbitrum-nova-dev
