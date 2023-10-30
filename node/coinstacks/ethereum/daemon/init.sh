@@ -10,6 +10,7 @@ start_coin_bg() {
     --authrpc.jwtsecret /jwt.hex \
     --syncmode full \
     --datadir /data \
+    --db.engine pebble \
     --http \
     --http.addr 0.0.0.0 \
     --http.port 8545 \
@@ -21,8 +22,8 @@ start_coin_bg() {
     --ws.port 8546 \
     --ws.api eth,net,web3,debug,txpool,engine \
     --ws.origins '*' \
-    --txlookuplimit 0 \
-    --cache 4096 \
+    --state.scheme path \
+    --history.transactions 0 \
     --ipcdisable \
     --nat none &
   PID="$!"

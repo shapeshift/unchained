@@ -6,6 +6,7 @@ start() {
   MONIKER=unchained \
   CHAIN_JSON=https://raw.githubusercontent.com/cosmos/chain-registry/master/cosmoshub/chain.json \
   P2P_POLKACHU=true \
+  POLKACHU_NETWORK=cosmos \
   run.sh gaiad start \
     --rpc.laddr tcp://0.0.0.0:26657 \
     --minimum-gas-prices 0uatom &
