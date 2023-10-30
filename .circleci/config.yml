@@ -286,11 +286,11 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: avaplatform/avalanchego:v1.10.13
+    service-image-1: avaplatform/avalanchego:v1.10.14
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 8Gi
-    service-storage-size-1: 5000Gi
+    service-storage-size-1: 5500Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:95ee9b5
     service-cpu-limit-2: "2"
@@ -683,7 +683,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: offchainlabs/nitro-node:v2.1.1-e9d8842
+    service-image-1: offchainlabs/nitro-node:v2.1.2-4c55843
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
