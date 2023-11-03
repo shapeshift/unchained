@@ -140,6 +140,12 @@ export function createCoinService(args: CoinServiceArgs, assetName: string): Ser
       name: `${name}-monitor`,
       image: 'shapeshiftdao/unchained-probe:1.0.0',
       env,
+      resources: {
+        limits: {
+          cpu: '100m',
+          memory: '10Mi',
+        },
+      },
       ...(readinessProbe && {
         readinessProbe: {
           exec: {
