@@ -170,7 +170,7 @@ aliases:
     service-image-2: shapeshiftdao/unchained-blockbook:95ee9b5
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 32Gi
+    service-memory-limit-2: 36Gi
     service-storage-size-2: 500Gi
 
   - &bitcoin-dev
@@ -250,10 +250,10 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/cosmoshub:v13.0.0
+    service-image-1: shapeshiftdao/cosmoshub:v13.0.1
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
-    service-memory-limit-1: 32Gi
+    service-memory-limit-1: 40Gi
     service-storage-size-1: 4000Gi
 
   - &cosmos-dev
@@ -286,7 +286,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: avaplatform/avalanchego:v1.10.14
+    service-image-1: avaplatform/avalanchego:v1.10.15
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 8Gi
@@ -592,7 +592,7 @@ aliases:
     service-cpu-request-1: "4"
     service-memory-request-1: 32Gi
     service-memory-limit-1: 48Gi
-    service-storage-size-1: 3500Gi
+    service-storage-size-1: 4000Gi
     service-name-2: heimdall
     service-image-2: 0xpolygon/heimdall:1.0.2
     service-cpu-limit-2: "2"
@@ -687,7 +687,7 @@ aliases:
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
-    service-storage-size-1: 1000Gi
+    service-storage-size-1: 500Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:arbitrum-92a5619
     service-cpu-limit-2: "2"
@@ -1411,56 +1411,56 @@ workflows:
           <<: *only-main
 
       ####### ETHEREUM
-      #- deploy-coinstack-node:
-      #    name: preview ethereum
-      #    organization: TAXISTAKE
-      #    pulumi-command: preview
-      #    requires:
-      #      - validate dependencies
-      #    <<: *ethereum
-      #    <<: *only-main
+      - deploy-coinstack-node:
+          name: preview ethereum
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies
+          <<: *ethereum
+          <<: *only-main
 
-      #- approve-coinstack:
-      #    name: approve ethereum coinstack
-      #    type: approval
-      #    requires:
-      #      - preview ethereum
-      #    <<: *only-main
+      - approve-coinstack:
+          name: approve ethereum coinstack
+          type: approval
+          requires:
+            - preview ethereum
+          <<: *only-main
 
-      #- deploy-coinstack-node:
-      #    name: deploy ethereum
-      #    organization: TAXISTAKE
-      #    pulumi-command: up -f --yes
-      #    requires:
-      #      - approve ethereum coinstack
-      #    <<: *ethereum
-      #    <<: *only-main
+      - deploy-coinstack-node:
+          name: deploy ethereum
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve ethereum coinstack
+          <<: *ethereum
+          <<: *only-main
 
       ####### AVALANCHE
-      #- deploy-coinstack-node:
-      #    name: preview avalanche
-      #    organization: TAXISTAKE
-      #    pulumi-command: preview
-      #    requires:
-      #      - validate dependencies
-      #    <<: *avalanche
-      #    <<: *only-main
+      - deploy-coinstack-node:
+          name: preview avalanche
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies
+          <<: *avalanche
+          <<: *only-main
 
-      #- approve-coinstack:
-      #    name: approve avalanche coinstack
-      #    type: approval
-      #    requires:
-      #      - preview avalanche
-      #    <<: *only-main
+      - approve-coinstack:
+          name: approve avalanche coinstack
+          type: approval
+          requires:
+            - preview avalanche
+          <<: *only-main
 
-      #- deploy-coinstack-node:
-      #    name: deploy avalanche
-      #    organization: TAXISTAKE
-      #    pulumi-command: up -f --yes
-      #    requires:
-      #      - approve avalanche coinstack
-      #    <<: *avalanche
-      #    <<: *only-main
+      - deploy-coinstack-node:
+          name: deploy avalanche
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve avalanche coinstack
+          <<: *avalanche
+          <<: *only-main
 
       ####### OPTIMISM
       - deploy-coinstack-node:

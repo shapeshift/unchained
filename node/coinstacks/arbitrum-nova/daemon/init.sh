@@ -13,6 +13,7 @@ start() {
   --init.download-path /data/tmp \
   --persistent.chain /data \
   --auth.jwtsecret /jwt.hex \
+  --file-logging.enable='false' \
   --http.addr 0.0.0.0 \
   --http.port 8547 \
   --http.api eth,net,web3,debug,txpool,arb \
