@@ -190,7 +190,7 @@ export function deployIpfs({ namespace, provider, domain, additionalDomain }: Ip
             metadata: { name: 'cluster-storage' },
             spec: {
               accessModes: ['ReadWriteOnce'],
-              storageClassName: 'ebs-csi-gp2',
+              storageClassName: 'gp3',
               resources: {
                 requests: { storage: '5Gi' },
               },
@@ -200,7 +200,7 @@ export function deployIpfs({ namespace, provider, domain, additionalDomain }: Ip
             metadata: { name: 'ipfs-storage' },
             spec: {
               accessModes: ['ReadWriteOnce'],
-              storageClassName: 'ebs-csi-gp2',
+              storageClassName: 'gp3',
               resources: {
                 requests: { storage: '200Gi' },
               },

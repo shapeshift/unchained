@@ -37,9 +37,9 @@ export = async (): Promise<Outputs> => {
             storageSpec: {
               volumeClaimTemplate: {
                 spec: {
-                  storageClassName: 'ebs-csi-gp2',
+                  storageClassName: 'gp3',
                   accessModes: ['ReadWriteOnce'],
-                  resources: { requests: { storage: '100Gi' } },
+                  resources: { requests: { storage: '500Gi' } },
                 },
               },
             },
@@ -48,7 +48,7 @@ export = async (): Promise<Outputs> => {
         grafana: {
           adminPassword: process.env.GRAFANA_ADMIN_PASSWORD ?? 'unchained',
           deploymentStrategy: { type: 'Recreate' },
-          persistence: { enabled: true, size: '10Gi', storageClassName: 'ebs-csi-gp2' },
+          persistence: { enabled: true, size: '10Gi', storageClassName: 'gp3' },
           dashboardProviders: {
             'dashboardProviders.yaml': {
               apiVersion: 1,
@@ -92,7 +92,7 @@ export = async (): Promise<Outputs> => {
             storage: {
               volumeClaimTemplate: {
                 spec: {
-                  storageClassName: 'ebs-csi-gp2',
+                  storageClassName: 'gp3',
                   accessModes: ['ReadWriteOnce'],
                   resources: { requests: { storage: '50Gi' } },
                 },

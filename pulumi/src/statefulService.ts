@@ -171,14 +171,26 @@ export function createCoinService(args: CoinServiceArgs, assetName: string): Ser
     containers.push(monitorContainer)
   }
 
+  const storageClassName = args.storageClassName ?? 'gp3'
+
   const volumeClaimTemplates = [
     {
       metadata: {
         name: `data-${args.name}`,
+        annotations: {
+          ...(storageClassName === 'gp3' &&
+            args.storageIops && {
+              'ebs.csi.aws.com/iops': args.storageIops,
+            }),
+          ...(storageClassName === 'gp3' &&
+            args.storageThroughput && {
+              'ebs.csi.aws.com/throughput': args.storageThroughput,
+            }),
+        },
       },
       spec: {
         accessModes: ['ReadWriteOnce'],
-        storageClassName: 'ebs-csi-gp2',
+        storageClassName,
         resources: {
           requests: {
             storage: args.storageSize,
