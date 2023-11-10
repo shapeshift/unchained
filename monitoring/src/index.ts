@@ -36,10 +36,16 @@ export = async (): Promise<Outputs> => {
             retention: '60d',
             storageSpec: {
               volumeClaimTemplate: {
+                metadata: {
+                  annotations: {
+                    'ebs.csi.aws.com/iops': '3000',
+                    'ebs.csi.aws.com/throughput': '125',
+                  },
+                },
                 spec: {
                   storageClassName: 'gp3',
                   accessModes: ['ReadWriteOnce'],
-                  resources: { requests: { storage: '500Gi' } },
+                  resources: { requests: { storage: '1000Gi' } },
                 },
               },
             },
@@ -91,6 +97,12 @@ export = async (): Promise<Outputs> => {
           alertmanagerSpec: {
             storage: {
               volumeClaimTemplate: {
+                metadata: {
+                  annotations: {
+                    'ebs.csi.aws.com/iops': '3000',
+                    'ebs.csi.aws.com/throughput': '125',
+                  },
+                },
                 spec: {
                   storageClassName: 'gp3',
                   accessModes: ['ReadWriteOnce'],

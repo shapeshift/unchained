@@ -187,7 +187,13 @@ export function deployIpfs({ namespace, provider, domain, additionalDomain }: Ip
         template: podSpec,
         volumeClaimTemplates: [
           {
-            metadata: { name: 'cluster-storage' },
+            metadata: {
+              name: 'cluster-storage',
+              annotations: {
+                'ebs.csi.aws.com/iops': '3000',
+                'ebs.csi.aws.com/throughput': '125',
+              },
+            },
             spec: {
               accessModes: ['ReadWriteOnce'],
               storageClassName: 'gp3',
@@ -197,7 +203,13 @@ export function deployIpfs({ namespace, provider, domain, additionalDomain }: Ip
             },
           },
           {
-            metadata: { name: 'ipfs-storage' },
+            metadata: {
+              name: 'ipfs-storage',
+              annotations: {
+                'ebs.csi.aws.com/iops': '3000',
+                'ebs.csi.aws.com/throughput': '125',
+              },
+            },
             spec: {
               accessModes: ['ReadWriteOnce'],
               storageClassName: 'gp3',
