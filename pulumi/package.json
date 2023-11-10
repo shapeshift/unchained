@@ -9,7 +9,7 @@
     "clean": "rm -rf dist node_modules"
   },
   "dependencies": {
-    "@shapeshiftoss/cluster-launcher": "^0.19.0",
+    "@shapeshiftoss/cluster-launcher": "^0.20.1",
     "commander": "^10.0.0",
     "figlet": "^1.5.2"
   },
