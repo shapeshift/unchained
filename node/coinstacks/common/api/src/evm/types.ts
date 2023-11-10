@@ -86,7 +86,23 @@ export interface ExplorerApiResponse<T> {
   result: T
 }
 
-export interface ExplorerInternalTx {
+export interface ExplorerInternalTxByHash {
+  index?: number
+  blockNumber: string
+  timeStamp: string
+  from: string
+  to: string
+  value: string
+  contractAddress: string
+  input: string
+  type: string
+  gas: string
+  gasUsed: string
+  isError: string
+  errCode: string
+}
+
+export interface ExplorerInternalTxByAddress {
   blockNumber: string
   timeStamp: string
   hash: string

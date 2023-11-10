@@ -17,7 +17,15 @@ import {
   TokenMetadata,
   TokenType,
 } from './models'
-import { Cursor, NodeBlock, DebugCallStack, ExplorerApiResponse, ExplorerInternalTx, TraceCall } from './types'
+import {
+  Cursor,
+  NodeBlock,
+  DebugCallStack,
+  ExplorerApiResponse,
+  TraceCall,
+  ExplorerInternalTxByHash,
+  ExplorerInternalTxByAddress,
+} from './types'
 import { GasOracle } from './gasOracle'
 import { formatAddress, handleError } from './utils'
 import { validatePageSize } from '../utils'
@@ -555,13 +563,17 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   }
 
   private async fetchInternalTxsByTxid(txid: string): Promise<Array<InternalTx> | undefined> {
-    const { data } = await axios.get<ExplorerApiResponse<Array<ExplorerInternalTx>>>(
+    const { data } = await axios.get<ExplorerApiResponse<Array<ExplorerInternalTxByHash>>>(
       `${this.explorerApiUrl}?module=account&action=txlistinternal&txhash=${txid}&apikey=${this.explorerApiKey}`
     )
 
     if (data.status === '0') return []
 
-    return data.result.map((t) => ({ from: formatAddress(t.from), to: formatAddress(t.to), value: t.value }))
+    return data.result.reduce<Array<InternalTx>>((prev, t) => {
+      // filter out all 0 index trace ids as these are the normal initiating tx calls that are returned by routescan.io for some reason
+      if (t.index === 0) return prev
+      return [...prev, { from: formatAddress(t.from), to: formatAddress(t.to), value: t.value }]
+    }, [])
   }
 
   private async getInternalTxs(
@@ -631,14 +643,18 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     pageSize: number,
     from?: number,
     to?: number
-  ): Promise<Array<ExplorerInternalTx> | undefined> {
-    const { data } = await axios.get<ExplorerApiResponse<Array<ExplorerInternalTx>>>(
-      `${this.explorerApiUrl}?module=account&action=txlistinternal&address=${address}&page=${page}&offset=${pageSize}&startblock=${from}&endblock=${to}&sort=desc&apikey=${this.explorerApiKey}`
-    )
+  ): Promise<Array<ExplorerInternalTxByAddress> | undefined> {
+    let url = `${this.explorerApiUrl}?module=account&action=txlistinternal&address=${address}&page=${page}&offset=${pageSize}&sort=desc`
+    if (from) url += `&startblock=${from}`
+    if (to) url += `&endblock=${to}`
+    if (this.explorerApiKey) url += `&apikey=${this.explorerApiKey}`
+
+    const { data } = await axios.get<ExplorerApiResponse<Array<ExplorerInternalTxByAddress>>>(url)
 
     if (data.status === '0') return []
 
-    return data.result
+    // filter out all 0 index trace ids as these are the normal initiating tx calls that are returned by routescan.io for some reason
+    return data.result.filter((internalTx) => internalTx.traceId !== '0')
   }
 
   private async getTxs(
