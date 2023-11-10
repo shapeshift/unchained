@@ -4,7 +4,7 @@ get_best_reference_block_number() {
   local best_reference_block_number=0
 
   for reference_url in "$@"; do
-    local eth_blockNumber=$(curl -sf -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' -H 'Content-Type: application/json' $reference_url)
+    local eth_blockNumber=$(curl -sf -m 3 -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' -H 'Content-Type: application/json' $reference_url)
 
     if [[ $eth_blockNumber != "" ]]; then
       local current_block_number_hex=$(echo $eth_blockNumber | jq -r '.result')

@@ -19,10 +19,16 @@ IS_SYNCING=$(echo $SYNCING | jq -r '.syncing')
 CATCHING_UP=$(echo $STATUS | jq -r '.result.sync_info.catching_up')
 NUM_PEERS=$(echo $NET_INFO | jq -r '.result.n_peers')
 
+status_curls=(
+  "curl -sf -m 3 https://rpc.ninerealms.com/status"
+  # referer header now required to avoid being blocked
+  "curl -sf -m 3 -H \"Referer: https://app.thorswap.finance\" https://rpc.thorswap.net/status"
+)
+
 if [[ $IS_SYNCING == false && $CATCHING_UP == false ]]; then
   if (( $NUM_PEERS > 0 )); then
     latest_block_height=$(echo $STATUS | jq -r '.result.sync_info.latest_block_height')
-    best_reference_block_height=$(get_best_reference_block_height https://rpc.ninerealms.com https://rpc.thorswap.net https://rpc.thorchain.liquify.com)
+    best_reference_block_height=$(get_best_reference_block_height_eval "${status_curls[@]}")
 
     # if node is reporting synced, double check against reference nodes
     reference_validation $latest_block_height $best_reference_block_height $BLOCK_HEIGHT_TOLERANCE
