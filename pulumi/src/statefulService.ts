@@ -179,8 +179,8 @@ export function createCoinService(args: CoinServiceArgs, assetName: string): Ser
         name: `data-${args.name}`,
         ...(storageClassName === 'gp3' && {
           annotations: {
-            'ebs.csi.aws.com/iops': args.storageIops ?? '3000',
-            'ebs.csi.aws.com/throughput': args.storageThroughput ?? '125',
+            'ebs.csi.aws.com/iops': String(args.storageIops) ?? '3000',
+            'ebs.csi.aws.com/throughput': String(args.storageThroughput) ?? '125',
           },
         }),
       },
