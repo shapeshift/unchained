@@ -32,7 +32,7 @@ This process involves scaling down a kubernetes statefulset to ensure no process
 	- Enter the description in the form of `{coinstack}-{service}` and select `Create snapshot` (ex. `ethereum-indexer`, `ethereum-daemon`, `ethereum-daemon-beacon`)  
 	![](aws-volumes-create-snapshot-details.png)
 	- Repeat for each volume in the coinstack
-1. Manually scale the statefulset of the target coinstack back up in k9s  
+1. Manually scale the statefulset of the target coinstack back up in k9s (NOTE: you do not have to wait for the ebs snapshot to complete before scaling back up)  
 	![](k9s-s-replicas-0.png)![](k9s-s-replicas-1.png)
 1. Wait for snapshot to complete 
 	- Navigate to `EC2` -> `Elastic Block Store` -> `Snapshots`  
