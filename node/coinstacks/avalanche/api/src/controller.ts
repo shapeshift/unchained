@@ -45,7 +45,7 @@ export const gasOracle = new GasOracle({ logger, provider, coinstack: 'avalanche
 export const service = new Service({
   blockbook,
   gasOracle,
-  explorerApiUrl: 'https://api.snowtrace.io/api',
+  explorerApiUrl: 'https://api.routescan.io/v2/network/mainnet/evm/43114/etherscan/api',
   provider,
   logger,
   rpcUrl: RPC_URL,
