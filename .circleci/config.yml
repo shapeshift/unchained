@@ -103,13 +103,13 @@ aliases:
       default: ""
     service-storage-class-1:
       type: string
-      default: "gp3"
+      default: ""
     service-storage-iops-1:
       type: string
-      default: "3000"
+      default: ""
     service-storage-throughput-1:
       type: string
-      default: "125"
+      default: ""
     service-name-2:
       type: string
       default: ""
@@ -133,13 +133,13 @@ aliases:
       default: ""
     service-storage-class-2:
       type: string
-      default: "gp3"
+      default: ""
     service-storage-iops-2:
       type: string
-      default: "3000"
+      default: ""
     service-storage-throughput-2:
       type: string
-      default: "125"
+      default: ""
     service-name-3:
       type: string
       default: ""
@@ -163,13 +163,13 @@ aliases:
       default: ""
     service-storage-class-3:
       type: string
-      default: "gp3"
+      default: ""
     service-storage-iops-3:
       type: string
-      default: "3000"
+      default: ""
     service-storage-throughput-3:
       type: string
-      default: "125"
+      default: ""
 
   - &bitcoin
     assetName: bitcoin
