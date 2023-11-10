@@ -54,6 +54,8 @@ export interface Port extends k8s.types.input.core.v1.ServicePort {
   stripPathPrefix?: boolean
 }
 
+export type StorageClass = 'gp2' | 'gp3'
+
 export interface ServiceConfig {
   cpuLimit: string
   cpuRequest?: string
@@ -62,6 +64,27 @@ export interface ServiceConfig {
   memoryRequest?: string
   name: string
   storageSize: string
+  /**
+   * **Only applicable for gp3 volumes**
+   *
+   * - Baseline: 3000 IOPS
+   * - Max: 16000 IOPS
+   * - Additional provision ratio: 500 IOPS per GiB max (ex. 500 IOPS per GiB × 32 GiB = 16000 IOPS)
+   *
+   * _if no value is specified, the gp2 equivalent will be used_
+   **/
+  storageIops?: string
+  /**
+   * **Only applicable for gp3 volumes**
+   *
+   * - Baseline: 125 MiB/s
+   * - Max: 1000 MiB/s
+   * - Additional provision ratio: 0.25 MiB/s per IOPS max (ex. 4000 IOPS × 0.25 MiB/s per IOPS = 1,000 MiB/s)
+   *
+   * _if no value is specified, the gp2 max burstable equivalent will be used_
+   **/
+  storageThroughput?: string
+  storageClassName?: StorageClass
 }
 
 export interface CoinServiceArgs extends ServiceConfig {

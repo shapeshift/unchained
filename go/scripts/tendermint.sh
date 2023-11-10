@@ -4,7 +4,25 @@ get_best_reference_block_height() {
   local best_reference_block_height=0
 
   for reference_url in "$@"; do
-    local status=$(curl -sf $reference_url/status)
+    local status=$(curl -sf -m 3 $reference_url/status)
+
+    if [[ $status != "" ]]; then
+      local latest_block_height=$(echo $status | jq -r '.result.sync_info.latest_block_height')
+
+      if (( $latest_block_height > $best_reference_block_height )); then
+        best_reference_block_height=$latest_block_height
+      fi
+    fi
+  done
+
+  echo $best_reference_block_height
+}
+
+get_best_reference_block_height_eval() {
+  local best_reference_block_height=0
+
+  for status_curl in "$@"; do
+    local status=$(eval "$status_curl")
 
     if [[ $status != "" ]]; then
       local latest_block_height=$(echo $status | jq -r '.result.sync_info.latest_block_height')

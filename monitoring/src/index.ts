@@ -36,10 +36,16 @@ export = async (): Promise<Outputs> => {
             retention: '60d',
             storageSpec: {
               volumeClaimTemplate: {
+                metadata: {
+                  annotations: {
+                    'ebs.csi.aws.com/iops': '3000',
+                    'ebs.csi.aws.com/throughput': '125',
+                  },
+                },
                 spec: {
-                  storageClassName: 'ebs-csi-gp2',
+                  storageClassName: 'gp3',
                   accessModes: ['ReadWriteOnce'],
-                  resources: { requests: { storage: '100Gi' } },
+                  resources: { requests: { storage: '1000Gi' } },
                 },
               },
             },
@@ -48,7 +54,7 @@ export = async (): Promise<Outputs> => {
         grafana: {
           adminPassword: process.env.GRAFANA_ADMIN_PASSWORD ?? 'unchained',
           deploymentStrategy: { type: 'Recreate' },
-          persistence: { enabled: true, size: '10Gi', storageClassName: 'ebs-csi-gp2' },
+          persistence: { enabled: true, size: '10Gi', storageClassName: 'gp3' },
           dashboardProviders: {
             'dashboardProviders.yaml': {
               apiVersion: 1,
@@ -91,8 +97,14 @@ export = async (): Promise<Outputs> => {
           alertmanagerSpec: {
             storage: {
               volumeClaimTemplate: {
+                metadata: {
+                  annotations: {
+                    'ebs.csi.aws.com/iops': '3000',
+                    'ebs.csi.aws.com/throughput': '125',
+                  },
+                },
                 spec: {
-                  storageClassName: 'ebs-csi-gp2',
+                  storageClassName: 'gp3',
                   accessModes: ['ReadWriteOnce'],
                   resources: { requests: { storage: '50Gi' } },
                 },

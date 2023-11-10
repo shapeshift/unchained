@@ -23,13 +23,16 @@ spec:
           values:
           - <us-east-2x>
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: ebs-csi-gp2
+  storageClassName: gp3
   volumeMode: Filesystem
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: <data-xxx-sts-0>
+  annotations:
+    ebs.csi.aws.com/iops: "<3000>"
+    ebs.csi.aws.com/throughput: "<125>"
   namespace: <namespace>
   labels:
     app: unchained
@@ -41,5 +44,5 @@ spec:
   resources:
     requests:
       storage: <200Gi>
-  storageClassName: ebs-csi-gp2
+  storageClassName: gp3
   volumeName: <data-xxx-sts-0-pv-dev>
