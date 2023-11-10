@@ -21,7 +21,7 @@ export = async (): Promise<Outputs> => {
     {
       name,
       chart: 'kube-prometheus-stack',
-      version: '48.3.1',
+      version: '52.1.0',
       repositoryOpts: {
         repo: 'https://prometheus-community.github.io/helm-charts',
       },
