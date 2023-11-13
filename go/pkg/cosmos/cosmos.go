@@ -19,8 +19,9 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	ibctransfertypes "github.com/cosmos/ibc-go/v3/modules/apps/transfer/types"
-	ibccoretypes "github.com/cosmos/ibc-go/v3/modules/core/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v4/modules/apps/transfer/types"
+	ibccoretypes "github.com/cosmos/ibc-go/v4/modules/core/types"
+	ibclightclientstypes "github.com/cosmos/ibc-go/v4/modules/light-clients/07-tendermint/types"
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/internal/log"
@@ -160,6 +161,7 @@ func NewEncoding(registerInterfaces ...func(r codectypes.InterfaceRegistry)) *pa
 	govtypes.RegisterInterfaces(registry)
 	ibccoretypes.RegisterInterfaces(registry)
 	ibctransfertypes.RegisterInterfaces(registry)
+	ibclightclientstypes.RegisterInterfaces(registry)
 	liquiditytypes.RegisterInterfaces(registry)
 	stakingtypes.RegisterInterfaces(registry)
 	stdtypes.RegisterInterfaces(registry)
