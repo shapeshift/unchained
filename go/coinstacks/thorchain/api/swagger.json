@@ -237,10 +237,10 @@
     },
     "/api/v1/tx/{txid}": {
       "get": {
-        "description": "# Get transaction details",
         "tags": [
           "v1"
         ],
+        "summary": "Get transaction details",
         "operationId": "GetTx",
         "parameters": [
           {
