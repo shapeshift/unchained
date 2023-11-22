@@ -42,7 +42,7 @@ export = async (): Promise<Outputs> => {
             SNAPSHOT: 'https://snapshot-download.polygon.technology/snapdown.sh',
           },
           startupProbe: { periodSeconds: 30, failureThreshold: 60, timeoutSeconds: 10 },
-          livenessProbe: { periodSeconds: 30, failureThreshold: 5, timeoutSeconds: 10 },
+          livenessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
           readinessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
         }
       case 'indexer':
