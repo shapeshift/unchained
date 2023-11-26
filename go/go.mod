@@ -16,7 +16,7 @@ require (
 	github.com/spf13/viper v1.17.0
 	github.com/tendermint/liquidity v1.5.0
 	github.com/tendermint/tendermint v0.35.9
-	gitlab.com/thorchain/thornode v1.124.1
+	gitlab.com/thorchain/thornode v1.124.2
 	golang.org/x/sync v0.5.0
 	google.golang.org/grpc v1.59.0
 )
