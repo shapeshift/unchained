@@ -78,7 +78,7 @@ start() {
     --maxpeers 200 \
     --rpc.allow-unprotected-txs \
     --txpool.pricelimit 1 \
-    --txlookuplimit 0 \
+    --history.transactions 0 \
     --cache 8000 \
     --nat none &
   PID="$!"
