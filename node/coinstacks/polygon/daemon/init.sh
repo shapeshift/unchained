@@ -16,10 +16,8 @@ if [ -n "$SNAPSHOT" ] && [ ! -d "$CHAINDATA_DIR" ]; then
   curl -L $SNAPSHOT | bash -s -- --network mainnet --client bor --extract-dir $CHAINDATA_DIR --validate-checksum true
 fi
 
-if [ ! -f "$DATA_DIR/bor/genesis.json" ]; then
-  # copy genesis file
-  cp /var/lib/bor/genesis-mainnet-v1.json $DATA_DIR/bor/genesis.json
-fi
+# copy genesis file
+cp /var/lib/bor/genesis-mainnet-v1.json $DATA_DIR/bor/genesis.json
 
 start() {
   bor server \
