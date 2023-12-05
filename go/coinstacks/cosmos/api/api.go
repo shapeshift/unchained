@@ -119,6 +119,7 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient 
 
 	v1Gas := v1.PathPrefix("/gas").Subrouter()
 	v1Gas.HandleFunc("/estimate", a.EstimateGas).Methods("POST")
+	v1Gas.HandleFunc("/fees", a.Fees).Methods("GET")
 
 	v1ValidatorsRoot := v1.PathPrefix("/validators").Subrouter()
 	v1ValidatorsRoot.HandleFunc("", a.GetValidators).Methods("GET")
@@ -205,4 +206,23 @@ func (a *API) ValidatorTxHistory(w http.ResponseWriter, r *http.Request) {
 	}
 
 	api.HandleResponse(w, http.StatusOK, txHistory)
+}
+
+// swagger:route GET /api/v1/gas/fees v1 Fees
+//
+// Get current fees.
+//
+// responses:
+//
+//	200: Fees
+//	400: BadRequestError
+//	500: InternalServerError
+func (a *API) Fees(w http.ResponseWriter, r *http.Request) {
+	fees, err := a.handler.GetFees()
+	if err != nil {
+		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	api.HandleResponse(w, http.StatusOK, fees)
 }

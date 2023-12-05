@@ -234,3 +234,31 @@ func (h *Handler) getAPRData() (*APRData, error) {
 
 	return aprData, nil
 }
+
+// Contains info about the current fees
+// swagger:model Fees
+type Fees map[string]string
+
+func (h *Handler) GetFees() (*Fees, error) {
+	globalMinGasPrices, err := h.HTTPClient.GetGlobalMinimumGasPrices()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get global minimum gas prices")
+	}
+
+	localMinGasPrice, err := h.HTTPClient.GetLocalMinimumGasPrices()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get local minimum gas prices")
+	}
+
+	minGasPrices := make(Fees)
+	for k, global := range globalMinGasPrices {
+		minGasPrices[k] = global.String()
+		if local, ok := localMinGasPrice[k]; ok {
+			if local.GT(global) {
+				minGasPrices[k] = local.String()
+			}
+		}
+	}
+
+	return &minGasPrices, nil
+}
