@@ -575,7 +575,7 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/bnb-smart-chain:v1.3.4
+    service-image-1: shapeshiftdao/bnb-smart-chain:v1.2.15
     service-cpu-limit-1: "8"
     service-cpu-request-1: "4"
     service-memory-limit-1: 72Gi
