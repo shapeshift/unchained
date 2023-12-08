@@ -45,12 +45,19 @@ export = async (): Promise<Outputs> => {
           livenessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
           readinessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
         }
-      case 'indexer':
+      case 'indexer': {
+        const indexerConfig = JSON.parse(readFileSync('../indexer/config.json').toString())
+
+        const url =
+          process.env[config.environment ? `POLYGON_WS_URL_${config.environment.toUpperCase()}` : 'POLYGON_WS_URL']
+        if (url) indexerConfig.rpc_url = url
+
         return {
           ...service,
           ...defaultBlockbookServiceArgs,
-          configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
+          configMapData: { 'indexer-config.json': JSON.stringify(indexerConfig) },
         }
+      }
       default:
         throw new Error(`no support for coin service: ${service.name}`)
     }
