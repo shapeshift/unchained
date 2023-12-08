@@ -9,14 +9,15 @@ export = async (): Promise<Outputs> => {
   const coinstack = 'polygon'
   const sampleEnv = readFileSync('../sample.env')
   const { kubeconfig, config, namespace } = await getConfig()
+  const { environment, network, statefulService } = config
 
-  const coinServiceArgs = config.statefulService?.services?.map((service): CoinServiceArgs => {
+  const coinServiceArgs = statefulService?.services?.map((service): CoinServiceArgs => {
     switch (service.name) {
       case 'daemon':
         return {
           ...service,
           env: {
-            NETWORK: config.network,
+            NETWORK: network,
             SNAPSHOT: 'https://snapshot-download.polygon.technology/snapdown.sh',
           },
           ports: {
@@ -45,12 +46,18 @@ export = async (): Promise<Outputs> => {
           livenessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
           readinessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
         }
-      case 'indexer':
+      case 'indexer': {
+        const indexerConfig = JSON.parse(readFileSync('../indexer/config.json').toString())
+
+        const url = process.env[environment ? `POLYGON_WS_URL_${environment.toUpperCase()}` : 'POLYGON_WS_URL']
+        if (url) indexerConfig.rpc_url = url
+
         return {
           ...service,
           ...defaultBlockbookServiceArgs,
-          configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
+          configMapData: { 'indexer-config.json': JSON.stringify(indexerConfig) },
         }
+      }
       default:
         throw new Error(`no support for coin service: ${service.name}`)
     }

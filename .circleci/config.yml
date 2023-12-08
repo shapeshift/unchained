@@ -95,9 +95,6 @@ aliases:
     service-memory-limit-1:
       type: string
       default: ""
-    service-memory-request-1:
-      type: string
-      default: ""
     service-storage-size-1:
       type: string
       default: ""
@@ -125,9 +122,6 @@ aliases:
     service-memory-limit-2:
       type: string
       default: ""
-    service-memory-request-2:
-      type: string
-      default: ""
     service-storage-size-2:
       type: string
       default: ""
@@ -153,9 +147,6 @@ aliases:
       type: string
       default: ""
     service-memory-limit-3:
-      type: string
-      default: ""
-    service-memory-request-3:
       type: string
       default: ""
     service-storage-size-3:
@@ -188,7 +179,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/bitcoin-core:25.1
+    service-image-1: shapeshiftdao/bitcoin-core:26.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 8Gi
@@ -197,7 +188,7 @@ aliases:
     service-image-2: shapeshiftdao/unchained-blockbook:559cfbc
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 36Gi
+    service-memory-limit-2: 32Gi
     service-storage-size-2: 500Gi
 
   - &bitcoin-dev
@@ -232,7 +223,7 @@ aliases:
     service-image-1: ethereum/client-go:v1.13.5
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
-    service-memory-limit-1: 32Gi
+    service-memory-limit-1: 24Gi
     service-storage-size-1: 1250Gi
     service-name-2: daemon-beacon
     service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.1.1
@@ -244,7 +235,7 @@ aliases:
     service-image-3: shapeshiftdao/unchained-blockbook:559cfbc
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
-    service-memory-limit-3: 16Gi
+    service-memory-limit-3: 12Gi
     service-storage-size-3: 500Gi
 
   - &ethereum-dev
@@ -318,7 +309,7 @@ aliases:
     service-image-1: avaplatform/avalanchego:v1.10.17
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
-    service-memory-limit-1: 10Gi
+    service-memory-limit-1: 12Gi
     service-storage-size-1: 5500Gi
     service-storage-iops-1: "8000"
     service-name-2: indexer
@@ -366,7 +357,7 @@ aliases:
     service-image-2: shapeshiftdao/unchained-blockbook:559cfbc
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 10Gi
+    service-memory-limit-2: 12Gi
     service-storage-size-2: 250Gi
 
   - &dogecoin-dev
@@ -407,7 +398,7 @@ aliases:
     service-image-2: shapeshiftdao/unchained-blockbook:559cfbc
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 12Gi
+    service-memory-limit-2: 16Gi
     service-storage-size-2: 250Gi
 
   - &litecoin-dev
@@ -490,12 +481,12 @@ aliases:
     service-image-2: timescale/timescaledb:2.2.0-pg13
     service-cpu-request-2: "1"
     service-cpu-limit-2: "2"
-    service-memory-limit-2: 8Gi
+    service-memory-limit-2: 6Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
     service-image-3: registry.gitlab.com/thorchain/midgard:2.17.1
-    service-cpu-limit-3: 500m
-    service-cpu-request-3: 250m
+    service-cpu-limit-3: "1"
+    service-cpu-request-3: 500m
     service-memory-limit-3: 1Gi
     service-storage-size-3: 100Gi
 
@@ -529,8 +520,8 @@ aliases:
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101304.1
-    service-cpu-limit-1: "4"
-    service-cpu-request-1: "2"
+    service-cpu-limit-1: "2"
+    service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
     service-storage-size-1: 1000Gi
     service-name-2: op-node
@@ -575,11 +566,10 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/bnb-smart-chain:v1.2.15
-    service-cpu-limit-1: "8"
-    service-cpu-request-1: "4"
+    service-image-1: shapeshiftdao/bnb-smart-chain:v1.3.5
+    service-cpu-limit-1: "16"
+    service-cpu-request-1: "8"
     service-memory-limit-1: 72Gi
-    service-memory-request-1: 48Gi
     service-storage-size-1: 5500Gi
     service-storage-iops-1: "16000"
     service-storage-throughput-1: "300"
@@ -587,7 +577,7 @@ aliases:
     service-image-2: shapeshiftdao/unchained-blockbook:559cfbc
     service-cpu-limit-2: "4"
     service-cpu-request-2: "2"
-    service-memory-limit-2: 24Gi
+    service-memory-limit-2: 16Gi
     service-storage-size-2: 1000Gi
 
   - &bnbsmartchain-dev
@@ -619,27 +609,12 @@ aliases:
     api-memory-limit: 1Gi
     api-memory-request: 500Mi
     stateful-service-replicas: 2
-    service-name-1: daemon
-    service-image-1: 0xpolygon/bor:1.2.0
-    service-cpu-limit-1: "16"
-    service-cpu-request-1: "8"
-    service-memory-request-1: 48Gi
-    service-memory-limit-1: 72Gi
-    service-storage-size-1: 4000Gi
-    service-storage-iops-1: "16000"
-    service-storage-throughput-1: "300"
-    service-name-2: heimdall
-    service-image-2: 0xpolygon/heimdall:1.0.3
-    service-cpu-limit-2: "2"
-    service-cpu-request-2: "1"
-    service-memory-limit-2: 1Gi
-    service-storage-size-2: 500Gi
-    service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:559cfbc
-    service-cpu-limit-3: "4"
-    service-cpu-request-3: "2"
-    service-memory-limit-3: 24Gi
-    service-storage-size-3: 750Gi
+    service-name-1: indexer
+    service-image-1: shapeshiftdao/unchained-blockbook:559cfbc
+    service-cpu-limit-1: "4"
+    service-cpu-request-1: "2"
+    service-memory-limit-1: 24Gi
+    service-storage-size-1: 750Gi
 
   - &polygon-dev
     <<: *polygon
@@ -673,20 +648,20 @@ aliases:
     service-name-1: daemon
     service-image-1: nethermind/nethermind:1.23.0
     service-cpu-limit-1: "2"
-    service-cpu-request-1: "1"
+    service-cpu-request-1: "2"
     service-memory-limit-1: 6Gi
     service-storage-size-1: 1000Gi
     service-name-2: daemon-beacon
     service-image-2: sigp/lighthouse:v4.5.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 4Gi
+    service-memory-limit-2: 2Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
     service-image-3: shapeshiftdao/unchained-blockbook:gnosis-f21acf1
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
-    service-memory-limit-3: 16Gi
+    service-memory-limit-3: 12Gi
     service-storage-size-3: 500Gi
 
   - &gnosis-dev
@@ -721,7 +696,7 @@ aliases:
     service-image-1: offchainlabs/nitro-node:v2.1.3-e815395
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
-    service-memory-limit-1: 18Gi
+    service-memory-limit-1: 16Gi
     service-storage-size-1: 500Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:arbitrum-0e84937
@@ -762,13 +737,13 @@ aliases:
     service-image-1: offchainlabs/nitro-node:v2.1.3-e815395
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
-    service-memory-limit-1: 16Gi
+    service-memory-limit-1: 12Gi
     service-storage-size-1: 500Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:arbitrum-0e84937
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 12Gi
+    service-memory-limit-2: 6Gi
     service-storage-size-2: 500Gi
 
   - &arbitrum-nova-dev
@@ -1021,7 +996,6 @@ jobs:
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-limit-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].cpuLimit << parameters.service-cpu-limit-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-request-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].cpuRequest << parameters.service-cpu-request-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-limit-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].memoryLimit << parameters.service-memory-limit-1 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-request-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].memoryRequest << parameters.service-memory-request-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-size-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].storageSize << parameters.service-storage-size-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-class-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].storageClassName << parameters.service-storage-class-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-iops-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].storageIops << parameters.service-storage-iops-1 >>
@@ -1031,7 +1005,6 @@ jobs:
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-limit-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].cpuLimit << parameters.service-cpu-limit-2 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-request-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].cpuRequest << parameters.service-cpu-request-2 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-limit-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].memoryLimit << parameters.service-memory-limit-2 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-request-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].memoryRequest << parameters.service-memory-request-2 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-size-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].storageSize << parameters.service-storage-size-2 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-class-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].storageClassName << parameters.service-storage-class-2 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-iops-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].storageIops << parameters.service-storage-iops-2 >>
@@ -1041,7 +1014,6 @@ jobs:
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-limit-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].cpuLimit << parameters.service-cpu-limit-3 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-request-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].cpuRequest << parameters.service-cpu-request-3 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-limit-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].memoryLimit << parameters.service-memory-limit-3 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-request-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].memoryRequest << parameters.service-memory-request-3 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-size-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageSize << parameters.service-storage-size-3 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-class-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageClassName << parameters.service-storage-class-3 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-iops-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageIops << parameters.service-storage-iops-3 >>
@@ -1104,7 +1076,6 @@ jobs:
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-limit-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].cpuLimit << parameters.service-cpu-limit-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-request-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].cpuRequest << parameters.service-cpu-request-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-limit-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].memoryLimit << parameters.service-memory-limit-1 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-request-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].memoryRequest << parameters.service-memory-request-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-size-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].storageSize << parameters.service-storage-size-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-class-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].storageClassName << parameters.service-storage-class-1 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-iops-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].storageIops << parameters.service-storage-iops-1 >>
@@ -1114,7 +1085,6 @@ jobs:
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-limit-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].cpuLimit << parameters.service-cpu-limit-2 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-request-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].cpuRequest << parameters.service-cpu-request-2 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-limit-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].memoryLimit << parameters.service-memory-limit-2 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-request-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].memoryRequest << parameters.service-memory-request-2 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-size-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].storageSize << parameters.service-storage-size-2 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-class-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].storageClassName << parameters.service-storage-class-2 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-iops-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].storageIops << parameters.service-storage-iops-2 >>
@@ -1124,7 +1094,6 @@ jobs:
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-limit-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].cpuLimit << parameters.service-cpu-limit-3 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-request-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].cpuRequest << parameters.service-cpu-request-3 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-limit-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].memoryLimit << parameters.service-memory-limit-3 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-request-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].memoryRequest << parameters.service-memory-request-3 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-size-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageSize << parameters.service-storage-size-3 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-class-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageClassName << parameters.service-storage-class-3 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-iops-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageIops << parameters.service-storage-iops-3 >>
@@ -1287,6 +1256,7 @@ workflows:
           requires:
             - deploy dependencies
           <<: *polygon-dev
+          rpc-url: $POLYGON_RPC_URL_DEV
           <<: *only-develop
 
       - deploy-coinstack-node:
@@ -1580,6 +1550,7 @@ workflows:
           requires:
             - validate dependencies
           <<: *polygon
+          rpc-url: $POLYGON_RPC_URL
           <<: *only-main
 
       - approve-coinstack:
@@ -1597,6 +1568,7 @@ workflows:
           requires:
             - approve polygon coinstack
           <<: *polygon
+          rpc-url: $POLYGON_RPC_URL
           <<: *only-main
 
       ####### GNOSIS
