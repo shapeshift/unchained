@@ -16,6 +16,9 @@ RUN wget https://github.com/bnb-chain/bsc/releases/download/${VERSION}/mainnet.z
 # Remove LogConfig from included config.toml to keep logging directed at stdout
 RUN sed -i -e '/\[Node.LogConfig\]/,+5d' config.toml
 
+# Remove HTTPHost from included config.toml to allow value to be specified via `--http.addr` cli flag
+RUN sed -i '/HTTPHost = "localhost"/d' config.toml
+
 EXPOSE 8545 8546 30303 30303/udp
 
 ENTRYPOINT ["geth"]
