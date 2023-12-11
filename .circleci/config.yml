@@ -1137,7 +1137,7 @@ jobs:
   lint-and-test-persist:
     description: lint and test project (persist to workspace)
     machine:
-      image: ubuntu-2204:2022.10.2
+      image: ubuntu-2204:2023.10.1
     resource_class: large
     steps:
       - checkout
