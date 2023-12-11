@@ -26,7 +26,7 @@ export class WebsocketClient {
   private url: string
   private pingTimeout?: NodeJS.Timeout
   private interval?: NodeJS.Timeout
-  private retries = 0
+  private retryCount = 0
 
   private handleTransaction: TransactionHandler | Array<TransactionHandler>
   private handleBlock: BlockHandler | Array<BlockHandler>
@@ -43,18 +43,10 @@ export class WebsocketClient {
     this.url = url
     this.socket = new WebSocket(this.url, { handshakeTimeout: 5000 })
 
-    this.initialize(false)
+    this.initialize()
   }
 
-  private initialize(retry: boolean): void {
-    if (retry) {
-      if (++this.retries >= this.retryAttempts) {
-        throw new Error('failed to reconnect')
-      }
-
-      this.socket = new WebSocket(this.url, { handshakeTimeout: 5000 })
-    }
-
+  private initialize(): void {
     this.socket.on('ping', () => this.socket.pong())
     this.socket.on('pong', () => this.heartbeat())
     this.socket.onerror = (error) => {
@@ -70,8 +62,18 @@ export class WebsocketClient {
 
   private close(): void {
     this.interval && clearInterval(this.interval)
-    // TODO: retry with backoff
-    this.initialize(true)
+
+    if (++this.retryCount >= this.retryAttempts) {
+      throw new Error('failed to reconnect')
+    }
+
+    setTimeout(
+      () => {
+        this.socket = new WebSocket(this.url, { handshakeTimeout: 5000 })
+        this.initialize()
+      },
+      500 * this.retryCount ** 2
+    )
   }
 
   private heartbeat(): void {
@@ -84,7 +86,7 @@ export class WebsocketClient {
 
   private onOpen(): void {
     this.logger.debug({ fn: 'ws.onopen' }, 'websocket opened')
-    this.retries = 0
+    this.retryCount = 0
     this.interval = setInterval(() => {
       this.socket.ping()
     }, this.pingInterval)
