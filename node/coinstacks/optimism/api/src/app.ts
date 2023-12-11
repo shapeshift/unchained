@@ -1,5 +1,4 @@
-import express, { json, urlencoded } from 'express'
-import cors from 'cors'
+import express from 'express'
 import { join } from 'path'
 import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
@@ -32,7 +31,7 @@ const prometheus = new Prometheus({ coinstack: 'optimism' })
 
 const app = express()
 
-app.use(json(), urlencoded({ extended: true }), cors(), middleware.requestLogger, middleware.metrics(prometheus))
+app.use(...middleware.common(prometheus))
 
 app.get('/health', async (_, res) => res.json({ status: 'up', asset: 'optimism', connections: wsServer.clients.size }))
 

@@ -1,5 +1,7 @@
-import { NextFunction, Request, Response } from 'express'
+import { json, urlencoded, NextFunction, Request, Response } from 'express'
+import compression from 'compression'
 import morgan from 'morgan'
+import cors from 'cors'
 import { ValidateError } from 'tsoa'
 import { ApiError, NotFoundError } from '.'
 import { Prometheus } from './prometheus'
@@ -67,3 +69,12 @@ export const metrics =
 
     next()
   }
+
+export const common = (prometheus: Prometheus) => [
+  compression(),
+  json(),
+  urlencoded({ extended: false }),
+  cors(),
+  requestLogger,
+  metrics(prometheus),
+]
