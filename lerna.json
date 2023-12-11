@@ -10,9 +10,12 @@
     }
   },
   "packages": [
-    "packages/*",
-    "coinstacks/**/*",
-    "pulumi/*"
-  ],
-  "useWorkspaces": true
+    "monitoring/*",
+    "pulumi/*",
+    "node/packages/*",
+    "node/coinstacks/**/*",
+    "node/pulumi/*",
+    "go/coinstacks/**/pulumi/*",
+    "go/pulumi/*"
+  ]
 }

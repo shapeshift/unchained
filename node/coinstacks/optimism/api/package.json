@@ -14,7 +14,6 @@
   "dependencies": {
     "@eth-optimism/contracts-bedrock": "^0.14.0",
     "@shapeshiftoss/blockbook": "^9.3.0",
-    "@shapeshiftoss/common-api": "^9.3.0",
-    "bignumber.js": "^9.1.1"
+    "@shapeshiftoss/common-api": "^9.3.0"
   }
 }
