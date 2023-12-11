@@ -17,9 +17,9 @@
     "watch": "nodemon -e ts --watch src --ignore src/routes.ts -x yarn build"
   },
   "dependencies": {
-    "ws": "^8.8.0"
+    "ws": "^8.15.0"
   },
   "devDependencies": {
-    "@types/ws": "^8.5.3"
+    "@types/ws": "^8.5.10"
   }
 }
