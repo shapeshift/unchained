@@ -8,14 +8,5 @@
         "**/*.md"
       ]
     }
-  },
-  "packages": [
-    "monitoring/*",
-    "pulumi/*",
-    "node/packages/*",
-    "node/coinstacks/**/*",
-    "node/pulumi/*",
-    "go/coinstacks/**/pulumi/*",
-    "go/pulumi/*"
-  ]
+  }
 }

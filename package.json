@@ -8,10 +8,8 @@
   "workspaces": [
     "monitoring",
     "pulumi",
-    "node/pulumi",
     "node/packages/**/*",
     "node/coinstacks/**/*",
-    "go/pulumi",
     "go/coinstacks/**/pulumi"
   ],
   "scripts": {
