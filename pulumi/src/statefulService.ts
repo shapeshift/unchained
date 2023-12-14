@@ -177,12 +177,13 @@ export function createCoinService(args: CoinServiceArgs, assetName: string): Ser
     {
       metadata: {
         name: `data-${args.name}`,
-        ...(storageClassName === 'gp3' && {
-          annotations: {
-            'ebs.csi.aws.com/iops': String(args.storageIops) ?? '3000',
-            'ebs.csi.aws.com/throughput': String(args.storageThroughput) ?? '125',
-          },
-        }),
+        ...(storageClassName === 'gp3' &&
+          (args.storageIops || args.storageThroughput) && {
+            annotations: {
+              ...(args.storageIops && { 'ebs.csi.aws.com/iops': String(args.storageIops) }),
+              ...(args.storageThroughput && { 'ebs.csi.aws.com/throughput': String(args.storageThroughput) }),
+            },
+          }),
       },
       spec: {
         accessModes: ['ReadWriteOnce'],

@@ -273,8 +273,8 @@ aliases:
     service-cpu-request-1: "2"
     service-memory-limit-1: 48Gi
     service-storage-size-1: 4500Gi
-    service-storage-iops-1: "16000"
-    service-storage-throughput-1: "300"
+    service-storage-iops-1: "6000"
+    service-storage-throughput-1: "250"
 
   - &cosmos-dev
     <<: *cosmos
@@ -309,14 +309,13 @@ aliases:
     service-image-1: avaplatform/avalanchego:v1.10.17
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
-    service-memory-limit-1: 12Gi
+    service-memory-limit-1: 16Gi
     service-storage-size-1: 5500Gi
-    service-storage-iops-1: "8000"
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:559cfbc
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 6Gi
+    service-memory-limit-2: 8Gi
     service-storage-size-2: 500Gi
 
   - &avalanche-dev
@@ -357,7 +356,7 @@ aliases:
     service-image-2: shapeshiftdao/unchained-blockbook:559cfbc
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 12Gi
+    service-memory-limit-2: 16Gi
     service-storage-size-2: 250Gi
 
   - &dogecoin-dev
@@ -471,12 +470,11 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.125.0
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.125.1
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
     service-storage-size-1: 3250Gi
-    service-storage-iops-1: "4500"
     service-name-2: timescaledb
     service-image-2: timescale/timescaledb:2.2.0-pg13
     service-cpu-request-2: "1"
@@ -571,8 +569,8 @@ aliases:
     service-cpu-request-1: "8"
     service-memory-limit-1: 72Gi
     service-storage-size-1: 5500Gi
-    service-storage-iops-1: "16000"
-    service-storage-throughput-1: "300"
+    service-storage-iops-1: "6000"
+    service-storage-throughput-1: "250"
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:559cfbc
     service-cpu-limit-2: "4"
@@ -609,12 +607,26 @@ aliases:
     api-memory-limit: 1Gi
     api-memory-request: 500Mi
     stateful-service-replicas: 2
-    service-name-1: indexer
-    service-image-1: shapeshiftdao/unchained-blockbook:559cfbc
-    service-cpu-limit-1: "4"
-    service-cpu-request-1: "2"
-    service-memory-limit-1: 24Gi
-    service-storage-size-1: 750Gi
+    service-name-1: daemon
+    service-image-1: 0xpolygon/bor:1.2.0
+    service-cpu-limit-1: "8"
+    service-cpu-request-1: "4"
+    service-memory-limit-1: 48Gi
+    service-storage-size-1: 4000Gi
+    service-storage-iops-1: "6000"
+    service-storage-throughput-1: "300"
+    service-name-2: heimdall
+    service-image-2: 0xpolygon/heimdall:1.0.3
+    service-cpu-limit-2: "2"
+    service-cpu-request-2: "1"
+    service-memory-limit-2: 1Gi
+    service-storage-size-2: 400Gi
+    service-name-3: indexer
+    service-image-3: shapeshiftdao/unchained-blockbook:559cfbc
+    service-cpu-limit-3: "4"
+    service-cpu-request-3: "2"
+    service-memory-limit-3: 24Gi
+    service-storage-size-3: 750Gi
 
   - &polygon-dev
     <<: *polygon
@@ -655,13 +667,13 @@ aliases:
     service-image-2: sigp/lighthouse:v4.5.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 2Gi
+    service-memory-limit-2: 4Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
     service-image-3: shapeshiftdao/unchained-blockbook:gnosis-f21acf1
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
-    service-memory-limit-3: 12Gi
+    service-memory-limit-3: 16Gi
     service-storage-size-3: 500Gi
 
   - &gnosis-dev

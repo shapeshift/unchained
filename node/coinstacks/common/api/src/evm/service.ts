@@ -19,7 +19,6 @@ import {
 } from './models'
 import {
   Cursor,
-  NodeBlock,
   DebugCallStack,
   ExplorerApiResponse,
   TraceCall,
@@ -323,34 +322,17 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     }
   }
 
-  async handleBlock(hash: string, retryCount = 0): Promise<Array<BlockbookTx>> {
-    const request: RPCRequest = {
-      jsonrpc: '2.0',
-      id: `eth_getBlockByHash-${hash}`,
-      method: 'eth_getBlockByHash',
-      params: [hash, false],
+  async handleBlock(hash: string): Promise<Array<BlockbookTx>> {
+    try {
+      const { txs = [], totalPages = 1 } = await this.blockbook.getBlock(hash)
+      for (let page = 1; page < totalPages; ++page) {
+        const data = await this.blockbook.getBlock(hash, page)
+        data.txs && txs.push(...data.txs)
+      }
+      return txs
+    } catch (err) {
+      throw handleError(err)
     }
-
-    const { data } = await axios.post<RPCResponse>(this.rpcUrl, request)
-
-    if (data.error) throw new Error(`failed to get block: ${hash}: ${data.error.message}`)
-
-    // retry if no results are returned, this typically means we queried a node that hasn't indexed the data yet
-    if (!data.result) {
-      if (retryCount >= 5) throw new Error(`failed to get block: ${hash}: ${JSON.stringify(data)}`)
-      retryCount++
-      await exponentialDelay(retryCount)
-      return this.handleBlock(hash, retryCount)
-    }
-
-    const block = data.result as NodeBlock
-
-    // make best effort to fetch all transactions, but don't fail handling block if a single transaction fails
-    const txs = await Promise.allSettled(block.transactions.map((hash) => this.blockbook.getTransaction(hash)))
-
-    return txs
-      .filter((tx): tx is PromiseFulfilledResult<BlockbookTx> => tx.status === 'fulfilled')
-      .map((tx) => tx.value)
   }
 
   handleTransaction(tx: BlockbookTx): Tx {

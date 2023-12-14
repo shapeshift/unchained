@@ -119,9 +119,9 @@ export class WebsocketClient {
           if ('hash' in res.data) {
             const newBlock = res.data
             if (Array.isArray(this.handleBlock)) {
-              await Promise.all(this.handleBlock.map(async (handleBlock) => handleBlock(newBlock)))
+              this.handleBlock.map(async (handleBlock) => handleBlock(newBlock))
             } else {
-              await this.handleBlock(newBlock)
+              this.handleBlock(newBlock)
             }
           }
           return
@@ -129,9 +129,9 @@ export class WebsocketClient {
           if ('txid' in res.data) {
             const newTx = res.data
             if (Array.isArray(this.handleTransaction)) {
-              await Promise.all(this.handleTransaction.map(async (handleTransaction) => handleTransaction(newTx)))
+              this.handleTransaction.map(async (handleTransaction) => handleTransaction(newTx))
             } else {
-              await this.handleTransaction(newTx)
+              this.handleTransaction(newTx)
             }
           }
           return

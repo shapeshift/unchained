@@ -37,7 +37,7 @@ export const logger = new Logger({
 
 const CHAIN_ID: Record<string, number> = { mainnet: 10 }
 
-const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
+const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL, logger })
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
 export const gasOracle = new GasOracle({ logger, provider, coinstack: 'optimism' })
 

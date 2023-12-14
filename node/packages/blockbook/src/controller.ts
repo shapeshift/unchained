@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosInstance } from 'axios'
-import axiosRetry from 'axios-retry'
+import axiosRetry, { isNetworkOrIdempotentRequestError } from 'axios-retry'
 import { Controller, Example, Get, Path, Query, Route, Tags } from 'tsoa'
 import WebSocket from 'ws'
 import {
@@ -17,22 +17,24 @@ import {
   Utxo,
   Xpub,
 } from './models'
+import { Logger } from '@shapeshiftoss/logger'
+
+const defaultArgs: BlockbookArgs = {
+  httpURL: 'https://indexer.ethereum.shapeshift.com',
+  wsURL: 'wss://indexer.ethereum.shapeshift.com/websocket',
+  logger: new Logger({ namespace: ['unchained', 'blockbook'], level: process.env.LOG_LEVEL }),
+}
 
 @Route('api/v2')
 @Tags('v2')
 export class Blockbook extends Controller {
   instance: AxiosInstance
   wsURL: string
+  logger: Logger
 
-  constructor(
-    args: BlockbookArgs = {
-      httpURL: 'https://indexer.ethereum.shapeshift.com',
-      wsURL: 'wss://indexer.ethereum.shapeshift.com/websocket',
-    },
-    timeout?: number,
-    retries = 3
-  ) {
+  constructor(args: BlockbookArgs = defaultArgs, timeout?: number, retries = 5) {
     super()
+    this.logger = args.logger.child({ namespace: ['blockbook'] })
     this.wsURL = args.wsURL
     this.instance = axios.create({
       timeout: timeout ?? 10000,
@@ -42,7 +44,14 @@ export class Blockbook extends Controller {
         'Content-Type': 'application/json',
       },
     })
-    axiosRetry(this.instance, { shouldResetTimeout: true, retries, retryDelay: axiosRetry.exponentialDelay })
+    axiosRetry(this.instance, {
+      shouldResetTimeout: true,
+      retries,
+      retryDelay: axiosRetry.exponentialDelay,
+      retryCondition: (err) =>
+        isNetworkOrIdempotentRequestError(err) ||
+        (!!err.response && err.response.status >= 400 && err.response.status < 600),
+    })
   }
 
   /**
@@ -87,10 +96,7 @@ export class Blockbook extends Controller {
       const { data } = await this.instance.get<Info>(`api/v2`)
       return data
     } catch (err) {
-      if (err instanceof AxiosError || err instanceof Error) {
-        throw new ApiError(err)
-      }
-
+      if (err instanceof AxiosError || err instanceof Error) throw new ApiError(err)
       throw err
     }
   }
@@ -114,10 +120,7 @@ export class Blockbook extends Controller {
       const { data } = await this.instance.get<BlockIndex>(`api/v2/block-index/${height}`)
       return data
     } catch (err) {
-      if (err instanceof AxiosError || err instanceof Error) {
-        throw new ApiError(err)
-      }
-
+      if (err instanceof AxiosError || err instanceof Error) throw new ApiError(err)
       throw err
     }
   }
@@ -233,15 +236,15 @@ export class Blockbook extends Controller {
   })
   @Get('tx/{txid}')
   async getTransaction(@Path() txid: string): Promise<Tx> {
+    const start = Date.now()
     try {
       const { data } = await this.instance.get<Tx>(`api/v2/tx/${txid}`)
       return data
     } catch (err) {
-      if (err instanceof AxiosError || err instanceof Error) {
-        throw new ApiError(err)
-      }
-
+      if (err instanceof AxiosError || err instanceof Error) throw new ApiError(err)
       throw err
+    } finally {
+      this.logger.trace(`getTransaction: ${txid}: ${Date.now() - start}ms`)
     }
   }
 
@@ -252,15 +255,15 @@ export class Blockbook extends Controller {
    */
   @Get('tx-specific/{txid}')
   async getTransactionSpecific(@Path() txid: string): Promise<unknown> {
+    const start = Date.now()
     try {
       const { data } = await this.instance.get(`api/v2/tx-specific/${txid}`)
       return data
     } catch (err) {
-      if (err instanceof AxiosError || err instanceof Error) {
-        throw new ApiError(err)
-      }
-
+      if (err instanceof AxiosError || err instanceof Error) throw new ApiError(err)
       throw err
+    } finally {
+      this.logger.trace(`getTransactionSpecific: ${txid}: ${Date.now() - start}ms`)
     }
   }
 
@@ -439,6 +442,7 @@ export class Blockbook extends Controller {
     @Query() details?: 'basic' | 'tokens' | 'tokenBalances' | 'txids' | 'txslight' | 'txs',
     @Query() contract?: string
   ): Promise<Address> {
+    const start = Date.now()
     try {
       const { data } = await this.instance.get<Address>(`api/v2/address/${address}`, {
         params: {
@@ -452,11 +456,10 @@ export class Blockbook extends Controller {
       })
       return data
     } catch (err) {
-      if (err instanceof AxiosError || err instanceof Error) {
-        throw new ApiError(err)
-      }
-
+      if (err instanceof AxiosError || err instanceof Error) throw new ApiError(err)
       throw err
+    } finally {
+      this.logger.debug(`getAddress: ${address} (page: ${page}, details: ${details}): ${Date.now() - start}ms`)
     }
   }
 
@@ -590,6 +593,7 @@ export class Blockbook extends Controller {
     @Query() details?: 'basic' | 'tokens' | 'tokenBalances' | 'txids' | 'txs',
     @Query() tokens?: 'nonzero' | 'used' | 'derived'
   ): Promise<Xpub> {
+    const start = Date.now()
     try {
       const { data } = await this.instance.get<Xpub>(`api/v2/xpub/${xpub}`, {
         params: {
@@ -603,11 +607,10 @@ export class Blockbook extends Controller {
       })
       return data
     } catch (err) {
-      if (err instanceof AxiosError || err instanceof Error) {
-        throw new ApiError(err)
-      }
-
+      if (err instanceof AxiosError || err instanceof Error) throw new ApiError(err)
       throw err
+    } finally {
+      this.logger.debug(`getXpub: ${xpub} (page: ${page}, details: ${details}): ${Date.now() - start}ms`)
     }
   }
 
@@ -650,6 +653,7 @@ export class Blockbook extends Controller {
   ])
   @Get('utxo/{account}')
   async getUtxo(@Path() account: string, @Query() confirmed?: boolean): Promise<Array<Utxo>> {
+    const start = Date.now()
     try {
       const { data } = await this.instance.get<Array<Utxo>>(`api/v2/utxo/${account}`, {
         params: {
@@ -658,11 +662,10 @@ export class Blockbook extends Controller {
       })
       return data
     } catch (err) {
-      if (err instanceof AxiosError || err instanceof Error) {
-        throw new ApiError(err)
-      }
-
+      if (err instanceof AxiosError || err instanceof Error) throw new ApiError(err)
       throw err
+    } finally {
+      this.logger.debug(`getUtxo: ${account}: ${Date.now() - start}ms`)
     }
   }
 
@@ -751,6 +754,7 @@ export class Blockbook extends Controller {
   })
   @Get('block/{block}')
   async getBlock(@Path() block: string, @Query() page?: number): Promise<Block> {
+    const start = Date.now()
     try {
       const { data } = await this.instance.get<Block>(`api/v2/block/${block}`, {
         params: {
@@ -759,11 +763,10 @@ export class Blockbook extends Controller {
       })
       return data
     } catch (err) {
-      if (err instanceof AxiosError || err instanceof Error) {
-        throw new ApiError(err)
-      }
-
+      if (err instanceof AxiosError || err instanceof Error) throw new ApiError(err)
       throw err
+    } finally {
+      this.logger.trace(`getBlock: ${block} (page: ${page}): ${Date.now() - start}ms`)
     }
   }
 
@@ -784,10 +787,7 @@ export class Blockbook extends Controller {
       const { data } = await this.instance.get<SendTx>(`api/v2/sendtx/${hex}`)
       return data
     } catch (err) {
-      if (err instanceof AxiosError || err instanceof Error) {
-        throw new ApiError(err)
-      }
-
+      if (err instanceof AxiosError || err instanceof Error) throw new ApiError(err)
       throw err
     }
   }
@@ -848,10 +848,7 @@ export class Blockbook extends Controller {
       })
       return data
     } catch (err) {
-      if (err instanceof AxiosError || err instanceof Error) {
-        throw new ApiError(err)
-      }
-
+      if (err instanceof AxiosError || err instanceof Error) throw new ApiError(err)
       throw err
     }
   }
