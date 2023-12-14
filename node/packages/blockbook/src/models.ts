@@ -1,3 +1,4 @@
+import { Logger } from '@shapeshiftoss/logger'
 import axios, { AxiosError } from 'axios'
 
 /**
@@ -307,4 +308,5 @@ export interface FeeResponse {
 export interface BlockbookArgs {
   httpURL: string
   wsURL: string
+  logger: Logger
 }
