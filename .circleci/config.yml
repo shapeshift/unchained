@@ -1268,7 +1268,7 @@ workflows:
           requires:
             - deploy dependencies
           <<: *polygon-dev
-          rpc-url: $POLYGON_RPC_URL_DEV
+          #rpc-url: $POLYGON_RPC_URL_DEV
           <<: *only-develop
 
       - deploy-coinstack-node:
@@ -1562,7 +1562,7 @@ workflows:
           requires:
             - validate dependencies
           <<: *polygon
-          rpc-url: $POLYGON_RPC_URL
+          #rpc-url: $POLYGON_RPC_URL
           <<: *only-main
 
       - approve-coinstack:
@@ -1580,7 +1580,7 @@ workflows:
           requires:
             - approve polygon coinstack
           <<: *polygon
-          rpc-url: $POLYGON_RPC_URL
+          #rpc-url: $POLYGON_RPC_URL
           <<: *only-main
 
       ####### GNOSIS

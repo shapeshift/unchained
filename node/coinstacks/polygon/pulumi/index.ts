@@ -9,7 +9,7 @@ export = async (): Promise<Outputs> => {
   const coinstack = 'polygon'
   const sampleEnv = readFileSync('../sample.env')
   const { kubeconfig, config, namespace } = await getConfig()
-  const { environment, network, statefulService } = config
+  const { network, statefulService } = config
 
   const coinServiceArgs = statefulService?.services?.map((service): CoinServiceArgs => {
     switch (service.name) {
@@ -49,8 +49,10 @@ export = async (): Promise<Outputs> => {
       case 'indexer': {
         const indexerConfig = JSON.parse(readFileSync('../indexer/config.json').toString())
 
-        const url = process.env[environment ? `POLYGON_WS_URL_${environment.toUpperCase()}` : 'POLYGON_WS_URL']
-        if (url) indexerConfig.rpc_url = url
+        // uncomment me to use remote endpoint
+        //const { environment } = config
+        //const url = process.env[environment ? `POLYGON_WS_URL_${environment.toUpperCase()}` : 'POLYGON_WS_URL']
+        //if (url) indexerConfig.rpc_url = url
 
         return {
           ...service,
