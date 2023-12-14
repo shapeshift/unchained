@@ -1,9 +1,8 @@
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
 import { ApiError as BlockbookApiError, Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
-import { AddressFormatter, ApiError, BadRequestError, BaseAPI, Cursor, RPCRequest, RPCResponse, SendTxBody } from '../'
+import { AddressFormatter, ApiError, BadRequestError, BaseAPI, Cursor, SendTxBody } from '../'
 import { Account, Address, API, NetworkFee, NetworkFees, RawTx, Tx, TxHistory, Utxo } from './models'
-import { NodeBlock } from './types'
 import { validatePageSize } from '../utils'
 
 axiosRetry(axios, { retries: 5, retryDelay: axiosRetry.exponentialDelay })
@@ -31,12 +30,10 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   readonly isXpub: (pubkey: string) => boolean
 
   private readonly blockbook: Blockbook
-  private readonly rpcUrl: string
   private formatAddress: AddressFormatter = (address: string) => address.toLowerCase()
 
   constructor(args: ServiceArgs) {
     this.blockbook = args.blockbook
-    this.rpcUrl = args.rpcUrl
     this.isXpub = args.isXpub
 
     if (args.addressFormatter) this.formatAddress = args.addressFormatter
@@ -182,26 +179,16 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   }
 
   async handleBlock(hash: string): Promise<Array<BlockbookTx>> {
-    const request: RPCRequest = {
-      jsonrpc: '2.0',
-      id: `getblock-${hash}`,
-      method: 'getblock',
-      params: [hash],
+    try {
+      const { txs = [], totalPages = 1 } = await this.blockbook.getBlock(hash)
+      for (let page = 1; page < totalPages; ++page) {
+        const data = await this.blockbook.getBlock(hash)
+        data.txs && txs.push(...data.txs)
+      }
+      return txs
+    } catch (err) {
+      throw handleError(err)
     }
-
-    const { data } = await axios.post<RPCResponse>(this.rpcUrl, request)
-
-    if (data.error) throw new Error(`failed to get block: ${hash}: ${data.error.message}`)
-    if (!data.result) throw new Error(`failed to get block: ${hash}: ${JSON.stringify(data)}`)
-
-    const block = data.result as NodeBlock
-
-    // make best effort to fetch all transactions, but don't fail handling block if a single transaction fails
-    const txs = await Promise.allSettled(block.tx.map((hash) => this.blockbook.getTransaction(hash)))
-
-    return txs
-      .filter((tx): tx is PromiseFulfilledResult<BlockbookTx> => tx.status === 'fulfilled')
-      .map((tx) => tx.value)
   }
 
   handleTransaction(tx: BlockbookTx): Tx {
