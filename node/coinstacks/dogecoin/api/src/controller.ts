@@ -12,7 +12,7 @@ if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
 
 export const logger = new Logger({
-  namespace: ['unchained', 'coinstacks', 'gnosis', 'api'],
+  namespace: ['unchained', 'coinstacks', 'dogecoin', 'api'],
   level: process.env.LOG_LEVEL,
 })
 

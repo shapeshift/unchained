@@ -182,7 +182,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     try {
       const { txs = [], totalPages = 1 } = await this.blockbook.getBlock(hash)
       for (let page = 1; page < totalPages; ++page) {
-        const data = await this.blockbook.getBlock(hash)
+        const data = await this.blockbook.getBlock(hash, page)
         data.txs && txs.push(...data.txs)
       }
       return txs
