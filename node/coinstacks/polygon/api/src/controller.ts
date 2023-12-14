@@ -38,8 +38,8 @@ export const logger = new Logger({
   level: process.env.LOG_LEVEL,
 })
 
-const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL })
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
+export const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL, logger })
 export const gasOracle = new GasOracle({ logger, provider, coinstack: 'polygon' })
 
 export const service = new Service({

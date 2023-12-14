@@ -78,7 +78,7 @@ const server = app.listen(PORT, () => logger.info('Server started'))
 const wsServer = new Server({ server })
 
 wsServer.on('connection', (connection) => {
-  ConnectionHandler.start(connection, registry, prometheus)
+  ConnectionHandler.start(connection, registry, prometheus, logger)
 })
 
 new WebsocketClient(INDEXER_WS_URL, {
