@@ -6,7 +6,7 @@ import { NewBlock } from '@shapeshiftoss/blockbook'
 import { NodeBlock, NodeTransaction } from './types'
 
 const exponentialDelay = async (retryCount: number) =>
-  new Promise((resolve) => setTimeout(resolve, axiosRetry.exponentialDelay(retryCount)))
+  new Promise((resolve) => setTimeout(resolve, axiosRetry.exponentialDelay(retryCount, undefined, 500)))
 
 export interface GasOracleArgs {
   logger: Logger
@@ -174,8 +174,7 @@ export class GasOracle {
       >
 
       if (!block) {
-        if (retryCount >= 5) throw new Error('block not found')
-        retryCount++
+        if (++retryCount >= 5) throw new Error('block not found')
         await exponentialDelay(retryCount)
         return this.update(blockNumber, blockTag, retryCount)
       }

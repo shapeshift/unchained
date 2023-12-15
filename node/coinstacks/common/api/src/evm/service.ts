@@ -1,5 +1,5 @@
 import axios from 'axios'
-import axiosRetry from 'axios-retry'
+import axiosRetry, { isNetworkOrIdempotentRequestError } from 'axios-retry'
 import BigNumber from 'bignumber.js'
 import { ethers } from 'ethers'
 import { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
@@ -33,13 +33,27 @@ import { ERC721_ABI } from './abi/erc721'
 import { AxiosError } from 'axios'
 
 const axiosNoRetry = axios.create({ timeout: 5000 })
+const axiosWithRetry = axios.create({ timeout: 10000 })
 
 type InternalTxFetchMethod = 'trace_transaction' | 'debug_traceTransaction'
 
-axiosRetry(axios, { retries: 5, retryDelay: axiosRetry.exponentialDelay })
+axiosRetry(axiosWithRetry, {
+  shouldResetTimeout: true,
+  retries: 5,
+  retryDelay: (retryCount, err) => {
+    // don't add delay on top of request timeout
+    if (err.code === 'ECONNABORTED') return 0
+    // add exponential delay for network errors
+    return axiosRetry.exponentialDelay(retryCount, undefined, 500)
+  },
+  retryCondition: (err) =>
+    isNetworkOrIdempotentRequestError(err) ||
+    (!!err.response && err.response.status >= 400 && err.response.status < 600) ||
+    err.code === 'ECONNABORTED',
+})
 
 const exponentialDelay = async (retryCount: number) =>
-  new Promise((resolve) => setTimeout(resolve, axiosRetry.exponentialDelay(retryCount)))
+  new Promise((resolve) => setTimeout(resolve, axiosRetry.exponentialDelay(retryCount, undefined, 500)))
 
 export interface ServiceArgs {
   blockbook: Blockbook
@@ -438,14 +452,13 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       params: [txid],
     }
 
-    const { data } = await axios.post<RPCResponse>(this.rpcUrl, request)
+    const { data } = await axiosWithRetry.post<RPCResponse>(this.rpcUrl, request)
 
     if (data.error) throw new Error(`failed to get internalTransactions for txid: ${txid}: ${data.error.message}`)
 
     // retry if no results are returned, this typically means we queried a node that hasn't indexed the data yet
     if (!data.result) {
-      if (retryCount >= 5) throw new Error(`failed to get internalTransactions for txid: ${txid}`)
-      retryCount++
+      if (++retryCount >= 5) throw new Error(`failed to get internalTransactions for txid: ${txid}`)
       await exponentialDelay(retryCount)
       return this.fetchInternalTxsTrace(txid, retryCount)
     }
@@ -478,14 +491,13 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       params: [txid, { tracer: 'callTracer' }],
     }
 
-    const { data } = await axios.post<RPCResponse>(this.rpcUrl, request)
+    const { data } = await axiosWithRetry.post<RPCResponse>(this.rpcUrl, request)
 
     if (data.error) throw new Error(`failed to get internalTransactions for txid: ${txid}: ${data.error.message}`)
 
     // retry if no results are returned, this typically means we queried a node that hasn't indexed the data yet
     if (!data.result) {
-      if (retryCount >= 5) throw new Error(`failed to get internalTransactions for txid: ${txid}`)
-      retryCount++
+      if (++retryCount >= 5) throw new Error(`failed to get internalTransactions for txid: ${txid}`)
       await exponentialDelay(retryCount)
       return this.fetchInternalTxsDebug(txid, retryCount)
     }
@@ -545,7 +557,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   }
 
   private async fetchInternalTxsByTxid(txid: string): Promise<Array<InternalTx> | undefined> {
-    const { data } = await axios.get<ExplorerApiResponse<Array<ExplorerInternalTxByHash>>>(
+    const { data } = await axiosWithRetry.get<ExplorerApiResponse<Array<ExplorerInternalTxByHash>>>(
       `${this.explorerApiUrl}?module=account&action=txlistinternal&txhash=${txid}&apikey=${this.explorerApiKey}`
     )
 
@@ -631,7 +643,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     if (to) url += `&endblock=${to}`
     if (this.explorerApiKey) url += `&apikey=${this.explorerApiKey}`
 
-    const { data } = await axios.get<ExplorerApiResponse<Array<ExplorerInternalTxByAddress>>>(url)
+    const { data } = await axiosWithRetry.get<ExplorerApiResponse<Array<ExplorerInternalTxByAddress>>>(url)
 
     if (data.status === '0') return []
 

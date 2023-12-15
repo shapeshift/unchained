@@ -47,10 +47,16 @@ export class Blockbook extends Controller {
     axiosRetry(this.instance, {
       shouldResetTimeout: true,
       retries,
-      retryDelay: axiosRetry.exponentialDelay,
+      retryDelay: (retryCount, err) => {
+        // don't add delay on top of request timeout
+        if (err.code === 'ECONNABORTED') return 0
+        // add exponential delay for network errors
+        return axiosRetry.exponentialDelay(retryCount, undefined, 500)
+      },
       retryCondition: (err) =>
         isNetworkOrIdempotentRequestError(err) ||
-        (!!err.response && err.response.status >= 400 && err.response.status < 600),
+        (!!err.response && err.response.status >= 400 && err.response.status < 600) ||
+        err.code === 'ECONNABORTED',
     })
   }
 

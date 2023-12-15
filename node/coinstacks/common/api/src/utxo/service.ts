@@ -1,11 +1,7 @@
-import axios from 'axios'
-import axiosRetry from 'axios-retry'
 import { ApiError as BlockbookApiError, Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import { AddressFormatter, ApiError, BadRequestError, BaseAPI, Cursor, SendTxBody } from '../'
 import { Account, Address, API, NetworkFee, NetworkFees, RawTx, Tx, TxHistory, Utxo } from './models'
 import { validatePageSize } from '../utils'
-
-axiosRetry(axios, { retries: 5, retryDelay: axiosRetry.exponentialDelay })
 
 const handleError = (err: unknown): ApiError => {
   if (err instanceof BlockbookApiError) {
