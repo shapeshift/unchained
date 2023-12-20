@@ -175,7 +175,7 @@ aliases:
     api-cpu-limit: 500m
     api-cpu-request: 250m
     api-cpu-threshold: 75
-    api-memory-limit: 500Mi
+    api-memory-limit: 1Gi
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
@@ -220,7 +220,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.13.5
+    service-image-1: ethereum/client-go:v1.13.7
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
@@ -273,8 +273,8 @@ aliases:
     service-cpu-request-1: "2"
     service-memory-limit-1: 48Gi
     service-storage-size-1: 4500Gi
-    service-storage-iops-1: "6000"
-    service-storage-throughput-1: "250"
+    service-storage-iops-1: "10000"
+    service-storage-throughput-1: "300"
 
   - &cosmos-dev
     <<: *cosmos
@@ -309,7 +309,7 @@ aliases:
     service-image-1: avaplatform/avalanchego:v1.10.17
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
-    service-memory-limit-1: 16Gi
+    service-memory-limit-1: 24Gi
     service-storage-size-1: 5500Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:559cfbc
@@ -429,7 +429,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/bitcoin-cash-node:26.1.0
+    service-image-1: shapeshiftdao/bitcoin-cash-node:27.0.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 4Gi
@@ -513,17 +513,17 @@ aliases:
     api-cpu-limit: 500m
     api-cpu-request: 250m
     api-cpu-threshold: 75
-    api-memory-limit: 500Mi
+    api-memory-limit: 1Gi
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101304.1
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101304.2
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
-    service-storage-size-1: 1000Gi
+    service-storage-size-1: 1250Gi
     service-name-2: op-node
-    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.3.0
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.3.2
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 2Gi
@@ -564,13 +564,13 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/bnb-smart-chain:v1.3.5
+    service-image-1: shapeshiftdao/bnb-smart-chain:v1.3.7
     service-cpu-limit-1: "16"
     service-cpu-request-1: "8"
     service-memory-limit-1: 72Gi
-    service-storage-size-1: 5500Gi
-    service-storage-iops-1: "6000"
-    service-storage-throughput-1: "250"
+    service-storage-size-1: 5750Gi
+    service-storage-iops-1: "10000"
+    service-storage-throughput-1: "300"
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:559cfbc
     service-cpu-limit-2: "4"
@@ -612,7 +612,7 @@ aliases:
     service-cpu-limit-1: "8"
     service-cpu-request-1: "4"
     service-memory-limit-1: 48Gi
-    service-storage-size-1: 4000Gi
+    service-storage-size-1: 3250Gi
     service-storage-iops-1: "6000"
     service-storage-throughput-1: "300"
     service-name-2: heimdall
@@ -625,7 +625,7 @@ aliases:
     service-image-3: shapeshiftdao/unchained-blockbook:559cfbc
     service-cpu-limit-3: "4"
     service-cpu-request-3: "2"
-    service-memory-limit-3: 24Gi
+    service-memory-limit-3: 32Gi
     service-storage-size-3: 750Gi
 
   - &polygon-dev
@@ -658,7 +658,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.23.0
+    service-image-1: nethermind/nethermind:1.24.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "2"
     service-memory-limit-1: 6Gi
@@ -705,11 +705,11 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: offchainlabs/nitro-node:v2.1.3-e815395
+    service-image-1: offchainlabs/nitro-node:v2.2.0-f7dc9de
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
-    service-memory-limit-1: 16Gi
-    service-storage-size-1: 500Gi
+    service-memory-limit-1: 24Gi
+    service-storage-size-1: 750Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:arbitrum-0e84937
     service-cpu-limit-2: "2"
@@ -726,7 +726,6 @@ aliases:
     indexer-ws-url: ws://arbitrum-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &arbitrum-nova
@@ -746,7 +745,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: offchainlabs/nitro-node:v2.1.3-e815395
+    service-image-1: offchainlabs/nitro-node:v2.2.0-f7dc9de
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
@@ -767,7 +766,6 @@ aliases:
     indexer-ws-url: ws://arbitrum-nova-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
 commands:
