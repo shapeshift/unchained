@@ -23,7 +23,7 @@ start() {
   --ws.port 8548 \
   --ws.api eth,net,web3,debug,txpool,arb \
   --ws.origins '*' \
-  --execution.staker.enable='false' \
+  --node.staker.enable='false' \
   --execution.tx-lookup-limit 0 &
   PID="$!"
 }
