@@ -176,7 +176,7 @@ aliases:
     api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
-    api-memory-request: 250Mi
+    api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: shapeshiftdao/bitcoin-core:26.0
@@ -200,7 +200,7 @@ aliases:
     indexer-ws-url: ws://bitcoin-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 250Mi
+    api-memory-limit: 500Mi
     stateful-service-replicas: 1
 
   - &ethereum
@@ -264,15 +264,15 @@ aliases:
     api-cpu-limit: 500m
     api-cpu-request: 250m
     api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-    api-memory-request: 250Mi
+    api-memory-limit: 1Gi
+    api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: shapeshiftdao/cosmoshub:v14.1.0
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 48Gi
-    service-storage-size-1: 4500Gi
+    service-storage-size-1: 4750Gi
     service-storage-iops-1: "10000"
     service-storage-throughput-1: "300"
 
@@ -286,7 +286,7 @@ aliases:
     ws-url: ws://cosmos-svc.unchained-dev.svc.cluster.local:26657
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 250Mi
+    api-memory-limit: 500Mi
     stateful-service-replicas: 1
 
   - &avalanche
@@ -309,7 +309,7 @@ aliases:
     service-image-1: avaplatform/avalanchego:v1.10.17
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
-    service-memory-limit-1: 24Gi
+    service-memory-limit-1: 32Gi
     service-storage-size-1: 5750Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:559cfbc
@@ -514,7 +514,7 @@ aliases:
     api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
-    api-memory-request: 250Mi
+    api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101304.2
@@ -544,7 +544,7 @@ aliases:
     indexer-ws-url: ws://optimism-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 250Mi
+    api-memory-limit: 500Mi
     stateful-service-replicas: 1
 
   - &bnbsmartchain
@@ -557,11 +557,11 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: "1"
-    api-cpu-request: 500m
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     api-cpu-threshold: 75
-    api-memory-limit: 1Gi
-    api-memory-request: 500Mi
+    api-memory-limit: 500Mi
+    api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: shapeshiftdao/bnb-smart-chain:v1.3.7
@@ -575,7 +575,7 @@ aliases:
     service-image-2: shapeshiftdao/unchained-blockbook:559cfbc
     service-cpu-limit-2: "4"
     service-cpu-request-2: "2"
-    service-memory-limit-2: 16Gi
+    service-memory-limit-2: 24Gi
     service-storage-size-2: 1000Gi
 
   - &bnbsmartchain-dev
@@ -587,8 +587,7 @@ aliases:
     indexer-ws-url: ws://bnbsmartchain-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
+    api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &polygon
@@ -601,8 +600,8 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: "1"
-    api-cpu-request: 500m
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
     api-memory-request: 500Mi
@@ -637,8 +636,7 @@ aliases:
     indexer-ws-url: ws://polygon-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
+    api-memory-limit: 500Mi
     stateful-service-replicas: 1
 
   - &gnosis
@@ -654,8 +652,8 @@ aliases:
     api-cpu-limit: 500m
     api-cpu-request: 250m
     api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-    api-memory-request: 250Mi
+    api-memory-limit: 1Gi
+    api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: nethermind/nethermind:1.24.0
@@ -685,7 +683,7 @@ aliases:
     indexer-ws-url: ws://gnosis-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 250Mi
+    api-memory-limit: 500Mi
     stateful-service-replicas: 1
 
   - &arbitrum
@@ -705,7 +703,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: offchainlabs/nitro-node:v2.2.0-f7dc9de
+    service-image-1: offchainlabs/nitro-node:v2.1.3-e815395
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
@@ -726,6 +724,7 @@ aliases:
     indexer-ws-url: ws://arbitrum-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
+    api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &arbitrum-nova
@@ -745,7 +744,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: offchainlabs/nitro-node:v2.2.0-f7dc9de
+    service-image-1: offchainlabs/nitro-node:v2.1.3-e815395
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
@@ -766,6 +765,7 @@ aliases:
     indexer-ws-url: ws://arbitrum-nova-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
+    api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
 commands:

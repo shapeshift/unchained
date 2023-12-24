@@ -24,7 +24,7 @@ start() {
   --ws.api eth,net,web3,debug,txpool,arb \
   --ws.origins '*' \
   --node.staker.enable='false' \
-  --execution.tx-lookup-limit 0 &
+  --node.tx-lookup-limit 0 &
   PID="$!"
 }
 
