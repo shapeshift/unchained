@@ -2,12 +2,10 @@
 
 set -e
 
-CONFIG=/root/.gaia/config/config.toml
-
 start() {
   MONIKER=unchained \
   CHAIN_JSON=https://raw.githubusercontent.com/cosmos/chain-registry/master/cosmoshub/chain.json \
-  MAX_OUTBOUND_PEERS=200 \
+  MAX_NUM_OUTBOUND_PEERS=200 \
   POLKACHU_NETWORK=cosmos \
   run.sh gaiad start \
     --rpc.laddr tcp://0.0.0.0:26657 \

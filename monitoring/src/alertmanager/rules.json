@@ -10,7 +10,7 @@
             "description": "Service {{ $labels.statefulset }} has been down for more than 15 minutes"
           },
           "expr": "kube_statefulset_status_replicas_available == 0",
-          "for": "5m",
+          "for": "15m",
           "labels": {
             "severity": "critical"
           }
@@ -22,7 +22,7 @@
             "description": "Deployment {{ $labels.deployment }} has been down for more than 15 minutes"
           },
           "expr": "kube_deployment_status_replicas_available == 0",
-          "for": "5m",
+          "for": "15m",
           "labels": {
             "severity": "critical"
           }
