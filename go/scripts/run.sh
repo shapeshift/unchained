@@ -126,7 +126,8 @@ fi
 
 # Overwrite seeds in config.toml for chains that are not using the env variable correctly
 if [ "$OVERWRITE_SEEDS" == "1" ]; then
-    sed -i "s/seeds = \"\"/seeds = \"$P2P_SEEDS\"/" $CONFIG_PATH/config.toml
+    sed -i "s/seeds =.*/seeds = \"$P2P_SEEDS\"/" $CONFIG_PATH/config.toml
+    sed -i "s/persistent_peers =.*/persistent_peers = \"$P2P_PERSISTENT_PEERS\"/" $CONFIG_PATH/config.toml
 fi
 
 # preseed priv_validator_state.json if missing
