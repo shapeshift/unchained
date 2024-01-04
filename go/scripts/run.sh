@@ -8,6 +8,8 @@ if [ -n "$CHAIN_JSON" ]; then
   CHAIN_METADATA=$(curl -s $CHAIN_JSON)
 
   export CHAIN_ID="${CHAIN_ID:-$(echo $CHAIN_METADATA | jq -r .chain_id)}"
+  export P2P_SEEDS="${P2P_SEEDS:-$(echo $CHAIN_METADATA | jq -r '.peers.seeds | map(.id+"@"+.address) | join(",")')}"
+  export P2P_PERSISTENT_PEERS="${P2P_PERSISTENT_PEERS:-$(echo $CHAIN_METADATA | jq -r '.peers.persistent_peers | map(.id+"@"+.address) | join(",")')}"
   export GENESIS_URL="${GENESIS_URL:-$(echo $CHAIN_METADATA | jq -r '.codebase.genesis.genesis_url? // .genesis.genesis_url? // .genesis?')}"
   export PROJECT_BIN="${PROJECT_BIN:-$(echo $CHAIN_METADATA | jq -r '.codebase.daemon_name? // .daemon_name?')}"
   export PROJECT_DIR="${PROJECT_DIR:-$(echo $CHAIN_METADATA | jq -r '.codebase.node_home? // .node_home?')}"
@@ -20,6 +22,10 @@ export CONFIG_PATH="$PROJECT_ROOT/config"
 export NAMESPACE="$(echo ${PROJECT_BIN^^})"
 
 [ -z "$CHAIN_ID" ] && echo "CHAIN_ID not found" && exit
+
+# config
+[ -n "$MONIKER" ] && export "${NAMESPACE}_MONIKER"="$MONIKER"
+[ -n "$MAX_NUM_OUTBOUND_PEERS" ] && sed -i "s/^max_num_outbound_peers =.*/max_num_outbound_peers = $MAX_NUM_OUTBOUND_PEERS/" $CONFIG_PATH/config.toml
 
 # snapshot
 if [[ -n $SNAPSHOT_QUICKSYNC && ! -f "$PROJECT_ROOT/data/priv_validator_state.json" ]]; then
@@ -95,9 +101,9 @@ if [ -n "$P2P_POLKACHU" ]; then
   fi
 fi
 
-# config
-[ -n "$MONIKER" ] && export "${NAMESPACE}_MONIKER"="$MONIKER"
-[ -n "$P2P_SEEDS" ] && export "${NAMESPACE}_P2P_SEEDS=${P2P_SEEDS}"
+# peers
+[ -n "$P2P_SEEDS" ] && [ "$P2P_SEEDS" != '0' ] && export "${NAMESPACE}_P2P_SEEDS=${P2P_SEEDS}"
+[ -n "$P2P_PERSISTENT_PEERS" ] && [ "$P2P_PERSISTENT_PEERS" != '0' ] && export "${NAMESPACE}_P2P_PERSISTENT_PEERS"=${P2P_PERSISTENT_PEERS}
 
 # init chain
 if [[ ! -d "$CONFIG_PATH" ]]; then
