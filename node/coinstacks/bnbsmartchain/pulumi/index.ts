@@ -20,7 +20,7 @@ export = async (): Promise<Outputs> => {
             'daemon-ws': { port: 8546, pathPrefix: '/websocket', stripPathPrefix: true },
           },
           env: {
-            SNAPSHOT: 'https://pub-c0627345c16f47ab858c9469133073a8.r2.dev/geth-20230719.tar.lz4',
+            SNAPSHOT: 'https://pub-c0627345c16f47ab858c9469133073a8.r2.dev/geth-pbss-pebble-20231217.tar.lz4',
           },
           configMapData: { 'evm.sh': readFileSync('../../../scripts/evm.sh').toString() },
           volumeMounts: [{ name: 'config-map', mountPath: '/evm.sh', subPath: 'evm.sh' }],

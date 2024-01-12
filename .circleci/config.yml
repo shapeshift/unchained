@@ -272,8 +272,8 @@ aliases:
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 48Gi
-    service-storage-size-1: 4750Gi
-    service-storage-iops-1: "10000"
+    service-storage-size-1: 5000Gi
+    service-storage-iops-1: "6000"
     service-storage-throughput-1: "300"
 
   - &cosmos-dev
@@ -470,11 +470,11 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.125.3
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.126.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
-    service-storage-size-1: 3250Gi
+    service-storage-size-1: 3500Gi
     service-name-2: timescaledb
     service-image-2: timescale/timescaledb:2.2.0-pg13
     service-cpu-request-2: "1"
@@ -567,10 +567,8 @@ aliases:
     service-image-1: shapeshiftdao/bnb-smart-chain:v1.3.7
     service-cpu-limit-1: "16"
     service-cpu-request-1: "8"
-    service-memory-limit-1: 72Gi
-    service-storage-size-1: 6000Gi
-    service-storage-iops-1: "10000"
-    service-storage-throughput-1: "300"
+    service-memory-limit-1: 48Gi
+    service-storage-size-1: 2500Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:559cfbc
     service-cpu-limit-2: "4"
@@ -611,7 +609,7 @@ aliases:
     service-cpu-limit-1: "8"
     service-cpu-request-1: "4"
     service-memory-limit-1: 48Gi
-    service-storage-size-1: 3500Gi
+    service-storage-size-1: 4000Gi
     service-storage-iops-1: "6000"
     service-storage-throughput-1: "300"
     service-name-2: heimdall
@@ -625,7 +623,7 @@ aliases:
     service-cpu-limit-3: "4"
     service-cpu-request-3: "2"
     service-memory-limit-3: 32Gi
-    service-storage-size-3: 750Gi
+    service-storage-size-3: 1000Gi
 
   - &polygon-dev
     <<: *polygon
