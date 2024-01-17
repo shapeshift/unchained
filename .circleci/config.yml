@@ -195,9 +195,9 @@ aliases:
     <<: *bitcoin
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    rpc-url: http://user:password@bitcoin-svc.unchained-dev.svc.cluster.local:8332
-    indexer-url: http://bitcoin-svc.unchained-dev.svc.cluster.local:8001
-    indexer-ws-url: ws://bitcoin-svc.unchained-dev.svc.cluster.local:8001/websocket
+    indexer-url: https://btcbook.nownodes.io
+    indexer-ws-url: wss://btc.nownodes.io/wss
+    indexer-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 500Mi
