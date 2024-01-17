@@ -1,11 +1,12 @@
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 import axiosRetry, { isNetworkOrIdempotentRequestError } from 'axios-retry'
 import BigNumber from 'bignumber.js'
 import { ethers } from 'ethers'
-import { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
-import { Logger } from '@shapeshiftoss/logger'
-import { ApiError, BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
-import {
+import type { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
+import type { Logger } from '@shapeshiftoss/logger'
+import type { BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
+import { ApiError } from '../'
+import type {
   Account,
   API,
   TokenBalance,
@@ -17,7 +18,7 @@ import {
   TokenMetadata,
   TokenType,
 } from './models'
-import {
+import type {
   Cursor,
   DebugCallStack,
   ExplorerApiResponse,
@@ -25,12 +26,11 @@ import {
   ExplorerInternalTxByHash,
   ExplorerInternalTxByAddress,
 } from './types'
-import { GasOracle } from './gasOracle'
+import type { GasOracle } from './gasOracle'
 import { formatAddress, handleError } from './utils'
 import { validatePageSize } from '../utils'
 import { ERC1155_ABI } from './abi/erc1155'
 import { ERC721_ABI } from './abi/erc721'
-import { AxiosError } from 'axios'
 
 const axiosNoRetry = axios.create({ timeout: 5000 })
 const axiosWithRetry = axios.create({ timeout: 10000 })
@@ -63,6 +63,7 @@ export interface ServiceArgs {
   logger: Logger
   provider: ethers.providers.JsonRpcProvider
   rpcUrl: string
+  rpcApiKey?: string
 }
 
 export class Service implements Omit<BaseAPI, 'getInfo'>, API {
@@ -73,6 +74,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   private readonly logger: Logger
   private readonly provider: ethers.providers.JsonRpcProvider
   private readonly rpcUrl: string
+  private readonly rpcApiKey?: string
   private readonly abiInterface: Record<TokenType, ethers.utils.Interface> = {
     erc721: new ethers.utils.Interface(ERC721_ABI),
     erc1155: new ethers.utils.Interface(ERC1155_ABI),
@@ -86,6 +88,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     this.logger = args.logger.child({ namespace: ['service'] })
     this.provider = args.provider
     this.rpcUrl = args.rpcUrl
+    this.rpcApiKey = args.rpcApiKey
 
     this.gasOracle.start()
   }
@@ -452,7 +455,8 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       params: [txid],
     }
 
-    const { data } = await axiosWithRetry.post<RPCResponse>(this.rpcUrl, request)
+    const config = this.rpcApiKey ? { headers: { 'api-key': this.rpcApiKey } } : undefined
+    const { data } = await axiosWithRetry.post<RPCResponse>(this.rpcUrl, request, config)
 
     if (data.error) throw new Error(`failed to get internalTransactions for txid: ${txid}: ${data.error.message}`)
 
@@ -491,7 +495,8 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       params: [txid, { tracer: 'callTracer' }],
     }
 
-    const { data } = await axiosWithRetry.post<RPCResponse>(this.rpcUrl, request)
+    const config = this.rpcApiKey ? { headers: { 'api-key': this.rpcApiKey } } : undefined
+    const { data } = await axiosWithRetry.post<RPCResponse>(this.rpcUrl, request, config)
 
     if (data.error) throw new Error(`failed to get internalTransactions for txid: ${txid}: ${data.error.message}`)
 
