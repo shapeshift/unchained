@@ -10,6 +10,7 @@ export interface Subscription {
 }
 
 export interface Args {
+  apiKey?: string
   transactionHandler: TransactionHandler
   blockHandler: BlockHandler | Array<BlockHandler>
 }
@@ -40,7 +41,7 @@ export class WebsocketClient {
     this.handleTransaction = args.transactionHandler
     this.handleBlock = args.blockHandler
     this.pingInterval = opts?.pingInterval ?? 10000
-    this.url = url
+    this.url = args.apiKey ? `${url}/${args.apiKey}` : url
     this.socket = new WebSocket(this.url, { handshakeTimeout: 5000 })
 
     this.initialize()

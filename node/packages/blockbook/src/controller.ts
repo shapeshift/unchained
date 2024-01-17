@@ -2,9 +2,8 @@ import axios, { AxiosError, AxiosInstance } from 'axios'
 import axiosRetry, { isNetworkOrIdempotentRequestError } from 'axios-retry'
 import { Controller, Example, Get, Path, Query, Route, Tags } from 'tsoa'
 import WebSocket from 'ws'
-import {
+import type {
   Address,
-  ApiError,
   BalanceHistory,
   Block,
   BlockbookArgs,
@@ -17,6 +16,7 @@ import {
   Utxo,
   Xpub,
 } from './models'
+import { ApiError } from './models'
 import { Logger } from '@shapeshiftoss/logger'
 
 const defaultArgs: BlockbookArgs = {
@@ -35,11 +35,12 @@ export class Blockbook extends Controller {
   constructor(args: BlockbookArgs = defaultArgs, timeout?: number, retries = 5) {
     super()
     this.logger = args.logger.child({ namespace: ['blockbook'] })
-    this.wsURL = args.wsURL
+    this.wsURL = args.apiKey ? `${args.wsURL}/${args.apiKey}` : args.wsURL
     this.instance = axios.create({
       timeout: timeout ?? 10000,
       baseURL: args.httpURL,
       headers: {
+        ...(args.apiKey && { 'api-key': args.apiKey }),
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
