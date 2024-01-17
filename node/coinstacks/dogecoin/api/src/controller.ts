@@ -5,6 +5,7 @@ import { Logger } from '@shapeshiftoss/logger'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
+const INDEXER_API_KEY = process.env.INDEXER_API_KEY
 
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
@@ -14,7 +15,7 @@ export const logger = new Logger({
   level: process.env.LOG_LEVEL,
 })
 
-const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL, logger })
+const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL, apiKey: INDEXER_API_KEY, logger })
 
 const isXpub = (pubkey: string): boolean => {
   return pubkey.startsWith('dgub')

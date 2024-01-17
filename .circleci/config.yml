@@ -367,9 +367,9 @@ aliases:
     <<: *dogecoin
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    rpc-url: http://user:password@dogecoin-svc.unchained-dev.svc.cluster.local:8332
-    indexer-url: http://dogecoin-svc.unchained-dev.svc.cluster.local:8001
-    indexer-ws-url: ws://dogecoin-svc.unchained-dev.svc.cluster.local:8001/websocket
+    indexer-url: https://dogebook.nownodes.io
+    indexer-ws-url: wss://doge.nownodes.io/wss
+    indexer-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 250Mi
