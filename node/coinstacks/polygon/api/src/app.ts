@@ -18,6 +18,7 @@ import { RegisterRoutes } from './routes'
 
 const PORT = process.env.PORT ?? 3000
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
+const INDEXER_API_KEY = process.env.INDEXER_API_KEY
 
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 
@@ -82,6 +83,7 @@ wsServer.on('connection', (connection) => {
 })
 
 new WebsocketClient(INDEXER_WS_URL, {
+  apiKey: INDEXER_API_KEY,
   blockHandler: [registry.onBlock.bind(registry), gasOracle.onBlock.bind(gasOracle)],
   transactionHandler: registry.onTransaction.bind(registry),
 })
