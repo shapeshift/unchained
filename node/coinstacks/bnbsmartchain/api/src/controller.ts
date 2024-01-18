@@ -25,8 +25,10 @@ import { GasOracle } from '../../../common/api/src/evm/gasOracle'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
+const INDEXER_API_KEY = process.env.INDEXER_API_KEY
 const NETWORK = process.env.NETWORK
 const RPC_URL = process.env.RPC_URL
+const RPC_API_KEY = process.env.RPC_API_KEY
 
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
@@ -38,8 +40,9 @@ export const logger = new Logger({
   level: process.env.LOG_LEVEL,
 })
 
-const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL, logger })
-const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
+const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL, apiKey: INDEXER_API_KEY, logger })
+const headers = RPC_API_KEY ? { 'api-key': RPC_API_KEY } : undefined
+const provider = new ethers.providers.JsonRpcProvider({ url: RPC_URL, headers })
 export const gasOracle = new GasOracle({ logger, provider, coinstack: 'bnbsmartchain' })
 
 export const service = new Service({
@@ -49,6 +52,7 @@ export const service = new Service({
   provider,
   logger,
   rpcUrl: RPC_URL,
+  rpcApiKey: RPC_API_KEY,
 })
 
 @Route('api/v1')
