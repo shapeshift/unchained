@@ -44,6 +44,7 @@ type Config struct {
 	LCDURL            string
 	RPCURL            string
 	WSURL             string
+	APIKEY            string
 }
 
 // HTTPClient allows communicating over http
@@ -71,6 +72,9 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 
 	// untyped resty http clients
 	headers := map[string]string{"Accept": "application/json"}
+	if conf.APIKEY != "" {
+		headers["api-key"] = conf.APIKEY
+	}
 	lcd := resty.New().SetBaseURL(lcdURL.String()).SetHeaders(headers)
 	rpc := resty.New().SetBaseURL(rpcURL.String()).SetHeaders(headers)
 
