@@ -6,6 +6,8 @@ start() {
   MONIKER=unchained \
   CHAIN_JSON=https://raw.githubusercontent.com/cosmos/chain-registry/master/cosmoshub/chain.json \
   MAX_NUM_OUTBOUND_PEERS=200 \
+  P2P_SEEDS="ade4d8bc8cbe014af6ebdf3cb7b1e9ad36f412c0@seeds.polkachu.com:14956" \
+  P2P_PERSISTENT_PEERS="" \
   OVERWRITE_SEEDS=1 \
   POLKACHU_NETWORK=cosmos \
   run.sh gaiad start \

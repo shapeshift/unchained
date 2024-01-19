@@ -567,7 +567,7 @@ aliases:
     service-image-1: shapeshiftdao/bnb-smart-chain:v1.3.7
     service-cpu-limit-1: "16"
     service-cpu-request-1: "8"
-    service-memory-limit-1: 48Gi
+    service-memory-limit-1: 64Gi
     service-storage-size-1: 2500Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:559cfbc
