@@ -18,7 +18,10 @@ services:
       context: ./node
       dockerfile: Dockerfile.local
     working_dir: /app/node
-    command: sh -c "yarn lerna run watch --scope @shapeshiftoss/* --parallel"
+    # the additional yarn install here allows for platform specific packages to be install in the container
+    # previously this would fail when copying over node_modules from the host on macos due to 
+    # @nx/nx-linux-arm64-musl not being installed
+    command: sh -c "yarn install && yarn lerna run watch --scope @shapeshiftoss/* --parallel"
     volumes:
       - ./:/app
 

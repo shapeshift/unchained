@@ -652,8 +652,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
     if (data.status === '0') return []
 
-    // filter out all 0 index trace ids as these are the normal initiating tx calls that are returned by routescan.io for some reason
-    return data.result.filter((internalTx) => internalTx.traceId !== '0')
+    return data.result
   }
 
   private async getTxs(
