@@ -407,7 +407,7 @@ aliases:
     environment: dev
     pulumi-stack: public-dev-us-east-2
     indexer-url: https://ltcbook.nownodes.io
-    indexer-ws-url: wss://ltc.nownodes.io/wss
+    indexer-ws-url: wss://ltcbook.nownodes.io/wss
     indexer-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
