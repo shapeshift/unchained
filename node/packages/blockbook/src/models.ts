@@ -306,6 +306,7 @@ export interface FeeResponse {
  * Arguments to Blockbook constructor
  */
 export interface BlockbookArgs {
+  apiKey?: string
   httpURL: string
   wsURL: string
   logger: Logger

@@ -963,8 +963,15 @@ jobs:
         type: string
       indexer-ws-url:
         type: string
+      indexer-api-key:
+        type: string
+        default: ''
       rpc-url:
         type: string
+        default: ''
+      rpc-api-key:
+        type: string
+        default: ''
       etherscan-env-var:
         type: string
         default: ETHERSCAN_API_KEY
@@ -980,8 +987,10 @@ jobs:
           command: |
             echo 'export INDEXER_URL=<< parameters.indexer-url >>' >> $BASH_ENV
             echo 'export INDEXER_WS_URL=<< parameters.indexer-ws-url >>' >> $BASH_ENV
+            echo 'export INDEXER_API_KEY=<< parameters.indexer-api-key >> $BASH_ENV
             echo 'export NETWORK=<< parameters.network >>' >> $BASH_ENV
             echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
+            echo 'export RPC_API_KEY=<< parameters.rpc-api-key >> $BASH_ENV
             echo 'export ETHERSCAN_API_KEY=$<< parameters.etherscan-env-var >>' >> $BASH_ENV
       - run:
           name: pulumi
@@ -1268,7 +1277,6 @@ workflows:
           requires:
             - deploy dependencies
           <<: *polygon-dev
-          #rpc-url: $POLYGON_RPC_URL_DEV
           <<: *only-develop
 
       #- deploy-coinstack-node:
@@ -1562,7 +1570,6 @@ workflows:
           requires:
             - validate dependencies
           <<: *polygon
-          #rpc-url: $POLYGON_RPC_URL
           <<: *only-main
 
       - approve-coinstack:
@@ -1580,7 +1587,6 @@ workflows:
           requires:
             - approve polygon coinstack
           <<: *polygon
-          #rpc-url: $POLYGON_RPC_URL
           <<: *only-main
 
       ####### GNOSIS

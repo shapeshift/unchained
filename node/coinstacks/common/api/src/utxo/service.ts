@@ -1,6 +1,8 @@
-import { ApiError as BlockbookApiError, Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
-import { AddressFormatter, ApiError, BadRequestError, BaseAPI, Cursor, SendTxBody } from '../'
-import { Account, Address, API, NetworkFee, NetworkFees, RawTx, Tx, TxHistory, Utxo } from './models'
+import type { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
+import { ApiError as BlockbookApiError } from '@shapeshiftoss/blockbook'
+import type { AddressFormatter, BadRequestError, BaseAPI, Cursor, SendTxBody } from '../'
+import { ApiError } from '../'
+import type { Account, Address, API, NetworkFee, NetworkFees, RawTx, Tx, TxHistory, Utxo } from './models'
 import { validatePageSize } from '../utils'
 
 const handleError = (err: unknown): ApiError => {
@@ -17,7 +19,6 @@ const handleError = (err: unknown): ApiError => {
 
 export interface ServiceArgs {
   blockbook: Blockbook
-  rpcUrl: string
   isXpub: (pubkey: string) => boolean
   addressFormatter?: AddressFormatter
 }
@@ -26,6 +27,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   readonly isXpub: (pubkey: string) => boolean
 
   private readonly blockbook: Blockbook
+
   private formatAddress: AddressFormatter = (address: string) => address.toLowerCase()
 
   constructor(args: ServiceArgs) {
