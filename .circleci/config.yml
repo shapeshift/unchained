@@ -636,7 +636,7 @@ aliases:
     environment: dev
     pulumi-stack: public-dev-us-east-2
     indexer-url: https://maticbook.nownodes.io
-    indexer-ws-url: wss://matic.nownodes.io/wss
+    indexer-ws-url: wss://maticbook.nownodes.io/wss
     indexer-api-key: $NOW_NODES_API_KEY_DEV
     rpc-url: https://matic.nownodes.io
     rpc-api-key: $NOW_NODES_API_KEY_DEV
