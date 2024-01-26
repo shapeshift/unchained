@@ -284,7 +284,7 @@ aliases:
     grpc-url: atom.nownodes.io
     rpc-url: https://atom-tendermint.nownodes.io
     rpc-api-key: $NOW_NODES_API_KEY_DEV
-    ws-url: wss://atom-tendermint.nownodes.io/wss
+    ws-url: wss://atom.nownodes.io/wss
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 500Mi
