@@ -242,9 +242,11 @@ aliases:
     <<: *ethereum
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    rpc-url: http://ethereum-svc.unchained-dev.svc.cluster.local:8545
-    indexer-url: http://ethereum-svc.unchained-dev.svc.cluster.local:8001
-    indexer-ws-url: ws://ethereum-svc.unchained-dev.svc.cluster.local:8001/websocket
+    indexer-url: https://eth-blockbook.nownodes.io
+    indexer-ws-url: wss://eth-blockbook.nownodes.io/wss
+    indexer-api-key: $NOW_NODES_API_KEY_DEV
+    rpc-url: https://eth.nownodes.io
+    rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 250Mi
