@@ -1271,15 +1271,15 @@ workflows:
           #rpc-url: $POLYGON_RPC_URL_DEV
           <<: *only-develop
 
-      - deploy-coinstack-node:
-          name: deploy gnosis develop
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          etherscan-env-var: ETHERSCAN_API_KEY_GNOSIS
-          requires:
-            - deploy dependencies
-          <<: *gnosis-dev
-          <<: *only-develop
+      #- deploy-coinstack-node:
+      #    name: deploy gnosis develop
+      #    organization: TAXISTAKE
+      #    pulumi-command: up -f --yes
+      #    etherscan-env-var: ETHERSCAN_API_KEY_GNOSIS
+      #    requires:
+      #      - deploy dependencies
+      #    <<: *gnosis-dev
+      #    <<: *only-develop
 
       - deploy-coinstack-node:
           name: deploy arbitrum develop
