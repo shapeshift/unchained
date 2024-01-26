@@ -53,7 +53,6 @@ start() {
     --ws.api eth,net,web3,debug,txpool \
     --ws.origins '*' \
     --state.scheme path \
-    --maxpeers 300 \
     --rpc.allow-unprotected-txs \
     --history.transactions 0 \
     --nat none &
