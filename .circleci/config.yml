@@ -987,10 +987,10 @@ jobs:
           command: |
             echo 'export INDEXER_URL=<< parameters.indexer-url >>' >> $BASH_ENV
             echo 'export INDEXER_WS_URL=<< parameters.indexer-ws-url >>' >> $BASH_ENV
-            echo 'export INDEXER_API_KEY=<< parameters.indexer-api-key >> $BASH_ENV
+            echo 'export INDEXER_API_KEY=<< parameters.indexer-api-key >>' >> $BASH_ENV
             echo 'export NETWORK=<< parameters.network >>' >> $BASH_ENV
             echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
-            echo 'export RPC_API_KEY=<< parameters.rpc-api-key >> $BASH_ENV
+            echo 'export RPC_API_KEY=<< parameters.rpc-api-key >>' >> $BASH_ENV
             echo 'export ETHERSCAN_API_KEY=$<< parameters.etherscan-env-var >>' >> $BASH_ENV
       - run:
           name: pulumi
