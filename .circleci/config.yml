@@ -220,13 +220,13 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.13.8
+    service-image-1: ethereum/client-go:v1.13.11
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
     service-storage-size-1: 1250Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.1.1
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.2.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 12Gi
@@ -271,7 +271,7 @@ aliases:
     service-image-1: shapeshiftdao/cosmoshub:v14.1.0
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
-    service-memory-limit-1: 48Gi
+    service-memory-limit-1: 64Gi
     service-storage-size-1: 5000Gi
     service-storage-iops-1: "6000"
     service-storage-throughput-1: "300"
@@ -306,7 +306,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: avaplatform/avalanchego:v1.10.17
+    service-image-1: avaplatform/avalanchego:v1.10.18
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 32Gi
@@ -329,6 +329,8 @@ aliases:
     api-max-replicas: 2
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
+    service-memory-limit-1: 24Gi
+    service-memory-limit-2: 6Gi
 
   - &dogecoin
     assetName: dogecoin
@@ -517,13 +519,13 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101304.2
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101305.1
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
     service-storage-size-1: 1250Gi
     service-name-2: op-node
-    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.4.0
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.4.2
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 2Gi
@@ -567,7 +569,7 @@ aliases:
     service-image-1: shapeshiftdao/bnb-smart-chain:v1.3.7
     service-cpu-limit-1: "16"
     service-cpu-request-1: "8"
-    service-memory-limit-1: 48Gi
+    service-memory-limit-1: 72Gi
     service-storage-size-1: 2500Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:559cfbc
@@ -605,10 +607,10 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: 0xpolygon/bor:1.2.0
+    service-image-1: 0xpolygon/bor:1.2.3
     service-cpu-limit-1: "8"
     service-cpu-request-1: "4"
-    service-memory-limit-1: 48Gi
+    service-memory-limit-1: 64Gi
     service-storage-size-1: 4000Gi
     service-storage-iops-1: "6000"
     service-storage-throughput-1: "300"
@@ -654,13 +656,13 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.24.0
+    service-image-1: nethermind/nethermind:1.25.3
     service-cpu-limit-1: "2"
     service-cpu-request-1: "2"
     service-memory-limit-1: 6Gi
     service-storage-size-1: 1000Gi
     service-name-2: daemon-beacon
-    service-image-2: sigp/lighthouse:v4.5.0
+    service-image-2: sigp/lighthouse:v4.6.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 4Gi
@@ -724,6 +726,8 @@ aliases:
     api-max-replicas: 2
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
+    service-memory-limit-1: 20Gi
+    service-memory-limit-2: 12Gi
 
   - &arbitrum-nova
     assetName: arbitrum-nova
@@ -1275,15 +1279,15 @@ workflows:
           <<: *polygon-dev
           <<: *only-develop
 
-      - deploy-coinstack-node:
-          name: deploy gnosis develop
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          etherscan-env-var: ETHERSCAN_API_KEY_GNOSIS
-          requires:
-            - deploy dependencies
-          <<: *gnosis-dev
-          <<: *only-develop
+      #- deploy-coinstack-node:
+      #    name: deploy gnosis develop
+      #    organization: TAXISTAKE
+      #    pulumi-command: up -f --yes
+      #    etherscan-env-var: ETHERSCAN_API_KEY_GNOSIS
+      #    requires:
+      #      - deploy dependencies
+      #    <<: *gnosis-dev
+      #    <<: *only-develop
 
       - deploy-coinstack-node:
           name: deploy arbitrum develop
