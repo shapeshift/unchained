@@ -185,7 +185,7 @@ aliases:
     service-memory-limit-1: 8Gi
     service-storage-size-1: 650Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:559cfbc
+    service-image-2: shapeshiftdao/unchained-blockbook:c2cb648
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 32Gi
@@ -232,7 +232,7 @@ aliases:
     service-memory-limit-2: 12Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:559cfbc
+    service-image-3: shapeshiftdao/unchained-blockbook:c2cb648
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
     service-memory-limit-3: 12Gi
@@ -314,7 +314,7 @@ aliases:
     service-memory-limit-1: 32Gi
     service-storage-size-1: 5750Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:559cfbc
+    service-image-2: shapeshiftdao/unchained-blockbook:c2cb648
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 8Gi
@@ -357,7 +357,7 @@ aliases:
     service-memory-limit-1: 4Gi
     service-storage-size-1: 250Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:559cfbc
+    service-image-2: shapeshiftdao/unchained-blockbook:c2cb648
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 16Gi
@@ -398,7 +398,7 @@ aliases:
     service-memory-limit-1: 4Gi
     service-storage-size-1: 250Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:559cfbc
+    service-image-2: shapeshiftdao/unchained-blockbook:c2cb648
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 16Gi
@@ -439,7 +439,7 @@ aliases:
     service-memory-limit-1: 4Gi
     service-storage-size-1: 250Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:559cfbc
+    service-image-2: shapeshiftdao/unchained-blockbook:c2cb648
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 8Gi
@@ -527,7 +527,7 @@ aliases:
     service-memory-limit-1: 24Gi
     service-storage-size-1: 1250Gi
     service-name-2: op-node
-    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.4.2
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.4.3
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 2Gi
@@ -568,13 +568,13 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/bnb-smart-chain:v1.3.7
+    service-image-1: shapeshiftdao/bnb-smart-chain:v1.3.8
     service-cpu-limit-1: "16"
     service-cpu-request-1: "8"
     service-memory-limit-1: 72Gi
     service-storage-size-1: 2500Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:559cfbc
+    service-image-2: shapeshiftdao/unchained-blockbook:c2cb648
     service-cpu-limit-2: "4"
     service-cpu-request-2: "2"
     service-memory-limit-2: 24Gi
@@ -627,7 +627,7 @@ aliases:
     service-memory-limit-2: 1Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:559cfbc
+    service-image-3: shapeshiftdao/unchained-blockbook:c2cb648
     service-cpu-limit-3: "4"
     service-cpu-request-3: "2"
     service-memory-limit-3: 32Gi
