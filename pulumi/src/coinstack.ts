@@ -41,7 +41,7 @@ const getSecretData = (sampleEnv: Buffer): Record<string, string> => {
   const stringData = Object.keys(parse(sampleEnv)).reduce((prev, key) => {
     const value = process.env[key]
 
-    if (!value) {
+    if (value === undefined) {
       missingKeys.push(key)
       return prev
     }
