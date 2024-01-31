@@ -7,20 +7,21 @@ import (
 
 // ResultTx represents a tx_search ResultTx created from block_result block events
 type ResultTx struct {
-	Hash       string
-	Height     int64
-	Timestamp  int
-	Index      int
-	TxID       string
-	Fee        cosmos.Value
-	Events     cosmos.EventsByMsgIndex
-	Messages   []cosmos.Message
-	TypedEvent thorchain.TypedEvent
-	formatTx   func(tx *ResultTx) (*cosmos.Tx, error)
+	BlockHash   string
+	BlockHeight int64
+	Timestamp   int
+	Index       int
+	TxID        string
+	Memo        string
+	Fee         cosmos.Value
+	Events      cosmos.EventsByMsgIndex
+	Messages    []cosmos.Message
+	TypedEvent  thorchain.TypedEvent
+	formatTx    func(tx *ResultTx) (*cosmos.Tx, error)
 }
 
 func (r *ResultTx) GetHeight() int64 {
-	return r.Height
+	return r.BlockHeight
 }
 
 func (r *ResultTx) GetIndex() int {

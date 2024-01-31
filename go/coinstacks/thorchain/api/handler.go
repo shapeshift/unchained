@@ -194,47 +194,44 @@ func (h *Handler) getTxFromEndBlockEvents(eventCache map[string]interface{}, blo
 	typedEvent := typedEvents[eventIndex]
 
 	tx := &ResultTx{
-		Hash:       blockHeader.Hash().String(),
-		Height:     blockHeader.Height,
-		Timestamp:  int(blockHeader.Time.Unix()),
-		Events:     cosmos.EventsByMsgIndex{"0": events[strconv.Itoa(eventIndex)]},
-		Messages:   thorchain.TypedEventsToMessages([]thorchain.TypedEvent{typedEvent}),
-		TypedEvent: typedEvent,
-		formatTx:   h.formatTx,
+		BlockHash:   blockHeader.Hash().String(),
+		BlockHeight: blockHeader.Height,
+		Timestamp:   int(blockHeader.Time.Unix()),
+		Index:       -1, // synthetic transactions don't have a real tx index
+		Events:      cosmos.EventsByMsgIndex{"0": events[strconv.Itoa(eventIndex)]},
+		Messages:    thorchain.TypedEventsToMessages([]thorchain.TypedEvent{typedEvent}),
+		TypedEvent:  typedEvent,
+		formatTx:    h.formatTx,
 	}
 
 	switch v := typedEvent.(type) {
 	case *thorchain.EventOutbound:
 		tx.TxID = v.InTxID
+		tx.Memo = v.Memo
 		tx.Fee = matchFee(v.InTxID, typedEvents)
+		return tx, nil
 	default:
 		return nil, nil
 	}
-
-	return tx, nil
 }
 
 // formatTx creates a synthetic transaction from a BlockEndEvent
 func (h *Handler) formatTx(tx *ResultTx) (*cosmos.Tx, error) {
 	t := &cosmos.Tx{
 		BaseTx: api.BaseTx{
-			BlockHash:   &tx.Hash,
-			BlockHeight: int(tx.Height),
+			TxID:        tx.TxID,
+			BlockHash:   &tx.BlockHash,
+			BlockHeight: int(tx.BlockHeight),
 			Timestamp:   tx.Timestamp,
 		},
-		Index:         -1, // synthetic transactions don't have a real tx index
+		Index:         tx.Index,
 		Fee:           tx.Fee,
-		Confirmations: h.BlockService.Latest.Height - int(tx.Height) + 1,
+		Confirmations: h.BlockService.Latest.Height - int(tx.BlockHeight) + 1,
 		Events:        tx.Events,
 		GasWanted:     "0",
 		GasUsed:       "0",
 		Messages:      tx.Messages,
-	}
-
-	switch v := tx.TypedEvent.(type) {
-	case *thorchain.EventOutbound:
-		t.BaseTx.TxID = v.InTxID
-		t.Memo = v.Memo
+		Memo:          tx.Memo,
 	}
 
 	return t, nil
