@@ -47,6 +47,18 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 			to := events[strconv.Itoa(i)]["transfer"]["recipient"]
 			events[strconv.Itoa(i)]["message"]["memo"] = v.Memo // add memo value from message to events
 
+			// detect withdraw event as a result of the deposit and use this to address instead
+			withdraw := events[strconv.Itoa(i)]["withdraw"]
+			if withdraw != nil {
+				to = withdraw["to"]
+			}
+
+			// detect refund event as a result of the deposit and use this to address instead
+			refund := events[strconv.Itoa(i)]["refund"]
+			if refund != nil {
+				to = refund["to"]
+			}
+
 			message := cosmos.Message{
 				Addresses: []string{v.Signer.String(), to},
 				Index:     strconv.Itoa(i),
@@ -57,6 +69,27 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 				Value:     coinToValue(v.Coins[0]),
 			}
 			messages = append(messages, message)
+
+			// detect outbound event as a result of the deposit and create a synthetic message for it
+			outbound := events[strconv.Itoa(i)]["outbound"]
+			if outbound != nil {
+				coin, err := common.ParseCoin(outbound["coin"])
+				if err != nil && outbound["coin"] != "" {
+					logger.Error(err)
+				}
+
+				message := cosmos.Message{
+					Addresses: []string{outbound["from"], outbound["to"]},
+					Index:     strconv.Itoa(i),
+					Origin:    outbound["from"],
+					From:      outbound["from"],
+					To:        outbound["to"],
+					Type:      "outbound",
+					Value:     coinToValue(coin),
+				}
+				messages = append(messages, message)
+			}
+
 		default:
 			unhandledMsgs = append(unhandledMsgs, msg)
 		}
