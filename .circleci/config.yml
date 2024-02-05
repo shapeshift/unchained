@@ -674,7 +674,7 @@ aliases:
     service-memory-limit-2: 4Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:gnosis-de1a23e
+    service-image-3: shapeshiftdao/unchained-blockbook:gnosis-patch-bf15e46
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
     service-memory-limit-3: 16Gi
