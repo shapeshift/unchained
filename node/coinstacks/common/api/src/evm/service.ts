@@ -310,12 +310,9 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
         const baseFeePerGas = this.gasOracle.getBaseFeePerGas()
         if (!baseFeePerGas) return {}
 
-        // TODO: re-enable once expose via nownodes
-        //// fetch maxPriorityFeePerGas estimate from the node
-        //const maxPriorityFeePerGas = (await this.provider.send('eth_maxPriorityFeePerGas', [])) as string
-        //return { baseFeePerGas, maxPriorityFeePerGas: Number(maxPriorityFeePerGas).toString() }
-
-        return { baseFeePerGas, maxPriorityFeePerGas: undefined }
+        // fetch maxPriorityFeePerGas estimate from the node
+        const maxPriorityFeePerGas = (await this.provider.send('eth_maxPriorityFeePerGas', [])) as string
+        return { baseFeePerGas, maxPriorityFeePerGas: Number(maxPriorityFeePerGas).toString() }
       })()
 
       const estimatedFees = await this.gasOracle.estimateFees([1, 60, 90])
