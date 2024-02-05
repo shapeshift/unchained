@@ -43,13 +43,14 @@ export = async (): Promise<Outputs> => {
           configMapData: { 'jwt.hex': readFileSync('../daemon/jwt.hex').toString() },
           volumeMounts: [{ name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' }],
           useMonitorContainer: true,
-          // Disable readiness probe while for gnosis indexer patch
-          //readinessProbe: { periodSeconds: 30, failureThreshold: 10 },
+          readinessProbe: { periodSeconds: 30, failureThreshold: 10 },
         }
       case 'indexer':
         return {
           ...service,
           ...defaultBlockbookServiceArgs,
+          // Disable readiness probe while for gnosis indexer patch
+          readinessProbe: undefined,
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
         }
       default:
