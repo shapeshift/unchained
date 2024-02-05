@@ -45,7 +45,6 @@ export = async (): Promise<Outputs> => {
           useMonitorContainer: true,
           // Disable readiness probe while for gnosis indexer patch
           //readinessProbe: { periodSeconds: 30, failureThreshold: 10 },
-          readinessProbe: { exec: undefined },
         }
       case 'indexer':
         return {
