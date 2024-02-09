@@ -587,10 +587,8 @@ aliases:
     indexer-url: https://bsc-blockbook.nownodes.io
     indexer-ws-url: wss://bsc-blockbook.nownodes.io/wss
     indexer-api-key: $NOW_NODES_API_KEY_DEV
-    rpc-url: http://bnbsmartchain-svc.unchained-dev.svc.cluster.local:8545
-    # TODO: use nownodes once `debug_traceTransaction` support is enabled
-    #rpc-url: https://bsc.nownodes.io
-    #rpc-api-key: $NOW_NODES_API_KEY_DEV
+    rpc-url: https://bsc.nownodes.io
+    rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 250Mi
