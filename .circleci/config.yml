@@ -338,12 +338,12 @@ aliases:
     assetName: dogecoin
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/dogecoin/pulumi
-    rpc-url: http://user:password@dogecoin-svc.unchained.svc.cluster.local:8332
-    indexer-url: http://dogecoin-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://dogecoin-svc.unchained.svc.cluster.local:8001/websocket
+    indexer-url: https://dogebook.nownodes.io
+    indexer-ws-url: wss://dogebook.nownodes.io/wss
+    indexer-api-key: $NOW_NODES_API_KEY_PROD
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
+    api-max-replicas: 4
     api-cpu-limit: 500m
     api-cpu-request: 250m
     api-cpu-threshold: 75
@@ -379,12 +379,12 @@ aliases:
     assetName: litecoin
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/litecoin/pulumi
-    rpc-url: http://user:password@litecoin-svc.unchained.svc.cluster.local:8332
-    indexer-url: http://litecoin-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://litecoin-svc.unchained.svc.cluster.local:8001/websocket
+    indexer-url: https://ltcbook.nownodes.io
+    indexer-ws-url: wss://ltcbook.nownodes.io/wss
+    indexer-api-key: $NOW_NODES_API_KEY_PROD
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
+    api-max-replicas: 4
     api-cpu-limit: 500m
     api-cpu-request: 250m
     api-cpu-threshold: 75
@@ -420,9 +420,9 @@ aliases:
     assetName: bitcoincash
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/bitcoincash/pulumi
-    rpc-url: http://user:password@bitcoincash-svc.unchained.svc.cluster.local:8332
-    indexer-url: http://bitcoincash-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://bitcoincash-svc.unchained.svc.cluster.local:8001/websocket
+    indexer-url: https://bchbook.nownodes.io
+    indexer-ws-url: wss://bchbook.nownodes.io/wss
+    indexer-api-key: $NOW_NODES_API_KEY_PROD
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -598,14 +598,16 @@ aliases:
     assetName: polygon
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/polygon/pulumi
-    rpc-url: http://polygon-svc.unchained.svc.cluster.local:8545
-    indexer-url: http://polygon-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://polygon-svc.unchained.svc.cluster.local:8001/websocket
+    indexer-url: https://maticbook.nownodes.io
+    indexer-ws-url: wss://maticbook.nownodes.io/wss
+    indexer-api-key: $NOW_NODES_API_KEY_PROD
+    rpc-url: https://matic.nownodes.io
+    rpc-api-key: $NOW_NODES_API_KEY_PROD
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
+    api-max-replicas: 4
+    api-cpu-limit: 1
+    api-cpu-request: 500m
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
     api-memory-request: 500Mi
