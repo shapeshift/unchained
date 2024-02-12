@@ -340,7 +340,7 @@ aliases:
     pulumi-dir: coinstacks/dogecoin/pulumi
     indexer-url: https://dogebook.nownodes.io
     indexer-ws-url: wss://dogebook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY_PROD
+    indexer-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
@@ -381,7 +381,7 @@ aliases:
     pulumi-dir: coinstacks/litecoin/pulumi
     indexer-url: https://ltcbook.nownodes.io
     indexer-ws-url: wss://ltcbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY_PROD
+    indexer-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
@@ -422,7 +422,7 @@ aliases:
     pulumi-dir: coinstacks/bitcoincash/pulumi
     indexer-url: https://bchbook.nownodes.io
     indexer-ws-url: wss://bchbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY_PROD
+    indexer-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -600,9 +600,9 @@ aliases:
     pulumi-dir: coinstacks/polygon/pulumi
     indexer-url: https://maticbook.nownodes.io
     indexer-ws-url: wss://maticbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY_PROD
+    indexer-api-key: $NOW_NODES_API_KEY
     rpc-url: https://matic.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY_PROD
+    rpc-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
