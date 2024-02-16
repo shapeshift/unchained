@@ -201,7 +201,7 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 500Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &ethereum
     assetName: ethereum
@@ -220,13 +220,13 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.13.11
+    service-image-1: ethereum/client-go:v1.13.12
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
     service-storage-size-1: 1250Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.2.0
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.2.1
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 12Gi
@@ -250,7 +250,7 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 250Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &cosmos
     assetName: cosmos
@@ -308,7 +308,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: avaplatform/avalanchego:v1.10.18
+    service-image-1: avaplatform/avalanchego:v1.10.19
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 32Gi
@@ -373,7 +373,7 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 250Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &litecoin
     assetName: litecoin
@@ -414,7 +414,7 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 250Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &bitcoincash
     assetName: bitcoincash
@@ -455,7 +455,7 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 250Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &thorchain
     assetName: thorchain
@@ -474,7 +474,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.127.0
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.127.2
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
@@ -521,13 +521,13 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101305.1
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101308.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
     service-storage-size-1: 1250Gi
     service-name-2: op-node
-    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.4.3
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.5.1
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 2Gi
@@ -592,7 +592,7 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 250Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &polygon
     assetName: polygon
@@ -645,7 +645,7 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 500Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &gnosis
     assetName: gnosis
@@ -664,7 +664,7 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.25.3
+    service-image-1: nethermind/nethermind:1.25.4
     service-cpu-limit-1: "2"
     service-cpu-request-1: "2"
     service-memory-limit-1: 6Gi
@@ -711,7 +711,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: offchainlabs/nitro-node:v2.2.2-8f33fea
+    service-image-1: offchainlabs/nitro-node:v2.2.4-8517340
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
@@ -735,7 +735,7 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 250Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
     service-memory-limit-1: 20Gi
     service-memory-limit-2: 12Gi
 
@@ -756,7 +756,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: offchainlabs/nitro-node:v2.2.2-8f33fea
+    service-image-1: offchainlabs/nitro-node:v2.2.4-8517340
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
