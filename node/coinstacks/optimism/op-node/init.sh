@@ -10,6 +10,7 @@ start() {
     --rpc.addr 0.0.0.0 \
     --rpc.port 9545 \
     --l1 $L1_RPC_ENDPOINT \
+    --l1.beacon $L1_BEACON_ENDPOINT \
     --l1.trustrpc \
     --l1.rpckind debug_geth \
     --l2 http://localhost:8551 \

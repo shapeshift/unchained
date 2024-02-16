@@ -40,6 +40,7 @@ export = async (): Promise<Outputs> => {
           env: {
             NETWORK: config.network,
             L1_RPC_ENDPOINT: `http://ethereum-svc.${namespace}.svc.cluster.local:8545`,
+            L1_BEACON_ENDPOINT: `http://ethereum-svc.${namespace}.svc.cluster.local:8551`,
           },
           ports: { 'op-node-rpc': { port: 9545 } },
           configMapData: { 'evm.sh': readFileSync('../../../scripts/evm.sh').toString() },
