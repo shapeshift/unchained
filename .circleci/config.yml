@@ -201,7 +201,7 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 500Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &ethereum
     assetName: ethereum
@@ -373,7 +373,7 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 250Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &litecoin
     assetName: litecoin
@@ -414,7 +414,7 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 250Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &bitcoincash
     assetName: bitcoincash
@@ -455,7 +455,7 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 250Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &thorchain
     assetName: thorchain
@@ -592,7 +592,7 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 250Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &polygon
     assetName: polygon
@@ -645,7 +645,7 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 500Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &gnosis
     assetName: gnosis
@@ -735,7 +735,7 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 250Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
     service-memory-limit-1: 20Gi
     service-memory-limit-2: 12Gi
 
