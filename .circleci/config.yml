@@ -171,13 +171,13 @@ aliases:
     indexer-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
+    api-max-replicas: 4
+    api-cpu-limit: "1"
+    api-cpu-request: 500m
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
     api-memory-request: 500Mi
-    stateful-service-replicas: 2
+    stateful-service-replicas: 1
     service-name-1: daemon
     service-image-1: shapeshiftdao/bitcoin-core:26.0
     service-cpu-limit-1: "2"
@@ -200,7 +200,6 @@ aliases:
     indexer-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 500Mi
     stateful-service-replicas: 0
 
   - &ethereum
@@ -214,12 +213,12 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
+    api-max-replicas: 4
+    api-cpu-limit: "2"
+    api-cpu-request: "1"
     api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-    api-memory-request: 250Mi
+    api-memory-limit: 1Gi
+    api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: ethereum/client-go:v1.13.12
@@ -251,8 +250,7 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 250Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &cosmos
     assetName: cosmos
@@ -351,7 +349,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 2
+    stateful-service-replicas: 1
     service-name-1: daemon
     service-image-1: shapeshiftdao/dogecoin:1.14.6
     service-cpu-limit-1: "2"
@@ -374,7 +372,6 @@ aliases:
     indexer-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 250Mi
     stateful-service-replicas: 0
 
   - &litecoin
@@ -392,7 +389,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 2
+    stateful-service-replicas: 1
     service-name-1: daemon
     service-image-1: shapeshiftdao/litecoin-core:v0.21.2.2
     service-cpu-limit-1: "2"
@@ -415,7 +412,6 @@ aliases:
     indexer-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 250Mi
     stateful-service-replicas: 0
 
   - &bitcoincash
@@ -427,13 +423,13 @@ aliases:
     indexer-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
+    api-max-replicas: 4
     api-cpu-limit: 500m
     api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 2
+    stateful-service-replicas: 1
     service-name-1: daemon
     service-image-1: shapeshiftdao/bitcoin-cash-node:27.0.0
     service-cpu-limit-1: "2"
@@ -456,7 +452,6 @@ aliases:
     indexer-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 250Mi
     stateful-service-replicas: 0
 
   - &thorchain
@@ -564,13 +559,13 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
+    api-max-replicas: 4
+    api-cpu-limit: "2"
+    api-cpu-request: "1"
     api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-    api-memory-request: 250Mi
-    stateful-service-replicas: 2
+    api-memory-limit: 1Gi
+    api-memory-request: 500Mi
+    stateful-service-replicas: 1
     service-name-1: daemon
     service-image-1: shapeshiftdao/bnb-smart-chain:v1.3.8
     service-cpu-limit-1: "16"
@@ -595,7 +590,6 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 250Mi
     stateful-service-replicas: 0
 
   - &polygon
@@ -610,12 +604,12 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
-    api-cpu-limit: "1"
-    api-cpu-request: 500m
+    api-cpu-limit: "2"
+    api-cpu-request: "1"
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
     api-memory-request: 500Mi
-    stateful-service-replicas: 2
+    stateful-service-replicas: 1
     service-name-1: daemon
     service-image-1: 0xpolygon/bor:1.2.3
     service-cpu-limit-1: "8"
@@ -648,7 +642,6 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 500Mi
     stateful-service-replicas: 0
 
   - &gnosis
@@ -709,13 +702,13 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
+    api-max-replicas: 4
+    api-cpu-limit: "1"
+    api-cpu-request: 500m
     api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-    api-memory-request: 250Mi
-    stateful-service-replicas: 2
+    api-memory-limit: 1Gi
+    api-memory-request: 500Mi
+    stateful-service-replicas: 1
     service-name-1: daemon
     service-image-1: offchainlabs/nitro-node:v2.2.4-8517340
     service-cpu-limit-1: "2"
@@ -740,10 +733,7 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 250Mi
     stateful-service-replicas: 0
-    service-memory-limit-1: 20Gi
-    service-memory-limit-2: 12Gi
 
   - &arbitrum-nova
     assetName: arbitrum-nova
