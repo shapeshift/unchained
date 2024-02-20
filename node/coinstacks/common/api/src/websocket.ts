@@ -25,7 +25,7 @@ export interface TxsTopicData {
 
 export interface MessageResponse {
   address: string
-  data: string
+  data: unknown
   subscriptionId: string
 }
 
@@ -161,7 +161,7 @@ export class ConnectionHandler {
     this.registry.unsubscribe(this.clientId, subscriptionId, data?.addresses ?? [])
   }
 
-  publish(subscriptionId: string, address: string, data: string): void {
+  publish(subscriptionId: string, address: string, data: unknown): void {
     const message: MessageResponse = { address, data, subscriptionId }
     this.websocket.send(JSON.stringify(message))
   }
