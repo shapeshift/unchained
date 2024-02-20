@@ -352,6 +352,61 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     }
   }
 
+  async fetchInternalTxsByBlockDebug(
+    blockHash: string,
+    retryCount = 0
+  ): Promise<Record<string, Array<InternalTx> | undefined>> {
+    const request: RPCRequest = {
+      jsonrpc: '2.0',
+      id: `debug_traceBlockByHash${blockHash}`,
+      method: 'debug_traceBlockByHash',
+      params: [blockHash, { tracer: 'callTracer' }],
+    }
+
+    const config = this.rpcApiKey ? { headers: { 'api-key': this.rpcApiKey } } : undefined
+    const { data } = await axiosWithRetry.post<RPCResponse>(this.rpcUrl, request, config)
+
+    if (!data.result) {
+      if (++retryCount >= 5)
+        throw new Error(`failed to get internalTransactions for block: ${blockHash}: ${data.error?.message}`)
+      await exponentialDelay(retryCount)
+      return this.fetchInternalTxsByBlockDebug(blockHash, retryCount)
+    }
+
+    const txs = data.result as Array<{ txHash: string; result: DebugCallStack }>
+
+    return txs.reduce<Record<string, Array<InternalTx> | undefined>>((prev, tx) => {
+      prev[tx.txHash] = this.processCallStackDebug(tx.result.calls)
+      return prev
+    }, {})
+  }
+
+  async fetchInternalTxsByBlockTrace(
+    blockHash: string,
+    retryCount = 0
+  ): Promise<Record<string, Array<InternalTx> | undefined>> {
+    const request: RPCRequest = {
+      jsonrpc: '2.0',
+      id: `trace_block${blockHash}`,
+      method: 'trace_block',
+      params: [blockHash],
+    }
+
+    const config = this.rpcApiKey ? { headers: { 'api-key': this.rpcApiKey } } : undefined
+    const { data } = await axiosWithRetry.post<RPCResponse>(this.rpcUrl, request, config)
+
+    if (!data.result) {
+      if (++retryCount >= 5)
+        throw new Error(`failed to get internalTransactions for block: ${blockHash}: ${data.error?.message}`)
+      await exponentialDelay(retryCount)
+      return this.fetchInternalTxsByBlockTrace(blockHash, retryCount)
+    }
+
+    const callStack = data.result as Array<TraceCall>
+
+    return this.processCallStackTrace(callStack)
+  }
+
   handleTransaction(tx: BlockbookTx): Tx {
     if (!tx.ethereumSpecific) throw new Error(`invalid blockbook evm transaction: ${tx.txid}`)
 
@@ -433,9 +488,9 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     const internalTxs = await (async () => {
       try {
         if (internalTxMethod === 'trace_transaction') {
-          return await this.fetchInternalTxsTrace(tx.txid)
+          return await this.fetchInternalTxsByTxTrace(tx.txid)
         } else {
-          return await this.fetchInternalTxsDebug(tx.txid)
+          return await this.fetchInternalTxsByTxDebug(tx.txid)
         }
       } catch (err) {
         return undefined
@@ -447,7 +502,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     return t
   }
 
-  private async fetchInternalTxsTrace(txid: string, retryCount = 0): Promise<Array<InternalTx> | undefined> {
+  private async fetchInternalTxsByTxTrace(txid: string, retryCount = 0): Promise<Array<InternalTx> | undefined> {
     const request: RPCRequest = {
       jsonrpc: '2.0',
       id: `trace_transaction${txid}`,
@@ -458,36 +513,20 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     const config = this.rpcApiKey ? { headers: { 'api-key': this.rpcApiKey } } : undefined
     const { data } = await axiosWithRetry.post<RPCResponse>(this.rpcUrl, request, config)
 
-    if (data.error) throw new Error(`failed to get internalTransactions for txid: ${txid}: ${data.error.message}`)
-
-    // retry if no results are returned, this typically means we queried a node that hasn't indexed the data yet
     if (!data.result) {
-      if (++retryCount >= 5) throw new Error(`failed to get internalTransactions for txid: ${txid}`)
+      if (++retryCount >= 5)
+        throw new Error(`failed to get internalTransactions for txid: ${txid}: ${data.error?.message}`)
       await exponentialDelay(retryCount)
-      return this.fetchInternalTxsTrace(txid, retryCount)
+      return this.fetchInternalTxsByTxTrace(txid, retryCount)
     }
 
     const callStack = data.result as Array<TraceCall>
+    const txs = this.processCallStackTrace(callStack)[txid]
 
-    const txs = callStack.reduce<Array<InternalTx>>((prev, call) => {
-      const value = new BigNumber(call.action.value ?? 0)
-      const gas = new BigNumber(call.action.gas)
-
-      if (value.gt(0) && gas.gt(0)) {
-        prev.push({
-          from: formatAddress(call.action.from),
-          to: formatAddress(call.action.to),
-          value: value.toString(),
-        })
-      }
-
-      return prev
-    }, [])
-
-    return txs.length ? txs : undefined
+    return txs?.length ? txs : undefined
   }
 
-  private async fetchInternalTxsDebug(txid: string, retryCount = 0): Promise<Array<InternalTx> | undefined> {
+  private async fetchInternalTxsByTxDebug(txid: string, retryCount = 0): Promise<Array<InternalTx> | undefined> {
     const request: RPCRequest = {
       jsonrpc: '2.0',
       id: `debug_traceTransaction${txid}`,
@@ -498,42 +537,55 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     const config = this.rpcApiKey ? { headers: { 'api-key': this.rpcApiKey } } : undefined
     const { data } = await axiosWithRetry.post<RPCResponse>(this.rpcUrl, request, config)
 
-    if (data.error) throw new Error(`failed to get internalTransactions for txid: ${txid}: ${data.error.message}`)
-
-    // retry if no results are returned, this typically means we queried a node that hasn't indexed the data yet
     if (!data.result) {
-      if (++retryCount >= 5) throw new Error(`failed to get internalTransactions for txid: ${txid}`)
+      if (++retryCount >= 5)
+        throw new Error(`failed to get internalTransactions for txid: ${txid}: ${data.error?.message}`)
       await exponentialDelay(retryCount)
-      return this.fetchInternalTxsDebug(txid, retryCount)
+      return this.fetchInternalTxsByTxDebug(txid, retryCount)
     }
 
     const callStack = data.result as DebugCallStack
+    const txs = this.processCallStackDebug(callStack.calls)
 
-    const processCallStack = (
-      calls?: Array<DebugCallStack>,
-      txs: Array<InternalTx> = []
-    ): Array<InternalTx> | undefined => {
-      if (!calls) return
+    return txs.length ? txs : undefined
+  }
 
-      calls.forEach((call) => {
-        const value = new BigNumber(call.value ?? 0)
-        const gas = new BigNumber(call.gas)
+  private processCallStackDebug = (calls?: Array<DebugCallStack>, txs: Array<InternalTx> = []): Array<InternalTx> => {
+    calls?.forEach((call) => {
+      const value = new BigNumber(call.value ?? 0)
+      const gas = new BigNumber(call.gas)
 
-        if (value.gt(0) && gas.gt(0)) {
-          txs.push({
-            from: formatAddress(call.from),
-            to: formatAddress(call.to),
-            value: value.toString(),
-          })
-        }
+      if (value.gt(0) && gas.gt(0)) {
+        txs.push({
+          from: formatAddress(call.from),
+          to: formatAddress(call.to),
+          value: value.toString(),
+        })
+      }
 
-        processCallStack(call.calls, txs)
+      this.processCallStackDebug(call.calls, txs)
+    })
+
+    return txs
+  }
+
+  private processCallStackTrace(callStack: Array<TraceCall>): Record<string, Array<InternalTx> | undefined> {
+    return callStack.reduce<Record<string, Array<InternalTx>>>((prev, call) => {
+      if (!prev[call.transactionHash]) prev[call.transactionHash] = []
+
+      const value = new BigNumber(call.action.value ?? 0)
+      const gas = new BigNumber(call.action.gas)
+
+      if (!(value.gt(0) && gas.gt(0))) return prev
+
+      prev[call.transactionHash].push({
+        from: formatAddress(call.action.from),
+        to: formatAddress(call.action.to),
+        value: value.toString(),
       })
 
-      return txs.length ? txs : undefined
-    }
-
-    return processCallStack(callStack.calls)
+      return prev
+    }, {})
   }
 
   /**
