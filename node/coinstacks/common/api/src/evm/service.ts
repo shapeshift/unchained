@@ -551,7 +551,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   }
 
   private processCallStackDebug = (calls?: Array<DebugCallStack>, txs: Array<InternalTx> = []): Array<InternalTx> => {
-    ;(calls ?? []).forEach((call) => {
+    calls?.forEach((call) => {
       const value = new BigNumber(call.value ?? 0)
       const gas = new BigNumber(call.gas)
 
