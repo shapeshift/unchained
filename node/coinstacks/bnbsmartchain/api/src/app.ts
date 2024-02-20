@@ -63,8 +63,10 @@ app.get('/', async (_, res) => {
 app.use(middleware.errorHandler, middleware.notFoundHandler)
 
 const blockHandler: BlockHandler<NewBlock, Array<{ addresses: Array<string>; tx: evm.Tx }>> = async (block) => {
-  const blockbookTxs = await service.handleBlock(block.hash)
-  const internalTxs = await service.fetchInternalTxsByBlockDebug(block.hash)
+  const [blockbookTxs, internalTxs] = await Promise.all([
+    service.handleBlock(block.hash),
+    service.fetchInternalTxsByBlockDebug(block.hash),
+  ])
 
   const txs = blockbookTxs.map((t) => {
     const tx = service.handleTransaction(t)
