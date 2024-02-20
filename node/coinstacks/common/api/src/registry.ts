@@ -1,19 +1,20 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Logger } from '@shapeshiftoss/logger'
 import { ConnectionHandler } from './websocket'
 
 export type AddressFormatter = (address: string) => string
-export type BlockHandler<T = any, T2 = any> = (block: T) => Promise<{ txs: T2 }>
-export type TransactionHandler<T = any, T2 = any> = (tx: T) => Promise<{ addresses: Array<string>; tx: T2 }>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type BlockHandler<T = any, T2 = Array<unknown>> = (block: T) => Promise<{ txs: T2 }>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type TransactionHandler<T = any, T2 = unknown> = (tx: T) => Promise<{ addresses: Array<string>; tx: T2 }>
+
+const isTxWithAddresses = (tx: unknown): tx is { addresses: Array<string>; tx: unknown } => {
+  return 'addresses' in (tx as { addresses: string; tx: unknown })
+}
 
 export interface RegistryArgs {
   addressFormatter?: AddressFormatter
   blockHandler: BlockHandler
   transactionHandler: TransactionHandler
-}
-
-const isTxWithAddresses = (tx: unknown): tx is { addresses: Array<string>; tx: any } => {
-  return 'addresses' in (tx as { addresses: string; tx: any })
 }
 
 /**
@@ -143,7 +144,7 @@ export class Registry {
     }
   }
 
-  private publishTransaction(addresses: string[], tx: any) {
+  private publishTransaction(addresses: string[], tx: unknown) {
     addresses.forEach((address) => {
       address = this.formatAddress(address)
 
