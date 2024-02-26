@@ -18,7 +18,8 @@ export = async (): Promise<Outputs> => {
           ports: {
             'daemon-rpc': { port: 8545 },
             'daemon-ws': { port: 8546, pathPrefix: '/websocket', stripPathPrefix: true },
-            'daemon-beacon': { port: 8551, ingressRoute: false },
+            'daemon-auth': { port: 8551, ingressRoute: false },
+            'daemon-beacon': { port: 3500, ingressRoute: false },
           },
           configMapData: {
             'jwt.hex': readFileSync('../daemon/jwt.hex').toString(),
