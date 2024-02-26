@@ -9,6 +9,7 @@ start() {
   --chain.id 42170 \
   --chain.name nova \
   --parent-chain.connection.url $L1_RPC_ENDPOINT \
+  --parent-chain.blob-client.beacon-url $L1_BEACON_ENDPOINT \
   --init.url 'https://snapshot.arbitrum.foundation/nova/nitro-pruned.tar' \
   --init.download-path /data/tmp \
   --persistent.chain /data \

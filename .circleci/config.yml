@@ -221,13 +221,13 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.13.12
+    service-image-1: ethereum/client-go:v1.13.13
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
     service-storage-size-1: 1250Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.2.1
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v5.0.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 12Gi
@@ -308,7 +308,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: avaplatform/avalanchego:v1.10.19
+    service-image-1: avaplatform/avalanchego:v1.11.1
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 32Gi
@@ -471,7 +471,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.127.2
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.128.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
@@ -483,7 +483,7 @@ aliases:
     service-memory-limit-2: 6Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: registry.gitlab.com/thorchain/midgard:2.17.1
+    service-image-3: registry.gitlab.com/thorchain/midgard:2.19.1
     service-cpu-limit-3: "1"
     service-cpu-request-3: 500m
     service-memory-limit-3: 1Gi
@@ -518,13 +518,13 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101308.0
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101308.2
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
     service-storage-size-1: 1250Gi
     service-name-2: op-node
-    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.5.1
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.7.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 2Gi
@@ -567,7 +567,7 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 1
     service-name-1: daemon
-    service-image-1: shapeshiftdao/bnb-smart-chain:v1.3.8
+    service-image-1: shapeshiftdao/bnb-smart-chain:v1.3.9
     service-cpu-limit-1: "16"
     service-cpu-request-1: "8"
     service-memory-limit-1: 72Gi
@@ -667,7 +667,7 @@ aliases:
     service-memory-limit-1: 6Gi
     service-storage-size-1: 1000Gi
     service-name-2: daemon-beacon
-    service-image-2: sigp/lighthouse:v4.6.0
+    service-image-2: sigp/lighthouse:v5.0.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 4Gi
@@ -710,7 +710,7 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 1
     service-name-1: daemon
-    service-image-1: offchainlabs/nitro-node:v2.2.4-8517340
+    service-image-1: offchainlabs/nitro-node:v2.3.0-3e14543
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
@@ -752,7 +752,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: offchainlabs/nitro-node:v2.2.4-8517340
+    service-image-1: offchainlabs/nitro-node:v2.3.0-3e14543
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
