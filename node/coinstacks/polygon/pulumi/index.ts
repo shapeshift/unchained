@@ -39,7 +39,7 @@ export = async (): Promise<Outputs> => {
             'heimdall-rpc': { port: 26657, pathPrefix: '/rpc', stripPathPrefix: true },
           },
           env: {
-            ETH_RPC_URL: `http://ethereum-svc.${namespace}.svc.cluster.local:8545`,
+            ETH_RPC_URL: `http://ethereum-svc.unchained.svc.cluster.local:8545`,
             SNAPSHOT: 'https://snapshot-download.polygon.technology/snapdown.sh',
           },
           startupProbe: { periodSeconds: 30, failureThreshold: 60, timeoutSeconds: 10 },

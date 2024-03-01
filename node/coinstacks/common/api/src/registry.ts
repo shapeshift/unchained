@@ -2,10 +2,14 @@ import { Logger } from '@shapeshiftoss/logger'
 import { ConnectionHandler } from './websocket'
 
 export type AddressFormatter = (address: string) => string
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-export type BlockHandler<T = any, T2 = any> = (block: T) => Promise<{ txs: T2 }>
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-export type TransactionHandler<T = any, T2 = any> = (tx: T) => Promise<{ addresses: Array<string>; tx: T2 }>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type BlockHandler<T = any, T2 = Array<unknown>> = (block: T) => Promise<{ txs: T2 }>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type TransactionHandler<T = any, T2 = unknown> = (tx: T) => Promise<{ addresses: Array<string>; tx: T2 }>
+
+const isTxWithAddresses = (tx: unknown): tx is { addresses: Array<string>; tx: unknown } => {
+  return 'addresses' in (tx as { addresses: string; tx: unknown })
+}
 
 export interface RegistryArgs {
   addressFormatter?: AddressFormatter
@@ -117,7 +121,13 @@ export class Registry {
     try {
       const { txs } = await this.handleBlock(msg)
 
-      txs.forEach((tx: unknown) => this.onTransaction(tx))
+      txs.forEach((tx: unknown) => {
+        if (isTxWithAddresses(tx)) {
+          this.publishTransaction(tx.addresses, tx.tx)
+        } else {
+          this.onTransaction(tx)
+        }
+      })
     } catch (err) {
       this.logger.error(err, 'failed to handle block')
     }
@@ -128,19 +138,22 @@ export class Registry {
 
     try {
       const { addresses, tx } = await this.handleTransaction(msg)
-
-      addresses.forEach((address) => {
-        address = this.formatAddress(address)
-
-        if (!this.addresses[address]) return
-
-        for (const [id, connection] of this.addresses[address].entries()) {
-          const { subscriptionId } = Registry.fromId(id)
-          connection.publish(subscriptionId, address, tx)
-        }
-      })
+      this.publishTransaction(addresses, tx)
     } catch (err) {
       this.logger.error(err, 'failed to handle transaction')
     }
+  }
+
+  private publishTransaction(addresses: string[], tx: unknown) {
+    addresses.forEach((address) => {
+      address = this.formatAddress(address)
+
+      if (!this.addresses[address]) return
+
+      for (const [id, connection] of this.addresses[address].entries()) {
+        const { subscriptionId } = Registry.fromId(id)
+        connection.publish(subscriptionId, address, tx)
+      }
+    })
   }
 }

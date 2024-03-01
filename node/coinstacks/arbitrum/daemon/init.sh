@@ -9,6 +9,7 @@ start() {
   --chain.id 42161 \
   --chain.name arb1 \
   --parent-chain.connection.url $L1_RPC_ENDPOINT \
+  --parent-chain.blob-client.beacon-url $L1_BEACON_ENDPOINT \
   --init.url 'https://snapshot.arbitrum.foundation/arb1/nitro-pruned.tar' \
   --init.download-path /data/tmp \
   --persistent.chain /data \

@@ -18,7 +18,8 @@ export = async (): Promise<Outputs> => {
           ports: {
             'daemon-rpc': { port: 8545 },
             'daemon-ws': { port: 8546, pathPrefix: '/websocket', stripPathPrefix: true },
-            'daemon-beacon': { port: 8551, ingressRoute: false },
+            'daemon-auth': { port: 8551, ingressRoute: false },
+            'daemon-beacon': { port: 3500, ingressRoute: false },
           },
           configMapData: {
             'jwt.hex': readFileSync('../daemon/jwt.hex').toString(),
@@ -39,12 +40,11 @@ export = async (): Promise<Outputs> => {
         return {
           ...service,
           args: [
-            '--datadir',
-            '/data',
-            '--execution-endpoint',
-            'http://localhost:8551',
-            '--jwt-secret',
-            '/jwt.hex',
+            '--datadir=/data',
+            '--grpc-gateway-host=0.0.0.0',
+            '--grpc-gateway-port=3500',
+            '--execution-endpoint=http://localhost:8551',
+            '--jwt-secret=/jwt.hex',
             '--accept-terms-of-use',
           ],
           volumeMounts: [{ name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' }],

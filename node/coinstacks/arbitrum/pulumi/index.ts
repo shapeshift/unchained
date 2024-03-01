@@ -20,7 +20,8 @@ export = async (): Promise<Outputs> => {
             'daemon-ws': { port: 8548, pathPrefix: '/websocket', stripPathPrefix: true },
           },
           env: {
-            L1_RPC_ENDPOINT: `http://ethereum-svc.${namespace}.svc.cluster.local:8545`,
+            L1_RPC_ENDPOINT: `http://ethereum-svc.unchained.svc.cluster.local:8545`,
+            L1_BEACON_ENDPOINT: `http://ethereum-svc.unchained.svc.cluster.local:3500`,
           },
           configMapData: {
             'jwt.hex': readFileSync('../daemon/jwt.hex').toString(),

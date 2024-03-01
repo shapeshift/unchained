@@ -9,7 +9,7 @@ fi
 
 source /tendermint.sh
 
-BLOCK_HEIGHT_TOLERANCE=5
+BLOCK_HEIGHT_TOLERANCE=250
 
 SYNCING=$(curl -sf http://localhost:1317/syncing) || exit 1
 NET_INFO=$(curl -sf http://localhost:26657/net_info) || exit 1

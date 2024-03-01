@@ -166,18 +166,18 @@ aliases:
     assetName: bitcoin
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/bitcoin/pulumi
-    rpc-url: http://user:password@bitcoin-svc.unchained.svc.cluster.local:8332
-    indexer-url: http://bitcoin-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://bitcoin-svc.unchained.svc.cluster.local:8001/websocket
+    indexer-url: https://btcbook.nownodes.io
+    indexer-ws-url: wss://btcbook.nownodes.io/wss
+    indexer-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
+    api-max-replicas: 4
+    api-cpu-limit: "1"
+    api-cpu-request: 500m
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
     api-memory-request: 500Mi
-    stateful-service-replicas: 2
+    stateful-service-replicas: 1
     service-name-1: daemon
     service-image-1: shapeshiftdao/bitcoin-core:26.0
     service-cpu-limit-1: "2"
@@ -200,33 +200,34 @@ aliases:
     indexer-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 500Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &ethereum
     assetName: ethereum
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/ethereum/pulumi
-    rpc-url: http://ethereum-svc.unchained.svc.cluster.local:8545
-    indexer-url: http://ethereum-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://ethereum-svc.unchained.svc.cluster.local:8001/websocket
+    indexer-url: https://eth-blockbook.nownodes.io
+    indexer-ws-url: wss://eth-blockbook.nownodes.io/wss
+    indexer-api-key: $NOW_NODES_API_KEY
+    rpc-url: https://eth.nownodes.io
+    rpc-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
+    api-max-replicas: 4
+    api-cpu-limit: "2"
+    api-cpu-request: "1"
     api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-    api-memory-request: 250Mi
+    api-memory-limit: 1Gi
+    api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.13.11
+    service-image-1: ethereum/client-go:v1.13.14
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
     service-storage-size-1: 1250Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v4.2.0
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v5.0.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 12Gi
@@ -249,8 +250,7 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 250Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &cosmos
     assetName: cosmos
@@ -308,7 +308,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: avaplatform/avalanchego:v1.10.18
+    service-image-1: avaplatform/avalanchego:v1.11.2
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 32Gi
@@ -340,20 +340,20 @@ aliases:
     assetName: dogecoin
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/dogecoin/pulumi
-    rpc-url: http://user:password@dogecoin-svc.unchained.svc.cluster.local:8332
-    indexer-url: http://dogecoin-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://dogecoin-svc.unchained.svc.cluster.local:8001/websocket
+    indexer-url: https://dogebook.nownodes.io
+    indexer-ws-url: wss://dogebook.nownodes.io/wss
+    indexer-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
+    api-max-replicas: 4
     api-cpu-limit: 500m
     api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 2
+    stateful-service-replicas: 1
     service-name-1: daemon
-    service-image-1: shapeshiftdao/dogecoin:1.14.6
+    service-image-1: shapeshiftdao/dogecoin:1.14.7
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 4Gi
@@ -374,25 +374,24 @@ aliases:
     indexer-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 250Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &litecoin
     assetName: litecoin
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/litecoin/pulumi
-    rpc-url: http://user:password@litecoin-svc.unchained.svc.cluster.local:8332
-    indexer-url: http://litecoin-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://litecoin-svc.unchained.svc.cluster.local:8001/websocket
+    indexer-url: https://ltcbook.nownodes.io
+    indexer-ws-url: wss://ltcbook.nownodes.io/wss
+    indexer-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
+    api-max-replicas: 4
     api-cpu-limit: 500m
     api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 2
+    stateful-service-replicas: 1
     service-name-1: daemon
     service-image-1: shapeshiftdao/litecoin-core:v0.21.2.2
     service-cpu-limit-1: "2"
@@ -415,25 +414,24 @@ aliases:
     indexer-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 250Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &bitcoincash
     assetName: bitcoincash
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/bitcoincash/pulumi
-    rpc-url: http://user:password@bitcoincash-svc.unchained.svc.cluster.local:8332
-    indexer-url: http://bitcoincash-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://bitcoincash-svc.unchained.svc.cluster.local:8001/websocket
+    indexer-url: https://bchbook.nownodes.io
+    indexer-ws-url: wss://bchbook.nownodes.io/wss
+    indexer-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
+    api-max-replicas: 4
     api-cpu-limit: 500m
     api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 2
+    stateful-service-replicas: 1
     service-name-1: daemon
     service-image-1: shapeshiftdao/bitcoin-cash-node:27.0.0
     service-cpu-limit-1: "2"
@@ -456,8 +454,7 @@ aliases:
     indexer-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 250Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &thorchain
     assetName: thorchain
@@ -476,7 +473,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.127.0
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.127.2
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
@@ -488,7 +485,7 @@ aliases:
     service-memory-limit-2: 6Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: registry.gitlab.com/thorchain/midgard:2.17.1
+    service-image-3: registry.gitlab.com/thorchain/midgard:2.19.1
     service-cpu-limit-3: "1"
     service-cpu-request-3: 500m
     service-memory-limit-3: 1Gi
@@ -523,13 +520,13 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101305.1
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101308.2
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
     service-storage-size-1: 1250Gi
     service-name-2: op-node
-    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.4.3
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.7.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 2Gi
@@ -557,20 +554,22 @@ aliases:
     assetName: bnbsmartchain
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/bnbsmartchain/pulumi
-    rpc-url: http://bnbsmartchain-svc.unchained.svc.cluster.local:8545
-    indexer-url: http://bnbsmartchain-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://bnbsmartchain-svc.unchained.svc.cluster.local:8001/websocket
+    indexer-url: https://bsc-blockbook.nownodes.io
+    indexer-ws-url: wss://bsc-blockbook.nownodes.io/wss
+    indexer-api-key: $NOW_NODES_API_KEY
+    rpc-url: https://bsc.nownodes.io
+    rpc-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
+    api-max-replicas: 4
+    api-cpu-limit: "2"
+    api-cpu-request: "1"
     api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-    api-memory-request: 250Mi
-    stateful-service-replicas: 2
+    api-memory-limit: 1Gi
+    api-memory-request: 500Mi
+    stateful-service-replicas: 1
     service-name-1: daemon
-    service-image-1: shapeshiftdao/bnb-smart-chain:v1.3.8
+    service-image-1: shapeshiftdao/bnb-smart-chain:v1.3.9
     service-cpu-limit-1: "16"
     service-cpu-request-1: "8"
     service-memory-limit-1: 72Gi
@@ -589,31 +588,30 @@ aliases:
     indexer-url: https://bsc-blockbook.nownodes.io
     indexer-ws-url: wss://bsc-blockbook.nownodes.io/wss
     indexer-api-key: $NOW_NODES_API_KEY_DEV
-    rpc-url: http://bnbsmartchain-svc.unchained-dev.svc.cluster.local:8545
-    # TODO: use nownodes once `debug_traceTransaction` support is enabled
-    #rpc-url: https://bsc.nownodes.io
-    #rpc-api-key: $NOW_NODES_API_KEY_DEV
+    rpc-url: https://bsc.nownodes.io
+    rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 250Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &polygon
     assetName: polygon
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/polygon/pulumi
-    rpc-url: http://polygon-svc.unchained.svc.cluster.local:8545
-    indexer-url: http://polygon-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://polygon-svc.unchained.svc.cluster.local:8001/websocket
+    indexer-url: https://maticbook.nownodes.io
+    indexer-ws-url: wss://maticbook.nownodes.io/wss
+    indexer-api-key: $NOW_NODES_API_KEY
+    rpc-url: https://matic.nownodes.io
+    rpc-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
+    api-max-replicas: 4
+    api-cpu-limit: "2"
+    api-cpu-request: "1"
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
     api-memory-request: 500Mi
-    stateful-service-replicas: 2
+    stateful-service-replicas: 1
     service-name-1: daemon
     service-image-1: 0xpolygon/bor:1.2.3
     service-cpu-limit-1: "8"
@@ -639,13 +637,14 @@ aliases:
     <<: *polygon
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    rpc-url: http://polygon-svc.unchained-dev.svc.cluster.local:8545
-    indexer-url: http://polygon-svc.unchained-dev.svc.cluster.local:8001
-    indexer-ws-url: ws://polygon-svc.unchained-dev.svc.cluster.local:8001/websocket
+    indexer-url: https://maticbook.nownodes.io
+    indexer-ws-url: wss://maticbook.nownodes.io/wss
+    indexer-api-key: $NOW_NODES_API_KEY_DEV
+    rpc-url: https://matic.nownodes.io
+    rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 500Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &gnosis
     assetName: gnosis
@@ -664,13 +663,13 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.25.3
+    service-image-1: nethermind/nethermind:1.25.4
     service-cpu-limit-1: "2"
     service-cpu-request-1: "2"
     service-memory-limit-1: 6Gi
     service-storage-size-1: 1000Gi
     service-name-2: daemon-beacon
-    service-image-2: sigp/lighthouse:v4.6.0
+    service-image-2: sigp/lighthouse:v5.0.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 4Gi
@@ -698,20 +697,22 @@ aliases:
     assetName: arbitrum
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/arbitrum/pulumi
-    rpc-url: http://arbitrum-svc.unchained.svc.cluster.local:8547
-    indexer-url: http://arbitrum-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://arbitrum-svc.unchained.svc.cluster.local:8001/websocket
+    indexer-url: https://arb-blockbook.nownodes.io
+    indexer-ws-url: wss://arb-blockbook.nownodes.io/wss
+    indexer-api-key: $NOW_NODES_API_KEY
+    rpc-url: https://arbitrum.nownodes.io
+    rpc-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
+    api-max-replicas: 4
+    api-cpu-limit: "1"
+    api-cpu-request: 500m
     api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-    api-memory-request: 250Mi
-    stateful-service-replicas: 2
+    api-memory-limit: 1Gi
+    api-memory-request: 500Mi
+    stateful-service-replicas: 1
     service-name-1: daemon
-    service-image-1: offchainlabs/nitro-node:v2.2.2-8f33fea
+    service-image-1: offchainlabs/nitro-node:v2.3.0-3e14543
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
@@ -734,10 +735,7 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 250Mi
-    stateful-service-replicas: 1
-    service-memory-limit-1: 20Gi
-    service-memory-limit-2: 12Gi
+    stateful-service-replicas: 0
 
   - &arbitrum-nova
     assetName: arbitrum-nova
@@ -756,7 +754,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: offchainlabs/nitro-node:v2.2.2-8f33fea
+    service-image-1: offchainlabs/nitro-node:v2.3.0-3e14543
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi

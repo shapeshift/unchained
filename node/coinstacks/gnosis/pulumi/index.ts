@@ -18,7 +18,7 @@ export = async (): Promise<Outputs> => {
           ports: {
             'daemon-http': { port: 8545 },
             'daemon-ws': { port: 8546, pathPrefix: '/websocket', stripPathPrefix: true },
-            'daemon-beacon': { port: 8551, ingressRoute: false },
+            'daemon-auth': { port: 8551, ingressRoute: false },
           },
           configMapData: { 'jwt.hex': readFileSync('../daemon/jwt.hex').toString() },
           startupProbe: { periodSeconds: 30, failureThreshold: 60, timeoutSeconds: 10 },
