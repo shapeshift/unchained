@@ -166,8 +166,11 @@ export class GasOracle {
   // update oracle state for the specified block
   private async update(blockNumber: number, blockTag?: BlockTag, retryCount = 0): Promise<void> {
     try {
-      const numOrTag =
-        !this.canQueryPendingBlockByHeight && blockTag === 'pending' ? blockTag : ethers.utils.hexValue(blockNumber)
+      const numOrTag = (() => {
+        if (!this.canQueryPendingBlockByHeight && blockTag === 'pending') return blockTag
+        if (this.coinstack === 'avalanche' && blockTag === 'latest') return blockTag
+        return ethers.utils.hexValue(blockNumber)
+      })()
 
       const block = (await this.provider.send('eth_getBlockByNumber', [numOrTag, true])) as NodeBlock<
         Array<NodeTransaction>
