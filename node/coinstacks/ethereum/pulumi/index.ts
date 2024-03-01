@@ -40,12 +40,11 @@ export = async (): Promise<Outputs> => {
         return {
           ...service,
           args: [
-            '--datadir',
-            '/data',
-            '--execution-endpoint',
-            'http://localhost:8551',
-            '--jwt-secret',
-            '/jwt.hex',
+            '--datadir=/data',
+            '--grpc-gateway-host=0.0.0.0',
+            '--grpc-gateway-port=3500',
+            '--execution-endpoint=http://localhost:8551',
+            '--jwt-secret=/jwt.hex',
             '--accept-terms-of-use',
           ],
           volumeMounts: [{ name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' }],
