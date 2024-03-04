@@ -898,8 +898,7 @@ jobs:
         type: string
         default: preview
     steps:
-      - setup_remote_docker:
-          version: 20.10.18
+      - setup_remote_docker
       - attach_workspace:
           at: ~/
       - pulumi-dependencies:
@@ -984,8 +983,7 @@ jobs:
         type: string
         default: ETHERSCAN_API_KEY
     steps:
-      - setup_remote_docker:
-          version: 20.10.18
+      - setup_remote_docker
       - attach_workspace:
           at: ~/
       - pulumi-dependencies:
@@ -1066,8 +1064,7 @@ jobs:
       ws-url:
         type: string
     steps:
-      - setup_remote_docker:
-          version: 20.10.18
+      - setup_remote_docker
       - attach_workspace:
           at: ~/
       - pulumi-dependencies:
@@ -1139,8 +1136,7 @@ jobs:
         type: string
         default: preview
     steps:
-      - setup_remote_docker:
-          version: 20.10.18
+      - setup_remote_docker
       - attach_workspace:
           at: ~/
       - pulumi-dependencies:
