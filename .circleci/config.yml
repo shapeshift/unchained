@@ -678,7 +678,7 @@ aliases:
     service-image-3: shapeshiftdao/unchained-blockbook:gnosis-patch-bf15e46
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
-    service-memory-limit-3: 16Gi
+    service-memory-limit-3: 24Gi
     service-storage-size-3: 500Gi
 
   - &gnosis-dev
@@ -757,7 +757,7 @@ aliases:
     service-image-1: offchainlabs/nitro-node:v2.3.0-3e14543
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
-    service-memory-limit-1: 12Gi
+    service-memory-limit-1: 16Gi
     service-storage-size-1: 500Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:arbitrum-0e84937
