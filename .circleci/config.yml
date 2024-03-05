@@ -295,9 +295,11 @@ aliases:
     assetName: avalanche
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/avalanche/pulumi
-    rpc-url: http://avalanche-svc.unchained.svc.cluster.local:9650/ext/bc/C/rpc
-    indexer-url: http://avalanche-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://avalanche-svc.unchained.svc.cluster.local:8001/websocket
+    indexer-url: https://avax-blockbook.nownodes.io
+    indexer-ws-url: wss://avax-blockbook.nownodes.io/wss
+    indexer-api-key: $NOW_NODES_API_KEY
+    rpc-url: https://avax.nownodes.io/ext/bc/C/rpc
+    rpc-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -898,8 +900,7 @@ jobs:
         type: string
         default: preview
     steps:
-      - setup_remote_docker:
-          version: 20.10.18
+      - setup_remote_docker
       - attach_workspace:
           at: ~/
       - pulumi-dependencies:
@@ -984,8 +985,7 @@ jobs:
         type: string
         default: ETHERSCAN_API_KEY
     steps:
-      - setup_remote_docker:
-          version: 20.10.18
+      - setup_remote_docker
       - attach_workspace:
           at: ~/
       - pulumi-dependencies:
@@ -1066,8 +1066,7 @@ jobs:
       ws-url:
         type: string
     steps:
-      - setup_remote_docker:
-          version: 20.10.18
+      - setup_remote_docker
       - attach_workspace:
           at: ~/
       - pulumi-dependencies:
@@ -1139,8 +1138,7 @@ jobs:
         type: string
         default: preview
     steps:
-      - setup_remote_docker:
-          version: 20.10.18
+      - setup_remote_docker
       - attach_workspace:
           at: ~/
       - pulumi-dependencies:
