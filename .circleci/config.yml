@@ -209,8 +209,7 @@ aliases:
     indexer-url: https://eth-blockbook.nownodes.io
     indexer-ws-url: wss://eth-blockbook.nownodes.io/wss
     indexer-api-key: $NOW_NODES_API_KEY
-    rpc-url: https://eth.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY
+    rpc-url: http://ethereum-svc.unchained.svc.cluster.local:8545
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
@@ -246,8 +245,7 @@ aliases:
     indexer-url: https://eth-blockbook.nownodes.io
     indexer-ws-url: wss://eth-blockbook.nownodes.io/wss
     indexer-api-key: $NOW_NODES_API_KEY_DEV
-    rpc-url: https://eth.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY_DEV
+    rpc-url: http://ethereum-svc.unchained.svc.cluster.local:8545
     api-replicas: 1
     api-max-replicas: 2
     stateful-service-replicas: 0
