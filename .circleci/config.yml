@@ -308,7 +308,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 2
+    stateful-service-replicas: 1
     service-name-1: daemon
     service-image-1: avaplatform/avalanchego:v1.11.2
     service-cpu-limit-1: "2"
@@ -334,9 +334,7 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 250Mi
-    stateful-service-replicas: 1
-    service-memory-limit-1: 24Gi
-    service-memory-limit-2: 6Gi
+    stateful-service-replicas: 0
 
   - &dogecoin
     assetName: dogecoin
