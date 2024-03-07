@@ -209,7 +209,8 @@ aliases:
     indexer-url: https://eth-blockbook.nownodes.io
     indexer-ws-url: wss://eth-blockbook.nownodes.io/wss
     indexer-api-key: $NOW_NODES_API_KEY
-    rpc-url: http://ethereum-svc.unchained.svc.cluster.local:8545
+    rpc-url: https://eth.nownodes.io
+    rpc-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
@@ -245,7 +246,8 @@ aliases:
     indexer-url: https://eth-blockbook.nownodes.io
     indexer-ws-url: wss://eth-blockbook.nownodes.io/wss
     indexer-api-key: $NOW_NODES_API_KEY_DEV
-    rpc-url: http://ethereum-svc.unchained.svc.cluster.local:8545
+    rpc-url: https://eth.nownodes.io
+    rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
     stateful-service-replicas: 0
@@ -268,7 +270,7 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: shapeshiftdao/cosmoshub:v14.1.0
+    service-image-1: shapeshiftdao/cosmoshub:v14.2.0
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 64Gi
@@ -306,7 +308,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 2
+    stateful-service-replicas: 1
     service-name-1: daemon
     service-image-1: avaplatform/avalanchego:v1.11.2
     service-cpu-limit-1: "2"
@@ -332,9 +334,7 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 250Mi
-    stateful-service-replicas: 1
-    service-memory-limit-1: 24Gi
-    service-memory-limit-2: 6Gi
+    stateful-service-replicas: 0
 
   - &dogecoin
     assetName: dogecoin
@@ -473,7 +473,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.127.2
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.128.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
@@ -485,7 +485,7 @@ aliases:
     service-memory-limit-2: 6Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: registry.gitlab.com/thorchain/midgard:2.19.1
+    service-image-3: registry.gitlab.com/thorchain/midgard:2.20.0
     service-cpu-limit-3: "1"
     service-cpu-request-3: 500m
     service-memory-limit-3: 1Gi
@@ -526,7 +526,7 @@ aliases:
     service-memory-limit-1: 24Gi
     service-storage-size-1: 1250Gi
     service-name-2: op-node
-    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.7.0
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.7.1
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 2Gi
@@ -569,7 +569,7 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 1
     service-name-1: daemon
-    service-image-1: shapeshiftdao/bnb-smart-chain:v1.3.9
+    service-image-1: shapeshiftdao/bnb-smart-chain:v1.3.10
     service-cpu-limit-1: "16"
     service-cpu-request-1: "8"
     service-memory-limit-1: 72Gi
