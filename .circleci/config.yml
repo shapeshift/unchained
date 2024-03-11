@@ -227,7 +227,7 @@ aliases:
     service-memory-limit-1: 24Gi
     service-storage-size-1: 1250Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v5.0.0
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v5.0.1
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 12Gi
@@ -473,7 +473,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.128.0
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.128.1
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
@@ -485,7 +485,7 @@ aliases:
     service-memory-limit-2: 6Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: registry.gitlab.com/thorchain/midgard:2.20.0
+    service-image-3: registry.gitlab.com/thorchain/midgard:2.19.1
     service-cpu-limit-3: "1"
     service-cpu-request-3: 500m
     service-memory-limit-3: 1Gi
@@ -613,7 +613,7 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 1
     service-name-1: daemon
-    service-image-1: 0xpolygon/bor:1.2.3
+    service-image-1: 0xpolygon/bor:1.2.7
     service-cpu-limit-1: "8"
     service-cpu-request-1: "4"
     service-memory-limit-1: 64Gi
@@ -621,7 +621,7 @@ aliases:
     service-storage-iops-1: "6000"
     service-storage-throughput-1: "300"
     service-name-2: heimdall
-    service-image-2: 0xpolygon/heimdall:1.0.3
+    service-image-2: 0xpolygon/heimdall:1.0.4
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 1Gi
@@ -669,7 +669,7 @@ aliases:
     service-memory-limit-1: 6Gi
     service-storage-size-1: 1000Gi
     service-name-2: daemon-beacon
-    service-image-2: sigp/lighthouse:v5.0.0
+    service-image-2: sigp/lighthouse:v5.1.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 4Gi
@@ -956,7 +956,7 @@ jobs:
             pulumi config set --path unchained:common.dockerhub.password $DOCKERHUB_PASSWORD --plaintext
             pulumi config set --path unchained:common.dockerhub.server docker.io
             pulumi config set --path unchained:common.rootDomainName $<< parameters.organization >>_ROOT_DOMAIN_NAME
-            pulumi <<parameters.pulumi-command>> --suppress-outputs
+            pulumi <<parameters.pulumi-command>> --refresh --suppress-outputs
 
   deploy-coinstack-node:
     description: deploy a specific node coinstack
@@ -1045,7 +1045,7 @@ jobs:
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-class-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageClassName << parameters.service-storage-class-3 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-iops-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageIops << parameters.service-storage-iops-3 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-throughput-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageThroughput << parameters.service-storage-throughput-3 >>
-            pulumi << parameters.pulumi-command >> --suppress-outputs
+            pulumi << parameters.pulumi-command >> --refresh --suppress-outputs
 
   deploy-coinstack-go:
     description: deploy a specific go coinstack
@@ -1124,7 +1124,7 @@ jobs:
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-class-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageClassName << parameters.service-storage-class-3 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-iops-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageIops << parameters.service-storage-iops-3 >>
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-throughput-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageThroughput << parameters.service-storage-throughput-3 >>
-            pulumi << parameters.pulumi-command >> --suppress-outputs
+            pulumi << parameters.pulumi-command >> --refresh --suppress-outputs
 
   deploy-monitoring-pulumi:
     description: deploy unchained monitoring stack
