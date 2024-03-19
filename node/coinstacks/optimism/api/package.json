@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/optimism-api",
-  "version": "9.3.0",
+  "version": "9.4.0",
   "license": "MIT",
   "private": true,
   "files": [
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@eth-optimism/contracts-bedrock": "^0.14.0",
-    "@shapeshiftoss/blockbook": "^9.3.0",
-    "@shapeshiftoss/common-api": "^9.3.0"
+    "@shapeshiftoss/blockbook": "^9.4.0",
+    "@shapeshiftoss/common-api": "^9.4.0"
   }
 }

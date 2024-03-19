@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/blockbook",
-  "version": "9.3.0",
+  "version": "9.4.0",
   "license": "MIT",
   "main": "dist/index.js",
   "source": "src/index.ts",

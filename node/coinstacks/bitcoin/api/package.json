@@ -1,6 +1,6 @@
 {
   "name": "@shapeshiftoss/bitcoin-api",
-  "version": "9.3.0",
+  "version": "9.4.0",
   "license": "MIT",
   "private": true,
   "files": [
@@ -12,8 +12,8 @@
     "generate": "tsoa spec-and-routes"
   },
   "dependencies": {
-    "@shapeshiftoss/blockbook": "^9.3.0",
-    "@shapeshiftoss/common-api": "^9.3.0",
+    "@shapeshiftoss/blockbook": "^9.4.0",
+    "@shapeshiftoss/common-api": "^9.4.0",
     "bech32": "^2.0.0"
   }
 }
