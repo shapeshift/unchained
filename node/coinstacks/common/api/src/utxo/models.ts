@@ -115,17 +115,17 @@ export interface Account extends BaseAccount {
   /**
    * List of associated addresses for an extended public key
    */
-  addresses?: Array<Address>
+  addresses: Array<Address>
 
   /**
    * The next unused receive address index for an extended public key (change index 0)
    */
-  nextReceiveAddressIndex?: number
+  nextReceiveAddressIndex: number
 
   /**
    * The next unused change address index for an extended public key (change index 1)
    */
-  nextChangeAddressIndex?: number
+  nextChangeAddressIndex: number
 }
 
 /**

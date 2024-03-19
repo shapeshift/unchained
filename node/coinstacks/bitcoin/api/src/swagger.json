@@ -69,7 +69,10 @@
 				"required": [
 					"balance",
 					"unconfirmedBalance",
-					"pubkey"
+					"pubkey",
+					"addresses",
+					"nextReceiveAddressIndex",
+					"nextChangeAddressIndex"
 				],
 				"type": "object",
 				"additionalProperties": false

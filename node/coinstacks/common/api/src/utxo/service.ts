@@ -49,7 +49,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       })()
 
       // list of all used addresses with additional derived addresses up to gap limit of 20, including any detected balances
-      const addresses = data.tokens?.map<Address>((token) => ({
+      const addresses = (data.tokens ?? []).map<Address>((token) => ({
         balance: token.balance ?? '0',
         pubkey: token.name,
       }))
