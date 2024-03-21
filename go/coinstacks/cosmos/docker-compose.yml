@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  api:
+    image: unchained-local-go
+    environment:
+      - GOCACHE=/tmp
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.cosmos-api.rule=Host(`api.cosmos.localhost`)'
+      - 'traefik.http.services.cosmos-api.loadbalancer.server.port=3000'
+    command: ["-r", "(pkg|internal|cosmos)", "-R", "swagger", "--", "sh", "-c", "swagger generate spec -w coinstacks/cosmos -o coinstacks/cosmos/api/swagger.json -x protoc-gen-openapiv2 -m && go run cmd/cosmos/main.go -env cmd/cosmos/.env"]
+    working_dir: /app
+    volumes:
+      - ../..:/app
+      - $GOPATH/pkg/mod/cache:/go/pkg/mod/cache
+    networks:
+      - cosmos
+
+networks:
+  cosmos:
+    name: cosmos_default
+    external: true
