@@ -6,26 +6,26 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/shapeshift/unchained/coinstacks/thorchain-v1/api"
+	"github.com/shapeshift/unchained/coinstacks/cosmos/api"
 	"github.com/shapeshift/unchained/internal/config"
 	"github.com/shapeshift/unchained/internal/log"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/shapeshift/unchained/pkg/metrics"
-
-	thortypes "gitlab.com/thorchain/thornode/v3/x/thorchain/types"
 )
 
 var (
 	logger = log.WithoutFields()
 
 	envPath     = flag.String("env", "", "path to env file (default: use os env)")
-	swaggerPath = flag.String("swagger", "coinstacks/thorchain-v1/api/swagger.json", "path to swagger spec")
+	swaggerPath = flag.String("swagger", "coinstacks/cosmos/api/swagger.json", "path to swagger spec")
 )
 
+// Config for running application
 type Config struct {
-	LCDURL string `mapstructure:"LCD_URL"`
-	RPCURL string `mapstructure:"RPC_URL"`
-	WSURL  string `mapstructure:"WS_URL"`
+	GRPCURL string `mapstructure:"GRPC_URL"`
+	LCDURL  string `mapstructure:"LCD_URL"`
+	RPCURL  string `mapstructure:"RPC_URL"`
+	WSURL   string `mapstructure:"WS_URL"`
 }
 
 func main() {
@@ -37,7 +37,7 @@ func main() {
 
 	conf := &Config{}
 	if *envPath == "" {
-		if err := config.LoadFromEnv(conf, "LCD_URL", "RPC_URL", "WS_URL"); err != nil {
+		if err := config.LoadFromEnv(conf, "GRPC_URL", "LCD_URL", "RPC_URL", "WS_URL"); err != nil {
 			logger.Panicf("failed to load config from env: %+v", err)
 		}
 	} else {
@@ -46,26 +46,31 @@ func main() {
 		}
 	}
 
-	encoding := cosmos.NewEncoding(thortypes.RegisterInterfaces)
+	encoding := cosmos.NewEncoding()
 
 	cfg := cosmos.Config{
-		Bech32AddrPrefix:  "thor",
-		Bech32PkPrefix:    "thorpub",
-		Bech32ValPrefix:   "thorv",
-		Bech32PkValPrefix: "thorvpub",
-		Denom:             "rune",
-		NativeFee:         2000000, // https://daemon.thorchain.shapeshift.com/lcd/thorchain/constants
+		Bech32AddrPrefix:  "cosmos",
+		Bech32PkPrefix:    "cosmospub",
+		Bech32ValPrefix:   "cosmosvaloper",
+		Bech32PkValPrefix: "cosmosvalpub",
+		Denom:             "uatom",
 		Encoding:          encoding,
+		GRPCURL:           conf.GRPCURL,
 		LCDURL:            conf.LCDURL,
 		RPCURL:            conf.RPCURL,
 		WSURL:             conf.WSURL,
 	}
 
-	prometheus := metrics.NewPrometheus("thorchain-v1")
+	prometheus := metrics.NewPrometheus("cosmos")
 
 	httpClient, err := cosmos.NewHTTPClient(cfg)
 	if err != nil {
 		logger.Panicf("failed to create new http client: %+v", err)
+	}
+
+	grpcClient, err := cosmos.NewGRPCClient(cfg)
+	if err != nil {
+		logger.Panicf("failed to create new grpc client: %+v", err)
 	}
 
 	blockService, err := cosmos.NewBlockService(httpClient)
@@ -78,7 +83,7 @@ func main() {
 		logger.Panicf("failed to create new websocket client: %+v", err)
 	}
 
-	api := api.New(cfg, httpClient, wsClient, blockService, *swaggerPath, prometheus)
+	api := api.New(httpClient, grpcClient, wsClient, blockService, *swaggerPath, prometheus)
 	defer api.Shutdown()
 
 	go api.Serve(errChan)
