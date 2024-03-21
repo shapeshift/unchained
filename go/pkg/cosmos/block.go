@@ -5,10 +5,10 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/cometbft/cometbft/libs/json"
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
+	rpctypes "github.com/cometbft/cometbft/rpc/jsonrpc/types"
 	"github.com/pkg/errors"
-	tmjson "github.com/tendermint/tendermint/libs/json"
-	coretypes "github.com/tendermint/tendermint/rpc/core/types"
-	rpctypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
 type BlockFetcher interface {
@@ -92,7 +92,7 @@ func (c *HTTPClient) GetBlock(height *int) (*coretypes.ResultBlock, error) {
 	}
 
 	result := &coretypes.ResultBlock{}
-	if err := tmjson.Unmarshal(res.Result, result); err != nil {
+	if err := json.Unmarshal(res.Result, result); err != nil {
 		return nil, errors.Errorf("failed to unmarshal block result: %v: %s", res.Result, res.Error.Error())
 	}
 
@@ -122,7 +122,7 @@ func (c *HTTPClient) BlockSearch(query string, page int, pageSize int) (*coretyp
 	}
 
 	result := &coretypes.ResultBlockSearch{}
-	if err := tmjson.Unmarshal(res.Result, result); err != nil {
+	if err := json.Unmarshal(res.Result, result); err != nil {
 		return nil, errors.Wrapf(err, "failed to unmarshal block search result: %v", res.Result)
 	}
 
@@ -142,7 +142,7 @@ func (c *HTTPClient) BlockResults(height int) (*coretypes.ResultBlockResults, er
 	}
 
 	result := &coretypes.ResultBlockResults{}
-	if err := tmjson.Unmarshal(res.Result, result); err != nil {
+	if err := json.Unmarshal(res.Result, result); err != nil {
 		return nil, errors.Wrapf(err, "failed to unmarshal block result: %v", res.Result)
 	}
 

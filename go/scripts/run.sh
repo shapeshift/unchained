@@ -23,10 +23,6 @@ export NAMESPACE="$(echo ${PROJECT_BIN^^})"
 
 [ -z "$CHAIN_ID" ] && echo "CHAIN_ID not found" && exit
 
-# config
-[ -n "$MONIKER" ] && export "${NAMESPACE}_MONIKER"="$MONIKER"
-[ -n "$MAX_NUM_OUTBOUND_PEERS" ] && sed -i "s/^max_num_outbound_peers =.*/max_num_outbound_peers = $MAX_NUM_OUTBOUND_PEERS/" $CONFIG_PATH/config.toml
-
 # snapshot
 if [[ -n $SNAPSHOT_QUICKSYNC && ! -f "$PROJECT_ROOT/data/priv_validator_state.json" ]]; then
   SNAPSHOT_PRUNING="${SNAPSHOT_PRUNING:-default}"
@@ -101,7 +97,7 @@ if [ -n "$P2P_POLKACHU" ]; then
   fi
 fi
 
-# peers
+[ -n "$MONIKER" ] && export "${NAMESPACE}_MONIKER"="$MONIKER"
 [ -n "$P2P_SEEDS" ] && [ "$P2P_SEEDS" != '0' ] && export "${NAMESPACE}_P2P_SEEDS=${P2P_SEEDS}"
 [ -n "$P2P_PERSISTENT_PEERS" ] && [ "$P2P_PERSISTENT_PEERS" != '0' ] && export "${NAMESPACE}_P2P_PERSISTENT_PEERS"=${P2P_PERSISTENT_PEERS}
 
@@ -124,10 +120,12 @@ if [[ ! -d "$CONFIG_PATH" ]]; then
   fi
 fi
 
+[ -n "$MAX_NUM_OUTBOUND_PEERS" ] && sed -i "s/^max_num_outbound_peers =.*/max_num_outbound_peers = $MAX_NUM_OUTBOUND_PEERS/" $CONFIG_PATH/config.toml
+
 # Overwrite seeds in config.toml for chains that are not using the env variable correctly
 if [ "$OVERWRITE_SEEDS" == "1" ]; then
-    sed -i "s/seeds =.*/seeds = \"$P2P_SEEDS\"/" $CONFIG_PATH/config.toml
-    sed -i "s/persistent_peers =.*/persistent_peers = \"$P2P_PERSISTENT_PEERS\"/" $CONFIG_PATH/config.toml
+  [ -n "$P2P_SEEDS" ] && [ "$P2P_SEEDS" != '0' ] && sed -i "s/seeds =.*/seeds = \"$P2P_SEEDS\"/" $CONFIG_PATH/config.toml
+  [ -n "$P2P_PERSISTENT_PEERS" ] && [ "$P2P_PERSISTENT_PEERS" != '0' ] && sed -i "s/persistent_peers =.*/persistent_peers = \"$P2P_PERSISTENT_PEERS\"/" $CONFIG_PATH/config.toml
 fi
 
 # preseed priv_validator_state.json if missing
