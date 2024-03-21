@@ -1,6 +1,6 @@
 package cosmos
 
-import coretypes "github.com/tendermint/tendermint/rpc/core/types"
+import coretypes "github.com/cometbft/cometbft/rpc/core/types"
 
 type AccountResponse struct {
 	Address       string
