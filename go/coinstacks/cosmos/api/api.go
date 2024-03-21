@@ -1,6 +1,6 @@
-// Package classification Thorchain Unchained API
+// Package classification Cosmos Unchained API
 //
-// Provides access to thorchain chain data.
+// Provides access to cosmos chain data.
 //
 // License: MIT http://opensource.org/licenses/MIT
 //
@@ -47,17 +47,17 @@ type API struct {
 	handler *Handler
 }
 
-func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, indexer *AffiliateFeeIndexer, swaggerPath string, prometheus *metrics.Prometheus) *API {
+func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, swaggerPath string, prometheus *metrics.Prometheus) *API {
 	r := mux.NewRouter()
 
 	handler := &Handler{
 		Handler: &cosmos.Handler{
 			HTTPClient:   httpClient,
+			GRPCClient:   grpcClient,
 			WSClient:     wsClient,
 			BlockService: blockService,
-			Denom:        "rune",
+			Denom:        "uatom",
 		},
-		indexer: indexer,
 	}
 
 	manager := websocket.NewManager(prometheus)
@@ -75,11 +75,11 @@ func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService 
 		handler: handler,
 	}
 
-	// runtime check to ensure Handler implements CoinSpecific functionality
+	// compile check to ensure Handler implements necessary interfaces
 	var _ api.BaseAPI = handler
 	var _ cosmos.CoinSpecificHandler = handler
 
-	// runtime check to ensure Handler implements CoinSpecificHandler
+	// runtime check to ensure Handler implements CoinSpecific functionality
 	if err := handler.ValidateCoinSpecific(handler); err != nil {
 		logger.Panicf("%+v", err)
 	}
@@ -94,7 +94,7 @@ func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService 
 	r.HandleFunc("/", a.Root).Methods("GET")
 
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		api.HandleResponse(w, http.StatusOK, map[string]string{"status": "up", "coinstack": "thorchain", "connections": strconv.Itoa(manager.ConnectionCount())})
+		api.HandleResponse(w, http.StatusOK, map[string]string{"status": "up", "coinstack": "cosmos", "connections": strconv.Itoa(manager.ConnectionCount())})
 	}).Methods("GET")
 
 	r.Handle("/metrics", promhttp.HandlerFor(prometheus.Registry, promhttp.HandlerOpts{}))
@@ -119,9 +119,15 @@ func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService 
 
 	v1Gas := v1.PathPrefix("/gas").Subrouter()
 	v1Gas.HandleFunc("/estimate", a.EstimateGas).Methods("POST")
+	v1Gas.HandleFunc("/fees", a.Fees).Methods("GET")
 
-	v1Affiliate := v1.PathPrefix("/affiliate").Subrouter()
-	v1Affiliate.HandleFunc("/revenue", a.AffiliateRevenue).Methods("GET")
+	v1ValidatorsRoot := v1.PathPrefix("/validators").Subrouter()
+	v1ValidatorsRoot.HandleFunc("", a.GetValidators).Methods("GET")
+
+	v1Validators := v1.PathPrefix("/validators").Subrouter()
+	v1Validators.Use(cosmos.ValidateValidatorPubkey)
+	v1Validators.HandleFunc("/{pubkey}", a.GetValidator).Methods("GET")
+	v1Validators.HandleFunc("/{pubkey}/txs", a.ValidatorTxHistory).Methods("GET")
 
 	// docs redirect paths
 	r.HandleFunc("/docs", api.DocsRedirect).Methods("GET")
@@ -131,128 +137,92 @@ func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService 
 	return a
 }
 
-// swagger:route GET / Websocket Websocket
+// swagger:route Get /api/v1/validators v1 GetValidators
 //
-// Subscribe to pending and confirmed transactions.
-//
-// responses:
-//
-//	200:
-func (a *API) Websocket(w http.ResponseWriter, r *http.Request) {
-	a.API.Websocket(w, r)
-}
-
-// swagger:route GET /api/v1/info v1 GetInfo
-//
-// Get information about the running coinstack.
+// Get the list of current validators.
 //
 // responses:
 //
-//	200: Info
-func (a *API) Info(w http.ResponseWriter, r *http.Request) {
-	a.API.Info(w, r)
-}
-
-// swagger:route GET /api/v1/account/{pubkey} v1 GetAccount
-//
-// Get account details.
-//
-// responses:
-//
-//	200: Account
-//	400: BadRequestError
+//	200: Validators
 //	500: InternalServerError
-func (a *API) Account(w http.ResponseWriter, r *http.Request) {
-	a.API.Account(w, r)
+func (a *API) GetValidators(w http.ResponseWriter, r *http.Request) {
+	cursor, pageSize, err := a.ValidatePagingParams(w, r, cosmos.DEFAULT_PAGE_SIZE_VALIDATORS, nil)
+	if err != nil {
+		return
+	}
+
+	validators, err := a.handler.GetValidators(cursor, pageSize)
+	if err != nil {
+		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	api.HandleResponse(w, http.StatusOK, validators)
 }
 
-// swagger:route GET /api/v1/account/{pubkey}/txs v1 GetTxHistory
+// swagger:route Get /api/v1/validators/{pubkey} v1 GetValidator
 //
-// Get paginated transaction history.
+// Get a specific validator.
+//
+// responses:
+//
+//	200: Validator
+//	500: InternalServerError
+func (a *API) GetValidator(w http.ResponseWriter, r *http.Request) {
+	// pubkey validated by ValidatePubkey middleware
+	pubkey := mux.Vars(r)["pubkey"]
+
+	validator, err := a.handler.GetValidator(pubkey)
+	if err != nil {
+		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	api.HandleResponse(w, http.StatusOK, validator)
+}
+
+// swagger:route GET /api/v1/validators/{pubkey}/txs v1 ValidatorTxHistory
+//
+// Get paginated transaction history for a validator.
 //
 // responses:
 //
 //	200: TxHistory
 //	400: BadRequestError
 //	500: InternalServerError
-func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
-	a.API.TxHistory(w, r)
-}
+func (a *API) ValidatorTxHistory(w http.ResponseWriter, r *http.Request) {
+	validatorAddr := mux.Vars(r)["pubkey"]
 
-// swagger:route GET /api/v1/tx/{txid} v1 GetTx
-//
-// # Get transaction details
-//
-// responses:
-//
-//	200: Tx
-//	400: BadRequestError
-//	500: InternalServerError
-func (a *API) Tx(w http.ResponseWriter, r *http.Request) {
-	a.API.Tx(w, r)
-}
-
-// swagger:route POST /api/v1/send v1 SendTx
-//
-// Sends raw transaction to be broadcast to the node.
-//
-// responses:
-//
-//	200: TransactionHash
-//	400: BadRequestError
-//	500: InternalServerError
-func (a *API) SendTx(w http.ResponseWriter, r *http.Request) {
-	a.API.SendTx(w, r)
-}
-
-// swagger:route POST /api/v1/gas/estimate v1 EstimateGas
-//
-// Get the estimated gas cost for a transaction.
-//
-// responses:
-//
-//	200: GasAmount
-//	400: BadRequestError
-//	500: InternalServerError
-func (a *API) EstimateGas(w http.ResponseWriter, r *http.Request) {
-	a.API.EstimateGas(w, r)
-}
-
-// swagger:parameters GetAffiliateRevenue
-type GetAffiliateRevenueParams struct {
-	// Start timestamp
-	// in: query
-	Start string `json:"start"`
-	// End timestamp
-	// in: query
-	End string `json:"end"`
-}
-
-// swagger:route Get /api/v1/affiliate/revenue v1 GetAffiliateRevenue
-//
-// Get total ss affiliate revenue earned.
-//
-// responses:
-//
-//	200: AffiliateRevenue
-//	400: BadRequestError
-//	500: InternalServerError
-func (a *API) AffiliateRevenue(w http.ResponseWriter, r *http.Request) {
-	start, err := strconv.Atoi(r.URL.Query().Get("start"))
+	maxPageSize := cosmos.MAX_PAGE_SIZE_TX_HISTORY
+	cursor, pageSize, err := a.ValidatePagingParams(w, r, cosmos.DEFAULT_PAGE_SIZE_TX_HISTORY, &maxPageSize)
 	if err != nil {
-		start = 0
+		return
 	}
 
-	end, err := strconv.Atoi(r.URL.Query().Get("end"))
-	if err != nil {
-		end = int(time.Now().UnixMilli())
-	}
-
-	affiliateRevenue, err := a.handler.GetAffiliateRevenue(start, end)
+	txHistory, err := a.handler.GetValidatorTxHistory(validatorAddr, cursor, pageSize)
 	if err != nil {
 		api.HandleError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	api.HandleResponse(w, http.StatusOK, affiliateRevenue)
+	api.HandleResponse(w, http.StatusOK, txHistory)
+}
+
+// swagger:route GET /api/v1/gas/fees v1 Fees
+//
+// Get current fees.
+//
+// responses:
+//
+//	200: Fees
+//	400: BadRequestError
+//	500: InternalServerError
+func (a *API) Fees(w http.ResponseWriter, r *http.Request) {
+	fees, err := a.handler.GetFees()
+	if err != nil {
+		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	api.HandleResponse(w, http.StatusOK, fees)
 }
