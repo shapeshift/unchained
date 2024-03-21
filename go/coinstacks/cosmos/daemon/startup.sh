@@ -7,4 +7,4 @@ if [[ -f "$DISABLE_STARTUP_PROBE" ]]; then
   exit 0
 fi
 
-curl -sf http://localhost:27147/status && exit 0 || exit 1
+curl -sf http://localhost:26657/status && exit 0 || exit 1
