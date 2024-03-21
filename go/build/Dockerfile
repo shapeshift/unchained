@@ -1,4 +1,4 @@
-FROM golang:1.21.0 as builder
+FROM golang:1.22.0 as builder
 
 ARG COINSTACK
 
