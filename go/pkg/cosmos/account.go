@@ -259,7 +259,7 @@ func (c *GRPCClient) GetAccount(address string) (*AccountResponse, error) {
 	}
 
 	account := authtypes.BaseAccount{}
-	if err := c.encoding.Marshaler.Unmarshal(res.Account.Value, &account); err != nil {
+	if err := c.encoding.Codec.Unmarshal(res.Account.Value, &account); err != nil {
 		return nil, errors.Wrap(err, "failed to unmarshal account")
 	}
 
