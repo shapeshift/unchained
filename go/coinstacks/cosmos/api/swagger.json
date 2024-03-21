@@ -7,8 +7,8 @@
   ],
   "swagger": "2.0",
   "info": {
-    "description": "Provides access to thorchain chain data.",
-    "title": "Thorchain Unchained API",
+    "description": "Provides access to cosmos chain data.",
+    "title": "Cosmos Unchained API",
     "license": {
       "name": "MIT",
       "url": "http://opensource.org/licenses/MIT"
@@ -215,6 +215,35 @@
         }
       }
     },
+    "/api/v1/gas/fees": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "summary": "Get current fees.",
+        "operationId": "Fees",
+        "responses": {
+          "200": {
+            "description": "Fees",
+            "schema": {
+              "$ref": "#/definitions/Fees"
+            }
+          },
+          "400": {
+            "description": "BadRequestError",
+            "schema": {
+              "$ref": "#/definitions/BadRequestError"
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "schema": {
+              "$ref": "#/definitions/InternalServerError"
+            }
+          }
+        }
+      }
+    },
     "/api/v1/info": {
       "get": {
         "tags": [
@@ -318,6 +347,133 @@
           }
         }
       }
+    },
+    "/api/v1/validators": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "summary": "Get the list of current validators.",
+        "operationId": "GetValidators",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Cursor",
+            "description": "Pagination cursor from previous response or empty string for first page fetch",
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "PageSize",
+            "description": "Page size",
+            "name": "pageSize",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validators",
+            "schema": {
+              "$ref": "#/definitions/Validators"
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "schema": {
+              "$ref": "#/definitions/InternalServerError"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/validators/{pubkey}": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "summary": "Get a specific validator.",
+        "operationId": "GetValidator",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Pubkey",
+            "description": "Account address or xpub",
+            "name": "pubkey",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validator",
+            "schema": {
+              "$ref": "#/definitions/Validator"
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "schema": {
+              "$ref": "#/definitions/InternalServerError"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/validators/{pubkey}/txs": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "summary": "Get paginated transaction history for a validator.",
+        "operationId": "ValidatorTxHistory",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Pubkey",
+            "description": "Account address or xpub",
+            "name": "pubkey",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "Cursor",
+            "description": "Pagination cursor from previous response or empty string for first page fetch",
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "PageSize",
+            "description": "Page size",
+            "name": "pageSize",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "TxHistory",
+            "schema": {
+              "$ref": "#/definitions/TxHistory"
+            }
+          },
+          "400": {
+            "description": "BadRequestError",
+            "schema": {
+              "$ref": "#/definitions/BadRequestError"
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "schema": {
+              "$ref": "#/definitions/InternalServerError"
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -326,9 +482,12 @@
       "allOf": [
         {
           "$ref": "#/definitions/CosmosSDKAccount"
+        },
+        {
+          "$ref": "#/definitions/Staking"
         }
       ],
-      "x-go-package": "github.com/shapeshift/unchained/coinstacks/thorchain/api"
+      "x-go-package": "github.com/shapeshift/unchained/coinstacks/cosmos/api"
     },
     "AffiliateRevenue": {
       "description": "Contains info about the affiliate revenue earned",
@@ -617,6 +776,14 @@
       },
       "x-go-package": "github.com/shapeshift/unchained/pkg/cosmos"
     },
+    "Fees": {
+      "description": "Contains info about the current fees",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "x-go-package": "github.com/shapeshift/unchained/coinstacks/cosmos/api"
+    },
     "GasAmount": {
       "type": "string",
       "x-go-package": "github.com/shapeshift/unchained/pkg/api"
@@ -626,9 +793,46 @@
       "allOf": [
         {
           "$ref": "#/definitions/CosmosSDKInfo"
+        },
+        {
+          "type": "object",
+          "required": [
+            "totalSupply",
+            "bondedTokens",
+            "apr",
+            "annualProvisions",
+            "communityTax"
+          ],
+          "properties": {
+            "annualProvisions": {
+              "type": "string",
+              "x-go-name": "AnnualProvisions",
+              "example": "29255184955917.174457731278996910"
+            },
+            "apr": {
+              "type": "string",
+              "x-go-name": "APR",
+              "example": "0.1541068456"
+            },
+            "bondedTokens": {
+              "type": "string",
+              "x-go-name": "BondedTokens",
+              "example": "186039736185555"
+            },
+            "communityTax": {
+              "type": "string",
+              "x-go-name": "CommunityTax",
+              "example": "0.020000000000000000"
+            },
+            "totalSupply": {
+              "type": "string",
+              "x-go-name": "TotalSupply",
+              "example": "291107634956378"
+            }
+          }
         }
       ],
-      "x-go-package": "github.com/shapeshift/unchained/coinstacks/thorchain/api"
+      "x-go-package": "github.com/shapeshift/unchained/coinstacks/cosmos/api"
     },
     "InternalServerError": {
       "description": "Contains info about a 500 Internal Server Error response",

@@ -9,7 +9,7 @@ fi
 
 FILE=/root/.latest_block_height
 
-STATUS=$(curl -sf http://localhost:27147/status) || exit 1
+STATUS=$(curl -sf http://localhost:26657/status) || exit 1
 
 LATEST_BLOCK_HEIGHT=$(echo $STATUS | jq -r '.result.sync_info.latest_block_height')
 
