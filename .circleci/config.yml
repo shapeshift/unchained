@@ -3,7 +3,7 @@ version: 2.1
 executors:
   pulumi:
     docker:
-      - image: pulumi/pulumi-nodejs:3.96.2
+      - image: pulumi/pulumi-nodejs:3.111.1
 
 aliases:
   - &only-feature
@@ -252,45 +252,6 @@ aliases:
     api-max-replicas: 2
     stateful-service-replicas: 0
 
-  - &cosmos
-    assetName: cosmos
-    pulumi-stack: public-us-east-2
-    pulumi-dir: coinstacks/cosmos/pulumi
-    lcd-url: http://cosmos-svc.unchained.svc.cluster.local:1317
-    grpc-url: cosmos-svc.unchained.svc.cluster.local:9090
-    rpc-url: http://cosmos-svc.unchained.svc.cluster.local:26657
-    ws-url: ws://cosmos-svc.unchained.svc.cluster.local:26657
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
-    api-cpu-threshold: 75
-    api-memory-limit: 1Gi
-    api-memory-request: 500Mi
-    stateful-service-replicas: 2
-    service-name-1: daemon
-    service-image-1: shapeshiftdao/cosmoshub:v14.2.0
-    service-cpu-limit-1: "4"
-    service-cpu-request-1: "2"
-    service-memory-limit-1: 64Gi
-    service-storage-size-1: 5000Gi
-    service-storage-iops-1: "6000"
-    service-storage-throughput-1: "300"
-
-  - &cosmos-dev
-    <<: *cosmos
-    environment: dev
-    pulumi-stack: public-dev-us-east-2
-    lcd-url: http://cosmos-svc.unchained-dev.svc.cluster.local:1317
-    grpc-url: cosmos-svc.unchained-dev.svc.cluster.local:9090
-    rpc-url: http://cosmos-svc.unchained-dev.svc.cluster.local:26657
-    ws-url: ws://cosmos-svc.unchained-dev.svc.cluster.local:26657
-    api-replicas: 1
-    api-max-replicas: 2
-    api-memory-limit: 500Mi
-    stateful-service-replicas: 1
-
   - &avalanche
     assetName: avalanche
     pulumi-stack: public-us-east-2
@@ -310,16 +271,16 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 1
     service-name-1: daemon
-    service-image-1: avaplatform/avalanchego:v1.11.2
+    service-image-1: avaplatform/avalanchego:v1.11.3
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
-    service-memory-limit-1: 32Gi
+    service-memory-limit-1: 16Gi
     service-storage-size-1: 5750Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:c2cb648
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 8Gi
+    service-memory-limit-2: 6Gi
     service-storage-size-2: 500Gi
 
   - &avalanche-dev
@@ -362,7 +323,7 @@ aliases:
     service-image-2: shapeshiftdao/unchained-blockbook:c2cb648
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 16Gi
+    service-memory-limit-2: 12Gi
     service-storage-size-2: 250Gi
 
   - &dogecoin-dev
@@ -402,7 +363,7 @@ aliases:
     service-image-2: shapeshiftdao/unchained-blockbook:c2cb648
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 16Gi
+    service-memory-limit-2: 8Gi
     service-storage-size-2: 250Gi
 
   - &litecoin-dev
@@ -473,7 +434,7 @@ aliases:
     api-memory-request: 250Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.129.0
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.130.1
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 12Gi
@@ -526,7 +487,7 @@ aliases:
     service-memory-limit-1: 24Gi
     service-storage-size-1: 1250Gi
     service-name-2: op-node
-    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.7.1
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.7.2
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 2Gi
@@ -614,9 +575,9 @@ aliases:
     stateful-service-replicas: 1
     service-name-1: daemon
     service-image-1: 0xpolygon/bor:1.2.8
-    service-cpu-limit-1: "8"
-    service-cpu-request-1: "4"
-    service-memory-limit-1: 64Gi
+    service-cpu-limit-1: "4"
+    service-cpu-request-1: "2"
+    service-memory-limit-1: 48Gi
     service-storage-size-1: 4000Gi
     service-storage-iops-1: "6000"
     service-storage-throughput-1: "300"
@@ -628,9 +589,9 @@ aliases:
     service-storage-size-2: 500Gi
     service-name-3: indexer
     service-image-3: shapeshiftdao/unchained-blockbook:c2cb648
-    service-cpu-limit-3: "4"
-    service-cpu-request-3: "2"
-    service-memory-limit-3: 32Gi
+    service-cpu-limit-3: "2"
+    service-cpu-request-3: "1"
+    service-memory-limit-3: 24Gi
     service-storage-size-3: 1000Gi
 
   - &polygon-dev
@@ -669,7 +630,7 @@ aliases:
     service-memory-limit-1: 6Gi
     service-storage-size-1: 1000Gi
     service-name-2: daemon-beacon
-    service-image-2: sigp/lighthouse:v5.1.1
+    service-image-2: sigp/lighthouse:v5.1.2
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 4Gi
@@ -715,13 +676,13 @@ aliases:
     service-image-1: offchainlabs/nitro-node:v2.3.2-064fa11
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
-    service-memory-limit-1: 24Gi
+    service-memory-limit-1: 18Gi
     service-storage-size-1: 750Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:arbitrum-0e84937
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 16Gi
+    service-memory-limit-2: 12Gi
     service-storage-size-2: 500Gi
 
   - &arbitrum-dev
@@ -736,47 +697,6 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
     stateful-service-replicas: 0
-
-  - &arbitrum-nova
-    assetName: arbitrum-nova
-    pulumi-stack: public-us-east-2
-    pulumi-dir: coinstacks/arbitrum-nova/pulumi
-    rpc-url: http://arbitrum-nova-svc.unchained.svc.cluster.local:8547
-    indexer-url: http://arbitrum-nova-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://arbitrum-nova-svc.unchained.svc.cluster.local:8001/websocket
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
-    api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-    api-memory-request: 250Mi
-    stateful-service-replicas: 2
-    service-name-1: daemon
-    service-image-1: offchainlabs/nitro-node:v2.3.2-064fa11
-    service-cpu-limit-1: "2"
-    service-cpu-request-1: "1"
-    service-memory-limit-1: 16Gi
-    service-storage-size-1: 500Gi
-    service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:arbitrum-0e84937
-    service-cpu-limit-2: "2"
-    service-cpu-request-2: "1"
-    service-memory-limit-2: 6Gi
-    service-storage-size-2: 500Gi
-
-  - &arbitrum-nova-dev
-    <<: *arbitrum-nova
-    environment: dev
-    pulumi-stack: public-dev-us-east-2
-    rpc-url: http://arbitrum-nova-svc.unchained-dev.svc.cluster.local:8547
-    indexer-url: http://arbitrum-nova-svc.unchained-dev.svc.cluster.local:8001
-    indexer-ws-url: ws://arbitrum-nova-svc.unchained-dev.svc.cluster.local:8001/websocket
-    api-replicas: 1
-    api-max-replicas: 2
-    api-memory-limit: 250Mi
-    stateful-service-replicas: 1
 
 commands:
   precheck:
@@ -839,12 +759,12 @@ commands:
       - run:
           name: install docker cli
           command: |
-            wget -O dockercli.deb https://download.docker.com/linux/debian/dists/buster/pool/stable/amd64/docker-ce-cli_20.10.22~3-0~debian-buster_amd64.deb
+            wget -O dockercli.deb https://download.docker.com/linux/debian/dists/bullseye/pool/stable/amd64/docker-ce-cli_26.0.0-1~debian.11~bullseye_amd64.deb
             dpkg -i dockercli.deb
       - run:
           name: install kubectl
           command: |
-            wget -O kubectl "https://dl.k8s.io/release/v1.26.0/bin/linux/amd64/kubectl"
+            wget -O kubectl "https://dl.k8s.io/release/v1.29.2/bin/linux/amd64/kubectl"
             chmod +x kubectl
             mv ./kubectl /usr/local/bin/kubectl
       - run:
@@ -866,7 +786,7 @@ commands:
       - run:
           name: install helm charts
           command: |
-            wget -O helm.tar.gz https://get.helm.sh/helm-v3.11.0-linux-amd64.tar.gz
+            wget -O helm.tar.gz https://get.helm.sh/helm-v3.14.3-linux-amd64.tar.gz
             tar -zxvf helm.tar.gz
             mv linux-amd64/helm /usr/local/bin/helm
             helm repo add autoscaler https://kubernetes.github.io/autoscaler
@@ -1153,7 +1073,7 @@ jobs:
   lint-and-test:
     description: lint and test project
     machine:
-      image: ubuntu-2204:2023.10.1
+      image: ubuntu-2204:current
     resource_class: large
     steps:
       - checkout
@@ -1162,7 +1082,7 @@ jobs:
   lint-and-test-persist:
     description: lint and test project (persist to workspace)
     machine:
-      image: ubuntu-2204:2023.10.1
+      image: ubuntu-2204:current
     resource_class: large
     steps:
       - checkout
@@ -1301,25 +1221,6 @@ workflows:
           requires:
             - deploy dependencies
           <<: *arbitrum-dev
-          <<: *only-develop
-
-      - deploy-coinstack-node:
-          name: deploy arbitrum nova develop
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          etherscan-env-var: ETHERSCAN_API_KEY_ARBITRUM_NOVA
-          requires:
-            - deploy dependencies
-          <<: *arbitrum-nova-dev
-          <<: *only-develop
-
-      - deploy-coinstack-go:
-          name: deploy cosmos develop
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - deploy dependencies
-          <<: *cosmos-dev
           <<: *only-develop
 
       - deploy-coinstack-go:
@@ -1643,58 +1544,6 @@ workflows:
           requires:
             - approve arbitrum coinstack
           <<: *arbitrum
-          <<: *only-main
-
-      ####### ARBITRUM NOVA
-      - deploy-coinstack-node:
-          name: preview arbitrum nova
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - validate dependencies
-          <<: *arbitrum-nova
-          <<: *only-main
-
-      - approve-coinstack:
-          name: approve arbitrum nova coinstack
-          type: approval
-          requires:
-            - preview arbitrum nova
-          <<: *only-main
-
-      - deploy-coinstack-node:
-          name: deploy arbitrum nova
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve arbitrum nova coinstack
-          <<: *arbitrum-nova
-          <<: *only-main
-
-      ####### COSMOS
-      - deploy-coinstack-go:
-          name: preview cosmos
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - validate dependencies
-          <<: *cosmos
-          <<: *only-main
-
-      - approve-coinstack:
-          name: approve cosmos coinstack
-          type: approval
-          requires:
-            - preview cosmos
-          <<: *only-main
-
-      - deploy-coinstack-go:
-          name: deploy cosmos
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve cosmos coinstack
-          <<: *cosmos
           <<: *only-main
 
       ####### THORCHAIN
