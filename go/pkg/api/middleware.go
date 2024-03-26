@@ -46,19 +46,17 @@ func Logger(prometheus *metrics.Prometheus) mux.MiddlewareFunc {
 
 			statusLogger := log.WithFields(log.Fields{"method": r.Method, "statusCode": sw.status, "responseTime": duration.String()})
 
-			if strings.HasPrefix(r.RequestURI, "/api/v1/") || sw.status != 404 {
+			if strings.HasPrefix(r.RequestURI, "/api/v1/") && sw.status != 404 {
 				labels := metrics.Labels{"method": r.Method, "route": r.RequestURI, "statusCode": strconv.Itoa(sw.status)}
+
 				prometheus.Metrics.HTTPRequestCounter.With(labels).Inc()
 				prometheus.Metrics.HTTPRequestDurationSeconds.With(labels).Observe(duration.Seconds())
-			}
 
-			if sw.status < http.StatusOK || sw.status >= http.StatusBadRequest {
-				statusLogger.Errorf("%s", r.RequestURI)
-				return
-			}
-
-			if !strings.Contains(r.RequestURI, "/health") {
-				statusLogger.Infof("%s from %s", r.RequestURI, r.RemoteAddr)
+				if sw.status < http.StatusOK || sw.status >= http.StatusBadRequest {
+					statusLogger.Errorf("%s", r.RequestURI)
+				} else {
+					statusLogger.Infof("%s from %s", r.RequestURI, r.RemoteAddr)
+				}
 			}
 		})
 	}
