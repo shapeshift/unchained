@@ -762,6 +762,9 @@ commands:
             wget -O dockercli.deb https://download.docker.com/linux/debian/dists/bullseye/pool/stable/amd64/docker-ce-cli_26.0.0-1~debian.11~bullseye_amd64.deb
             dpkg -i dockercli.deb
       - run:
+          name: install docker buildx
+          command: docker buildx install
+      - run:
           name: install kubectl
           command: |
             wget -O kubectl "https://dl.k8s.io/release/v1.29.2/bin/linux/amd64/kubectl"
@@ -1125,8 +1128,7 @@ workflows:
           pulumi-command: up -f --yes
           requires:
             - deploy dependencies
-          <<: *bitcoin-dev
-          <<: *only-develop
+          <<: [*bitcoin-dev, *only-develop]
 
       - deploy-coinstack-node:
           name: deploy dogecoin develop
@@ -1134,8 +1136,7 @@ workflows:
           pulumi-command: up -f --yes
           requires:
             - deploy dependencies
-          <<: *dogecoin-dev
-          <<: *only-develop
+          <<: [*dogecoin-dev, *only-develop]
 
       - deploy-coinstack-node:
           name: deploy litecoin develop
@@ -1143,8 +1144,7 @@ workflows:
           pulumi-command: up -f --yes
           requires:
             - deploy dependencies
-          <<: *litecoin-dev
-          <<: *only-develop
+          <<: [*litecoin-dev, *only-develop]
 
       - deploy-coinstack-node:
           name: deploy bitcoincash develop
@@ -1152,8 +1152,7 @@ workflows:
           pulumi-command: up -f --yes
           requires:
             - deploy dependencies
-          <<: *bitcoincash-dev
-          <<: *only-develop
+          <<: [*bitcoincash-dev, *only-develop]
 
       - deploy-coinstack-node:
           name: deploy ethereum develop
@@ -1161,8 +1160,7 @@ workflows:
           pulumi-command: up -f --yes
           requires:
             - deploy dependencies
-          <<: *ethereum-dev
-          <<: *only-develop
+          <<: [*ethereum-dev, *only-develop]
 
       - deploy-coinstack-node:
           name: deploy avalanche develop
@@ -1170,8 +1168,7 @@ workflows:
           pulumi-command: up -f --yes
           requires:
             - deploy dependencies
-          <<: *avalanche-dev
-          <<: *only-develop
+          <<: [*avalanche-dev, *only-develop]
 
       - deploy-coinstack-node:
           name: deploy optimism develop
@@ -1180,8 +1177,7 @@ workflows:
           etherscan-env-var: ETHERSCAN_API_KEY_OPTIMISM
           requires:
             - deploy dependencies
-          <<: *optimism-dev
-          <<: *only-develop
+          <<: [*optimism-dev, *only-develop]
 
       - deploy-coinstack-node:
           name: deploy bnbsmartchain develop
@@ -1190,8 +1186,7 @@ workflows:
           etherscan-env-var: ETHERSCAN_API_KEY_BSC
           requires:
             - deploy dependencies
-          <<: *bnbsmartchain-dev
-          <<: *only-develop
+          <<: [*bnbsmartchain-dev, *only-develop]
 
       - deploy-coinstack-node:
           name: deploy polygon develop
@@ -1200,8 +1195,7 @@ workflows:
           etherscan-env-var: ETHERSCAN_API_KEY_POLYGON
           requires:
             - deploy dependencies
-          <<: *polygon-dev
-          <<: *only-develop
+          <<: [*polygon-dev, *only-develop]
 
       - deploy-coinstack-node:
           name: deploy gnosis develop
@@ -1210,8 +1204,7 @@ workflows:
           etherscan-env-var: ETHERSCAN_API_KEY_GNOSIS
           requires:
             - deploy dependencies
-          <<: *gnosis-dev
-          <<: *only-develop
+          <<: [*gnosis-dev, *only-develop]
 
       - deploy-coinstack-node:
           name: deploy arbitrum develop
@@ -1220,8 +1213,7 @@ workflows:
           etherscan-env-var: ETHERSCAN_API_KEY_ARBITRUM
           requires:
             - deploy dependencies
-          <<: *arbitrum-dev
-          <<: *only-develop
+          <<: [*arbitrum-dev, *only-develop]
 
       - deploy-coinstack-go:
           name: deploy thorchain develop
@@ -1229,8 +1221,7 @@ workflows:
           pulumi-command: up -f --yes
           requires:
             - deploy dependencies
-          <<: *thorchain-dev
-          <<: *only-develop
+          <<: [*thorchain-dev, *only-develop]
 
       - deploy-monitoring-pulumi:
           name: deploy monitoring pulumi
@@ -1261,8 +1252,7 @@ workflows:
           pulumi-command: preview
           requires:
             - validate dependencies
-          <<: *bitcoin
-          <<: *only-main
+          <<: [*bitcoin, *only-main]
 
       - approve-coinstack:
           name: approve bitcoin coinstack
@@ -1277,8 +1267,7 @@ workflows:
           pulumi-command: up -f --yes
           requires:
             - approve bitcoin coinstack
-          <<: *bitcoin
-          <<: *only-main
+          <<: [*bitcoin, *only-main]
 
       ####### BITCOINCASH
       - deploy-coinstack-node:
@@ -1287,8 +1276,7 @@ workflows:
           pulumi-command: preview
           requires:
             - validate dependencies
-          <<: *bitcoincash
-          <<: *only-main
+          <<: [*bitcoincash, *only-main]
 
       - approve-coinstack:
           name: approve bitcoincash coinstack
@@ -1303,8 +1291,7 @@ workflows:
           pulumi-command: up -f --yes
           requires:
             - approve bitcoincash coinstack
-          <<: *bitcoincash
-          <<: *only-main
+          <<: [*bitcoincash, *only-main]
 
       ####### DOGECOIN
       - deploy-coinstack-node:
@@ -1313,8 +1300,7 @@ workflows:
           pulumi-command: preview
           requires:
             - validate dependencies
-          <<: *dogecoin
-          <<: *only-main
+          <<: [*dogecoin, *only-main]
 
       - approve-coinstack:
           name: approve dogecoin coinstack
@@ -1329,8 +1315,7 @@ workflows:
           pulumi-command: up -f --yes
           requires:
             - approve dogecoin coinstack
-          <<: *dogecoin
-          <<: *only-main
+          <<: [*dogecoin, *only-main]
 
       ####### LITECOIN
       - deploy-coinstack-node:
@@ -1339,8 +1324,7 @@ workflows:
           pulumi-command: preview
           requires:
             - validate dependencies
-          <<: *litecoin
-          <<: *only-main
+          <<: [*litecoin, *only-main]
 
       - approve-coinstack:
           name: approve litecoin coinstack
@@ -1355,8 +1339,7 @@ workflows:
           pulumi-command: up -f --yes
           requires:
             - approve litecoin coinstack
-          <<: *litecoin
-          <<: *only-main
+          <<: [*litecoin, *only-main]
 
       ####### ETHEREUM
       - deploy-coinstack-node:
@@ -1365,8 +1348,7 @@ workflows:
           pulumi-command: preview
           requires:
             - validate dependencies
-          <<: *ethereum
-          <<: *only-main
+          <<: [*ethereum, *only-main]
 
       - approve-coinstack:
           name: approve ethereum coinstack
@@ -1381,8 +1363,7 @@ workflows:
           pulumi-command: up -f --yes
           requires:
             - approve ethereum coinstack
-          <<: *ethereum
-          <<: *only-main
+          <<: [*ethereum, *only-main]
 
       ####### AVALANCHE
       - deploy-coinstack-node:
@@ -1391,8 +1372,7 @@ workflows:
           pulumi-command: preview
           requires:
             - validate dependencies
-          <<: *avalanche
-          <<: *only-main
+          <<: [*avalanche, *only-main]
 
       - approve-coinstack:
           name: approve avalanche coinstack
@@ -1407,8 +1387,7 @@ workflows:
           pulumi-command: up -f --yes
           requires:
             - approve avalanche coinstack
-          <<: *avalanche
-          <<: *only-main
+          <<: [*avalanche, *only-main]
 
       ####### OPTIMISM
       - deploy-coinstack-node:
@@ -1418,8 +1397,7 @@ workflows:
           etherscan-env-var: ETHERSCAN_API_KEY_OPTIMISM
           requires:
             - validate dependencies
-          <<: *optimism
-          <<: *only-main
+          <<: [*optimism, *only-main]
 
       - approve-coinstack:
           name: approve optimism coinstack
@@ -1435,8 +1413,7 @@ workflows:
           etherscan-env-var: ETHERSCAN_API_KEY_OPTIMISM
           requires:
             - approve optimism coinstack
-          <<: *optimism
-          <<: *only-main
+          <<: [*optimism, *only-main]
 
       ####### BNB SMART CHAIN
       - deploy-coinstack-node:
@@ -1446,8 +1423,7 @@ workflows:
           etherscan-env-var: ETHERSCAN_API_KEY_BSC
           requires:
             - validate dependencies
-          <<: *bnbsmartchain
-          <<: *only-main
+          <<: [*bnbsmartchain, *only-main]
 
       - approve-coinstack:
           name: approve bnbsmartchain coinstack
@@ -1463,8 +1439,7 @@ workflows:
           etherscan-env-var: ETHERSCAN_API_KEY_BSC
           requires:
             - approve bnbsmartchain coinstack
-          <<: *bnbsmartchain
-          <<: *only-main
+          <<: [*bnbsmartchain, *only-main]
 
       ####### POLYGON
       - deploy-coinstack-node:
@@ -1474,8 +1449,7 @@ workflows:
           etherscan-env-var: ETHERSCAN_API_KEY_POLYGON
           requires:
             - validate dependencies
-          <<: *polygon
-          <<: *only-main
+          <<: [*polygon, *only-main]
 
       - approve-coinstack:
           name: approve polygon coinstack
@@ -1491,8 +1465,7 @@ workflows:
           etherscan-env-var: ETHERSCAN_API_KEY_POLYGON
           requires:
             - approve polygon coinstack
-          <<: *polygon
-          <<: *only-main
+          <<: [*polygon, *only-main]
 
       ####### GNOSIS
       - deploy-coinstack-node:
@@ -1501,8 +1474,7 @@ workflows:
           pulumi-command: preview
           requires:
             - validate dependencies
-          <<: *gnosis
-          <<: *only-main
+          <<: [*gnosis, *only-main]
 
       - approve-coinstack:
           name: approve gnosis coinstack
@@ -1517,8 +1489,7 @@ workflows:
           pulumi-command: up -f --yes
           requires:
             - approve gnosis coinstack
-          <<: *gnosis
-          <<: *only-main
+          <<: [*gnosis, *only-main]
 
       ####### ARBITRUM
       - deploy-coinstack-node:
@@ -1527,8 +1498,7 @@ workflows:
           pulumi-command: preview
           requires:
             - validate dependencies
-          <<: *arbitrum
-          <<: *only-main
+          <<: [*arbitrum, *only-main]
 
       - approve-coinstack:
           name: approve arbitrum coinstack
@@ -1543,8 +1513,7 @@ workflows:
           pulumi-command: up -f --yes
           requires:
             - approve arbitrum coinstack
-          <<: *arbitrum
-          <<: *only-main
+          <<: [*arbitrum, *only-main]
 
       ####### THORCHAIN
       - deploy-coinstack-go:
@@ -1553,8 +1522,7 @@ workflows:
           pulumi-command: preview
           requires:
             - validate dependencies
-          <<: *thorchain
-          <<: *only-main
+          <<: [*thorchain, *only-main]
 
       - approve-coinstack:
           name: approve thorchain coinstack
@@ -1569,5 +1537,4 @@ workflows:
           pulumi-command: up -f --yes
           requires:
             - approve thorchain coinstack
-          <<: *thorchain
-          <<: *only-main
+          <<: [*thorchain, *only-main]
