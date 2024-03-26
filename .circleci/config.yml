@@ -759,11 +759,13 @@ commands:
       - run:
           name: install docker cli
           command: |
-            wget -O dockercli.deb https://download.docker.com/linux/debian/dists/bullseye/pool/stable/amd64/docker-ce-cli_26.0.0-1~debian.11~bullseye_amd64.deb
-            dpkg -i dockercli.deb
+            wget -O docker-ce-cli.deb https://download.docker.com/linux/debian/dists/bullseye/pool/stable/amd64/docker-ce-cli_26.0.0-1~debian.11~bullseye_amd64.deb
+            dpkg -i docker-ce-cli.deb
       - run:
-          name: install docker buildx
-          command: docker buildx install
+          name: install docker buildx plugin
+          command: |
+            wget -O docker-buildx-plugin.deb https://download.docker.com/linux/debian/dists/bullseye/pool/stable/amd64/docker-buildx-plugin_0.13.1-1~debian.11~bullseye_amd64.deb
+            dpkg -i docker-buildx-plugin.deb
       - run:
           name: install kubectl
           command: |
