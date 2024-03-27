@@ -60,8 +60,22 @@ app.get('/', async (_, res) => {
 
 app.use(middleware.errorHandler, middleware.notFoundHandler)
 
-const blockHandler: BlockHandler<NewBlock, Array<BlockbookTx>> = async (block) => {
-  const txs = await service.handleBlock(block.hash)
+const blockHandler: BlockHandler<NewBlock, Array<{ addresses: Array<string>; tx: evm.Tx }>> = async (block) => {
+  const [blockbookTxs, internalTxs] = await Promise.all([
+    service.handleBlock(block.hash),
+    service.fetchInternalTxsByBlockDebug(block.hash),
+  ])
+
+  const txs = blockbookTxs.map((t) => {
+    const tx = service.handleTransaction(t)
+    tx.internalTxs = internalTxs[t.txid]
+
+    const internalAddresses = (tx.internalTxs ?? []).reduce<Array<string>>((prev, tx) => [...prev, tx.to, tx.from], [])
+    const addresses = [...new Set([...getAddresses(t), ...internalAddresses])]
+
+    return { addresses, tx }
+  })
+
   return { txs }
 }
 
@@ -75,15 +89,15 @@ const transactionHandler: TransactionHandler<BlockbookTx, evm.Tx> = async (block
 
 const registry = new Registry({ addressFormatter: evm.formatAddress, blockHandler, transactionHandler })
 
+const blockbook = new WebsocketClient(INDEXER_WS_URL, {
+  apiKey: INDEXER_API_KEY,
+  blockHandler: [registry.onBlock.bind(registry), gasOracle.onBlock.bind(gasOracle)],
+  transactionHandler: registry.onTransaction.bind(registry),
+})
+
 const server = app.listen(PORT, () => logger.info('Server started'))
 const wsServer = new Server({ server })
 
 wsServer.on('connection', (connection) => {
-  ConnectionHandler.start(connection, registry, prometheus, logger)
-})
-
-new WebsocketClient(INDEXER_WS_URL, {
-  apiKey: INDEXER_API_KEY,
-  blockHandler: [registry.onBlock.bind(registry), gasOracle.onBlock.bind(gasOracle)],
-  transactionHandler: registry.onTransaction.bind(registry),
+  ConnectionHandler.start(connection, registry, blockbook, prometheus, logger)
 })

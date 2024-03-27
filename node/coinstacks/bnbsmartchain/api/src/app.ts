@@ -91,15 +91,15 @@ const transactionHandler: TransactionHandler<BlockbookTx, evm.Tx> = async (block
 
 const registry = new Registry({ addressFormatter: evm.formatAddress, blockHandler, transactionHandler })
 
+const blockbook = new WebsocketClient(INDEXER_WS_URL, {
+  apiKey: INDEXER_API_KEY,
+  blockHandler: [registry.onBlock.bind(registry), gasOracle.onBlock.bind(gasOracle)],
+  transactionHandler: registry.onTransaction.bind(registry),
+})
+
 const server = app.listen(PORT, () => logger.info('Server started'))
 const wsServer = new Server({ server })
 
 wsServer.on('connection', (connection) => {
-  ConnectionHandler.start(connection, registry, prometheus, logger)
-})
-
-new WebsocketClient(INDEXER_WS_URL, {
-  apiKey: INDEXER_API_KEY,
-  blockHandler: [registry.onBlock.bind(registry), gasOracle.onBlock.bind(gasOracle)],
-  transactionHandler: registry.onTransaction.bind(registry),
+  ConnectionHandler.start(connection, registry, blockbook, prometheus, logger)
 })

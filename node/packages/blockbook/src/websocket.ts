@@ -6,7 +6,7 @@ import { NewBlock, WebsocketRepsonse } from '.'
 export interface Subscription {
   id: string
   method: string
-  params?: Record<string, string>
+  params?: unknown
 }
 
 export interface Args {
@@ -88,25 +88,11 @@ export class WebsocketClient {
   private onOpen(): void {
     this.logger.debug({ fn: 'ws.onopen' }, 'websocket opened')
     this.retryCount = 0
-    this.interval = setInterval(() => {
-      this.socket.ping()
-    }, this.pingInterval)
+    this.interval = setInterval(() => this.socket.ping(), this.pingInterval)
     this.heartbeat()
 
-    const newBlock: Subscription = {
-      id: 'newBlock',
-      method: 'subscribeNewBlock',
-      params: {},
-    }
-
-    const newTx: Subscription = {
-      id: 'newTx',
-      method: 'subscribeNewTransaction',
-      params: {},
-    }
-
-    this.socket.send(JSON.stringify(newBlock))
-    this.socket.send(JSON.stringify(newTx))
+    const subscribeNewBlock: Subscription = { id: 'newBlock', method: 'subscribeNewBlock', params: {} }
+    this.socket.send(JSON.stringify(subscribeNewBlock))
   }
 
   private async onMessage(message: WebSocket.MessageEvent): Promise<void> {
@@ -119,6 +105,7 @@ export class WebsocketClient {
         case 'newBlock':
           if ('hash' in res.data) {
             const newBlock = res.data
+
             if (Array.isArray(this.handleBlock)) {
               this.handleBlock.map(async (handleBlock) => handleBlock(newBlock))
             } else {
@@ -127,8 +114,9 @@ export class WebsocketClient {
           }
           return
         case 'newTx':
-          if ('txid' in res.data) {
-            const newTx = res.data
+          if ('tx' in res.data) {
+            const newTx = res.data.tx
+
             if (Array.isArray(this.handleTransaction)) {
               this.handleTransaction.map(async (handleTransaction) => handleTransaction(newTx))
             } else {
@@ -140,5 +128,10 @@ export class WebsocketClient {
     } catch (err) {
       this.logger.error(err, `failed to handle message: ${JSON.stringify(message)}`)
     }
+  }
+
+  subscribeAddresses(addresses: string[]): void {
+    const subscribeAddresses: Subscription = { id: 'newTx', method: 'subscribeAddresses', params: { addresses } }
+    this.socket.send(JSON.stringify(subscribeAddresses))
   }
 }
