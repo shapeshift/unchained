@@ -1,5 +1,6 @@
 import WebSocket from 'ws'
 import { v4 } from 'uuid'
+import { WebsocketClient } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
 import { Registry } from './registry'
 import { Prometheus } from './prometheus'
@@ -41,17 +42,25 @@ export class ConnectionHandler {
 
   private readonly websocket: WebSocket
   private readonly registry: Registry
+  private readonly blockbook: WebsocketClient
   private readonly prometheus: Prometheus
   private readonly logger: Logger
   private readonly routes: Record<Topics, Methods>
   private readonly pingIntervalMs = 10000
 
   private pingTimeout?: NodeJS.Timeout
-  private subscriptionIds = new Map<string, void>()
+  private subscriptionIds = new Set<string>()
 
-  private constructor(websocket: WebSocket, registry: Registry, prometheus: Prometheus, logger: Logger) {
+  private constructor(
+    websocket: WebSocket,
+    registry: Registry,
+    blockbook: WebsocketClient,
+    prometheus: Prometheus,
+    logger: Logger
+  ) {
     this.clientId = v4()
     this.registry = registry
+    this.blockbook = blockbook
     this.prometheus = prometheus
     this.logger = logger.child({ namespace: ['websocket'] })
     this.routes = {
@@ -84,8 +93,14 @@ export class ConnectionHandler {
     this.websocket.onmessage = (event) => this.onMessage(event)
   }
 
-  static start(websocket: WebSocket, registry: Registry, prometheus: Prometheus, logger: Logger): void {
-    new ConnectionHandler(websocket, registry, prometheus, logger)
+  static start(
+    websocket: WebSocket,
+    registry: Registry,
+    blockbook: WebsocketClient,
+    prometheus: Prometheus,
+    logger: Logger
+  ): void {
+    new ConnectionHandler(websocket, registry, blockbook, prometheus, logger)
   }
 
   private heartbeat(): void {
@@ -139,11 +154,12 @@ export class ConnectionHandler {
     this.pingTimeout && clearTimeout(this.pingTimeout)
     clearInterval(interval)
 
-    for (const subscriptionId of this.subscriptionIds.keys()) {
+    for (const subscriptionId of this.subscriptionIds) {
       this.registry.unsubscribe(this.clientId, subscriptionId, [])
     }
 
     this.subscriptionIds.clear()
+    this.blockbook.subscribeAddresses(this.registry.getAddresses())
   }
 
   private handleSubscribeTxs(subscriptionId: string, data?: TxsTopicData): void {
@@ -152,13 +168,15 @@ export class ConnectionHandler {
       return
     }
 
-    this.subscriptionIds.set(subscriptionId)
+    this.subscriptionIds.add(subscriptionId)
     this.registry.subscribe(this.clientId, subscriptionId, this, data.addresses)
+    this.blockbook.subscribeAddresses(this.registry.getAddresses())
   }
 
   private handleUnsubscribeTxs(subscriptionId: string, data?: TxsTopicData): void {
     this.subscriptionIds.delete(subscriptionId)
     this.registry.unsubscribe(this.clientId, subscriptionId, data?.addresses ?? [])
+    this.blockbook.subscribeAddresses(this.registry.getAddresses())
   }
 
   publish(subscriptionId: string, address: string, data: unknown): void {

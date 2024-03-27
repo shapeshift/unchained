@@ -23,8 +23,8 @@ export interface RegistryArgs {
  * unchained transaction payloads will be sent to any clients that have an address registered that was found in the transaction.
  */
 export class Registry {
-  private clients: Record<string, Map<string, void>>
-  private addresses: Record<string, Map<string, ConnectionHandler>>
+  private clients: Record<string, Set<string>> = {}
+  private addresses: Record<string, Map<string, ConnectionHandler>> = {}
 
   private handleBlock: BlockHandler
   private handleTransaction: TransactionHandler
@@ -33,9 +33,6 @@ export class Registry {
   private logger = new Logger({ namespace: ['unchained', 'common', 'api', 'registry'], level: process.env.LOG_LEVEL })
 
   constructor(args: RegistryArgs) {
-    this.clients = {}
-    this.addresses = {}
-
     this.handleBlock = args.blockHandler
     this.handleTransaction = args.transactionHandler
 
@@ -51,6 +48,10 @@ export class Registry {
     return { clientId, subscriptionId }
   }
 
+  getAddresses(): Array<string> {
+    return Object.keys(this.addresses)
+  }
+
   /**
    * Subscribe to new pending/confirmed transactions for addresses by clientId
    *
@@ -62,14 +63,14 @@ export class Registry {
   subscribe(clientId: string, subscriptionId: string, connection: ConnectionHandler, addresses: Array<string>) {
     const id = Registry.toId(clientId, subscriptionId)
 
-    if (!this.clients[id]) this.clients[id] = new Map<string, void>()
+    if (!this.clients[id]) this.clients[id] = new Set<string>()
 
     addresses.forEach((address) => {
       address = this.formatAddress(address)
 
       if (!this.addresses[address]) this.addresses[address] = new Map<string, ConnectionHandler>()
 
-      this.clients[id].set(address)
+      this.clients[id].add(address)
       this.addresses[address].set(id, connection)
     })
   }
@@ -105,7 +106,7 @@ export class Registry {
     }
 
     if (!addresses.length) {
-      for (const address of this.clients[id].keys()) {
+      for (const address of this.clients[id]) {
         unregister(id, address)
       }
     } else {
