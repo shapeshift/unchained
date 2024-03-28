@@ -311,6 +311,146 @@
 				"$ref": "#/components/schemas/BaseTxHistory_Tx_",
 				"description": "Contains info about EVM transaction history"
 			},
+			"SendTxBody": {
+				"description": "Contains the serialized raw transaction hex",
+				"properties": {
+					"hex": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"hex"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"RPCResponse": {
+				"properties": {
+					"jsonrpc": {
+						"type": "string",
+						"enum": [
+							"2.0"
+						],
+						"nullable": false
+					},
+					"id": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "number",
+								"format": "double"
+							}
+						]
+					},
+					"result": {},
+					"error": {
+						"properties": {
+							"data": {},
+							"message": {
+								"type": "string"
+							},
+							"code": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"message",
+							"code"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"jsonrpc",
+					"id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"RPCRequest": {
+				"properties": {
+					"jsonrpc": {
+						"type": "string",
+						"enum": [
+							"2.0"
+						],
+						"nullable": false
+					},
+					"id": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "number",
+								"format": "double"
+							}
+						]
+					},
+					"method": {
+						"type": "string"
+					},
+					"params": {
+						"items": {},
+						"type": "array"
+					}
+				},
+				"required": [
+					"jsonrpc",
+					"id",
+					"method",
+					"params"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TokenMetadata": {
+				"description": "Contains info about token metadata (ERC-721/ERC-1155)",
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"media": {
+						"properties": {
+							"type": {
+								"type": "string",
+								"enum": [
+									"image",
+									"video"
+								]
+							},
+							"url": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"url"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"name",
+					"description",
+					"media"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TokenType": {
+				"type": "string",
+				"enum": [
+					"erc721",
+					"erc1155"
+				],
+				"description": "Supported token types for token metadata"
+			},
 			"GasEstimate": {
 				"description": "Contains info about estimated gas cost of a transaction",
 				"properties": {
@@ -373,63 +513,6 @@
 				],
 				"type": "object",
 				"additionalProperties": false
-			},
-			"SendTxBody": {
-				"description": "Contains the serialized raw transaction hex",
-				"properties": {
-					"hex": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"hex"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"TokenMetadata": {
-				"description": "Contains info about token metadata (ERC-721/ERC-1155)",
-				"properties": {
-					"name": {
-						"type": "string"
-					},
-					"description": {
-						"type": "string"
-					},
-					"media": {
-						"properties": {
-							"type": {
-								"type": "string",
-								"enum": [
-									"image",
-									"video"
-								]
-							},
-							"url": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"url"
-						],
-						"type": "object"
-					}
-				},
-				"required": [
-					"name",
-					"description",
-					"media"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"TokenType": {
-				"type": "string",
-				"enum": [
-					"erc721",
-					"erc1155"
-				],
-				"description": "Supported token types for token metadata"
 			}
 		},
 		"securitySchemes": {}
@@ -552,8 +635,7 @@
 						"required": true,
 						"schema": {
 							"type": "string"
-						},
-						"example": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
+						}
 					}
 				]
 			}
@@ -642,8 +724,7 @@
 						"required": true,
 						"schema": {
 							"type": "string"
-						},
-						"example": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa"
+						}
 					},
 					{
 						"description": "the cursor returned in previous query (base64 encoded json object with a 'page' property)",
@@ -766,8 +847,225 @@
 						"required": true,
 						"schema": {
 							"type": "string"
-						},
-						"example": "0x8825fe8d60e1aa8d990f150bffe1196adcab36d0c4e98bac76c691719103b79d"
+						}
+					}
+				]
+			}
+		},
+		"/api/v1/send": {
+			"post": {
+				"operationId": "SendTx",
+				"responses": {
+					"200": {
+						"description": "transaction id",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Sends raw transaction to be broadcast to the node.",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"description": "serialized raw transaction hex",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SendTxBody",
+								"description": "serialized raw transaction hex"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/jsonrpc": {
+			"post": {
+				"operationId": "DoRpcRequest",
+				"responses": {
+					"200": {
+						"description": "jsonrpc response or batch responses",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/RPCResponse"
+										},
+										{
+											"items": {
+												"$ref": "#/components/schemas/RPCResponse"
+											},
+											"type": "array"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"jsonrpc": "2.0",
+											"id": "test",
+											"result": "0x1a4"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"description": "Makes a jsonrpc request to the node.",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"description": "jsonrpc request or batch requests",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"anyOf": [
+									{
+										"$ref": "#/components/schemas/RPCRequest"
+									},
+									{
+										"items": {
+											"$ref": "#/components/schemas/RPCRequest"
+										},
+										"type": "array"
+									}
+								],
+								"description": "jsonrpc request or batch requests"
+							},
+							"example": {
+								"jsonrpc": "2.0",
+								"id": "test",
+								"method": "eth_blockNumber",
+								"params": []
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/metadata/token": {
+			"get": {
+				"operationId": "GetTokenMetadata",
+				"responses": {
+					"200": {
+						"description": "token metadata",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TokenMetadata"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"name": "Foxy",
+											"description": "FOXatars are a cyber-fox NFT project created by ShapeShift and Mercle",
+											"media": {
+												"url": "https://storage.mercle.xyz/ipfs/bafybeifihbavnaqwmisq72nwqpmxy3qkfqxj5nvjg7wimluhisp7wkzcru",
+												"type": "image"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get token metadata",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "contract address",
+						"in": "query",
+						"name": "contract",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "token identifier",
+						"in": "query",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "token type (erc721 or erc1155)",
+						"in": "query",
+						"name": "type",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/TokenType"
+						}
 					}
 				]
 			}
@@ -848,7 +1146,7 @@
 						"schema": {
 							"type": "string"
 						},
-						"example": "0x642F4Bda144C63f6DC47EE0fDfbac0a193e2eDb7"
+						"example": "0x0000000000000000000000000000000000000000"
 					},
 					{
 						"description": "transaction value in wei",
@@ -918,164 +1216,6 @@
 				],
 				"security": [],
 				"parameters": []
-			}
-		},
-		"/api/v1/send": {
-			"post": {
-				"operationId": "SendTx",
-				"responses": {
-					"200": {
-						"description": "transaction id",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "string"
-								},
-								"examples": {
-									"Example 1": {
-										"value": "0xb9d4ad5408f53eac8627f9ccd840ba8fb3469d55cd9cc2a11c6e049f1eef4edd"
-									}
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Bad Request",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/BadRequestError"
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Validation Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ValidationError"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/InternalServerError"
-								}
-							}
-						}
-					}
-				},
-				"description": "Sends raw transaction to be broadcast to the node.",
-				"tags": [
-					"v1"
-				],
-				"security": [],
-				"parameters": [],
-				"requestBody": {
-					"description": "serialized raw transaction hex",
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/SendTxBody",
-								"description": "serialized raw transaction hex"
-							},
-							"example": {
-								"hex": "0xf86c0a85046c7cfe0083016dea94d1310c1e038bc12865d3d3997275b3e4737c6302880b503be34d9fe80080269fc7eaaa9c21f59adf8ad43ed66cf5ef9ee1c317bd4d32cd65401e7aaca47cfaa0387d79c65b90be6260d09dcfb780f29dd8133b9b1ceb20b83b7e442b4bfc30cb"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v1/metadata/token": {
-			"get": {
-				"operationId": "GetTokenMetadata",
-				"responses": {
-					"200": {
-						"description": "token metadata",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/TokenMetadata"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"name": "HAPE #3150",
-											"description": "8192 next-generation, high-fashion HAPES.",
-											"media": {
-												"url": "https://meta.hapeprime.com/3150.png",
-												"type": "image"
-											}
-										}
-									}
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Validation Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ValidationError"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/InternalServerError"
-								}
-							}
-						}
-					}
-				},
-				"description": "Get token metadata",
-				"tags": [
-					"v1"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"description": "contract address",
-						"in": "query",
-						"name": "contract",
-						"required": true,
-						"schema": {
-							"type": "string"
-						},
-						"example": "0x4Db1f25D3d98600140dfc18dEb7515Be5Bd293Af"
-					},
-					{
-						"description": "token identifier",
-						"in": "query",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"type": "string"
-						},
-						"example": "3150"
-					},
-					{
-						"description": "token type (erc721 or erc1155)",
-						"in": "query",
-						"name": "type",
-						"required": true,
-						"schema": {
-							"$ref": "#/components/schemas/TokenType"
-						}
-					}
-				]
 			}
 		}
 	},
