@@ -579,10 +579,10 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"balance": "284809805024198107",
+											"balance": "0",
 											"unconfirmedBalance": "0",
-											"nonce": 1,
-											"pubkey": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa",
+											"nonce": 0,
+											"pubkey": "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
 											"tokens": [
 												{
 													"balance": "1337",
@@ -662,24 +662,22 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"pubkey": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa",
-											"cursor": "eyJibG9ja2Jvb2tQYWdlIjoxLCJldGhlcnNjYW5QYWdlIjoxLCJibG9ja2Jvb2tUeGlkIjoiMHhhZWU0MzJmODUzZmRjMTNhZDlmZjZjYWJlMmEzOTQwM2Q4N2RkZWUxODQyNDk2ODE4ZmNkODg3NDdmNjU2NmY5IiwiYmxvY2tIZWlnaHQiOjEzODUwMjEzfQ==",
+											"pubkey": "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
 											"txs": [
 												{
-													"txid": "0x8e3528c933483770a3c8377c2ee7e34f846908653168188fd0d90a20b295d002",
-													"blockHash": "0x94228c1b7052720846e2d7b9f36de30acf45d9a06ec483bd4433c5c38c8673a8",
-													"blockHeight": 12267105,
-													"timestamp": 1618788849,
+													"txid": "0x6850c6f3af68eb60a211af8f07f5b305375d0c94786b79a48371f5143953cb26",
+													"blockHash": "0x969bda3f454330557492deacffb0ee8a7fd1d094cf884926d24c71ad11ed13bb",
+													"blockHeight": 15624164,
+													"timestamp": 1664275343,
 													"status": 1,
-													"from": "0xB3DD70991aF983Cf82d95c46C24979ee98348ffa",
-													"to": "0x642F4Bda144C63f6DC47EE0fDfbac0a193e2eDb7",
-													"confirmations": 2088440,
-													"value": "737092621690531649",
-													"fee": "3180000000009000",
+													"from": "0xc730B028dA66EBB14f20e67c68DD809FBC49890D",
+													"to": "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
+													"confirmations": 3911254,
+													"value": "5384660932716527",
+													"fee": "278408778879000",
 													"gasLimit": "21000",
 													"gasUsed": "21000",
-													"gasPrice": "151428571429",
-													"inputData": "0x"
+													"gasPrice": "13257560899"
 												}
 											]
 										}
@@ -791,20 +789,19 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"txid": "0x8825fe8d60e1aa8d990f150bffe1196adcab36d0c4e98bac76c691719103b79d",
-											"blockHash": "0x122f1e1b594b797d96c1777ce9cdb68ddb69d262ac7f2ddc345909aba4ebabd7",
-											"blockHeight": 14813163,
-											"timestamp": 1653078780,
+											"txid": "0x6850c6f3af68eb60a211af8f07f5b305375d0c94786b79a48371f5143953cb26",
+											"blockHash": "0x969bda3f454330557492deacffb0ee8a7fd1d094cf884926d24c71ad11ed13bb",
+											"blockHeight": 15624164,
+											"timestamp": 1664275343,
 											"status": 1,
-											"from": "0xEA674fdDe714fd979de3EdF0F56AA9716B898ec8",
-											"to": "0x275C7d416c1DBfafa53A861EEc6F0AD6138ca4dD",
-											"confirmations": 21,
-											"value": "49396718157429775",
-											"fee": "603633477678000",
-											"gasLimit": "250000",
+											"from": "0xc730B028dA66EBB14f20e67c68DD809FBC49890D",
+											"to": "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
+											"confirmations": 3911254,
+											"value": "5384660932716527",
+											"fee": "278408778879000",
+											"gasLimit": "21000",
 											"gasUsed": "21000",
-											"gasPrice": "28744451318",
-											"inputData": "0x"
+											"gasPrice": "13257560899"
 										}
 									}
 								}
@@ -1009,7 +1006,7 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"name": "Foxy",
+											"name": "FoxyFox",
 											"description": "FOXatars are a cyber-fox NFT project created by ShapeShift and Mercle",
 											"media": {
 												"url": "https://storage.mercle.xyz/ipfs/bafybeifihbavnaqwmisq72nwqpmxy3qkfqxj5nvjg7wimluhisp7wkzcru",
