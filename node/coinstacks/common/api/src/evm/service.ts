@@ -876,4 +876,14 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       }
     }
   }
+
+  async doRpcRequest(req: RPCRequest | Array<RPCRequest>): Promise<RPCResponse | Array<RPCResponse>> {
+    try {
+      const config = this.rpcApiKey ? { headers: { 'api-key': this.rpcApiKey } } : undefined
+      const { data } = await axiosWithRetry.post<RPCResponse>(this.rpcUrl, req, config)
+      return data
+    } catch (err) {
+      throw handleError(err)
+    }
+  }
 }

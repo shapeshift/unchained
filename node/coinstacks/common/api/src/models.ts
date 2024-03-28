@@ -74,3 +74,21 @@ export interface BaseTxHistory<T = BaseTx> extends Pagination {
   pubkey: string
   txs: Array<T>
 }
+
+export interface RPCRequest {
+  jsonrpc: '2.0'
+  id: string | number
+  method: string
+  params: Array<unknown>
+}
+
+export interface RPCResponse {
+  jsonrpc: '2.0'
+  id: string | number
+  result?: unknown
+  error?: {
+    code: number
+    message: string
+    data?: unknown
+  }
+}
