@@ -9,13 +9,18 @@ export interface NewBlock {
   hash: string
 }
 
+export interface NewTx {
+  address: string
+  tx: Tx
+}
+
 export interface SubscriptionResponse {
   subscribed: boolean
 }
 
 export interface WebsocketRepsonse {
   id: string
-  data: NewBlock | Tx | SubscriptionResponse
+  data: NewBlock | NewTx | SubscriptionResponse
 }
 
 /**

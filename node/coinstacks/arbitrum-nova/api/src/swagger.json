@@ -311,6 +311,146 @@
 				"$ref": "#/components/schemas/BaseTxHistory_Tx_",
 				"description": "Contains info about EVM transaction history"
 			},
+			"SendTxBody": {
+				"description": "Contains the serialized raw transaction hex",
+				"properties": {
+					"hex": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"hex"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"RPCResponse": {
+				"properties": {
+					"jsonrpc": {
+						"type": "string",
+						"enum": [
+							"2.0"
+						],
+						"nullable": false
+					},
+					"id": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "number",
+								"format": "double"
+							}
+						]
+					},
+					"result": {},
+					"error": {
+						"properties": {
+							"data": {},
+							"message": {
+								"type": "string"
+							},
+							"code": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"message",
+							"code"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"jsonrpc",
+					"id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"RPCRequest": {
+				"properties": {
+					"jsonrpc": {
+						"type": "string",
+						"enum": [
+							"2.0"
+						],
+						"nullable": false
+					},
+					"id": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "number",
+								"format": "double"
+							}
+						]
+					},
+					"method": {
+						"type": "string"
+					},
+					"params": {
+						"items": {},
+						"type": "array"
+					}
+				},
+				"required": [
+					"jsonrpc",
+					"id",
+					"method",
+					"params"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TokenMetadata": {
+				"description": "Contains info about token metadata (ERC-721/ERC-1155)",
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"media": {
+						"properties": {
+							"type": {
+								"type": "string",
+								"enum": [
+									"image",
+									"video"
+								]
+							},
+							"url": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"url"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"name",
+					"description",
+					"media"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TokenType": {
+				"type": "string",
+				"enum": [
+					"erc721",
+					"erc1155"
+				],
+				"description": "Supported token types for token metadata"
+			},
 			"GasEstimate": {
 				"description": "Contains info about estimated gas cost of a transaction",
 				"properties": {
@@ -373,63 +513,6 @@
 				],
 				"type": "object",
 				"additionalProperties": false
-			},
-			"SendTxBody": {
-				"description": "Contains the serialized raw transaction hex",
-				"properties": {
-					"hex": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"hex"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"TokenMetadata": {
-				"description": "Contains info about token metadata (ERC-721/ERC-1155)",
-				"properties": {
-					"name": {
-						"type": "string"
-					},
-					"description": {
-						"type": "string"
-					},
-					"media": {
-						"properties": {
-							"type": {
-								"type": "string",
-								"enum": [
-									"image",
-									"video"
-								]
-							},
-							"url": {
-								"type": "string"
-							}
-						},
-						"required": [
-							"url"
-						],
-						"type": "object"
-					}
-				},
-				"required": [
-					"name",
-					"description",
-					"media"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"TokenType": {
-				"type": "string",
-				"enum": [
-					"erc721",
-					"erc1155"
-				],
-				"description": "Supported token types for token metadata"
 			}
 		},
 		"securitySchemes": {}
@@ -488,17 +571,17 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"balance": "3947543807646782",
+											"balance": "0",
 											"unconfirmedBalance": "0",
-											"nonce": 2,
-											"pubkey": "0x6E249A692314bcEB8ac43B296262Df1800915Bf4",
+											"nonce": 0,
+											"pubkey": "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
 											"tokens": [
 												{
-													"balance": "14131423",
-													"contract": "0x750ba8b76187092B0D1E87E28daaf484d1b5273b",
-													"decimals": 6,
-													"name": "USD Coin",
-													"symbol": "USDC",
+													"balance": "1337",
+													"contract": "0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d",
+													"decimals": 18,
+													"name": "FOX",
+													"symbol": "FOX",
 													"type": "ERC20"
 												}
 											]
@@ -552,8 +635,7 @@
 						"required": true,
 						"schema": {
 							"type": "string"
-						},
-						"example": "0x6e249a692314bceb8ac43b296262df1800915bf4"
+						}
 					}
 				]
 			}
@@ -572,30 +654,22 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"pubkey": "0x6e249a692314bceb8ac43b296262df1800915bf4",
+											"pubkey": "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
 											"txs": [
 												{
-													"txid": "0x375cb328fe3399f67ac315ee4a00d92b0b60d12c98830d7600aec0f55e4163c6",
-													"blockHash": "0x3ee0749ef10654a2bc87e7d949d18d344f26320184e4c0f0f4c3932877d9affa",
-													"blockHeight": 26670056,
-													"timestamp": 1698434321,
+													"txid": "0x6850c6f3af68eb60a211af8f07f5b305375d0c94786b79a48371f5143953cb26",
+													"blockHash": "0x969bda3f454330557492deacffb0ee8a7fd1d094cf884926d24c71ad11ed13bb",
+													"blockHeight": 15624164,
+													"timestamp": 1664275343,
 													"status": 1,
-													"from": "0xe93685f3bBA03016F02bD1828BaDD6195988D950",
-													"to": "0xA658742d33ebd2ce2F0bdFf73515Aa797Fd161D9",
-													"confirmations": 2744,
-													"value": "11000000000000000",
-													"fee": "1868700000000",
-													"gasLimit": "1193952",
-													"gasUsed": "155725",
-													"gasPrice": "12000000",
-													"inputData": "0x0508941e00000000000000000000000000000000000000000000000000000000000000a5000000000000000000000000b6789dacf323d60f650628dc1da344d502bc41e30000000000000000000000000000000000000000000000000000000000030d407ae3e7b0abe71c59d59ffdff318609711ef20011e4eab53d342e4f0093cb0d9b7ae3e7b0abe71c59d59ffdff318609711ef20011e4eab53d342e4f0093cb0d9b00000000000000000000000000000000000000000000000000000000000000e00000000000000000000000006e249a692314bceb8ac43b296262df1800915bf40000000000000000000000000000000000000000000000000000000000000068000000000000000000000000042b8289c97896529ec2fe49ba1a8b9c956a86cc0000000000009f8500a55673b6e6e51de3479b8deb22df46b12308db5e1e00afb6789dacf323d60f650628dc1da344d502bc41e36e249a692314bceb8ac43b296262df1800915bf4000000000000000000000000000000000000000000000000",
-													"internalTxs": [
-														{
-															"from": "0xA658742d33ebd2ce2F0bdFf73515Aa797Fd161D9",
-															"to": "0x6E249A692314bcEB8ac43B296262Df1800915Bf4",
-															"value": "11000000000000000"
-														}
-													]
+													"from": "0xc730B028dA66EBB14f20e67c68DD809FBC49890D",
+													"to": "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
+													"confirmations": 3911254,
+													"value": "5384660932716527",
+													"fee": "278408778879000",
+													"gasLimit": "21000",
+													"gasUsed": "21000",
+													"gasPrice": "13257560899"
 												}
 											]
 										}
@@ -648,8 +722,7 @@
 						"required": true,
 						"schema": {
 							"type": "string"
-						},
-						"example": "0x6e249a692314bceb8ac43b296262df1800915bf4"
+						}
 					},
 					{
 						"description": "the cursor returned in previous query (base64 encoded json object with a 'page' property)",
@@ -708,27 +781,19 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"txid": "0x375cb328fe3399f67ac315ee4a00d92b0b60d12c98830d7600aec0f55e4163c6",
-											"blockHash": "0x3ee0749ef10654a2bc87e7d949d18d344f26320184e4c0f0f4c3932877d9affa",
-											"blockHeight": 26670056,
-											"timestamp": 1698434321,
+											"txid": "0x6850c6f3af68eb60a211af8f07f5b305375d0c94786b79a48371f5143953cb26",
+											"blockHash": "0x969bda3f454330557492deacffb0ee8a7fd1d094cf884926d24c71ad11ed13bb",
+											"blockHeight": 15624164,
+											"timestamp": 1664275343,
 											"status": 1,
-											"from": "0xe93685f3bBA03016F02bD1828BaDD6195988D950",
-											"to": "0xA658742d33ebd2ce2F0bdFf73515Aa797Fd161D9",
-											"confirmations": 2937,
-											"value": "11000000000000000",
-											"fee": "1868700000000",
-											"gasLimit": "1193952",
-											"gasUsed": "155725",
-											"gasPrice": "12000000",
-											"inputData": "0x0508941e00000000000000000000000000000000000000000000000000000000000000a5000000000000000000000000b6789dacf323d60f650628dc1da344d502bc41e30000000000000000000000000000000000000000000000000000000000030d407ae3e7b0abe71c59d59ffdff318609711ef20011e4eab53d342e4f0093cb0d9b7ae3e7b0abe71c59d59ffdff318609711ef20011e4eab53d342e4f0093cb0d9b00000000000000000000000000000000000000000000000000000000000000e00000000000000000000000006e249a692314bceb8ac43b296262df1800915bf40000000000000000000000000000000000000000000000000000000000000068000000000000000000000000042b8289c97896529ec2fe49ba1a8b9c956a86cc0000000000009f8500a55673b6e6e51de3479b8deb22df46b12308db5e1e00afb6789dacf323d60f650628dc1da344d502bc41e36e249a692314bceb8ac43b296262df1800915bf4000000000000000000000000000000000000000000000000",
-											"internalTxs": [
-												{
-													"from": "0xA658742d33ebd2ce2F0bdFf73515Aa797Fd161D9",
-													"to": "0x6E249A692314bcEB8ac43B296262Df1800915Bf4",
-													"value": "11000000000000000"
-												}
-											]
+											"from": "0xc730B028dA66EBB14f20e67c68DD809FBC49890D",
+											"to": "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF",
+											"confirmations": 3911254,
+											"value": "5384660932716527",
+											"fee": "278408778879000",
+											"gasLimit": "21000",
+											"gasUsed": "21000",
+											"gasPrice": "13257560899"
 										}
 									}
 								}
@@ -779,8 +844,225 @@
 						"required": true,
 						"schema": {
 							"type": "string"
-						},
-						"example": "0x375cb328fe3399f67ac315ee4a00d92b0b60d12c98830d7600aec0f55e4163c6"
+						}
+					}
+				]
+			}
+		},
+		"/api/v1/send": {
+			"post": {
+				"operationId": "SendTx",
+				"responses": {
+					"200": {
+						"description": "transaction id",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Sends raw transaction to be broadcast to the node.",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"description": "serialized raw transaction hex",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SendTxBody",
+								"description": "serialized raw transaction hex"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/jsonrpc": {
+			"post": {
+				"operationId": "DoRpcRequest",
+				"responses": {
+					"200": {
+						"description": "jsonrpc response or batch responses",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/RPCResponse"
+										},
+										{
+											"items": {
+												"$ref": "#/components/schemas/RPCResponse"
+											},
+											"type": "array"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"jsonrpc": "2.0",
+											"id": "test",
+											"result": "0x1a4"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"description": "Makes a jsonrpc request to the node.",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"description": "jsonrpc request or batch requests",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"anyOf": [
+									{
+										"$ref": "#/components/schemas/RPCRequest"
+									},
+									{
+										"items": {
+											"$ref": "#/components/schemas/RPCRequest"
+										},
+										"type": "array"
+									}
+								],
+								"description": "jsonrpc request or batch requests"
+							},
+							"example": {
+								"jsonrpc": "2.0",
+								"id": "test",
+								"method": "eth_blockNumber",
+								"params": []
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/metadata/token": {
+			"get": {
+				"operationId": "GetTokenMetadata",
+				"responses": {
+					"200": {
+						"description": "token metadata",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TokenMetadata"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"name": "FoxyFox",
+											"description": "FOXatars are a cyber-fox NFT project created by ShapeShift and Mercle",
+											"media": {
+												"url": "https://storage.mercle.xyz/ipfs/bafybeifihbavnaqwmisq72nwqpmxy3qkfqxj5nvjg7wimluhisp7wkzcru",
+												"type": "image"
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get token metadata",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "contract address",
+						"in": "query",
+						"name": "contract",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "token identifier",
+						"in": "query",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "token type (erc721 or erc1155)",
+						"in": "query",
+						"name": "type",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/TokenType"
+						}
 					}
 				]
 			}
@@ -931,164 +1213,6 @@
 				],
 				"security": [],
 				"parameters": []
-			}
-		},
-		"/api/v1/send": {
-			"post": {
-				"operationId": "SendTx",
-				"responses": {
-					"200": {
-						"description": "transaction id",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "string"
-								},
-								"examples": {
-									"Example 1": {
-										"value": "0xb9d4ad5408f53eac8627f9ccd840ba8fb3469d55cd9cc2a11c6e049f1eef4edd"
-									}
-								}
-							}
-						}
-					},
-					"400": {
-						"description": "Bad Request",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/BadRequestError"
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Validation Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ValidationError"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/InternalServerError"
-								}
-							}
-						}
-					}
-				},
-				"description": "Broadcast signed raw transaction",
-				"tags": [
-					"v1"
-				],
-				"security": [],
-				"parameters": [],
-				"requestBody": {
-					"description": "serialized raw transaction hex",
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/SendTxBody",
-								"description": "serialized raw transaction hex"
-							},
-							"example": {
-								"hex": "0xf86c0a85046c7cfe0083016dea94d1310c1e038bc12865d3d3997275b3e4737c6302880b503be34d9fe80080269fc7eaaa9c21f59adf8ad43ed66cf5ef9ee1c317bd4d32cd65401e7aaca47cfaa0387d79c65b90be6260d09dcfb780f29dd8133b9b1ceb20b83b7e442b4bfc30cb"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v1/metadata/token": {
-			"get": {
-				"operationId": "GetTokenMetadata",
-				"responses": {
-					"200": {
-						"description": "token metadata",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/TokenMetadata"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"name": "Mira \"Striker\" Loyola",
-											"description": "",
-											"media": {
-												"url": "https://dps-gen1-meta.s3.amazonaws.com/9999.png",
-												"type": "image"
-											}
-										}
-									}
-								}
-							}
-						}
-					},
-					"422": {
-						"description": "Validation Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ValidationError"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/InternalServerError"
-								}
-							}
-						}
-					}
-				},
-				"description": "Get token metadata",
-				"tags": [
-					"v1"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"description": "contract address",
-						"in": "query",
-						"name": "contract",
-						"required": true,
-						"schema": {
-							"type": "string"
-						},
-						"example": "0x6f81e9D51Bf482EC3f3724B28eEFE9f9fBe4Fe04"
-					},
-					{
-						"description": "token identifier",
-						"in": "query",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"type": "string"
-						},
-						"example": "9999"
-					},
-					{
-						"description": "token type (erc721 or erc1155)",
-						"in": "query",
-						"name": "type",
-						"required": true,
-						"schema": {
-							"$ref": "#/components/schemas/TokenType"
-						}
-					}
-				]
 			}
 		}
 	},
