@@ -679,7 +679,7 @@ aliases:
     service-memory-limit-1: 18Gi
     service-storage-size-1: 750Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:arbitrum-0e84937
+    service-image-2: shapeshiftdao/unchained-blockbook:arbitrum-f5376bc
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 12Gi
