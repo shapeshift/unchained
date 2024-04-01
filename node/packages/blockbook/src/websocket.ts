@@ -3,6 +3,10 @@ import { Logger } from '@shapeshiftoss/logger'
 import { Tx } from './models'
 import { NewBlock, WebsocketRepsonse } from '.'
 
+const BASE_DELAY = 500
+const MAX_DELAY = 120_000
+const MAX_RETRY_ATTEMPTS = 0
+
 export interface Subscription {
   id: string
   method: string
@@ -17,6 +21,7 @@ export interface Args {
 
 export interface Options {
   pingInterval?: number
+  retryAttempts?: number
 }
 
 type TransactionHandler = (data: Tx) => Promise<void>
@@ -33,16 +38,18 @@ export class WebsocketClient {
   private handleBlock: BlockHandler | Array<BlockHandler>
 
   private readonly pingInterval: number
-  private readonly retryAttempts = 5
+  private readonly retryAttempts: number
 
   private logger = new Logger({ namespace: ['unchained', 'blockbook'], level: process.env.LOG_LEVEL })
 
   constructor(url: string, args: Args, opts?: Options) {
     this.handleTransaction = args.transactionHandler
     this.handleBlock = args.blockHandler
-    this.pingInterval = opts?.pingInterval ?? 10000
     this.url = args.apiKey ? `${url}/${args.apiKey}` : url
     this.socket = new WebSocket(this.url, { handshakeTimeout: 5000 })
+
+    this.pingInterval = opts?.pingInterval ?? 10000
+    this.retryAttempts = opts?.retryAttempts ?? MAX_RETRY_ATTEMPTS
 
     this.initialize()
   }
@@ -64,7 +71,7 @@ export class WebsocketClient {
   private close(): void {
     this.interval && clearInterval(this.interval)
 
-    if (++this.retryCount >= this.retryAttempts) {
+    if (++this.retryCount >= this.retryAttempts && this.retryAttempts !== 0) {
       throw new Error('failed to reconnect')
     }
 
@@ -73,7 +80,7 @@ export class WebsocketClient {
         this.socket = new WebSocket(this.url, { handshakeTimeout: 5000 })
         this.initialize()
       },
-      500 * this.retryCount ** 2
+      Math.min(Math.random() * (BASE_DELAY * this.retryCount ** 2), MAX_DELAY)
     )
   }
 
