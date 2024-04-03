@@ -181,7 +181,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
     const additionalRootDomainName = process.env.ADDITIONAL_ROOT_DOMAIN_NAME
     const hostMatch = `Host(\`${domain}\`)`
     const additionalHostMatch = `Host(\`${
-      config.environment ? `${config.environment}-api` : 'api'
+      config.environment && config.environment !== 'infra' ? `${config.environment}-api` : 'api'
     }.${assetName}.${additionalRootDomainName}\`)`
 
     new k8s.apiextensions.CustomResource(

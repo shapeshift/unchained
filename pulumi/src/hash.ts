@@ -55,12 +55,21 @@ const getNodeCoinstackApiHash = async (coinstack: string, buildArgs: Record<stri
   })
   hash.update(commonApiHash)
 
-  // hash contents of coinstack-api
-  const { hash: apiHash } = await hashElement(`${nodeBasePath}/coinstacks/${coinstack}/api`, {
-    folders: { include: ['**'], exclude: ['.*', 'dist', 'node_modules', 'pulumi'] },
-    files: { include: ['*.ts', '*.json', 'Dockerfile'] },
-  })
-  hash.update(apiHash)
+  if (coinstack === 'proxy') {
+    // hash contents of proxy api
+    const { hash: apiHash } = await hashElement(`${nodeBasePath}/${coinstack}/api`, {
+      folders: { include: ['**'], exclude: ['.*', 'dist', 'node_modules', 'pulumi'] },
+      files: { include: ['*.ts', '*.json', 'Dockerfile'] },
+    })
+    hash.update(apiHash)
+  } else {
+    // hash contents of coinstack-api
+    const { hash: apiHash } = await hashElement(`${nodeBasePath}/coinstacks/${coinstack}/api`, {
+      folders: { include: ['**'], exclude: ['.*', 'dist', 'node_modules', 'pulumi'] },
+      files: { include: ['*.ts', '*.json', 'Dockerfile'] },
+    })
+    hash.update(apiHash)
+  }
 
   hash.update(objectHash(buildArgs))
 
