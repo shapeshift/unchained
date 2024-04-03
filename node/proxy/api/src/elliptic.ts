@@ -19,7 +19,7 @@ type WalletResponse = {
   risk_score?: number
 }
 
-type WalletErrorResponse = {
+type WalletError = {
   name: string
   message: string
 }
@@ -43,7 +43,7 @@ export const validateAddress = async (address: string): Promise<{ valid: boolean
     // the submitted address has not yet been processed into the elliptic tool or does not exist on the blockchain
     // assume valid and put responsibility back on client for any further validation
     if (
-      isAxiosError<WalletErrorResponse>(err) &&
+      isAxiosError<WalletError>(err) &&
       err.response?.status === 404 &&
       err.response.data.name === 'NotInBlockchain'
     ) {
