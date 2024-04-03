@@ -1,0 +1,6 @@
+{
+  "ignore": ["src/routes.ts"],
+  "watch": ["../../coinstacks/common/api/dist/tsconfig.tsbuildinfo", "src"],
+  "ext": "ts",
+  "exec": "yarn build && node dist/proxy/api/src/app.js"
+}

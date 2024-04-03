@@ -24,7 +24,7 @@ export const getConfig = async (): Promise<Config> => {
   const defaultNamespace = (await stackReference.getOutputValue('defaultNamespace')) as string
 
   const namespace = config.environment ? `${defaultNamespace}-${config.environment}` : defaultNamespace
-  if (!namespaces.includes(namespace)) {
+  if (!namespaces.concat('unchained-infra').includes(namespace)) {
     throw new Error(
       `Error: environment: ${config.environment} not found in cluster. Either remove to use default environment or verify environment exists`
     )

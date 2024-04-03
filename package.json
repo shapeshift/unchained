@@ -8,6 +8,7 @@
   "workspaces": [
     "monitoring",
     "pulumi",
+    "node/proxy/**/*",
     "node/packages/**/*",
     "node/coinstacks/**/*",
     "go/coinstacks/**/pulumi"

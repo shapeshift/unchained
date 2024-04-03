@@ -537,7 +537,7 @@
 	},
 	"info": {
 		"title": "@shapeshiftoss/litecoin-api",
-		"version": "9.3.0",
+		"version": "10.0.0",
 		"license": {
 			"name": "MIT"
 		},
