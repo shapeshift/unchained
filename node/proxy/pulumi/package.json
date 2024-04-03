@@ -1,5 +1,5 @@
 {
-  "name": "@shapeshiftoss/arbitrum-nova-pulumi",
+  "name": "@shapeshiftoss/proxy-pulumi",
   "version": "10.0.0",
   "license": "MIT",
   "private": true,

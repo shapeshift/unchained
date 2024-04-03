@@ -1,5 +1,5 @@
 {
-  "name": "@shapeshiftoss/litecoin-api",
+  "name": "@shapeshiftoss/unchained-proxy",
   "version": "10.0.0",
   "license": "MIT",
   "private": true,
@@ -12,8 +12,7 @@
     "generate": "tsoa spec-and-routes"
   },
   "dependencies": {
-    "@shapeshiftoss/blockbook": "^10.0.0",
     "@shapeshiftoss/common-api": "^10.0.0",
-    "bech32": "^2.0.0"
+    "elliptic-sdk": "^0.7.2"
   }
 }

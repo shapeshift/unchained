@@ -698,6 +698,20 @@ aliases:
     api-max-replicas: 2
     stateful-service-replicas: 0
 
+  - &proxy
+    assetName: proxy
+    environment: infra
+    pulumi-stack: public-infra-us-east-2
+    pulumi-dir: proxy/pulumi
+    api-autoscaling: true
+    api-replicas: 1
+    api-max-replicas: 2
+    api-cpu-limit: "1"
+    api-cpu-request: 500m
+    api-cpu-threshold: 75
+    api-memory-limit: 1Gi
+    api-memory-request: 500Mi
+
 commands:
   precheck:
     description: install dependencies
@@ -893,8 +907,10 @@ jobs:
       <<: *params
       indexer-url:
         type: string
+        default: ''
       indexer-ws-url:
         type: string
+        default: ''
       indexer-api-key:
         type: string
         default: ''
@@ -1224,6 +1240,14 @@ workflows:
           requires:
             - deploy dependencies
           <<: [*thorchain-dev, *only-develop]
+
+      - deploy-coinstack-node:
+          name: deploy proxy
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - deploy dependencies
+          <<: [*proxy, *only-develop]
 
       - deploy-monitoring-pulumi:
           name: deploy monitoring pulumi

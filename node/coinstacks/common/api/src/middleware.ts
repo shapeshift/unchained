@@ -7,7 +7,7 @@ import { ApiError, NotFoundError } from '.'
 import { Prometheus } from './prometheus'
 
 export function errorHandler(err: Error, req: Request, res: Response, next: NextFunction): Response | void {
-  if (err.constructor.name === ValidateError.prototype.constructor.name) {
+  if (err instanceof ValidateError) {
     const e = err as ValidateError
 
     console.warn(`Caught Validation Error for ${req.path}:`, e.fields)
@@ -18,7 +18,7 @@ export function errorHandler(err: Error, req: Request, res: Response, next: Next
     })
   }
 
-  if (err.constructor.name === ApiError.prototype.constructor.name) {
+  if (err instanceof ApiError) {
     const e = err as ApiError
     console.error(e)
     return res.status(e.statusCode ?? 500).json({ message: e.message })
@@ -70,11 +70,9 @@ export const metrics =
     next()
   }
 
-export const common = (prometheus: Prometheus) => [
-  compression(),
-  json(),
-  urlencoded({ extended: false }),
-  cors(),
-  requestLogger,
-  metrics(prometheus),
-]
+export const common = (prometheus?: Prometheus) => {
+  const _default = [compression(), json(), urlencoded({ extended: false }), cors(), requestLogger]
+
+  if (!prometheus) return _default
+  return _default.concat(metrics(prometheus))
+}
