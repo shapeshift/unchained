@@ -401,8 +401,7 @@
 				"required": [
 					"jsonrpc",
 					"id",
-					"method",
-					"params"
+					"method"
 				],
 				"type": "object",
 				"additionalProperties": false

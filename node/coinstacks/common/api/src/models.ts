@@ -79,7 +79,7 @@ export interface RPCRequest {
   jsonrpc: '2.0'
   id: string | number
   method: string
-  params: Array<unknown>
+  params?: Array<unknown>
 }
 
 export interface RPCResponse {
