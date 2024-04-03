@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  api:
+    image: unchained-local-node
+    env_file: .env
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.proxy-api.rule=Host(`api.proxy.localhost`)'
+      - 'traefik.http.services.proxy-api.loadbalancer.server.port=3000'
+    working_dir: /app/node/proxy/api
+    command: yarn nodemon
+    volumes:
+      - ../..:/app
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    name: proxy_default
+    external: true

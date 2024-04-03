@@ -1,0 +1,9 @@
+{
+  "name": "@shapeshiftoss/proxy-pulumi",
+  "version": "9.3.0",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "clean": "rm -rf dist node_modules"
+  }
+}
