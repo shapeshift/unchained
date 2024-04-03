@@ -907,8 +907,10 @@ jobs:
       <<: *params
       indexer-url:
         type: string
+        default: ''
       indexer-ws-url:
         type: string
+        default: ''
       indexer-api-key:
         type: string
         default: ''
