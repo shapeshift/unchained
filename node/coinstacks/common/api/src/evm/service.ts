@@ -27,8 +27,7 @@ import type {
   ExplorerInternalTxByAddress,
 } from './types'
 import type { GasOracle } from './gasOracle'
-import { formatAddress, handleError } from './utils'
-import { validatePageSize } from '../utils'
+import { handleError, validatePageSize } from '../utils'
 import { ERC1155_ABI } from './abi/erc1155'
 import { ERC721_ABI } from './abi/erc721'
 
@@ -54,6 +53,8 @@ axiosRetry(axiosWithRetry, {
 
 const exponentialDelay = async (retryCount: number) =>
   new Promise((resolve) => setTimeout(resolve, axiosRetry.exponentialDelay(retryCount, undefined, 500)))
+
+export const formatAddress = (address: string): string => ethers.utils.getAddress(address)
 
 export interface ServiceArgs {
   blockbook: Blockbook

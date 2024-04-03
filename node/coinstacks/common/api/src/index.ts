@@ -6,6 +6,7 @@ export * from './websocket'
 export * from './registry'
 export * from './types'
 export * from './prometheus'
+export * from './utils'
 
 export * as evm from './evm'
 export * as utxo from './utxo'

@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosInstance } from 'axios'
+import axios, { AxiosInstance, isAxiosError } from 'axios'
 import axiosRetry, { isNetworkOrIdempotentRequestError } from 'axios-retry'
 import { Controller, Example, Get, Path, Query, Route, Tags } from 'tsoa'
 import WebSocket from 'ws'
@@ -103,7 +103,7 @@ export class Blockbook extends Controller {
       const { data } = await this.instance.get<Info>(`api/v2`)
       return data
     } catch (err) {
-      if (err instanceof AxiosError || err instanceof Error) throw new ApiError(err)
+      if (isAxiosError(err) || err instanceof Error) throw new ApiError(err)
       throw err
     }
   }
@@ -127,7 +127,7 @@ export class Blockbook extends Controller {
       const { data } = await this.instance.get<BlockIndex>(`api/v2/block-index/${height}`)
       return data
     } catch (err) {
-      if (err instanceof AxiosError || err instanceof Error) throw new ApiError(err)
+      if (isAxiosError(err) || err instanceof Error) throw new ApiError(err)
       throw err
     }
   }
@@ -248,7 +248,7 @@ export class Blockbook extends Controller {
       const { data } = await this.instance.get<Tx>(`api/v2/tx/${txid}`)
       return data
     } catch (err) {
-      if (err instanceof AxiosError || err instanceof Error) throw new ApiError(err)
+      if (isAxiosError(err) || err instanceof Error) throw new ApiError(err)
       throw err
     } finally {
       this.logger.trace(`getTransaction: ${txid}: ${Date.now() - start}ms`)
@@ -267,7 +267,7 @@ export class Blockbook extends Controller {
       const { data } = await this.instance.get(`api/v2/tx-specific/${txid}`)
       return data
     } catch (err) {
-      if (err instanceof AxiosError || err instanceof Error) throw new ApiError(err)
+      if (isAxiosError(err) || err instanceof Error) throw new ApiError(err)
       throw err
     } finally {
       this.logger.trace(`getTransactionSpecific: ${txid}: ${Date.now() - start}ms`)
@@ -463,7 +463,7 @@ export class Blockbook extends Controller {
       })
       return data
     } catch (err) {
-      if (err instanceof AxiosError || err instanceof Error) throw new ApiError(err)
+      if (isAxiosError(err) || err instanceof Error) throw new ApiError(err)
       throw err
     } finally {
       this.logger.debug(`getAddress: ${address} (page: ${page}, details: ${details}): ${Date.now() - start}ms`)
@@ -614,7 +614,7 @@ export class Blockbook extends Controller {
       })
       return data
     } catch (err) {
-      if (err instanceof AxiosError || err instanceof Error) throw new ApiError(err)
+      if (isAxiosError(err) || err instanceof Error) throw new ApiError(err)
       throw err
     } finally {
       this.logger.debug(`getXpub: ${xpub} (page: ${page}, details: ${details}): ${Date.now() - start}ms`)
@@ -669,7 +669,7 @@ export class Blockbook extends Controller {
       })
       return data
     } catch (err) {
-      if (err instanceof AxiosError || err instanceof Error) throw new ApiError(err)
+      if (isAxiosError(err) || err instanceof Error) throw new ApiError(err)
       throw err
     } finally {
       this.logger.debug(`getUtxo: ${account}: ${Date.now() - start}ms`)
@@ -770,7 +770,7 @@ export class Blockbook extends Controller {
       })
       return data
     } catch (err) {
-      if (err instanceof AxiosError || err instanceof Error) throw new ApiError(err)
+      if (isAxiosError(err) || err instanceof Error) throw new ApiError(err)
       throw err
     } finally {
       this.logger.trace(`getBlock: ${block} (page: ${page}): ${Date.now() - start}ms`)
@@ -794,7 +794,7 @@ export class Blockbook extends Controller {
       const { data } = await this.instance.get<SendTx>(`api/v2/sendtx/${hex}`)
       return data
     } catch (err) {
-      if (err instanceof AxiosError || err instanceof Error) throw new ApiError(err)
+      if (isAxiosError(err) || err instanceof Error) throw new ApiError(err)
       throw err
     }
   }
@@ -855,7 +855,7 @@ export class Blockbook extends Controller {
       })
       return data
     } catch (err) {
-      if (err instanceof AxiosError || err instanceof Error) throw new ApiError(err)
+      if (isAxiosError(err) || err instanceof Error) throw new ApiError(err)
       throw err
     }
   }

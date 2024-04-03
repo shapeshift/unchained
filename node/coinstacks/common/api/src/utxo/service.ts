@@ -1,21 +1,8 @@
 import type { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
-import { ApiError as BlockbookApiError } from '@shapeshiftoss/blockbook'
 import type { AddressFormatter, BadRequestError, BaseAPI, Cursor, SendTxBody } from '../'
 import { ApiError } from '../'
 import type { Account, Address, API, NetworkFee, NetworkFees, RawTx, Tx, TxHistory, Utxo } from './models'
-import { validatePageSize } from '../utils'
-
-const handleError = (err: unknown): ApiError => {
-  if (err instanceof BlockbookApiError) {
-    return new ApiError(err.response?.statusText ?? 'Internal Server Error', err.response?.status ?? 500, err.message)
-  }
-
-  if (err instanceof Error) {
-    return new ApiError('Internal Server Error', 500, err.message)
-  }
-
-  return new ApiError('Internal Server Error', 500, 'unknown error')
-}
+import { handleError, validatePageSize } from '../utils'
 
 export interface ServiceArgs {
   blockbook: Blockbook
