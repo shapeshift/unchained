@@ -33,6 +33,7 @@ export class WebsocketClient {
   private pingTimeout?: NodeJS.Timeout
   private interval?: NodeJS.Timeout
   private retryCount = 0
+  private addresses: Array<string> = []
 
   private handleTransaction: TransactionHandler | Array<TransactionHandler>
   private handleBlock: BlockHandler | Array<BlockHandler>
@@ -100,6 +101,13 @@ export class WebsocketClient {
 
     const subscribeNewBlock: Subscription = { id: 'newBlock', method: 'subscribeNewBlock', params: {} }
     this.socket.send(JSON.stringify(subscribeNewBlock))
+
+    const subscribeAddresses: Subscription = {
+      id: 'newTx',
+      method: 'subscribeAddresses',
+      params: { addresses: this.addresses },
+    }
+    this.socket.send(JSON.stringify(subscribeAddresses))
   }
 
   private async onMessage(message: WebSocket.MessageEvent): Promise<void> {
@@ -138,7 +146,12 @@ export class WebsocketClient {
   }
 
   subscribeAddresses(addresses: string[]): void {
+    this.addresses = addresses
     const subscribeAddresses: Subscription = { id: 'newTx', method: 'subscribeAddresses', params: { addresses } }
-    this.socket.send(JSON.stringify(subscribeAddresses))
+    try {
+      this.socket.send(JSON.stringify(subscribeAddresses))
+    } catch (err) {
+      this.logger.error(err, `failed to subscribe addresses: ${JSON.stringify(subscribeAddresses)}`)
+    }
   }
 }
