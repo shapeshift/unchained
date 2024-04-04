@@ -704,8 +704,8 @@ aliases:
     pulumi-stack: public-infra-us-east-2
     pulumi-dir: proxy/pulumi
     api-autoscaling: true
-    api-replicas: 1
-    api-max-replicas: 2
+    api-replicas: 2
+    api-max-replicas: 4
     api-cpu-limit: "1"
     api-cpu-request: 500m
     api-cpu-threshold: 75
