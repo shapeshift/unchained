@@ -42,9 +42,8 @@ ENV CGO_LDFLAGS="-L/opt/rocksdb -ldl -lrocksdb -lstdc++ -lm -lz -lbz2 -lsnappy -
 RUN go mod download
 
 # hack to increase read limit for evm websocket clients
-RUN sed -i 's/wsMessageSizeLimit\ =\ ..\ \*\ 1024\ \*\ 1024/wsMessageSizeLimit = 64 * 1024 * 1024/g' $GOPATH/pkg/mod/github.com/ethereum/go-ethereum*/rpc/websocket.go 2>&1 > /dev/null || exit 0
+RUN sed -i 's/wsDefaultReadLimit\ =\ ..\ \*\ 1024\ \*\ 1024/wsDefaultReadLimit = 64 * 1024 * 1024/g' $GOPATH/pkg/mod/github.com/ethereum/go-ethereum*/rpc/websocket.go 2>&1 > /dev/null || exit 0
 RUN sed -i 's/wsMessageSizeLimit\ =\ ..\ \*\ 1024\ \*\ 1024/wsMessageSizeLimit = 64 * 1024 * 1024/g' $GOPATH/pkg/mod/github.com/ava-labs/coreth*/rpc/websocket.go 2>&1 > /dev/null || exit 0
-RUN sed -i 's/wsMessageSizeLimit\ =\ ..\ \*\ 1024\ \*\ 1024/wsMessageSizeLimit = 64 * 1024 * 1024/g' $GOPATH/pkg/mod/github.com/ethereum-optimism/op-geth*/rpc/websocket.go 2>&1 > /dev/null || exit 0
 
 # build blockbook binary
 RUN go build -ldflags="-s -w -X github.com/trezor/blockbook/common.version=${BLOCKBOOK_VERSION} -X github.com/trezor/blockbook/common.gitcommit=${BLOCKBOOK_COMMIT}"
