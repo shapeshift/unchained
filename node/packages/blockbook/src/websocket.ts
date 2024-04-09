@@ -151,7 +151,7 @@ export class WebsocketClient {
     try {
       this.socket.send(JSON.stringify(subscribeAddresses))
     } catch (err) {
-      this.logger.error(err, `failed to subscribe addresses: ${JSON.stringify(subscribeAddresses)}`)
+      this.logger.debug(err, `failed to subscribe addresses: ${JSON.stringify(subscribeAddresses)}`)
     }
   }
 }
