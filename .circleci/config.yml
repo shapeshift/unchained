@@ -24,7 +24,7 @@ aliases:
       branches:
         only:
           - main
-  
+
   - &params
     organization:
       type: string
@@ -32,7 +32,7 @@ aliases:
       description: the k8s asset name
       type: string
     environment:
-      description: environment to deploy into. empty string ('') is our prod
+      description: environment to deploy into. empty string ("") is our prod
       type: string
       default: ""
     network:
@@ -79,7 +79,7 @@ aliases:
       default: 3
     stateful-service-backup-schedule:
       type: string
-      default: "0 4 * * 0" 
+      default: "0 4 * * 0"
     service-name-1:
       type: string
       default: ""
@@ -191,6 +191,12 @@ aliases:
     service-memory-limit-2: 32Gi
     service-storage-size-2: 500Gi
 
+  - &bitcoin-fallback
+    <<: *bitcoin
+    indexer-url: http://bitcoin-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://bitcoin-svc.unchained.svc.cluster.local:8001/websocket
+    indexer-api-key: ""
+
   - &bitcoin-dev
     <<: *bitcoin
     environment: dev
@@ -238,6 +244,14 @@ aliases:
     service-cpu-request-3: "1"
     service-memory-limit-3: 12Gi
     service-storage-size-3: 500Gi
+
+  - &ethereum-fallback
+    <<: *ethereum
+    indexer-url: http://ethereum-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://ethereum-svc.unchained.svc.cluster.local:8001/websocket
+    indexer-api-key: ""
+    rpc-url: http://ethereum-svc.unchained.svc.cluster.local:8545
+    rpc-api-key: ""
 
   - &ethereum-dev
     <<: *ethereum
@@ -337,6 +351,12 @@ aliases:
     service-cpu-request-2: "1"
     service-memory-limit-2: 8Gi
     service-storage-size-2: 250Gi
+
+  - &litecoin-fallback
+    <<: *litecoin
+    indexer-url: http://litecoin-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://litecoin-svc.unchained.svc.cluster.local:8001/websocket
+    indexer-api-key: ""
 
   - &litecoin-dev
     <<: *litecoin
@@ -500,6 +520,14 @@ aliases:
     service-memory-limit-2: 24Gi
     service-storage-size-2: 1000Gi
 
+  - &bnbsmartchain-fallback
+    <<: *bnbsmartchain
+    indexer-url: http://bnbsmartchain-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://bnbsmartchain-svc.unchained.svc.cluster.local:8001/websocket
+    indexer-api-key: ""
+    rpc-url: http://bnbsmartchain-svc.unchained.svc.cluster.local:8545
+    rpc-api-key: ""
+
   - &bnbsmartchain-dev
     <<: *bnbsmartchain
     environment: dev
@@ -653,8 +681,8 @@ commands:
           working_directory: go
           command: make
       - run:
-         working_directory: go
-         command: golangci-lint run --version --verbose 
+          working_directory: go
+          command: golangci-lint run --version --verbose
 
   postcheck:
     description: perform postcheck operations
@@ -715,7 +743,7 @@ commands:
             echo [default] > ~/.aws/credentials
             echo aws_access_key_id = $<< parameters.organization >>_AWS_ACCESS_KEY_ID >> ~/.aws/credentials
             echo aws_secret_access_key = $<< parameters.organization >>_AWS_SECRET_ACCESS_KEY >> ~/.aws/credentials
-    
+
   pulumi-dependencies:
     description: set up pulumi dependencies
     parameters:
@@ -829,19 +857,19 @@ jobs:
       <<: *params
       indexer-url:
         type: string
-        default: ''
+        default: ""
       indexer-ws-url:
         type: string
-        default: ''
+        default: ""
       indexer-api-key:
         type: string
-        default: ''
+        default: ""
       rpc-url:
         type: string
-        default: ''
+        default: ""
       rpc-api-key:
         type: string
-        default: ''
+        default: ""
       etherscan-env-var:
         type: string
         default: ETHERSCAN_API_KEY
@@ -1203,7 +1231,7 @@ workflows:
           <<: [*bitcoin, *only-main]
 
       - approve-coinstack:
-          name: approve bitcoin coinstack
+          name: approve bitcoin
           type: approval
           requires:
             - preview bitcoin
@@ -1214,7 +1242,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: up -f --yes
           requires:
-            - approve bitcoin coinstack
+            - approve bitcoin
           <<: [*bitcoin, *only-main]
 
       ####### BITCOINCASH
@@ -1227,7 +1255,7 @@ workflows:
           <<: [*bitcoincash, *only-main]
 
       - approve-coinstack:
-          name: approve bitcoincash coinstack
+          name: approve bitcoincash
           type: approval
           requires:
             - preview bitcoincash
@@ -1238,7 +1266,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: up -f --yes
           requires:
-            - approve bitcoincash coinstack
+            - approve bitcoincash
           <<: [*bitcoincash, *only-main]
 
       ####### DOGECOIN
@@ -1251,7 +1279,7 @@ workflows:
           <<: [*dogecoin, *only-main]
 
       - approve-coinstack:
-          name: approve dogecoin coinstack
+          name: approve dogecoin
           type: approval
           requires:
             - preview dogecoin
@@ -1262,7 +1290,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: up -f --yes
           requires:
-            - approve dogecoin coinstack
+            - approve dogecoin
           <<: [*dogecoin, *only-main]
 
       ####### LITECOIN
@@ -1275,7 +1303,7 @@ workflows:
           <<: [*litecoin, *only-main]
 
       - approve-coinstack:
-          name: approve litecoin coinstack
+          name: approve litecoin
           type: approval
           requires:
             - preview litecoin
@@ -1286,7 +1314,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: up -f --yes
           requires:
-            - approve litecoin coinstack
+            - approve litecoin
           <<: [*litecoin, *only-main]
 
       ####### ETHEREUM
@@ -1299,7 +1327,7 @@ workflows:
           <<: [*ethereum, *only-main]
 
       - approve-coinstack:
-          name: approve ethereum coinstack
+          name: approve ethereum
           type: approval
           requires:
             - preview ethereum
@@ -1310,7 +1338,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: up -f --yes
           requires:
-            - approve ethereum coinstack
+            - approve ethereum
           <<: [*ethereum, *only-main]
 
       ####### AVALANCHE
@@ -1323,7 +1351,7 @@ workflows:
           <<: [*avalanche, *only-main]
 
       - approve-coinstack:
-          name: approve avalanche coinstack
+          name: approve avalanche
           type: approval
           requires:
             - preview avalanche
@@ -1334,7 +1362,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: up -f --yes
           requires:
-            - approve avalanche coinstack
+            - approve avalanche
           <<: [*avalanche, *only-main]
 
       ####### OPTIMISM
@@ -1348,7 +1376,7 @@ workflows:
           <<: [*optimism, *only-main]
 
       - approve-coinstack:
-          name: approve optimism coinstack
+          name: approve optimism
           type: approval
           requires:
             - preview optimism
@@ -1360,7 +1388,7 @@ workflows:
           pulumi-command: up -f --yes
           etherscan-env-var: ETHERSCAN_API_KEY_OPTIMISM
           requires:
-            - approve optimism coinstack
+            - approve optimism
           <<: [*optimism, *only-main]
 
       ####### BNB SMART CHAIN
@@ -1374,7 +1402,7 @@ workflows:
           <<: [*bnbsmartchain, *only-main]
 
       - approve-coinstack:
-          name: approve bnbsmartchain coinstack
+          name: approve bnbsmartchain
           type: approval
           requires:
             - preview bnbsmartchain
@@ -1386,7 +1414,7 @@ workflows:
           pulumi-command: up -f --yes
           etherscan-env-var: ETHERSCAN_API_KEY_BSC
           requires:
-            - approve bnbsmartchain coinstack
+            - approve bnbsmartchain
           <<: [*bnbsmartchain, *only-main]
 
       ####### POLYGON
@@ -1400,7 +1428,7 @@ workflows:
           <<: [*polygon, *only-main]
 
       - approve-coinstack:
-          name: approve polygon coinstack
+          name: approve polygon
           type: approval
           requires:
             - preview polygon
@@ -1412,7 +1440,7 @@ workflows:
           pulumi-command: up -f --yes
           etherscan-env-var: ETHERSCAN_API_KEY_POLYGON
           requires:
-            - approve polygon coinstack
+            - approve polygon
           <<: [*polygon, *only-main]
 
       ####### GNOSIS
@@ -1425,7 +1453,7 @@ workflows:
           <<: [*gnosis, *only-main]
 
       - approve-coinstack:
-          name: approve gnosis coinstack
+          name: approve gnosis
           type: approval
           requires:
             - preview gnosis
@@ -1436,7 +1464,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: up -f --yes
           requires:
-            - approve gnosis coinstack
+            - approve gnosis
           <<: [*gnosis, *only-main]
 
       ####### ARBITRUM
@@ -1449,7 +1477,7 @@ workflows:
           <<: [*arbitrum, *only-main]
 
       - approve-coinstack:
-          name: approve arbitrum coinstack
+          name: approve arbitrum
           type: approval
           requires:
             - preview arbitrum
@@ -1460,7 +1488,7 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: up -f --yes
           requires:
-            - approve arbitrum coinstack
+            - approve arbitrum
           <<: [*arbitrum, *only-main]
 
       ####### THORCHAIN
@@ -1473,7 +1501,7 @@ workflows:
           <<: [*thorchain, *only-main]
 
       - approve-coinstack:
-          name: approve thorchain coinstack
+          name: approve thorchain
           type: approval
           requires:
             - preview thorchain
@@ -1484,5 +1512,76 @@ workflows:
           organization: TAXISTAKE
           pulumi-command: up -f --yes
           requires:
-            - approve thorchain coinstack
+            - approve thorchain
           <<: [*thorchain, *only-main]
+
+  deploy-fallback:
+    jobs:
+      - lint-and-test-persist:
+          name: lint and test project (persist to workspace)
+          <<: *only-main
+
+      ####### BITCOIN
+      - approve-coinstack:
+          name: approve bitcoin fallback
+          type: approval
+          requires:
+            - lint and test project (persist to workspace)
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy bitcoin fallback
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve bitcoin fallback
+          <<: [*bitcoin-fallback, *only-main]
+
+      ####### LITECOIN
+      - approve-coinstack:
+          name: approve litecoin fallback
+          type: approval
+          requires:
+            - lint and test project (persist to workspace)
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy litecoin fallback
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve litecoin fallback
+          <<: [*litecoin-fallback, *only-main]
+
+      ####### ETHEREUM
+      - approve-coinstack:
+          name: approve ethereum fallback
+          type: approval
+          requires:
+            - lint and test project (persist to workspace)
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy ethereum fallback
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve ethereum fallback
+          <<: [*ethereum-fallback, *only-main]
+
+      ####### BNB SMART CHAIN
+      - approve-coinstack:
+          name: approve bnbsmartchain fallback
+          type: approval
+          requires:
+            - lint and test project (persist to workspace)
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy bnbsmartchain fallback
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          etherscan-env-var: ETHERSCAN_API_KEY_BSC
+          requires:
+            - approve bnbsmartchain fallback
+          <<: [*bnbsmartchain-fallback, *only-main]
