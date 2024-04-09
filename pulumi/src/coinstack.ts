@@ -46,11 +46,17 @@ const getSecretData = (sampleEnv: Buffer): Record<string, string> => {
       return prev
     }
 
+    // handles updating secret data for fallback deployments (self-hosted) to trigger spec update
+    if (['INDEXER_API_KEY', 'RPC_API_KEY'].some((envVar) => key === envVar) && value === '') {
+      return prev
+    }
+
     return { ...prev, [key]: value }
   }, {})
 
   if (missingKeys.length) {
     throw new Error(`Missing the following required environment variables: ${missingKeys.join(', ')}`)
   }
+
   return stringData
 }
