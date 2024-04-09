@@ -8,11 +8,21 @@ export type CoinstackType = 'go' | 'node'
 
 const rootDir = `${__dirname}/../..`
 
-export const secretEnvs = (assetName: string, sampleEnv: Buffer) =>
-  Object.keys(parse(sampleEnv)).map<k8s.types.input.core.v1.EnvVar>((key) => ({
-    name: key,
-    valueFrom: { secretKeyRef: { name: assetName, key: key } },
-  }))
+export const secretEnvs = (assetName: string, sampleEnv: Buffer) => {
+  return Object.keys(parse(sampleEnv)).reduce<Array<k8s.types.input.core.v1.EnvVar>>((prev, key) => {
+    const value = process.env[key]
+
+    // handles updating secret envs for fallback deployments (self-hosted) to trigger spec update
+    if (['INDEXER_API_KEY', 'RPC_API_KEY'].some((envVar) => key === envVar) && value === '') {
+      return prev
+    }
+
+    return prev.concat({
+      name: key,
+      valueFrom: { secretKeyRef: { name: assetName, key: key } },
+    })
+  }, [])
+}
 
 export const getCoinstackHash = async (
   coinstack: string,

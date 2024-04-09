@@ -90,7 +90,6 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
     imageName = `${image}:${tag}` // configured dockerhub image
 
     if (!(await hasTag(image, tag))) {
-      console.log(`Building and pushing ${imageName}...`)
       await buildAndPushImage({
         image,
         auth: {
