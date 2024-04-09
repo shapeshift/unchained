@@ -59,13 +59,6 @@ export const getConfig = async (): Promise<Config> => {
   if (config.statefulService) {
     if (config.statefulService?.replicas === undefined) missingRequiredConfig.push('statefulService.replicas')
 
-    if (config.statefulService?.backup) {
-      if (config.statefulService?.backup?.count === undefined)
-        missingRequiredConfig.push('statefulService.backup.count')
-      if (config.statefulService?.backup?.schedule === undefined)
-        missingRequiredConfig.push('statefulService.backup.schedule')
-    }
-
     config.statefulService?.services.forEach((service, i) => {
       if (service.cpuRequest === undefined && service.cpuLimit === undefined)
         missingRequiredConfig.push(

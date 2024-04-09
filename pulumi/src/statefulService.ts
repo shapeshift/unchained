@@ -1,7 +1,6 @@
 import * as k8s from '@pulumi/kubernetes'
 import { readFileSync } from 'fs'
 import { Config, Service, CoinServiceArgs } from '.'
-import { deployReaperCron } from './reaperCron'
 
 export function createCoinService(args: CoinServiceArgs, assetName: string): Service {
   const name = `${assetName}-${args.name}`
@@ -442,9 +441,5 @@ export async function deployStatefulService(
       },
       { provider }
     )
-  }
-
-  if (namespace == 'unchained-dev') {
-    deployReaperCron(assetName, config.statefulService, namespace, provider)
   }
 }
