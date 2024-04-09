@@ -200,6 +200,7 @@ aliases:
     indexer-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
+    stateful-service-replicas: 0
 
   - &ethereum
     assetName: ethereum
@@ -249,6 +250,7 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
+    stateful-service-replicas: 0
 
   - &avalanche
     assetName: avalanche
@@ -345,6 +347,7 @@ aliases:
     indexer-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
+    stateful-service-replicas: 0
 
   - &bitcoincash
     assetName: bitcoincash
@@ -508,6 +511,7 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
+    stateful-service-replicas: 0
 
   - &polygon
     assetName: polygon
