@@ -5,7 +5,6 @@ export * from './config'
 export * from './api'
 export * from './docker'
 export * from './statefulService'
-export * from './snapper'
 export * from './hasher'
 
 export interface Dockerhub {
@@ -28,15 +27,9 @@ export interface BaseConfig {
   rootDomainName?: string
 }
 
-export interface BackupConfig {
-  count: number
-  schedule: string
-}
-
 export interface StatefulService {
   replicas: number
   services: Array<ServiceConfig>
-  backup?: BackupConfig
 }
 
 export interface Config extends BaseConfig {
