@@ -200,7 +200,6 @@ aliases:
     indexer-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    stateful-service-replicas: 0
 
   - &ethereum
     assetName: ethereum
@@ -250,7 +249,6 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    stateful-service-replicas: 0
 
   - &avalanche
     assetName: avalanche
@@ -269,19 +267,6 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 1
-    service-name-1: daemon
-    service-image-1: avaplatform/avalanchego:v1.11.3
-    service-cpu-limit-1: "2"
-    service-cpu-request-1: "1"
-    service-memory-limit-1: 16Gi
-    service-storage-size-1: 5750Gi
-    service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:e9a0858
-    service-cpu-limit-2: "2"
-    service-cpu-request-2: "1"
-    service-memory-limit-2: 6Gi
-    service-storage-size-2: 500Gi
 
   - &avalanche-dev
     <<: *avalanche
@@ -295,7 +280,6 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 250Mi
-    stateful-service-replicas: 0
 
   - &dogecoin
     assetName: dogecoin
@@ -312,19 +296,6 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 1
-    service-name-1: daemon
-    service-image-1: shapeshiftdao/dogecoin:1.14.7
-    service-cpu-limit-1: "2"
-    service-cpu-request-1: "1"
-    service-memory-limit-1: 4Gi
-    service-storage-size-1: 250Gi
-    service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:e9a0858
-    service-cpu-limit-2: "2"
-    service-cpu-request-2: "1"
-    service-memory-limit-2: 12Gi
-    service-storage-size-2: 250Gi
 
   - &dogecoin-dev
     <<: *dogecoin
@@ -335,7 +306,6 @@ aliases:
     indexer-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    stateful-service-replicas: 0
 
   - &litecoin
     assetName: litecoin
@@ -375,7 +345,6 @@ aliases:
     indexer-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    stateful-service-replicas: 0
 
   - &bitcoincash
     assetName: bitcoincash
@@ -392,19 +361,6 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 1
-    service-name-1: daemon
-    service-image-1: shapeshiftdao/bitcoin-cash-node:27.0.0
-    service-cpu-limit-1: "2"
-    service-cpu-request-1: "1"
-    service-memory-limit-1: 4Gi
-    service-storage-size-1: 250Gi
-    service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:e9a0858
-    service-cpu-limit-2: "2"
-    service-cpu-request-2: "1"
-    service-memory-limit-2: 8Gi
-    service-storage-size-2: 250Gi
 
   - &bitcoincash-dev
     <<: *bitcoincash
@@ -415,7 +371,6 @@ aliases:
     indexer-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    stateful-service-replicas: 0
 
   - &thorchain
     assetName: thorchain
@@ -553,7 +508,6 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    stateful-service-replicas: 0
 
   - &polygon
     assetName: polygon
@@ -572,27 +526,6 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
     api-memory-request: 500Mi
-    stateful-service-replicas: 1
-    service-name-1: daemon
-    service-image-1: 0xpolygon/bor:1.2.8
-    service-cpu-limit-1: "4"
-    service-cpu-request-1: "2"
-    service-memory-limit-1: 48Gi
-    service-storage-size-1: 4000Gi
-    service-storage-iops-1: "6000"
-    service-storage-throughput-1: "300"
-    service-name-2: heimdall
-    service-image-2: 0xpolygon/heimdall:1.0.4
-    service-cpu-limit-2: "2"
-    service-cpu-request-2: "1"
-    service-memory-limit-2: 1Gi
-    service-storage-size-2: 500Gi
-    service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:e9a0858
-    service-cpu-limit-3: "2"
-    service-cpu-request-3: "1"
-    service-memory-limit-3: 24Gi
-    service-storage-size-3: 1000Gi
 
   - &polygon-dev
     <<: *polygon
@@ -605,7 +538,6 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    stateful-service-replicas: 0
 
   - &gnosis
     assetName: gnosis
@@ -671,19 +603,6 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
     api-memory-request: 500Mi
-    stateful-service-replicas: 1
-    service-name-1: daemon
-    service-image-1: offchainlabs/nitro-node:v2.3.2-064fa11
-    service-cpu-limit-1: "2"
-    service-cpu-request-1: "1"
-    service-memory-limit-1: 18Gi
-    service-storage-size-1: 750Gi
-    service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:arbitrum-f5376bc
-    service-cpu-limit-2: "2"
-    service-cpu-request-2: "1"
-    service-memory-limit-2: 12Gi
-    service-storage-size-2: 500Gi
 
   - &arbitrum-dev
     <<: *arbitrum
@@ -696,7 +615,6 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    stateful-service-replicas: 0
 
   - &proxy
     assetName: proxy
@@ -1215,14 +1133,14 @@ workflows:
             - deploy dependencies
           <<: [*polygon-dev, *only-develop]
 
-      - deploy-coinstack-node:
-          name: deploy gnosis develop
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          etherscan-env-var: ETHERSCAN_API_KEY_GNOSIS
-          requires:
-            - deploy dependencies
-          <<: [*gnosis-dev, *only-develop]
+      #- deploy-coinstack-node:
+      #    name: deploy gnosis develop
+      #    organization: TAXISTAKE
+      #    pulumi-command: up -f --yes
+      #    etherscan-env-var: ETHERSCAN_API_KEY_GNOSIS
+      #    requires:
+      #      - deploy dependencies
+      #    <<: [*gnosis-dev, *only-develop]
 
       - deploy-coinstack-node:
           name: deploy arbitrum develop
