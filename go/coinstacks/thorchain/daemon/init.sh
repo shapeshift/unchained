@@ -4,6 +4,9 @@ set -e
 
 apk add bash
 
+export THOR_TENDERMINT_RPC_EXPERIMENTAL_SUBSCRIPTION_BUFFER_SIZE=5000
+export THOR_TENDERMINT_RPC_EXPERIMENTAL_WEBSOCKET_WRITE_BUFFER_SIZE=5000
+
 start_coin() {
   /scripts/fullnode.sh thornode start \
     --p2p.laddr=tcp://0.0.0.0:27146 \
