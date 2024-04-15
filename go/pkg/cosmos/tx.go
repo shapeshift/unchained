@@ -61,6 +61,10 @@ func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int, s
 func (c *HTTPClient) GetTx(txid string) (*coretypes.ResultTx, error) {
 	res := &rpctypes.RPCResponse{}
 
+	if !strings.HasPrefix(txid, "0x") {
+		txid = "0x" + txid
+	}
+
 	_, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParam("hash", txid).Get("/tx")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get tx: %s", txid)
