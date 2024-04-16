@@ -409,7 +409,7 @@ aliases:
     service-memory-limit-1: 12Gi
     service-storage-size-1: 3500Gi
     service-name-2: timescaledb
-    service-image-2: timescale/timescaledb:2.2.0-pg13
+    service-image-2: timescale/timescaledb:2.13.0-pg15
     service-cpu-request-2: "1"
     service-cpu-limit-2: "2"
     service-memory-limit-2: 6Gi
