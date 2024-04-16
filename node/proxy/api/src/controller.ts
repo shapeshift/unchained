@@ -1,8 +1,10 @@
 import { Controller, Example, Get, Path, Response, Route, Tags } from 'tsoa'
 import { BadRequestError, InternalServerError, ValidationError } from '../../../coinstacks/common/api/src' // unable to import models from a module with tsoa
 import { ValidationResult } from './models'
-import * as elliptic from './elliptic'
+import { Elliptic } from './elliptic'
 import { handleError } from '@shapeshiftoss/common-api'
+
+const elliptic = new Elliptic()
 
 @Route('api/v1')
 export class Proxy extends Controller {
