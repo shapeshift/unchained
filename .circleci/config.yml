@@ -211,8 +211,8 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
-    api-cpu-limit: "2"
-    api-cpu-request: "1"
+    api-cpu-limit: "1"
+    api-cpu-request: 500m
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
     api-memory-request: 500Mi
@@ -409,13 +409,13 @@ aliases:
     service-memory-limit-1: 12Gi
     service-storage-size-1: 3500Gi
     service-name-2: timescaledb
-    service-image-2: timescale/timescaledb:2.2.0-pg13
-    service-cpu-request-2: "1"
+    service-image-2: timescale/timescaledb:2.13.0-pg15
     service-cpu-limit-2: "2"
+    service-cpu-request-2: "1"
     service-memory-limit-2: 6Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: registry.gitlab.com/thorchain/midgard:2.19.1
+    service-image-3: registry.gitlab.com/thorchain/midgard:2.21.1
     service-cpu-limit-3: "1"
     service-cpu-request-3: 500m
     service-memory-limit-3: 1Gi
@@ -492,22 +492,22 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
-    api-cpu-limit: "2"
-    api-cpu-request: "1"
+    api-cpu-limit: "1"
+    api-cpu-request: 500m
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
     api-memory-request: 500Mi
     stateful-service-replicas: 1
     service-name-1: daemon
     service-image-1: shapeshiftdao/bnb-smart-chain:v1.3.13
-    service-cpu-limit-1: "16"
-    service-cpu-request-1: "8"
+    service-cpu-limit-1: "8"
+    service-cpu-request-1: "4"
     service-memory-limit-1: 72Gi
     service-storage-size-1: 2500Gi
     service-name-2: indexer
     service-image-2: shapeshiftdao/unchained-blockbook:e9a0858
-    service-cpu-limit-2: "4"
-    service-cpu-request-2: "2"
+    service-cpu-limit-2: "2"
+    service-cpu-request-2: "1"
     service-memory-limit-2: 24Gi
     service-storage-size-2: 1000Gi
 
@@ -544,8 +544,8 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
-    api-cpu-limit: "2"
-    api-cpu-request: "1"
+    api-cpu-limit: "1"
+    api-cpu-request: 500m
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
     api-memory-request: 500Mi
@@ -581,7 +581,7 @@ aliases:
     service-name-1: daemon
     service-image-1: nethermind/nethermind:1.25.4
     service-cpu-limit-1: "2"
-    service-cpu-request-1: "2"
+    service-cpu-request-1: "1"
     service-memory-limit-1: 6Gi
     service-storage-size-1: 1000Gi
     service-name-2: daemon-beacon
@@ -621,8 +621,8 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
-    api-cpu-limit: "1"
-    api-cpu-request: 500m
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
     api-memory-request: 500Mi
@@ -797,9 +797,9 @@ jobs:
             pulumi config set --path unchained:common.eks.cidrBlock 10.0.0.0/16
             pulumi config set --path unchained:common.eks.nodeGroups[0].name spot
             pulumi config set --path unchained:common.eks.nodeGroups[0].type SPOT
-            pulumi config set --path unchained:common.eks.nodeGroups[0].desired 7
-            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 7
-            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 7
+            pulumi config set --path unchained:common.eks.nodeGroups[0].desired 4
+            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 4
+            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 4
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[0] r6in.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r6idn.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r6a.4xlarge
