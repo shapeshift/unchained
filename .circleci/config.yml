@@ -797,9 +797,9 @@ jobs:
             pulumi config set --path unchained:common.eks.cidrBlock 10.0.0.0/16
             pulumi config set --path unchained:common.eks.nodeGroups[0].name spot
             pulumi config set --path unchained:common.eks.nodeGroups[0].type SPOT
-            pulumi config set --path unchained:common.eks.nodeGroups[0].desired 4
-            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 4
-            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 4
+            pulumi config set --path unchained:common.eks.nodeGroups[0].desired 3
+            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 3
+            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 3
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[0] r6in.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r6idn.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r6a.4xlarge
