@@ -36,7 +36,7 @@ export = async (): Promise<Outputs> => {
           env: {
             MIDGARD_BLOCKSTORE_LOCAL: '/blockstore',
             MIDGARD_BLOCKSTORE_REMOTE:
-              'https://storage.googleapis.com/public-snapshots-ninerealms/midgard-blockstore/v2/',
+              'https://storage.googleapis.com/public-snapshots-ninerealms/midgard-blockstore/mainnet/v2/',
           },
           ports: { midgard: { port: 8080 } },
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
