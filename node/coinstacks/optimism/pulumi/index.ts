@@ -38,11 +38,10 @@ export = async (): Promise<Outputs> => {
         return {
           ...service,
           env: {
-            NETWORK: config.network,
             L1_RPC_ENDPOINT: `http://ethereum-svc.unchained.svc.cluster.local:8545`,
             L1_BEACON_ENDPOINT: `http://ethereum-svc.unchained.svc.cluster.local:3500`,
           },
-          ports: { 'op-node-rpc': { port: 9545 } },
+          ports: { 'op-node-rpc': { port: 9545, ingressRoute: false } },
           configMapData: { 'evm.sh': readFileSync('../../../scripts/evm.sh').toString() },
           volumeMounts: [
             { name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' },
