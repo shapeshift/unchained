@@ -58,6 +58,10 @@ export class GasOracle {
         this.latestBlockTag = 'latest'
         this.canQueryPendingBlockByHeight = true
         break
+      case 'base':
+        this.latestBlockTag = 'latest'
+        this.canQueryPendingBlockByHeight = true
+        break
       case 'gnosis':
         this.latestBlockTag = 'latest'
         this.canQueryPendingBlockByHeight = true
