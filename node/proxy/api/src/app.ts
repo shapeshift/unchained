@@ -4,6 +4,7 @@ import swaggerUi from 'swagger-ui-express'
 import { middleware } from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
 import { RegisterRoutes } from './routes'
+import { Markets } from './coingecko'
 
 const PORT = process.env.PORT ?? 3000
 
@@ -30,6 +31,9 @@ app.use('/swagger.json', express.static(join(__dirname, './swagger.json')))
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(undefined, options))
 
 RegisterRoutes(app)
+
+const markets = new Markets()
+app.get('/markets/*', markets.handler.bind(markets))
 
 // redirect any unmatched routes to docs
 app.get('/', async (_, res) => {
