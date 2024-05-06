@@ -20,7 +20,7 @@ if [[ $SYNCING == false ]]; then
   current_block_number_hex=$(echo $eth_blockNumber | jq -r '.result')
   current_block_number=$(($current_block_number_hex))
 
-  best_reference_block_number=$(get_best_reference_block_number https://mainnet.optimism.io https://optimism.publicnode.com https://opt-mainnet.g.alchemy.com/v2/demo)
+  best_reference_block_number=$(get_best_reference_block_number https://mainnet.base.org https://base-rpc.publicnode.com https://base.llamarpc.com)
 
   # if node is reporting synced, double check against reference nodes
   reference_validation daemon $current_block_number $best_reference_block_number $BLOCK_HEIGHT_TOLERANCE
