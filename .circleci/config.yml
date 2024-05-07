@@ -415,7 +415,7 @@ aliases:
     service-memory-limit-2: 6Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: registry.gitlab.com/thorchain/midgard:2.22.0
+    service-image-3: registry.gitlab.com/thorchain/midgard:2.21.1
     service-cpu-limit-3: "1"
     service-cpu-request-3: 500m
     service-memory-limit-3: 1Gi
@@ -450,7 +450,7 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101311.0
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101315.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
