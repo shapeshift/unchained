@@ -1,6 +1,6 @@
 import axios, { AxiosResponse, isAxiosError } from 'axios'
 import { Axios } from 'axios'
-import { NextFunction, Request, Response } from 'express'
+import { Request, Response } from 'express'
 
 const COINGECKO_API_KEY = process.env.COINGECKO_API_KEY
 
@@ -10,24 +10,22 @@ const CACHE_TTL_MS = 60_000
 
 type RequestCache = Partial<Record<string, AxiosResponse>>
 
-export class Markets {
+export class CoinGecko {
   private axiosInstance: Axios
   private requestCache: RequestCache
 
   constructor() {
     this.requestCache = {}
     this.axiosInstance = axios.create({
-      baseURL: 'https://pro-api.coingecko.com/',
+      baseURL: 'https://pro-api.coingecko.com/api/v3/',
       headers: {
         'x-cg-pro-api-key': COINGECKO_API_KEY,
       },
     })
   }
 
-  async handler(req: Request, res: Response, next: NextFunction): Promise<void> {
-    const url = req.url.substring('/markets/'.length)
-
-    if (!url.startsWith('api/v3/')) return next()
+  async handler(req: Request, res: Response): Promise<void> {
+    const url = req.url.substring('/api/v1/markets/'.length)
 
     const cachedResponse = this.requestCache[req.url]
     if (cachedResponse) {
@@ -40,7 +38,7 @@ export class Markets {
 
     try {
       const response = await this.axiosInstance.get(url)
-      this.requestCache[url] = response
+      this.requestCache[req.url] = response
       Object.entries(response.headers).forEach(([k, v]) => res.set(k, v))
       res.status(response.status).send(response.data)
     } catch (err) {
@@ -52,7 +50,7 @@ export class Markets {
         res.status(500).send('Internal Server Error')
       }
     } finally {
-      setInterval(() => delete this.requestCache[url], CACHE_TTL_MS)
+      setInterval(() => delete this.requestCache[req.url], CACHE_TTL_MS)
     }
   }
 }
