@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  api:
+    image: unchained-local-node
+    env_file: .env
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.base-api.rule=Host(`api.base.localhost`)'
+      - 'traefik.http.services.base-api.loadbalancer.server.port=3000'
+    working_dir: /app/node/coinstacks/base/api
+    command: yarn nodemon
+    volumes:
+      - ../../..:/app
+    networks:
+      - base
+
+networks:
+  base:
+    name: base_default
+    external: true
