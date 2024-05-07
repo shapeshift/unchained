@@ -39,6 +39,7 @@ services:
       - arbitrum_default
       - arbitrum-nova_default
       - avalanche_default
+      - base_default
       - bitcoin_default
       - bitcoincash_default
       - bnbsmartchain_default
@@ -67,6 +68,8 @@ networks:
     name: arbitrum-nova_default
   avalanche_default:
     name: avalanche_default
+  base_default:
+    name: base_default
   bitcoin_default:
     name: bitcoin_default
   bitcoincash_default:

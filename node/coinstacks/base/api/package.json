@@ -1,5 +1,5 @@
 {
-  "name": "@shapeshiftoss/optimism-api",
+  "name": "@shapeshiftoss/base-api",
   "version": "10.0.0",
   "license": "MIT",
   "private": true,
