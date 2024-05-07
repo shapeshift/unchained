@@ -6,7 +6,7 @@ apk add bash curl jq
 
 start() {
   op-node \
-    --network $NETWORK \
+    --network op-mainnet \
     --rpc.addr 0.0.0.0 \
     --rpc.port 9545 \
     --l1 $L1_RPC_ENDPOINT \

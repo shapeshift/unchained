@@ -13,7 +13,6 @@ fi
 
 start() {
   geth \
-    --networkid 10 \
     --syncmode full \
     --datadir $DATA_DIR \
     --authrpc.jwtsecret /jwt.hex \
@@ -31,6 +30,7 @@ start() {
     --ws.origins "*" \
     --rollup.disabletxpoolgossip=true \
     --rollup.sequencerhttp https://mainnet-sequencer.optimism.io \
+    --op-network op-mainnet \
     --txlookuplimit 0 \
     --cache 4096 \
     --maxpeers 0 \
