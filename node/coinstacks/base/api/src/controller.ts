@@ -3,7 +3,7 @@ import { ethers, Contract, BigNumber } from 'ethers'
 import { Example, Get, Query, Response, Route, Tags } from 'tsoa'
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
-import { predeploys, getContractInterface } from '@eth-optimism/contracts-bedrock'
+import { gasPriceOracleAddress, gasPriceOracleABI } from '@eth-optimism/contracts-ts'
 import { BaseAPI, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { API } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { EVM } from '../../../common/api/src/evm/controller'
@@ -48,7 +48,7 @@ export const service = new Service({
 EVM.service = service
 
 // gas price oracle contract to query current l1 and l2 values
-const gpo = new Contract(predeploys.GasPriceOracle, getContractInterface('GasPriceOracle'), provider)
+const gpo = new Contract(gasPriceOracleAddress[420], gasPriceOracleABI, provider)
 
 @Route('api/v1')
 @Tags('v1')
@@ -68,7 +68,7 @@ export class Base extends EVM implements BaseAPI, API {
    * @example to "0x15E03a18349cA885482F59935Af48C5fFbAb8DE1"
    * @example value "1337"
    */
-  @Example<BaseGasEstimate>({ gasLimit: '21000', l1GasLimit: '3800' })
+  @Example<BaseGasEstimate>({ gasLimit: '21000', l1GasLimit: '1664' })
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/estimate')
@@ -104,16 +104,24 @@ export class Base extends EVM implements BaseAPI, API {
    * @returns {Promise<BaseGasFees>} current fees specified in wei
    */
   @Example<BaseGasFees>({
-    l1GasPrice: '68076217338',
-    gasPrice: '1048154',
+    l1GasPrice: '5349789102',
+    gasPrice: '52518432',
+    baseFeePerGas: '51497198',
+    maxPriorityFeePerGas: '1000000',
     slow: {
-      gasPrice: '1082857',
+      gasPrice: '51815704',
+      maxFeePerGas: '51947082',
+      maxPriorityFeePerGas: '428650',
     },
     average: {
-      gasPrice: '1082857',
+      gasPrice: '53149928',
+      maxFeePerGas: '52728076',
+      maxPriorityFeePerGas: '1209644',
     },
     fast: {
-      gasPrice: '1082857',
+      gasPrice: '105353129',
+      maxFeePerGas: '145357641',
+      maxPriorityFeePerGas: '93839209',
     },
   })
   @Response<InternalServerError>(500, 'Internal Server Error')

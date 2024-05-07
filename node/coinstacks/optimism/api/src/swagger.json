@@ -1089,7 +1089,7 @@
 									"Example 1": {
 										"value": {
 											"gasLimit": "21000",
-											"l1GasLimit": "3800"
+											"l1GasLimit": "1632"
 										}
 									}
 								}
@@ -1180,16 +1180,24 @@
 								"examples": {
 									"Example 1": {
 										"value": {
-											"l1GasPrice": "68076217338",
-											"gasPrice": "1048154",
+											"l1GasPrice": "4819835362",
+											"gasPrice": "62068691",
+											"baseFeePerGas": "61074678",
+											"maxPriorityFeePerGas": "1000000",
 											"slow": {
-												"gasPrice": "1082857"
+												"gasPrice": "61121042",
+												"maxFeePerGas": "62605850",
+												"maxPriorityFeePerGas": "1537159"
 											},
 											"average": {
-												"gasPrice": "1082857"
+												"gasPrice": "93857447",
+												"maxFeePerGas": "151888001",
+												"maxPriorityFeePerGas": "90819310"
 											},
 											"fast": {
-												"gasPrice": "1082857"
+												"gasPrice": "211378464",
+												"maxFeePerGas": "340609987",
+												"maxPriorityFeePerGas": "279541296"
 											}
 										}
 									}
