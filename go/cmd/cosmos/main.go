@@ -22,6 +22,7 @@ var (
 
 // Config for running application
 type Config struct {
+	APIKEY  string `mapstructure:"API_KEY"`
 	GRPCURL string `mapstructure:"GRPC_URL"`
 	LCDURL  string `mapstructure:"LCD_URL"`
 	RPCURL  string `mapstructure:"RPC_URL"`
@@ -37,7 +38,7 @@ func main() {
 
 	conf := &Config{}
 	if *envPath == "" {
-		if err := config.LoadFromEnv(conf, "GRPC_URL", "LCD_URL", "RPC_URL", "WS_URL"); err != nil {
+		if err := config.LoadFromEnv(conf, "API_KEY", "GRPC_URL", "LCD_URL", "RPC_URL", "WS_URL"); err != nil {
 			logger.Panicf("failed to load config from env: %+v", err)
 		}
 	} else {
@@ -54,6 +55,7 @@ func main() {
 		Bech32ValPrefix:   "cosmosvaloper",
 		Bech32PkValPrefix: "cosmosvalpub",
 		Encoding:          encoding,
+		APIKEY:            conf.APIKEY,
 		GRPCURL:           conf.GRPCURL,
 		LCDURL:            conf.LCDURL,
 		RPCURL:            conf.RPCURL,
