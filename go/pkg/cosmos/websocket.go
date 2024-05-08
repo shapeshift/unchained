@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"strings"
 	"sync"
 	"time"
 
@@ -48,7 +49,13 @@ func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- 
 		return nil, errors.Wrapf(err, "failed to parse WSURL: %s", conf.WSURL)
 	}
 
-	client, err := tendermint.NewWS(wsURL.String(), "/websocket")
+	endpoint := "/websocket"
+	if conf.APIKEY != "" {
+		parts := strings.Split(conf.APIKEY, ":")
+		endpoint = fmt.Sprintf("/%s/websocket", parts[1])
+	}
+
+	client, err := tendermint.NewWS(wsURL.String(), endpoint)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create websocket client")
 	}

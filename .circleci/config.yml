@@ -150,10 +150,11 @@ aliases:
     assetName: cosmos
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/cosmos/pulumi
-    lcd-url: http://cosmos-svc.unchained.svc.cluster.local:1317
-    grpc-url: cosmos-svc.unchained.svc.cluster.local:9090
-    rpc-url: http://cosmos-svc.unchained.svc.cluster.local:26657
-    ws-url: ws://cosmos-svc.unchained.svc.cluster.local:26657
+    api-key: $NOW_NODES_API_KEY_COSMOS
+    lcd-url: https://cosmos-shapeshift.nownodes.io
+    grpc-url: cosmos-shapeshift.nownodes.io
+    rpc-url: https://cosmos-tendermint-shapeshift.nownodes.io
+    ws-url: wss://cosmos-tendermint-shapeshift.nownodes.io
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -168,18 +169,23 @@ aliases:
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 64Gi
-    service-storage-size-1: 5000Gi
+    service-storage-size-1: 6500Gi
     service-storage-iops-1: "6000"
     service-storage-throughput-1: "300"
+
+  - &cosmos-fallback
+    <<: *cosmos
+    api-key: ""
+    lcd-url: http://cosmos-svc.unchained.svc.cluster.local:1317
+    grpc-url: http://cosmos-svc.unchained.svc.cluster.local:9090
+    rpc-url: http://cosmos-svc.unchained.svc.cluster.local:26657
+    ws-url: ws://cosmos-svc.unchained.svc.cluster.local:26657
 
   - &cosmos-dev
     <<: *cosmos
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    lcd-url: http://cosmos-svc.unchained-dev.svc.cluster.local:1317
-    grpc-url: cosmos-svc.unchained-dev.svc.cluster.local:9090
-    rpc-url: http://cosmos-svc.unchained-dev.svc.cluster.local:26657
-    ws-url: ws://cosmos-svc.unchained-dev.svc.cluster.local:26657
+    api-key: $NOW_NODES_API_KEY_COSMOS
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 500Mi
@@ -308,6 +314,9 @@ jobs:
       DOCKER_BUILDKIT: 1
     parameters:
       <<: *params
+      api-key:
+        type: string
+        default: ''
       lcd-url:
         type: string
       lcd-v1-url:
@@ -332,6 +341,7 @@ jobs:
       - run:
           name: add custom environment variables
           command: |
+            echo 'export API_KEY=<< parameters.api-key >>' >> $BASH_ENV
             echo 'export LCD_URL=<< parameters.lcd-url >>' >> $BASH_ENV
             echo 'export LCD_V1_URL=<< parameters.lcd-v1-url >>' >> $BASH_ENV
             echo 'export GRPC_URL=<< parameters.grpc-url >>' >> $BASH_ENV
@@ -472,3 +482,24 @@ workflows:
           requires:
             - approve cosmos coinstack
           <<: [*cosmos, *only-cosmos]
+
+  deploy-fallback:
+    jobs:
+      - lint-and-test-persist:
+          name: lint and test project (persist to workspace)
+          <<: *only-cosmos
+
+      - approve-coinstack:
+          name: approve cosmos fallback
+          type: approval
+          requires:
+            - lint and test project (persist to workspace)
+          <<: *only-cosmos
+
+      - deploy-coinstack-go:
+          name: deploy cosmos fallback
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve cosmos fallback
+          <<: [*cosmos-fallback, *only-cosmos]
