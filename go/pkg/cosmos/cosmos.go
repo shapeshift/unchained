@@ -3,6 +3,8 @@ package cosmos
 
 import (
 	"context"
+	"encoding/base64"
+	"fmt"
 	"math/big"
 	"net/url"
 
@@ -86,6 +88,7 @@ type Config struct {
 	Denom             string
 	NativeFee         int
 	Encoding          *params.EncodingConfig
+	APIKEY            string
 	GRPCURL           string
 	LCDURL            string
 	RPCURL            string
@@ -118,6 +121,10 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 
 	// untyped resty http clients
 	headers := map[string]string{"Accept": "application/json"}
+	if conf.APIKEY != "" {
+		headers["Authorization"] = fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(conf.APIKEY)))
+	}
+
 	lcd := resty.New().SetBaseURL(lcdURL.String()).SetHeaders(headers)
 	rpc := resty.New().SetBaseURL(rpcURL.String()).SetHeaders(headers)
 
