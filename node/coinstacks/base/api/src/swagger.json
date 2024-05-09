@@ -450,7 +450,7 @@
 				],
 				"description": "Supported token types for token metadata"
 			},
-			"OptimismGasEstimate": {
+			"BaseGasEstimate": {
 				"description": "Contains info about estimated gas cost of a transaction on both L1 and L2",
 				"properties": {
 					"gasLimit": {
@@ -486,7 +486,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"OptimismGasFees": {
+			"BaseGasFees": {
 				"description": "Contains info about current recommended fees for a transaction on both L1 and L2",
 				"properties": {
 					"gasPrice": {
@@ -525,7 +525,7 @@
 		"securitySchemes": {}
 	},
 	"info": {
-		"title": "@shapeshiftoss/optimism-api",
+		"title": "@shapeshiftoss/base-api",
 		"version": "10.0.0",
 		"license": {
 			"name": "MIT"
@@ -1083,13 +1083,13 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/OptimismGasEstimate"
+									"$ref": "#/components/schemas/BaseGasEstimate"
 								},
 								"examples": {
 									"Example 1": {
 										"value": {
 											"gasLimit": "21000",
-											"l1GasLimit": "1632"
+											"l1GasLimit": "1664"
 										}
 									}
 								}
@@ -1175,29 +1175,29 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/OptimismGasFees"
+									"$ref": "#/components/schemas/BaseGasFees"
 								},
 								"examples": {
 									"Example 1": {
 										"value": {
-											"l1GasPrice": "4819835362",
-											"gasPrice": "62068691",
-											"baseFeePerGas": "61074678",
+											"l1GasPrice": "5349789102",
+											"gasPrice": "52518432",
+											"baseFeePerGas": "51497198",
 											"maxPriorityFeePerGas": "1000000",
 											"slow": {
-												"gasPrice": "61121042",
-												"maxFeePerGas": "62605850",
-												"maxPriorityFeePerGas": "1537159"
+												"gasPrice": "51815704",
+												"maxFeePerGas": "51947082",
+												"maxPriorityFeePerGas": "428650"
 											},
 											"average": {
-												"gasPrice": "93857447",
-												"maxFeePerGas": "151888001",
-												"maxPriorityFeePerGas": "90819310"
+												"gasPrice": "53149928",
+												"maxFeePerGas": "52728076",
+												"maxPriorityFeePerGas": "1209644"
 											},
 											"fast": {
-												"gasPrice": "211378464",
-												"maxFeePerGas": "340609987",
-												"maxPriorityFeePerGas": "279541296"
+												"gasPrice": "105353129",
+												"maxFeePerGas": "145357641",
+												"maxPriorityFeePerGas": "93839209"
 											}
 										}
 									}

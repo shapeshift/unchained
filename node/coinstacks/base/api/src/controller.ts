@@ -9,7 +9,7 @@ import { API } from '../../../common/api/src/evm' // unable to import models fro
 import { EVM } from '../../../common/api/src/evm/controller'
 import { Service } from '../../../common/api/src/evm/service'
 import { GasOracle } from '../../../common/api/src/evm/gasOracle'
-import { OptimismGasEstimate, OptimismGasFees } from './models'
+import { BaseGasEstimate, BaseGasFees } from './models'
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
@@ -24,21 +24,21 @@ if (!NETWORK) throw new Error('NETWORK env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
 
 export const logger = new Logger({
-  namespace: ['unchained', 'coinstacks', 'optimism', 'api'],
+  namespace: ['unchained', 'coinstacks', 'base', 'api'],
   level: process.env.LOG_LEVEL,
 })
 
-const CHAIN_ID: Record<string, number> = { mainnet: 10 }
+const CHAIN_ID: Record<string, number> = { mainnet: 8453 }
 
 const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL, logger })
 const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
-export const gasOracle = new GasOracle({ logger, provider, coinstack: 'optimism' })
+export const gasOracle = new GasOracle({ logger, provider, coinstack: 'base' })
 
 export const service = new Service({
   blockbook,
   gasOracle,
   explorerApiKey: ETHERSCAN_API_KEY,
-  explorerApiUrl: 'https://api-optimistic.etherscan.io/api',
+  explorerApiUrl: 'https://api.basescan.org/api',
   provider,
   logger,
   rpcUrl: RPC_URL,
@@ -52,7 +52,7 @@ const gpo = new Contract(gasPriceOracleAddress[420], gasPriceOracleABI, provider
 
 @Route('api/v1')
 @Tags('v1')
-export class Optimism extends EVM implements BaseAPI, API {
+export class Base extends EVM implements BaseAPI, API {
   /**
    * Get the estimated gas cost of a transaction
    *
@@ -61,14 +61,14 @@ export class Optimism extends EVM implements BaseAPI, API {
    * @param {string} to to address
    * @param {string} value transaction value in wei
    *
-   * @returns {Promise<OptimismGasEstimate>} estimated gas cost
+   * @returns {Promise<BaseGasEstimate>} estimated gas cost
    *
    * @example data "0x"
    * @example from "0x0000000000000000000000000000000000000000"
    * @example to "0x15E03a18349cA885482F59935Af48C5fFbAb8DE1"
    * @example value "1337"
    */
-  @Example<OptimismGasEstimate>({ gasLimit: '21000', l1GasLimit: '1632' })
+  @Example<BaseGasEstimate>({ gasLimit: '21000', l1GasLimit: '1664' })
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/estimate')
@@ -77,7 +77,7 @@ export class Optimism extends EVM implements BaseAPI, API {
     @Query() from: string,
     @Query() to: string,
     @Query() value: string
-  ): Promise<OptimismGasEstimate> {
+  ): Promise<BaseGasEstimate> {
     // l2 gas limit
     const { gasLimit } = await service.estimateGas(data, from, to, value)
 
@@ -101,32 +101,32 @@ export class Optimism extends EVM implements BaseAPI, API {
    *
    * * `l1GasPrice` = l1BaseFee * scalar
    *
-   * @returns {Promise<OptimismGasFees>} current fees specified in wei
+   * @returns {Promise<BaseGasFees>} current fees specified in wei
    */
-  @Example<OptimismGasFees>({
-    l1GasPrice: '4819835362',
-    gasPrice: '62068691',
-    baseFeePerGas: '61074678',
+  @Example<BaseGasFees>({
+    l1GasPrice: '5349789102',
+    gasPrice: '52518432',
+    baseFeePerGas: '51497198',
     maxPriorityFeePerGas: '1000000',
     slow: {
-      gasPrice: '61121042',
-      maxFeePerGas: '62605850',
-      maxPriorityFeePerGas: '1537159',
+      gasPrice: '51815704',
+      maxFeePerGas: '51947082',
+      maxPriorityFeePerGas: '428650',
     },
     average: {
-      gasPrice: '93857447',
-      maxFeePerGas: '151888001',
-      maxPriorityFeePerGas: '90819310',
+      gasPrice: '53149928',
+      maxFeePerGas: '52728076',
+      maxPriorityFeePerGas: '1209644',
     },
     fast: {
-      gasPrice: '211378464',
-      maxFeePerGas: '340609987',
-      maxPriorityFeePerGas: '279541296',
+      gasPrice: '105353129',
+      maxFeePerGas: '145357641',
+      maxPriorityFeePerGas: '93839209',
     },
   })
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
-  async getGasFees(): Promise<OptimismGasFees> {
+  async getGasFees(): Promise<BaseGasFees> {
     const l1GasPrice = (await gpo.l1BaseFee()) as BigNumber
     const gasFees = await service.getGasFees()
     return { l1GasPrice: l1GasPrice.toString(), ...gasFees }

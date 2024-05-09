@@ -450,13 +450,13 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101311.0
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101315.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
     service-storage-size-1: 1250Gi
     service-name-2: op-node
-    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.7.4
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.7.5
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 2Gi
@@ -579,7 +579,7 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.25.4
+    service-image-1: nethermind/nethermind:1.26.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 6Gi
@@ -639,10 +639,56 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
 
+  - &base
+    assetName: base
+    pulumi-stack: public-us-east-2
+    pulumi-dir: coinstacks/base/pulumi
+    rpc-url: http://base-svc.unchained.svc.cluster.local:8545
+    indexer-url: http://base-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://base-svc.unchained.svc.cluster.local:8001/websocket
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 6
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
+    api-cpu-threshold: 75
+    api-memory-limit: 1Gi
+    api-memory-request: 500Mi
+    stateful-service-replicas: 2
+    service-name-1: daemon
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101315.0
+    service-cpu-limit-1: "2"
+    service-cpu-request-1: "1"
+    service-memory-limit-1: 24Gi
+    service-storage-size-1: 750Gi
+    service-name-2: op-node
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.7.5
+    service-cpu-limit-2: "2"
+    service-cpu-request-2: "1"
+    service-memory-limit-2: 2Gi
+    service-storage-size-2: 1Gi
+    service-name-3: indexer
+    service-image-3: shapeshiftdao/unchained-blockbook:base-32a3bc7
+    service-cpu-limit-3: "4"
+    service-cpu-request-3: "2"
+    service-memory-limit-3: 32Gi
+    service-storage-size-3: 50Gi
+
+  - &base-dev
+    <<: *base
+    environment: dev
+    pulumi-stack: public-dev-us-east-2
+    rpc-url: http://base-svc.unchained-dev.svc.cluster.local:8545
+    indexer-url: http://base-svc.unchained-dev.svc.cluster.local:8001
+    indexer-ws-url: ws://base-svc.unchained-dev.svc.cluster.local:8001/websocket
+    api-replicas: 1
+    api-max-replicas: 2
+    api-memory-limit: 500Mi
+    stateful-service-replicas: 1
+
   - &proxy
     assetName: proxy
-    environment: infra
-    pulumi-stack: public-infra-us-east-2
+    pulumi-stack: public-us-east-2
     pulumi-dir: proxy/pulumi
     api-autoscaling: true
     api-replicas: 2
@@ -652,6 +698,15 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
     api-memory-request: 500Mi
+
+  - &proxy-dev
+    <<: *proxy
+    assetName: proxy
+    environment: dev
+    pulumi-stack: public-dev-us-east-2
+    api-replicas: 1
+    api-max-replicas: 2
+    api-memory-limit: 500Mi
 
 commands:
   precheck:
@@ -1170,6 +1225,15 @@ workflows:
             - deploy dependencies
           <<: [*arbitrum-dev, *only-develop]
 
+      - deploy-coinstack-node:
+          name: deploy base develop
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          etherscan-env-var: ETHERSCAN_API_KEY_BASE
+          requires:
+            - deploy dependencies
+          <<: [*base-dev, *only-develop]
+
       - deploy-coinstack-go:
           name: deploy thorchain develop
           organization: TAXISTAKE
@@ -1179,12 +1243,12 @@ workflows:
           <<: [*thorchain-dev, *only-develop]
 
       - deploy-coinstack-node:
-          name: deploy proxy
+          name: deploy proxy develop
           organization: TAXISTAKE
           pulumi-command: up -f --yes
           requires:
             - deploy dependencies
-          <<: [*proxy, *only-develop]
+          <<: [*proxy-dev, *only-develop]
 
       - deploy-monitoring-pulumi:
           name: deploy monitoring pulumi
@@ -1478,6 +1542,30 @@ workflows:
             - approve arbitrum
           <<: [*arbitrum, *only-main]
 
+      ####### BASE
+      - deploy-coinstack-node:
+          name: preview base
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies
+          <<: [*base, *only-main]
+
+      - approve-coinstack:
+          name: approve base
+          type: approval
+          requires:
+            - preview base
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy base
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve base
+          <<: [*base, *only-main]
+
       ####### THORCHAIN
       - deploy-coinstack-go:
           name: preview thorchain
@@ -1501,6 +1589,30 @@ workflows:
           requires:
             - approve thorchain
           <<: [*thorchain, *only-main]
+
+      ####### PROXY
+      - deploy-coinstack-node:
+          name: preview proxy
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies
+          <<: [*proxy, *only-main]
+
+      - approve-coinstack:
+          name: approve proxy
+          type: approval
+          requires:
+            - preview proxy
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy proxy
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve proxy
+          <<: [*proxy, *only-main]
 
   deploy-fallback:
     jobs:
