@@ -688,8 +688,7 @@ aliases:
 
   - &proxy
     assetName: proxy
-    environment: infra
-    pulumi-stack: public-infra-us-east-2
+    pulumi-stack: public-us-east-2
     pulumi-dir: proxy/pulumi
     api-autoscaling: true
     api-replicas: 2
@@ -699,6 +698,15 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
     api-memory-request: 500Mi
+
+  - &proxy-dev
+    <<: *proxy
+    assetName: proxy
+    environment: dev
+    pulumi-stack: public-dev-us-east-2
+    api-replicas: 1
+    api-max-replicas: 2
+    api-memory-limit: 500Mi
 
 commands:
   precheck:
@@ -1235,12 +1243,12 @@ workflows:
           <<: [*thorchain-dev, *only-develop]
 
       - deploy-coinstack-node:
-          name: deploy proxy
+          name: deploy proxy develop
           organization: TAXISTAKE
           pulumi-command: up -f --yes
           requires:
             - deploy dependencies
-          <<: [*proxy, *only-develop]
+          <<: [*proxy-dev, *only-develop]
 
       - deploy-monitoring-pulumi:
           name: deploy monitoring pulumi
@@ -1581,6 +1589,30 @@ workflows:
           requires:
             - approve thorchain
           <<: [*thorchain, *only-main]
+
+      ####### PROXY
+      - deploy-coinstack-node:
+          name: preview proxy
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies
+          <<: [*proxy, *only-main]
+
+      - approve-coinstack:
+          name: approve proxy
+          type: approval
+          requires:
+            - preview proxy
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy proxy
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve proxy
+          <<: [*proxy, *only-main]
 
   deploy-fallback:
     jobs:
