@@ -608,6 +608,7 @@ aliases:
     api-max-replicas: 2
     api-memory-limit: 500Mi
     stateful-service-replicas: 1
+    service-image-3: shapeshiftdao/unchained-blockbook:gnosis-6d09e34
 
   - &arbitrum
     assetName: arbitrum
@@ -1207,14 +1208,14 @@ workflows:
             - deploy dependencies
           <<: [*polygon-dev, *only-develop]
 
-      #- deploy-coinstack-node:
-      #    name: deploy gnosis develop
-      #    organization: TAXISTAKE
-      #    pulumi-command: up -f --yes
-      #    etherscan-env-var: ETHERSCAN_API_KEY_GNOSIS
-      #    requires:
-      #      - deploy dependencies
-      #    <<: [*gnosis-dev, *only-develop]
+      - deploy-coinstack-node:
+          name: deploy gnosis develop
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          etherscan-env-var: ETHERSCAN_API_KEY_GNOSIS
+          requires:
+            - deploy dependencies
+          <<: [*gnosis-dev, *only-develop]
 
       - deploy-coinstack-node:
           name: deploy arbitrum develop
