@@ -480,8 +480,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text",
-                    "value": null
+                    "color": "text"
                   }
                 ]
               }
@@ -570,8 +569,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -687,8 +685,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -784,8 +781,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -900,8 +896,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)",
-                    "value": null
+                    "color": "rgba(50, 172, 45, 0.97)"
                   },
                   {
                     "color": "rgba(237, 129, 40, 0.89)",
@@ -1030,8 +1025,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1141,8 +1135,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text",
-                    "value": null
+                    "color": "text"
                   }
                 ]
               }
@@ -1231,8 +1224,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -1348,8 +1340,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -1445,8 +1436,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1561,8 +1551,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)",
-                    "value": null
+                    "color": "rgba(50, 172, 45, 0.97)"
                   },
                   {
                     "color": "rgba(237, 129, 40, 0.89)",
@@ -1691,8 +1680,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1814,7 +1802,7 @@
             "h": 12,
             "w": 3,
             "x": 0,
-            "y": 83
+            "y": 60
           },
           "id": 184,
           "options": {
@@ -1905,7 +1893,7 @@
             "h": 7,
             "w": 9,
             "x": 3,
-            "y": 83
+            "y": 60
           },
           "id": 45,
           "options": {
@@ -2022,7 +2010,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 83
+            "y": 60
           },
           "id": 197,
           "options": {
@@ -2122,7 +2110,7 @@
             "h": 5,
             "w": 9,
             "x": 3,
-            "y": 90
+            "y": 67
           },
           "id": 122,
           "options": {
@@ -2243,7 +2231,7 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 95
+            "y": 72
           },
           "id": 46,
           "interval": "1m",
@@ -2368,7 +2356,7 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 95
+            "y": 72
           },
           "id": 225,
           "options": {
@@ -2446,7 +2434,7 @@
         "x": 0,
         "y": 60
       },
-      "id": 62,
+      "id": 363,
       "panels": [
         {
           "datasource": {
@@ -2463,7 +2451,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "text"
+                    "color": "text",
+                    "value": null
                   }
                 ]
               }
@@ -2474,9 +2463,9 @@
             "h": 12,
             "w": 3,
             "x": 0,
-            "y": 55
+            "y": 85
           },
-          "id": 223,
+          "id": 378,
           "options": {
             "colorMode": "value",
             "graphMode": "area",
@@ -2489,7 +2478,7 @@
             },
             "textMode": "auto"
           },
-          "pluginVersion": "10.0.3",
+          "pluginVersion": "10.1.5",
           "targets": [
             {
               "datasource": {
@@ -2497,11 +2486,10 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(unchained_ws_client_count{coinstack=\"bnbsmartchain\", namespace=\"$namespace\"})",
-              "hide": false,
+              "expr": "sum(unchained_ws_client_count{coinstack=\"base\", namespace=\"$namespace\"})",
               "instant": false,
               "range": true,
-              "refId": "B"
+              "refId": "A"
             }
           ],
           "title": "WS Connection Count",
@@ -2553,7 +2541,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               },
@@ -2565,9 +2554,9 @@
             "h": 7,
             "w": 9,
             "x": 3,
-            "y": 55
+            "y": 85
           },
-          "id": 75,
+          "id": 380,
           "options": {
             "orientation": "auto",
             "reduceOptions": {
@@ -2579,7 +2568,7 @@
             "showThresholdMarkers": false,
             "text": {}
           },
-          "pluginVersion": "10.0.3",
+          "pluginVersion": "10.1.5",
           "targets": [
             {
               "datasource": {
@@ -2588,7 +2577,7 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"bnbsmartchain-api-.*\"} / kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"bnbsmartchain-api-.*\"}) * 100",
+              "expr": "(kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"base-api-.*\"} / kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"base-api-.*\"}) * 100",
               "hide": false,
               "instant": true,
               "legendFormat": "API",
@@ -2602,7 +2591,7 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=~\"bnbsmartchain-sts\"} / kube_statefulset_replicas{namespace=\"$namespace\", statefulset=~\"bnbsmartchain-sts\"}) * 100",
+              "expr": "(kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=~\"base-sts\"} / kube_statefulset_replicas{namespace=\"$namespace\", statefulset=~\"base-sts\"}) * 100",
               "hide": false,
               "instant": true,
               "legendFormat": "STS",
@@ -2636,6 +2625,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -2668,7 +2658,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               },
@@ -2680,9 +2671,9 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 55
+            "y": 85
           },
-          "id": 275,
+          "id": 382,
           "options": {
             "legend": {
               "calcs": ["mean", "max"],
@@ -2703,7 +2694,7 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"base\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -2719,7 +2710,7 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"base\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -2735,7 +2726,7 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint)",
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"base\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint)",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -2764,7 +2755,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -2779,9 +2771,9 @@
             "h": 5,
             "w": 9,
             "x": 3,
-            "y": 62
+            "y": 92
           },
-          "id": 137,
+          "id": 381,
           "options": {
             "colorMode": "none",
             "graphMode": "area",
@@ -2795,7 +2787,7 @@
             "text": {},
             "textMode": "auto"
           },
-          "pluginVersion": "10.0.3",
+          "pluginVersion": "10.1.5",
           "targets": [
             {
               "datasource": {
@@ -2803,7 +2795,7 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"bnbsmartchain-api-.*\"}",
+              "expr": "kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"base-api-.*\"}",
               "instant": false,
               "legendFormat": "Available",
               "range": true,
@@ -2815,7 +2807,7 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"bnbsmartchain-api-.*\"}",
+              "expr": "kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"base-api-.*\"}",
               "hide": false,
               "instant": false,
               "legendFormat": "Total",
@@ -2828,7 +2820,7 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=\"bnbsmartchain-sts\"}",
+              "expr": "kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=\"base-sts\"}",
               "hide": false,
               "instant": false,
               "legendFormat": "Available",
@@ -2841,7 +2833,7 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "kube_statefulset_replicas{namespace=\"$namespace\", statefulset=\"bnbsmartchain-sts\"}",
+              "expr": "kube_statefulset_replicas{namespace=\"$namespace\", statefulset=\"base-sts\"}",
               "hide": false,
               "instant": false,
               "legendFormat": "Total",
@@ -2879,7 +2871,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "rgba(50, 172, 45, 0.97)"
+                    "color": "rgba(50, 172, 45, 0.97)",
+                    "value": null
                   },
                   {
                     "color": "rgba(237, 129, 40, 0.89)",
@@ -2899,9 +2892,9 @@
             "h": 12,
             "w": 12,
             "x": 0,
-            "y": 67
+            "y": 97
           },
-          "id": 76,
+          "id": 379,
           "interval": "1m",
           "links": [],
           "maxDataPoints": 100,
@@ -2915,7 +2908,7 @@
             "showThresholdLabels": false,
             "showThresholdMarkers": true
           },
-          "pluginVersion": "10.0.3",
+          "pluginVersion": "10.1.5",
           "targets": [
             {
               "datasource": {
@@ -2923,7 +2916,7 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=~\"data-daemon-bnbsmartchain-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-bnbsmartchain-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-bnbsmartchain-sts-0\"})\n* 100)\n",
+              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=~\"data-daemon-base-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-base-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-base-sts-0\"})\n* 100)\n",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -2937,7 +2930,7 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bnbsmartchain-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bnbsmartchain-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bnbsmartchain-sts-0\"})\n* 100)",
+              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-base-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-base-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-base-sts-0\"})\n* 100)",
               "hide": false,
               "instant": false,
               "legendFormat": "Indexer",
@@ -2972,6 +2965,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineStyle": {
                   "fill": "solid"
@@ -3007,7 +3001,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -3022,9 +3017,9 @@
             "h": 12,
             "w": 12,
             "x": 12,
-            "y": 67
+            "y": 97
           },
-          "id": 276,
+          "id": 383,
           "options": {
             "legend": {
               "calcs": ["mean", "max"],
@@ -3046,7 +3041,7 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"base\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"base\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -3061,7 +3056,7 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"base\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"base\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -3076,7 +3071,7 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint))",
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"base\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"base\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint))",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -3089,7 +3084,7 @@
           "type": "timeseries"
         }
       ],
-      "title": "BNB Smart Chain",
+      "title": "Base",
       "type": "row"
     },
     {
@@ -4398,6 +4393,660 @@
         "x": 0,
         "y": 63
       },
+      "id": 62,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text"
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 3,
+            "x": 0,
+            "y": 55
+          },
+          "id": 223,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(unchained_ws_client_count{coinstack=\"bnbsmartchain\", namespace=\"$namespace\"})",
+              "hide": false,
+              "instant": false,
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "WS Connection Count",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "continuous-GrYlRd"
+              },
+              "custom": {
+                "neutral": 0
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "color": "red",
+                      "index": 0,
+                      "text": "Down"
+                    },
+                    "100": {
+                      "color": "green",
+                      "index": 1,
+                      "text": "Healthy"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "from": 1,
+                    "result": {
+                      "color": "orange",
+                      "index": 2,
+                      "text": "Degraded"
+                    },
+                    "to": 99
+                  },
+                  "type": "range"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 9,
+            "x": 3,
+            "y": 55
+          },
+          "id": 75,
+          "options": {
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": false,
+            "text": {}
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"bnbsmartchain-api-.*\"} / kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"bnbsmartchain-api-.*\"}) * 100",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "API",
+              "range": false,
+              "refId": "API"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=~\"bnbsmartchain-sts\"} / kube_statefulset_replicas{namespace=\"$namespace\", statefulset=~\"bnbsmartchain-sts\"}) * 100",
+              "hide": false,
+              "instant": true,
+              "legendFormat": "STS",
+              "range": false,
+              "refId": "Coinstack"
+            }
+          ],
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": 3600000,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 12,
+            "y": 55
+          },
+          "id": 275,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "common"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "/account"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(increase(label_replace(unchained_http_request_count{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "legendFormat": "{{endpoint}}",
+              "range": true,
+              "refId": "/tx"
+            }
+          ],
+          "title": "Request Count",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "fixed"
+              },
+              "mappings": [],
+              "noValue": "-",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 9,
+            "x": 3,
+            "y": 62
+          },
+          "id": 137,
+          "options": {
+            "colorMode": "none",
+            "graphMode": "area",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_deployment_status_replicas_ready{namespace=\"$namespace\", deployment=~\"bnbsmartchain-api-.*\"}",
+              "instant": false,
+              "legendFormat": "Available",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_deployment_status_replicas{namespace=\"$namespace\", deployment=~\"bnbsmartchain-api-.*\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Total",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_statefulset_status_replicas_ready{namespace=\"$namespace\", statefulset=\"bnbsmartchain-sts\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Available",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "kube_statefulset_replicas{namespace=\"$namespace\", statefulset=\"bnbsmartchain-sts\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Total",
+              "range": true,
+              "refId": "D"
+            }
+          ],
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "rgba(50, 172, 45, 0.97)"
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 80
+                  },
+                  {
+                    "color": "rgba(245, 54, 54, 0.9)",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 0,
+            "y": 67
+          },
+          "id": 76,
+          "interval": "1m",
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": ["lastNotNull"],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=~\"data-daemon-bnbsmartchain-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-bnbsmartchain-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-daemon-bnbsmartchain-sts-0\"})\n* 100)\n",
+              "format": "time_series",
+              "instant": true,
+              "intervalFactor": 1,
+              "legendFormat": "Daemon",
+              "range": false,
+              "refId": "Daemon"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "max without(instance,node) (\n(\n  topk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bnbsmartchain-sts-0\"})\n  -\n  topk(1, kubelet_volume_stats_available_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bnbsmartchain-sts-0\"})\n)\n/\ntopk(1, kubelet_volume_stats_capacity_bytes{job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=\"data-indexer-bnbsmartchain-sts-0\"})\n* 100)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "Indexer",
+              "range": true,
+              "refId": "Indexer"
+            }
+          ],
+          "title": "Volume Space Usage",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "Seconds",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": 3600000,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "index": 0,
+                      "text": "0"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 12,
+            "y": 67
+          },
+          "id": 276,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "10.0.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/(info|gas|send|metadata).*\"}, \"endpoint\", \"$1\", \"route\", \"(.*?)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "common"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/account.*\"}, \"endpoint\", \"$1$2\", \"route\", \"(.*/account)(?:\\\\/.*?|\\\\?.*|$)(\\\\/.*?|$)(?:\\\\?.*|$)\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "/account"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "(sum(rate(label_replace(unchained_http_request_duration_seconds_sum{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint) / sum(rate(label_replace(unchained_http_request_duration_seconds_count{namespace=\"$namespace\", coinstack=\"bnbsmartchain\", statusCode!=\"404\", route=~\"/api/v1/tx.*\"}, \"endpoint\", \"$1\", \"route\", \"(.*/tx).*\")[$__rate_interval:])) by (endpoint))",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{label_name}}",
+              "range": true,
+              "refId": "/tx"
+            }
+          ],
+          "title": "Average Request Duration",
+          "type": "timeseries"
+        }
+      ],
+      "title": "BNB Smart Chain",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 64
+      },
       "id": 77,
       "panels": [
         {
@@ -5038,7 +5687,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 64
+        "y": 65
       },
       "id": 80,
       "panels": [
@@ -5687,7 +6336,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 65
+        "y": 66
       },
       "id": 83,
       "panels": [
@@ -6354,7 +7003,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 66
+        "y": 67
       },
       "id": 86,
       "panels": [
@@ -7021,7 +7670,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 67
+        "y": 68
       },
       "id": 89,
       "panels": [
@@ -7670,7 +8319,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 68
+        "y": 69
       },
       "id": 92,
       "panels": [
@@ -8337,7 +8986,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 69
+        "y": 70
       },
       "id": 98,
       "panels": [
@@ -9004,7 +9653,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 70
+        "y": 71
       },
       "id": 101,
       "panels": [
@@ -9733,6 +10382,11 @@
           },
           {
             "selected": false,
+            "text": "base",
+            "value": "base"
+          },
+          {
+            "selected": false,
             "text": "bitcoin",
             "value": "bitcoin"
           },
@@ -9787,7 +10441,7 @@
             "value": "thorchain"
           }
         ],
-        "query": "arbitrum,arbitrum-nova,avalanche,bitcoin,bitcoincash,bnbsmartchain,cosmos,dogecoin,ethereum,gnosis,litecoin,optimism,polygon,thorchain",
+        "query": "arbitrum,arbitrum-nova,avalanche,base,bitcoin,bitcoincash,bnbsmartchain,cosmos,dogecoin,ethereum,gnosis,litecoin,optimism,polygon,thorchain",
         "queryValue": "",
         "skipUrlSync": false,
         "type": "custom"
