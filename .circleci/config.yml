@@ -218,7 +218,7 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.14.0
+    service-image-1: ethereum/client-go:v1.14.3
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
@@ -583,13 +583,13 @@ aliases:
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 6Gi
-    service-storage-size-1: 1000Gi
+    service-storage-size-1: 750Gi
     service-name-2: daemon-beacon
     service-image-2: sigp/lighthouse:v5.1.3
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 4Gi
-    service-storage-size-2: 500Gi
+    service-storage-size-2: 100Gi
     service-name-3: indexer
     service-image-3: shapeshiftdao/unchained-blockbook:gnosis-patch-68ad335
     service-cpu-limit-3: "2"
@@ -608,6 +608,7 @@ aliases:
     api-max-replicas: 2
     api-memory-limit: 500Mi
     stateful-service-replicas: 1
+    service-image-3: shapeshiftdao/unchained-blockbook:gnosis-6d09e34
 
   - &arbitrum
     assetName: arbitrum
@@ -659,7 +660,7 @@ aliases:
     service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101315.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
-    service-memory-limit-1: 24Gi
+    service-memory-limit-1: 18Gi
     service-storage-size-1: 750Gi
     service-name-2: op-node
     service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.7.5
@@ -669,10 +670,10 @@ aliases:
     service-storage-size-2: 1Gi
     service-name-3: indexer
     service-image-3: shapeshiftdao/unchained-blockbook:base-32a3bc7
-    service-cpu-limit-3: "4"
-    service-cpu-request-3: "2"
-    service-memory-limit-3: 32Gi
-    service-storage-size-3: 50Gi
+    service-cpu-limit-3: "2"
+    service-cpu-request-3: "1"
+    service-memory-limit-3: 6Gi
+    service-storage-size-3: 100Gi
 
   - &base-dev
     <<: *base
@@ -1207,14 +1208,14 @@ workflows:
             - deploy dependencies
           <<: [*polygon-dev, *only-develop]
 
-      #- deploy-coinstack-node:
-      #    name: deploy gnosis develop
-      #    organization: TAXISTAKE
-      #    pulumi-command: up -f --yes
-      #    etherscan-env-var: ETHERSCAN_API_KEY_GNOSIS
-      #    requires:
-      #      - deploy dependencies
-      #    <<: [*gnosis-dev, *only-develop]
+      - deploy-coinstack-node:
+          name: deploy gnosis develop
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          etherscan-env-var: ETHERSCAN_API_KEY_GNOSIS
+          requires:
+            - deploy dependencies
+          <<: [*gnosis-dev, *only-develop]
 
       - deploy-coinstack-node:
           name: deploy arbitrum develop
@@ -1562,6 +1563,7 @@ workflows:
           name: deploy base
           organization: TAXISTAKE
           pulumi-command: up -f --yes
+          etherscan-env-var: ETHERSCAN_API_KEY_BASE
           requires:
             - approve base
           <<: [*base, *only-main]
