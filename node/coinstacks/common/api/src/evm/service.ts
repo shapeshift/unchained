@@ -298,7 +298,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       const gasLimit = await this.provider.estimateGas(tx)
       return { gasLimit: gasLimit.toString() }
     } catch (err) {
-      throw new ApiError('Internal Server Error', 500, JSON.stringify(err))
+      throw handleError(err)
     }
   }
 
@@ -327,7 +327,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
         fast: estimatedFees['90'],
       }
     } catch (err) {
-      throw new ApiError('Internal Server Error', 500, JSON.stringify(err))
+      throw handleError(err)
     }
   }
 
