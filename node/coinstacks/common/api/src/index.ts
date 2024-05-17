@@ -15,10 +15,13 @@ export * as utxo from './utxo'
  * Generic api error for handling failed requests
  */
 export class ApiError extends Error {
+  statusText: string
   statusCode: number
-  constructor(name: string, statusCode: number, message?: string) {
+
+  constructor(statusText: string, statusCode: number, message?: string) {
     super(message)
-    this.name = name
+    this.name = this.constructor.name
+    this.statusText = statusText
     this.statusCode = statusCode
   }
 }

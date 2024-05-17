@@ -18,7 +18,7 @@ export function errorHandler(err: Error, req: Request, res: Response, next: Next
     })
   }
 
-  if (err instanceof ApiError) {
+  if (err.constructor.name === ApiError.prototype.constructor.name) {
     const e = err as ApiError
     console.error(e)
     return res.status(e.statusCode ?? 500).json({ message: e.message })
