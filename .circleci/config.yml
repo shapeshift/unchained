@@ -860,7 +860,6 @@ jobs:
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r6idn.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r6a.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[3] r6i.4xlarge
-            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[4] r6id.4xlarge
             pulumi config set --path unchained:common.eks.traefik.autoscaling.enabled true
             pulumi config set --path unchained:common.eks.traefik.autoscaling.memoryThreshold 50
             pulumi config set --path unchained:common.eks.traefik.autoscaling.cpuThreshold 80
