@@ -126,11 +126,12 @@ export class Base extends EVM implements BaseAPI, API {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
   async getGasFees(): Promise<BaseGasFees> {
-    const l1BaseFee = (await gpo.l1BaseFee()) as BigNumber
-    const isEcotone = await gpo.isEcotone()
     const gasFees = await service.getGasFees()
+    const isEcotone = await gpo.isEcotone()
 
+    // ecotone l1GasPrice = ((l1BaseFee * baseFeeScalar * 16) + (blobBaseFee * baseFeeScalar)) / (16 * 10^decimals)
     if (isEcotone) {
+      const l1BaseFee = BigNumber.from(await gpo.l1BaseFee())
       const baseFeeScalar = BigNumber.from(await gpo.baseFeeScalar())
       const blobBaseFee = BigNumber.from(await gpo.blobBaseFeeScalar())
       const blobBaseFeeScalar = BigNumber.from(await gpo.blobBaseFeeScalar())
@@ -145,6 +146,11 @@ export class Base extends EVM implements BaseAPI, API {
       return { l1GasPrice: l1GasPrice.toFixed(), ...gasFees }
     }
 
-    return { l1GasPrice: l1BaseFee.toString(), ...gasFees }
+    // legacy l1GasPrice = l1BaseFee * scalar
+    const l1BaseFee = BigNumber.from(await gpo.l1BaseFee())
+    const scalar = BigNumber.from(await gpo.scalar())
+    const l1GasPrice = l1BaseFee.mul(scalar)
+
+    return { l1GasPrice: l1GasPrice.toString(), ...gasFees }
   }
 }
