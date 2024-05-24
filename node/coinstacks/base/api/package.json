@@ -12,7 +12,6 @@
     "generate": "tsoa spec-and-routes"
   },
   "dependencies": {
-    "@eth-optimism/contracts-ts": "^0.17.2",
     "@shapeshiftoss/blockbook": "^10.0.0",
     "@shapeshiftoss/common-api": "^10.0.0"
   }
