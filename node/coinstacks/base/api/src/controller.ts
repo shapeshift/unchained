@@ -100,8 +100,6 @@ export class Base extends EVM implements BaseAPI, API {
   /**
    * Get the current recommended gas fees to use in a transaction
    *
-   * * `l1GasPrice` = l1BaseFee * scalar
-   *
    * @returns {Promise<BaseGasFees>} current fees specified in wei
    */
   @Example<BaseGasFees>({

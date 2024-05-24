@@ -100,8 +100,6 @@ export class Optimism extends EVM implements BaseAPI, API {
   /**
    * Get the current recommended gas fees to use in a transaction
    *
-   * * `l1GasPrice` = l1BaseFee * scalar
-   *
    * @returns {Promise<OptimismGasFees>} current fees specified in wei
    */
   @Example<OptimismGasFees>({
