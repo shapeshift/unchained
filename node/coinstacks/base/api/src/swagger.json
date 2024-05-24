@@ -1216,7 +1216,7 @@
 						}
 					}
 				},
-				"description": "Get the current recommended gas fees to use in a transaction\n\n* `l1GasPrice` = l1BaseFee * scalar",
+				"description": "Get the current recommended gas fees to use in a transaction",
 				"tags": [
 					"v1"
 				],
