@@ -329,25 +329,6 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
     api-memory-request: 250Mi
-    stateful-service-replicas: 1
-    service-name-1: daemon
-    service-image-1: shapeshiftdao/litecoin-core:v0.21.3
-    service-cpu-limit-1: "2"
-    service-cpu-request-1: "1"
-    service-memory-limit-1: 4Gi
-    service-storage-size-1: 250Gi
-    service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:e9a0858
-    service-cpu-limit-2: "2"
-    service-cpu-request-2: "1"
-    service-memory-limit-2: 8Gi
-    service-storage-size-2: 250Gi
-
-  - &litecoin-fallback
-    <<: *litecoin
-    indexer-url: http://litecoin-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://litecoin-svc.unchained.svc.cluster.local:8001/websocket
-    indexer-api-key: ""
 
   - &litecoin-dev
     <<: *litecoin
@@ -358,7 +339,6 @@ aliases:
     indexer-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    stateful-service-replicas: 0
 
   - &bitcoincash
     assetName: bitcoincash
@@ -497,27 +477,6 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
     api-memory-request: 500Mi
-    stateful-service-replicas: 1
-    service-name-1: daemon
-    service-image-1: shapeshiftdao/bnb-smart-chain:v1.4.8
-    service-cpu-limit-1: "8"
-    service-cpu-request-1: "4"
-    service-memory-limit-1: 72Gi
-    service-storage-size-1: 2500Gi
-    service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:e9a0858
-    service-cpu-limit-2: "2"
-    service-cpu-request-2: "1"
-    service-memory-limit-2: 24Gi
-    service-storage-size-2: 1000Gi
-
-  - &bnbsmartchain-fallback
-    <<: *bnbsmartchain
-    indexer-url: http://bnbsmartchain-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://bnbsmartchain-svc.unchained.svc.cluster.local:8001/websocket
-    indexer-api-key: ""
-    rpc-url: http://bnbsmartchain-svc.unchained.svc.cluster.local:8545
-    rpc-api-key: ""
 
   - &bnbsmartchain-dev
     <<: *bnbsmartchain
@@ -530,7 +489,6 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    stateful-service-replicas: 0
 
   - &polygon
     assetName: polygon
@@ -1637,22 +1595,6 @@ workflows:
             - approve bitcoin fallback
           <<: [*bitcoin-fallback, *only-main]
 
-      ####### LITECOIN
-      - approve-coinstack:
-          name: approve litecoin fallback
-          type: approval
-          requires:
-            - lint and test project (persist to workspace)
-          <<: *only-main
-
-      - deploy-coinstack-node:
-          name: deploy litecoin fallback
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve litecoin fallback
-          <<: [*litecoin-fallback, *only-main]
-
       ####### ETHEREUM
       - approve-coinstack:
           name: approve ethereum fallback
@@ -1668,20 +1610,3 @@ workflows:
           requires:
             - approve ethereum fallback
           <<: [*ethereum-fallback, *only-main]
-
-      ####### BNB SMART CHAIN
-      - approve-coinstack:
-          name: approve bnbsmartchain fallback
-          type: approval
-          requires:
-            - lint and test project (persist to workspace)
-          <<: *only-main
-
-      - deploy-coinstack-node:
-          name: deploy bnbsmartchain fallback
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          etherscan-env-var: ETHERSCAN_API_KEY_BSC
-          requires:
-            - approve bnbsmartchain fallback
-          <<: [*bnbsmartchain-fallback, *only-main]
