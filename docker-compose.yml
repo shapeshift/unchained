@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   unchained-local-node:
     image: unchained-local-node
