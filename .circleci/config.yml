@@ -450,13 +450,13 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101315.0
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101315.1
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
     service-storage-size-1: 1250Gi
     service-name-2: op-node
-    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.7.5
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.7.6
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 2Gi
@@ -499,7 +499,7 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 1
     service-name-1: daemon
-    service-image-1: shapeshiftdao/bnb-smart-chain:v1.4.6
+    service-image-1: shapeshiftdao/bnb-smart-chain:v1.4.8
     service-cpu-limit-1: "8"
     service-cpu-request-1: "4"
     service-memory-limit-1: 72Gi
@@ -657,13 +657,13 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101315.0
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101315.1
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 18Gi
     service-storage-size-1: 750Gi
     service-name-2: op-node
-    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.7.5
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.7.6
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 2Gi
@@ -672,7 +672,7 @@ aliases:
     service-image-3: shapeshiftdao/unchained-blockbook:base-32a3bc7
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
-    service-memory-limit-3: 6Gi
+    service-memory-limit-3: 8Gi
     service-storage-size-3: 100Gi
 
   - &base-dev
@@ -697,7 +697,7 @@ aliases:
     api-cpu-limit: "1"
     api-cpu-request: 500m
     api-cpu-threshold: 75
-    api-memory-limit: 1Gi
+    api-memory-limit: 2Gi
     api-memory-request: 500Mi
 
   - &proxy-dev
