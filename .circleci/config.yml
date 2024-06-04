@@ -163,23 +163,6 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
     api-memory-request: 500Mi
-    stateful-service-replicas: 1
-    service-name-1: daemon
-    service-image-1: shapeshiftdao/cosmoshub:v16.0.0
-    service-cpu-limit-1: "4"
-    service-cpu-request-1: "2"
-    service-memory-limit-1: 64Gi
-    service-storage-size-1: 6500Gi
-    service-storage-iops-1: "6000"
-    service-storage-throughput-1: "300"
-
-  - &cosmos-fallback
-    <<: *cosmos
-    api-key: ""
-    lcd-url: http://cosmos-svc.unchained.svc.cluster.local:1317
-    grpc-url: http://cosmos-svc.unchained.svc.cluster.local:9090
-    rpc-url: http://cosmos-svc.unchained.svc.cluster.local:26657
-    ws-url: ws://cosmos-svc.unchained.svc.cluster.local:26657
 
   - &cosmos-dev
     <<: *cosmos
@@ -482,24 +465,3 @@ workflows:
           requires:
             - approve cosmos coinstack
           <<: [*cosmos, *only-cosmos]
-
-  deploy-fallback:
-    jobs:
-      - lint-and-test-persist:
-          name: lint and test project (persist to workspace)
-          <<: *only-cosmos
-
-      - approve-coinstack:
-          name: approve cosmos fallback
-          type: approval
-          requires:
-            - lint and test project (persist to workspace)
-          <<: *only-cosmos
-
-      - deploy-coinstack-go:
-          name: deploy cosmos fallback
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve cosmos fallback
-          <<: [*cosmos-fallback, *only-cosmos]

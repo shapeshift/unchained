@@ -122,51 +122,6 @@
         }
       }
     },
-    "/api/v1/affiliate/revenue": {
-      "get": {
-        "tags": [
-          "v1"
-        ],
-        "summary": "Get total ss affiliate revenue earned.",
-        "operationId": "GetAffiliateRevenue",
-        "parameters": [
-          {
-            "type": "string",
-            "x-go-name": "Start",
-            "description": "Start timestamp",
-            "name": "start",
-            "in": "query"
-          },
-          {
-            "type": "string",
-            "x-go-name": "End",
-            "description": "End timestamp",
-            "name": "end",
-            "in": "query"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "AffiliateRevenue",
-            "schema": {
-              "$ref": "#/definitions/AffiliateRevenue"
-            }
-          },
-          "400": {
-            "description": "BadRequestError",
-            "schema": {
-              "$ref": "#/definitions/BadRequestError"
-            }
-          },
-          "500": {
-            "description": "InternalServerError",
-            "schema": {
-              "$ref": "#/definitions/InternalServerError"
-            }
-          }
-        }
-      }
-    },
     "/api/v1/gas/estimate": {
       "post": {
         "tags": [
@@ -488,30 +443,6 @@
         }
       ],
       "x-go-package": "github.com/shapeshift/unchained/coinstacks/cosmos/api"
-    },
-    "AffiliateRevenue": {
-      "description": "Contains info about the affiliate revenue earned",
-      "type": "object",
-      "required": [
-        "addresses",
-        "amount"
-      ],
-      "properties": {
-        "addresses": {
-          "description": "Affiliate addresses",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Addresses"
-        },
-        "amount": {
-          "description": "Amount earned (RUNE)",
-          "type": "string",
-          "x-go-name": "Amount"
-        }
-      },
-      "x-go-package": "github.com/shapeshift/unchained/coinstacks/thorchain/api"
     },
     "ApiError": {
       "description": "Generic api error for handling failed requests",
