@@ -154,7 +154,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       return Object.entries(blockTimes).reduce<NetworkFees>((prev, [key, val], index) => {
         const networkFee: NetworkFee = {
           blocksUntilConfirmation: val,
-          satsPerKiloByte: Number(result[index].feePerUnit),
+          satsPerKiloByte: Number(result[index]) * 100000000,
         }
         return { ...prev, [key]: networkFee }
       }, {})
