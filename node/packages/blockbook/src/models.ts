@@ -285,23 +285,6 @@ export interface Vout {
 export type Xpub = Address
 
 /**
- * Contains info about current network fees
- */
-export interface NetworkFee {
-  feePerTx?: string
-  feePerUnit?: string
-  feeLimit?: string
-}
-
-/**
- * Response data for fees endpoint on websocket API
- */
-export interface FeeResponse {
-  id: number
-  data: NetworkFee[]
-}
-
-/**
  * Arguments to Blockbook constructor
  */
 export interface BlockbookArgs {

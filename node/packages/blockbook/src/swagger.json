@@ -806,22 +806,6 @@
 				],
 				"type": "object",
 				"additionalProperties": false
-			},
-			"NetworkFee": {
-				"description": "Contains info about current network fees",
-				"properties": {
-					"feePerTx": {
-						"type": "string"
-					},
-					"feePerUnit": {
-						"type": "string"
-					},
-					"feeLimit": {
-						"type": "string"
-					}
-				},
-				"type": "object",
-				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
@@ -1953,41 +1937,20 @@
 							"application/json": {
 								"schema": {
 									"items": {
-										"$ref": "#/components/schemas/NetworkFee"
+										"type": "string"
 									},
 									"type": "array"
 								},
 								"examples": {
 									"Example 1": {
-										"value": [
-											{
-												"feePerTx": "23424",
-												"feePerUnit": "14186",
-												"feeLimit": "99999"
-											},
-											{
-												"feePerTx": "11245",
-												"feePerUnit": "13727",
-												"feeLimit": "99999"
-											},
-											{
-												"feePerTx": "8263",
-												"feePerUnit": "10719",
-												"feeLimit": "99999"
-											},
-											{
-												"feePerTx": "1243",
-												"feePerUnit": "2015",
-												"feeLimit": "99999"
-											}
-										]
+										"value": []
 									}
 								}
 							}
 						}
 					}
 				},
-				"description": "Returns estimated network fees for the specified confirmation times (in blocks)",
+				"description": "Returns estimated network fees in BTC/kB for the specified block confirmation times",
 				"tags": [
 					"v2"
 				],
