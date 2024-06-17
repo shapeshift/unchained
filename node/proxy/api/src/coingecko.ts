@@ -7,6 +7,7 @@ const COINGECKO_API_KEY = process.env.COINGECKO_API_KEY
 if (!COINGECKO_API_KEY) throw new Error('COINGECKO_API_KEY env var not set')
 
 const CACHE_TTL_MS = 60_000
+const BASE_URL = 'https://pro-api.coingecko.com/api/v3/'
 
 type RequestCache = Partial<Record<string, AxiosResponse>>
 
@@ -17,7 +18,6 @@ export class CoinGecko {
   constructor() {
     this.requestCache = {}
     this.axiosInstance = axios.create({
-      baseURL: 'https://pro-api.coingecko.com/api/v3/',
       headers: {
         'x-cg-pro-api-key': COINGECKO_API_KEY,
       },
@@ -37,7 +37,7 @@ export class CoinGecko {
     res.set('X-Cache', 'MISS')
 
     try {
-      const response = await this.axiosInstance.get(url)
+      const response = await this.axiosInstance.get(`${BASE_URL}${url}`)
       this.requestCache[req.url] = response
       Object.entries(response.headers).forEach(([k, v]) => res.set(k, v))
       res.status(response.status).send(response.data)
