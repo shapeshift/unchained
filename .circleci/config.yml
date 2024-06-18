@@ -386,7 +386,7 @@ aliases:
     service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.133.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
-    service-memory-limit-1: 12Gi
+    service-memory-limit-1: 16Gi
     service-storage-size-1: 3500Gi
     service-name-2: timescaledb
     service-image-2: timescale/timescaledb:2.13.0-pg15

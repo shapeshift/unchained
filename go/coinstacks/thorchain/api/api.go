@@ -47,7 +47,7 @@ type API struct {
 	handler *Handler
 }
 
-func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, swaggerPath string, prometheus *metrics.Prometheus) *API {
+func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, indexer *AffiliateFeeIndexer, swaggerPath string, prometheus *metrics.Prometheus) *API {
 	r := mux.NewRouter()
 
 	handler := &Handler{
@@ -57,6 +57,7 @@ func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService 
 			BlockService: blockService,
 			Denom:        "rune",
 		},
+		indexer: indexer,
 	}
 
 	manager := websocket.NewManager(prometheus)
@@ -119,10 +120,52 @@ func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService 
 	v1Gas := v1.PathPrefix("/gas").Subrouter()
 	v1Gas.HandleFunc("/estimate", a.EstimateGas).Methods("POST")
 
+	v1Affiliate := v1.PathPrefix("/affiliate").Subrouter()
+	v1Affiliate.HandleFunc("/revenue", a.AffiliateRevenue).Methods("GET")
+
 	// docs redirect paths
 	r.HandleFunc("/docs", api.DocsRedirect).Methods("GET")
 
 	http.Handle("/", r)
 
 	return a
+}
+
+// swagger:parameters GetAffiliateRevenue
+type GetAffiliateRevenueParams struct {
+	// Start timestamp
+	// in: query
+	Start string `json:"start"`
+	// End timestamp
+	// in: query
+	End string `json:"end"`
+}
+
+// swagger:route Get /api/v1/affiliate/revenue v1 GetAffiliateRevenue
+//
+// Get total ss affiliate revenue earned.
+//
+// responses:
+//
+//	200: AffiliateRevenue
+//	400: BadRequestError
+//	500: InternalServerError
+func (a *API) AffiliateRevenue(w http.ResponseWriter, r *http.Request) {
+	start, err := strconv.Atoi(r.URL.Query().Get("start"))
+	if err != nil {
+		start = 0
+	}
+
+	end, err := strconv.Atoi(r.URL.Query().Get("end"))
+	if err != nil {
+		end = int(time.Now().UnixMilli())
+	}
+
+	affiliateRevenue, err := a.handler.GetAffiliateRevenue(start, end)
+	if err != nil {
+		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	api.HandleResponse(w, http.StatusOK, affiliateRevenue)
 }
