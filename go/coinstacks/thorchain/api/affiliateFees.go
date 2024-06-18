@@ -19,13 +19,12 @@ import (
 	tendermint "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 	"github.com/tendermint/tendermint/types"
 	tmtypes "github.com/tendermint/tendermint/types"
-	"golang.org/x/sync/errgroup"
 )
 
 const (
 	blockWorkers     = 10
 	resultWorkers    = 100
-	pageSize         = 25
+	pageSize         = 50
 	affiliateAddress = "thor1xmaggkcln5m5fnha2780xrdrulmplvfrz6wj3l"
 )
 
@@ -36,6 +35,7 @@ type AffiliateFeeIndexer struct {
 	mu            sync.Mutex
 	pageCh        chan int
 	resultCh      chan *coretypes.ResultBlockSearch
+	wg            sync.WaitGroup
 }
 
 type AffiliateFee struct {
@@ -59,8 +59,8 @@ func NewAffiliateFeeIndexer(conf cosmos.Config, httpClient *cosmos.HTTPClient) *
 }
 
 func (i *AffiliateFeeIndexer) Sync() error {
-	logger.Info("Started indexing affiliate fees")
 	start := time.Now()
+	logger.Info("Started indexing affiliate fees")
 
 	defer close(i.resultCh)
 
@@ -68,20 +68,16 @@ func (i *AffiliateFeeIndexer) Sync() error {
 		return err
 	}
 
-	go func() {
-		for j := 0; j < resultWorkers; j++ {
-			go func() {
-				for result := range i.resultCh {
-					for _, b := range result.Blocks {
-						block := b.Block
-						if err := i.handleBlock(block); err != nil {
-							logger.Error(err)
-						}
-					}
+	for w := 0; w < resultWorkers; w++ {
+		go func() {
+			for result := range i.resultCh {
+				for _, b := range result.Blocks {
+					block := b.Block
+					i.handleBlock(block)
 				}
-			}()
-		}
-	}()
+			}
+		}()
+	}
 
 	result, err := i.httpClient.BlockSearch(fmt.Sprintf(`"outbound.to='%s'"`, "thor1xmaggkcln5m5fnha2780xrdrulmplvfrz6wj3l"), 1, pageSize)
 	if err != nil {
@@ -91,11 +87,9 @@ func (i *AffiliateFeeIndexer) Sync() error {
 	maxPages := int(math.Ceil(float64(result.TotalCount) / float64(pageSize)))
 	i.resultCh <- result
 
-	g := new(errgroup.Group)
-	for w := 0; w <= blockWorkers; w++ {
-		g.Go(func() error {
-			return i.fetchBlocks()
-		})
+	i.wg.Add(blockWorkers)
+	for w := 0; w < blockWorkers; w++ {
+		go i.fetchBlocks()
 	}
 
 	go func() {
@@ -110,9 +104,7 @@ func (i *AffiliateFeeIndexer) Sync() error {
 		}
 	}()
 
-	if err := g.Wait(); err != nil {
-		return err
-	}
+	i.wg.Wait()
 
 	logger.Infof("Finished indexing affiliate fees (%s)", time.Since(start))
 
@@ -188,34 +180,30 @@ func (i *AffiliateFeeIndexer) listen() error {
 	return nil
 }
 
-func (i *AffiliateFeeIndexer) fetchBlocks() error {
+func (i *AffiliateFeeIndexer) fetchBlocks() {
+	defer i.wg.Done()
+
 	for page := range i.pageCh {
 		result, err := i.httpClient.BlockSearch(fmt.Sprintf(`"outbound.to='%s'"`, "thor1xmaggkcln5m5fnha2780xrdrulmplvfrz6wj3l"), page, pageSize)
 		if err != nil {
-			return errors.Wrapf(err, "failed to fetch blocks for page: %d", page)
+			logger.Panicf("failed to fetch blocks for page: %d: %+v", page, err)
 		}
 
 		i.resultCh <- result
 	}
-
-	return nil
 }
 
-func (i *AffiliateFeeIndexer) handleBlock(block *tmtypes.Block) error {
+func (i *AffiliateFeeIndexer) handleBlock(block *tmtypes.Block) {
 	blockResult, err := i.httpClient.BlockResults(int(block.Height))
 	if err != nil {
-		return errors.Wrapf(err, "failed to handle block: %v", block.Height)
+		logger.Panicf("failed to handle block: %d: %+v", block.Height, err)
 	}
 
 	b := &ResultBlock{
 		Block: block,
 	}
 
-	if err := i.processAffiliateFees(b, blockResult.EndBlockEvents); err != nil {
-		return errors.Wrap(err, "failed to process affiliate fees")
-	}
-
-	return nil
+	i.processAffiliateFees(b, blockResult.EndBlockEvents)
 }
 
 func (i *AffiliateFeeIndexer) handleNewBlockHeader(newBlockHeader types.EventDataNewBlockHeader) {
@@ -223,15 +211,13 @@ func (i *AffiliateFeeIndexer) handleNewBlockHeader(newBlockHeader types.EventDat
 		EventDataNewBlockHeader: newBlockHeader,
 	}
 
-	if err := i.processAffiliateFees(b, newBlockHeader.ResultEndBlock.Events); err != nil {
-		logger.Panicf("failed to process affiliate fees: %+v", err)
-	}
+	i.processAffiliateFees(b, newBlockHeader.ResultEndBlock.Events)
 }
 
-func (i *AffiliateFeeIndexer) processAffiliateFees(block Block, endBlockEvents []abci.Event) error {
+func (i *AffiliateFeeIndexer) processAffiliateFees(block Block, endBlockEvents []abci.Event) {
 	_, typedEvents, err := thorchain.ParseBlockEvents(endBlockEvents)
 	if err != nil {
-		return errors.Wrap(err, "failed to parse block events")
+		logger.Panicf("failed to parse block events for block: %d: %+v", block.Height(), err)
 	}
 
 	for _, event := range typedEvents {
@@ -258,6 +244,4 @@ func (i *AffiliateFeeIndexer) processAffiliateFees(block Block, endBlockEvents [
 			i.mu.Unlock()
 		}
 	}
-
-	return nil
 }
