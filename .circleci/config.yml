@@ -376,11 +376,11 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
-    api-cpu-limit: 500m
-    api-cpu-request: 250m
+    api-cpu-limit: "4"
+    api-cpu-request: "2"
     api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-    api-memory-request: 250Mi
+    api-memory-limit: 2Gi
+    api-memory-request: 1Gi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.133.0
@@ -392,13 +392,13 @@ aliases:
     service-image-2: timescale/timescaledb:2.13.0-pg15
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 6Gi
+    service-memory-limit-2: 8Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
     service-image-3: registry.gitlab.com/thorchain/midgard:2.21.1
-    service-cpu-limit-3: "1"
-    service-cpu-request-3: 500m
-    service-memory-limit-3: 1Gi
+    service-cpu-limit-3: "2"
+    service-cpu-request-3: "1"
+    service-memory-limit-3: 2Gi
     service-storage-size-3: 100Gi
 
   - &thorchain-dev
@@ -410,7 +410,6 @@ aliases:
     ws-url: ws://thorchain-svc.unchained-dev.svc.cluster.local:27147
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &optimism
