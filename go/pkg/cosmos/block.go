@@ -137,6 +137,10 @@ func (c *HTTPClient) BlockResults(height int) (*coretypes.ResultBlockResults, er
 		return nil, errors.Wrapf(err, "failed to get block results for block: %v", height)
 	}
 
+	if res.Error != nil {
+		return nil, errors.Wrapf(errors.New(res.Error.Error()), "failed to get block results for block: %v", height)
+	}
+
 	result := &coretypes.ResultBlockResults{}
 	if err := tmjson.Unmarshal(res.Result, result); err != nil {
 		return nil, errors.Wrapf(err, "failed to unmarshal block result: %v", res.Result)
