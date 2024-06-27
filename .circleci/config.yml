@@ -160,6 +160,8 @@ aliases:
     indexer-url: https://btcbook.nownodes.io
     indexer-ws-url: wss://btcbook.nownodes.io/wss
     indexer-api-key: $NOW_NODES_API_KEY
+    rpc-url: https://btc.nownodes.io
+    rpc-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
@@ -192,9 +194,8 @@ aliases:
     <<: *bitcoin
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://btcbook.nownodes.io
-    indexer-ws-url: wss://btcbook.nownodes.io/wss
     indexer-api-key: $NOW_NODES_API_KEY_DEV
+    rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
     stateful-service-replicas: 0
@@ -295,6 +296,8 @@ aliases:
     indexer-url: https://dogebook.nownodes.io
     indexer-ws-url: wss://dogebook.nownodes.io/wss
     indexer-api-key: $NOW_NODES_API_KEY
+    rpc-url: https://doge.nownodes.io
+    rpc-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
@@ -308,9 +311,8 @@ aliases:
     <<: *dogecoin
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://dogebook.nownodes.io
-    indexer-ws-url: wss://dogebook.nownodes.io/wss
     indexer-api-key: $NOW_NODES_API_KEY_DEV
+    rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
 
@@ -321,6 +323,8 @@ aliases:
     indexer-url: https://ltcbook.nownodes.io
     indexer-ws-url: wss://ltcbook.nownodes.io/wss
     indexer-api-key: $NOW_NODES_API_KEY
+    rpc-url: https://ltc.nownodes.io
+    rpc-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
@@ -334,9 +338,8 @@ aliases:
     <<: *litecoin
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://ltcbook.nownodes.io
-    indexer-ws-url: wss://ltcbook.nownodes.io/wss
     indexer-api-key: $NOW_NODES_API_KEY_DEV
+    rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
 
@@ -347,6 +350,8 @@ aliases:
     indexer-url: https://bchbook.nownodes.io
     indexer-ws-url: wss://bchbook.nownodes.io/wss
     indexer-api-key: $NOW_NODES_API_KEY
+    rpc-url: https://bch.nownodes.io
+    rpc-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
@@ -360,9 +365,8 @@ aliases:
     <<: *bitcoincash
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://bchbook.nownodes.io
-    indexer-ws-url: wss://bchbook.nownodes.io/wss
     indexer-api-key: $NOW_NODES_API_KEY_DEV
+    rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
 
