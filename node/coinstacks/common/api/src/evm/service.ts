@@ -333,8 +333,19 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
 
   async sendTx(body: SendTxBody): Promise<string> {
     try {
-      const { result } = await this.blockbook.sendTransaction(body.hex)
-      return result
+      const request: RPCRequest = {
+        jsonrpc: '2.0',
+        id: 'eth_sendRawTransaction',
+        method: 'eth_sendRawTransaction',
+        params: [body.hex],
+      }
+
+      const config = this.rpcApiKey ? { headers: { 'api-key': this.rpcApiKey } } : undefined
+      const { data } = await axiosNoRetry.post<RPCResponse>(this.rpcUrl, request, config)
+
+      if (!data.result) throw new Error(JSON.stringify(data.error))
+
+      return data.result as string
     } catch (err) {
       throw handleError(err)
     }
