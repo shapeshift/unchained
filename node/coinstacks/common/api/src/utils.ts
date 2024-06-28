@@ -16,7 +16,7 @@ export const handleError = (err: unknown): ApiError => {
     return new ApiError(
       err.response?.statusText || 'Internal Server Error',
       err.response?.status ?? 500,
-      err.response?.data.message || err.message
+      JSON.stringify(err.response?.data.error) || err.response?.data.message || err.message
     )
   }
 
@@ -25,7 +25,7 @@ export const handleError = (err: unknown): ApiError => {
   }
 
   if (err instanceof Error) {
-    return new ApiError('Internal Server Error', 500, err.message)
+    return new ApiError('Internal Server Error', 500, err.message || 'unknown error')
   }
 
   return new ApiError('Internal Server Error', 500, 'unknown error')
