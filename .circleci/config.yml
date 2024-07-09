@@ -655,11 +655,11 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
-    api-cpu-limit: "1"
-    api-cpu-request: 500m
+    api-cpu-limit: "2"
+    api-cpu-request: "1"
     api-cpu-threshold: 75
-    api-memory-limit: 2Gi
-    api-memory-request: 500Mi
+    api-memory-limit: 4Gi
+    api-memory-request: 2Gi
 
   - &proxy-dev
     <<: *proxy
