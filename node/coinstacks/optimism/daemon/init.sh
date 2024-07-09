@@ -31,7 +31,7 @@ start() {
     --rollup.disabletxpoolgossip=true \
     --rollup.sequencerhttp https://mainnet-sequencer.optimism.io \
     --op-network op-mainnet \
-    --txlookuplimit 0 \
+    --history.transactions 0 \
     --cache 4096 \
     --maxpeers 0 \
     --nodiscover &
