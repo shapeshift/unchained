@@ -36,7 +36,7 @@ start() {
     --rollup.sequencerhttp https://mainnet-sequencer.base.org \
     --rollup.halt major \
     --op-network base-mainnet \
-    --txlookuplimit 0 \
+    --history.transactions 0 \
     --cache 4096 \
     --maxpeers 0 \
     --nodiscover &
