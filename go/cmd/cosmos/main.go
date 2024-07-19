@@ -54,6 +54,7 @@ func main() {
 		Bech32PkPrefix:    "cosmospub",
 		Bech32ValPrefix:   "cosmosvaloper",
 		Bech32PkValPrefix: "cosmosvalpub",
+		Denom:             "uatom",
 		Encoding:          encoding,
 		APIKEY:            conf.APIKEY,
 		GRPCURL:           conf.GRPCURL,
