@@ -42,6 +42,7 @@ type Config struct {
 	Bech32ValPrefix   string
 	Bech32PkPrefix    string
 	Bech32PkValPrefix string
+	Denom             string
 	Encoding          *params.EncodingConfig
 	APIKEY            string
 	GRPCURL           string
@@ -53,6 +54,7 @@ type Config struct {
 // HTTPClient allows communicating over http
 type HTTPClient struct {
 	ctx      context.Context
+	denom    string
 	encoding *params.EncodingConfig
 	LCD      *resty.Client
 	RPC      *resty.Client
@@ -84,6 +86,7 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 
 	c := &HTTPClient{
 		ctx:      context.Background(),
+		denom:    conf.Denom,
 		encoding: conf.Encoding,
 		LCD:      lcd,
 		RPC:      rpc,
