@@ -420,9 +420,11 @@ aliases:
     assetName: optimism
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/optimism/pulumi
-    rpc-url: http://optimism-svc.unchained.svc.cluster.local:8545
-    indexer-url: http://optimism-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://optimism-svc.unchained.svc.cluster.local:8001/websocket
+    indexer-url: https://optimism-index.nownodes.io
+    indexer-ws-url: wss://optimism-index.nownodes.io/wss
+    indexer-api-key: $NOW_NODES_API_KEY
+    rpc-url: https://optimism.nownodes.io
+    rpc-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -451,13 +453,23 @@ aliases:
     service-memory-limit-3: 8Gi
     service-storage-size-3: 500Gi
 
+  - &optimism-fallback
+    <<: *optimism
+    indexer-url: http://optimism-svc.unchained.svc.cluster.local:8001
+    indexer-ws-url: ws://optimism-svc.unchained.svc.cluster.local:8001/websocket
+    indexer-api-key: ""
+    rpc-url: http://optimism-svc.unchained.svc.cluster.local:8545
+    rpc-api-key: ""
+
   - &optimism-dev
     <<: *optimism
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    rpc-url: http://optimism-svc.unchained-dev.svc.cluster.local:8545
-    indexer-url: http://optimism-svc.unchained-dev.svc.cluster.local:8001
-    indexer-ws-url: ws://optimism-svc.unchained-dev.svc.cluster.local:8001/websocket
+    indexer-url: https://optimism-index.nownodes.io
+    indexer-ws-url: wss://optimism-index.nownodes.io/wss
+    indexer-api-key: $NOW_NODES_API_KEY_DEV
+    rpc-url: https://optimism.nownodes.io
+    rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 500Mi
@@ -1613,3 +1625,19 @@ workflows:
           requires:
             - approve ethereum fallback
           <<: [*ethereum-fallback, *only-main]
+
+      ####### OPTIMISM
+      - approve-coinstack:
+          name: approve optimism fallback
+          type: approval
+          requires:
+            - lint and test project (persist to workspace)
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy optimism fallback
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve optimism fallback
+          <<: [*optimism-fallback, *only-main]
