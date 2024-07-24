@@ -433,7 +433,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
     api-memory-request: 500Mi
-    stateful-service-replicas: 2
+    stateful-service-replicas: 1
     service-name-1: daemon
     service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101315.2
     service-cpu-limit-1: "2"
@@ -473,7 +473,7 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 500Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &bnbsmartchain
     assetName: bnbsmartchain

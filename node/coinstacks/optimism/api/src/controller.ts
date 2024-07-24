@@ -135,14 +135,19 @@ export class Optimism extends EVM implements BaseAPI, API {
 
     // ecotone l1GasPrice = ((l1BaseFee * baseFeeScalar * 16) + (blobBaseFee * baseFeeScalar)) / (16 * 10^decimals)
     if (isEcotone) {
-      const l1BaseFee = BigNumber.from(await gpo.l1BaseFee())
-      const baseFeeScalar = BigNumber.from(await gpo.baseFeeScalar())
-      const blobBaseFee = BigNumber.from(await gpo.blobBaseFeeScalar())
-      const blobBaseFeeScalar = BigNumber.from(await gpo.blobBaseFeeScalar())
+      const [l1BaseFee, baseFeeScalar, blobBaseFee, blobBaseFeeScalar, decimals] = (
+        await Promise.all([
+          gpo.l1BaseFee(),
+          gpo.baseFeeScalar(),
+          gpo.blobBaseFeeScalar(),
+          gpo.blobBaseFeeScalar(),
+          gpo.decimals(),
+        ])
+      ).map((value) => BigNumber.from(value))
+
       const scaledBaseFee = l1BaseFee.mul(baseFeeScalar).mul(16)
       const scaledBlobBaseFee = blobBaseFee.mul(blobBaseFeeScalar)
 
-      const decimals = BigNumber.from(await gpo.decimals())
       const l1GasPrice = new BN(scaledBaseFee.add(scaledBlobBaseFee).toString()).div(
         new BN(16).times(new BN(10).exponentiatedBy(decimals.toString()))
       )
@@ -151,8 +156,10 @@ export class Optimism extends EVM implements BaseAPI, API {
     }
 
     // legacy l1GasPrice = l1BaseFee * scalar
-    const l1BaseFee = BigNumber.from(await gpo.l1BaseFee())
-    const scalar = BigNumber.from(await gpo.scalar())
+    const [l1BaseFee, scalar] = (await Promise.all([gpo.l1BaseFee(), gpo.scalar()])).map((value) =>
+      BigNumber.from(value)
+    )
+
     const l1GasPrice = l1BaseFee.mul(scalar)
 
     return { l1GasPrice: l1GasPrice.toString(), ...gasFees }
