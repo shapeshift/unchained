@@ -14,8 +14,10 @@ import { OptimismGasEstimate, OptimismGasFees } from './models'
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
+const INDEXER_API_KEY = process.env.INDEXER_API_KEY
 const NETWORK = process.env.NETWORK
 const RPC_URL = process.env.RPC_URL
+const RPC_API_KEY = process.env.RPC_API_KEY
 
 if (!ETHERSCAN_API_KEY) throw new Error('ETHERSCAN_API_KEY env var not set')
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
@@ -31,8 +33,9 @@ export const logger = new Logger({
 const CHAIN_ID: Record<string, number> = { mainnet: 10 }
 const GAS_PRICE_ORACLE_ADDRESS = '0x420000000000000000000000000000000000000F'
 
-const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL, logger })
-const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
+const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL, apiKey: INDEXER_API_KEY, logger })
+const headers = RPC_API_KEY ? { 'api-key': RPC_API_KEY } : undefined
+const provider = new ethers.providers.JsonRpcProvider({ url: RPC_URL, headers })
 export const gasOracle = new GasOracle({ logger, provider, coinstack: 'optimism' })
 
 export const service = new Service({
@@ -43,6 +46,7 @@ export const service = new Service({
   provider,
   logger,
   rpcUrl: RPC_URL,
+  rpcApiKey: RPC_API_KEY,
 })
 
 // assign service to be used for all instances of EVM
@@ -131,14 +135,19 @@ export class Optimism extends EVM implements BaseAPI, API {
 
     // ecotone l1GasPrice = ((l1BaseFee * baseFeeScalar * 16) + (blobBaseFee * baseFeeScalar)) / (16 * 10^decimals)
     if (isEcotone) {
-      const l1BaseFee = BigNumber.from(await gpo.l1BaseFee())
-      const baseFeeScalar = BigNumber.from(await gpo.baseFeeScalar())
-      const blobBaseFee = BigNumber.from(await gpo.blobBaseFeeScalar())
-      const blobBaseFeeScalar = BigNumber.from(await gpo.blobBaseFeeScalar())
+      const [l1BaseFee, baseFeeScalar, blobBaseFee, blobBaseFeeScalar, decimals] = (
+        await Promise.all([
+          gpo.l1BaseFee(),
+          gpo.baseFeeScalar(),
+          gpo.blobBaseFeeScalar(),
+          gpo.blobBaseFeeScalar(),
+          gpo.decimals(),
+        ])
+      ).map((value) => BigNumber.from(value))
+
       const scaledBaseFee = l1BaseFee.mul(baseFeeScalar).mul(16)
       const scaledBlobBaseFee = blobBaseFee.mul(blobBaseFeeScalar)
 
-      const decimals = BigNumber.from(await gpo.decimals())
       const l1GasPrice = new BN(scaledBaseFee.add(scaledBlobBaseFee).toString()).div(
         new BN(16).times(new BN(10).exponentiatedBy(decimals.toString()))
       )
@@ -147,8 +156,10 @@ export class Optimism extends EVM implements BaseAPI, API {
     }
 
     // legacy l1GasPrice = l1BaseFee * scalar
-    const l1BaseFee = BigNumber.from(await gpo.l1BaseFee())
-    const scalar = BigNumber.from(await gpo.scalar())
+    const [l1BaseFee, scalar] = (await Promise.all([gpo.l1BaseFee(), gpo.scalar()])).map((value) =>
+      BigNumber.from(value)
+    )
+
     const l1GasPrice = l1BaseFee.mul(scalar)
 
     return { l1GasPrice: l1GasPrice.toString(), ...gasFees }
