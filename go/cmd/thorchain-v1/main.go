@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/shapeshift/unchained/coinstacks/thorchain/api"
+	"github.com/shapeshift/unchained/coinstacks/thorchain-v1/api"
 	"github.com/shapeshift/unchained/internal/config"
 	"github.com/shapeshift/unchained/internal/log"
 	"github.com/shapeshift/unchained/pkg/cosmos"
@@ -19,7 +19,7 @@ var (
 	logger = log.WithoutFields()
 
 	envPath     = flag.String("env", "", "path to env file (default: use os env)")
-	swaggerPath = flag.String("swagger", "coinstacks/thorchain/api/swagger.json", "path to swagger spec")
+	swaggerPath = flag.String("swagger", "coinstacks/thorchain-v1/api/swagger.json", "path to swagger spec")
 )
 
 type Config struct {
@@ -59,7 +59,7 @@ func main() {
 		WSURL:             conf.WSURL,
 	}
 
-	prometheus := metrics.NewPrometheus("thorchain")
+	prometheus := metrics.NewPrometheus("thorchain-v1")
 
 	httpClient, err := cosmos.NewHTTPClient(cfg)
 	if err != nil {
@@ -71,17 +71,7 @@ func main() {
 		logger.Panicf("failed to create new block service: %+v", err)
 	}
 
-	wsClient, err := cosmos.NewWebsocketClient(cfg, blockService, errChan)
-	if err != nil {
-		logger.Panicf("failed to create new websocket client: %+v", err)
-	}
-
-	indexer := api.NewAffiliateFeeIndexer(cfg, httpClient)
-	if err := indexer.Sync(); err != nil {
-		logger.Panicf("failed to index affiliate fees: %+v", err)
-	}
-
-	api := api.New(httpClient, wsClient, blockService, indexer, *swaggerPath, prometheus)
+	api := api.New(httpClient, blockService, *swaggerPath, prometheus)
 	defer api.Shutdown()
 
 	go api.Serve(errChan)
