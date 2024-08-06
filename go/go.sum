@@ -2744,8 +2744,8 @@ github.com/zondax/ledger-go v0.14.3 h1:wEpJt2CEcBJ428md/5MgSLsXLBos98sBOyxNmCjfU
 github.com/zondax/ledger-go v0.14.3/go.mod h1:IKKaoxupuB43g4NxeQmbLXv7T9AlQyie1UpHb342ycI=
 github.com/zquestz/grab v0.0.0-20190224022517-abcee96e61b1/go.mod h1:bslhAiUxakrA6z6CHmVyvkfpnxx18RJBwVyx2TluJWw=
 gitlab.com/bosi/decorder v0.2.3/go.mod h1:9K1RB5+VPNQYtXtTDAzd2OEftsZb1oV0IrJrzChSdGE=
-gitlab.com/thorchain/thornode v1.133.1-0.20240802191720-1e1ef3900f34 h1:LN8ZXwKM+YDOUrODa8YiLaLEuP52zzEwzR4bUUWrD5Y=
-gitlab.com/thorchain/thornode v1.133.1-0.20240802191720-1e1ef3900f34/go.mod h1:rUOy1E+y3aZd5Q1D502mDaCF/C2cQgOfgGPIB7T/5XM=
+gitlab.com/thorchain/thornode v1.134.0 h1:fnTX/S2frn9FkM5w0XIYlOLIpCpX12Uhk6b5XXP5ISI=
+gitlab.com/thorchain/thornode v1.134.0/go.mod h1:vAh7rNNXdfNKsaR0s+cToiFBS7L98TWzcCJgF5fyg0g=
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.4/go.mod h1:G5EMThwa9y8QZGBClrRx5EY+Yw9kAhnjy3bSjsnlVTQ=

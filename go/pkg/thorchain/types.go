@@ -46,17 +46,18 @@ func (b *NewBlockHeader) Timestamp() int64 {
 
 // ResultTx represents a tx_search ResultTx created from block_result block events
 type ResultTx struct {
-	BlockHash   string
-	BlockHeight int64
-	Timestamp   int
-	Index       int
-	TxID        string
-	Memo        string
-	Fee         cosmos.Value
-	Events      cosmos.EventsByMsgIndex
-	Messages    []cosmos.Message
-	TypedEvent  TypedEvent
-	FormatTxFn  func(tx *ResultTx) (*cosmos.Tx, error)
+	BlockHash    string
+	BlockHeight  int64
+	Timestamp    int
+	Index        int
+	TxID         string
+	Memo         string
+	Fee          cosmos.Value
+	Events       cosmos.EventsByMsgIndex
+	Messages     []cosmos.Message
+	TypedEvent   TypedEvent
+	latestHeight int
+	formatTx     func(tx *ResultTx) (*cosmos.Tx, error)
 }
 
 func (r *ResultTx) GetHeight() int64 {
@@ -72,5 +73,5 @@ func (r *ResultTx) GetTxID() string {
 }
 
 func (r *ResultTx) FormatTx() (*cosmos.Tx, error) {
-	return r.FormatTxFn(r)
+	return r.formatTx(r)
 }
