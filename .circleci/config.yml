@@ -1003,6 +1003,7 @@ jobs:
         type: string
       ws-url:
         type: string
+        default: ""
     steps:
       - setup_remote_docker
       - attach_workspace:
