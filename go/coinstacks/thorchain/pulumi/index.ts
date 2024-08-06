@@ -16,7 +16,7 @@ export = async (): Promise<Outputs> => {
           ...service,
           dataDir: '/root',
           env: {
-            CHAIN_ID: `${coinstack}-${config.network}-v1`,
+            CHAIN_ID: 'thorchain-mainnet-v1',
             NET: config.network,
           },
           ports: {
