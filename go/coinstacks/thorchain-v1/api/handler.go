@@ -17,31 +17,10 @@ import (
 
 type Handler struct {
 	*cosmos.Handler
-	indexer *AffiliateFeeIndexer
 }
 
 func (h *Handler) StartWebsocket() error {
-	h.WSClient.EndBlockEventHandler(func(eventCache map[string]interface{}, blockHeader types.Header, endBlockEvents []abci.Event, eventIndex int) (interface{}, []string, error) {
-		tx, err := h.getTxFromEndBlockEvents(eventCache, blockHeader, endBlockEvents, eventIndex)
-		if err != nil {
-			return nil, nil, errors.Wrap(err, "failed to get txs from end block events")
-		}
-
-		if tx == nil {
-			return nil, nil, nil
-		}
-
-		t, err := tx.FormatTx()
-		if err != nil {
-			return nil, nil, errors.Wrapf(err, "failed to format transaction: %s", tx.TxID)
-		}
-
-		addrs := cosmos.GetTxAddrs(tx.Events, tx.Messages)
-
-		return t, addrs, nil
-	})
-
-	return h.Handler.StartWebsocket()
+	return nil
 }
 
 // Contains info about the running coinstack
@@ -60,24 +39,6 @@ func (h *Handler) GetInfo() (api.Info, error) {
 	i := Info{Info: info.(cosmos.Info)}
 
 	return i, nil
-}
-
-// Contains info about account details for an address or xpub
-// swagger:model Account
-type Account struct {
-	// swagger:allOf
-	cosmos.Account
-}
-
-func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
-	account, err := h.Handler.GetAccount(pubkey)
-	if err != nil {
-		return nil, err
-	}
-
-	a := Account{Account: account.(cosmos.Account)}
-
-	return a, nil
 }
 
 func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
@@ -145,47 +106,6 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 	}
 
 	return txHistory, nil
-}
-
-func (h *Handler) GetTx(txid string) (api.Tx, error) {
-	return h.Handler.GetTx(txid)
-}
-
-func (h *Handler) SendTx(hex string) (string, error) {
-	return h.Handler.SendTx(hex)
-}
-
-func (h Handler) EstimateGas(rawTx string) (string, error) {
-	return h.Handler.EstimateGas(rawTx)
-}
-
-// Contains info about the affiliate revenue earned
-// swagger:model AffiliateRevenue
-type AffiliateRevenue struct {
-	// Affiliate address
-	// required: true
-	Address string `json:"address"`
-	// Amount earned (RUNE)
-	// required: true
-	Amount string `json:"amount"`
-}
-
-func (h *Handler) GetAffiliateRevenue(start int, end int) (*AffiliateRevenue, error) {
-	total := big.NewInt(0)
-	for _, fee := range h.indexer.AffiliateFees {
-		if fee.Timestamp >= int64(start) && fee.Timestamp <= int64(end) {
-			amount := new(big.Int)
-			amount.SetString(fee.Amount, 10)
-			total.Add(total, amount)
-		}
-	}
-
-	a := &AffiliateRevenue{
-		Address: affiliateAddress,
-		Amount:  total.String(),
-	}
-
-	return a, nil
 }
 
 func (h *Handler) ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Message {

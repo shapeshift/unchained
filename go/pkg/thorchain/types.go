@@ -1,7 +1,6 @@
-package api
+package thorchain
 
 import (
-	"github.com/shapeshift/unchained/coinstacks/thorchain"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/tendermint/tendermint/types"
 	tmtypes "github.com/tendermint/tendermint/types"
@@ -56,8 +55,8 @@ type ResultTx struct {
 	Fee         cosmos.Value
 	Events      cosmos.EventsByMsgIndex
 	Messages    []cosmos.Message
-	TypedEvent  thorchain.TypedEvent
-	formatTx    func(tx *ResultTx) (*cosmos.Tx, error)
+	TypedEvent  TypedEvent
+	FormatTxFn  func(tx *ResultTx) (*cosmos.Tx, error)
 }
 
 func (r *ResultTx) GetHeight() int64 {
@@ -73,5 +72,5 @@ func (r *ResultTx) GetTxID() string {
 }
 
 func (r *ResultTx) FormatTx() (*cosmos.Tx, error) {
-	return r.formatTx(r)
+	return r.FormatTxFn(r)
 }

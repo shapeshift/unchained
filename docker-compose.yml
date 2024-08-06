@@ -49,6 +49,7 @@ services:
       - optimism_default
       - polygon_default
       - thorchain_default
+      - thorchain-v1_default
       - proxy_default
     ports:
       # The HTTP port
@@ -90,5 +91,7 @@ networks:
     name: polygon_default
   thorchain_default:
     name: thorchain_default
+  thorchain-v1_default:
+    name: thorchain-v1_default
   proxy_default:
     name: proxy_default

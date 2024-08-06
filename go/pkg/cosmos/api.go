@@ -111,13 +111,6 @@ func (a *API) ValidatePagingParams(w http.ResponseWriter, r *http.Request, defau
 	return cursor, pageSize, nil
 }
 
-// swagger:route GET / Websocket Websocket
-//
-// Subscribe to pending and confirmed transactions.
-//
-// responses:
-//
-//	200:
 func (a *API) Websocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -128,13 +121,6 @@ func (a *API) Websocket(w http.ResponseWriter, r *http.Request) {
 	a.handler.NewWebsocketConnection(conn, a.manager)
 }
 
-// swagger:route GET /api/v1/info v1 GetInfo
-//
-// Get information about the running coinstack.
-//
-// responses:
-//
-//	200: Info
 func (a *API) Info(w http.ResponseWriter, r *http.Request) {
 	info, err := a.handler.GetInfo()
 	if err != nil {
@@ -145,15 +131,6 @@ func (a *API) Info(w http.ResponseWriter, r *http.Request) {
 	api.HandleResponse(w, http.StatusOK, info)
 }
 
-// swagger:route GET /api/v1/account/{pubkey} v1 GetAccount
-//
-// Get account details.
-//
-// responses:
-//
-//	200: Account
-//	400: BadRequestError
-//	500: InternalServerError
 func (a *API) Account(w http.ResponseWriter, r *http.Request) {
 	// pubkey validated by ValidatePubkey middleware
 	pubkey := mux.Vars(r)["pubkey"]
@@ -167,15 +144,6 @@ func (a *API) Account(w http.ResponseWriter, r *http.Request) {
 	api.HandleResponse(w, http.StatusOK, account)
 }
 
-// swagger:route GET /api/v1/account/{pubkey}/txs v1 GetTxHistory
-//
-// Get paginated transaction history.
-//
-// responses:
-//
-//	200: TxHistory
-//	400: BadRequestError
-//	500: InternalServerError
 func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 	// pubkey validated by ValidatePubkey middleware
 	pubkey := mux.Vars(r)["pubkey"]
@@ -195,15 +163,6 @@ func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 	api.HandleResponse(w, http.StatusOK, txHistory)
 }
 
-// swagger:route GET /api/v1/tx/{txid} v1 GetTx
-//
-// # Get transaction details
-//
-// responses:
-//
-//	200: Tx
-//	400: BadRequestError
-//	500: InternalServerError
 func (a *API) Tx(w http.ResponseWriter, r *http.Request) {
 	txid, ok := mux.Vars(r)["txid"]
 	if !ok || txid == "" {
@@ -220,15 +179,6 @@ func (a *API) Tx(w http.ResponseWriter, r *http.Request) {
 	api.HandleResponse(w, http.StatusOK, tx)
 }
 
-// swagger:route POST /api/v1/send v1 SendTx
-//
-// Sends raw transaction to be broadcast to the node.
-//
-// responses:
-//
-//	200: TransactionHash
-//	400: BadRequestError
-//	500: InternalServerError
 func (a *API) SendTx(w http.ResponseWriter, r *http.Request) {
 	body := &api.TxBody{}
 
@@ -247,15 +197,6 @@ func (a *API) SendTx(w http.ResponseWriter, r *http.Request) {
 	api.HandleResponse(w, http.StatusOK, txHash)
 }
 
-// swagger:route POST /api/v1/gas/estimate v1 EstimateGas
-//
-// Get the estimated gas cost for a transaction.
-//
-// responses:
-//
-//	200: GasAmount
-//	400: BadRequestError
-//	500: InternalServerError
 func (a *API) EstimateGas(w http.ResponseWriter, r *http.Request) {
 	body := &api.TxBody{}
 
