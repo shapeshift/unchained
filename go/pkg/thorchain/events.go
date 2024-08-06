@@ -29,20 +29,6 @@ type EventOutbound struct {
 	Memo   string `json:"memo"`
 }
 
-func CoinToValue(coin string) cosmos.Value {
-	coinParts := strings.Fields(coin)
-
-	denom, ok := assetToDenom[coinParts[1]]
-	if !ok {
-		denom = coinParts[1]
-	}
-
-	return cosmos.Value{
-		Amount: coinParts[0],
-		Denom:  denom,
-	}
-}
-
 func ParseBlockEvents(events []abci.Event) (cosmos.EventsByMsgIndex, []TypedEvent, error) {
 	typedEvents := make([]TypedEvent, len(events))
 	eventsByMsgIndex := cosmos.EventsByMsgIndex{}
@@ -85,7 +71,21 @@ func ParseBlockEvents(events []abci.Event) (cosmos.EventsByMsgIndex, []TypedEven
 	return eventsByMsgIndex, typedEvents, nil
 }
 
-func TypedEventsToMessages(events []TypedEvent) []cosmos.Message {
+func coinToValue(coin string) cosmos.Value {
+	coinParts := strings.Fields(coin)
+
+	denom, ok := assetToDenom[coinParts[1]]
+	if !ok {
+		denom = coinParts[1]
+	}
+
+	return cosmos.Value{
+		Amount: coinParts[0],
+		Denom:  denom,
+	}
+}
+
+func typedEventsToMessages(events []TypedEvent) []cosmos.Message {
 	messages := []cosmos.Message{}
 
 	for i, event := range events {
@@ -98,7 +98,7 @@ func TypedEventsToMessages(events []TypedEvent) []cosmos.Message {
 				From:      v.From,
 				To:        v.To,
 				Type:      "outbound",
-				Value:     CoinToValue(v.Coin),
+				Value:     coinToValue(v.Coin),
 			}
 			messages = append(messages, message)
 		}

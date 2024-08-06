@@ -1,7 +1,6 @@
-package api
+package thorchain
 
 import (
-	"github.com/shapeshift/unchained/coinstacks/thorchain"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/tendermint/tendermint/types"
 	tmtypes "github.com/tendermint/tendermint/types"
@@ -47,17 +46,18 @@ func (b *NewBlockHeader) Timestamp() int64 {
 
 // ResultTx represents a tx_search ResultTx created from block_result block events
 type ResultTx struct {
-	BlockHash   string
-	BlockHeight int64
-	Timestamp   int
-	Index       int
-	TxID        string
-	Memo        string
-	Fee         cosmos.Value
-	Events      cosmos.EventsByMsgIndex
-	Messages    []cosmos.Message
-	TypedEvent  thorchain.TypedEvent
-	formatTx    func(tx *ResultTx) (*cosmos.Tx, error)
+	BlockHash    string
+	BlockHeight  int64
+	Timestamp    int
+	Index        int
+	TxID         string
+	Memo         string
+	Fee          cosmos.Value
+	Events       cosmos.EventsByMsgIndex
+	Messages     []cosmos.Message
+	TypedEvent   TypedEvent
+	latestHeight int
+	formatTx     func(tx *ResultTx) (*cosmos.Tx, error)
 }
 
 func (r *ResultTx) GetHeight() int64 {

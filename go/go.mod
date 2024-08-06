@@ -1,6 +1,6 @@
 module github.com/shapeshift/unchained
 
-go 1.21
+go 1.22
 
 require (
 	github.com/cosmos/cosmos-sdk v0.50.5
@@ -16,8 +16,8 @@ require (
 	github.com/spf13/viper v1.18.2
 	github.com/tendermint/liquidity v1.5.0
 	github.com/tendermint/tendermint v0.35.9
-	gitlab.com/thorchain/thornode v1.130.1
-	golang.org/x/sync v0.6.0
+	gitlab.com/thorchain/thornode v1.134.0
+	golang.org/x/sync v0.7.0
 	google.golang.org/grpc v1.62.1
 )
 
@@ -40,10 +40,10 @@ require (
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
-	github.com/cockroachdb/errors v1.9.1 // indirect
+	github.com/cockroachdb/errors v1.11.1 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
-	github.com/cockroachdb/pebble v0.0.0-20230928194634-aa077af62593 // indirect
-	github.com/cockroachdb/redact v1.1.3 // indirect
+	github.com/cockroachdb/pebble v1.1.0 // indirect
+	github.com/cockroachdb/redact v1.1.5 // indirect
 	github.com/cockroachdb/tokenbucket v0.0.0-20230807174530-cc333fc44b06 // indirect
 	github.com/confio/ics23/go v0.9.1 // indirect
 	github.com/cosmos/btcutil v1.0.4 // indirect
@@ -64,7 +64,7 @@ require (
 	github.com/dvsekhvalnov/jose2go v1.5.0 // indirect
 	github.com/eager7/dogd v0.0.0-20200427085516-2caf59f59dbb // indirect
 	github.com/eager7/dogutil v0.0.0-20200427040807-200e961ba4b5 // indirect
-	github.com/ethereum/go-ethereum v1.13.14 // indirect
+	github.com/ethereum/go-ethereum v1.14.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gcash/bchd v0.17.1 // indirect
 	github.com/gcash/bchutil v0.0.0-20201025062739-fc759989ee3e // indirect
@@ -75,7 +75,7 @@ require (
 	github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2 // indirect
 	github.com/gogo/protobuf v1.3.3 // indirect
 	github.com/golang/glog v1.2.0 // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v0.0.5-0.20220116011046-fa5810519dcb // indirect
 	github.com/google/btree v1.1.2 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
@@ -136,19 +136,19 @@ require (
 	github.com/zondax/ledger-go v0.14.3 // indirect
 	go.etcd.io/bbolt v1.3.6 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
-	golang.org/x/crypto v0.21.0 // indirect
+	golang.org/x/crypto v0.22.0 // indirect
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
-	golang.org/x/net v0.22.0 // indirect
+	golang.org/x/net v0.24.0 // indirect
 	golang.org/x/oauth2 v0.16.0 // indirect
-	golang.org/x/sys v0.18.0 // indirect
-	golang.org/x/term v0.18.0 // indirect
+	golang.org/x/sys v0.19.0 // indirect
+	golang.org/x/term v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	gonum.org/v1/gonum v0.12.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto v0.0.0-20240123012728-ef4313101c80 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240123012728-ef4313101c80 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240123012728-ef4313101c80 // indirect
-	google.golang.org/protobuf v1.32.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

@@ -416,6 +416,38 @@ aliases:
     api-max-replicas: 2
     stateful-service-replicas: 1
 
+  - &thorchain-v1
+    assetName: thorchain-v1
+    pulumi-stack: public-us-east-2
+    pulumi-dir: coinstacks/thorchain-v1/pulumi
+    lcd-url: http://thorchain-v1-svc.unchained.svc.cluster.local:1317
+    rpc-url: http://thorchain-v1-svc.unchained.svc.cluster.local:27147
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 4
+    api-cpu-limit: "2"
+    api-cpu-request: "1"
+    api-cpu-threshold: 75
+    api-memory-limit: 1Gi
+    api-memory-request: 500Mi
+    stateful-service-replicas: 2
+    service-name-1: daemon
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.134.0
+    service-cpu-limit-1: "2"
+    service-cpu-request-1: "1"
+    service-memory-limit-1: 16Gi
+    service-storage-size-1: 4750Gi
+
+  - &thorchain-v1-dev
+    <<: *thorchain-v1
+    environment: dev
+    pulumi-stack: public-dev-us-east-2
+    lcd-url: http://thorchain-v1-svc.unchained-dev.svc.cluster.local:1317
+    rpc-url: http://thorchain-v1-svc.unchained-dev.svc.cluster.local:27147
+    api-replicas: 1
+    api-max-replicas: 2
+    stateful-service-replicas: 1
+
   - &optimism
     assetName: optimism
     pulumi-stack: public-us-east-2
@@ -971,6 +1003,7 @@ jobs:
         type: string
       ws-url:
         type: string
+        default: ""
     steps:
       - setup_remote_docker
       - attach_workspace:
@@ -1214,6 +1247,14 @@ workflows:
           requires:
             - deploy dependencies
           <<: [*thorchain-dev, *only-develop]
+
+      - deploy-coinstack-go:
+          name: deploy thorchain-v1 develop
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - deploy dependencies
+          <<: [*thorchain-v1-dev, *only-develop]
 
       - deploy-coinstack-node:
           name: deploy proxy develop
@@ -1563,6 +1604,30 @@ workflows:
           requires:
             - approve thorchain
           <<: [*thorchain, *only-main]
+
+      ####### THORCHAIN-V1
+      - deploy-coinstack-go:
+          name: preview thorchain-v1
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies
+          <<: [*thorchain-v1, *only-main]
+
+      - approve-coinstack:
+          name: approve thorchain-v1
+          type: approval
+          requires:
+            - preview thorchain-v1
+          <<: *only-main
+
+      - deploy-coinstack-go:
+          name: deploy thorchain-v1
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve thorchain-v1
+          <<: [*thorchain-v1, *only-main]
 
       ####### PROXY
       - deploy-coinstack-node:

@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/shapeshift/unchained/coinstacks/thorchain"
 	"github.com/shapeshift/unchained/pkg/cosmos"
+	"github.com/shapeshift/unchained/pkg/thorchain"
 	abci "github.com/tendermint/tendermint/abci/types"
 	tendermintjson "github.com/tendermint/tendermint/libs/json"
 	coretypes "github.com/tendermint/tendermint/rpc/core/types"
@@ -199,7 +199,7 @@ func (i *AffiliateFeeIndexer) handleBlock(block *tmtypes.Block) {
 		logger.Panicf("failed to handle block: %d: %+v", block.Height, err)
 	}
 
-	b := &ResultBlock{
+	b := &thorchain.ResultBlock{
 		Block: block,
 	}
 
@@ -207,14 +207,14 @@ func (i *AffiliateFeeIndexer) handleBlock(block *tmtypes.Block) {
 }
 
 func (i *AffiliateFeeIndexer) handleNewBlockHeader(newBlockHeader types.EventDataNewBlockHeader) {
-	b := &NewBlockHeader{
+	b := &thorchain.NewBlockHeader{
 		EventDataNewBlockHeader: newBlockHeader,
 	}
 
 	i.processAffiliateFees(b, newBlockHeader.ResultEndBlock.Events)
 }
 
-func (i *AffiliateFeeIndexer) processAffiliateFees(block Block, endBlockEvents []abci.Event) {
+func (i *AffiliateFeeIndexer) processAffiliateFees(block thorchain.Block, endBlockEvents []abci.Event) {
 	_, typedEvents, err := thorchain.ParseBlockEvents(endBlockEvents)
 	if err != nil {
 		logger.Panicf("failed to parse block events for block: %d: %+v", block.Height(), err)
