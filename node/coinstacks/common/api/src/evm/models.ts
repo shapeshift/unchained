@@ -21,12 +21,8 @@ export interface Fees {
  * Estimates for slow, average and fast confirmation speeds provided as well.
  */
 export interface GasFees {
-  // legacy gasPrice recommended by the node
-  gasPrice: string
   // baseFeePerGas for the pending block
   baseFeePerGas?: string
-  // maxPriorityFeePerGas recommended by the node
-  maxPriorityFeePerGas?: string
   // slow confirmation speed estimation
   slow: Fees
   // average confirmation speed estimation

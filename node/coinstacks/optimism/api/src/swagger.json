@@ -489,13 +489,7 @@
 			"OptimismGasFees": {
 				"description": "Contains info about current recommended fees for a transaction on both L1 and L2",
 				"properties": {
-					"gasPrice": {
-						"type": "string"
-					},
 					"baseFeePerGas": {
-						"type": "string"
-					},
-					"maxPriorityFeePerGas": {
 						"type": "string"
 					},
 					"slow": {
@@ -512,7 +506,6 @@
 					}
 				},
 				"required": [
-					"gasPrice",
 					"slow",
 					"average",
 					"fast",
@@ -1181,9 +1174,7 @@
 									"Example 1": {
 										"value": {
 											"l1GasPrice": "4819835362",
-											"gasPrice": "62068691",
 											"baseFeePerGas": "61074678",
-											"maxPriorityFeePerGas": "1000000",
 											"slow": {
 												"gasPrice": "61121042",
 												"maxFeePerGas": "62605850",

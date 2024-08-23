@@ -82,9 +82,7 @@ export class Gnosis extends EVM implements BaseAPI, API {
    * @returns {Promise<GasFees>} current fees specified in wei
    */
   @Example<GasFees>({
-    gasPrice: '3000000000',
     baseFeePerGas: '7',
-    maxPriorityFeePerGas: '2250000003',
     slow: {
       gasPrice: '1967447305',
       maxFeePerGas: '1554947308',

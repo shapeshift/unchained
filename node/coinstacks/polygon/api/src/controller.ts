@@ -84,9 +84,7 @@ export class Polygon extends EVM implements BaseAPI, API {
    * @returns {Promise<GasFees>} current fees specified in wei
    */
   @Example<GasFees>({
-    gasPrice: '142419538445',
     baseFeePerGas: '112419538445',
-    maxPriorityFeePerGas: '30000000000',
     slow: {
       gasPrice: '131449097003',
       maxFeePerGas: '140884315981',
