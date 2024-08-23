@@ -79,9 +79,7 @@ export class ArbitrumNova extends EVM implements BaseAPI, API {
    * @returns {Promise<GasFees>} current fees specified in wei
    */
   @Example<GasFees>({
-    gasPrice: '10000000',
     baseFeePerGas: '10000000',
-    maxPriorityFeePerGas: '0',
     slow: {
       gasPrice: '1166100000',
       maxFeePerGas: '1167100000',

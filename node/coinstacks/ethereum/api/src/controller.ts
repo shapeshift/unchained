@@ -86,9 +86,7 @@ export class Ethereum extends EVM implements BaseAPI, API {
    * @returns {Promise<GasFees>} current fees specified in wei
    */
   @Example<GasFees>({
-    gasPrice: '77125288868',
     baseFeePerGas: '77654025212',
-    maxPriorityFeePerGas: '94000001',
     slow: {
       gasPrice: '77109280451',
       maxFeePerGas: '77744243213',
