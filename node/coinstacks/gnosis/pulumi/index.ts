@@ -51,7 +51,7 @@ export = async (): Promise<Outputs> => {
           ...defaultBlockbookServiceArgs,
           ...(config.environment === 'dev'
             ? {
-                command: [...defaultBlockbookServiceArgs.command, '--processerc1155=false'],
+                command: [...defaultBlockbookServiceArgs.command, '-processerc1155=false'],
               }
             : {
                 // Disable readiness probe while for gnosis indexer patch
