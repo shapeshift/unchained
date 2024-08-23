@@ -585,7 +585,7 @@ aliases:
     api-max-replicas: 2
     api-memory-limit: 500Mi
     stateful-service-replicas: 1
-    service-image-3: shapeshiftdao/unchained-blockbook:gnosis-6d09e34
+    service-image-3: shapeshiftdao/unchained-blockbook:gnosis-no-erc1155-2b7e214
 
   - &arbitrum
     assetName: arbitrum
