@@ -387,7 +387,7 @@ aliases:
     api-memory-request: 1Gi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.134.0
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.134.1
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 16Gi
@@ -432,7 +432,7 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.134.0
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.134.1
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 16Gi
@@ -554,7 +554,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
     api-memory-request: 500Mi
-    stateful-service-replicas: 2
+    stateful-service-replicas: 1
     service-name-1: daemon
     service-image-1: nethermind/nethermind:1.28.0
     service-cpu-limit-1: "2"
