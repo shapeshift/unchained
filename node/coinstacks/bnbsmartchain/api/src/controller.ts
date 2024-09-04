@@ -80,9 +80,7 @@ export class BNBSmartChain extends EVM implements BaseAPI, API {
    * @returns {Promise<GasFees>} current fees specified in wei
    */
   @Example<GasFees>({
-    gasPrice: '3000000000',
     baseFeePerGas: '0',
-    maxPriorityFeePerGas: '3000000000',
     slow: {
       gasPrice: '1800000000',
       maxFeePerGas: '2200000000',

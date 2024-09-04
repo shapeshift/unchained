@@ -83,9 +83,7 @@ export class Avalanche extends EVM implements BaseAPI, API {
    * @returns {Promise<GasFees>} current fees specified in wei
    */
   @Example<GasFees>({
-    gasPrice: '25000000000',
     baseFeePerGas: '25000000000',
-    maxPriorityFeePerGas: '0',
     slow: {
       gasPrice: '25757584186',
       maxFeePerGas: '28394352138',

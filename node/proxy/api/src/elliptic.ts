@@ -32,8 +32,6 @@ export class Elliptic {
       secret: ELLIPTIC_API_SECRET as string,
     })
     this.addressCache = {}
-
-    setInterval(() => this.resetCache(), CACHE_TTL_MS)
   }
 
   async validateAddress(address: string): Promise<{ valid: boolean }> {
@@ -71,19 +69,10 @@ export class Elliptic {
       }
 
       throw err
+    } finally {
+      if (this.addressCache[address] === true) {
+        setInterval(() => delete this.addressCache[address], CACHE_TTL_MS)
+      }
     }
-  }
-
-  /**
-   * resetCache will remove all valid addresses while keeping all invalid addresses.
-   * - valid addresses may be invalidated which is why they are removed and forced to refectch from elliptic
-   * - invalid addresses will always remain invalid so there is no need to refetch ever
-   */
-  private resetCache(): void {
-    this.addressCache = Object.entries(this.addressCache).reduce<AddressCache>((prev, [address, valid]) => {
-      if (valid) return prev
-      prev[address] = valid
-      return prev
-    }, {})
   }
 }
