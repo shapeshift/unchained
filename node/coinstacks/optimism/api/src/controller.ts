@@ -108,9 +108,7 @@ export class Optimism extends EVM implements BaseAPI, API {
    */
   @Example<OptimismGasFees>({
     l1GasPrice: '4819835362',
-    gasPrice: '62068691',
     baseFeePerGas: '61074678',
-    maxPriorityFeePerGas: '1000000',
     slow: {
       gasPrice: '61121042',
       maxFeePerGas: '62605850',

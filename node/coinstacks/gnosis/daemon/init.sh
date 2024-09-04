@@ -15,6 +15,7 @@ start() {
     --JsonRpc.WebSocketsPort=8546 \
     --JsonRpc.EnginePort 8551 \
     --Init.WebSocketsEnabled=true \
+    --Receipt.TxLookupLimit=0 \
     --HealthChecks.Enabled=true \
     --Metrics.CountersEnabled=true &
   PID="$!"

@@ -19,6 +19,7 @@ import (
 	tendermint "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 	"github.com/tendermint/tendermint/types"
 	tmtypes "github.com/tendermint/tendermint/types"
+	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -31,10 +32,10 @@ const (
 type AffiliateFeeIndexer struct {
 	AffiliateFees []*AffiliateFee
 	conf          cosmos.Config
-	httpClient    *cosmos.HTTPClient
+	httpClients   []*cosmos.HTTPClient
 	mu            sync.Mutex
-	pageCh        chan int
-	resultCh      chan *coretypes.ResultBlockSearch
+	pageChs       []chan int
+	resultChs     []chan *coretypes.ResultBlockSearch
 	wg            sync.WaitGroup
 }
 
@@ -48,13 +49,23 @@ type AffiliateFee struct {
 	TxID        string
 }
 
-func NewAffiliateFeeIndexer(conf cosmos.Config, httpClient *cosmos.HTTPClient) *AffiliateFeeIndexer {
+func NewAffiliateFeeIndexer(conf cosmos.Config, httpClients []*cosmos.HTTPClient) *AffiliateFeeIndexer {
+	pageChs := make([]chan int, len(httpClients))
+	for i := range pageChs {
+		pageChs[i] = make(chan int)
+	}
+
+	resultChs := make([]chan *coretypes.ResultBlockSearch, len(httpClients))
+	for i := range resultChs {
+		resultChs[i] = make(chan *coretypes.ResultBlockSearch)
+	}
+
 	return &AffiliateFeeIndexer{
 		AffiliateFees: []*AffiliateFee{},
 		conf:          conf,
-		httpClient:    httpClient,
-		pageCh:        make(chan int),
-		resultCh:      make(chan *coretypes.ResultBlockSearch),
+		httpClients:   httpClients,
+		pageChs:       pageChs,
+		resultChs:     resultChs,
 	}
 }
 
@@ -62,49 +73,69 @@ func (i *AffiliateFeeIndexer) Sync() error {
 	start := time.Now()
 	logger.Info("Started indexing affiliate fees")
 
-	defer close(i.resultCh)
+	defer func() {
+		for _, resultCh := range i.resultChs {
+			close(resultCh)
+		}
+	}()
 
 	if err := i.listen(); err != nil {
 		return err
 	}
 
-	for w := 0; w < resultWorkers; w++ {
-		go func() {
-			for result := range i.resultCh {
-				for _, b := range result.Blocks {
-					block := b.Block
-					i.handleBlock(block)
-				}
+	g := new(errgroup.Group)
+
+	for j, httpClient := range i.httpClients {
+		httpClient := httpClient
+		resultCh := i.resultChs[j]
+		pageCh := i.pageChs[j]
+
+		g.Go(func() error {
+			for w := 0; w < resultWorkers; w++ {
+				go func() {
+					for result := range resultCh {
+						for _, b := range result.Blocks {
+							block := b.Block
+							i.handleBlock(httpClient, block)
+						}
+					}
+				}()
 			}
-		}()
+
+			result, err := httpClient.BlockSearch(fmt.Sprintf(`"outbound.to='%s'"`, "thor1xmaggkcln5m5fnha2780xrdrulmplvfrz6wj3l"), 1, pageSize)
+			if err != nil {
+				return err
+			}
+
+			maxPages := int(math.Ceil(float64(result.TotalCount) / float64(pageSize)))
+			resultCh <- result
+
+			i.wg.Add(blockWorkers)
+			for w := 0; w < blockWorkers; w++ {
+				go i.fetchBlocks(httpClient, pageCh, resultCh)
+			}
+
+			go func() {
+				page := 2
+				for {
+					if page > maxPages {
+						close(pageCh)
+						break
+					}
+					pageCh <- page
+					page++
+				}
+			}()
+
+			i.wg.Wait()
+
+			return nil
+		})
 	}
 
-	result, err := i.httpClient.BlockSearch(fmt.Sprintf(`"outbound.to='%s'"`, "thor1xmaggkcln5m5fnha2780xrdrulmplvfrz6wj3l"), 1, pageSize)
-	if err != nil {
+	if err := g.Wait(); err != nil {
 		return err
 	}
-
-	maxPages := int(math.Ceil(float64(result.TotalCount) / float64(pageSize)))
-	i.resultCh <- result
-
-	i.wg.Add(blockWorkers)
-	for w := 0; w < blockWorkers; w++ {
-		go i.fetchBlocks()
-	}
-
-	go func() {
-		page := 2
-		for {
-			if page > maxPages {
-				close(i.pageCh)
-				break
-			}
-			i.pageCh <- page
-			page++
-		}
-	}()
-
-	i.wg.Wait()
 
 	logger.Infof("Finished indexing affiliate fees (%s)", time.Since(start))
 
@@ -180,21 +211,21 @@ func (i *AffiliateFeeIndexer) listen() error {
 	return nil
 }
 
-func (i *AffiliateFeeIndexer) fetchBlocks() {
+func (i *AffiliateFeeIndexer) fetchBlocks(httpClient *cosmos.HTTPClient, pageCh <-chan int, resultCh chan<- *coretypes.ResultBlockSearch) {
 	defer i.wg.Done()
 
-	for page := range i.pageCh {
-		result, err := i.httpClient.BlockSearch(fmt.Sprintf(`"outbound.to='%s'"`, "thor1xmaggkcln5m5fnha2780xrdrulmplvfrz6wj3l"), page, pageSize)
+	for page := range pageCh {
+		result, err := httpClient.BlockSearch(fmt.Sprintf(`"outbound.to='%s'"`, "thor1xmaggkcln5m5fnha2780xrdrulmplvfrz6wj3l"), page, pageSize)
 		if err != nil {
 			logger.Panicf("failed to fetch blocks for page: %d: %+v", page, err)
 		}
 
-		i.resultCh <- result
+		resultCh <- result
 	}
 }
 
-func (i *AffiliateFeeIndexer) handleBlock(block *tmtypes.Block) {
-	blockResult, err := i.httpClient.BlockResults(int(block.Height))
+func (i *AffiliateFeeIndexer) handleBlock(httpClient *cosmos.HTTPClient, block *tmtypes.Block) {
+	blockResult, err := httpClient.BlockResults(int(block.Height))
 	if err != nil {
 		logger.Panicf("failed to handle block: %d: %+v", block.Height, err)
 	}

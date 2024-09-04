@@ -49,8 +49,14 @@ export = async (): Promise<Outputs> => {
         return {
           ...service,
           ...defaultBlockbookServiceArgs,
-          // Disable readiness probe while for gnosis indexer patch
-          readinessProbe: undefined,
+          ...(config.environment === 'dev'
+            ? {
+                command: [...defaultBlockbookServiceArgs.command, '-processerc1155=false'],
+              }
+            : {
+                // Disable readiness probe while for gnosis indexer patch
+                readinessProbe: undefined,
+              }),
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
         }
       default:

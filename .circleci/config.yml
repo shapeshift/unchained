@@ -219,13 +219,13 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.14.7
+    service-image-1: ethereum/client-go:v1.14.8
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
     service-storage-size-1: 1250Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v5.0.4
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v5.1.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 12Gi
@@ -375,7 +375,9 @@ aliases:
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/thorchain/pulumi
     lcd-url: http://thorchain-svc.unchained.svc.cluster.local:1317
+    lcd-v1-url: http://thorchain-v1-svc.unchained.svc.cluster.local:1317
     rpc-url: http://thorchain-svc.unchained.svc.cluster.local:27147
+    rpc-v1-url: http://thorchain-v1-svc.unchained.svc.cluster.local:27147
     ws-url: ws://thorchain-svc.unchained.svc.cluster.local:27147
     api-autoscaling: true
     api-replicas: 2
@@ -387,11 +389,11 @@ aliases:
     api-memory-request: 1Gi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.134.0
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-2.135.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 16Gi
-    service-storage-size-1: 3500Gi
+    service-storage-size-1: 100Gi
     service-name-2: timescaledb
     service-image-2: timescale/timescaledb:2.13.0-pg15
     service-cpu-limit-2: "2"
@@ -410,7 +412,9 @@ aliases:
     environment: dev
     pulumi-stack: public-dev-us-east-2
     lcd-url: http://thorchain-svc.unchained-dev.svc.cluster.local:1317
+    lcd-v1-url: http://thorchain-v1-svc.unchained-dev.svc.cluster.local:1317
     rpc-url: http://thorchain-svc.unchained-dev.svc.cluster.local:27147
+    rpc-v1-url: http://thorchain-v1-svc.unchained-dev.svc.cluster.local:27147
     ws-url: ws://thorchain-svc.unchained-dev.svc.cluster.local:27147
     api-replicas: 1
     api-max-replicas: 2
@@ -432,7 +436,7 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.134.0
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.134.1
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 16Gi
@@ -556,7 +560,7 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.27.1
+    service-image-1: nethermind/nethermind:1.28.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 6Gi
@@ -568,7 +572,7 @@ aliases:
     service-memory-limit-2: 4Gi
     service-storage-size-2: 100Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:gnosis-patch-68ad335
+    service-image-3: shapeshiftdao/unchained-blockbook:gnosis-no-erc1155-2b7e214
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
     service-memory-limit-3: 24Gi
@@ -585,7 +589,6 @@ aliases:
     api-max-replicas: 2
     api-memory-limit: 500Mi
     stateful-service-replicas: 1
-    service-image-3: shapeshiftdao/unchained-blockbook:gnosis-6d09e34
 
   - &arbitrum
     assetName: arbitrum
@@ -968,11 +971,17 @@ jobs:
       <<: *params
       lcd-url:
         type: string
+      lcd-v1-url:
+        type: string
+        default: ""
       grpc-url:
         type: string
         default: ""
       rpc-url:
         type: string
+      rpc-v1-url:
+        type: string
+        default: ""
       ws-url:
         type: string
         default: ""
@@ -986,8 +995,10 @@ jobs:
           name: add custom environment variables
           command: |
             echo 'export LCD_URL=<< parameters.lcd-url >>' >> $BASH_ENV
+            echo 'export LCD_V1_URL=<< parameters.lcd-v1-url >>' >> $BASH_ENV
             echo 'export GRPC_URL=<< parameters.grpc-url >>' >> $BASH_ENV
             echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
+            echo 'export RPC_V1_URL=<< parameters.rpc-v1-url >>' >> $BASH_ENV
             echo 'export WS_URL=<< parameters.ws-url >>' >> $BASH_ENV
       - run:
           name: pulumi
