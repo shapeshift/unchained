@@ -554,7 +554,7 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
     api-memory-request: 500Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: nethermind/nethermind:1.28.0
     service-cpu-limit-1: "2"
@@ -568,7 +568,7 @@ aliases:
     service-memory-limit-2: 4Gi
     service-storage-size-2: 100Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:gnosis-patch-68ad335
+    service-image-3: shapeshiftdao/unchained-blockbook:gnosis-no-erc1155-2b7e214
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
     service-memory-limit-3: 24Gi
@@ -585,7 +585,6 @@ aliases:
     api-max-replicas: 2
     api-memory-limit: 500Mi
     stateful-service-replicas: 1
-    service-image-3: shapeshiftdao/unchained-blockbook:gnosis-no-erc1155-2b7e214
 
   - &arbitrum
     assetName: arbitrum
