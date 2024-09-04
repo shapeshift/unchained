@@ -5,7 +5,8 @@ set -e
 apk add bash
 
 start_coin() {
-  /scripts/fullnode.sh thornode start \
+  thornode start \
+    --p2p.pex=false \
     --p2p.laddr=tcp://0.0.0.0:27146 \
     --proxy_app=tcp://127.0.0.1:27148 \
     --rpc.laddr=tcp://0.0.0.0:27147 &
