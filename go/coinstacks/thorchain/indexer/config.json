@@ -7,7 +7,28 @@
     "last_chain_backoff": "7s",
     "fetch_batch_size": 100,
     "parallelism": 4,
-    "read_timeout": "32s"
+    "read_timeout": "32s",
+    "fork_infos": [
+      {
+        "chain_id": "thorchain",
+        "earliest_block_hash": "7D37DEF6E1BE23C912092069325C4A51E66B9EF7DDBDE004FF730CFABC0307B1",
+        "earliest_block_height": 1,
+        "hard_fork_height": 4786559
+      },
+      {
+        "chain_id": "thorchain-mainnet-v1",
+        "parent_chain_id": "thorchain",
+        "earliest_block_hash": "9B86543A5CF5E26E3CE93C8349B2EABE5E238DFFC9EBE8EC6207FE7178FF27AC",
+        "earliest_block_height": 4786560,
+        "hard_fork_height": 17562000
+      },
+      {
+        "chain_id": "thorchain-1",
+        "parent_chain_id": "thorchain-mainnet-v1",
+        "earliest_block_hash": "0B3C8F9E3EA7E9B1C10CAC5217ED771E0540671EFB9C5315BF01167266BCBEDF",
+        "earliest_block_height": 17562001
+      }
+    ]
   },
   "timescale": {
     "host": "localhost",
