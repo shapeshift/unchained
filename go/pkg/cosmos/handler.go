@@ -119,9 +119,7 @@ func (h *Handler) StartWebsocket() error {
 }
 
 func (h *Handler) StopWebsocket() {
-	if h.WSClient != nil {
-		h.WSClient.Stop()
-	}
+	h.WSClient.Stop()
 }
 
 func (h *Handler) GetInfo() (api.Info, error) {
