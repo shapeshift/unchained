@@ -25,6 +25,7 @@ var (
 type Config struct {
 	LCDURL string `mapstructure:"LCD_URL"`
 	RPCURL string `mapstructure:"RPC_URL"`
+	WSURL  string `mapstructure:"WS_URL"`
 }
 
 func main() {
@@ -36,7 +37,7 @@ func main() {
 
 	conf := &Config{}
 	if *envPath == "" {
-		if err := config.LoadFromEnv(conf, "LCD_URL", "RPC_URL"); err != nil {
+		if err := config.LoadFromEnv(conf, "LCD_URL", "RPC_URL", "WS_URL"); err != nil {
 			logger.Panicf("failed to load config from env: %+v", err)
 		}
 	} else {
@@ -55,6 +56,7 @@ func main() {
 		Encoding:          encoding,
 		LCDURL:            conf.LCDURL,
 		RPCURL:            conf.RPCURL,
+		WSURL:             conf.WSURL,
 	}
 
 	prometheus := metrics.NewPrometheus("thorchain-v1")
@@ -69,7 +71,12 @@ func main() {
 		logger.Panicf("failed to create new block service: %+v", err)
 	}
 
-	api := api.New(httpClient, blockService, *swaggerPath, prometheus)
+	wsClient, err := cosmos.NewWebsocketClient(cfg, blockService, errChan)
+	if err != nil {
+		logger.Panicf("failed to create new websocket client: %+v", err)
+	}
+
+	api := api.New(httpClient, wsClient, blockService, *swaggerPath, prometheus)
 	defer api.Shutdown()
 
 	go api.Serve(errChan)

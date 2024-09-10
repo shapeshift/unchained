@@ -3,6 +3,7 @@ package api
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
+	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/shapeshift/unchained/pkg/thorchain"
@@ -13,6 +14,11 @@ type Handler struct {
 }
 
 func (h *Handler) StartWebsocket() error {
+	err := h.WSClient.Start()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
 	return nil
 }
 
