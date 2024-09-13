@@ -27,21 +27,17 @@ const (
 )
 
 type TxHandlerFunc = func(tx types.EventDataTx, block *BlockResponse) (interface{}, []string, error)
-type BlockEventHandlerFunc = func(eventCache map[string]interface{}, blockHeader types.Header, blockEvents []ABCIEvent, eventIndex int) (interface{}, []string, error)
-type NewBlockHandlerFunc = func(newBlock types.EventDataNewBlock, blockEvents []ABCIEvent)
 
 type WSClient struct {
 	*websocket.Registry
-	blockService      *BlockService
-	client            *cometbft.WSClient
-	encoding          *params.EncodingConfig
-	errChan           chan<- error
-	m                 sync.RWMutex
-	t                 *time.Timer
-	txHandler         TxHandlerFunc
-	blockEventHandler BlockEventHandlerFunc
-	newBlockHandlers  []NewBlockHandlerFunc
-	unhandledTxs      map[int][]types.EventDataTx
+	blockService *BlockService
+	client       *tendermint.WSClient
+	encoding     *params.EncodingConfig
+	errChan      chan<- error
+	m            sync.RWMutex
+	t            *time.Timer
+	txHandler    TxHandlerFunc
+	unhandledTxs map[int][]types.EventDataTx
 }
 
 func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- error) (*WSClient, error) {
@@ -111,14 +107,6 @@ func (ws *WSClient) Stop() {
 
 func (ws *WSClient) TxHandler(fn TxHandlerFunc) {
 	ws.txHandler = fn
-}
-
-func (ws *WSClient) BlockEventHandler(fn BlockEventHandlerFunc) {
-	ws.blockEventHandler = fn
-}
-
-func (ws *WSClient) NewBlockHandler(fn NewBlockHandlerFunc) {
-	ws.newBlockHandlers = append(ws.newBlockHandlers, fn)
 }
 
 func (ws *WSClient) EncodingConfig() params.EncodingConfig {
@@ -224,24 +212,6 @@ func (ws *WSClient) handleNewBlock(newBlock types.EventDataNewBlock, blockEvents
 	}
 
 	ws.blockService.WriteBlock(b, true)
-
-	if ws.blockEventHandler != nil {
-		go func(newBlock types.EventDataNewBlock, blockEvents []ABCIEvent) {
-			eventCache := make(map[string]interface{})
-
-			for i := range blockEvents {
-				data, addrs, err := ws.blockEventHandler(eventCache, newBlock.Block.Header, blockEvents, i)
-				if err != nil {
-					logger.Error(err)
-					return
-				}
-
-				if data != nil {
-					ws.Publish(addrs, data)
-				}
-			}
-		}(newBlock, blockEvents)
-	}
 
 	// process any unhandled transactions
 	for _, tx := range ws.unhandledTxs[b.Height] {
