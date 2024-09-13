@@ -3,12 +3,13 @@ package cosmos
 import (
 	"fmt"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
 )
 
-func (c *HTTPClient) GetGlobalMinimumGasPrices() (map[string]sdk.Dec, error) {
-	gasPrices := make(map[string]sdk.Dec)
+func (c *HTTPClient) GetGlobalMinimumGasPrices() (map[string]sdkmath.LegacyDec, error) {
+	gasPrices := make(map[string]sdkmath.LegacyDec)
 
 	var res struct {
 		Price struct {
@@ -29,7 +30,7 @@ func (c *HTTPClient) GetGlobalMinimumGasPrices() (map[string]sdk.Dec, error) {
 		return gasPrices, errors.Errorf("failed to get globalfee params: %s", e.Msg)
 	}
 
-	amount, err := sdk.NewDecFromStr(res.Price.Amount)
+	amount, err := sdkmath.LegacyNewDecFromStr(res.Price.Amount)
 	if err != nil {
 		return gasPrices, errors.Errorf("failed to handle amount: %s", err)
 	}
@@ -39,8 +40,8 @@ func (c *HTTPClient) GetGlobalMinimumGasPrices() (map[string]sdk.Dec, error) {
 	return gasPrices, nil
 }
 
-func (c *HTTPClient) GetLocalMinimumGasPrices() (map[string]sdk.Dec, error) {
-	gasPrices := make(map[string]sdk.Dec)
+func (c *HTTPClient) GetLocalMinimumGasPrices() (map[string]sdkmath.LegacyDec, error) {
+	gasPrices := make(map[string]sdkmath.LegacyDec)
 
 	var res struct {
 		MinimumGasPrice string `json:"minimum_gas_price"`
