@@ -2,6 +2,7 @@ package cosmos
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -21,6 +22,8 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	ibcchanneltypes "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
 	"github.com/pkg/errors"
 )
 
@@ -287,6 +290,53 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 				}
 				messages = append(messages, message)
 			}
+		case *ibctransfertypes.MsgTransfer:
+			message := Message{
+				Addresses: []string{v.Sender, v.Receiver},
+				Index:     strconv.Itoa(i),
+				Origin:    v.Sender,
+				From:      v.Sender,
+				To:        v.Receiver,
+				Type:      "transfer",
+				Value:     CoinToValue(&v.Token),
+			}
+			messages = append(messages, message)
+		case *ibcchanneltypes.MsgRecvPacket:
+			type PacketData struct {
+				Amount   string `json:"amount"`
+				Denom    string `json:"denom"`
+				Receiver string `json:"receiver"`
+				Sender   string `json:"sender"`
+			}
+
+			d := &PacketData{}
+
+			err := json.Unmarshal(v.Packet.Data, &d)
+			if err != nil {
+				logger.Error(err)
+			}
+
+			amount := events[strconv.Itoa(i)]["transfer"]["amount"]
+
+			value := func() Value {
+				coin, err := sdk.ParseCoinNormalized(amount)
+				if err != nil {
+					return Value{Amount: d.Amount, Denom: d.Denom}
+				}
+
+				return CoinToValue(&coin)
+			}()
+
+			message := Message{
+				Addresses: []string{d.Sender, d.Receiver},
+				Index:     strconv.Itoa(i),
+				Origin:    d.Sender,
+				From:      d.Sender,
+				To:        d.Receiver,
+				Type:      "recv_packet",
+				Value:     value,
+			}
+			messages = append(messages, message)
 		}
 	}
 
