@@ -7,21 +7,23 @@ import (
 	"strconv"
 	"strings"
 
+	sdkerrors "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	"cosmossdk.io/simapp/params"
+	abcitypes "github.com/cometbft/cometbft/abci/types"
 	tmjson "github.com/cometbft/cometbft/libs/json"
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	rpctypes "github.com/cometbft/cometbft/rpc/jsonrpc/types"
 	tmtypes "github.com/cometbft/cometbft/types"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	errortypes "github.com/cosmos/cosmos-sdk/types/errors"
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	ibcchanneltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	ibcchanneltypes "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
 	"github.com/pkg/errors"
 )
 
@@ -142,7 +144,7 @@ func (c *HTTPClient) BroadcastTx(rawTx string) (string, error) {
 
 	if res.TxResponse.Code != 0 {
 		message := fmt.Sprintf("failed to broadcast transaction: codespace: %s, code: %d, description", res.TxResponse.Codespace, res.TxResponse.Code)
-		return "", errortypes.ABCIError(res.TxResponse.Codespace, res.TxResponse.Code, message)
+		return "", sdkerrors.ABCIError(res.TxResponse.Codespace, res.TxResponse.Code, message)
 	}
 
 	return res.TxResponse.TxHash, nil
@@ -162,25 +164,51 @@ func (c *GRPCClient) BroadcastTx(rawTx string) (string, error) {
 	return res.TxResponse.TxHash, nil
 }
 
-func ParseEvents(log string) EventsByMsgIndex {
+func ParseEvents(txResult abcitypes.ExecTxResult) EventsByMsgIndex {
 	events := make(EventsByMsgIndex)
 
-	logs, err := sdk.ParseABCILogs(log)
-	if err != nil {
-		// transaction error logs are not in json format and will fail to parse
-		// return error event with the log message
-		events["0"] = AttributesByEvent{"error": ValueByAttribute{"message": log}}
-		return events
-	}
+	if txResult.Log != "" {
+		logs, err := sdk.ParseABCILogs(txResult.Log)
+		if err != nil {
+			// transaction error logs are not in json format and will fail to parse
+			// return error event with the log message
+			events["0"] = AttributesByEvent{"error": ValueByAttribute{"message": txResult.Log}}
+			return events
+		}
 
-	for _, l := range logs {
-		msgIndex := strconv.Itoa(int(l.GetMsgIndex()))
-		events[msgIndex] = make(AttributesByEvent)
+		for _, l := range logs {
+			msgIndex := strconv.Itoa(int(l.GetMsgIndex()))
+			events[msgIndex] = make(AttributesByEvent)
 
-		for _, e := range l.GetEvents() {
+			for _, e := range l.GetEvents() {
+				attributes := make(ValueByAttribute)
+				for _, a := range e.Attributes {
+					attributes[a.Key] = a.Value
+				}
+
+				events[msgIndex][e.Type] = attributes
+			}
+		}
+	} else {
+		for _, e := range txResult.Events {
 			attributes := make(ValueByAttribute)
 			for _, a := range e.Attributes {
 				attributes[a.Key] = a.Value
+			}
+
+			msgIndex := attributes["msg_index"]
+			if msgIndex == "" {
+				continue
+			}
+
+			if e.Type == "message" && attributes["action"] == "" {
+				continue
+			}
+
+			delete(attributes, "msg_index")
+
+			if events[msgIndex] == nil {
+				events[msgIndex] = make(AttributesByEvent)
 			}
 
 			events[msgIndex][e.Type] = attributes
@@ -206,7 +234,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 				Origin:    v.FromAddress,
 				From:      v.FromAddress,
 				To:        v.ToAddress,
-				Type:      v.Type(),
+				Type:      "send",
 				Value:     CoinToValue(&v.Amount[0]),
 			}
 			messages = append(messages, message)
@@ -217,7 +245,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 				Origin:    v.DelegatorAddress,
 				From:      v.DelegatorAddress,
 				To:        v.ValidatorAddress,
-				Type:      v.Type(),
+				Type:      "delegate",
 				Value:     CoinToValue(&v.Amount),
 			}
 			messages = append(messages, message)
@@ -228,7 +256,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 				Origin:    v.DelegatorAddress,
 				From:      v.ValidatorAddress,
 				To:        v.DelegatorAddress,
-				Type:      v.Type(),
+				Type:      "begin_unbonding",
 				Value:     CoinToValue(&v.Amount),
 			}
 			messages = append(messages, message)
@@ -239,7 +267,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 				Origin:    v.DelegatorAddress,
 				From:      v.ValidatorSrcAddress,
 				To:        v.ValidatorDstAddress,
-				Type:      v.Type(),
+				Type:      "begin_redelegate",
 				Value:     CoinToValue(&v.Amount),
 			}
 			messages = append(messages, message)
@@ -258,7 +286,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 					Origin:    v.DelegatorAddress,
 					From:      v.ValidatorAddress,
 					To:        v.DelegatorAddress,
-					Type:      v.Type(),
+					Type:      "withdraw_delegator_reward",
 					Value:     CoinToValue(&coin),
 				}
 				messages = append(messages, message)
@@ -270,7 +298,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 				Origin:    v.Sender,
 				From:      v.Sender,
 				To:        v.Receiver,
-				Type:      v.Type(),
+				Type:      "transfer",
 				Value:     CoinToValue(&v.Token),
 			}
 			messages = append(messages, message)
@@ -320,7 +348,7 @@ func Fee(tx signing.Tx, txid string, denom string) Value {
 	fees := tx.GetFee()
 
 	if len(fees) == 0 {
-		fees = []sdk.Coin{{Denom: denom, Amount: sdk.NewInt(0)}}
+		fees = []sdk.Coin{{Denom: denom, Amount: sdkmath.NewInt(0)}}
 	} else if len(fees) > 1 {
 		logger.Warnf("txid: %s - multiple fees detected (defaulting to index 0): %+v", txid, fees)
 	}

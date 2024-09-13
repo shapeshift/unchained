@@ -67,7 +67,7 @@ func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- 
 		logger.Info("OnReconnect triggered: resubscribing")
 		ws.unhandledTxs = make(map[int][]types.EventDataTx)
 		_ = client.Subscribe(context.Background(), types.EventQueryTx.String())
-		_ = client.Subscribe(context.Background(), types.EventQueryNewBlockHeader.String())
+		_ = client.Subscribe(context.Background(), types.EventQueryNewBlock.String())
 	})(client)
 
 	return ws, nil
@@ -84,7 +84,7 @@ func (ws *WSClient) Start() error {
 		return errors.Wrap(err, "failed to subscribe to txs")
 	}
 
-	err = ws.client.Subscribe(context.Background(), types.EventQueryNewBlockHeader.String())
+	err = ws.client.Subscribe(context.Background(), types.EventQueryNewBlock.String())
 	if err != nil {
 		return errors.Wrap(err, "failed to subscribe to newBlocks")
 	}
@@ -128,7 +128,7 @@ func (ws *WSClient) listen() {
 					logger.Error(errors.Wrap(err, "failed to subscribe to txs"))
 				}
 
-				err = ws.client.Subscribe(context.Background(), types.EventQueryNewBlockHeader.String())
+				err = ws.client.Subscribe(context.Background(), types.EventQueryNewBlock.String())
 				if err != nil {
 					logger.Error(errors.Wrap(err, "failed to subscribe to newBlocks"))
 				}
@@ -150,8 +150,8 @@ func (ws *WSClient) listen() {
 			switch result.Data.(type) {
 			case types.EventDataTx:
 				go ws.handleTx(result.Data.(types.EventDataTx))
-			case types.EventDataNewBlockHeader:
-				go ws.handleNewBlockHeader(result.Data.(types.EventDataNewBlockHeader))
+			case types.EventDataNewBlock:
+				go ws.handleNewBlockHeader(result.Data.(types.EventDataNewBlock))
 			default:
 				fmt.Printf("unsupported result type: %T", result.Data)
 			}
@@ -183,21 +183,21 @@ func (ws *WSClient) handleTx(tx types.EventDataTx) {
 	}
 }
 
-func (ws *WSClient) handleNewBlockHeader(block types.EventDataNewBlockHeader) {
+func (ws *WSClient) handleNewBlockHeader(block types.EventDataNewBlock) {
 	b := &BlockResponse{
-		Height:    int(block.Header.Height),
-		Hash:      block.Header.Hash().String(),
-		Timestamp: int(block.Header.Time.Unix()),
+		Height:    int(block.Block.Header.Height),
+		Hash:      block.Block.Header.Hash().String(),
+		Timestamp: int(block.Block.Header.Time.Unix()),
 	}
 
 	ws.blockService.WriteBlock(b, true)
 
 	if ws.endBlockEventHandler != nil {
-		go func(b types.EventDataNewBlockHeader) {
+		go func(b types.EventDataNewBlock) {
 			eventCache := make(map[string]interface{})
 
-			for i := range b.ResultEndBlock.Events {
-				data, addrs, err := ws.endBlockEventHandler(eventCache, b.Header, b.ResultEndBlock.Events, i)
+			for i := range b.ResultFinalizeBlock.Events {
+				data, addrs, err := ws.endBlockEventHandler(eventCache, b.Block.Header, b.ResultFinalizeBlock.Events, i)
 				if err != nil {
 					logger.Error(err)
 					return
