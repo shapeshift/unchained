@@ -9,7 +9,6 @@ import (
 	"sync"
 
 	"cosmossdk.io/simapp/params"
-	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cometbft/cometbft/libs/json"
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	tendermint "github.com/cometbft/cometbft/rpc/jsonrpc/client"
@@ -19,18 +18,16 @@ import (
 )
 
 type TxHandlerFunc = func(tx types.EventDataTx, block *BlockResponse) (interface{}, []string, error)
-type EndBlockEventHandlerFunc = func(eventCache map[string]interface{}, blockHeader types.Header, endBlockEvents []abci.Event, eventIndex int) (interface{}, []string, error)
 
 type WSClient struct {
 	*websocket.Registry
-	blockService         *BlockService
-	client               *tendermint.WSClient
-	encoding             *params.EncodingConfig
-	errChan              chan<- error
-	m                    sync.RWMutex
-	txHandler            TxHandlerFunc
-	endBlockEventHandler EndBlockEventHandlerFunc
-	unhandledTxs         map[int][]types.EventDataTx
+	blockService *BlockService
+	client       *tendermint.WSClient
+	encoding     *params.EncodingConfig
+	errChan      chan<- error
+	m            sync.RWMutex
+	txHandler    TxHandlerFunc
+	unhandledTxs map[int][]types.EventDataTx
 }
 
 func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- error) (*WSClient, error) {
@@ -67,7 +64,7 @@ func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- 
 		logger.Info("OnReconnect triggered: resubscribing")
 		ws.unhandledTxs = make(map[int][]types.EventDataTx)
 		_ = client.Subscribe(context.Background(), types.EventQueryTx.String())
-		_ = client.Subscribe(context.Background(), types.EventQueryNewBlock.String())
+		_ = client.Subscribe(context.Background(), types.EventQueryNewBlockHeader.String())
 	})(client)
 
 	return ws, nil
@@ -84,7 +81,7 @@ func (ws *WSClient) Start() error {
 		return errors.Wrap(err, "failed to subscribe to txs")
 	}
 
-	err = ws.client.Subscribe(context.Background(), types.EventQueryNewBlock.String())
+	err = ws.client.Subscribe(context.Background(), types.EventQueryNewBlockHeader.String())
 	if err != nil {
 		return errors.Wrap(err, "failed to subscribe to newBlocks")
 	}
@@ -102,10 +99,6 @@ func (ws *WSClient) Stop() {
 
 func (ws *WSClient) TxHandler(fn TxHandlerFunc) {
 	ws.txHandler = fn
-}
-
-func (ws *WSClient) EndBlockEventHandler(fn EndBlockEventHandlerFunc) {
-	ws.endBlockEventHandler = fn
 }
 
 func (ws *WSClient) EncodingConfig() params.EncodingConfig {
@@ -128,7 +121,7 @@ func (ws *WSClient) listen() {
 					logger.Error(errors.Wrap(err, "failed to subscribe to txs"))
 				}
 
-				err = ws.client.Subscribe(context.Background(), types.EventQueryNewBlock.String())
+				err = ws.client.Subscribe(context.Background(), types.EventQueryNewBlockHeader.String())
 				if err != nil {
 					logger.Error(errors.Wrap(err, "failed to subscribe to newBlocks"))
 				}
@@ -150,8 +143,8 @@ func (ws *WSClient) listen() {
 			switch result.Data.(type) {
 			case types.EventDataTx:
 				go ws.handleTx(result.Data.(types.EventDataTx))
-			case types.EventDataNewBlock:
-				go ws.handleNewBlockHeader(result.Data.(types.EventDataNewBlock))
+			case types.EventDataNewBlockHeader:
+				go ws.handleNewBlockHeader(result.Data.(types.EventDataNewBlockHeader))
 			default:
 				fmt.Printf("unsupported result type: %T", result.Data)
 			}
@@ -183,36 +176,19 @@ func (ws *WSClient) handleTx(tx types.EventDataTx) {
 	}
 }
 
-func (ws *WSClient) handleNewBlockHeader(block types.EventDataNewBlock) {
+func (ws *WSClient) handleNewBlockHeader(block types.EventDataNewBlockHeader) {
 	b := &BlockResponse{
-		Height:    int(block.Block.Header.Height),
-		Hash:      block.Block.Header.Hash().String(),
-		Timestamp: int(block.Block.Header.Time.Unix()),
+		Height:    int(block.Header.Height),
+		Hash:      block.Header.Hash().String(),
+		Timestamp: int(block.Header.Time.Unix()),
 	}
 
 	ws.blockService.WriteBlock(b, true)
-
-	if ws.endBlockEventHandler != nil {
-		go func(b types.EventDataNewBlock) {
-			eventCache := make(map[string]interface{})
-
-			for i := range b.ResultFinalizeBlock.Events {
-				data, addrs, err := ws.endBlockEventHandler(eventCache, b.Block.Header, b.ResultFinalizeBlock.Events, i)
-				if err != nil {
-					logger.Error(err)
-					return
-				}
-
-				if data != nil {
-					ws.Publish(addrs, data)
-				}
-			}
-		}(block)
-	}
 
 	// process any unhandled transactions
 	for _, tx := range ws.unhandledTxs[b.Height] {
 		go ws.handleTx(tx)
 	}
+
 	delete(ws.unhandledTxs, b.Height)
 }
