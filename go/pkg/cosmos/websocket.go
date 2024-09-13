@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"cosmossdk.io/simapp/params"
-	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cometbft/cometbft/libs/json"
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	tendermint "github.com/cometbft/cometbft/rpc/jsonrpc/client"
@@ -28,19 +27,17 @@ const (
 )
 
 type TxHandlerFunc = func(tx types.EventDataTx, block *BlockResponse) (interface{}, []string, error)
-type EndBlockEventHandlerFunc = func(eventCache map[string]interface{}, blockHeader types.Header, endBlockEvents []abci.Event, eventIndex int) (interface{}, []string, error)
 
 type WSClient struct {
 	*websocket.Registry
-	blockService         *BlockService
-	client               *tendermint.WSClient
-	encoding             *params.EncodingConfig
-	errChan              chan<- error
-	m                    sync.RWMutex
-	t                    *time.Timer
-	txHandler            TxHandlerFunc
-	endBlockEventHandler EndBlockEventHandlerFunc
-	unhandledTxs         map[int][]types.EventDataTx
+	blockService *BlockService
+	client       *tendermint.WSClient
+	encoding     *params.EncodingConfig
+	errChan      chan<- error
+	m            sync.RWMutex
+	t            *time.Timer
+	txHandler    TxHandlerFunc
+	unhandledTxs map[int][]types.EventDataTx
 }
 
 func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- error) (*WSClient, error) {
@@ -108,10 +105,6 @@ func (ws *WSClient) Stop() {
 
 func (ws *WSClient) TxHandler(fn TxHandlerFunc) {
 	ws.txHandler = fn
-}
-
-func (ws *WSClient) EndBlockEventHandler(fn EndBlockEventHandlerFunc) {
-	ws.endBlockEventHandler = fn
 }
 
 func (ws *WSClient) EncodingConfig() params.EncodingConfig {
@@ -214,24 +207,6 @@ func (ws *WSClient) handleNewBlockHeader(block types.EventDataNewBlockHeader) {
 	}
 
 	ws.blockService.WriteBlock(b, true)
-
-	if ws.endBlockEventHandler != nil {
-		go func(b types.EventDataNewBlockHeader) {
-			eventCache := make(map[string]interface{})
-
-			for i := range b.ResultEndBlock.Events {
-				data, addrs, err := ws.endBlockEventHandler(eventCache, b.Header, b.ResultEndBlock.Events, i)
-				if err != nil {
-					logger.Error(err)
-					return
-				}
-
-				if data != nil {
-					ws.Publish(addrs, data)
-				}
-			}
-		}(block)
-	}
 
 	// process any unhandled transactions
 	for _, tx := range ws.unhandledTxs[b.Height] {

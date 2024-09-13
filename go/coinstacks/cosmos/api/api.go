@@ -137,6 +137,93 @@ func New(httpClient *cosmos.HTTPClient, grpcClient *cosmos.GRPCClient, wsClient 
 	return a
 }
 
+// swagger:route GET / Websocket Websocket
+//
+// Subscribe to pending and confirmed transactions.
+//
+// responses:
+//
+//	200:
+func (a *API) Websocket(w http.ResponseWriter, r *http.Request) {
+	a.API.Websocket(w, r)
+}
+
+// swagger:route GET /api/v1/info v1 GetInfo
+//
+// Get information about the running coinstack.
+//
+// responses:
+//
+//	200: Info
+func (a *API) Info(w http.ResponseWriter, r *http.Request) {
+	a.API.Info(w, r)
+}
+
+// swagger:route GET /api/v1/account/{pubkey} v1 GetAccount
+//
+// Get account details.
+//
+// responses:
+//
+//	200: Account
+//	400: BadRequestError
+//	500: InternalServerError
+func (a *API) Account(w http.ResponseWriter, r *http.Request) {
+	a.API.Account(w, r)
+}
+
+// swagger:route GET /api/v1/account/{pubkey}/txs v1 GetTxHistory
+//
+// Get paginated transaction history.
+//
+// responses:
+//
+//	200: TxHistory
+//	400: BadRequestError
+//	500: InternalServerError
+func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
+	a.API.TxHistory(w, r)
+}
+
+// swagger:route GET /api/v1/tx/{txid} v1 GetTx
+//
+// # Get transaction details
+//
+// responses:
+//
+//	200: Tx
+//	400: BadRequestError
+//	500: InternalServerError
+func (a *API) Tx(w http.ResponseWriter, r *http.Request) {
+	a.API.Tx(w, r)
+}
+
+// swagger:route POST /api/v1/send v1 SendTx
+//
+// Sends raw transaction to be broadcast to the node.
+//
+// responses:
+//
+//	200: TransactionHash
+//	400: BadRequestError
+//	500: InternalServerError
+func (a *API) SendTx(w http.ResponseWriter, r *http.Request) {
+	a.API.SendTx(w, r)
+}
+
+// swagger:route POST /api/v1/gas/estimate v1 EstimateGas
+//
+// Get the estimated gas cost for a transaction.
+//
+// responses:
+//
+//	200: GasAmount
+//	400: BadRequestError
+//	500: InternalServerError
+func (a *API) EstimateGas(w http.ResponseWriter, r *http.Request) {
+	a.API.EstimateGas(w, r)
+}
+
 // swagger:route Get /api/v1/validators v1 GetValidators
 //
 // Get the list of current validators.
