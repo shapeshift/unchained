@@ -15,6 +15,161 @@
     }
   },
   "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "Websocket"
+        ],
+        "summary": "Subscribe to pending and confirmed transactions.",
+        "operationId": "Websocket",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/v1/account/{pubkey}": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "summary": "Get account details.",
+        "operationId": "GetAccount",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Pubkey",
+            "description": "Account address or xpub",
+            "name": "pubkey",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account",
+            "schema": {
+              "$ref": "#/definitions/Account"
+            }
+          },
+          "400": {
+            "description": "BadRequestError",
+            "schema": {
+              "$ref": "#/definitions/BadRequestError"
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "schema": {
+              "$ref": "#/definitions/InternalServerError"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/account/{pubkey}/txs": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "summary": "Get paginated transaction history.",
+        "operationId": "GetTxHistory",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Pubkey",
+            "description": "Account address or xpub",
+            "name": "pubkey",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "Cursor",
+            "description": "Pagination cursor from previous response or empty string for first page fetch",
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "PageSize",
+            "description": "Page size",
+            "name": "pageSize",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "TxHistory",
+            "schema": {
+              "$ref": "#/definitions/TxHistory"
+            }
+          },
+          "400": {
+            "description": "BadRequestError",
+            "schema": {
+              "$ref": "#/definitions/BadRequestError"
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "schema": {
+              "$ref": "#/definitions/InternalServerError"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/gas/estimate": {
+      "post": {
+        "tags": [
+          "v1"
+        ],
+        "summary": "Get the estimated gas cost for a transaction.",
+        "operationId": "EstimateGas",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "rawTx"
+              ],
+              "properties": {
+                "rawTx": {
+                  "description": "Raw transaction",
+                  "type": "string",
+                  "x-go-name": "RawTx"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "GasAmount",
+            "schema": {
+              "$ref": "#/definitions/GasAmount"
+            }
+          },
+          "400": {
+            "description": "BadRequestError",
+            "schema": {
+              "$ref": "#/definitions/BadRequestError"
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "schema": {
+              "$ref": "#/definitions/InternalServerError"
+            }
+          }
+        }
+      }
+    },
     "/api/v1/gas/fees": {
       "get": {
         "tags": [
@@ -27,6 +182,110 @@
             "description": "Fees",
             "schema": {
               "$ref": "#/definitions/Fees"
+            }
+          },
+          "400": {
+            "description": "BadRequestError",
+            "schema": {
+              "$ref": "#/definitions/BadRequestError"
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "schema": {
+              "$ref": "#/definitions/InternalServerError"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/info": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "summary": "Get information about the running coinstack.",
+        "operationId": "GetInfo",
+        "responses": {
+          "200": {
+            "description": "Info",
+            "schema": {
+              "$ref": "#/definitions/Info"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/send": {
+      "post": {
+        "tags": [
+          "v1"
+        ],
+        "summary": "Sends raw transaction to be broadcast to the node.",
+        "operationId": "SendTx",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "rawTx"
+              ],
+              "properties": {
+                "rawTx": {
+                  "description": "Raw transaction",
+                  "type": "string",
+                  "x-go-name": "RawTx"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "TransactionHash",
+            "schema": {
+              "$ref": "#/definitions/TransactionHash"
+            }
+          },
+          "400": {
+            "description": "BadRequestError",
+            "schema": {
+              "$ref": "#/definitions/BadRequestError"
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "schema": {
+              "$ref": "#/definitions/InternalServerError"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tx/{txid}": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "summary": "Get transaction details",
+        "operationId": "GetTx",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "TxID",
+            "description": "Transaction hash",
+            "name": "txid",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tx",
+            "schema": {
+              "$ref": "#/definitions/Tx"
             }
           },
           "400": {
