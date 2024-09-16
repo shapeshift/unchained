@@ -85,9 +85,9 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 // Contains info about the affiliate revenue earned
 // swagger:model AffiliateRevenue
 type AffiliateRevenue struct {
-	// Affiliate address
+	// Affiliate addresses
 	// required: true
-	Address string `json:"address"`
+	Addresses []string `json:"addresses"`
 	// Amount earned (RUNE)
 	// required: true
 	Amount string `json:"amount"`
@@ -104,8 +104,8 @@ func (h *Handler) GetAffiliateRevenue(start int, end int) (*AffiliateRevenue, er
 	}
 
 	a := &AffiliateRevenue{
-		Address: affiliateAddress,
-		Amount:  total.String(),
+		Addresses: h.indexer.AffiliateAddresses,
+		Amount:    total.String(),
 	}
 
 	return a, nil

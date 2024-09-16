@@ -334,14 +334,17 @@
       "description": "Contains info about the affiliate revenue earned",
       "type": "object",
       "required": [
-        "address",
+        "addresses",
         "amount"
       ],
       "properties": {
-        "address": {
-          "description": "Affiliate address",
-          "type": "string",
-          "x-go-name": "Address"
+        "addresses": {
+          "description": "Affiliate addresses",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Addresses"
         },
         "amount": {
           "description": "Amount earned (RUNE)",
