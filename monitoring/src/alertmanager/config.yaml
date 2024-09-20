@@ -45,7 +45,6 @@ route:
         - alertname = "KubePersistentVolumeFillingUp"
         - namespace = "unchained"
         - severity = "critical"
-        - persistentvolumeclaim !~ "thorchain-v1"
     - receiver: "discord_critical"
       group_by: ["alertname", "namespace", "statefulset"]
       group_wait: 5m
@@ -111,7 +110,6 @@ route:
         - alertname = "KubePersistentVolumeFillingUp"
         - namespace = "unchained-dev"
         - severity = "critical"
-        - persistentvolumeclaim !~ "thorchain-v1"
     - receiver: "discord_dev"
       group_by: ["alertname", "namespace", "statefulset"]
       group_wait: 15m
