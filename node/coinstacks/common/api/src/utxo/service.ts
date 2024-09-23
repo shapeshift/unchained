@@ -48,7 +48,12 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       const addresses = data.tokens?.map<Address>((token) => ({
         balance: token.balance ?? '0',
         pubkey: token.name,
-      }))
+      })) ?? [
+        {
+          balance: data.balance,
+          pubkey: data.address,
+        },
+      ]
 
       // For any change indexes detected by blockbook, we want to find the next unused address.
       // To do this we will add 1 to any address indexes found and keep track of the highest index.
@@ -141,7 +146,10 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   async getUtxos(pubkey: string): Promise<Array<Utxo>> {
     try {
       const data = await this.blockbook.getUtxo(pubkey)
-      return data
+      return data.map((utxo) => {
+        if (utxo.address) return utxo
+        return { ...utxo, address: pubkey }
+      })
     } catch (err) {
       throw handleError(err)
     }
