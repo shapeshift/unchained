@@ -62,6 +62,7 @@ export class Solana implements BaseAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}/txs')
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getTxHistory(@Path() pubkey: string, @Query() _cursor?: string, @Query() _pageSize = 10): Promise<TxHistory> {
     return { pubkey } as TxHistory
   }
@@ -77,6 +78,7 @@ export class Solana implements BaseAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Post('send/')
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async sendTx(@Body() _body: SendTxBody): Promise<string> {
     return ''
   }
