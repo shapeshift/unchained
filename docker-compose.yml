@@ -50,6 +50,7 @@ services:
       - polygon_default
       - thorchain_default
       - thorchain-v1_default
+      - solana_default
       - proxy_default
     ports:
       # The HTTP port
@@ -93,5 +94,7 @@ networks:
     name: thorchain_default
   thorchain-v1_default:
     name: thorchain-v1_default
+  solana_default:
+    name: solana_default
   proxy_default:
     name: proxy_default

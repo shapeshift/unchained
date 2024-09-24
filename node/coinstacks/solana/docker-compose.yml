@@ -1,0 +1,19 @@
+services:
+  api:
+    image: unchained-local-node
+    env_file: .env
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.solana-api.rule=Host(`api.solana.localhost`)'
+      - 'traefik.http.services.solana-api.loadbalancer.server.port=3000'
+    working_dir: /app/node/coinstacks/solana/api
+    command: yarn nodemon
+    volumes:
+      - ../../..:/app
+    networks:
+      - solana
+
+networks:
+  solana:
+    name: solana_default
+    external: true
