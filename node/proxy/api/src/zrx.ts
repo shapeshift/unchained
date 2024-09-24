@@ -19,7 +19,7 @@ export class Zrx {
 
   async handler(req: Request, res: Response): Promise<void> {
     const parsedUrl = new URL('https://dummy.com'.concat(req.url))
-    const path = parsedUrl.pathname.substring('/api/v1/zrx/'.length)
+    const path = parsedUrl.pathname.replace('/api/v1/zrx/', '')
 
     const url = (() => {
       if (path.includes('v1')) {
