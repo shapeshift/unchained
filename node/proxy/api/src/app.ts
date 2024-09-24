@@ -6,6 +6,7 @@ import { Logger } from '@shapeshiftoss/logger'
 import { RegisterRoutes } from './routes'
 import { CoinGecko } from './coingecko'
 import { Zerion } from './zerion'
+import { Zrx } from './zrx'
 
 const PORT = process.env.PORT ?? 3000
 
@@ -38,6 +39,9 @@ app.get('/api/v1/markets/*', coingecko.handler.bind(coingecko))
 
 const zerion = new Zerion()
 app.get('/api/v1/zerion/*', zerion.handler.bind(zerion))
+
+const zrx = new Zrx()
+app.get('/api/v1/zrx/*', zrx.handler.bind(zrx))
 
 // redirect any unmatched routes to docs
 app.get('/', async (_, res) => {
