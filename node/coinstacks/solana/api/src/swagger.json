@@ -1,0 +1,407 @@
+{
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"BaseInfo": {
+				"description": "Contains base info about the running coinstack",
+				"properties": {
+					"network": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"network"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Account": {
+				"description": "Contains info about an address or extended public key account",
+				"properties": {
+					"balance": {
+						"type": "string"
+					},
+					"unconfirmedBalance": {
+						"type": "string"
+					},
+					"pubkey": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"balance",
+					"unconfirmedBalance",
+					"pubkey"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"BadRequestError": {
+				"description": "Contains info about a 400 Bad Request response",
+				"properties": {
+					"error": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ValidationError": {
+				"description": "Contains info about a 422 Validation Error response",
+				"properties": {
+					"message": {
+						"type": "string",
+						"enum": [
+							"Validation failed"
+						],
+						"nullable": false
+					},
+					"details": {
+						"properties": {},
+						"additionalProperties": {},
+						"type": "object"
+					}
+				},
+				"required": [
+					"message",
+					"details"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"InternalServerError": {
+				"description": "Contains info about a 500 Internal Server Error response",
+				"properties": {
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"message"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Tx": {
+				"description": "Contains info about a transaction",
+				"properties": {
+					"txid": {
+						"type": "string"
+					},
+					"blockHash": {
+						"type": "string"
+					},
+					"blockHeight": {
+						"type": "number",
+						"format": "double"
+					},
+					"timestamp": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"txid",
+					"blockHeight",
+					"timestamp"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"BaseTxHistory_Tx_": {
+				"description": "Contains paginated base transaction history details",
+				"properties": {
+					"cursor": {
+						"type": "string"
+					},
+					"pubkey": {
+						"type": "string"
+					},
+					"txs": {
+						"items": {
+							"$ref": "#/components/schemas/Tx"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"pubkey",
+					"txs"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TxHistory": {
+				"$ref": "#/components/schemas/BaseTxHistory_Tx_",
+				"description": "Contains info about transaction history"
+			},
+			"SendTxBody": {
+				"description": "Contains the serialized raw transaction hex",
+				"properties": {
+					"hex": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"hex"
+				],
+				"type": "object",
+				"additionalProperties": false
+			}
+		},
+		"securitySchemes": {}
+	},
+	"info": {
+		"title": "@shapeshiftoss/solana-api",
+		"version": "10.0.0",
+		"license": {
+			"name": "MIT"
+		},
+		"contact": {}
+	},
+	"openapi": "3.0.0",
+	"paths": {
+		"/api/v1/info": {
+			"get": {
+				"operationId": "GetInfo",
+				"responses": {
+					"200": {
+						"description": "coinstack info",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BaseInfo"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get information about the running coinstack",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/api/v1/account/{pubkey}": {
+			"get": {
+				"operationId": "GetAccount",
+				"responses": {
+					"200": {
+						"description": "account details",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Account"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get account details by address or extended public key",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "account address or extended public key",
+						"in": "path",
+						"name": "pubkey",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/v1/account/{pubkey}/txs": {
+			"get": {
+				"operationId": "GetTxHistory",
+				"responses": {
+					"200": {
+						"description": "transaction history",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TxHistory"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get transaction history by address or extended public key",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "account address or extended public key",
+						"in": "path",
+						"name": "pubkey",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "_cursor",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "_pageSize",
+						"required": false,
+						"schema": {
+							"default": 10,
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/api/v1/send": {
+			"post": {
+				"operationId": "SendTx",
+				"responses": {
+					"200": {
+						"description": "transaction signature",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Sends raw transaction to be broadcast to the node.",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/SendTxBody"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	]
+}

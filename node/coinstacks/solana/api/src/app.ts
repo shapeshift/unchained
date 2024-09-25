@@ -1,47 +1,42 @@
 import express from 'express'
 import { join } from 'path'
 import swaggerUi from 'swagger-ui-express'
-import { middleware } from '@shapeshiftoss/common-api'
+import { middleware, Prometheus } from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
 import { RegisterRoutes } from './routes'
-import { CoinGecko } from './coingecko'
-import { Zerion } from './zerion'
-import { Zrx } from './zrx'
 
 const PORT = process.env.PORT ?? 3000
 
 export const logger = new Logger({
-  namespace: ['unchained', 'proxy', 'api'],
+  namespace: ['unchained', 'coinstacks', 'solana', 'api'],
   level: process.env.LOG_LEVEL,
 })
 
+const prometheus = new Prometheus({ coinstack: 'solana' })
+
 const app = express()
 
-app.use(...middleware.common())
+app.use(...middleware.common(prometheus))
 
-app.get('/health', async (_, res) => res.json({ status: 'ok' }))
+app.get('/health', async (_, res) => res.json({ status: 'up', asset: 'solana' }))
+
+app.get('/metrics', async (_, res) => {
+  res.setHeader('Content-Type', prometheus.register.contentType)
+  res.send(await prometheus.register.metrics())
+})
 
 const options: swaggerUi.SwaggerUiOptions = {
   customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'ShapeShift Proxy API Docs',
+  customSiteTitle: 'ShapeShift Solana API Docs',
   customfavIcon: '/public/favi-blue.png',
   swaggerUrl: '/swagger.json',
 }
 
-app.use('/public', express.static(join(__dirname, '../../../../../../coinstacks/common/api/public/')))
+app.use('/public', express.static(join(__dirname, '../../../../../../common/api/public')))
 app.use('/swagger.json', express.static(join(__dirname, './swagger.json')))
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(undefined, options))
 
 RegisterRoutes(app)
-
-const coingecko = new CoinGecko()
-app.get('/api/v1/markets/*', coingecko.handler.bind(coingecko))
-
-const zerion = new Zerion()
-app.get('/api/v1/zerion/*', zerion.handler.bind(zerion))
-
-const zrx = new Zrx()
-app.get('/api/v1/zrx/*', zrx.handler.bind(zrx))
 
 // redirect any unmatched routes to docs
 app.get('/', async (_, res) => {
