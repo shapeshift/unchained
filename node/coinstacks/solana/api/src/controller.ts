@@ -9,10 +9,21 @@ import {
   ValidationError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { Account, TxHistory } from './models'
+import { Service } from './service'
+
+const RPC_URL = process.env.RPC_URL
+const RPC_API_KEY = process.env.RPC_API_KEY
 
 const NETWORK = process.env.NETWORK
 
 if (!NETWORK) throw new Error('NETWORK env var not set')
+if (!RPC_URL) throw new Error('RPC_URL env var not set')
+if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
+
+export const service = new Service({
+  rpcUrl: RPC_URL,
+  rpcApiKey: RPC_API_KEY,
+})
 
 export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'solana', 'api'],
@@ -22,6 +33,8 @@ export const logger = new Logger({
 @Route('api/v1')
 @Tags('v1')
 export class Solana implements BaseAPI {
+  static service: Service
+
   /**
    * Get information about the running coinstack
    *
@@ -78,8 +91,9 @@ export class Solana implements BaseAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Post('send/')
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async sendTx(@Body() _body: SendTxBody): Promise<string> {
-    return ''
+    return Solana.service.sendTx(_body)
   }
 }
+
+Solana.service = service
