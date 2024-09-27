@@ -128,7 +128,7 @@ export class Solana implements BaseAPI {
   /**
    * Get the current recommended gas fees to use in a transaction
    *
-   * @returns {Promise<GasFees>} current fees specified in wei
+   * @returns {Promise<GasFees>} current fees specified in lamports
    */
   @Example<GasFees>({
     baseFee: '5000',
@@ -141,7 +141,6 @@ export class Solana implements BaseAPI {
       const deserializedMessage = Message.from(Buffer.from(body.message, 'base64'))
 
       const feeResult = await heliusSdk.connection.getFeeForMessage(deserializedMessage)
-      console.log(feeResult)
       const gasPrice = feeResult.value
 
       if (!gasPrice) {
