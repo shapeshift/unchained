@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@shapeshiftoss/common-api": "^10.0.0",
-    "@solana/web3.js": "^2.0.0-rc.1"
+    "@solana/web3.js": "^2.0.0-rc.1",
+    "helius-sdk": "^1.3.5"
   }
 }

@@ -7,17 +7,26 @@ import {
   InternalServerError,
   SendTxBody,
   ValidationError,
+  handleError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { Account, TxHistory } from './models'
+import { Helius } from 'helius-sdk'
+
+const RPC_URL = process.env.RPC_URL
+const RPC_API_KEY = process.env.RPC_API_KEY
 
 const NETWORK = process.env.NETWORK
 
 if (!NETWORK) throw new Error('NETWORK env var not set')
+if (!RPC_URL) throw new Error('RPC_URL env var not set')
+if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
 
 export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'solana', 'api'],
   level: process.env.LOG_LEVEL,
 })
+
+const heliusSdk = new Helius(RPC_API_KEY)
 
 @Route('api/v1')
 @Tags('v1')
@@ -78,8 +87,13 @@ export class Solana implements BaseAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Post('send/')
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async sendTx(@Body() _body: SendTxBody): Promise<string> {
-    return ''
+  async sendTx(@Body() body: SendTxBody): Promise<string> {
+    try {
+      const txSig = await heliusSdk.connection.sendRawTransaction(Buffer.from(body.hex, 'base64'))
+
+      return txSig
+    } catch (err) {
+      throw handleError(err)
+    }
   }
 }
