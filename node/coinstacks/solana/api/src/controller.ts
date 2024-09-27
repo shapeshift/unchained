@@ -1,5 +1,5 @@
 import { Logger } from '@shapeshiftoss/logger'
-import { Body, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
+import { Body, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import {
   BadRequestError,
   BaseAPI,
@@ -9,8 +9,9 @@ import {
   ValidationError,
   handleError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { Account, EstimatePriorityFeeBody, TxHistory } from './models'
+import { Account, EstimatePriorityFeeBody, GasFees, GasFeesBody, TxHistory } from './models'
 import { Helius } from 'helius-sdk'
+import { Message } from '@solana/web3.js'
 
 const RPC_URL = process.env.RPC_URL
 const RPC_API_KEY = process.env.RPC_API_KEY
@@ -31,6 +32,7 @@ const heliusSdk = new Helius(RPC_API_KEY)
 @Route('api/v1')
 @Tags('v1')
 export class Solana implements BaseAPI {
+  static baseFee = '5000'
   /**
    * Get information about the running coinstack
    *
@@ -118,6 +120,38 @@ export class Solana implements BaseAPI {
       })
 
       return feeEstimate.priorityFeeEstimate
+    } catch (err) {
+      throw handleError(err)
+    }
+  }
+
+  /**
+   * Get the current recommended gas fees to use in a transaction
+   *
+   * @returns {Promise<GasFees>} current fees specified in wei
+   */
+  @Example<GasFees>({
+    baseFee: '5000',
+    gasPrice: '7000',
+  })
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Post('/gas/fees')
+  async getGasFees(@Body() body: GasFeesBody): Promise<GasFees> {
+    try {
+      const deserializedMessage = Message.from(Buffer.from(body.message, 'base64'))
+
+      const feeResult = await heliusSdk.connection.getFeeForMessage(deserializedMessage)
+      console.log(feeResult)
+      const gasPrice = feeResult.value
+
+      if (!gasPrice) {
+        throw new Error('Failed to get gas price')
+      }
+
+      return {
+        baseFee: Solana.baseFee,
+        gasPrice: gasPrice.toFixed(),
+      }
     } catch (err) {
       throw handleError(err)
     }

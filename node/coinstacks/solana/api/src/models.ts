@@ -44,3 +44,20 @@ export interface API {
 export interface EstimatePriorityFeeBody {
   accountKeys: string[]
 }
+
+/**
+ * Returns the priority fees estimation
+ */
+export interface GasFeesBody {
+  message: string
+}
+
+/**
+ * Contains info about current recommended fees to use in a transaction.
+ */
+export interface GasFees {
+  // static base gas fee
+  baseFee?: string
+  // gas fee including compute units
+  gasPrice: string
+}

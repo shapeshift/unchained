@@ -170,6 +170,35 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"GasFees": {
+				"description": "Contains info about current recommended fees to use in a transaction.",
+				"properties": {
+					"baseFee": {
+						"type": "string"
+					},
+					"gasPrice": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"gasPrice"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"GasFeesBody": {
+				"description": "Returns the priority fees estimation",
+				"properties": {
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"message"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
@@ -476,6 +505,57 @@
 							"schema": {
 								"$ref": "#/components/schemas/EstimatePriorityFeeBody",
 								"description": "to account keys"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/gas/fees": {
+			"post": {
+				"operationId": "GetGasFees",
+				"responses": {
+					"200": {
+						"description": "current fees specified in wei",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GasFees"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"baseFee": "5000",
+											"gasPrice": "7000"
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get the current recommended gas fees to use in a transaction",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/GasFeesBody"
 							}
 						}
 					}
