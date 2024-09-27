@@ -387,11 +387,13 @@
 				"security": [],
 				"parameters": [],
 				"requestBody": {
+					"description": "serialized raw transaction hex",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/SendTxBody"
+								"$ref": "#/components/schemas/SendTxBody",
+								"description": "serialized raw transaction hex"
 							}
 						}
 					}
