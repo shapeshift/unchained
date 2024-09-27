@@ -26,7 +26,7 @@ export const logger = new Logger({
   level: process.env.LOG_LEVEL,
 })
 
-const heliusSdk = new Helius(RPC_API_KEY, undefined, undefined, RPC_URL)
+const heliusSdk = new Helius(RPC_API_KEY)
 
 @Route('api/v1')
 @Tags('v1')
