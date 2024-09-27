@@ -154,6 +154,22 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"EstimatePriorityFeeBody": {
+				"description": "Returns the priority fees estimation",
+				"properties": {
+					"accountKeys": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"accountKeys"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
@@ -394,6 +410,72 @@
 							"schema": {
 								"$ref": "#/components/schemas/SendTxBody",
 								"description": "serialized raw transaction hex"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/estimate-priority-fee": {
+			"post": {
+				"operationId": "EstimatePriorityFee",
+				"responses": {
+					"200": {
+						"description": "priority fee estimate",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"format": "double"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Estimate priority fees for a transaction",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"description": "to account keys",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/EstimatePriorityFeeBody",
+								"description": "to account keys"
 							}
 						}
 					}

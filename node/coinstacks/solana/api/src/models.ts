@@ -37,3 +37,10 @@ export interface API {
   // @Get('tx/{txid}')
   getTransaction(txid: string): Promise<Tx>
 }
+
+/**
+ * Returns the priority fees estimation
+ */
+export interface EstimatePriorityFeeBody {
+  accountKeys: string[]
+}

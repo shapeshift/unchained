@@ -9,7 +9,7 @@ import {
   ValidationError,
   handleError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { Account, TxHistory } from './models'
+import { Account, EstimatePriorityFeeBody, TxHistory } from './models'
 import { Helius } from 'helius-sdk'
 
 const RPC_URL = process.env.RPC_URL
@@ -92,6 +92,32 @@ export class Solana implements BaseAPI {
       const txSig = await heliusSdk.connection.sendRawTransaction(Buffer.from(body.hex, 'base64'))
 
       return txSig
+    } catch (err) {
+      throw handleError(err)
+    }
+  }
+
+  /**
+   * Estimate priority fees for a transaction
+   *
+   * @param {SendTxBody} body to account keys
+   *
+   * @returns {Promise<number | undefined>} priority fee estimate
+   */
+  @Response<BadRequestError>(400, 'Bad Request')
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Post('/estimate-priority-fee')
+  async estimatePriorityFee(@Body() body: EstimatePriorityFeeBody): Promise<number | undefined> {
+    try {
+      const feeEstimate = await heliusSdk.rpc.getPriorityFeeEstimate({
+        accountKeys: body.accountKeys,
+        options: {
+          recommended: true,
+        },
+      })
+
+      return feeEstimate.priorityFeeEstimate
     } catch (err) {
       throw handleError(err)
     }
