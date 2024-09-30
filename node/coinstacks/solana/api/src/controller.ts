@@ -31,6 +31,8 @@ const heliusSdk = new Helius(RPC_API_KEY)
 @Route('api/v1')
 @Tags('v1')
 export class Solana implements BaseAPI {
+  static baseFee = 5000
+
   /**
    * Get information about the running coinstack
    *
@@ -115,6 +117,7 @@ export class Solana implements BaseAPI {
       if (!priorityFeeLevels) throw new Error('failed to get priority fees')
 
       return {
+        baseFee: Solana.baseFee,
         slow: priorityFeeLevels?.low,
         average: priorityFeeLevels?.medium,
         fast: priorityFeeLevels?.high,

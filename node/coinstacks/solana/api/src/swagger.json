@@ -158,8 +158,9 @@
 			"PriorityFees": {
 				"description": "Returns the priority fees estimation",
 				"properties": {
-					"baseFeePerGas": {
-						"type": "string"
+					"baseFee": {
+						"type": "number",
+						"format": "double"
 					},
 					"slow": {
 						"type": "number",
@@ -175,6 +176,7 @@
 					}
 				},
 				"required": [
+					"baseFee",
 					"slow",
 					"average",
 					"fast"

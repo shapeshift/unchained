@@ -42,8 +42,7 @@ export interface API {
  * Returns the priority fees estimation
  */
 export interface PriorityFees {
-  // baseFeePerGas for the pending block
-  baseFeePerGas?: string
+  baseFee: number
   // slow confirmation speed estimation
   slow: number
   // average confirmation speed estimation
