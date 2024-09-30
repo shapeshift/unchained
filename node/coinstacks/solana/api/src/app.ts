@@ -1,16 +1,24 @@
 import express from 'express'
 import { join } from 'path'
 import swaggerUi from 'swagger-ui-express'
-import { middleware, Prometheus } from '@shapeshiftoss/common-api'
+import { ConnectionHandler, middleware, Prometheus, Registry } from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
 import { RegisterRoutes } from './routes'
+import { Server } from 'ws'
+import { SolanaWebsocketClient } from './websocket'
+import { WebsocketClient } from '@shapeshiftoss/blockbook'
 
 const PORT = process.env.PORT ?? 3000
+const WEBSOCKET_URL = process.env.WEBSOCKET_URL
+const RPC_API_KEY = process.env.RPC_API_KEY
 
 export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'solana', 'api'],
   level: process.env.LOG_LEVEL,
 })
+
+if (!WEBSOCKET_URL) throw new Error('WEBSOCKET_URL env var not set')
+if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
 
 const prometheus = new Prometheus({ coinstack: 'solana' })
 
@@ -45,4 +53,30 @@ app.get('/', async (_, res) => {
 
 app.use(middleware.errorHandler, middleware.notFoundHandler)
 
-app.listen(PORT, () => logger.info('Server started'))
+const server = app.listen(PORT, () => logger.info('Server started'))
+
+const heliusWebsocket = new SolanaWebsocketClient(WEBSOCKET_URL, {
+  apiKey: RPC_API_KEY,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  blockHandler: async (block: any) => {
+    console.log(block)
+  },
+})
+
+// eslint-disable-next-line
+// @ts-ignore
+// eslint-disable-next-line
+const registry = new Registry({
+  addressFormatter: (address: string) => address,
+  blockHandler: async (block: any) => {
+    console.log(block)
+    // eslint-disable-next-line
+  },
+  transactionHandler: (tx: any) => tx,
+})
+
+const wsServer = new Server({ server })
+
+wsServer.on('connection', (connection) => {
+  ConnectionHandler.start(connection, registry, heliusWebsocket as unknown as WebsocketClient, prometheus, logger)
+})

@@ -516,7 +516,7 @@
 				"operationId": "GetGasFees",
 				"responses": {
 					"200": {
-						"description": "current fees specified in wei",
+						"description": "current fees specified in lamports",
 						"content": {
 							"application/json": {
 								"schema": {
