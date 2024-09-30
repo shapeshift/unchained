@@ -155,18 +155,31 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"EstimatePriorityFeeBody": {
+			"PriorityFees": {
 				"description": "Returns the priority fees estimation",
 				"properties": {
-					"accountKeys": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+					"baseFee": {
+						"type": "number",
+						"format": "double"
+					},
+					"slow": {
+						"type": "number",
+						"format": "double"
+					},
+					"average": {
+						"type": "number",
+						"format": "double"
+					},
+					"fast": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
-					"accountKeys"
+					"baseFee",
+					"slow",
+					"average",
+					"fast"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -445,17 +458,16 @@
 				}
 			}
 		},
-		"/api/v1/estimate-priority-fee": {
+		"/api/v1/fees/priority": {
 			"post": {
-				"operationId": "EstimatePriorityFee",
+				"operationId": "GetPriorityFees",
 				"responses": {
 					"200": {
-						"description": "priority fee estimate",
+						"description": "current priority fees specified in micro-lamports",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "number",
-									"format": "double"
+									"$ref": "#/components/schemas/PriorityFees"
 								}
 							}
 						}
@@ -491,24 +503,12 @@
 						}
 					}
 				},
-				"description": "Estimate priority fees for a transaction",
+				"description": "Get the current recommended priority fees for a transaction to land",
 				"tags": [
 					"v1"
 				],
 				"security": [],
-				"parameters": [],
-				"requestBody": {
-					"description": "to account keys",
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/EstimatePriorityFeeBody",
-								"description": "to account keys"
-							}
-						}
-					}
-				}
+				"parameters": []
 			}
 		},
 		"/api/v1/gas/fees": {
