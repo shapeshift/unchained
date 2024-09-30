@@ -184,22 +184,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"GasFees": {
-				"description": "Contains info about current recommended fees to use in a transaction.",
-				"properties": {
-					"baseFee": {
-						"type": "string"
-					},
-					"gasPrice": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"gasPrice"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"GasFeesBody": {
 				"description": "Returns the priority fees estimation",
 				"properties": {
@@ -516,19 +500,32 @@
 				"operationId": "GetGasFees",
 				"responses": {
 					"200": {
-						"description": "current fees specified in wei",
+						"description": "current fees specified in lamports",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/GasFees"
-								},
-								"examples": {
-									"Example 1": {
-										"value": {
-											"baseFee": "5000",
-											"gasPrice": "7000"
-										}
-									}
+									"type": "number",
+									"format": "double"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
 								}
 							}
 						}
