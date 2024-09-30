@@ -41,6 +41,13 @@ export interface API {
 /**
  * Returns the priority fees estimation
  */
-export interface EstimatePriorityFeeBody {
-  accountKeys: string[]
+export interface PriorityFees {
+  // baseFeePerGas for the pending block
+  baseFeePerGas?: string
+  // slow confirmation speed estimation
+  slow: number
+  // average confirmation speed estimation
+  average: number
+  // average confirmation speed estimation
+  fast: number
 }

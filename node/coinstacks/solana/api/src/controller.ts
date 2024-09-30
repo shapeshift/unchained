@@ -9,7 +9,7 @@ import {
   ValidationError,
   handleError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { Account, EstimatePriorityFeeBody, TxHistory } from './models'
+import { Account, PriorityFees, TxHistory } from './models'
 import { Helius } from 'helius-sdk'
 
 const RPC_URL = process.env.RPC_URL
@@ -98,26 +98,27 @@ export class Solana implements BaseAPI {
   }
 
   /**
-   * Estimate priority fees for a transaction
+   * Get the current recommended priority fees for a transaction to land
    *
-   * @param {SendTxBody} body to account keys
-   *
-   * @returns {Promise<number | undefined>} priority fee estimate
+   * @returns {Promise<PriorityFees>} current priority fees specified in micro-lamports
    */
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Post('/estimate-priority-fee')
-  async estimatePriorityFee(@Body() body: EstimatePriorityFeeBody): Promise<number | undefined> {
+  @Post('/fees/priority')
+  async getPriorityFees(): Promise<PriorityFees> {
     try {
-      const feeEstimate = await heliusSdk.rpc.getPriorityFeeEstimate({
-        accountKeys: body.accountKeys,
-        options: {
-          recommended: true,
-        },
+      const { priorityFeeLevels } = await heliusSdk.rpc.getPriorityFeeEstimate({
+        options: { includeAllPriorityFeeLevels: true },
       })
 
-      return feeEstimate.priorityFeeEstimate
+      if (!priorityFeeLevels) throw new Error('failed to get priority fees')
+
+      return {
+        slow: priorityFeeLevels?.low,
+        average: priorityFeeLevels?.medium,
+        fast: priorityFeeLevels?.high,
+      }
     } catch (err) {
       throw handleError(err)
     }
