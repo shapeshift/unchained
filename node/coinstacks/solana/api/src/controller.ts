@@ -9,18 +9,21 @@ import {
   ValidationError,
   handleError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { Account, EstimatePriorityFeeBody, GasFees, GasFeesBody, TxHistory } from './models'
+import { Account, EstimatePriorityFeeBody, GasFees, GasFeesBody, RawTx, Tx, TxHistory } from './models'
 import { Helius } from 'helius-sdk'
 import { Message } from '@solana/web3.js'
+import axios from 'axios'
 
 const RPC_URL = process.env.RPC_URL
 const RPC_API_KEY = process.env.RPC_API_KEY
+const INDEXER_URL = process.env.INDEXER_URL
 
 const NETWORK = process.env.NETWORK
 
 if (!NETWORK) throw new Error('NETWORK env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
 if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
+if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 
 export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'solana', 'api'],
@@ -28,6 +31,9 @@ export const logger = new Logger({
 })
 
 const heliusSdk = new Helius(RPC_API_KEY)
+heliusSdk.connection.getParsedTransactions
+
+const axiosNoRetry = axios.create({ timeout: 5000 })
 
 @Route('api/v1')
 @Tags('v1')
@@ -61,10 +67,10 @@ export class Solana implements BaseAPI {
   }
 
   /**
-   * Get transaction history by address or extended public key
+   * Get transaction history by address
    *
-   * @param {string} pubkey account address or extended public key
-   * @param {string} [cursor] the cursor returned in previous query (base64 encoded json object with a 'page' property)
+   * @param {string} pubkey account address
+   * @param {string} [lastSignature] the last signature returned in previous query
    * @param {number} [pageSize] page size (10 by default)
    *
    * @returns {Promise<TxHistory>} transaction history
@@ -73,9 +79,67 @@ export class Solana implements BaseAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}/txs')
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async getTxHistory(@Path() pubkey: string, @Query() _cursor?: string, @Query() _pageSize = 10): Promise<TxHistory> {
-    return { pubkey } as TxHistory
+  async getTxHistory(
+    @Path() pubkey: string,
+    @Query() lastSignature?: string,
+    @Query() pageSize = 10
+  ): Promise<TxHistory> {
+    const urlParams = new URLSearchParams()
+    urlParams.append('api-key', RPC_API_KEY ?? '')
+    urlParams.append('limit', pageSize.toString())
+    if (lastSignature) {
+      urlParams.append('before', lastSignature)
+    }
+
+    try {
+      const { data } = await axiosNoRetry.get<RawTx[]>(
+        `${INDEXER_URL}/v0/addresses/${pubkey}/transactions/?${urlParams.toString()}`
+      )
+
+      const txs = data.map((tx) => {
+        return {
+          txid: tx.signature,
+          blockHeight: tx.slot,
+          ...tx,
+        }
+      })
+
+      return { pubkey, txs: txs }
+    } catch (err) {
+      throw handleError(err)
+    }
+  }
+
+  /**
+   * Get transaction by txid
+   *
+   * @param {string} txid transaction id
+   *
+   * @returns {Promise<Tx>} transaction history
+   */
+  @Response<BadRequestError>(400, 'Bad Request')
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Get('tx/{txid}')
+  async getTxById(@Path() txid: string): Promise<Tx> {
+    const urlParams = new URLSearchParams()
+    urlParams.append('api-key', RPC_API_KEY ?? '')
+
+    try {
+      const { data } = await axiosNoRetry.post<RawTx>(`${INDEXER_URL}/v0/transactions/?${urlParams.toString()}`, {
+        transactions: [txid],
+      })
+
+      const tx = {
+        txid: data.signature,
+        blockHeight: data.slot,
+        ...data,
+      }
+
+      return tx
+    } catch (err) {
+      throw handleError(err)
+    }
   }
 
   /**

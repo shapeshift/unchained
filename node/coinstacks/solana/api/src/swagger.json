@@ -89,8 +89,671 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Tx": {
-				"description": "Contains info about a transaction",
+			"TransactionType": {
+				"enum": [
+					"UNKNOWN",
+					"NFT_BID",
+					"NFT_BID_CANCELLED",
+					"NFT_LISTING",
+					"NFT_CANCEL_LISTING",
+					"NFT_SALE",
+					"NFT_MINT",
+					"NFT_AUCTION_CREATED",
+					"NFT_AUCTION_UPDATED",
+					"NFT_AUCTION_CANCELLED",
+					"NFT_PARTICIPATION_REWARD",
+					"NFT_MINT_REJECTED",
+					"CREATE_STORE",
+					"WHITELIST_CREATOR",
+					"ADD_TO_WHITELIST",
+					"REMOVE_FROM_WHITELIST",
+					"AUCTION_MANAGER_CLAIM_BID",
+					"EMPTY_PAYMENT_ACCOUNT",
+					"UPDATE_PRIMARY_SALE_METADATA",
+					"ADD_TOKEN_TO_VAULT",
+					"ACTIVATE_VAULT",
+					"INIT_VAULT",
+					"INIT_BANK",
+					"INIT_STAKE",
+					"MERGE_STAKE",
+					"SPLIT_STAKE",
+					"SET_BANK_FLAGS",
+					"SET_VAULT_LOCK",
+					"UPDATE_VAULT_OWNER",
+					"UPDATE_BANK_MANAGER",
+					"RECORD_RARITY_POINTS",
+					"ADD_RARITIES_TO_BANK",
+					"INIT_FARM",
+					"INIT_FARMER",
+					"REFRESH_FARMER",
+					"UPDATE_FARM",
+					"AUTHORIZE_FUNDER",
+					"DEAUTHORIZE_FUNDER",
+					"FUND_REWARD",
+					"CANCEL_REWARD",
+					"LOCK_REWARD",
+					"PAYOUT",
+					"VALIDATE_SAFETY_DEPOSIT_BOX_V2",
+					"SET_AUTHORITY",
+					"INIT_AUCTION_MANAGER_V2",
+					"UPDATE_EXTERNAL_PRICE_ACCOUNT",
+					"AUCTION_HOUSE_CREATE",
+					"CLOSE_ESCROW_ACCOUNT",
+					"WITHDRAW",
+					"DEPOSIT",
+					"TRANSFER",
+					"BURN",
+					"BURN_NFT",
+					"PLATFORM_FEE",
+					"LOAN",
+					"REPAY_LOAN",
+					"ADD_TO_POOL",
+					"REMOVE_FROM_POOL",
+					"CLOSE_POSITION",
+					"UNLABELED",
+					"CLOSE_ACCOUNT",
+					"WITHDRAW_GEM",
+					"DEPOSIT_GEM",
+					"STAKE_TOKEN",
+					"UNSTAKE_TOKEN",
+					"STAKE_SOL",
+					"UNSTAKE_SOL",
+					"CLAIM_REWARDS",
+					"BUY_SUBSCRIPTION",
+					"SWAP",
+					"INIT_SWAP",
+					"CANCEL_SWAP",
+					"REJECT_SWAP",
+					"INITIALIZE_ACCOUNT",
+					"TOKEN_MINT",
+					"CREATE_APPARAISAL",
+					"FUSE",
+					"DEPOSIT_FRACTIONAL_POOL",
+					"FRACTIONALIZE",
+					"CREATE_RAFFLE",
+					"BUY_TICKETS",
+					"UPDATE_ITEM",
+					"LIST_ITEM",
+					"DELIST_ITEM",
+					"ADD_ITEM",
+					"CLOSE_ITEM",
+					"BUY_ITEM",
+					"FILL_ORDER",
+					"UPDATE_ORDER",
+					"CREATE_ORDER",
+					"CLOSE_ORDER",
+					"CANCEL_ORDER",
+					"KICK_ITEM",
+					"UPGRADE_FOX",
+					"UPGRADE_FOX_REQUEST",
+					"LOAN_FOX",
+					"BORROW_FOX",
+					"SWITCH_FOX_REQUEST",
+					"SWITCH_FOX",
+					"CREATE_ESCROW",
+					"ACCEPT_REQUEST_ARTIST",
+					"CANCEL_ESCROW",
+					"ACCEPT_ESCROW_ARTIST",
+					"ACCEPT_ESCROW_USER",
+					"PLACE_BET",
+					"PLACE_SOL_BET",
+					"CREATE_BET",
+					"NFT_RENT_UPDATE_LISTING",
+					"NFT_RENT_ACTIVATE",
+					"NFT_RENT_CANCEL_LISTING",
+					"NFT_RENT_LISTING",
+					"FINALIZE_PROGRAM_INSTRUCTION",
+					"UPGRADE_PROGRAM_INSTRUCTION",
+					"NFT_GLOBAL_BID",
+					"NFT_GLOBAL_BID_CANCELLED",
+					"EXECUTE_TRANSACTION",
+					"APPROVE_TRANSACTION",
+					"ACTIVATE_TRANSACTION",
+					"CREATE_TRANSACTION",
+					"REJECT_TRANSACTION",
+					"CANCEL_TRANSACTION",
+					"ADD_INSTRUCTION",
+					"ATTACH_METADATA",
+					"REQUEST_PNFT_MIGRATION",
+					"START_PNFT_MIGRATION",
+					"MIGRATE_TO_PNFT",
+					"UPDATE_RAFFLE",
+					"CREATE_POOL",
+					"ADD_LIQUIDITY",
+					"WITHDRAW_LIQUIDITY"
+				],
+				"type": "string"
+			},
+			"NativeTransfer": {
+				"properties": {
+					"fromUserAccount": {
+						"type": "string"
+					},
+					"toUserAccount": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"fromUserAccount",
+					"toUserAccount"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TokenTransfer": {
+				"properties": {
+					"fromUserAccount": {
+						"type": "string"
+					},
+					"toUserAccount": {
+						"type": "string"
+					},
+					"fromTokenAccount": {
+						"type": "string"
+					},
+					"toTokenAccount": {
+						"type": "string"
+					},
+					"tokenAmount": {
+						"type": "number",
+						"format": "double"
+					},
+					"mint": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"fromUserAccount",
+					"toUserAccount",
+					"fromTokenAccount",
+					"toTokenAccount",
+					"tokenAmount",
+					"mint"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"RawTokenAmount": {
+				"properties": {
+					"tokenAmount": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"tokenAmount"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TokenBalanceChange": {
+				"properties": {
+					"userAccount": {
+						"type": "string"
+					},
+					"tokenAccount": {
+						"type": "string"
+					},
+					"mint": {
+						"type": "string"
+					},
+					"rawTokenAmount": {
+						"$ref": "#/components/schemas/RawTokenAmount"
+					}
+				},
+				"required": [
+					"userAccount",
+					"tokenAccount",
+					"mint",
+					"rawTokenAmount"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"AccountData": {
+				"properties": {
+					"account": {
+						"type": "string"
+					},
+					"nativeBalanceChange": {
+						"type": "number",
+						"format": "double"
+					},
+					"tokenBalanceChanges": {
+						"items": {
+							"$ref": "#/components/schemas/TokenBalanceChange"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"account",
+					"nativeBalanceChange",
+					"tokenBalanceChanges"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TransactionError": {
+				"properties": {
+					"error": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Instruction": {
+				"properties": {
+					"accounts": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"data": {
+						"type": "string"
+					},
+					"programId": {
+						"type": "string"
+					},
+					"innerInstructions": {
+						"items": {
+							"$ref": "#/components/schemas/Instruction"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"accounts",
+					"data",
+					"programId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"NftElement": {
+				"properties": {
+					"mint": {
+						"type": "string"
+					},
+					"tokenStandard": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"mint",
+					"tokenStandard"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"EventsNft": {
+				"properties": {
+					"description": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string"
+					},
+					"source": {
+						"type": "string"
+					},
+					"amount": {
+						"type": "number",
+						"format": "double"
+					},
+					"fee": {
+						"type": "number",
+						"format": "double"
+					},
+					"feePayer": {
+						"type": "string"
+					},
+					"signature": {
+						"type": "string"
+					},
+					"slot": {
+						"type": "number",
+						"format": "double"
+					},
+					"timestamp": {
+						"type": "number",
+						"format": "double"
+					},
+					"saleType": {
+						"type": "string"
+					},
+					"buyer": {
+						"type": "string"
+					},
+					"seller": {
+						"type": "string"
+					},
+					"staker": {
+						"type": "string"
+					},
+					"nfts": {
+						"items": {
+							"$ref": "#/components/schemas/NftElement"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"description",
+					"type",
+					"source",
+					"amount",
+					"fee",
+					"feePayer",
+					"signature",
+					"slot",
+					"timestamp",
+					"saleType",
+					"buyer",
+					"seller",
+					"staker",
+					"nfts"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"NativeInput": {
+				"properties": {
+					"account": {
+						"type": "string"
+					},
+					"amount": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"account",
+					"amount"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ProgramInfo": {
+				"properties": {
+					"source": {
+						"type": "string"
+					},
+					"account": {
+						"type": "string"
+					},
+					"programName": {
+						"type": "string"
+					},
+					"instructionName": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"source",
+					"account",
+					"programName",
+					"instructionName"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"InnerSwap": {
+				"properties": {
+					"tokenInputs": {
+						"items": {
+							"$ref": "#/components/schemas/TokenTransfer"
+						},
+						"type": "array"
+					},
+					"tokenOutputs": {
+						"items": {
+							"$ref": "#/components/schemas/TokenTransfer"
+						},
+						"type": "array"
+					},
+					"tokenFees": {
+						"items": {
+							"$ref": "#/components/schemas/TokenTransfer"
+						},
+						"type": "array"
+					},
+					"nativeFees": {
+						"items": {
+							"$ref": "#/components/schemas/NativeTransfer"
+						},
+						"type": "array"
+					},
+					"programInfo": {
+						"$ref": "#/components/schemas/ProgramInfo"
+					}
+				},
+				"required": [
+					"tokenInputs",
+					"tokenOutputs",
+					"tokenFees",
+					"nativeFees",
+					"programInfo"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Swap": {
+				"properties": {
+					"nativeInput": {
+						"$ref": "#/components/schemas/NativeInput"
+					},
+					"nativeOutput": {
+						"$ref": "#/components/schemas/NativeInput"
+					},
+					"tokenInputs": {
+						"items": {
+							"$ref": "#/components/schemas/TokenBalanceChange"
+						},
+						"type": "array"
+					},
+					"tokenOutputs": {
+						"items": {
+							"$ref": "#/components/schemas/TokenBalanceChange"
+						},
+						"type": "array"
+					},
+					"tokenFees": {
+						"items": {
+							"$ref": "#/components/schemas/TokenBalanceChange"
+						},
+						"type": "array"
+					},
+					"nativeFees": {
+						"items": {
+							"$ref": "#/components/schemas/NativeInput"
+						},
+						"type": "array"
+					},
+					"innerSwaps": {
+						"items": {
+							"$ref": "#/components/schemas/InnerSwap"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"nativeInput",
+					"nativeOutput",
+					"tokenInputs",
+					"tokenOutputs",
+					"tokenFees",
+					"nativeFees",
+					"innerSwaps"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Compressed": {
+				"properties": {
+					"type": {
+						"type": "string"
+					},
+					"treeId": {
+						"type": "string"
+					},
+					"assetId": {
+						"type": "string"
+					},
+					"newLeafOwner": {
+						"type": "string"
+					},
+					"oldLeafOwner": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"type",
+					"treeId",
+					"assetId",
+					"newLeafOwner",
+					"oldLeafOwner"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"DistributeCompressionRewards": {
+				"properties": {},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SetAuthority": {
+				"properties": {
+					"account": {
+						"type": "string"
+					},
+					"from": {
+						"type": "string"
+					},
+					"to": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"account",
+					"from",
+					"to"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Events": {
+				"properties": {
+					"nft": {
+						"$ref": "#/components/schemas/EventsNft"
+					},
+					"swap": {
+						"$ref": "#/components/schemas/Swap"
+					},
+					"compressed": {
+						"$ref": "#/components/schemas/Compressed"
+					},
+					"distributeCompressionRewards": {
+						"$ref": "#/components/schemas/DistributeCompressionRewards"
+					},
+					"setAuthority": {
+						"$ref": "#/components/schemas/SetAuthority"
+					}
+				},
+				"required": [
+					"nft",
+					"swap",
+					"compressed",
+					"distributeCompressionRewards",
+					"setAuthority"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"RawTx": {
+				"properties": {
+					"description": {
+						"type": "string"
+					},
+					"type": {
+						"$ref": "#/components/schemas/TransactionType"
+					},
+					"source": {
+						"type": "string"
+					},
+					"fee": {
+						"type": "number",
+						"format": "double"
+					},
+					"feePayer": {
+						"type": "string"
+					},
+					"signature": {
+						"type": "string"
+					},
+					"slot": {
+						"type": "number",
+						"format": "double"
+					},
+					"timestamp": {
+						"type": "number",
+						"format": "double"
+					},
+					"nativeTransfers": {
+						"items": {
+							"$ref": "#/components/schemas/NativeTransfer"
+						},
+						"type": "array"
+					},
+					"tokenTransfers": {
+						"items": {
+							"$ref": "#/components/schemas/TokenTransfer"
+						},
+						"type": "array"
+					},
+					"accountData": {
+						"items": {
+							"$ref": "#/components/schemas/AccountData"
+						},
+						"type": "array"
+					},
+					"transactionError": {
+						"$ref": "#/components/schemas/TransactionError"
+					},
+					"instructions": {
+						"items": {
+							"$ref": "#/components/schemas/Instruction"
+						},
+						"type": "array"
+					},
+					"events": {
+						"$ref": "#/components/schemas/Events"
+					}
+				},
+				"required": [
+					"description",
+					"type",
+					"source",
+					"fee",
+					"feePayer",
+					"signature",
+					"slot",
+					"timestamp",
+					"nativeTransfers",
+					"tokenTransfers",
+					"accountData",
+					"transactionError",
+					"instructions",
+					"events"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"BaseTx": {
+				"description": "Contains base transaction details",
 				"properties": {
 					"txid": {
 						"type": "string"
@@ -114,6 +777,17 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"Tx": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/RawTx"
+					},
+					{
+						"$ref": "#/components/schemas/BaseTx"
+					}
+				],
+				"description": "Contains info about a transaction"
 			},
 			"BaseTxHistory_Tx_": {
 				"description": "Contains paginated base transaction history details",
@@ -344,14 +1018,14 @@
 						}
 					}
 				},
-				"description": "Get transaction history by address or extended public key",
+				"description": "Get transaction history by address",
 				"tags": [
 					"v1"
 				],
 				"security": [],
 				"parameters": [
 					{
-						"description": "account address or extended public key",
+						"description": "account address",
 						"in": "path",
 						"name": "pubkey",
 						"required": true,
@@ -360,21 +1034,86 @@
 						}
 					},
 					{
+						"description": "the last signature returned in previous query",
 						"in": "query",
-						"name": "_cursor",
+						"name": "lastSignature",
 						"required": false,
 						"schema": {
 							"type": "string"
 						}
 					},
 					{
+						"description": "page size (10 by default)",
 						"in": "query",
-						"name": "_pageSize",
+						"name": "pageSize",
 						"required": false,
 						"schema": {
 							"default": 10,
 							"format": "double",
 							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/api/v1/tx/{txid}": {
+			"get": {
+				"operationId": "GetTxById",
+				"responses": {
+					"200": {
+						"description": "transaction history",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Tx"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get transaction by txid",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "transaction id",
+						"in": "path",
+						"name": "txid",
+						"required": true,
+						"schema": {
+							"type": "string"
 						}
 					}
 				]
@@ -516,7 +1255,7 @@
 				"operationId": "GetGasFees",
 				"responses": {
 					"200": {
-						"description": "current fees specified in wei",
+						"description": "current fees specified in lamports",
 						"content": {
 							"application/json": {
 								"schema": {
