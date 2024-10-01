@@ -118,9 +118,9 @@ export class Solana implements BaseAPI {
 
       return {
         baseFee: Solana.baseFee,
-        slow: priorityFeeLevels?.low,
-        average: priorityFeeLevels?.medium,
-        fast: priorityFeeLevels?.high,
+        slow: priorityFeeLevels.low,
+        average: priorityFeeLevels.medium,
+        fast: priorityFeeLevels.high,
       }
     } catch (err) {
       throw handleError(err)

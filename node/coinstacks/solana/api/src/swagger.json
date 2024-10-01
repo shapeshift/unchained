@@ -156,7 +156,7 @@
 				"additionalProperties": false
 			},
 			"PriorityFees": {
-				"description": "Returns the priority fees estimation",
+				"description": "Contains info about current recommended priority fees for a transaction to land.",
 				"properties": {
 					"baseFee": {
 						"type": "number",
