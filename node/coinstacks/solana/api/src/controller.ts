@@ -10,8 +10,8 @@ import {
   handleError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { Account, EstimatePriorityFeeBody, GasFees, GasFeesBody, TxHistory } from './models'
-import { Helius } from 'helius-sdk'
 import { Message } from '@solana/web3.js'
+import { heliusSdk } from './app'
 
 const RPC_URL = process.env.RPC_URL
 const RPC_API_KEY = process.env.RPC_API_KEY
@@ -26,8 +26,6 @@ export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'solana', 'api'],
   level: process.env.LOG_LEVEL,
 })
-
-const heliusSdk = new Helius(RPC_API_KEY)
 
 @Route('api/v1')
 @Tags('v1')

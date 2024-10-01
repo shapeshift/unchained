@@ -27,7 +27,13 @@ export interface Options {
 type TransactionHandler = (data: Tx) => Promise<void>
 type BlockHandler = (data: NewBlock) => Promise<void>
 
-export class WebsocketClient {
+export interface IWebsocketClient {
+  subscribeAddresses(addresses: string[]): void
+  onOpen(): void
+  onMessage(message: WebSocket.MessageEvent): Promise<void>
+}
+
+export class WebsocketClient implements IWebsocketClient {
   private socket: WebSocket
   private url: string
   private pingTimeout?: NodeJS.Timeout
@@ -93,7 +99,7 @@ export class WebsocketClient {
     }, this.pingInterval + 1000)
   }
 
-  private onOpen(): void {
+  onOpen(): void {
     this.logger.debug({ fn: 'ws.onopen' }, 'websocket opened')
     this.retryCount = 0
     this.interval = setInterval(() => this.socket.ping(), this.pingInterval)
@@ -110,7 +116,7 @@ export class WebsocketClient {
     this.socket.send(JSON.stringify(subscribeAddresses))
   }
 
-  private async onMessage(message: WebSocket.MessageEvent): Promise<void> {
+  async onMessage(message: WebSocket.MessageEvent): Promise<void> {
     try {
       const res: WebsocketRepsonse = JSON.parse(message.data.toString())
 

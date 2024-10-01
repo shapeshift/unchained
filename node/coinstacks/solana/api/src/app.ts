@@ -6,7 +6,7 @@ import { Logger } from '@shapeshiftoss/logger'
 import { RegisterRoutes } from './routes'
 import { Server } from 'ws'
 import { SolanaWebsocketClient } from './websocket'
-import { WebsocketClient } from '@shapeshiftoss/blockbook'
+import { Helius } from 'helius-sdk'
 
 const PORT = process.env.PORT ?? 3000
 const WEBSOCKET_URL = process.env.WEBSOCKET_URL
@@ -19,6 +19,8 @@ export const logger = new Logger({
 
 if (!WEBSOCKET_URL) throw new Error('WEBSOCKET_URL env var not set')
 if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
+
+export const heliusSdk = new Helius(RPC_API_KEY)
 
 const prometheus = new Prometheus({ coinstack: 'solana' })
 
@@ -61,6 +63,7 @@ const heliusWebsocket = new SolanaWebsocketClient(WEBSOCKET_URL, {
   blockHandler: async (block: any) => {
     console.log(block)
   },
+  heliusSdk,
 })
 
 // eslint-disable-next-line
@@ -68,15 +71,18 @@ const heliusWebsocket = new SolanaWebsocketClient(WEBSOCKET_URL, {
 // eslint-disable-next-line
 const registry = new Registry({
   addressFormatter: (address: string) => address,
+  // eslint-disable-next-line
   blockHandler: async (block: any) => {
     console.log(block)
     // eslint-disable-next-line
+    return { txs: [] }
   },
+  // eslint-disable-next-line
   transactionHandler: (tx: any) => tx,
 })
 
 const wsServer = new Server({ server })
 
 wsServer.on('connection', (connection) => {
-  ConnectionHandler.start(connection, registry, heliusWebsocket as unknown as WebsocketClient, prometheus, logger)
+  ConnectionHandler.start(connection, registry, heliusWebsocket, prometheus, logger)
 })

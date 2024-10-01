@@ -1,9 +1,9 @@
 import WebSocket from 'ws'
 import { v4 } from 'uuid'
-import { WebsocketClient } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
 import { Registry } from './registry'
 import { Prometheus } from './prometheus'
+import { IWebsocketClient } from '@shapeshiftoss/blockbook'
 
 export interface RequestPayload {
   subscriptionId: string
@@ -42,7 +42,7 @@ export class ConnectionHandler {
 
   private readonly websocket: WebSocket
   private readonly registry: Registry
-  private readonly blockbook: WebsocketClient | undefined
+  private readonly blockbook: IWebsocketClient | undefined
   private readonly prometheus: Prometheus
   private readonly logger: Logger
   private readonly routes: Record<Topics, Methods>
@@ -54,7 +54,7 @@ export class ConnectionHandler {
   private constructor(
     websocket: WebSocket,
     registry: Registry,
-    blockbook: WebsocketClient | undefined,
+    blockbook: IWebsocketClient | undefined,
     prometheus: Prometheus,
     logger: Logger
     // solanaWebsocket: WebsocketClient | undefined,
@@ -97,7 +97,7 @@ export class ConnectionHandler {
   static start(
     websocket: WebSocket,
     registry: Registry,
-    blockbook: WebsocketClient,
+    blockbook: IWebsocketClient,
     prometheus: Prometheus,
     logger: Logger
   ): void {

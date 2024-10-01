@@ -1,11 +1,14 @@
 import WebSocket from 'ws'
 import { Logger } from '@shapeshiftoss/logger'
+import { IWebsocketClient } from '@shapeshiftoss/blockbook'
+import { Helius } from 'helius-sdk'
 
 const BASE_DELAY = 500
 const MAX_DELAY = 120_000
 const MAX_RETRY_ATTEMPTS = 0
 
 export interface Subscription {
+  jsonrpc: string
   id: string
   method: string
   params?: unknown
@@ -14,6 +17,7 @@ export interface Subscription {
 export interface Args {
   apiKey?: string
   blockHandler: BlockHandler | Array<BlockHandler>
+  heliusSdk: Helius
 }
 
 export interface Options {
@@ -26,12 +30,14 @@ export type TransactionHandler = (data: any) => Promise<void>
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type BlockHandler = (data: any) => Promise<void>
 
-export class SolanaWebsocketClient {
+export class SolanaWebsocketClient implements IWebsocketClient {
   private socket: WebSocket
   private url: string
   private pingTimeout?: NodeJS.Timeout
   private interval?: NodeJS.Timeout
   private retryCount = 0
+  private addresses: Array<string>
+  private heliusSdk: Helius
 
   private handleBlock: BlockHandler | Array<BlockHandler>
 
@@ -44,6 +50,8 @@ export class SolanaWebsocketClient {
     this.handleBlock = args.blockHandler
     this.url = args.apiKey ? `${url}/?api-key=${args.apiKey}` : url
     this.socket = new WebSocket(this.url, { handshakeTimeout: 5000 })
+    this.addresses = ['CebN5WGQ4jvEPvsVU4EoHEpgzq1VV7AbicfhtW4xC9iM']
+    this.heliusSdk = args.heliusSdk
 
     this.pingInterval = opts?.pingInterval ?? 10000
     this.retryAttempts = opts?.retryAttempts ?? MAX_RETRY_ATTEMPTS
@@ -89,38 +97,77 @@ export class SolanaWebsocketClient {
     }, this.pingInterval + 1000)
   }
 
-  private onOpen(): void {
+  onOpen(): void {
     this.logger.debug({ fn: 'ws.onopen' }, 'websocket opened')
     this.retryCount = 0
     this.interval = setInterval(() => this.socket.ping(), this.pingInterval)
     this.heartbeat()
 
-    const subscribeNewBlock: Subscription = { id: 'newBlock', method: 'blockSubscribe', params: {} }
-    this.socket.send(JSON.stringify(subscribeNewBlock))
+    // const subscribeNewBlock: Subscription = { jsonrpc:"2.0", id: 'newBlock', method: 'slotSubscribe', params: [] }
+    // this.socket.send(JSON.stringify(subscribeNewBlock))
+
+    const subscribeAddresses: Subscription = {
+      jsonrpc: '2.0',
+      id: 'newTx',
+      method: 'logsSubscribe',
+      params: [
+        {
+          mentions: this.addresses,
+        },
+      ],
+    }
+    this.socket.send(JSON.stringify(subscribeAddresses))
   }
 
-  private async onMessage(message: WebSocket.MessageEvent): Promise<void> {
+  async onMessage(message: WebSocket.MessageEvent): Promise<void> {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const res: any = JSON.parse(message.data.toString())
 
-      if (!res.data) return
-
-      switch (res.id) {
-        case 'newBlock':
-          if ('hash' in res.data) {
-            const newBlock = res.data
+      switch (res.method) {
+        case 'slotNotification':
+          if ('result' in res.params) {
+            const newSlot = res.params.result.slot
 
             if (Array.isArray(this.handleBlock)) {
-              this.handleBlock.map(async (handleBlock) => handleBlock(newBlock))
+              this.handleBlock.map(async (handleBlock) => handleBlock(newSlot))
             } else {
-              this.handleBlock(newBlock)
+              this.handleBlock(newSlot)
             }
+          }
+          return
+        case 'logsNotification':
+          if ('result' in res.params) {
+            console.log(res.params.result)
+            const parsedTx = await this.heliusSdk.connection.getParsedTransaction(res.params.result.value.signature, {
+              maxSupportedTransactionVersion: 0,
+            })
+            console.log(parsedTx)
           }
           return
       }
     } catch (err) {
       this.logger.error(err, `failed to handle message: ${JSON.stringify(message)}`)
+    }
+  }
+
+  subscribeAddresses(addresses: string[]): void {
+    this.addresses = addresses
+    const subscribeAddresses: Subscription = {
+      jsonrpc: '2.0',
+      id: 'newTx',
+      method: 'logsSubscribe',
+      params: [
+        {
+          mentions: this.addresses,
+        },
+      ],
+    }
+
+    try {
+      this.socket.send(JSON.stringify(subscribeAddresses))
+    } catch (err) {
+      this.logger.debug(err, `failed to subscribe addresses: ${JSON.stringify(subscribeAddresses)}`)
     }
   }
 }
