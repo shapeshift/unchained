@@ -154,6 +154,35 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"PriorityFees": {
+				"description": "Contains info about current recommended priority fees for a transaction to land.",
+				"properties": {
+					"baseFee": {
+						"type": "number",
+						"format": "double"
+					},
+					"slow": {
+						"type": "number",
+						"format": "double"
+					},
+					"average": {
+						"type": "number",
+						"format": "double"
+					},
+					"fast": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"baseFee",
+					"slow",
+					"average",
+					"fast"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
@@ -398,6 +427,59 @@
 						}
 					}
 				}
+			}
+		},
+		"/api/v1/fees/priority": {
+			"post": {
+				"operationId": "GetPriorityFees",
+				"responses": {
+					"200": {
+						"description": "current priority fees specified in micro-lamports",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PriorityFees"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get the current recommended priority fees for a transaction to land",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": []
 			}
 		}
 	},

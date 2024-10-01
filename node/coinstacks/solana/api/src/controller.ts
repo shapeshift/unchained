@@ -9,7 +9,7 @@ import {
   ValidationError,
   handleError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { Account, TxHistory } from './models'
+import { Account, PriorityFees, TxHistory } from './models'
 import { Helius } from 'helius-sdk'
 
 const RPC_URL = process.env.RPC_URL
@@ -31,6 +31,8 @@ const heliusSdk = new Helius(RPC_API_KEY)
 @Route('api/v1')
 @Tags('v1')
 export class Solana implements BaseAPI {
+  static baseFee = 5000
+
   /**
    * Get information about the running coinstack
    *
@@ -92,6 +94,34 @@ export class Solana implements BaseAPI {
       const txSig = await heliusSdk.connection.sendRawTransaction(Buffer.from(body.hex, 'base64'))
 
       return txSig
+    } catch (err) {
+      throw handleError(err)
+    }
+  }
+
+  /**
+   * Get the current recommended priority fees for a transaction to land
+   *
+   * @returns {Promise<PriorityFees>} current priority fees specified in micro-lamports
+   */
+  @Response<BadRequestError>(400, 'Bad Request')
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Post('/fees/priority')
+  async getPriorityFees(): Promise<PriorityFees> {
+    try {
+      const { priorityFeeLevels } = await heliusSdk.rpc.getPriorityFeeEstimate({
+        options: { includeAllPriorityFeeLevels: true },
+      })
+
+      if (!priorityFeeLevels) throw new Error('failed to get priority fees')
+
+      return {
+        baseFee: Solana.baseFee,
+        slow: priorityFeeLevels.low,
+        average: priorityFeeLevels.medium,
+        fast: priorityFeeLevels.high,
+      }
     } catch (err) {
       throw handleError(err)
     }

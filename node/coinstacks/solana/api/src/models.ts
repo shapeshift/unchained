@@ -37,3 +37,17 @@ export interface API {
   // @Get('tx/{txid}')
   getTransaction(txid: string): Promise<Tx>
 }
+
+/**
+ * Contains info about current recommended priority fees for a transaction to land.
+ */
+export interface PriorityFees {
+  // base fee per signature
+  baseFee: number
+  // slow confirmation speed estimation
+  slow: number
+  // average confirmation speed estimation
+  average: number
+  // average confirmation speed estimation
+  fast: number
+}
