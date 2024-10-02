@@ -119,9 +119,9 @@ export class Solana implements BaseAPI {
 
       return {
         baseFee: Solana.baseFee,
-        slow: priorityFeeLevels?.low,
-        average: priorityFeeLevels?.medium,
-        fast: priorityFeeLevels?.high,
+        slow: priorityFeeLevels.low,
+        average: priorityFeeLevels.medium,
+        fast: priorityFeeLevels.high,
       }
     } catch (err) {
       throw handleError(err)
@@ -131,13 +131,13 @@ export class Solana implements BaseAPI {
   /**
    * Get the current recommended gas fees to use in a transaction
    *
-   * @returns {Promise<number>} current fees specified in lamports
+   * @returns {Promise<number>} current fees specified in lamports including base fee
    */
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Post('/gas/fees')
-  async getGasFees(@Body() body: GasFeesBody): Promise<number> {
+  @Post('/fees/estimate')
+  async getEstimateFees(@Body() body: GasFeesBody): Promise<number> {
     try {
       const deserializedMessage = Message.from(Buffer.from(body.message, 'base64'))
 

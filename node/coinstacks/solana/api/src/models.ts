@@ -39,9 +39,10 @@ export interface API {
 }
 
 /**
- * Returns the priority fees estimation
+ * Contains info about current recommended priority fees for a transaction to land.
  */
 export interface PriorityFees {
+  // base fee per signature
   baseFee: number
   // slow confirmation speed estimation
   slow: number
@@ -52,7 +53,7 @@ export interface PriorityFees {
 }
 
 /**
- * Returns the priority fees estimation
+ * Returns the gas fees estimation
  */
 export interface GasFeesBody {
   message: string
