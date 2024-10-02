@@ -52,3 +52,10 @@ export interface PriorityFees {
   // average confirmation speed estimation
   fast: number
 }
+
+/**
+ * Contains the base64 encoded transaction message
+ */
+export interface EstimateFeesBody {
+  message: string
+}

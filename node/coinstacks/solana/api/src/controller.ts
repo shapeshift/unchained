@@ -9,10 +9,11 @@ import {
   ValidationError,
   handleError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { Account, PriorityFees, Tx, TxHistory } from './models'
-import { Helius, EnrichedTransaction } from 'helius-sdk'
-import axios from 'axios'
+import { Account, EstimateFeesBody, PriorityFees, Tx, TxHistory } from './models'
+import { EnrichedTransaction, Helius } from 'helius-sdk'
+import { VersionedMessage } from '@solana/web3.js'
 import { validatePageSize } from '@shapeshiftoss/common-api'
+import axios from 'axios'
 
 const RPC_URL = process.env.RPC_URL
 const RPC_API_KEY = process.env.RPC_API_KEY
@@ -186,6 +187,29 @@ export class Solana implements BaseAPI {
         average: priorityFeeLevels.medium,
         fast: priorityFeeLevels.high,
       }
+    } catch (err) {
+      throw handleError(err)
+    }
+  }
+
+  /**
+   * Get the estimated compute unit cost of a transaction
+   *
+   * @returns {Promise<number>} estimated compute unit cost
+   */
+  @Response<BadRequestError>(400, 'Bad Request')
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Post('/fees/estimate')
+  async getEstimateFees(@Body() body: EstimateFeesBody): Promise<number> {
+    try {
+      const deserializedMessage = VersionedMessage.deserialize(Buffer.from(body.message, 'base64'))
+
+      const { value } = await heliusSdk.connection.getFeeForMessage(deserializedMessage)
+
+      if (!value) throw new Error('Failed to get estimated fee')
+
+      return value
     } catch (err) {
       throw handleError(err)
     }

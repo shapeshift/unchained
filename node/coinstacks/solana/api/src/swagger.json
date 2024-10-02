@@ -1241,6 +1241,19 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"EstimateFeesBody": {
+				"description": "Contains the base64 encoded transaction message",
+				"properties": {
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"message"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
@@ -1603,6 +1616,70 @@
 				],
 				"security": [],
 				"parameters": []
+			}
+		},
+		"/api/v1/fees/estimate": {
+			"post": {
+				"operationId": "GetEstimateFees",
+				"responses": {
+					"200": {
+						"description": "estimated compute unit cost",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "number",
+									"format": "double"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get the estimated compute unit cost of a transaction",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/EstimateFeesBody"
+							}
+						}
+					}
+				}
 			}
 		}
 	},
