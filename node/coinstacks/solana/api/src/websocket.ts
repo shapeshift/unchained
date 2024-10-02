@@ -1,7 +1,6 @@
 import WebSocket from 'ws'
 import { Logger } from '@shapeshiftoss/logger'
 import { IWebsocketClient } from '@shapeshiftoss/blockbook'
-import { Helius } from 'helius-sdk'
 
 const BASE_DELAY = 500
 const MAX_DELAY = 120_000
@@ -17,7 +16,6 @@ export interface Subscription {
 export interface Args {
   apiKey?: string
   blockHandler: BlockHandler | Array<BlockHandler>
-  heliusSdk: Helius
 }
 
 export interface Options {
@@ -37,7 +35,6 @@ export class SolanaWebsocketClient implements IWebsocketClient {
   private interval?: NodeJS.Timeout
   private retryCount = 0
   private addresses: Array<string>
-  private heliusSdk: Helius
 
   private handleBlock: BlockHandler | Array<BlockHandler>
 
@@ -51,7 +48,6 @@ export class SolanaWebsocketClient implements IWebsocketClient {
     this.url = args.apiKey ? `${url}/?api-key=${args.apiKey}` : url
     this.socket = new WebSocket(this.url, { handshakeTimeout: 5000 })
     this.addresses = ['CebN5WGQ4jvEPvsVU4EoHEpgzq1VV7AbicfhtW4xC9iM']
-    this.heliusSdk = args.heliusSdk
 
     this.pingInterval = opts?.pingInterval ?? 10000
     this.retryAttempts = opts?.retryAttempts ?? MAX_RETRY_ATTEMPTS
@@ -109,10 +105,16 @@ export class SolanaWebsocketClient implements IWebsocketClient {
     const subscribeAddresses: Subscription = {
       jsonrpc: '2.0',
       id: 'newTx',
-      method: 'logsSubscribe',
+      method: 'transactionSubscribe',
       params: [
         {
-          mentions: this.addresses,
+          accountInclude: this.addresses,
+        },
+        {
+          encoding: 'jsonParsed',
+          transactionDetails: 'full',
+          showRewards: true,
+          maxSupportedTransactionVersion: 0,
         },
       ],
     }
@@ -122,7 +124,8 @@ export class SolanaWebsocketClient implements IWebsocketClient {
   async onMessage(message: WebSocket.MessageEvent): Promise<void> {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const res: any = JSON.parse(message.data.toString())
+      const res: any = JSON.parse(message.toString())
+      console.log(res)
 
       switch (res.method) {
         case 'slotNotification':
@@ -136,13 +139,9 @@ export class SolanaWebsocketClient implements IWebsocketClient {
             }
           }
           return
-        case 'logsNotification':
+        case 'transactionNotification':
           if ('result' in res.params) {
             console.log(res.params.result)
-            const parsedTx = await this.heliusSdk.connection.getParsedTransaction(res.params.result.value.signature, {
-              maxSupportedTransactionVersion: 0,
-            })
-            console.log(parsedTx)
           }
           return
       }
@@ -156,10 +155,16 @@ export class SolanaWebsocketClient implements IWebsocketClient {
     const subscribeAddresses: Subscription = {
       jsonrpc: '2.0',
       id: 'newTx',
-      method: 'logsSubscribe',
+      method: 'transactionSubscribe',
       params: [
         {
-          mentions: this.addresses,
+          accountInclude: this.addresses,
+        },
+        {
+          encoding: 'jsonParsed',
+          transactionDetails: 'full',
+          showRewards: true,
+          maxSupportedTransactionVersion: 0,
         },
       ],
     }

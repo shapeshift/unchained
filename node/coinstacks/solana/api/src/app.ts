@@ -63,7 +63,6 @@ const heliusWebsocket = new SolanaWebsocketClient(WEBSOCKET_URL, {
   blockHandler: async (block: any) => {
     console.log(block)
   },
-  heliusSdk,
 })
 
 // eslint-disable-next-line
