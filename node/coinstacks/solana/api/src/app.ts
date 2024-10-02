@@ -1,15 +1,17 @@
 import express from 'express'
 import { join } from 'path'
 import swaggerUi from 'swagger-ui-express'
-import { ConnectionHandler, middleware, Prometheus, Registry } from '@shapeshiftoss/common-api'
+import { ConnectionHandler, middleware, Prometheus, Registry, TransactionHandler } from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
 import { RegisterRoutes } from './routes'
 import { Server } from 'ws'
 import { SolanaWebsocketClient } from './websocket'
 import { Helius } from 'helius-sdk'
+import { GeyserResultTransaction } from './models'
 
 const PORT = process.env.PORT ?? 3000
 const WEBSOCKET_URL = process.env.WEBSOCKET_URL
+const GEYSER_URL = process.env.GEYSER_URL
 const RPC_API_KEY = process.env.RPC_API_KEY
 
 export const logger = new Logger({
@@ -18,6 +20,7 @@ export const logger = new Logger({
 })
 
 if (!WEBSOCKET_URL) throw new Error('WEBSOCKET_URL env var not set')
+if (!GEYSER_URL) throw new Error('GEYSER_URL env var not set')
 if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
 
 export const heliusSdk = new Helius(RPC_API_KEY)
@@ -57,27 +60,26 @@ app.use(middleware.errorHandler, middleware.notFoundHandler)
 
 const server = app.listen(PORT, () => logger.info('Server started'))
 
-const heliusWebsocket = new SolanaWebsocketClient(WEBSOCKET_URL, {
-  apiKey: RPC_API_KEY,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  blockHandler: async (block: any) => {
-    console.log(block)
-  },
-})
+const transactionHandler: TransactionHandler<GeyserResultTransaction, GeyserResultTransaction> = async (geyserTx) => {
+  const addresses = geyserTx.transaction.message.accountKeys.map((key) => key.pubkey)
 
-// eslint-disable-next-line
-// @ts-ignore
-// eslint-disable-next-line
+  return { addresses, tx: geyserTx }
+}
+
 const registry = new Registry({
   addressFormatter: (address: string) => address,
-  // eslint-disable-next-line
-  blockHandler: async (block: any) => {
-    console.log(block)
-    // eslint-disable-next-line
+  blockHandler: async () => {
+    // @TODO: What should we do with this?
     return { txs: [] }
   },
-  // eslint-disable-next-line
-  transactionHandler: (tx: any) => tx,
+  transactionHandler,
+})
+
+const heliusWebsocket = new SolanaWebsocketClient(WEBSOCKET_URL, {
+  geyserUrl: GEYSER_URL,
+  apiKey: RPC_API_KEY,
+  blockHandler: [registry.onBlock.bind(registry)],
+  transactionHandler: registry.onTransaction.bind(registry),
 })
 
 const wsServer = new Server({ server })
