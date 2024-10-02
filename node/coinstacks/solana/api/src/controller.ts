@@ -1,5 +1,5 @@
 import { Logger } from '@shapeshiftoss/logger'
-import { Body, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
+import { Body, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import {
   BadRequestError,
   BaseAPI,
@@ -9,8 +9,7 @@ import {
   ValidationError,
   handleError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { Account, EstimatePriorityFeeBody, GasFees, GasFeesBody, TxHistory } from './models'
-import { Message } from '@solana/web3.js'
+import { Account, PriorityFees, TxHistory } from './models'
 import { heliusSdk } from './app'
 
 const RPC_URL = process.env.RPC_URL
@@ -30,7 +29,8 @@ export const logger = new Logger({
 @Route('api/v1')
 @Tags('v1')
 export class Solana implements BaseAPI {
-  static baseFee = '5000'
+  static baseFee = 5000
+
   /**
    * Get information about the running coinstack
    *
@@ -98,56 +98,27 @@ export class Solana implements BaseAPI {
   }
 
   /**
-   * Estimate priority fees for a transaction
+   * Get the current recommended priority fees for a transaction to land
    *
-   * @param {SendTxBody} body to account keys
-   *
-   * @returns {Promise<number | undefined>} priority fee estimate
+   * @returns {Promise<PriorityFees>} current priority fees specified in micro-lamports
    */
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Post('/estimate-priority-fee')
-  async estimatePriorityFee(@Body() body: EstimatePriorityFeeBody): Promise<number | undefined> {
+  @Post('/fees/priority')
+  async getPriorityFees(): Promise<PriorityFees> {
     try {
-      const feeEstimate = await heliusSdk.rpc.getPriorityFeeEstimate({
-        accountKeys: body.accountKeys,
-        options: {
-          recommended: true,
-        },
+      const { priorityFeeLevels } = await heliusSdk.rpc.getPriorityFeeEstimate({
+        options: { includeAllPriorityFeeLevels: true },
       })
 
-      return feeEstimate.priorityFeeEstimate
-    } catch (err) {
-      throw handleError(err)
-    }
-  }
-
-  /**
-   * Get the current recommended gas fees to use in a transaction
-   *
-   * @returns {Promise<GasFees>} current fees specified in lamports
-   */
-  @Example<GasFees>({
-    baseFee: '5000',
-    gasPrice: '7000',
-  })
-  @Response<InternalServerError>(500, 'Internal Server Error')
-  @Post('/gas/fees')
-  async getGasFees(@Body() body: GasFeesBody): Promise<GasFees> {
-    try {
-      const deserializedMessage = Message.from(Buffer.from(body.message, 'base64'))
-
-      const feeResult = await heliusSdk.connection.getFeeForMessage(deserializedMessage)
-      const gasPrice = feeResult.value
-
-      if (!gasPrice) {
-        throw new Error('Failed to get gas price')
-      }
+      if (!priorityFeeLevels) throw new Error('failed to get priority fees')
 
       return {
         baseFee: Solana.baseFee,
-        gasPrice: gasPrice.toFixed(),
+        slow: priorityFeeLevels.low,
+        average: priorityFeeLevels.medium,
+        fast: priorityFeeLevels.high,
       }
     } catch (err) {
       throw handleError(err)
