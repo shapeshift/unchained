@@ -91,8 +91,11 @@
 			},
 			"TransactionType": {
 				"enum": [
+					"ANY",
 					"UNKNOWN",
 					"NFT_BID",
+					"NFT_GLOBAL_BID",
+					"NFT_GLOBAL_BID_CANCELLED",
 					"NFT_BID_CANCELLED",
 					"NFT_LISTING",
 					"NFT_CANCEL_LISTING",
@@ -146,7 +149,19 @@
 					"BURN_NFT",
 					"PLATFORM_FEE",
 					"LOAN",
+					"RESCIND_LOAN",
+					"OFFER_LOAN",
+					"CANCEL_OFFER",
+					"LEND_FOR_NFT",
+					"REQUEST_LOAN",
+					"CANCEL_LOAN_REQUEST",
+					"BORROW_SOL_FOR_NFT",
+					"CLAIM_NFT",
+					"REBORROW_SOL_FOR_NFT",
 					"REPAY_LOAN",
+					"TAKE_LOAN",
+					"FORECLOSE_LOAN",
+					"UPDATE_OFFER",
 					"ADD_TO_POOL",
 					"REMOVE_FROM_POOL",
 					"CLOSE_POSITION",
@@ -166,10 +181,14 @@
 					"REJECT_SWAP",
 					"INITIALIZE_ACCOUNT",
 					"TOKEN_MINT",
-					"CREATE_APPARAISAL",
-					"FUSE",
-					"DEPOSIT_FRACTIONAL_POOL",
+					"CREATE_APPRAISAL",
+					"CANDY_MACHINE_WRAP",
+					"CANDY_MACHINE_UNWRAP",
+					"CANDY_MACHINE_UPDATE",
+					"CANDY_MACHINE_ROUTE",
 					"FRACTIONALIZE",
+					"DEPOSIT_FRACTIONAL_POOL",
+					"FUSE",
 					"CREATE_RAFFLE",
 					"BUY_TICKETS",
 					"UPDATE_ITEM",
@@ -198,65 +217,200 @@
 					"PLACE_BET",
 					"PLACE_SOL_BET",
 					"CREATE_BET",
+					"INIT_RENT",
+					"NFT_RENT_LISTING",
+					"NFT_RENT_CANCEL_LISTING",
 					"NFT_RENT_UPDATE_LISTING",
 					"NFT_RENT_ACTIVATE",
-					"NFT_RENT_CANCEL_LISTING",
-					"NFT_RENT_LISTING",
-					"FINALIZE_PROGRAM_INSTRUCTION",
+					"NFT_RENT_END",
 					"UPGRADE_PROGRAM_INSTRUCTION",
-					"NFT_GLOBAL_BID",
-					"NFT_GLOBAL_BID_CANCELLED",
+					"FINALIZE_PROGRAM_INSTRUCTION",
 					"EXECUTE_TRANSACTION",
 					"APPROVE_TRANSACTION",
 					"ACTIVATE_TRANSACTION",
 					"CREATE_TRANSACTION",
-					"REJECT_TRANSACTION",
 					"CANCEL_TRANSACTION",
+					"REJECT_TRANSACTION",
 					"ADD_INSTRUCTION",
+					"CREATE_MASTER_EDITION",
 					"ATTACH_METADATA",
 					"REQUEST_PNFT_MIGRATION",
 					"START_PNFT_MIGRATION",
 					"MIGRATE_TO_PNFT",
 					"UPDATE_RAFFLE",
+					"CREATE_MERKLE_TREE",
+					"DELEGATE_MERKLE_TREE",
+					"COMPRESSED_NFT_MINT",
+					"COMPRESSED_NFT_TRANSFER",
+					"COMPRESSED_NFT_REDEEM",
+					"COMPRESSED_NFT_CANCEL_REDEEM",
+					"COMPRESSED_NFT_BURN",
+					"COMPRESSED_NFT_VERIFY_CREATOR",
+					"COMPRESSED_NFT_UNVERIFY_CREATOR",
+					"COMPRESSED_NFT_VERIFY_COLLECTION",
+					"COMPRESSED_NFT_UNVERIFY_COLLECTION",
+					"COMPRESSED_NFT_SET_VERIFY_COLLECTION",
+					"DECOMPRESS_NFT",
+					"COMPRESS_NFT",
+					"COMPRESSED_NFT_DELEGATE",
 					"CREATE_POOL",
-					"ADD_LIQUIDITY",
-					"WITHDRAW_LIQUIDITY"
+					"DISTRIBUTE_COMPRESSION_REWARDS",
+					"CHANGE_COMIC_STATE",
+					"UPDATE_RECORD_AUTHORITY_DATA"
+				],
+				"type": "string"
+			},
+			"Source": {
+				"enum": [
+					"FORM_FUNCTION",
+					"EXCHANGE_ART",
+					"CANDY_MACHINE_V3",
+					"CANDY_MACHINE_V2",
+					"CANDY_MACHINE_V1",
+					"UNKNOWN",
+					"SOLANART",
+					"SOLSEA",
+					"MAGIC_EDEN",
+					"HOLAPLEX",
+					"METAPLEX",
+					"OPENSEA",
+					"SOLANA_PROGRAM_LIBRARY",
+					"ANCHOR",
+					"PHANTOM",
+					"SYSTEM_PROGRAM",
+					"STAKE_PROGRAM",
+					"COINBASE",
+					"CORAL_CUBE",
+					"HEDGE",
+					"LAUNCH_MY_NFT",
+					"GEM_BANK",
+					"GEM_FARM",
+					"DEGODS",
+					"BLOCKSMITH_LABS",
+					"YAWWW",
+					"ATADIA",
+					"DIGITAL_EYES",
+					"HYPERSPACE",
+					"TENSOR",
+					"BIFROST",
+					"JUPITER",
+					"MERCURIAL_STABLE_SWAP",
+					"SABER",
+					"SERUM",
+					"STEP_FINANCE",
+					"CROPPER",
+					"RAYDIUM",
+					"ALDRIN",
+					"CREMA",
+					"LIFINITY",
+					"CYKURA",
+					"ORCA",
+					"MARINADE",
+					"STEPN",
+					"SENCHA_EXCHANGE",
+					"SAROS",
+					"ENGLISH_AUCTION",
+					"FOXY",
+					"HADESWAP",
+					"FOXY_STAKING",
+					"FOXY_RAFFLE",
+					"FOXY_TOKEN_MARKET",
+					"FOXY_MISSIONS",
+					"FOXY_MARMALADE",
+					"FOXY_COINFLIP",
+					"FOXY_AUCTION",
+					"CITRUS",
+					"ZETA",
+					"ELIXIR",
+					"ELIXIR_LAUNCHPAD",
+					"CARDINAL_RENT",
+					"CARDINAL_STAKING",
+					"BPF_LOADER",
+					"BPF_UPGRADEABLE_LOADER",
+					"SQUADS",
+					"SHARKY_FI",
+					"OPEN_CREATOR_PROTOCOL",
+					"BUBBLEGUM",
+					"W_SOL",
+					"DUST",
+					"SOLI",
+					"USDC",
+					"FLWR",
+					"HDG",
+					"MEAN",
+					"UXD",
+					"SHDW",
+					"POLIS",
+					"ATLAS",
+					"USH",
+					"TRTLS",
+					"RUNNER",
+					"INVICTUS"
 				],
 				"type": "string"
 			},
 			"NativeTransfer": {
 				"properties": {
 					"fromUserAccount": {
-						"type": "string"
+						"type": "string",
+						"nullable": true
 					},
 					"toUserAccount": {
-						"type": "string"
+						"type": "string",
+						"nullable": true
+					},
+					"amount": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
 					"fromUserAccount",
-					"toUserAccount"
+					"toUserAccount",
+					"amount"
 				],
 				"type": "object",
 				"additionalProperties": false
 			},
+			"TokenStandard": {
+				"enum": [
+					"ProgrammableNonFungible",
+					"NonFungible",
+					"Fungible",
+					"FungibleAsset",
+					"NonFungibleEdition",
+					"UnknownStandard"
+				],
+				"type": "string"
+			},
 			"TokenTransfer": {
 				"properties": {
 					"fromUserAccount": {
-						"type": "string"
+						"type": "string",
+						"nullable": true
 					},
 					"toUserAccount": {
-						"type": "string"
+						"type": "string",
+						"nullable": true
 					},
 					"fromTokenAccount": {
-						"type": "string"
+						"type": "string",
+						"nullable": true
 					},
 					"toTokenAccount": {
-						"type": "string"
+						"type": "string",
+						"nullable": true
 					},
 					"tokenAmount": {
 						"type": "number",
 						"format": "double"
+					},
+					"decimals": {
+						"type": "number",
+						"format": "double"
+					},
+					"tokenStandard": {
+						"$ref": "#/components/schemas/TokenStandard"
 					},
 					"mint": {
 						"type": "string"
@@ -268,6 +422,8 @@
 					"fromTokenAccount",
 					"toTokenAccount",
 					"tokenAmount",
+					"decimals",
+					"tokenStandard",
 					"mint"
 				],
 				"type": "object",
@@ -277,10 +433,15 @@
 				"properties": {
 					"tokenAmount": {
 						"type": "string"
+					},
+					"decimals": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
-					"tokenAmount"
+					"tokenAmount",
+					"decimals"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -293,18 +454,18 @@
 					"tokenAccount": {
 						"type": "string"
 					},
-					"mint": {
-						"type": "string"
-					},
 					"rawTokenAmount": {
 						"$ref": "#/components/schemas/RawTokenAmount"
+					},
+					"mint": {
+						"type": "string"
 					}
 				},
 				"required": [
 					"userAccount",
 					"tokenAccount",
-					"mint",
-					"rawTokenAmount"
+					"rawTokenAmount",
+					"mint"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -322,7 +483,8 @@
 						"items": {
 							"$ref": "#/components/schemas/TokenBalanceChange"
 						},
-						"type": "array"
+						"type": "array",
+						"nullable": true
 					}
 				},
 				"required": [
@@ -334,53 +496,86 @@
 				"additionalProperties": false
 			},
 			"TransactionError": {
-				"properties": {
-					"error": {
+				"anyOf": [
+					{
+						"properties": {},
+						"type": "object"
+					},
+					{
 						"type": "string"
 					}
-				},
-				"required": [
-					"error"
 				],
-				"type": "object",
-				"additionalProperties": false
+				"description": "Transaction error"
 			},
-			"Instruction": {
+			"InnerInstruction": {
 				"properties": {
+					"programId": {
+						"type": "string"
+					},
+					"data": {
+						"type": "string"
+					},
 					"accounts": {
 						"items": {
 							"type": "string"
 						},
 						"type": "array"
-					},
-					"data": {
-						"type": "string"
+					}
+				},
+				"required": [
+					"programId",
+					"data",
+					"accounts"
+				],
+				"type": "object"
+			},
+			"Instruction": {
+				"properties": {
+					"innerInstructions": {
+						"items": {
+							"$ref": "#/components/schemas/InnerInstruction"
+						},
+						"type": "array"
 					},
 					"programId": {
 						"type": "string"
 					},
-					"innerInstructions": {
+					"data": {
+						"type": "string"
+					},
+					"accounts": {
 						"items": {
-							"$ref": "#/components/schemas/Instruction"
+							"type": "string"
 						},
 						"type": "array"
 					}
 				},
 				"required": [
-					"accounts",
+					"innerInstructions",
+					"programId",
 					"data",
-					"programId"
+					"accounts"
 				],
-				"type": "object",
-				"additionalProperties": false
+				"type": "object"
 			},
-			"NftElement": {
+			"TransactionContext": {
+				"enum": [
+					"AUCTION",
+					"INSTANT_SALE",
+					"OFFER",
+					"GLOBAL_OFFER",
+					"MINT",
+					"UNKNOWN"
+				],
+				"type": "string"
+			},
+			"Token": {
 				"properties": {
 					"mint": {
 						"type": "string"
 					},
 					"tokenStandard": {
-						"type": "string"
+						"$ref": "#/components/schemas/TokenStandard"
 					}
 				},
 				"required": [
@@ -390,16 +585,17 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"EventsNft": {
+			"NFTEvent": {
 				"properties": {
-					"description": {
+					"seller": {
 						"type": "string"
 					},
-					"type": {
+					"buyer": {
 						"type": "string"
 					},
-					"source": {
-						"type": "string"
+					"timestamp": {
+						"type": "number",
+						"format": "double"
 					},
 					"amount": {
 						"type": "number",
@@ -409,65 +605,47 @@
 						"type": "number",
 						"format": "double"
 					},
-					"feePayer": {
-						"type": "string"
-					},
 					"signature": {
 						"type": "string"
 					},
-					"slot": {
-						"type": "number",
-						"format": "double"
+					"source": {
+						"$ref": "#/components/schemas/Source"
 					},
-					"timestamp": {
-						"type": "number",
-						"format": "double"
+					"type": {
+						"$ref": "#/components/schemas/TransactionType"
 					},
 					"saleType": {
-						"type": "string"
-					},
-					"buyer": {
-						"type": "string"
-					},
-					"seller": {
-						"type": "string"
-					},
-					"staker": {
-						"type": "string"
+						"$ref": "#/components/schemas/TransactionContext"
 					},
 					"nfts": {
 						"items": {
-							"$ref": "#/components/schemas/NftElement"
+							"$ref": "#/components/schemas/Token"
 						},
 						"type": "array"
 					}
 				},
 				"required": [
-					"description",
-					"type",
-					"source",
+					"seller",
+					"buyer",
+					"timestamp",
 					"amount",
 					"fee",
-					"feePayer",
 					"signature",
-					"slot",
-					"timestamp",
-					"saleType",
-					"buyer",
-					"seller",
-					"staker",
+					"source",
+					"type",
 					"nfts"
 				],
 				"type": "object",
 				"additionalProperties": false
 			},
-			"NativeInput": {
+			"NativeBalanceChange": {
 				"properties": {
 					"account": {
 						"type": "string"
 					},
 					"amount": {
-						"type": "string"
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
@@ -477,16 +655,68 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ProgramName": {
+				"enum": [
+					"UNKNOWN",
+					"JUPITER_V1",
+					"JUPITER_V2",
+					"JUPITER_V3",
+					"JUPITER_V4",
+					"MERCURIAL_STABLE_SWAP",
+					"SABER_STABLE_SWAP",
+					"SABER_EXCHANGE",
+					"SERUM_DEX_V1",
+					"SERUM_DEX_V2",
+					"SERUM_DEX_V3",
+					"SERUM_SWAP",
+					"STEP_FINANCE",
+					"CROPPER",
+					"RAYDIUM_LIQUIDITY_POOL_V2",
+					"RAYDIUM_LIQUIDITY_POOL_V3",
+					"RAYDIUM_LIQUIDITY_POOL_V4",
+					"ALDRIN_AMM_V1",
+					"ALDRIN_AMM_V2",
+					"CREMA",
+					"LIFINITY",
+					"LIFINITY_V2",
+					"CYKURA",
+					"ORCA_TOKEN_SWAP_V1",
+					"ORCA_TOKEN_SWAP_V2",
+					"ORCA_WHIRLPOOLS",
+					"MARINADE",
+					"STEPN",
+					"SENCHA_EXCHANGE",
+					"SAROS_AMM",
+					"FOXY_STAKE",
+					"FOXY_SWAP",
+					"FOXY_RAFFLE",
+					"FOXY_TOKEN_MARKET",
+					"FOXY_MISSIONS",
+					"FOXY_MARMALADE",
+					"FOXY_COINFLIP",
+					"FOXY_AUCTION",
+					"CITRUS",
+					"HADE_SWAP",
+					"ZETA",
+					"CARDINAL_RENT",
+					"CARDINAL_STAKING",
+					"SHARKY_FI",
+					"OPEN_CREATOR_PROTOCOL",
+					"BUBBLEGUM",
+					"CORAL_CUBE"
+				],
+				"type": "string"
+			},
 			"ProgramInfo": {
 				"properties": {
 					"source": {
-						"type": "string"
+						"$ref": "#/components/schemas/Source"
 					},
 					"account": {
 						"type": "string"
 					},
 					"programName": {
-						"type": "string"
+						"$ref": "#/components/schemas/ProgramName"
 					},
 					"instructionName": {
 						"type": "string"
@@ -501,8 +731,24 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"InnerSwap": {
+			"TokenSwap": {
 				"properties": {
+					"nativeInput": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/NativeTransfer"
+							}
+						],
+						"nullable": true
+					},
+					"nativeOutput": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/NativeTransfer"
+							}
+						],
+						"nullable": true
+					},
 					"tokenInputs": {
 						"items": {
 							"$ref": "#/components/schemas/TokenTransfer"
@@ -532,6 +778,8 @@
 					}
 				},
 				"required": [
+					"nativeInput",
+					"nativeOutput",
 					"tokenInputs",
 					"tokenOutputs",
 					"tokenFees",
@@ -541,13 +789,13 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Swap": {
+			"SwapEvent": {
 				"properties": {
 					"nativeInput": {
-						"$ref": "#/components/schemas/NativeInput"
+						"$ref": "#/components/schemas/NativeBalanceChange"
 					},
 					"nativeOutput": {
-						"$ref": "#/components/schemas/NativeInput"
+						"$ref": "#/components/schemas/NativeBalanceChange"
 					},
 					"tokenInputs": {
 						"items": {
@@ -569,13 +817,13 @@
 					},
 					"nativeFees": {
 						"items": {
-							"$ref": "#/components/schemas/NativeInput"
+							"$ref": "#/components/schemas/NativeBalanceChange"
 						},
 						"type": "array"
 					},
 					"innerSwaps": {
 						"items": {
-							"$ref": "#/components/schemas/InnerSwap"
+							"$ref": "#/components/schemas/TokenSwap"
 						},
 						"type": "array"
 					}
@@ -592,88 +840,205 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Compressed": {
+			"CompressedNftCreator": {
+				"properties": {
+					"address": {
+						"type": "string"
+					},
+					"share": {
+						"type": "number",
+						"format": "double"
+					},
+					"verified": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"address",
+					"share",
+					"verified"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CompressedNftMetadata": {
+				"properties": {
+					"collection": {
+						"properties": {
+							"verified": {
+								"type": "boolean"
+							},
+							"key": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"verified",
+							"key"
+						],
+						"type": "object"
+					},
+					"creators": {
+						"items": {
+							"$ref": "#/components/schemas/CompressedNftCreator"
+						},
+						"type": "array"
+					},
+					"isMutable": {
+						"type": "boolean"
+					},
+					"name": {
+						"type": "string"
+					},
+					"primarySaleHappened": {
+						"type": "boolean"
+					},
+					"sellerFeeBasisPoints": {
+						"type": "number",
+						"format": "double"
+					},
+					"symbol": {
+						"type": "string"
+					},
+					"tokenProgramVersion": {
+						"type": "string"
+					},
+					"tokenStandard": {
+						"$ref": "#/components/schemas/TokenStandard"
+					},
+					"uri": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"collection",
+					"creators",
+					"isMutable",
+					"name",
+					"primarySaleHappened",
+					"sellerFeeBasisPoints",
+					"symbol",
+					"tokenProgramVersion",
+					"tokenStandard",
+					"uri"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CompressedNftEvent": {
 				"properties": {
 					"type": {
-						"type": "string"
+						"$ref": "#/components/schemas/TransactionType"
 					},
 					"treeId": {
 						"type": "string"
 					},
+					"leafIndex": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"seq": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
 					"assetId": {
-						"type": "string"
+						"type": "string",
+						"nullable": true
+					},
+					"instructionIndex": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"innerInstructionIndex": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
 					},
 					"newLeafOwner": {
-						"type": "string"
+						"type": "string",
+						"nullable": true
 					},
 					"oldLeafOwner": {
-						"type": "string"
+						"type": "string",
+						"nullable": true
+					},
+					"newLeafDelegate": {
+						"type": "string",
+						"nullable": true
+					},
+					"oldLeafDelegate": {
+						"type": "string",
+						"nullable": true
+					},
+					"treeDelegate": {
+						"type": "string",
+						"nullable": true
+					},
+					"metadata": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/CompressedNftMetadata"
+							}
+						],
+						"nullable": true
 					}
 				},
 				"required": [
 					"type",
 					"treeId",
+					"leafIndex",
+					"seq",
 					"assetId",
+					"instructionIndex",
+					"innerInstructionIndex",
 					"newLeafOwner",
-					"oldLeafOwner"
+					"oldLeafOwner",
+					"newLeafDelegate",
+					"oldLeafDelegate",
+					"treeDelegate",
+					"metadata"
 				],
 				"type": "object",
 				"additionalProperties": false
 			},
-			"DistributeCompressionRewards": {
-				"properties": {},
-				"type": "object",
-				"additionalProperties": false
-			},
-			"SetAuthority": {
-				"properties": {
-					"account": {
-						"type": "string"
-					},
-					"from": {
-						"type": "string"
-					},
-					"to": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"account",
-					"from",
-					"to"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"Events": {
+			"TransactionEvent": {
 				"properties": {
 					"nft": {
-						"$ref": "#/components/schemas/EventsNft"
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/NFTEvent"
+							}
+						],
+						"nullable": true
 					},
 					"swap": {
-						"$ref": "#/components/schemas/Swap"
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/SwapEvent"
+							}
+						],
+						"nullable": true
 					},
 					"compressed": {
-						"$ref": "#/components/schemas/Compressed"
-					},
-					"distributeCompressionRewards": {
-						"$ref": "#/components/schemas/DistributeCompressionRewards"
-					},
-					"setAuthority": {
-						"$ref": "#/components/schemas/SetAuthority"
+						"items": {
+							"$ref": "#/components/schemas/CompressedNftEvent"
+						},
+						"type": "array",
+						"nullable": true
 					}
 				},
 				"required": [
 					"nft",
 					"swap",
-					"compressed",
-					"distributeCompressionRewards",
-					"setAuthority"
+					"compressed"
 				],
 				"type": "object",
 				"additionalProperties": false
 			},
-			"RawTx": {
+			"EnrichedTransaction": {
 				"properties": {
 					"description": {
 						"type": "string"
@@ -682,7 +1047,7 @@
 						"$ref": "#/components/schemas/TransactionType"
 					},
 					"source": {
-						"type": "string"
+						"$ref": "#/components/schemas/Source"
 					},
 					"fee": {
 						"type": "number",
@@ -706,13 +1071,15 @@
 						"items": {
 							"$ref": "#/components/schemas/NativeTransfer"
 						},
-						"type": "array"
+						"type": "array",
+						"nullable": true
 					},
 					"tokenTransfers": {
 						"items": {
 							"$ref": "#/components/schemas/TokenTransfer"
 						},
-						"type": "array"
+						"type": "array",
+						"nullable": true
 					},
 					"accountData": {
 						"items": {
@@ -721,7 +1088,12 @@
 						"type": "array"
 					},
 					"transactionError": {
-						"$ref": "#/components/schemas/TransactionError"
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/TransactionError"
+							}
+						],
+						"nullable": true
 					},
 					"instructions": {
 						"items": {
@@ -730,7 +1102,7 @@
 						"type": "array"
 					},
 					"events": {
-						"$ref": "#/components/schemas/Events"
+						"$ref": "#/components/schemas/TransactionEvent"
 					}
 				},
 				"required": [
@@ -781,7 +1153,7 @@
 			"Tx": {
 				"allOf": [
 					{
-						"$ref": "#/components/schemas/RawTx"
+						"$ref": "#/components/schemas/EnrichedTransaction"
 					},
 					{
 						"$ref": "#/components/schemas/BaseTx"
@@ -813,7 +1185,19 @@
 				"additionalProperties": false
 			},
 			"TxHistory": {
-				"$ref": "#/components/schemas/BaseTxHistory_Tx_",
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/BaseTxHistory_Tx_"
+					},
+					{
+						"properties": {
+							"cursor": {
+								"type": "string"
+							}
+						},
+						"type": "object"
+					}
+				],
 				"description": "Contains info about transaction history"
 			},
 			"SendTxBody": {

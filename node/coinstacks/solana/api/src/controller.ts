@@ -9,9 +9,10 @@ import {
   ValidationError,
   handleError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { Account, PriorityFees, RawTx, Tx, TxHistory } from './models'
-import { Helius } from 'helius-sdk'
+import { Account, PriorityFees, Tx, TxHistory } from './models'
+import { Helius, EnrichedTransaction } from 'helius-sdk'
 import axios from 'axios'
+import { validatePageSize } from '@shapeshiftoss/common-api'
 
 const RPC_URL = process.env.RPC_URL
 const RPC_API_KEY = process.env.RPC_API_KEY
@@ -30,9 +31,8 @@ export const logger = new Logger({
 })
 
 const heliusSdk = new Helius(RPC_API_KEY)
-heliusSdk.connection.getParsedTransactions
 
-const axiosNoRetry = axios.create({ timeout: 5000 })
+const axiosNoRetry = axios.create({ timeout: 5000, params: { 'api-key': RPC_API_KEY } })
 
 @Route('api/v1')
 @Tags('v1')
@@ -80,16 +80,17 @@ export class Solana implements BaseAPI {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}/txs')
   async getTxHistory(@Path() pubkey: string, @Query() cursor?: string, @Query() pageSize = 10): Promise<TxHistory> {
-    const urlParams = new URLSearchParams()
-    urlParams.append('api-key', RPC_API_KEY ?? '')
-    urlParams.append('limit', pageSize.toString())
-    if (cursor) {
-      urlParams.append('before', cursor)
-    }
+    validatePageSize(pageSize)
 
     try {
-      const { data } = await axiosNoRetry.get<RawTx[]>(
-        `${INDEXER_URL}/v0/addresses/${pubkey}/transactions/?${urlParams.toString()}`
+      const { data } = await axiosNoRetry.get<EnrichedTransaction[]>(
+        `${INDEXER_URL}/v0/addresses/${pubkey}/transactions/`,
+        {
+          params: {
+            limit: pageSize,
+            before: cursor,
+          },
+        }
       )
 
       const txs = data.map((tx) => {
@@ -100,7 +101,9 @@ export class Solana implements BaseAPI {
         }
       })
 
-      return { pubkey, txs: txs }
+      const nextCursor = txs.length ? txs[txs.length - 1].signature : undefined
+
+      return { pubkey, txs: txs, cursor: nextCursor }
     } catch (err) {
       throw handleError(err)
     }
@@ -118,11 +121,8 @@ export class Solana implements BaseAPI {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('tx/{txid}')
   async getTxById(@Path() txid: string): Promise<Tx> {
-    const urlParams = new URLSearchParams()
-    urlParams.append('api-key', RPC_API_KEY ?? '')
-
     try {
-      const { data } = await axiosNoRetry.post<RawTx[]>(`${INDEXER_URL}/v0/transactions/?${urlParams.toString()}`, {
+      const { data } = await axiosNoRetry.post<EnrichedTransaction[]>(`${INDEXER_URL}/v0/transactions/`, {
         transactions: [txid],
       })
 
