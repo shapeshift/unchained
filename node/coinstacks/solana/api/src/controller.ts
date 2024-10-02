@@ -9,9 +9,9 @@ import {
   ValidationError,
   handleError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { Account, GasFeesBody, PriorityFees, TxHistory } from './models'
+import { Account, EstimateFeesBody, PriorityFees, TxHistory } from './models'
 import { Helius } from 'helius-sdk'
-import { Message } from '@solana/web3.js'
+import { VersionedMessage } from '@solana/web3.js'
 
 const RPC_URL = process.env.RPC_URL
 const RPC_API_KEY = process.env.RPC_API_KEY
@@ -129,26 +129,23 @@ export class Solana implements BaseAPI {
   }
 
   /**
-   * Get the current recommended gas fees to use in a transaction
+   * Get the estimated compute unit cost of a transaction
    *
-   * @returns {Promise<number>} current fees specified in lamports including base fee
+   * @returns {Promise<number>} estimated compute unit cost
    */
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Post('/fees/estimate')
-  async getEstimateFees(@Body() body: GasFeesBody): Promise<number> {
+  async getEstimateFees(@Body() body: EstimateFeesBody): Promise<number> {
     try {
-      const deserializedMessage = Message.from(Buffer.from(body.message, 'base64'))
+      const deserializedMessage = VersionedMessage.deserialize(Buffer.from(body.message, 'base64'))
 
-      const feeResult = await heliusSdk.connection.getFeeForMessage(deserializedMessage)
-      const gasPrice = feeResult.value
+      const { value } = await heliusSdk.connection.getFeeForMessage(deserializedMessage)
 
-      if (!gasPrice) {
-        throw new Error('Failed to get gas price')
-      }
+      if (!value) throw new Error('Failed to get estimated fee')
 
-      return gasPrice
+      return value
     } catch (err) {
       throw handleError(err)
     }

@@ -53,8 +53,8 @@ export interface PriorityFees {
 }
 
 /**
- * Returns the gas fees estimation
+ * Contains the base64 encoded transaction message
  */
-export interface GasFeesBody {
+export interface EstimateFeesBody {
   message: string
 }

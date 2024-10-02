@@ -184,8 +184,8 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"GasFeesBody": {
-				"description": "Returns the gas fees estimation",
+			"EstimateFeesBody": {
+				"description": "Contains the base64 encoded transaction message",
 				"properties": {
 					"message": {
 						"type": "string"
@@ -500,7 +500,7 @@
 				"operationId": "GetEstimateFees",
 				"responses": {
 					"200": {
-						"description": "current fees specified in lamports including base fee",
+						"description": "estimated compute unit cost",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -541,7 +541,7 @@
 						}
 					}
 				},
-				"description": "Get the current recommended gas fees to use in a transaction",
+				"description": "Get the estimated compute unit cost of a transaction",
 				"tags": [
 					"v1"
 				],
@@ -552,7 +552,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/GasFeesBody"
+								"$ref": "#/components/schemas/EstimateFeesBody"
 							}
 						}
 					}
