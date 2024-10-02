@@ -156,11 +156,7 @@
 				"additionalProperties": false
 			},
 			"PriorityFees": {
-<<<<<<< HEAD
-				"description": "Returns the priority fees estimation",
-=======
 				"description": "Contains info about current recommended priority fees for a transaction to land.",
->>>>>>> develop
 				"properties": {
 					"baseFee": {
 						"type": "number",
@@ -187,10 +183,9 @@
 				],
 				"type": "object",
 				"additionalProperties": false
-<<<<<<< HEAD
 			},
 			"GasFeesBody": {
-				"description": "Returns the priority fees estimation",
+				"description": "Returns the gas fees estimation",
 				"properties": {
 					"message": {
 						"type": "string"
@@ -201,8 +196,6 @@
 				],
 				"type": "object",
 				"additionalProperties": false
-=======
->>>>>>> develop
 			}
 		},
 		"securitySchemes": {}
@@ -501,14 +494,13 @@
 				"security": [],
 				"parameters": []
 			}
-<<<<<<< HEAD
 		},
-		"/api/v1/gas/fees": {
+		"/api/v1/fees/estimate": {
 			"post": {
-				"operationId": "GetGasFees",
+				"operationId": "GetEstimateFees",
 				"responses": {
 					"200": {
-						"description": "current fees specified in lamports",
+						"description": "current fees specified in lamports including base fee",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -566,8 +558,6 @@
 					}
 				}
 			}
-=======
->>>>>>> develop
 		}
 	},
 	"servers": [
