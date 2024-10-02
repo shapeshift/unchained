@@ -70,7 +70,7 @@ export class Solana implements BaseAPI {
    * Get transaction history by address
    *
    * @param {string} pubkey account address
-   * @param {string} [lastSignature] the last signature returned in previous query
+   * @param {string} [cursor] the cursor returned in previous query (used as lastSignature)
    * @param {number} [pageSize] page size (10 by default)
    *
    * @returns {Promise<TxHistory>} transaction history
@@ -79,16 +79,12 @@ export class Solana implements BaseAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}/txs')
-  async getTxHistory(
-    @Path() pubkey: string,
-    @Query() lastSignature?: string,
-    @Query() pageSize = 10
-  ): Promise<TxHistory> {
+  async getTxHistory(@Path() pubkey: string, @Query() cursor?: string, @Query() pageSize = 10): Promise<TxHistory> {
     const urlParams = new URLSearchParams()
     urlParams.append('api-key', RPC_API_KEY ?? '')
     urlParams.append('limit', pageSize.toString())
-    if (lastSignature) {
-      urlParams.append('before', lastSignature)
+    if (cursor) {
+      urlParams.append('before', cursor)
     }
 
     try {
