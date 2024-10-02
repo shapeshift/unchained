@@ -35,9 +35,11 @@ export class SolanaWebsocketClient implements IWebsocketClient {
   private url: string
   private geyserUrl: string
   private pingTimeout?: NodeJS.Timeout
+  private geyserPingTimeout?: NodeJS.Timeout
   private interval?: NodeJS.Timeout
   private geyserInterval?: NodeJS.Timeout
   private retryCount = 0
+  private geyserRetryCount = 0
   private addresses: Array<string>
 
   private handleBlock: BlockHandler | Array<BlockHandler>
@@ -77,13 +79,13 @@ export class SolanaWebsocketClient implements IWebsocketClient {
     this.socket.onmessage = (msg) => this.onMessage(msg)
 
     this.geyserSocket.on('ping', () => this.geyserSocket.pong())
-    this.geyserSocket.on('pong', () => this.heartbeat())
+    this.geyserSocket.on('pong', () => this.geyserHeartbeat())
     this.geyserSocket.onerror = (error) => {
       this.logger.error({ error, fn: 'ws.onerror' }, 'websocket error')
     }
     this.geyserSocket.onclose = ({ code, reason }) => {
       this.logger.error({ code, reason, fn: 'ws.close' }, 'websocket closed')
-      this.close()
+      this.closeGeyser()
     }
     this.geyserSocket.onopen = () => this.onGeyserOpen()
     this.geyserSocket.onmessage = (msg) => this.onMessage(msg)
@@ -91,7 +93,6 @@ export class SolanaWebsocketClient implements IWebsocketClient {
 
   private close(): void {
     this.interval && clearInterval(this.interval)
-    this.geyserInterval && clearInterval(this.geyserInterval)
 
     if (++this.retryCount >= this.retryAttempts && this.retryAttempts !== 0) {
       throw new Error('failed to reconnect')
@@ -100,10 +101,25 @@ export class SolanaWebsocketClient implements IWebsocketClient {
     setTimeout(
       () => {
         this.socket = new WebSocket(this.url, { handshakeTimeout: 5000 })
-        this.geyserSocket = new WebSocket(this.geyserUrl, { handshakeTimeout: 5000 })
         this.initialize()
       },
       Math.min(Math.random() * (BASE_DELAY * this.retryCount ** 2), MAX_DELAY)
+    )
+  }
+
+  private closeGeyser(): void {
+    this.geyserInterval && clearInterval(this.geyserInterval)
+
+    if (++this.geyserRetryCount >= this.retryAttempts && this.retryAttempts !== 0) {
+      throw new Error('failed to reconnect')
+    }
+
+    setTimeout(
+      () => {
+        this.geyserSocket = new WebSocket(this.geyserUrl, { handshakeTimeout: 5000 })
+        this.initialize()
+      },
+      Math.min(Math.random() * (BASE_DELAY * this.geyserRetryCount ** 2), MAX_DELAY)
     )
   }
 
@@ -112,6 +128,13 @@ export class SolanaWebsocketClient implements IWebsocketClient {
     this.pingTimeout = setTimeout(() => {
       this.logger.debug({ fn: 'pingTimeout' }, 'heartbeat failed')
       this.socket.terminate()
+    }, this.pingInterval + 1000)
+  }
+
+  private geyserHeartbeat(): void {
+    this.geyserPingTimeout && clearTimeout(this.geyserPingTimeout)
+    this.geyserPingTimeout = setTimeout(() => {
+      this.logger.debug({ fn: 'pingTimeout' }, 'geyser heartbeat failed')
       this.geyserSocket.terminate()
     }, this.pingInterval + 1000)
   }
@@ -128,11 +151,9 @@ export class SolanaWebsocketClient implements IWebsocketClient {
 
   onGeyserOpen(): void {
     this.logger.debug({ fn: 'ws.onopen' }, 'geyser websocket opened')
-    // @TODO: retry only for geyser
-    this.retryCount = 0
+    this.geyserRetryCount = 0
     this.geyserInterval = setInterval(() => this.geyserSocket.ping(), this.pingInterval)
-    // @TODO: verify if this is needed
-    // this.heartbeat()
+    this.geyserHeartbeat()
 
     if (this.addresses.length > 0) {
       const subscribeAddresses: Subscription = {

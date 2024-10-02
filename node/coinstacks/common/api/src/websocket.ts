@@ -42,7 +42,7 @@ export class ConnectionHandler {
 
   private readonly websocket: WebSocket
   private readonly registry: Registry
-  private readonly blockbook: IWebsocketClient | undefined
+  private readonly blockbook: IWebsocketClient
   private readonly prometheus: Prometheus
   private readonly logger: Logger
   private readonly routes: Record<Topics, Methods>
@@ -54,10 +54,9 @@ export class ConnectionHandler {
   private constructor(
     websocket: WebSocket,
     registry: Registry,
-    blockbook: IWebsocketClient | undefined,
+    blockbook: IWebsocketClient,
     prometheus: Prometheus,
     logger: Logger
-    // solanaWebsocket: WebsocketClient | undefined,
   ) {
     this.clientId = v4()
     this.registry = registry
@@ -171,13 +170,13 @@ export class ConnectionHandler {
 
     this.subscriptionIds.add(subscriptionId)
     this.registry.subscribe(this.clientId, subscriptionId, this, data.addresses)
-    this.blockbook?.subscribeAddresses(this.registry.getAddresses())
+    this.blockbook.subscribeAddresses(this.registry.getAddresses())
   }
 
   private handleUnsubscribeTxs(subscriptionId: string, data?: TxsTopicData): void {
     this.subscriptionIds.delete(subscriptionId)
     this.registry.unsubscribe(this.clientId, subscriptionId, data?.addresses ?? [])
-    this.blockbook?.subscribeAddresses(this.registry.getAddresses())
+    this.blockbook.subscribeAddresses(this.registry.getAddresses())
   }
 
   publish(subscriptionId: string, address: string, data: unknown): void {
