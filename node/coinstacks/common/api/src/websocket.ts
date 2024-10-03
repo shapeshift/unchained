@@ -1,9 +1,9 @@
-import WebSocket from 'ws'
-import { v4 } from 'uuid'
 import { Logger } from '@shapeshiftoss/logger'
-import { Registry } from './registry'
+import { WebsocketClient } from '@shapeshiftoss/websocket'
+import { v4 } from 'uuid'
+import WebSocket from 'ws'
 import { Prometheus } from './prometheus'
-import { IWebsocketClient } from '@shapeshiftoss/blockbook'
+import { Registry } from './registry'
 
 export interface RequestPayload {
   subscriptionId: string
@@ -42,7 +42,7 @@ export class ConnectionHandler {
 
   private readonly websocket: WebSocket
   private readonly registry: Registry
-  private readonly blockbook: IWebsocketClient
+  private readonly client: WebsocketClient
   private readonly prometheus: Prometheus
   private readonly logger: Logger
   private readonly routes: Record<Topics, Methods>
@@ -54,13 +54,13 @@ export class ConnectionHandler {
   private constructor(
     websocket: WebSocket,
     registry: Registry,
-    blockbook: IWebsocketClient,
+    client: WebsocketClient,
     prometheus: Prometheus,
     logger: Logger
   ) {
     this.clientId = v4()
     this.registry = registry
-    this.blockbook = blockbook
+    this.client = client
     this.prometheus = prometheus
     this.logger = logger.child({ namespace: ['websocket'] })
     this.routes = {
@@ -96,11 +96,11 @@ export class ConnectionHandler {
   static start(
     websocket: WebSocket,
     registry: Registry,
-    blockbook: IWebsocketClient,
+    client: WebsocketClient,
     prometheus: Prometheus,
     logger: Logger
   ): void {
-    new ConnectionHandler(websocket, registry, blockbook, prometheus, logger)
+    new ConnectionHandler(websocket, registry, client, prometheus, logger)
   }
 
   private heartbeat(): void {
@@ -159,7 +159,7 @@ export class ConnectionHandler {
     }
 
     this.subscriptionIds.clear()
-    this.blockbook?.subscribeAddresses(this.registry.getAddresses())
+    this.client.subscribeAddresses(this.registry.getAddresses())
   }
 
   private handleSubscribeTxs(subscriptionId: string, data?: TxsTopicData): void {
@@ -170,13 +170,13 @@ export class ConnectionHandler {
 
     this.subscriptionIds.add(subscriptionId)
     this.registry.subscribe(this.clientId, subscriptionId, this, data.addresses)
-    this.blockbook.subscribeAddresses(this.registry.getAddresses())
+    this.client.subscribeAddresses(this.registry.getAddresses())
   }
 
   private handleUnsubscribeTxs(subscriptionId: string, data?: TxsTopicData): void {
     this.subscriptionIds.delete(subscriptionId)
     this.registry.unsubscribe(this.clientId, subscriptionId, data?.addresses ?? [])
-    this.blockbook.subscribeAddresses(this.registry.getAddresses())
+    this.client.subscribeAddresses(this.registry.getAddresses())
   }
 
   publish(subscriptionId: string, address: string, data: unknown): void {

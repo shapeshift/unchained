@@ -5,9 +5,9 @@ import { ConnectionHandler, middleware, Prometheus, Registry, TransactionHandler
 import { Logger } from '@shapeshiftoss/logger'
 import { RegisterRoutes } from './routes'
 import { Server } from 'ws'
-import { SolanaWebsocketClient } from './websocket'
+import { WebsocketClient } from './websocket'
 import { Helius } from 'helius-sdk'
-import { GeyserResultTransaction } from './models'
+import { Transaction } from './types'
 
 const PORT = process.env.PORT ?? 3000
 const RPC_API_KEY = process.env.RPC_API_KEY
@@ -58,30 +58,25 @@ app.get('/', async (_, res) => {
 
 app.use(middleware.errorHandler, middleware.notFoundHandler)
 
-const server = app.listen(PORT, () => logger.info('Server started'))
-
-const transactionHandler: TransactionHandler<GeyserResultTransaction, GeyserResultTransaction> = async (geyserTx) => {
-  const addresses = geyserTx.transaction.message.accountKeys.map((key) => key.pubkey)
+const transactionHandler: TransactionHandler<Transaction, Transaction> = async (geyserTx) => {
+  const addresses = geyserTx.transaction.message.accountKeys.map((key) => key.pubkey.toString())
 
   return { addresses, tx: geyserTx }
 }
 
 const registry = new Registry({
   addressFormatter: (address: string) => address,
-  // @TODO: Make it optional in the registry class
-  blockHandler: async () => {
-    return { txs: [] }
-  },
   transactionHandler,
 })
 
-const heliusWebsocket = new SolanaWebsocketClient(WEBSOCKET_URL, {
+const helius = new WebsocketClient(WEBSOCKET_URL, {
   apiKey: WEBSOCKET_API_KEY,
   transactionHandler: registry.onTransaction.bind(registry),
 })
 
+const server = app.listen(PORT, () => logger.info('Server started'))
 const wsServer = new Server({ server })
 
 wsServer.on('connection', (connection) => {
-  ConnectionHandler.start(connection, registry, heliusWebsocket, prometheus, logger)
+  ConnectionHandler.start(connection, registry, helius, prometheus, logger)
 })
