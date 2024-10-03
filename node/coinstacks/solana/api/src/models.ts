@@ -1,9 +1,10 @@
+import { EnrichedTransaction } from 'helius-sdk'
 import { BaseAccount, BaseTx, BaseTxHistory } from '../../../common/api/src' // unable to import models from a module with tsoa
 
 /**
  * Contains info about a transaction
  */
-export interface Tx extends BaseTx {}
+export type Tx = BaseTx & EnrichedTransaction
 
 /**
  * Contains info about transaction history
@@ -30,7 +31,7 @@ export interface API {
   /**
    * Get transaction details
    *
-   * @param {string} txid transaction hash
+   * @param {string} txid transaction signature
    *
    * @returns {Promise<Tx>} transaction payload
    */

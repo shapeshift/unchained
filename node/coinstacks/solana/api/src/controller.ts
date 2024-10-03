@@ -1,4 +1,8 @@
 import { Logger } from '@shapeshiftoss/logger'
+import { validatePageSize } from '@shapeshiftoss/common-api'
+import { VersionedMessage } from '@solana/web3.js'
+import axios from 'axios'
+import { EnrichedTransaction } from 'helius-sdk'
 import { Body, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import {
   BadRequestError,
@@ -9,27 +13,30 @@ import {
   ValidationError,
   handleError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { Account, EstimateFeesBody, PriorityFees, TxHistory } from './models'
-import { VersionedMessage } from '@solana/web3.js'
 import { heliusSdk } from './app'
+import { Account, API, EstimateFeesBody, PriorityFees, Tx, TxHistory } from './models'
 
 const RPC_URL = process.env.RPC_URL
 const RPC_API_KEY = process.env.RPC_API_KEY
+const INDEXER_URL = process.env.INDEXER_URL
 
 const NETWORK = process.env.NETWORK
 
 if (!NETWORK) throw new Error('NETWORK env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
 if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
+if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 
 export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'solana', 'api'],
   level: process.env.LOG_LEVEL,
 })
 
+const axiosNoRetry = axios.create({ timeout: 5000, params: { 'api-key': RPC_API_KEY } })
+
 @Route('api/v1')
 @Tags('v1')
-export class Solana implements BaseAPI {
+export class Solana implements BaseAPI, API {
   static baseFee = 5000
 
   /**
@@ -60,10 +67,10 @@ export class Solana implements BaseAPI {
   }
 
   /**
-   * Get transaction history by address or extended public key
+   * Get transaction history by address
    *
-   * @param {string} pubkey account address or extended public key
-   * @param {string} [cursor] the cursor returned in previous query (base64 encoded json object with a 'page' property)
+   * @param {string} pubkey account address
+   * @param {string} [cursor] the cursor returned in previous query (used as lastSignature)
    * @param {number} [pageSize] page size (10 by default)
    *
    * @returns {Promise<TxHistory>} transaction history
@@ -72,15 +79,73 @@ export class Solana implements BaseAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}/txs')
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async getTxHistory(@Path() pubkey: string, @Query() _cursor?: string, @Query() _pageSize = 10): Promise<TxHistory> {
-    return { pubkey } as TxHistory
+  async getTxHistory(@Path() pubkey: string, @Query() cursor?: string, @Query() pageSize = 10): Promise<TxHistory> {
+    validatePageSize(pageSize)
+
+    try {
+      const { data } = await axiosNoRetry.get<EnrichedTransaction[]>(
+        `${INDEXER_URL}/v0/addresses/${pubkey}/transactions/`,
+        {
+          params: {
+            limit: pageSize,
+            before: cursor,
+          },
+        }
+      )
+
+      const txs = data.map((tx) => {
+        return {
+          txid: tx.signature,
+          blockHeight: tx.slot,
+          ...tx,
+        }
+      })
+
+      const nextCursor = txs.length ? txs[txs.length - 1].signature : undefined
+
+      return { pubkey, cursor: nextCursor, txs: txs }
+    } catch (err) {
+      throw handleError(err)
+    }
+  }
+
+  /**
+   * Get transaction details
+   *
+   * @param {string} txid transaction signature
+   *
+   * @returns {Promise<Tx>} transaction payload
+   */
+  @Response<BadRequestError>(400, 'Bad Request')
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Get('tx/{txid}')
+  async getTransaction(@Path() txid: string): Promise<Tx> {
+    try {
+      const { data } = await axiosNoRetry.post<EnrichedTransaction[]>(`${INDEXER_URL}/v0/transactions/`, {
+        transactions: [txid],
+      })
+
+      const rawTx = data[0]
+
+      if (!rawTx) throw new Error('Transaction not found')
+
+      const tx = {
+        txid: rawTx.signature,
+        blockHeight: rawTx.slot,
+        ...rawTx,
+      }
+
+      return tx
+    } catch (err) {
+      throw handleError(err)
+    }
   }
 
   /**
    * Sends raw transaction to be broadcast to the node.
    *
-   * @param {SendTxBody} body serialized raw transaction hex
+   * @param {SendTxBody} body serialized raw transaction (base64 encoded)
    *
    * @returns {Promise<string>} transaction signature
    */
@@ -106,7 +171,7 @@ export class Solana implements BaseAPI {
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Post('/fees/priority')
+  @Get('/fees/priority')
   async getPriorityFees(): Promise<PriorityFees> {
     try {
       const { priorityFeeLevels } = await heliusSdk.rpc.getPriorityFeeEstimate({
@@ -128,6 +193,8 @@ export class Solana implements BaseAPI {
 
   /**
    * Get the estimated compute unit cost of a transaction
+   *
+   * @param {EstimateFeesBody} body transaction message (base64 encoded)
    *
    * @returns {Promise<number>} estimated compute unit cost
    */
