@@ -9,7 +9,7 @@ export type Tx = EnrichedTransaction & BaseTx
 /**
  * Contains info about transaction history
  */
-export type TxHistory = BaseTxHistory<Tx> & { cursor: string | undefined }
+export type TxHistory = BaseTxHistory<Tx>
 
 /**
  * Contains info about an address associated with an extended public key
