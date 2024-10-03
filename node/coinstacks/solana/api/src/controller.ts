@@ -9,7 +9,7 @@ import {
   ValidationError,
   handleError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { Account, EstimateFeesBody, PriorityFees, Tx, TxHistory } from './models'
+import { Account, API, EstimateFeesBody, PriorityFees, Tx, TxHistory } from './models'
 import { EnrichedTransaction, Helius } from 'helius-sdk'
 import { VersionedMessage } from '@solana/web3.js'
 import { validatePageSize } from '@shapeshiftoss/common-api'
@@ -37,7 +37,7 @@ const axiosNoRetry = axios.create({ timeout: 5000, params: { 'api-key': RPC_API_
 
 @Route('api/v1')
 @Tags('v1')
-export class Solana implements BaseAPI {
+export class Solana implements BaseAPI, API {
   static baseFee = 5000
 
   /**
@@ -104,24 +104,24 @@ export class Solana implements BaseAPI {
 
       const nextCursor = txs.length ? txs[txs.length - 1].signature : undefined
 
-      return { pubkey, txs: txs, cursor: nextCursor }
+      return { pubkey, cursor: nextCursor, txs: txs }
     } catch (err) {
       throw handleError(err)
     }
   }
 
   /**
-   * Get transaction by txid
+   * Get transaction details
    *
-   * @param {string} txid transaction id
+   * @param {string} txid transaction signature
    *
-   * @returns {Promise<Tx>} parsed transaction
+   * @returns {Promise<Tx>} transaction payload
    */
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('tx/{txid}')
-  async getTxById(@Path() txid: string): Promise<Tx> {
+  async getTransaction(@Path() txid: string): Promise<Tx> {
     try {
       const { data } = await axiosNoRetry.post<EnrichedTransaction[]>(`${INDEXER_URL}/v0/transactions/`, {
         transactions: [txid],
@@ -146,7 +146,7 @@ export class Solana implements BaseAPI {
   /**
    * Sends raw transaction to be broadcast to the node.
    *
-   * @param {SendTxBody} body serialized raw transaction hex
+   * @param {SendTxBody} body serialized raw transaction (base64 encoded)
    *
    * @returns {Promise<string>} transaction signature
    */
@@ -172,7 +172,7 @@ export class Solana implements BaseAPI {
   @Response<BadRequestError>(400, 'Bad Request')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
-  @Post('/fees/priority')
+  @Get('/fees/priority')
   async getPriorityFees(): Promise<PriorityFees> {
     try {
       const { priorityFeeLevels } = await heliusSdk.rpc.getPriorityFeeEstimate({
@@ -194,6 +194,8 @@ export class Solana implements BaseAPI {
 
   /**
    * Get the estimated compute unit cost of a transaction
+   *
+   * @param {EstimateFeesBody} body transaction message (base64 encoded)
    *
    * @returns {Promise<number>} estimated compute unit cost
    */

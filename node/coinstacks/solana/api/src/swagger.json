@@ -89,6 +89,32 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"BaseTx": {
+				"description": "Contains base transaction details",
+				"properties": {
+					"txid": {
+						"type": "string"
+					},
+					"blockHash": {
+						"type": "string"
+					},
+					"blockHeight": {
+						"type": "number",
+						"format": "double"
+					},
+					"timestamp": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"txid",
+					"blockHeight",
+					"timestamp"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"TransactionType": {
 				"enum": [
 					"ANY",
@@ -1124,39 +1150,13 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"BaseTx": {
-				"description": "Contains base transaction details",
-				"properties": {
-					"txid": {
-						"type": "string"
-					},
-					"blockHash": {
-						"type": "string"
-					},
-					"blockHeight": {
-						"type": "number",
-						"format": "double"
-					},
-					"timestamp": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"txid",
-					"blockHeight",
-					"timestamp"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"Tx": {
 				"allOf": [
 					{
-						"$ref": "#/components/schemas/EnrichedTransaction"
+						"$ref": "#/components/schemas/BaseTx"
 					},
 					{
-						"$ref": "#/components/schemas/BaseTx"
+						"$ref": "#/components/schemas/EnrichedTransaction"
 					}
 				],
 				"description": "Contains info about a transaction"
@@ -1185,19 +1185,7 @@
 				"additionalProperties": false
 			},
 			"TxHistory": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/BaseTxHistory_Tx_"
-					},
-					{
-						"properties": {
-							"cursor": {
-								"type": "string"
-							}
-						},
-						"type": "object"
-					}
-				],
+				"$ref": "#/components/schemas/BaseTxHistory_Tx_",
 				"description": "Contains info about transaction history"
 			},
 			"SendTxBody": {
@@ -1439,10 +1427,10 @@
 		},
 		"/api/v1/tx/{txid}": {
 			"get": {
-				"operationId": "GetTxById",
+				"operationId": "GetTransaction",
 				"responses": {
 					"200": {
-						"description": "parsed transaction",
+						"description": "transaction payload",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -1482,14 +1470,14 @@
 						}
 					}
 				},
-				"description": "Get transaction by txid",
+				"description": "Get transaction details",
 				"tags": [
 					"v1"
 				],
 				"security": [],
 				"parameters": [
 					{
-						"description": "transaction id",
+						"description": "transaction signature",
 						"in": "path",
 						"name": "txid",
 						"required": true,
@@ -1552,13 +1540,13 @@
 				"security": [],
 				"parameters": [],
 				"requestBody": {
-					"description": "serialized raw transaction hex",
+					"description": "serialized raw transaction (base64 encoded)",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
 								"$ref": "#/components/schemas/SendTxBody",
-								"description": "serialized raw transaction hex"
+								"description": "serialized raw transaction (base64 encoded)"
 							}
 						}
 					}
@@ -1566,7 +1554,7 @@
 			}
 		},
 		"/api/v1/fees/priority": {
-			"post": {
+			"get": {
 				"operationId": "GetPriorityFees",
 				"responses": {
 					"200": {
@@ -1671,11 +1659,13 @@
 				"security": [],
 				"parameters": [],
 				"requestBody": {
+					"description": "transaction message (base64 encoded)",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/EstimateFeesBody"
+								"$ref": "#/components/schemas/EstimateFeesBody",
+								"description": "transaction message (base64 encoded)"
 							}
 						}
 					}
