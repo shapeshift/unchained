@@ -10,9 +10,9 @@ import { Helius } from 'helius-sdk'
 import { GeyserResultTransaction } from './models'
 
 const PORT = process.env.PORT ?? 3000
-const WEBSOCKET_URL = process.env.WEBSOCKET_URL
-const GEYSER_URL = process.env.GEYSER_URL
 const RPC_API_KEY = process.env.RPC_API_KEY
+const WEBSOCKET_URL = process.env.WEBSOCKET_URL
+const WEBSOCKET_API_KEY = process.env.WEBSOCKET_API_KEY
 
 export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'solana', 'api'],
@@ -20,7 +20,7 @@ export const logger = new Logger({
 })
 
 if (!WEBSOCKET_URL) throw new Error('WEBSOCKET_URL env var not set')
-if (!GEYSER_URL) throw new Error('GEYSER_URL env var not set')
+if (!WEBSOCKET_API_KEY) throw new Error('WEBSOCKET_API_KEY env var not set')
 if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
 
 export const heliusSdk = new Helius(RPC_API_KEY)
@@ -68,17 +68,15 @@ const transactionHandler: TransactionHandler<GeyserResultTransaction, GeyserResu
 
 const registry = new Registry({
   addressFormatter: (address: string) => address,
+  // @TODO: Make it optional in the registry class
   blockHandler: async () => {
-    // @TODO: What should we do with this?
     return { txs: [] }
   },
   transactionHandler,
 })
 
 const heliusWebsocket = new SolanaWebsocketClient(WEBSOCKET_URL, {
-  geyserUrl: GEYSER_URL,
-  apiKey: RPC_API_KEY,
-  blockHandler: [registry.onBlock.bind(registry)],
+  apiKey: WEBSOCKET_API_KEY,
   transactionHandler: registry.onTransaction.bind(registry),
 })
 
