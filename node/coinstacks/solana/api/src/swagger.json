@@ -1185,19 +1185,7 @@
 				"additionalProperties": false
 			},
 			"TxHistory": {
-				"allOf": [
-					{
-						"$ref": "#/components/schemas/BaseTxHistory_Tx_"
-					},
-					{
-						"properties": {
-							"cursor": {
-								"type": "string"
-							}
-						},
-						"type": "object"
-					}
-				],
+				"$ref": "#/components/schemas/BaseTxHistory_Tx_",
 				"description": "Contains info about transaction history"
 			},
 			"SendTxBody": {
