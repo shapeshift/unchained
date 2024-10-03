@@ -189,3 +189,10 @@ export interface GeyserParsedMessageInstructionInfo {
   destination?: string
   lamports?: number
 }
+
+/**
+ * Contains the base64 encoded transaction message
+ */
+export interface EstimateFeesBody {
+  message: string
+}
