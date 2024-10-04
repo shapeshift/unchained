@@ -11,16 +11,16 @@ import { Transaction } from './types'
 
 const PORT = process.env.PORT ?? 3000
 const RPC_API_KEY = process.env.RPC_API_KEY
-const WEBSOCKET_URL = process.env.WEBSOCKET_URL
-const WEBSOCKET_API_KEY = process.env.WEBSOCKET_API_KEY
+const WS_URL = process.env.WS_URL
+const WS_API_KEY = process.env.WS_API_KEY
 
 export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'solana', 'api'],
   level: process.env.LOG_LEVEL,
 })
 
-if (!WEBSOCKET_URL) throw new Error('WEBSOCKET_URL env var not set')
-if (!WEBSOCKET_API_KEY) throw new Error('WEBSOCKET_API_KEY env var not set')
+if (!WS_URL) throw new Error('WS_URL env var not set')
+if (!WS_API_KEY) throw new Error('WS_API_KEY env var not set')
 if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
 
 export const heliusSdk = new Helius(RPC_API_KEY)
@@ -69,8 +69,8 @@ const registry = new Registry({
   transactionHandler,
 })
 
-const helius = new WebsocketClient(WEBSOCKET_URL, {
-  apiKey: WEBSOCKET_API_KEY,
+const helius = new WebsocketClient(WS_URL, {
+  apiKey: WS_API_KEY,
   transactionHandler: registry.onTransaction.bind(registry),
 })
 
