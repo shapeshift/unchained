@@ -15,6 +15,7 @@ export class WebsocketClient extends BaseWebsocketClient {
   private handleTransaction: TransactionHandler | Array<TransactionHandler>
 
   private addresses: Array<string> = []
+  private subscriptionsIds: Array<number> = []
 
   constructor(_url: string, args: WebsocketArgs, opts?: Options) {
     const url = args.apiKey ? `${_url}?api-key=${args.apiKey}` : _url
@@ -41,6 +42,10 @@ export class WebsocketClient extends BaseWebsocketClient {
     try {
       const res: WebsocketResponse = JSON.parse(message.data.toString())
 
+      if (res.params?.subscription && !this.subscriptionsIds.includes(res.params.subscription)) {
+        this.subscriptionsIds = [...this.subscriptionsIds, res.params.subscription]
+      }
+
       switch (res.method) {
         case 'transactionNotification':
           if ('result' in res.params) {
@@ -60,6 +65,19 @@ export class WebsocketClient extends BaseWebsocketClient {
   subscribeAddresses(addresses: string[]): void {
     this.addresses = addresses
     const subscribeAddresses = this.getAddressesSubscription()
+
+    this.subscriptionsIds.forEach((id) => {
+      this.socket.send(
+        JSON.stringify({
+          jsonrpc: '2.0',
+          id: 'newTx',
+          method: 'transactionUnsubscribe',
+          params: [id],
+        })
+      )
+    })
+
+    this.subscriptionsIds = []
 
     try {
       this.socket.send(JSON.stringify(subscribeAddresses))
