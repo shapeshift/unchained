@@ -1,7 +1,13 @@
 import { Logger } from '@shapeshiftoss/logger'
 import { WebsocketClient as BaseWebsocketClient, Args, Options, Subscription } from '@shapeshiftoss/websocket'
 import WebSocket from 'ws'
-import { Transaction, WebsocketResponse } from './types'
+import {
+  isWebsocketResponse,
+  isWebsocketSubscribeResponse,
+  Transaction,
+  WebsocketResponse,
+  WebsocketSubscribeResponse,
+} from './types'
 
 const logger = new Logger({ namespace: ['unchained', 'solana', 'websocket'], level: process.env.LOG_LEVEL })
 
@@ -40,15 +46,15 @@ export class WebsocketClient extends BaseWebsocketClient {
 
   protected async onMessage(message: WebSocket.MessageEvent): Promise<void> {
     try {
-      const res: WebsocketResponse = JSON.parse(message.data.toString())
+      const res: WebsocketResponse | WebsocketSubscribeResponse = JSON.parse(message.data.toString())
 
-      if (res.params?.subscription && !this.subscriptionsIds.includes(res.params.subscription)) {
-        this.subscriptionsIds = [...this.subscriptionsIds, res.params.subscription]
+      if (isWebsocketSubscribeResponse(res)) {
+        this.subscriptionsIds = [...this.subscriptionsIds, res.result]
       }
 
       switch (res.method) {
         case 'transactionNotification':
-          if ('result' in res.params) {
+          if (isWebsocketResponse(res)) {
             if (Array.isArray(this.handleTransaction)) {
               this.handleTransaction.map(async (handleTransaction) => handleTransaction(res.params.result.transaction))
             } else {
@@ -70,7 +76,7 @@ export class WebsocketClient extends BaseWebsocketClient {
       this.socket.send(
         JSON.stringify({
           jsonrpc: '2.0',
-          id: 'newTx',
+          id: 'newTxUnsubscribe',
           method: 'transactionUnsubscribe',
           params: [id],
         })
