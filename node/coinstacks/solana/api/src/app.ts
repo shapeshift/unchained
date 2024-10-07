@@ -63,7 +63,7 @@ app.get('/', async (_, res) => {
 app.use(middleware.errorHandler, middleware.notFoundHandler)
 
 const transactionHandler: TransactionHandler<Logs, Tx> = async (log) => {
-  const tx = await getTransaction(log.signature)
+  const tx = await getTransaction(log.signature, true)
 
   const addresses = tx.accountData.map((key) => key.account)
 

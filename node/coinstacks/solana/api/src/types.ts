@@ -31,5 +31,5 @@ export const isWebsocketResponse = (data: unknown): data is WebsocketResponse =>
 }
 
 export const isWebsocketSubscribeResponse = (data: unknown): data is WebsocketSubscribeResponse => {
-  return Boolean(typeof data === 'object' && data && 'result' in data)
+  return Boolean(typeof data === 'object' && data && 'result' in data && typeof data.result === 'number')
 }
