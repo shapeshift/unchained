@@ -7,7 +7,11 @@ import { RegisterRoutes } from './routes'
 import { Server } from 'ws'
 import { WebsocketClient } from './websocket'
 import { Helius } from 'helius-sdk'
-import { Transaction } from './types'
+import { getTransaction } from './utils'
+import { Tx } from './models'
+import { Logs } from '@solana/web3.js'
+// import { getTransaction } from './utils'
+// import { Tx } from './models'
 
 const PORT = process.env.PORT ?? 3000
 const RPC_API_KEY = process.env.RPC_API_KEY
@@ -58,10 +62,12 @@ app.get('/', async (_, res) => {
 
 app.use(middleware.errorHandler, middleware.notFoundHandler)
 
-const transactionHandler: TransactionHandler<Transaction, Transaction> = async (geyserTx) => {
-  const addresses = geyserTx.transaction.message.accountKeys.map((key) => key.pubkey.toString())
+const transactionHandler: TransactionHandler<Logs, Tx> = async (log) => {
+  const tx = await getTransaction(log.signature)
 
-  return { addresses, tx: geyserTx }
+  const addresses = tx.accountData.map((key) => key.account)
+
+  return { addresses, tx }
 }
 
 const registry = new Registry({

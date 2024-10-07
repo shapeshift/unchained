@@ -1,4 +1,4 @@
-import { ParsedTransactionWithMeta } from '@solana/web3.js'
+import { Logs, ParsedTransactionWithMeta } from '@solana/web3.js'
 
 export type Transaction = Omit<ParsedTransactionWithMeta, 'slot'>
 
@@ -20,9 +20,10 @@ interface Params {
 }
 
 interface Result {
-  transaction: Transaction
-  signature: string
-  slot: number
+  value: Logs
+  context: {
+    slot: number
+  }
 }
 
 export const isWebsocketResponse = (data: unknown): data is WebsocketResponse => {

@@ -1,7 +1,6 @@
 import { Logger } from '@shapeshiftoss/logger'
 import { validatePageSize } from '@shapeshiftoss/common-api'
 import { VersionedMessage } from '@solana/web3.js'
-import axios from 'axios'
 import { EnrichedTransaction } from 'helius-sdk'
 import { Body, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import {
@@ -15,24 +14,13 @@ import {
 } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { heliusSdk } from './app'
 import { Account, API, EstimateFeesBody, PriorityFees, Tx, TxHistory } from './models'
-
-const RPC_URL = process.env.RPC_URL
-const RPC_API_KEY = process.env.RPC_API_KEY
-const INDEXER_URL = process.env.INDEXER_URL
-
-const NETWORK = process.env.NETWORK
-
-if (!NETWORK) throw new Error('NETWORK env var not set')
-if (!RPC_URL) throw new Error('RPC_URL env var not set')
-if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
-if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
+import { NETWORK, INDEXER_URL } from './constants'
+import { axiosNoRetry, getTransaction } from './utils'
 
 export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'solana', 'api'],
   level: process.env.LOG_LEVEL,
 })
-
-const axiosNoRetry = axios.create({ timeout: 5000, params: { 'api-key': RPC_API_KEY } })
 
 @Route('api/v1')
 @Tags('v1')
@@ -121,25 +109,7 @@ export class Solana implements BaseAPI, API {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('tx/{txid}')
   async getTransaction(@Path() txid: string): Promise<Tx> {
-    try {
-      const { data } = await axiosNoRetry.post<EnrichedTransaction[]>(`${INDEXER_URL}/v0/transactions/`, {
-        transactions: [txid],
-      })
-
-      const rawTx = data[0]
-
-      if (!rawTx) throw new Error('Transaction not found')
-
-      const tx = {
-        txid: rawTx.signature,
-        blockHeight: rawTx.slot,
-        ...rawTx,
-      }
-
-      return tx
-    } catch (err) {
-      throw handleError(err)
-    }
+    return getTransaction(txid)
   }
 
   /**

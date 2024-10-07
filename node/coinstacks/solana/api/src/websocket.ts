@@ -4,10 +4,10 @@ import WebSocket from 'ws'
 import {
   isWebsocketResponse,
   isWebsocketSubscribeResponse,
-  Transaction,
   WebsocketResponse,
   WebsocketSubscribeResponse,
 } from './types'
+import { Logs } from '@solana/web3.js'
 
 const logger = new Logger({ namespace: ['unchained', 'solana', 'websocket'], level: process.env.LOG_LEVEL })
 
@@ -15,7 +15,7 @@ interface WebsocketArgs extends Omit<Args, 'logger'> {
   transactionHandler: TransactionHandler | Array<TransactionHandler>
 }
 
-type TransactionHandler = (data: Transaction) => Promise<void>
+type TransactionHandler = (data: Logs) => Promise<void>
 
 export class WebsocketClient extends BaseWebsocketClient {
   private handleTransaction: TransactionHandler | Array<TransactionHandler>
@@ -40,7 +40,14 @@ export class WebsocketClient extends BaseWebsocketClient {
 
     if (this.addresses.length > 0) {
       const subscribeAddresses = this.getAddressesSubscription()
-      this.socket.send(JSON.stringify(subscribeAddresses))
+
+      subscribeAddresses.forEach((subscribeAddress) => {
+        try {
+          this.socket.send(JSON.stringify(subscribeAddress))
+        } catch (err) {
+          this.logger.debug(err, `failed to subscribe addresses: ${JSON.stringify(subscribeAddress)}`)
+        }
+      })
     }
   }
 
@@ -53,12 +60,12 @@ export class WebsocketClient extends BaseWebsocketClient {
       }
 
       switch (res.method) {
-        case 'transactionNotification':
+        case 'logsNotification':
           if (isWebsocketResponse(res)) {
             if (Array.isArray(this.handleTransaction)) {
-              this.handleTransaction.map(async (handleTransaction) => handleTransaction(res.params.result.transaction))
+              this.handleTransaction.map(async (handleTransaction) => handleTransaction(res.params.result.value))
             } else {
-              this.handleTransaction(res.params.result.transaction)
+              this.handleTransaction(res.params.result.value)
             }
           }
           return
@@ -77,7 +84,7 @@ export class WebsocketClient extends BaseWebsocketClient {
         JSON.stringify({
           jsonrpc: '2.0',
           id: 'newTxUnsubscribe',
-          method: 'transactionUnsubscribe',
+          method: 'logsUnsubscribe',
           params: [id],
         })
       )
@@ -85,29 +92,25 @@ export class WebsocketClient extends BaseWebsocketClient {
 
     this.subscriptionsIds = []
 
-    try {
-      this.socket.send(JSON.stringify(subscribeAddresses))
-    } catch (err) {
-      this.logger.debug(err, `failed to subscribe addresses: ${JSON.stringify(subscribeAddresses)}`)
-    }
+    subscribeAddresses.forEach((subscribeAddress) => {
+      try {
+        this.socket.send(JSON.stringify(subscribeAddress))
+      } catch (err) {
+        this.logger.debug(err, `failed to subscribe addresses: ${JSON.stringify(subscribeAddress)}`)
+      }
+    })
   }
 
-  private getAddressesSubscription(): Subscription {
-    return {
+  private getAddressesSubscription(): Subscription[] {
+    return this.addresses.map((address) => ({
       jsonrpc: '2.0',
       id: 'newTx',
-      method: 'transactionSubscribe',
+      method: 'logsSubscribe',
       params: [
         {
-          accountInclude: this.addresses,
-        },
-        {
-          encoding: 'jsonParsed',
-          transactionDetails: 'full',
-          showRewards: true,
-          maxSupportedTransactionVersion: 0,
+          mentions: [address],
         },
       ],
-    }
+    }))
   }
 }
