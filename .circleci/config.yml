@@ -435,14 +435,6 @@ workflows:
             - deploy cosmos develop
           <<: *only-cosmos
 
-      - deploy-coinstack-node:
-          name: deploy solana develop
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - deploy dependencies
-          <<: [*solana-dev, *only-develop]
-
       - deploy-coinstack-go:
           name: preview cosmos
           organization: TAXISTAKE

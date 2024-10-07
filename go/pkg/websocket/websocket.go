@@ -68,6 +68,8 @@ func NewConnection(conn *websocket.Conn, handler Registrar, manager *Manager) *C
 
 	c.manager.register <- c
 
+	logger.Debugf("NewConnection: clientID: %s (total: %d)", c.clientID, c.manager.ConnectionCount())
+
 	return c
 }
 
@@ -135,6 +137,8 @@ func (c *Connection) Stop() {
 	if _, ok := c.manager.connections[c]; ok {
 		c.manager.unregister <- c
 	}
+
+	logger.Debugf("Stop: clientID: %s (total: %d)", c.clientID, c.manager.ConnectionCount())
 }
 
 func (c *Connection) cleanup() {
@@ -173,11 +177,20 @@ func (c *Connection) read() {
 				logger.Errorf("failed to write pong message: %+v", err)
 			}
 		case "subscribe":
+			logger.Debugf("Subscribe: clientID: %s, subscriptionID: %s, addresses: %v", c.clientID, r.SubscriptionID, r.Data.Addresses)
 			c.subscriptionIDs[r.SubscriptionID] = struct{}{}
 			c.handler.Subscribe(c.clientID, r.SubscriptionID, r.Data.Addresses, c.msgChan)
 		case "unsubscribe":
-			delete(c.subscriptionIDs, r.SubscriptionID)
-			c.handler.Unsubscribe(c.clientID, r.SubscriptionID, r.Data.Addresses, c.msgChan)
+			logger.Debugf("Unsubscribe: clientID: %s, subscriptionID: %s, addresses: %v", c.clientID, r.SubscriptionID, r.Data.Addresses)
+			if r.SubscriptionID == "" {
+				for subscriptionID := range c.subscriptionIDs {
+					delete(c.subscriptionIDs, subscriptionID)
+					c.handler.Unsubscribe(c.clientID, subscriptionID, r.Data.Addresses, c.msgChan)
+				}
+			} else {
+				delete(c.subscriptionIDs, r.SubscriptionID)
+				c.handler.Unsubscribe(c.clientID, r.SubscriptionID, r.Data.Addresses, c.msgChan)
+			}
 		default:
 			c.writeError(fmt.Sprintf("%s method not implemented", r.Method), r.SubscriptionID)
 		}
