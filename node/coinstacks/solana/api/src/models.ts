@@ -20,9 +20,29 @@ export interface Address {
 }
 
 /**
+ * Contains info about a token
+ */
+export interface Token {
+  id: string
+  decimals: number
+  name: string
+  symbol: string
+  type: string
+}
+
+/**
+ * Contains info about a token including balance for an address
+ */
+export interface TokenBalance extends Token {
+  balance: string
+}
+
+/**
  * Contains info about an address or extended public key account
  */
-export interface Account extends BaseAccount {}
+export interface Account extends BaseAccount {
+  tokens: Array<TokenBalance>
+}
 
 /**
  * Extended coin specific functionality

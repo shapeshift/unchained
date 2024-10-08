@@ -9,11 +9,12 @@ import {
   ValidationError,
   handleError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { Account, API, EstimateFeesBody, PriorityFees, Tx, TxHistory } from './models'
-import { EnrichedTransaction, Helius } from 'helius-sdk'
+import { Account, API, EstimateFeesBody, PriorityFees, TokenBalance, Tx, TxHistory } from './models'
+import { DAS, EnrichedTransaction, Helius, Interface } from 'helius-sdk'
 import { VersionedMessage } from '@solana/web3.js'
 import { validatePageSize } from '@shapeshiftoss/common-api'
 import axios from 'axios'
+import { NativeBalance } from './types'
 
 const RPC_URL = process.env.RPC_URL
 const RPC_API_KEY = process.env.RPC_API_KEY
@@ -64,7 +65,48 @@ export class Solana implements BaseAPI, API {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}')
   async getAccount(@Path() pubkey: string): Promise<Account> {
-    return { pubkey } as Account
+    try {
+      let page = 1
+      let balance = '0'
+      let hasMore = false
+      let tokens: Array<TokenBalance> = []
+
+      do {
+        const { total, limit, items, nativeBalance } = (await heliusSdk.rpc.getAssetsByOwner({
+          ownerAddress: pubkey,
+          page: page++,
+          displayOptions: { showFungible: true, showNativeBalance: true, showZeroBalance: true },
+        })) as DAS.GetAssetResponseList & { nativeBalance: NativeBalance }
+
+        hasMore = total === limit
+        balance = BigInt(nativeBalance.lamports).toString()
+
+        tokens = items.reduce<Array<TokenBalance>>((prev, item) => {
+          if (!item.content) return prev
+          if (item.interface !== Interface.FUNGIBLE_TOKEN) return prev
+
+          prev.push({
+            id: item.id,
+            name: item.content.metadata.name,
+            symbol: item.content.metadata.symbol,
+            decimals: item.token_info?.decimals ?? 0,
+            balance: item.token_info?.balance ? BigInt(item.token_info.balance).toString() : '0',
+            type: item.interface,
+          })
+
+          return prev
+        }, tokens)
+      } while (hasMore)
+
+      return {
+        pubkey,
+        balance,
+        unconfirmedBalance: '0',
+        tokens,
+      }
+    } catch (err) {
+      throw handleError(err)
+    }
   }
 
   /**
