@@ -669,6 +669,33 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 1
 
+  - &solana
+    assetName: solana
+    pulumi-stack: public-us-east-2
+    pulumi-dir: coinstacks/solana/pulumi
+    rpc-url: https://mainnet.helius-rpc.com
+    rpc-api-key: $HELIUS_API_KEY
+    indexer-url: https://api.helius.xyz
+    indexer-api-key: $HELIUS_API_KEY
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 6
+    api-cpu-limit: 500m
+    api-cpu-request: 250m
+    api-cpu-threshold: 75
+    api-memory-limit: 1Gi
+    api-memory-request: 500Mi
+
+  - &solana-dev
+    <<: *solana
+    environment: dev
+    pulumi-stack: public-dev-us-east-2
+    rpc-url: https://mainnet.helius-rpc.com
+    indexer-url: https://api.helius.xyz
+    api-replicas: 1
+    api-max-replicas: 2
+    api-memory-limit: 500Mi
+
   - &proxy
     assetName: proxy
     pulumi-stack: public-us-east-2
@@ -1224,6 +1251,14 @@ workflows:
             - deploy dependencies
           <<: [*base-dev, *only-develop]
 
+      - deploy-coinstack-node:
+          name: deploy solana develop
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - deploy dependencies
+          <<: [*solana-dev, *only-develop]
+
       - deploy-coinstack-go:
           name: deploy thorchain develop
           organization: TAXISTAKE
@@ -1564,6 +1599,30 @@ workflows:
           requires:
             - approve base
           <<: [*base, *only-main]
+
+      ####### SOLANA
+      - deploy-coinstack-node:
+          name: preview solana
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies
+          <<: [*solana, *only-main]
+
+      - approve-coinstack:
+          name: approve solana
+          type: approval
+          requires:
+            - preview solana
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy solana
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve solana
+          <<: [*solana, *only-main]
 
       ####### THORCHAIN
       - deploy-coinstack-go:
