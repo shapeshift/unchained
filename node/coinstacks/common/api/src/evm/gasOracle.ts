@@ -1,12 +1,9 @@
-import axiosRetry from 'axios-retry'
 import { ethers } from 'ethers'
 import { Logger } from '@shapeshiftoss/logger'
 import { Fees } from './models'
 import { NewBlock } from '@shapeshiftoss/blockbook'
 import { NodeBlock, NodeTransaction } from './types'
-
-const exponentialDelay = async (retryCount: number) =>
-  new Promise((resolve) => setTimeout(resolve, axiosRetry.exponentialDelay(retryCount, undefined, 500)))
+import { exponentialDelay } from '../utils'
 
 export interface GasOracleArgs {
   logger: Logger
