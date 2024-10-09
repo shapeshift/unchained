@@ -12,7 +12,6 @@ axiosRetry(axiosWithRetry, {
   shouldResetTimeout: true,
   retries: 5,
   retryDelay: (retryCount, err) => {
-    console.log({ retryCount, err })
     // don't add delay on top of request timeout
     if (err.code === 'ECONNABORTED') return 0
     // add exponential delay for network errors

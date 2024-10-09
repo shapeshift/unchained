@@ -10,8 +10,6 @@ import { Helius } from 'helius-sdk'
 import { getTransaction } from './utils'
 import { Tx } from './models'
 import { Logs } from '@solana/web3.js'
-// import { getTransaction } from './utils'
-// import { Tx } from './models'
 
 const PORT = process.env.PORT ?? 3000
 const RPC_API_KEY = process.env.RPC_API_KEY
