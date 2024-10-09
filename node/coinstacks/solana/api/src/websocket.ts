@@ -42,8 +42,13 @@ export class WebsocketClient extends BaseWebsocketClient {
   protected async onMessage(message: WebSocket.MessageEvent): Promise<void> {
     try {
       const res: WebsocketResponse | WebsocketSubscribeResponse = JSON.parse(message.data.toString())
-      if (isWebsocketSubscribeResponse(res)) {
-        this.subscriptionsIds.set(this.currentSubscriptionId, res.result)
+
+      if (isWebsocketSubscribeResponse(res) && typeof res.result === 'number') {
+        if (res.id === this.currentSubscriptionId.toString()) {
+          this.subscriptionsIds.set(this.currentSubscriptionId, res.result)
+        } else {
+          this.unsubscribe(res.result)
+        }
       }
 
       switch (res.method) {
@@ -105,7 +110,7 @@ export class WebsocketClient extends BaseWebsocketClient {
   private getAddressesSubscription(): Subscription[] {
     return this.addresses.map((address) => ({
       jsonrpc: '2.0',
-      id: 'newTx',
+      id: this.currentSubscriptionId.toString(),
       method: 'logsSubscribe',
       params: [
         {

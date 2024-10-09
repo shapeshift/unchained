@@ -4,12 +4,14 @@ export type Transaction = Omit<ParsedTransactionWithMeta, 'slot'>
 
 export interface WebsocketSubscribeResponse {
   jsonrpc: '2.0'
+  id: string
   method: string
-  result: number
+  result: unknown
 }
 
 export interface WebsocketResponse {
   jsonrpc: '2.0'
+  id: string
   method: string
   params: Params
 }
