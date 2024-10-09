@@ -33,3 +33,9 @@ export const isWebsocketResponse = (data: unknown): data is WebsocketResponse =>
 export const isWebsocketSubscribeResponse = (data: unknown): data is WebsocketSubscribeResponse => {
   return Boolean(typeof data === 'object' && data && 'result' in data && typeof data.result === 'number')
 }
+
+export type NativeBalance = {
+  lamports: number
+  price_per_sol: number
+  total_price: number
+}

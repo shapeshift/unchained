@@ -19,6 +19,40 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"TokenBalance": {
+				"description": "Contains info about a token including balance for an address",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"decimals": {
+						"type": "number",
+						"format": "double"
+					},
+					"name": {
+						"type": "string"
+					},
+					"symbol": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string"
+					},
+					"balance": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"decimals",
+					"name",
+					"symbol",
+					"type",
+					"balance"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"Account": {
 				"description": "Contains info about an address or extended public key account",
 				"properties": {
@@ -30,12 +64,19 @@
 					},
 					"pubkey": {
 						"type": "string"
+					},
+					"tokens": {
+						"items": {
+							"$ref": "#/components/schemas/TokenBalance"
+						},
+						"type": "array"
 					}
 				},
 				"required": [
 					"balance",
 					"unconfirmedBalance",
-					"pubkey"
+					"pubkey",
+					"tokens"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -596,17 +637,31 @@
 				"type": "string"
 			},
 			"Token": {
+				"description": "Contains info about a token",
 				"properties": {
-					"mint": {
+					"id": {
 						"type": "string"
 					},
-					"tokenStandard": {
-						"$ref": "#/components/schemas/TokenStandard"
+					"decimals": {
+						"type": "number",
+						"format": "double"
+					},
+					"name": {
+						"type": "string"
+					},
+					"symbol": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string"
 					}
 				},
 				"required": [
-					"mint",
-					"tokenStandard"
+					"id",
+					"decimals",
+					"name",
+					"symbol",
+					"type"
 				],
 				"type": "object",
 				"additionalProperties": false
