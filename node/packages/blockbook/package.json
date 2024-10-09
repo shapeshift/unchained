@@ -17,7 +17,6 @@
     "watch": "nodemon -e ts --watch src --ignore src/routes.ts -x yarn build"
   },
   "dependencies": {
-    "@shapeshiftoss/common-api": "^10.0.0",
     "@shapeshiftoss/websocket": "^10.0.0",
     "ws": "^8.15.0"
   },

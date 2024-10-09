@@ -1,9 +1,9 @@
-import { AxiosInstance, isAxiosError } from 'axios'
+import axios, { AxiosInstance, isAxiosError } from 'axios'
+import axiosRetry, { isNetworkOrIdempotentRequestError } from 'axios-retry'
 import { Controller, Example, Get, Path, Query, Route, Tags } from 'tsoa'
 import type { Address, BalanceHistory, Block, BlockbookArgs, BlockIndex, Info, SendTx, Tx, Utxo, Xpub } from './models'
 import { ApiError } from './models'
 import { Logger } from '@shapeshiftoss/logger'
-import { createAxiosRetry } from '@shapeshiftoss/common-api'
 
 const defaultArgs: BlockbookArgs = {
   httpURL: 'https://indexer.ethereum.shapeshift.com',
@@ -18,11 +18,11 @@ export class Blockbook extends Controller {
   wsURL: string
   logger: Logger
 
-  constructor(args: BlockbookArgs = defaultArgs, timeout?: number) {
+  constructor(args: BlockbookArgs = defaultArgs, timeout?: number, retries = 5) {
     super()
     this.logger = args.logger.child({ namespace: ['blockbook'] })
     this.wsURL = args.apiKey ? `${args.wsURL}/${args.apiKey}` : args.wsURL
-    this.instance = createAxiosRetry({
+    this.instance = axios.create({
       timeout: timeout ?? 10000,
       baseURL: args.httpURL,
       headers: {
@@ -30,6 +30,20 @@ export class Blockbook extends Controller {
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
+    })
+    axiosRetry(this.instance, {
+      shouldResetTimeout: true,
+      retries,
+      retryDelay: (retryCount, err) => {
+        // don't add delay on top of request timeout
+        if (err.code === 'ECONNABORTED') return 0
+        // add exponential delay for network errors
+        return axiosRetry.exponentialDelay(retryCount, undefined, 500)
+      },
+      retryCondition: (err) =>
+        isNetworkOrIdempotentRequestError(err) ||
+        (!!err.response && err.response.status >= 400 && err.response.status < 600) ||
+        err.code === 'ECONNABORTED',
     })
   }
 
