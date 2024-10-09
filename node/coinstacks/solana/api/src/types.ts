@@ -11,7 +11,6 @@ export interface WebsocketSubscribeResponse {
 
 export interface WebsocketResponse {
   jsonrpc: '2.0'
-  id: string
   method: string
   params: Params
 }
