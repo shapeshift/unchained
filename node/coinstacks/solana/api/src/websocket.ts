@@ -20,8 +20,8 @@ type TransactionHandler = (data: Logs) => Promise<void>
 export class WebsocketClient extends BaseWebsocketClient {
   private handleTransaction: TransactionHandler | Array<TransactionHandler>
   private addresses: Array<string> = []
-  private subscriptionsIds: Map<number, number> = new Map()
-  private currentSubscriptionId: number = 0
+  private subscriptionIds: Array<number> = []
+  private currentId = 0
 
   constructor(_url: string, args: WebsocketArgs, opts?: Options) {
     const url = args.apiKey ? `${_url}?api-key=${args.apiKey}` : _url
@@ -34,32 +34,27 @@ export class WebsocketClient extends BaseWebsocketClient {
 
   protected onOpen(): void {
     super._onOpen()
-    if (this.addresses.length > 0) {
-      this.subscribeAddresses(this.addresses)
-    }
+    if (this.addresses.length > 0) this.subscribeAddresses(this.addresses)
   }
 
   protected async onMessage(message: WebSocket.MessageEvent): Promise<void> {
     try {
       const res: WebsocketResponse | WebsocketSubscribeResponse = JSON.parse(message.data.toString())
 
-      if (isWebsocketSubscribeResponse(res) && typeof res.result === 'number') {
-        if (res.id === this.currentSubscriptionId.toString()) {
-          this.subscriptionsIds.set(this.currentSubscriptionId, res.result)
+      if (isWebsocketSubscribeResponse(res)) {
+        if (res.id === this.currentId.toString()) {
+          this.subscriptionIds.push(res.result)
         } else {
           this.unsubscribe(res.result)
         }
+        return
       }
 
       switch (res.method) {
-        case 'logsNotification':
+        case 'logsNotification': {
           if (isWebsocketResponse(res)) {
             const subscriptionId = res.params.subscription
-            const relevantSubscriptionId = Array.from(this.subscriptionsIds.entries()).find(
-              ([, value]) => value === subscriptionId
-            )?.[0]
-
-            if (relevantSubscriptionId === this.currentSubscriptionId) {
+            if (this.subscriptionIds.includes(subscriptionId)) {
               if (Array.isArray(this.handleTransaction)) {
                 this.handleTransaction.forEach(async (handleTransaction) => handleTransaction(res.params.result.value))
               } else {
@@ -69,7 +64,7 @@ export class WebsocketClient extends BaseWebsocketClient {
               this.unsubscribe(subscriptionId)
             }
           }
-          return
+        }
       }
     } catch (err) {
       this.logger.error(err, `failed to handle message: ${JSON.stringify(message)}`)
@@ -78,20 +73,26 @@ export class WebsocketClient extends BaseWebsocketClient {
 
   subscribeAddresses(addresses: string[]): void {
     this.addresses = addresses
-    this.currentSubscriptionId++
+    this.currentId++
 
-    this.subscriptionsIds.forEach((subscriptionId) => {
+    this.subscriptionIds.forEach((subscriptionId) => {
       this.unsubscribe(subscriptionId)
     })
 
-    this.subscriptionsIds.clear()
+    this.subscriptionIds = []
 
-    const subscribeAddresses = this.getAddressesSubscription()
-    subscribeAddresses.forEach((subscribeAddress) => {
+    this.addresses.forEach((address) => {
+      const subscription: Subscription = {
+        jsonrpc: '2.0',
+        id: this.currentId.toString(),
+        method: 'logsSubscribe',
+        params: [{ mentions: [address] }],
+      }
+
       try {
-        this.socket.send(JSON.stringify(subscribeAddress))
+        this.socket.send(JSON.stringify(subscription))
       } catch (err) {
-        this.logger.debug(err, `failed to subscribe addresses: ${JSON.stringify(subscribeAddress)}`)
+        this.logger.debug(err, `failed to subscribe address: ${JSON.stringify(subscription)}`)
       }
     })
   }
@@ -105,18 +106,5 @@ export class WebsocketClient extends BaseWebsocketClient {
         params: [subscriptionId],
       })
     )
-  }
-
-  private getAddressesSubscription(): Subscription[] {
-    return this.addresses.map((address) => ({
-      jsonrpc: '2.0',
-      id: this.currentSubscriptionId.toString(),
-      method: 'logsSubscribe',
-      params: [
-        {
-          mentions: [address],
-        },
-      ],
-    }))
   }
 }

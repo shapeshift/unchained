@@ -1,9 +1,9 @@
-import { ethers } from 'ethers'
-import { Logger } from '@shapeshiftoss/logger'
-import { Fees } from './models'
 import { NewBlock } from '@shapeshiftoss/blockbook'
-import { NodeBlock, NodeTransaction } from './types'
+import { Logger } from '@shapeshiftoss/logger'
+import { ethers } from 'ethers'
 import { exponentialDelay } from '../utils'
+import { Fees } from './models'
+import { NodeBlock, NodeTransaction } from './types'
 
 export interface GasOracleArgs {
   logger: Logger

@@ -673,10 +673,12 @@ aliases:
     assetName: solana
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/solana/pulumi
-    rpc-url: https://mainnet.helius-rpc.com
-    rpc-api-key: $HELIUS_API_KEY
     indexer-url: https://api.helius.xyz
     indexer-api-key: $HELIUS_API_KEY
+    rpc-url: https://mainnet.helius-rpc.com
+    rpc-api-key: $HELIUS_API_KEY
+    ws-url: wss://mainnet.helius-rpc.com
+    ws-api-key: $HELIUS_API_KEY
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 6
@@ -690,8 +692,6 @@ aliases:
     <<: *solana
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    rpc-url: https://mainnet.helius-rpc.com
-    indexer-url: https://api.helius.xyz
     api-replicas: 1
     api-max-replicas: 2
     api-memory-limit: 500Mi
@@ -925,6 +925,12 @@ jobs:
       rpc-api-key:
         type: string
         default: ""
+      ws-url:
+        type: string
+        default: ""
+      ws-api-key:
+        type: string
+        default: ""
       etherscan-env-var:
         type: string
         default: ETHERSCAN_API_KEY
@@ -943,6 +949,8 @@ jobs:
             echo 'export NETWORK=<< parameters.network >>' >> $BASH_ENV
             echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
             echo 'export RPC_API_KEY=<< parameters.rpc-api-key >>' >> $BASH_ENV
+            echo 'export WS_URL=<< parameters.ws-url >>' >> $BASH_ENV
+            echo 'export WS_API_KEY=<< parameters.ws-api-key >>' >> $BASH_ENV
             echo 'export ETHERSCAN_API_KEY=$<< parameters.etherscan-env-var >>' >> $BASH_ENV
       - run:
           name: pulumi

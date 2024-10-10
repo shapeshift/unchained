@@ -1,31 +1,26 @@
+import { ConnectionHandler, middleware, Prometheus, Registry, TransactionHandler } from '@shapeshiftoss/common-api'
+import { Logger } from '@shapeshiftoss/logger'
+import { Logs } from '@solana/web3.js'
 import express from 'express'
 import { join } from 'path'
 import swaggerUi from 'swagger-ui-express'
-import { ConnectionHandler, middleware, Prometheus, Registry, TransactionHandler } from '@shapeshiftoss/common-api'
-import { Logger } from '@shapeshiftoss/logger'
-import { RegisterRoutes } from './routes'
 import { Server } from 'ws'
-import { WebsocketClient } from './websocket'
-import { Helius } from 'helius-sdk'
-import { getTransaction } from './utils'
 import { Tx } from './models'
-import { Logs } from '@solana/web3.js'
+import { RegisterRoutes } from './routes'
+import { getTransaction } from './utils'
+import { WebsocketClient } from './websocket'
 
 const PORT = process.env.PORT ?? 3000
-const RPC_API_KEY = process.env.RPC_API_KEY
 const WS_URL = process.env.WS_URL
 const WS_API_KEY = process.env.WS_API_KEY
+
+if (!WS_URL) throw new Error('WS_URL env var not set')
+if (!WS_API_KEY) throw new Error('WS_API_KEY env var not set')
 
 export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'solana', 'api'],
   level: process.env.LOG_LEVEL,
 })
-
-if (!WS_URL) throw new Error('WS_URL env var not set')
-if (!WS_API_KEY) throw new Error('WS_API_KEY env var not set')
-if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
-
-export const heliusSdk = new Helius(RPC_API_KEY)
 
 const prometheus = new Prometheus({ coinstack: 'solana' })
 

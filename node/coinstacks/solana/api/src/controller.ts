@@ -1,4 +1,6 @@
-import { Logger } from '@shapeshiftoss/logger'
+import { validatePageSize } from '@shapeshiftoss/common-api'
+import { VersionedMessage } from '@solana/web3.js'
+import { DAS, EnrichedTransaction, Helius, Interface } from 'helius-sdk'
 import { Body, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import {
   BadRequestError,
@@ -9,19 +11,19 @@ import {
   ValidationError,
   handleError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { heliusSdk } from './app'
-import { NETWORK, INDEXER_URL } from './constants'
-import { axiosNoRetry, getTransaction } from './utils'
 import { Account, API, EstimateFeesBody, PriorityFees, TokenBalance, Tx, TxHistory } from './models'
-import { DAS, EnrichedTransaction, Interface } from 'helius-sdk'
-import { VersionedMessage } from '@solana/web3.js'
-import { validatePageSize } from '@shapeshiftoss/common-api'
+import { axiosNoRetry, getTransaction } from './utils'
 import { NativeBalance } from './types'
 
-export const logger = new Logger({
-  namespace: ['unchained', 'coinstacks', 'solana', 'api'],
-  level: process.env.LOG_LEVEL,
-})
+const INDEXER_URL = process.env.INDEXER_URL
+const NETWORK = process.env.NETWORK
+const RPC_API_KEY = process.env.RPC_API_KEY
+
+if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
+if (!NETWORK) throw new Error('NETWORK env var not set')
+if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
+
+const heliusSdk = new Helius(RPC_API_KEY)
 
 @Route('api/v1')
 @Tags('v1')

@@ -1,10 +1,11 @@
+import type { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
+import type { Logger } from '@shapeshiftoss/logger'
 import axios, { AxiosError } from 'axios'
 import BigNumber from 'bignumber.js'
 import { ethers } from 'ethers'
-import type { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
-import type { Logger } from '@shapeshiftoss/logger'
 import type { BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
 import { ApiError } from '../'
+import { createAxiosRetry, exponentialDelay, handleError, validatePageSize } from '../utils'
 import type {
   Account,
   API,
@@ -26,7 +27,6 @@ import type {
   ExplorerInternalTxByAddress,
 } from './types'
 import type { GasOracle } from './gasOracle'
-import { createAxiosRetry, exponentialDelay, handleError, validatePageSize } from '../utils'
 import { ERC1155_ABI } from './abi/erc1155'
 import { ERC721_ABI } from './abi/erc721'
 
