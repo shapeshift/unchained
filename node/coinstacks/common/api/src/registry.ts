@@ -13,7 +13,7 @@ const isTxWithAddresses = (tx: unknown): tx is { addresses: Array<string>; tx: u
 
 export interface RegistryArgs {
   addressFormatter?: AddressFormatter
-  blockHandler: BlockHandler
+  blockHandler?: BlockHandler
   transactionHandler: TransactionHandler
 }
 
@@ -26,7 +26,7 @@ export class Registry {
   private clients: Record<string, Set<string>> = {}
   private addresses: Record<string, Map<string, ConnectionHandler>> = {}
 
-  private handleBlock: BlockHandler
+  private handleBlock?: BlockHandler
   private handleTransaction: TransactionHandler
   private formatAddress: AddressFormatter = (address: string) => address.toLowerCase()
 
@@ -117,6 +117,7 @@ export class Registry {
   }
 
   async onBlock(msg: unknown): Promise<void> {
+    if (!this.handleBlock) return
     if (!Object.keys(this.clients).length) return
 
     try {

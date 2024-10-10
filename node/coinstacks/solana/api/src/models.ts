@@ -45,21 +45,6 @@ export interface Account extends BaseAccount {
 }
 
 /**
- * Extended coin specific functionality
- */
-export interface API {
-  /**
-   * Get transaction details
-   *
-   * @param {string} txid transaction signature
-   *
-   * @returns {Promise<Tx>} transaction payload
-   */
-  // @Get('tx/{txid}')
-  getTransaction(txid: string): Promise<Tx>
-}
-
-/**
  * Contains info about current recommended priority fees for a transaction to land.
  */
 export interface PriorityFees {
@@ -78,4 +63,19 @@ export interface PriorityFees {
  */
 export interface EstimateFeesBody {
   message: string
+}
+
+/**
+ * Extended coin specific functionality
+ */
+export interface API {
+  /**
+   * Get transaction details
+   *
+   * @param {string} txid transaction signature
+   *
+   * @returns {Promise<Tx>} transaction payload
+   */
+  // @Get('tx/{txid}')
+  getTransaction(txid: string): Promise<Tx>
 }

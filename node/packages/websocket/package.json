@@ -1,5 +1,5 @@
 {
-  "name": "@shapeshiftoss/common-api",
+  "name": "@shapeshiftoss/websocket",
   "version": "10.0.0",
   "license": "MIT",
   "main": "dist/index.js",
@@ -11,17 +11,13 @@
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist node_modules",
-    "watch": "tsc --watch"
+    "dev": "nodemon -e ts --watch src -x yarn build",
+    "watch": "nodemon -e ts --watch src -x yarn build"
   },
   "dependencies": {
-    "@shapeshiftoss/blockbook": "^10.0.0",
-    "@shapeshiftoss/websocket": "^10.0.0",
-    "bignumber.js": "^9.1.2",
-    "uuid": "^9.0.1",
     "ws": "^8.15.0"
   },
   "devDependencies": {
-    "@types/uuid": "^9.0.7",
     "@types/ws": "^8.5.10"
   }
 }
