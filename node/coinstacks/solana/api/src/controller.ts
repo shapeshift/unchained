@@ -28,7 +28,7 @@ const heliusSdk = new Helius(RPC_API_KEY)
 @Route('api/v1')
 @Tags('v1')
 export class Solana implements BaseAPI, API {
-  static baseFee = 5000
+  static baseFee = '5000'
 
   /**
    * Get information about the running coinstack
@@ -196,9 +196,9 @@ export class Solana implements BaseAPI, API {
 
       return {
         baseFee: Solana.baseFee,
-        slow: priorityFeeLevels.low,
-        average: priorityFeeLevels.medium,
-        fast: priorityFeeLevels.high,
+        slow: priorityFeeLevels.low.toString(),
+        average: priorityFeeLevels.medium.toString(),
+        fast: priorityFeeLevels.high.toString(),
       }
     } catch (err) {
       throw handleError(err)
@@ -216,7 +216,7 @@ export class Solana implements BaseAPI, API {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Post('/fees/estimate')
-  async getEstimateFees(@Body() body: EstimateFeesBody): Promise<number> {
+  async estimateFees(@Body() body: EstimateFeesBody): Promise<string> {
     try {
       const deserializedMessage = VersionedMessage.deserialize(Buffer.from(body.message, 'base64'))
 
@@ -224,7 +224,7 @@ export class Solana implements BaseAPI, API {
 
       if (!value) throw new Error('Failed to get estimated fee')
 
-      return value
+      return value.toString()
     } catch (err) {
       throw handleError(err)
     }

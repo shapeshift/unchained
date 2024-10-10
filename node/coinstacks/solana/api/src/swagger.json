@@ -1260,20 +1260,16 @@
 				"description": "Contains info about current recommended priority fees for a transaction to land.",
 				"properties": {
 					"baseFee": {
-						"type": "number",
-						"format": "double"
+						"type": "string"
 					},
 					"slow": {
-						"type": "number",
-						"format": "double"
+						"type": "string"
 					},
 					"average": {
-						"type": "number",
-						"format": "double"
+						"type": "string"
 					},
 					"fast": {
-						"type": "number",
-						"format": "double"
+						"type": "string"
 					}
 				},
 				"required": [
@@ -1663,15 +1659,14 @@
 		},
 		"/api/v1/fees/estimate": {
 			"post": {
-				"operationId": "GetEstimateFees",
+				"operationId": "EstimateFees",
 				"responses": {
 					"200": {
 						"description": "estimated compute unit cost",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "number",
-									"format": "double"
+									"type": "string"
 								}
 							}
 						}

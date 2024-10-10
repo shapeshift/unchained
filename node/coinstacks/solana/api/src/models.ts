@@ -49,13 +49,13 @@ export interface Account extends BaseAccount {
  */
 export interface PriorityFees {
   // base fee per signature
-  baseFee: number
+  baseFee: string
   // slow confirmation speed estimation
-  slow: number
+  slow: string
   // average confirmation speed estimation
-  average: number
+  average: string
   // average confirmation speed estimation
-  fast: number
+  fast: string
 }
 
 /**
