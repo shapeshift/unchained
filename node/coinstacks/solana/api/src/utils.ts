@@ -20,21 +20,24 @@ export const getTransaction = async (txid: string, shouldRetry?: boolean, retryC
       transactions: [txid],
     })
 
-    const enrichedTx = data[0]
+    const tx = data[0]
 
-    if (!enrichedTx) {
+    if (!tx) {
       if (!shouldRetry || ++retryCount >= 5) throw new Error('Transaction not found')
       await exponentialDelay(retryCount)
       return getTransaction(txid, true, retryCount)
     }
 
-    const tx = {
-      txid: enrichedTx.signature,
-      blockHeight: enrichedTx.slot,
-      ...enrichedTx,
+    return {
+      txid: tx.signature,
+      blockHeight: tx.slot,
+      ...tx,
+      events: {
+        compressed: tx.events.compressed ?? null,
+        nft: tx.events.nft ?? null,
+        swap: tx.events.swap ?? null,
+      },
     }
-
-    return tx
   } catch (err) {
     throw handleError(err)
   }
