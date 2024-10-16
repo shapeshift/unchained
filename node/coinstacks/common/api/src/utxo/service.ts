@@ -1,9 +1,10 @@
 import axios from 'axios'
 import type { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
-import type { AddressFormatter, BadRequestError, BaseAPI, Cursor, RPCRequest, RPCResponse, SendTxBody } from '../'
+import type { AddressFormatter, BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
 import { ApiError } from '../'
 import type { Account, Address, API, NetworkFee, NetworkFees, RawTx, Tx, TxHistory, Utxo } from './models'
 import { handleError, validatePageSize } from '../utils'
+import type { Cursor } from './types'
 
 const axiosNoRetry = axios.create({ timeout: 5000 })
 

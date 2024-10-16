@@ -1,11 +1,11 @@
-import axios, { AxiosError } from 'axios'
-import axiosRetry, { isNetworkOrIdempotentRequestError } from 'axios-retry'
-import BigNumber from 'bignumber.js'
-import { ethers } from 'ethers'
 import type { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import type { Logger } from '@shapeshiftoss/logger'
+import axios, { AxiosError } from 'axios'
+import BigNumber from 'bignumber.js'
+import { ethers } from 'ethers'
 import type { BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
 import { ApiError } from '../'
+import { createAxiosRetry, exponentialDelay, handleError, validatePageSize } from '../utils'
 import type {
   Account,
   API,
@@ -27,32 +27,13 @@ import type {
   ExplorerInternalTxByAddress,
 } from './types'
 import type { GasOracle } from './gasOracle'
-import { handleError, validatePageSize } from '../utils'
 import { ERC1155_ABI } from './abi/erc1155'
 import { ERC721_ABI } from './abi/erc721'
 
 const axiosNoRetry = axios.create({ timeout: 5000 })
-const axiosWithRetry = axios.create({ timeout: 10000 })
+const axiosWithRetry = createAxiosRetry({ timeout: 10000 })
 
 type InternalTxFetchMethod = 'trace_transaction' | 'debug_traceTransaction'
-
-axiosRetry(axiosWithRetry, {
-  shouldResetTimeout: true,
-  retries: 5,
-  retryDelay: (retryCount, err) => {
-    // don't add delay on top of request timeout
-    if (err.code === 'ECONNABORTED') return 0
-    // add exponential delay for network errors
-    return axiosRetry.exponentialDelay(retryCount, undefined, 500)
-  },
-  retryCondition: (err) =>
-    isNetworkOrIdempotentRequestError(err) ||
-    (!!err.response && err.response.status >= 400 && err.response.status < 600) ||
-    err.code === 'ECONNABORTED',
-})
-
-const exponentialDelay = async (retryCount: number) =>
-  new Promise((resolve) => setTimeout(resolve, axiosRetry.exponentialDelay(retryCount, undefined, 500)))
 
 export const formatAddress = (address: string): string => ethers.utils.getAddress(address)
 

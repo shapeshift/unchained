@@ -58,13 +58,18 @@ export class Zrx {
       }
     })()
 
+    const headers = (() => {
+      if (path.includes('v1')) return
+      return { '0x-version': 'v2' }
+    })()
+
     if (!url) {
       res.status(404).send('Not Found')
       return
     }
 
     try {
-      const response = await this.axiosInstance.get(url)
+      const response = await this.axiosInstance.get(url, { headers })
       Object.entries(response.headers).forEach(([k, v]) => res.set(k, v))
       res.status(response.status).send(response.data)
     } catch (err) {

@@ -1,11 +1,21 @@
+import { ConnectionHandler, middleware, Prometheus, Registry, TransactionHandler } from '@shapeshiftoss/common-api'
+import { Logger } from '@shapeshiftoss/logger'
+import { Logs } from '@solana/web3.js'
 import express from 'express'
 import { join } from 'path'
 import swaggerUi from 'swagger-ui-express'
-import { middleware, Prometheus } from '@shapeshiftoss/common-api'
-import { Logger } from '@shapeshiftoss/logger'
+import { Server } from 'ws'
+import { Tx } from './models'
 import { RegisterRoutes } from './routes'
+import { getTransaction } from './utils'
+import { WebsocketClient } from './websocket'
 
 const PORT = process.env.PORT ?? 3000
+const WS_URL = process.env.WS_URL
+const WS_API_KEY = process.env.WS_API_KEY
+
+if (!WS_URL) throw new Error('WS_URL env var not set')
+if (!WS_API_KEY) throw new Error('WS_API_KEY env var not set')
 
 export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'solana', 'api'],
@@ -45,4 +55,27 @@ app.get('/', async (_, res) => {
 
 app.use(middleware.errorHandler, middleware.notFoundHandler)
 
-app.listen(PORT, () => logger.info('Server started'))
+const transactionHandler: TransactionHandler<Logs, Tx> = async (log) => {
+  const tx = await getTransaction(log.signature, true)
+
+  const addresses = tx.accountData.map((key) => key.account)
+
+  return { addresses, tx }
+}
+
+const registry = new Registry({
+  addressFormatter: (address: string) => address,
+  transactionHandler,
+})
+
+const helius = new WebsocketClient(WS_URL, {
+  apiKey: WS_API_KEY,
+  transactionHandler: registry.onTransaction.bind(registry),
+})
+
+const server = app.listen(PORT, () => logger.info('Server started'))
+const wsServer = new Server({ server })
+
+wsServer.on('connection', (connection) => {
+  ConnectionHandler.start(connection, registry, helius, prometheus, logger)
+})

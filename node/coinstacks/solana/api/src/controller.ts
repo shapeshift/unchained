@@ -1,4 +1,6 @@
-import { Logger } from '@shapeshiftoss/logger'
+import { validatePageSize } from '@shapeshiftoss/common-api'
+import { VersionedMessage } from '@solana/web3.js'
+import { DAS, EnrichedTransaction, Helius, Interface } from 'helius-sdk'
 import { Body, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import {
   BadRequestError,
@@ -7,21 +9,27 @@ import {
   InternalServerError,
   SendTxBody,
   ValidationError,
+  handleError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { Account, TxHistory } from './models'
+import { Account, API, EstimateFeesBody, PriorityFees, TokenBalance, Tx, TxHistory } from './models'
+import { axiosNoRetry, getTransaction } from './utils'
+import { NativeBalance } from './types'
 
+const INDEXER_URL = process.env.INDEXER_URL
 const NETWORK = process.env.NETWORK
+const RPC_API_KEY = process.env.RPC_API_KEY
 
+if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 if (!NETWORK) throw new Error('NETWORK env var not set')
+if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
 
-export const logger = new Logger({
-  namespace: ['unchained', 'coinstacks', 'solana', 'api'],
-  level: process.env.LOG_LEVEL,
-})
+const heliusSdk = new Helius(RPC_API_KEY)
 
 @Route('api/v1')
 @Tags('v1')
-export class Solana implements BaseAPI {
+export class Solana implements BaseAPI, API {
+  static baseFee = '5000'
+
   /**
    * Get information about the running coinstack
    *
@@ -46,14 +54,55 @@ export class Solana implements BaseAPI {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}')
   async getAccount(@Path() pubkey: string): Promise<Account> {
-    return { pubkey } as Account
+    try {
+      let page = 1
+      let balance = '0'
+      let hasMore = false
+      let tokens: Array<TokenBalance> = []
+
+      do {
+        const { total, limit, items, nativeBalance } = (await heliusSdk.rpc.getAssetsByOwner({
+          ownerAddress: pubkey,
+          page: page++,
+          displayOptions: { showFungible: true, showNativeBalance: true, showZeroBalance: true },
+        })) as DAS.GetAssetResponseList & { nativeBalance: NativeBalance }
+
+        hasMore = total === limit
+        balance = BigInt(nativeBalance.lamports).toString()
+
+        tokens = items.reduce<Array<TokenBalance>>((prev, item) => {
+          if (!item.content) return prev
+          if (item.interface !== Interface.FUNGIBLE_TOKEN) return prev
+
+          prev.push({
+            id: item.id,
+            name: item.content.metadata.name,
+            symbol: item.content.metadata.symbol,
+            decimals: item.token_info?.decimals ?? 0,
+            balance: item.token_info?.balance ? BigInt(item.token_info.balance).toString() : '0',
+            type: item.interface,
+          })
+
+          return prev
+        }, tokens)
+      } while (hasMore)
+
+      return {
+        pubkey,
+        balance,
+        unconfirmedBalance: '0',
+        tokens,
+      }
+    } catch (err) {
+      throw handleError(err)
+    }
   }
 
   /**
-   * Get transaction history by address or extended public key
+   * Get transaction history by address
    *
-   * @param {string} pubkey account address or extended public key
-   * @param {string} [cursor] the cursor returned in previous query (base64 encoded json object with a 'page' property)
+   * @param {string} pubkey account address
+   * @param {string} [cursor] the cursor returned in previous query (used as lastSignature)
    * @param {number} [pageSize] page size (10 by default)
    *
    * @returns {Promise<TxHistory>} transaction history
@@ -62,15 +111,60 @@ export class Solana implements BaseAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('account/{pubkey}/txs')
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async getTxHistory(@Path() pubkey: string, @Query() _cursor?: string, @Query() _pageSize = 10): Promise<TxHistory> {
-    return { pubkey } as TxHistory
+  async getTxHistory(@Path() pubkey: string, @Query() cursor?: string, @Query() pageSize = 10): Promise<TxHistory> {
+    validatePageSize(pageSize)
+
+    try {
+      const { data } = await axiosNoRetry.get<EnrichedTransaction[]>(
+        `${INDEXER_URL}/v0/addresses/${pubkey}/transactions/`,
+        {
+          params: {
+            limit: pageSize,
+            before: cursor,
+          },
+        }
+      )
+
+      const txs = data.map((tx) => {
+        return {
+          txid: tx.signature,
+          blockHeight: tx.slot,
+          ...tx,
+          events: {
+            compressed: tx.events.compressed ?? null,
+            nft: tx.events.nft ?? null,
+            swap: tx.events.swap ?? null,
+          },
+        } as Tx
+      })
+
+      const nextCursor = txs.length === pageSize ? txs[txs.length - 1].signature : undefined
+
+      return { pubkey, cursor: nextCursor, txs: txs }
+    } catch (err) {
+      throw handleError(err)
+    }
+  }
+
+  /**
+   * Get transaction details
+   *
+   * @param {string} txid transaction signature
+   *
+   * @returns {Promise<Tx>} transaction payload
+   */
+  @Response<BadRequestError>(400, 'Bad Request')
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Get('tx/{txid}')
+  async getTransaction(@Path() txid: string): Promise<Tx> {
+    return getTransaction(txid)
   }
 
   /**
    * Sends raw transaction to be broadcast to the node.
    *
-   * @param {SendTxBody} body serialized raw transaction hex
+   * @param {SendTxBody} body serialized raw transaction (base64 encoded)
    *
    * @returns {Promise<string>} transaction signature
    */
@@ -78,8 +172,66 @@ export class Solana implements BaseAPI {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Post('send/')
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async sendTx(@Body() _body: SendTxBody): Promise<string> {
-    return ''
+  async sendTx(@Body() body: SendTxBody): Promise<string> {
+    try {
+      const txSig = await heliusSdk.connection.sendRawTransaction(Buffer.from(body.hex, 'base64'))
+
+      return txSig
+    } catch (err) {
+      throw handleError(err)
+    }
+  }
+
+  /**
+   * Get the current recommended priority fees for a transaction to land
+   *
+   * @returns {Promise<PriorityFees>} current priority fees specified in micro-lamports
+   */
+  @Response<BadRequestError>(400, 'Bad Request')
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Get('/fees/priority')
+  async getPriorityFees(): Promise<PriorityFees> {
+    try {
+      const { priorityFeeLevels } = await heliusSdk.rpc.getPriorityFeeEstimate({
+        options: { includeAllPriorityFeeLevels: true },
+      })
+
+      if (!priorityFeeLevels) throw new Error('failed to get priority fees')
+
+      return {
+        baseFee: Solana.baseFee,
+        slow: priorityFeeLevels.low.toString(),
+        average: priorityFeeLevels.medium.toString(),
+        fast: priorityFeeLevels.high.toString(),
+      }
+    } catch (err) {
+      throw handleError(err)
+    }
+  }
+
+  /**
+   * Get the estimated compute unit cost of a transaction
+   *
+   * @param {EstimateFeesBody} body transaction message (base64 encoded)
+   *
+   * @returns {Promise<number>} estimated compute unit cost
+   */
+  @Response<BadRequestError>(400, 'Bad Request')
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Post('/fees/estimate')
+  async estimateFees(@Body() body: EstimateFeesBody): Promise<string> {
+    try {
+      const deserializedMessage = VersionedMessage.deserialize(Buffer.from(body.message, 'base64'))
+
+      const { value } = await heliusSdk.connection.getFeeForMessage(deserializedMessage)
+
+      if (!value) throw new Error('Failed to get estimated fee')
+
+      return value.toString()
+    } catch (err) {
+      throw handleError(err)
+    }
   }
 }
