@@ -1282,17 +1282,31 @@
 				"additionalProperties": false
 			},
 			"EstimateFeesBody": {
-				"description": "Contains the base64 encoded serialized transaction",
-				"properties": {
-					"serializedTx": {
-						"type": "string"
+				"anyOf": [
+					{
+						"properties": {
+							"serializedTx": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"serializedTx"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"message": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"message"
+						],
+						"type": "object"
 					}
-				},
-				"required": [
-					"serializedTx"
 				],
-				"type": "object",
-				"additionalProperties": false
+				"description": "Contains the base64 encoded serialized transaction"
 			},
 			"RPCResponse": {
 				"properties": {

@@ -357,6 +357,8 @@ export class Solana implements BaseAPI, API {
   @Post('/fees/estimate')
   async estimateFees(@Body() body: EstimateFeesBody): Promise<string> {
     try {
+      if (!('serializedTx' in body)) throw new Error('Use serializedTx (message deprecated)')
+
       const deserializedTransaction = VersionedTransaction.deserialize(Buffer.from(body.serializedTx, 'base64'))
 
       const { value } = await heliusSdk.connection.simulateTransaction(deserializedTransaction, {

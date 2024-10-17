@@ -61,9 +61,13 @@ export interface PriorityFees {
 /**
  * Contains the base64 encoded serialized transaction
  */
-export interface EstimateFeesBody {
-  serializedTx: string
-}
+export type EstimateFeesBody =
+  | {
+      serializedTx: string
+    }
+  | {
+      message: string
+    }
 
 /**
  * Extended coin specific functionality
