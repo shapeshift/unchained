@@ -1282,14 +1282,96 @@
 				"additionalProperties": false
 			},
 			"EstimateFeesBody": {
-				"description": "Contains the base64 encoded transaction message",
+				"description": "Contains the base64 encoded serialized transaction",
 				"properties": {
-					"message": {
+					"serializedTx": {
 						"type": "string"
 					}
 				},
 				"required": [
-					"message"
+					"serializedTx"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"RPCResponse": {
+				"properties": {
+					"jsonrpc": {
+						"type": "string",
+						"enum": [
+							"2.0"
+						],
+						"nullable": false
+					},
+					"id": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "number",
+								"format": "double"
+							}
+						]
+					},
+					"result": {},
+					"error": {
+						"properties": {
+							"data": {},
+							"message": {
+								"type": "string"
+							},
+							"code": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"message",
+							"code"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"jsonrpc",
+					"id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"RPCRequest": {
+				"properties": {
+					"jsonrpc": {
+						"type": "string",
+						"enum": [
+							"2.0"
+						],
+						"nullable": false
+					},
+					"id": {
+						"anyOf": [
+							{
+								"type": "string"
+							},
+							{
+								"type": "number",
+								"format": "double"
+							}
+						]
+					},
+					"method": {
+						"type": "string"
+					},
+					"params": {
+						"items": {},
+						"type": "array"
+					}
+				},
+				"required": [
+					"jsonrpc",
+					"id",
+					"method"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -1317,6 +1399,13 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/BaseInfo"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"network": "mainnet"
+										}
+									}
 								}
 							}
 						}
@@ -1340,6 +1429,16 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Account"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"pubkey": "2bUNK6eVUmXyxeSDURsWdqi1KK8BYu4egnzyi3xDYc9M",
+											"balance": "0",
+											"unconfirmedBalance": "0",
+											"tokens": []
+										}
+									}
 								}
 							}
 						}
@@ -1388,7 +1487,8 @@
 						"required": true,
 						"schema": {
 							"type": "string"
-						}
+						},
+						"example": "2bUNK6eVUmXyxeSDURsWdqi1KK8BYu4egnzyi3xDYc9M"
 					}
 				]
 			}
@@ -1403,6 +1503,69 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/TxHistory"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"pubkey": "2bUNK6eVUmXyxeSDURsWdqi1KK8BYu4egnzyi3xDYc9M",
+											"txs": [
+												{
+													"txid": "5KDSVYdUSSKSgTcq1PJFmo3vMSNeP383Q3xVqWhGX4xExaYtYmcygA7wncwz8gVgZMbhKtg5ZekD9fsF6T5mCMAv",
+													"blockHeight": 296167290,
+													"description": "2bUNK6eVUmXyxeSDURsWdqi1KK8BYu4egnzyi3xDYc9M transferred 0.132585825 SOL to 97UQvPXbadGSsVaGuJCBLRm3Mkm7A5DVJ2HktRzrnDTB.",
+													"type": "TRANSFER",
+													"source": "SYSTEM_PROGRAM",
+													"fee": 5000,
+													"feePayer": "2bUNK6eVUmXyxeSDURsWdqi1KK8BYu4egnzyi3xDYc9M",
+													"signature": "5KDSVYdUSSKSgTcq1PJFmo3vMSNeP383Q3xVqWhGX4xExaYtYmcygA7wncwz8gVgZMbhKtg5ZekD9fsF6T5mCMAv",
+													"slot": 296167290,
+													"timestamp": 1729185925,
+													"tokenTransfers": [],
+													"nativeTransfers": [
+														{
+															"fromUserAccount": "2bUNK6eVUmXyxeSDURsWdqi1KK8BYu4egnzyi3xDYc9M",
+															"toUserAccount": "97UQvPXbadGSsVaGuJCBLRm3Mkm7A5DVJ2HktRzrnDTB",
+															"amount": 132585825
+														}
+													],
+													"accountData": [
+														{
+															"account": "2bUNK6eVUmXyxeSDURsWdqi1KK8BYu4egnzyi3xDYc9M",
+															"nativeBalanceChange": -132590825,
+															"tokenBalanceChanges": []
+														},
+														{
+															"account": "97UQvPXbadGSsVaGuJCBLRm3Mkm7A5DVJ2HktRzrnDTB",
+															"nativeBalanceChange": 132585825,
+															"tokenBalanceChanges": []
+														},
+														{
+															"account": "11111111111111111111111111111111",
+															"nativeBalanceChange": 0,
+															"tokenBalanceChanges": []
+														}
+													],
+													"transactionError": null,
+													"instructions": [
+														{
+															"accounts": [
+																"2bUNK6eVUmXyxeSDURsWdqi1KK8BYu4egnzyi3xDYc9M",
+																"97UQvPXbadGSsVaGuJCBLRm3Mkm7A5DVJ2HktRzrnDTB"
+															],
+															"data": "3Bxs4H6fRtDxLiaT",
+															"programId": "11111111111111111111111111111111",
+															"innerInstructions": []
+														}
+													],
+													"events": {
+														"compressed": null,
+														"nft": null,
+														"swap": null
+													}
+												}
+											]
+										}
+									}
 								}
 							}
 						}
@@ -1451,7 +1614,8 @@
 						"required": true,
 						"schema": {
 							"type": "string"
-						}
+						},
+						"example": "2bUNK6eVUmXyxeSDURsWdqi1KK8BYu4egnzyi3xDYc9M"
 					},
 					{
 						"description": "the cursor returned in previous query (used as lastSignature)",
@@ -1486,6 +1650,64 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/Tx"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"txid": "5KDSVYdUSSKSgTcq1PJFmo3vMSNeP383Q3xVqWhGX4xExaYtYmcygA7wncwz8gVgZMbhKtg5ZekD9fsF6T5mCMAv",
+											"blockHeight": 296167290,
+											"description": "2bUNK6eVUmXyxeSDURsWdqi1KK8BYu4egnzyi3xDYc9M transferred 0.132585825 SOL to 97UQvPXbadGSsVaGuJCBLRm3Mkm7A5DVJ2HktRzrnDTB.",
+											"type": "TRANSFER",
+											"source": "SYSTEM_PROGRAM",
+											"fee": 5000,
+											"feePayer": "2bUNK6eVUmXyxeSDURsWdqi1KK8BYu4egnzyi3xDYc9M",
+											"signature": "5KDSVYdUSSKSgTcq1PJFmo3vMSNeP383Q3xVqWhGX4xExaYtYmcygA7wncwz8gVgZMbhKtg5ZekD9fsF6T5mCMAv",
+											"slot": 296167290,
+											"timestamp": 1729185925,
+											"tokenTransfers": [],
+											"nativeTransfers": [
+												{
+													"fromUserAccount": "2bUNK6eVUmXyxeSDURsWdqi1KK8BYu4egnzyi3xDYc9M",
+													"toUserAccount": "97UQvPXbadGSsVaGuJCBLRm3Mkm7A5DVJ2HktRzrnDTB",
+													"amount": 132585825
+												}
+											],
+											"accountData": [
+												{
+													"account": "2bUNK6eVUmXyxeSDURsWdqi1KK8BYu4egnzyi3xDYc9M",
+													"nativeBalanceChange": -132590825,
+													"tokenBalanceChanges": []
+												},
+												{
+													"account": "97UQvPXbadGSsVaGuJCBLRm3Mkm7A5DVJ2HktRzrnDTB",
+													"nativeBalanceChange": 132585825,
+													"tokenBalanceChanges": []
+												},
+												{
+													"account": "11111111111111111111111111111111",
+													"nativeBalanceChange": 0,
+													"tokenBalanceChanges": []
+												}
+											],
+											"transactionError": null,
+											"instructions": [
+												{
+													"accounts": [
+														"2bUNK6eVUmXyxeSDURsWdqi1KK8BYu4egnzyi3xDYc9M",
+														"97UQvPXbadGSsVaGuJCBLRm3Mkm7A5DVJ2HktRzrnDTB"
+													],
+													"data": "3Bxs4H6fRtDxLiaT",
+													"programId": "11111111111111111111111111111111",
+													"innerInstructions": []
+												}
+											],
+											"events": {
+												"compressed": null,
+												"nft": null,
+												"swap": null
+											}
+										}
+									}
 								}
 							}
 						}
@@ -1534,7 +1756,8 @@
 						"required": true,
 						"schema": {
 							"type": "string"
-						}
+						},
+						"example": "5KDSVYdUSSKSgTcq1PJFmo3vMSNeP383Q3xVqWhGX4xExaYtYmcygA7wncwz8gVgZMbhKtg5ZekD9fsF6T5mCMAv"
 					}
 				]
 			}
@@ -1614,6 +1837,16 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/PriorityFees"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"baseFee": "5000",
+											"slow": "0",
+											"average": "10",
+											"fast": "400000"
+										}
+									}
 								}
 							}
 						}
@@ -1716,6 +1949,76 @@
 							"schema": {
 								"$ref": "#/components/schemas/EstimateFeesBody",
 								"description": "transaction message (base64 encoded)"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/jsonrpc": {
+			"post": {
+				"operationId": "DoRpcRequest",
+				"responses": {
+					"200": {
+						"description": "jsonrpc response or batch responses",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/RPCResponse"
+										},
+										{
+											"items": {
+												"$ref": "#/components/schemas/RPCResponse"
+											},
+											"type": "array"
+										}
+									]
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"jsonrpc": "2.0",
+											"id": "test",
+											"result": 274885350
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"description": "Makes a jsonrpc request to the node.",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"description": "jsonrpc request or batch requests",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"anyOf": [
+									{
+										"$ref": "#/components/schemas/RPCRequest"
+									},
+									{
+										"items": {
+											"$ref": "#/components/schemas/RPCRequest"
+										},
+										"type": "array"
+									}
+								],
+								"description": "jsonrpc request or batch requests"
+							},
+							"example": {
+								"jsonrpc": "2.0",
+								"id": "test",
+								"method": "getBlockHeight",
+								"params": []
 							}
 						}
 					}

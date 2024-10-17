@@ -59,10 +59,10 @@ export interface PriorityFees {
 }
 
 /**
- * Contains the base64 encoded transaction message
+ * Contains the base64 encoded serialized transaction
  */
 export interface EstimateFeesBody {
-  message: string
+  serializedTx: string
 }
 
 /**
