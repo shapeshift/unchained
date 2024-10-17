@@ -1289,9 +1289,6 @@
 								"type": "string"
 							}
 						},
-						"required": [
-							"serializedTx"
-						],
 						"type": "object"
 					},
 					{
@@ -1300,9 +1297,6 @@
 								"type": "string"
 							}
 						},
-						"required": [
-							"message"
-						],
 						"type": "object"
 					}
 				],

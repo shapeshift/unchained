@@ -63,10 +63,10 @@ export interface PriorityFees {
  */
 export type EstimateFeesBody =
   | {
-      serializedTx: string
+      serializedTx?: string
     }
   | {
-      message: string
+      message?: string
     }
 
 /**
