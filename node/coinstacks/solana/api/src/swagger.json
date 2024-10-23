@@ -2032,6 +2032,71 @@
 					}
 				}
 			}
+		},
+		"/api/v1/token/{id}": {
+			"get": {
+				"operationId": "GetToken",
+				"responses": {
+					"200": {
+						"description": "token details",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Token"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"id": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+											"name": "USD Coin",
+											"symbol": "USDC",
+											"decimals": 6,
+											"type": "FungibleToken"
+										}
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get token details",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "token id",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						},
+						"example": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+					}
+				]
+			}
 		}
 	},
 	"servers": [
