@@ -35,6 +35,8 @@ const heliusSdk = new Helius(RPC_API_KEY)
 export class Solana implements BaseAPI, API {
   static baseFee = '5000'
 
+  private tokens: Record<string, Token> = {}
+
   /**
    * Get information about the running coinstack
    *
@@ -424,18 +426,24 @@ export class Solana implements BaseAPI, API {
   @Get('/token/{id}')
   async getToken(@Path() id: string): Promise<Token> {
     try {
+      if (this.tokens[id]) return this.tokens.id
+
       const asset = await heliusSdk.rpc.getAsset({ id })
 
       if (asset.content?.metadata === undefined) throw new Error('token metadata undefined')
       if (asset.token_info?.decimals === undefined) throw new Error('token decimals undefined')
 
-      return {
+      const token: Token = {
         id: asset.id,
         name: asset.content.metadata.name,
         symbol: asset.content.metadata.symbol,
         decimals: asset.token_info.decimals,
         type: asset.interface,
       }
+
+      this.tokens[id] = token
+
+      return token
     } catch (err) {
       throw handleError(err)
     }
