@@ -30,12 +30,12 @@ if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
 const rpcUrl = RPC_API_KEY ? `${RPC_URL}?api-key=${RPC_API_KEY}` : `${RPC_URL}`
 const heliusSdk = new Helius(RPC_API_KEY)
 
+const tokens: Record<string, Token> = {}
+
 @Route('api/v1')
 @Tags('v1')
 export class Solana implements BaseAPI, API {
   static baseFee = '5000'
-
-  private tokens: Record<string, Token> = {}
 
   /**
    * Get information about the running coinstack
@@ -412,7 +412,7 @@ export class Solana implements BaseAPI, API {
    *
    * @returns {Promise<Token>} token details
    *
-   * @example pubkey "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+   * @example id "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
    */
   @Example<Token>({
     id: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
@@ -426,7 +426,7 @@ export class Solana implements BaseAPI, API {
   @Get('/token/{id}')
   async getToken(@Path() id: string): Promise<Token> {
     try {
-      if (this.tokens[id]) return this.tokens.id
+      if (tokens[id]) return tokens[id]
 
       const asset = await heliusSdk.rpc.getAsset({ id })
 
@@ -441,7 +441,7 @@ export class Solana implements BaseAPI, API {
         type: asset.interface,
       }
 
-      this.tokens[id] = token
+      tokens[id] = token
 
       return token
     } catch (err) {
