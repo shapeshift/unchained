@@ -13,7 +13,7 @@ import {
   ValidationError,
   handleError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { Account, API, EstimateFeesBody, PriorityFees, TokenBalance, Tx, TxHistory } from './models'
+import { Account, API, EstimateFeesBody, PriorityFees, Token, TokenBalance, Tx, TxHistory } from './models'
 import { axiosNoRetry, axiosWithRetry, getTransaction } from './utils'
 import { NativeBalance } from './types'
 
@@ -27,6 +27,7 @@ if (!NETWORK) throw new Error('NETWORK env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
 if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
 
+const rpcUrl = RPC_API_KEY ? `${RPC_URL}?api-key=${RPC_API_KEY}` : `${RPC_URL}`
 const heliusSdk = new Helius(RPC_API_KEY)
 
 @Route('api/v1')
@@ -395,9 +396,46 @@ export class Solana implements BaseAPI, API {
   @Post('jsonrpc/')
   async doRpcRequest(@Body() body: RPCRequest | Array<RPCRequest>): Promise<RPCResponse | Array<RPCResponse>> {
     try {
-      const url = RPC_API_KEY ? `${RPC_URL}?api-key=${RPC_API_KEY}` : `${RPC_URL}`
-      const { data } = await axiosWithRetry.post<RPCResponse>(url, body)
+      const { data } = await axiosWithRetry.post<RPCResponse>(rpcUrl, body)
       return data
+    } catch (err) {
+      throw handleError(err)
+    }
+  }
+
+  /**
+   * Get token details
+   *
+   * @param {string} id token id
+   *
+   * @returns {Promise<Token>} token details
+   *
+   * @example pubkey "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+   */
+  @Example<Token>({
+    id: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+    name: 'USD Coin',
+    symbol: 'USDC',
+    decimals: 6,
+    type: 'FungibleToken',
+  })
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Get('/token/{id}')
+  async getToken(@Path() id: string): Promise<Token> {
+    try {
+      const asset = await heliusSdk.rpc.getAsset({ id })
+
+      if (asset.content?.metadata === undefined) throw new Error('token metadata undefined')
+      if (asset.token_info?.decimals === undefined) throw new Error('token decimals undefined')
+
+      return {
+        id: asset.id,
+        name: asset.content.metadata.name,
+        symbol: asset.content.metadata.symbol,
+        decimals: asset.token_info.decimals,
+        type: asset.interface,
+      }
     } catch (err) {
       throw handleError(err)
     }
