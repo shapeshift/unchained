@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/url"
 	"sync"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/pkg/errors"
@@ -55,6 +56,8 @@ func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- 
 		unhandledTxs: make(map[int][]types.EventDataTx),
 	}
 
+	tendermint.ReadWait(5 * time.Second)
+	tendermint.PingPeriod(10 * time.Second)
 	tendermint.MaxReconnectAttempts(10)(client)
 	tendermint.OnReconnect(func() {
 		logger.Info("OnReconnect triggered: resubscribing")
