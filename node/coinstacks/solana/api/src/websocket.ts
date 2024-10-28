@@ -26,14 +26,13 @@ export class WebsocketClient extends BaseWebsocketClient {
   constructor(_url: string, args: WebsocketArgs, opts?: Options) {
     const url = args.apiKey ? `${_url}?api-key=${args.apiKey}` : _url
     super(url, { logger }, opts)
+
     this.handleTransaction = args.transactionHandler
+
     this.initialize()
-    this.socket.onmessage = (msg) => this.onMessage(msg)
-    this.socket.onopen = () => this.onOpen()
   }
 
   protected onOpen(): void {
-    super._onOpen()
     if (this.addresses.length > 0) this.subscribeAddresses(this.addresses)
   }
 
@@ -54,11 +53,17 @@ export class WebsocketClient extends BaseWebsocketClient {
         case 'logsNotification': {
           if (isWebsocketResponse(res)) {
             const subscriptionId = res.params.subscription
+
             if (this.subscriptionIds.includes(subscriptionId)) {
+              super.reset()
+
+              const tx = res.params.result.value
+              logger.debug({ fn: 'onMessage' }, `tx: ${tx.signature}`)
+
               if (Array.isArray(this.handleTransaction)) {
-                this.handleTransaction.forEach(async (handleTransaction) => handleTransaction(res.params.result.value))
+                this.handleTransaction.forEach(async (handleTransaction) => handleTransaction(tx))
               } else {
-                this.handleTransaction(res.params.result.value)
+                this.handleTransaction(tx)
               }
             } else {
               this.unsubscribe(subscriptionId)
