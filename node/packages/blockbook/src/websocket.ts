@@ -28,14 +28,9 @@ export class WebsocketClient extends BaseWebsocketClient {
     this.handleBlock = args.blockHandler
 
     super.initialize()
-
-    this.socket.onmessage = (msg) => this.onMessage(msg)
-    this.socket.onopen = () => this.onOpen()
   }
 
   protected onOpen(): void {
-    super._onOpen()
-
     const subscribeNewBlock: Subscription = { jsonrpc: '2.0', id: 'newBlock', method: 'subscribeNewBlock', params: {} }
     this.socket.send(JSON.stringify(subscribeNewBlock))
 
@@ -54,7 +49,10 @@ export class WebsocketClient extends BaseWebsocketClient {
       switch (res.id) {
         case 'newBlock':
           if ('hash' in res.data) {
+            super.reset()
+
             const newBlock = res.data
+            logger.debug({ fn: 'onMessage' }, `block: ${newBlock.height}`)
 
             if (Array.isArray(this.handleBlock)) {
               this.handleBlock.map(async (handleBlock) => handleBlock(newBlock))
@@ -65,7 +63,10 @@ export class WebsocketClient extends BaseWebsocketClient {
           return
         case 'newTx':
           if ('tx' in res.data) {
+            super.reset()
+
             const newTx = res.data.tx
+            logger.debug({ fn: 'onMessage' }, `tx: ${newTx.txid}`)
 
             if (Array.isArray(this.handleTransaction)) {
               this.handleTransaction.map(async (handleTransaction) => handleTransaction(newTx))

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/cosmos"
@@ -14,10 +15,18 @@ import (
 	"github.com/tendermint/tendermint/types"
 )
 
+const (
+	writeWait    = 15 * time.Second
+	readWait     = 15 * time.Second
+	pingPeriod   = (readWait * 9) / 10
+	resetTimeout = 30 * time.Second
+)
+
 type WSClient struct {
 	blockService *cosmos.BlockService
 	client       *tendermint.WSClient
 	errChan      chan<- error
+	t            *time.Timer
 }
 
 func NewWebsocketClient(conf cosmos.Config, blockService *cosmos.BlockService, errChan chan<- error) (*WSClient, error) {
@@ -40,6 +49,9 @@ func NewWebsocketClient(conf cosmos.Config, blockService *cosmos.BlockService, e
 		errChan:      errChan,
 	}
 
+	tendermint.ReadWait(readWait)
+	tendermint.WriteWait(writeWait)
+	tendermint.PingPeriod(pingPeriod)
 	tendermint.MaxReconnectAttempts(10)(client)
 	tendermint.OnReconnect(func() {
 		logger.Info("OnReconnect triggered: resubscribing")
@@ -50,14 +62,12 @@ func NewWebsocketClient(conf cosmos.Config, blockService *cosmos.BlockService, e
 }
 
 func (ws *WSClient) Start() error {
-	err := ws.client.Start()
-	if err != nil {
+	if err := ws.client.Start(); err != nil {
 		return errors.Wrap(err, "failed to start websocket client")
 	}
 
-	err = ws.client.Subscribe(context.Background(), types.EventQueryNewBlockHeader.String())
-	if err != nil {
-		return errors.Wrap(err, "failed to subscribe to newBlocks")
+	if err := ws.subscribe(); err != nil {
+		return errors.Wrap(err, "failed to start websocket client")
 	}
 
 	go ws.listen()
@@ -71,22 +81,37 @@ func (ws *WSClient) Stop() {
 	}
 }
 
+func (ws *WSClient) subscribe() error {
+	if err := ws.client.Subscribe(context.Background(), types.EventQueryNewBlockHeader.String()); err != nil {
+		return errors.Wrap(err, "failed to subscribe to newBlocks")
+	}
+
+	ws.t = time.AfterFunc(resetTimeout, ws.reset)
+
+	return nil
+}
+
+func (ws *WSClient) reset() {
+	logger.Debugln("reset websocket")
+
+	ws.t.Stop()
+
+	if err := ws.client.UnsubscribeAll(context.Background()); err != nil {
+		ws.errChan <- errors.Wrap(err, "failed to unsubscribe from all subscriptions")
+	}
+
+	if err := ws.subscribe(); err != nil {
+		ws.errChan <- errors.Wrap(err, "failed to reset websocket")
+	}
+}
+
 func (ws *WSClient) listen() {
 	for r := range ws.client.ResponsesCh {
 		if r.Error != nil {
 			// resubscribe if subscription is cancelled by the server for reason: client is not pulling messages fast enough
 			// experimental rpc config available to help mitigate this issue: https://github.com/tendermint/tendermint/blob/main/config/config.go#L373
 			if r.Error.Code == -32000 {
-				err := ws.client.UnsubscribeAll(context.Background())
-				if err != nil {
-					logger.Error(errors.Wrap(err, "failed to unsubscribe from all subscriptions"))
-				}
-
-				err = ws.client.Subscribe(context.Background(), types.EventQueryNewBlockHeader.String())
-				if err != nil {
-					logger.Error(errors.Wrap(err, "failed to subscribe to newBlocks"))
-				}
-
+				ws.reset()
 				continue
 			}
 
@@ -103,18 +128,18 @@ func (ws *WSClient) listen() {
 		if result.Data != nil {
 			switch result.Data.(type) {
 			case types.EventDataNewBlockHeader:
+				ws.t.Reset(resetTimeout)
 				go ws.handleNewBlockHeader(result.Data.(types.EventDataNewBlockHeader))
 			default:
 				fmt.Printf("unsupported result type: %T", result.Data)
 			}
 		}
 	}
-
-	// if reconnect fails, ResponsesCh is closed
-	ws.errChan <- errors.New("websocket client connection closed by server")
 }
 
 func (ws *WSClient) handleNewBlockHeader(block types.EventDataNewBlockHeader) {
+	logger.Debugf("block: %d", block.Header.Height)
+
 	b := &cosmos.BlockResponse{
 		Height:    int(block.Header.Height),
 		Hash:      block.Header.Hash().String(),

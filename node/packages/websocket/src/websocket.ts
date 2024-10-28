@@ -4,6 +4,7 @@ import WebSocket from 'ws'
 const BASE_DELAY = 500
 const MAX_DELAY = 120_000
 const MAX_RETRY_ATTEMPTS = 0
+const RESET_INTERVAL = 30_000
 
 export interface Subscription {
   jsonrpc: '2.0'
@@ -27,6 +28,7 @@ export abstract class WebsocketClient {
   protected url: string
   protected pingTimeout?: NodeJS.Timeout
   protected interval?: NodeJS.Timeout
+  protected resetTimeout?: NodeJS.Timeout
   protected retryCount = 0
   protected logger: Logger
 
@@ -57,6 +59,15 @@ export abstract class WebsocketClient {
       this.logger.error({ code, reason, fn: 'ws.close' }, 'websocket closed')
       this.close()
     }
+    this.socket.onmessage = (msg) => this.onMessage(msg)
+    this.socket.onopen = () => {
+      this.logger.debug({ fn: 'ws.onopen' }, 'websocket opened')
+      this.retryCount = 0
+      this.interval = setInterval(() => this.socket.ping(), this.pingInterval)
+      this.heartbeat()
+      this.onOpen()
+      this.reset()
+    }
   }
 
   private close(): void {
@@ -83,10 +94,11 @@ export abstract class WebsocketClient {
     }, this.pingInterval + 1000)
   }
 
-  protected _onOpen(): void {
-    this.logger.debug({ fn: 'ws.onopen' }, 'websocket opened')
-    this.retryCount = 0
-    this.interval = setInterval(() => this.socket.ping(), this.pingInterval)
-    this.heartbeat()
+  protected reset(): void {
+    this.resetTimeout && clearTimeout(this.resetTimeout)
+    this.resetTimeout = setTimeout(() => {
+      this.logger.debug({ fn: 'reset' }, 'reset websocket')
+      this.socket.terminate()
+    }, RESET_INTERVAL)
   }
 }

@@ -215,7 +215,7 @@ export class Solana implements BaseAPI, API {
         } as Tx
       })
 
-      const nextCursor = txs.length === pageSize ? txs[txs.length - 1].signature : undefined
+      const nextCursor = txs.length ? txs[txs.length - 1].signature : undefined
 
       return { pubkey, cursor: nextCursor, txs: txs }
     } catch (err) {
