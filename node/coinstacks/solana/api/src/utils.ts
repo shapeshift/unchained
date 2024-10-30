@@ -10,7 +10,14 @@ if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
 
 export const axiosNoRetry = axios.create({ timeout: 5000, params: { 'api-key': RPC_API_KEY } })
-export const axiosWithRetry = createAxiosRetry({ timeout: 10000, params: { 'api-key': RPC_API_KEY } })
+
+// Amounts to ~1 minutes worth of potential retries to account for logsSubscribe "confirmed" commit level
+// and /transactions only returning "finalized" transactions. The "confirmed" commit level is required for logsSubscribe
+// because "finalized" commit level is not stable and misses logs frequently.
+export const axiosWithRetry = createAxiosRetry(
+  { retries: 6, delayFactor: 1000 },
+  { timeout: 10000, params: { 'api-key': RPC_API_KEY } }
+)
 
 export const getTransaction = async (txid: string, shouldRetry?: boolean, retryCount = 0): Promise<Tx> => {
   try {

@@ -32,17 +32,22 @@ export const handleError = (err: unknown): ApiError => {
   return new ApiError('Internal Server Error', 500, 'unknown error')
 }
 
-export const createAxiosRetry = (axiosParams?: CreateAxiosDefaults) => {
+type RetryConfig = {
+  retries?: number
+  delayFactor?: number
+}
+
+export const createAxiosRetry = (config: RetryConfig, axiosParams?: CreateAxiosDefaults) => {
   const axiosWithRetry = axios.create(axiosParams)
 
   axiosRetry(axiosWithRetry, {
     shouldResetTimeout: true,
-    retries: 5,
+    retries: config.retries ?? 5,
     retryDelay: (retryCount, err) => {
       // don't add delay on top of request timeout
       if (err.code === 'ECONNABORTED') return 0
       // add exponential delay for network errors
-      return axiosRetry.exponentialDelay(retryCount, undefined, 500)
+      return axiosRetry.exponentialDelay(retryCount, undefined, config.delayFactor ?? 500)
     },
     retryCondition: (err) =>
       isNetworkOrIdempotentRequestError(err) ||

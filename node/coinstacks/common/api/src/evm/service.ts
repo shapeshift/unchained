@@ -31,7 +31,7 @@ import { ERC1155_ABI } from './abi/erc1155'
 import { ERC721_ABI } from './abi/erc721'
 
 const axiosNoRetry = axios.create({ timeout: 5000 })
-const axiosWithRetry = createAxiosRetry({ timeout: 10000 })
+const axiosWithRetry = createAxiosRetry({}, { timeout: 10000 })
 
 type InternalTxFetchMethod = 'trace_transaction' | 'debug_traceTransaction'
 
