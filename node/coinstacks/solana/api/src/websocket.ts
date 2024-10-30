@@ -91,7 +91,7 @@ export class WebsocketClient extends BaseWebsocketClient {
         jsonrpc: '2.0',
         id: this.currentId.toString(),
         method: 'logsSubscribe',
-        params: [{ mentions: [address] }],
+        params: [{ mentions: [address] }, { commitment: 'confirmed' }],
       }
 
       try {
