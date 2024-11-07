@@ -163,6 +163,11 @@ export class ConnectionHandler {
   }
 
   private handleSubscribeTxs(subscriptionId: string, data?: TxsTopicData): void {
+    if (!subscriptionId) {
+      this.sendError('subscriptionId required', subscriptionId)
+      return
+    }
+
     if (!data?.addresses?.length) {
       this.sendError('addresses required', subscriptionId)
       return
