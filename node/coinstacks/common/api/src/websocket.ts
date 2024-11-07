@@ -163,6 +163,11 @@ export class ConnectionHandler {
   }
 
   private handleSubscribeTxs(subscriptionId: string, data?: TxsTopicData): void {
+    if (!subscriptionId) {
+      this.sendError('subscriptionId required', subscriptionId)
+      return
+    }
+
     if (!data?.addresses?.length) {
       this.sendError('addresses required', subscriptionId)
       return
@@ -174,8 +179,17 @@ export class ConnectionHandler {
   }
 
   private handleUnsubscribeTxs(subscriptionId: string, data?: TxsTopicData): void {
-    this.subscriptionIds.delete(subscriptionId)
-    this.registry.unsubscribe(this.clientId, subscriptionId, data?.addresses ?? [])
+    if (subscriptionId) {
+      this.subscriptionIds.delete(subscriptionId)
+      this.registry.unsubscribe(this.clientId, subscriptionId, data?.addresses ?? [])
+    } else {
+      for (const subscriptionId of this.subscriptionIds) {
+        this.registry.unsubscribe(this.clientId, subscriptionId, [])
+      }
+
+      this.subscriptionIds.clear()
+    }
+
     this.client.subscribeAddresses(this.registry.getAddresses())
   }
 
