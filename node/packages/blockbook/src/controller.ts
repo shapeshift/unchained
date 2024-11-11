@@ -596,6 +596,7 @@ export class Blockbook extends Controller {
           to,
           details,
           tokens,
+          gap: 25,
         },
       })
       return data
@@ -651,6 +652,7 @@ export class Blockbook extends Controller {
       const { data } = await this.instance.get<Array<Utxo>>(`api/v2/utxo/${account}`, {
         params: {
           confirmed,
+          gap: 25,
         },
       })
       return data
