@@ -26,6 +26,17 @@ type EstimatedFees = Record<string, Fees>
 
 type BlockTag = 'latest' | 'pending'
 
+const getFeeThreshold = (arr: number[]): number => {
+  const magnitudeThreshold = 10
+
+  arr = arr.sort((a, b) => a - b)
+
+  const mid = Math.floor(arr.length / 2)
+  const median = arr.length % 2 === 0 ? (arr[mid - 1] + arr[mid]) / 2 : arr[mid]
+
+  return median * magnitudeThreshold
+}
+
 export class GasOracle {
   public readonly coinstack: string
 
@@ -273,10 +284,26 @@ export class GasOracle {
       return value
     }
 
+    const gasPriceThreshold = getFeeThreshold(
+      blockFees
+        .map((fees) => fees.gasPrices)
+        .flat()
+        .filter((gasPrice) => gasPrice > 1)
+    )
+
+    const maxPriorityFeeThreshold = getFeeThreshold(
+      blockFees
+        .map((fees) => fees.maxPriorityFees)
+        .flat()
+        .filter((maxPriorityFee) => maxPriorityFee > 1)
+    )
+
     const sum = blockFees.reduce(
       (sum, fees) => {
-        sum.gasPrice += valueAtPercentile(fees.gasPrices)
-        sum.maxPriorityFee += valueAtPercentile(fees.maxPriorityFees)
+        sum.gasPrice += valueAtPercentile(fees.gasPrices.filter((gasPrice) => gasPrice <= gasPriceThreshold))
+        sum.maxPriorityFee += valueAtPercentile(
+          fees.maxPriorityFees.filter((maxPriorityFee) => maxPriorityFee <= maxPriorityFeeThreshold)
+        )
         return sum
       },
       { gasPrice: 0, maxPriorityFee: 0 }
