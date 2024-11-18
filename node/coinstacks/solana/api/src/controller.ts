@@ -1,5 +1,5 @@
 import { validatePageSize } from '@shapeshiftoss/common-api'
-import { VersionedTransaction } from '@solana/web3.js'
+import { AccountInfo, PublicKey, VersionedTransaction } from '@solana/web3.js'
 import { DAS, EnrichedTransaction, Helius, Interface, Source, TransactionType } from 'helius-sdk'
 import { Body, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import {
@@ -111,6 +111,30 @@ export class Solana implements BaseAPI, API {
         unconfirmedBalance: '0',
         tokens,
       }
+    } catch (err) {
+      throw handleError(err)
+    }
+  }
+
+  /**
+   * Get multiple accounts infos to construct any address lookup table accounts
+   *
+   * @param {string[]} addresses all the addresses of the accounts container in the address lookup table
+   *
+   * @returns {Promise<(AccountInfo<Buffer> | null)[]>} account infos
+   *
+   */
+  @Response<BadRequestError>(400, 'Bad Request')
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Get('accounts-info')
+  async getAddressLookupTableAccounts(@Query() addresses: string[]): Promise<(AccountInfo<Buffer> | null)[]> {
+    try {
+      const addressLookupTableAccountInfos = await heliusSdk.connection.getMultipleAccountsInfo(
+        addresses.map((key) => new PublicKey(key))
+      )
+
+      return addressLookupTableAccountInfos
     } catch (err) {
       throw handleError(err)
     }

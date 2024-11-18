@@ -130,6 +130,45 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"PublicKey": {
+				"type": "string",
+				"description": "A public key"
+			},
+			"AccountInfo_Buffer_": {
+				"properties": {
+					"rentEpoch": {
+						"type": "number",
+						"format": "double",
+						"description": "Optional rent epoch info for account"
+					},
+					"data": {
+						"type": "string",
+						"format": "byte",
+						"description": "Optional data assigned to the account"
+					},
+					"lamports": {
+						"type": "number",
+						"format": "double",
+						"description": "Number of lamports assigned to the account"
+					},
+					"owner": {
+						"$ref": "#/components/schemas/PublicKey",
+						"description": "Identifier of the program that owns the account"
+					},
+					"executable": {
+						"type": "boolean",
+						"description": "`true` if this account's data contains a loaded program"
+					}
+				},
+				"required": [
+					"data",
+					"lamports",
+					"owner",
+					"executable"
+				],
+				"type": "object",
+				"description": "Information describing an account"
+			},
 			"BaseTx": {
 				"description": "Contains base transaction details",
 				"properties": {
@@ -1497,6 +1536,80 @@
 							"type": "string"
 						},
 						"example": "2bUNK6eVUmXyxeSDURsWdqi1KK8BYu4egnzyi3xDYc9M"
+					}
+				]
+			}
+		},
+		"/api/v1/accounts-info": {
+			"get": {
+				"operationId": "GetAddressLookupTableAccounts",
+				"responses": {
+					"200": {
+						"description": "account infos",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"allOf": [
+											{
+												"$ref": "#/components/schemas/AccountInfo_Buffer_"
+											}
+										],
+										"nullable": true
+									},
+									"type": "array"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get multiple accounts infos to construct any address lookup table accounts",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "all the addresses of the accounts container in the address lookup table",
+						"in": "query",
+						"name": "addresses",
+						"required": true,
+						"schema": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						}
 					}
 				]
 			}
