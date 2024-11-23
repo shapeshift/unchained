@@ -1,6 +1,6 @@
 # Remote Unchained Deployment
 
-run your own [uncahined api](https://api.ethereum.shapeshift.com/docs/#/)
+run your own [unchained api](https://api.ethereum.shapeshift.com/docs/#/)
 
 ### dependencies:
 
