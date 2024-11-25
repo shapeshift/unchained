@@ -22,7 +22,7 @@ By setting `logging.persistentVolume: true` a persistent volume will be created 
 
 #### **Log Retention**
 
-A log retention policy can be configured by changing `logging.retentionPeriod`.  Unit is hour and the minimum retention time is 24 hours (`24h`).  If combining this feature with a persistent volume, ensure you have enough storage space setting `logging.pvSize` to a resonable value. 
+A log retention policy can be configured by changing `logging.retentionPeriod`.  Unit is hour and the minimum retention time is 24 hours (`24h`).  If combining this feature with a persistent volume, ensure you have enough storage space setting `logging.pvSize` to a reasonable value. 
 
 
 ### **Grafana**
