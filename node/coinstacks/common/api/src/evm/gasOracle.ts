@@ -44,11 +44,13 @@ export class GasOracle {
   private readonly logger: Logger
   private readonly provider: ethers.providers.JsonRpcProvider
 
-  private latestBlockTag: BlockTag
-  private canQueryPendingBlockByHeight: boolean
   private feesByBlock = new Map<string, BlockFees>()
   private newBlocksQueue: Array<NewBlock> = []
   private baseFeePerGas?: string
+
+  private baseFeeBuffer: boolean
+  private latestBlockTag: BlockTag
+  private canQueryPendingBlockByHeight: boolean
 
   constructor(args: GasOracleArgs) {
     this.logger = args.logger.child({ namespace: ['gasOracle'] })
@@ -59,35 +61,43 @@ export class GasOracle {
     // specify latestBlockTag as supported by the coinstack node
     switch (args.coinstack) {
       case 'avalanche':
+        this.baseFeeBuffer = false
         this.latestBlockTag = 'latest'
         this.canQueryPendingBlockByHeight = true
         break
       case 'optimism':
+        this.baseFeeBuffer = true
         this.latestBlockTag = 'latest'
         this.canQueryPendingBlockByHeight = true
         break
       case 'base':
         this.latestBlockTag = 'latest'
         this.canQueryPendingBlockByHeight = true
+        this.baseFeeBuffer = true
         break
       case 'gnosis':
+        this.baseFeeBuffer = false
         this.latestBlockTag = 'latest'
         this.canQueryPendingBlockByHeight = true
         break
       case 'ethereum':
+        this.baseFeeBuffer = false
         this.latestBlockTag = 'pending'
         this.canQueryPendingBlockByHeight = false
         break
       case 'bnbsmartchain':
+        this.baseFeeBuffer = false
         this.latestBlockTag = 'pending'
         this.canQueryPendingBlockByHeight = true
         break
       case 'polygon':
+        this.baseFeeBuffer = false
         this.latestBlockTag = 'pending'
         this.canQueryPendingBlockByHeight = true
         break
       case 'arbitrum':
       case 'arbitrum-nova':
+        this.baseFeeBuffer = false
         this.latestBlockTag = 'pending'
         this.canQueryPendingBlockByHeight = true
         break
@@ -141,7 +151,7 @@ export class GasOracle {
       estimatedFees[percentile.toString()] = {
         gasPrice: gasPrice.toFixed(0),
         ...(this.baseFeePerGas && {
-          maxFeePerGas: (maxPriorityFee + Number(this.baseFeePerGas)).toFixed(0),
+          maxFeePerGas: (maxPriorityFee + Number(this.baseFeePerGas) * (this.baseFeeBuffer ? 2 : 1)).toFixed(0),
           maxPriorityFeePerGas: maxPriorityFee.toFixed(0),
         }),
       }
