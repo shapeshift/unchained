@@ -42,7 +42,7 @@ This process involves scaling down a kubernetes statefulset to ensure no process
 
 ## Manual Restore
 
-This process involves scaling down a kubenetes statefulset in order to remove any existing pvcs and pvs associated with the replica you wish to restore, creating a new ebs volume from an aws snapshot, and then manually applying a kubernetes yaml file to create a new pvc and pv pointed at the new ebs volume created. Take note of volume size and availability zone to ensure that you recreate the pvc and pv correctly.
+This process involves scaling down a kubernetes statefulset in order to remove any existing pvcs and pvs associated with the replica you wish to restore, creating a new ebs volume from an aws snapshot, and then manually applying a kubernetes yaml file to create a new pvc and pv pointed at the new ebs volume created. Take note of volume size and availability zone to ensure that you recreate the pvc and pv correctly.
 
 1. Manually scale the statefulset of the target coinstack down in k9s (see above)
 1. Delete the pvc associated with the statefulset replica to be restored

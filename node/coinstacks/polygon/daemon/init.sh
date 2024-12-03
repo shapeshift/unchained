@@ -9,7 +9,7 @@ apk add bash curl jq wget zstd tar pv aria2
 DATA_DIR=/data
 CHAINDATA_DIR=$DATA_DIR/bor/chaindata
 
-# shapshots provided by: https://snapshot.polygon.technology/
+# snapshots provided by: https://snapshot.polygon.technology/
 if [ -n "$SNAPSHOT" ] && [ ! -d "$CHAINDATA_DIR" ]; then
   rm -rf $DATA_DIR/bor;
   mkdir -p $CHAINDATA_DIR;
