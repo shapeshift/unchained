@@ -654,7 +654,7 @@ aliases:
     service-image-3: shapeshiftdao/unchained-blockbook:base-32a3bc7
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
-    service-memory-limit-3: 16Gi
+    service-memory-limit-3: 24Gi
     service-storage-size-3: 100Gi
 
   - &base-dev
