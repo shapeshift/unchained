@@ -18,7 +18,8 @@ start_coin() {
     -zmqpubhashblock=tcp://127.0.0.1:28332 \
     -rpcworkqueue=1100 \
     -maxmempool=2000 \
-    -dbcache=4000 &
+    -dbcache=4000 \
+    -deprecatedrpc=warnings &
   PID="$!"
 }
 
