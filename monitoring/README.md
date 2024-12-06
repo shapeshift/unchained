@@ -5,7 +5,7 @@ Deploys a collection of software that enables us to aggregate logs, collect metr
 _This stack is experimental, use at your own risk_
 
 ## Design
-Helm brings a valuable level of abstraction to this stack so that maintenance tasks should be lessened. Instead of implementing a stack that brings all of these components, we decided to bring each discreet component separately for ease of configuring each component. Splitting monitoring out into its own pulumi stack allows us to deploy out-of-band relative to common deploys, making quick changes to IAC as cluster behavior changes. 
+Helm brings a valuable level of abstraction to this stack so that maintenance tasks should be lessened. Instead of implementing a stack that brings all of these components, we decided to bring each discrete component separately for ease of configuring each component. Splitting monitoring out into its own pulumi stack allows us to deploy out-of-band relative to common deploys, making quick changes to IAC as cluster behavior changes. 
 
 ##### Global considerations:
 * All stateful components have been specified to create as StatefulSets instead of Deployments. This is to ensure multiple pods don't try to claim the same PVC during updates.  
