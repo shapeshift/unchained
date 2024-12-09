@@ -26,4 +26,4 @@ ipfs config --json Internal.Bitswap.TaskWorkerCount 500
 ipfs config --json Datastore.BloomFilterSize 1048576
 ipfs config Datastore.StorageMax 100GB
 
-chown -R "user" /data/ipfs
+chown -R "$user" /data/ipfs
