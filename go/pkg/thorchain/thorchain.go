@@ -10,7 +10,7 @@ import (
 
 var logger = log.WithoutFields()
 
-// map thorchain assets to native tendermint denoms
+// map thorchain assets to native denoms
 var assetToDenom = map[string]string{
 	"THOR.RUNE": "rune",
 }

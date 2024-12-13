@@ -1,4 +1,4 @@
-// Package cosmos provides a cosmos-sdk/tendermint client wrapper with support for both http and grpc.
+// Package cosmos provides a client wrapper with support for both http and grpc.
 package cosmos
 
 import (
