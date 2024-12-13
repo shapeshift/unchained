@@ -19,8 +19,8 @@ type Handler struct {
 }
 
 func (h *Handler) StartWebsocket() error {
-	h.WSClient.EndBlockEventHandler(func(eventCache map[string]interface{}, blockHeader types.Header, endBlockEvents []abci.Event, eventIndex int) (interface{}, []string, error) {
-		tx, err := thorchain.GetTxFromEndBlockEvents(eventCache, blockHeader, endBlockEvents, eventIndex, h.BlockService.Latest.Height, h.Denom)
+	h.WSClient.BlockEventHandler(func(eventCache map[string]interface{}, blockHeader types.Header, blockEvents []abci.Event, eventIndex int) (interface{}, []string, error) {
+		tx, err := thorchain.GetTxFromBlockEvents(eventCache, blockHeader, blockEvents, eventIndex, h.BlockService.Latest.Height, h.Denom)
 		if err != nil {
 			return nil, nil, errors.Wrap(err, "failed to get txs from end block events")
 		}

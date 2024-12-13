@@ -2,7 +2,7 @@ package thorchain
 
 import (
 	"github.com/cometbft/cometbft/types"
-	tmtypes "github.com/cometbft/cometbft/types"
+	cometbfttypes "github.com/cometbft/cometbft/types"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 )
 
@@ -13,7 +13,7 @@ type Block interface {
 }
 
 type ResultBlock struct {
-	*tmtypes.Block
+	*cometbfttypes.Block
 }
 
 func (b *ResultBlock) Hash() string {

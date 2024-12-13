@@ -10,10 +10,10 @@ import (
 	sdkmath "cosmossdk.io/math"
 	"cosmossdk.io/simapp/params"
 	abcitypes "github.com/cometbft/cometbft/abci/types"
-	tmjson "github.com/cometbft/cometbft/libs/json"
+	cometbftjson "github.com/cometbft/cometbft/libs/json"
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	rpctypes "github.com/cometbft/cometbft/rpc/jsonrpc/types"
-	tmtypes "github.com/cometbft/cometbft/types"
+	cometbfttypes "github.com/cometbft/cometbft/types"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
@@ -74,7 +74,7 @@ func (c *HTTPClient) GetTx(txid string) (*coretypes.ResultTx, error) {
 	}
 
 	tx := &coretypes.ResultTx{}
-	if err := tmjson.Unmarshal(res.Result, tx); err != nil {
+	if err := cometbftjson.Unmarshal(res.Result, tx); err != nil {
 		return nil, errors.Errorf("failed to unmarshal tx result: %v: %s", res.Result, res.Error.Error())
 	}
 
@@ -104,7 +104,7 @@ func (c *HTTPClient) TxSearch(query string, page int, pageSize int) (*coretypes.
 	}
 
 	result := &coretypes.ResultTxSearch{}
-	if err := tmjson.Unmarshal(res.Result, result); err != nil {
+	if err := cometbftjson.Unmarshal(res.Result, result); err != nil {
 		return nil, errors.Wrapf(err, "failed to unmarshal tx search result: %v", res.Result)
 	}
 
@@ -324,7 +324,7 @@ func DecodeTx(encoding params.EncodingConfig, rawTx interface{}) (sdk.Tx, signin
 		}
 	case []byte:
 		txBytes = rawTx
-	case tmtypes.Tx:
+	case cometbfttypes.Tx:
 		txBytes = rawTx
 	default:
 		return nil, nil, errors.New("rawTx must be string or []byte")

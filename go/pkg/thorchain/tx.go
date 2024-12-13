@@ -24,7 +24,7 @@ func GetTxHistory(handler *cosmos.Handler, pubkey string, cursor string, pageSiz
 
 		txs := []cosmos.HistoryTx{}
 		for _, b := range result.Blocks {
-			// fetch block results for each block found so we can inspect the EndBlockEvents
+			// fetch block results for each block found so we can inspect the block events
 			blockResult, err := handler.HTTPClient.BlockResults(int(b.Block.Height))
 			if err != nil {
 				return nil, errors.WithStack(err)
@@ -33,9 +33,9 @@ func GetTxHistory(handler *cosmos.Handler, pubkey string, cursor string, pageSiz
 			eventCache := make(map[string]interface{})
 
 			for i := range blockResult.FinalizeBlockEvents {
-				tx, err := GetTxFromEndBlockEvents(eventCache, b.Block.Header, blockResult.FinalizeBlockEvents, i, handler.BlockService.Latest.Height, handler.Denom)
+				tx, err := GetTxFromBlockEvents(eventCache, b.Block.Header, blockResult.FinalizeBlockEvents, i, handler.BlockService.Latest.Height, handler.Denom)
 				if err != nil {
-					return nil, errors.Wrap(err, "failed to get tx from end block events")
+					return nil, errors.Wrap(err, "failed to get tx from block events")
 				}
 
 				if tx == nil {
@@ -172,7 +172,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 	return messages
 }
 
-func GetTxFromEndBlockEvents(eventCache map[string]interface{}, blockHeader types.Header, endBlockEvents []abci.Event, eventIndex int, latestHeight int, denom string) (*ResultTx, error) {
+func GetTxFromBlockEvents(eventCache map[string]interface{}, blockHeader types.Header, blockEvents []abci.Event, eventIndex int, latestHeight int, denom string) (*ResultTx, error) {
 	// attempt to find matching fee event for txid or use default fee as defined by https://daemon.thorchain.shapeshift.com/lcd/thorchain/constants
 	matchFee := func(txid string, events []TypedEvent) cosmos.Value {
 		for _, e := range events {
@@ -189,7 +189,7 @@ func GetTxFromEndBlockEvents(eventCache map[string]interface{}, blockHeader type
 
 	// cache parsed block events for use in all subsequent event indices within the block
 	if eventCache["events"] == nil || eventCache["typedEvents"] == nil {
-		events, typedEvents, err := ParseBlockEvents(endBlockEvents)
+		events, typedEvents, err := ParseBlockEvents(blockEvents)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to parse block events")
 		}
