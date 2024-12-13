@@ -3,8 +3,8 @@ package cosmos
 import (
 	"fmt"
 
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	"github.com/pkg/errors"
-	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -15,7 +15,7 @@ type TxState struct {
 	hasMore  bool        // indicates if the source has more tx history available
 	lastTxID string      // tracks the last txid returned
 	page     int         // current page
-	query    string      // query string for tendermint search
+	query    string      // query string for rpc search
 	request  RequestFn   // request http function
 	txs      []HistoryTx // txs returned
 }

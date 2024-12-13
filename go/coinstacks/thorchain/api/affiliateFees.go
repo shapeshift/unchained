@@ -10,15 +10,15 @@ import (
 	"sync"
 	"time"
 
+	abci "github.com/cometbft/cometbft/abci/types"
+	cometbftjson "github.com/cometbft/cometbft/libs/json"
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
+	cometbft "github.com/cometbft/cometbft/rpc/jsonrpc/client"
+	"github.com/cometbft/cometbft/types"
+	cometbfttypes "github.com/cometbft/cometbft/types"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/shapeshift/unchained/pkg/thorchain"
-	abci "github.com/tendermint/tendermint/abci/types"
-	tendermintjson "github.com/tendermint/tendermint/libs/json"
-	coretypes "github.com/tendermint/tendermint/rpc/core/types"
-	tendermint "github.com/tendermint/tendermint/rpc/jsonrpc/client"
-	"github.com/tendermint/tendermint/types"
-	tmtypes "github.com/tendermint/tendermint/types"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -159,7 +159,7 @@ func (i *AffiliateFeeIndexer) listen() error {
 		return errors.Wrapf(err, "failed to parse WSURL: %s", i.conf.WSURL)
 	}
 
-	client, err := tendermint.NewWS(wsURL.String(), "/websocket")
+	client, err := cometbft.NewWS(wsURL.String(), "/websocket")
 	if err != nil {
 		return errors.Wrapf(err, "failed to create websocket client")
 	}
@@ -167,8 +167,8 @@ func (i *AffiliateFeeIndexer) listen() error {
 	// use default dialer
 	client.Dialer = net.Dial
 
-	tendermint.MaxReconnectAttempts(10)(client)
-	tendermint.OnReconnect(func() {
+	cometbft.MaxReconnectAttempts(10)(client)
+	cometbft.OnReconnect(func() {
 		logger.Info("OnReconnect triggered: resubscribing")
 		_ = client.Subscribe(context.Background(), types.EventQueryNewBlockHeader.String())
 	})(client)
@@ -181,7 +181,7 @@ func (i *AffiliateFeeIndexer) listen() error {
 		return errors.Wrap(err, "failed to subscribe to newBlocks")
 	}
 
-	go func(client *tendermint.WSClient) {
+	go func(client *cometbft.WSClient) {
 		for r := range client.ResponsesCh {
 			if r.Error != nil {
 				if r.Error.Code == -32000 {
@@ -203,7 +203,7 @@ func (i *AffiliateFeeIndexer) listen() error {
 			}
 
 			result := &coretypes.ResultEvent{}
-			if err := tendermintjson.Unmarshal(r.Result, result); err != nil {
+			if err := cometbftjson.Unmarshal(r.Result, result); err != nil {
 				logger.Errorf("failed to unmarshal tx message: %v", err)
 				continue
 			}
@@ -235,7 +235,7 @@ func (i *AffiliateFeeIndexer) fetchBlocks(httpClient *cosmos.HTTPClient, affilia
 	}
 }
 
-func (i *AffiliateFeeIndexer) handleBlock(httpClient *cosmos.HTTPClient, block *tmtypes.Block, affiliateAddress string) {
+func (i *AffiliateFeeIndexer) handleBlock(httpClient *cosmos.HTTPClient, block *cometbfttypes.Block, affiliateAddress string) {
 	blockResult, err := httpClient.BlockResults(int(block.Height))
 	if err != nil {
 		logger.Panicf("failed to handle block: %d: %+v", block.Height, err)
@@ -245,19 +245,19 @@ func (i *AffiliateFeeIndexer) handleBlock(httpClient *cosmos.HTTPClient, block *
 		Block: block,
 	}
 
-	i.processAffiliateFees(b, blockResult.EndBlockEvents, []string{affiliateAddress})
+	i.processAffiliateFees(b, blockResult.FinalizeBlockEvents, []string{affiliateAddress})
 }
 
 func (i *AffiliateFeeIndexer) handleNewBlockHeader(newBlockHeader types.EventDataNewBlockHeader) {
-	b := &thorchain.NewBlockHeader{
-		EventDataNewBlockHeader: newBlockHeader,
-	}
+	//b := &thorchain.NewBlockHeader{
+	//	EventDataNewBlockHeader: newBlockHeader,
+	//}
 
-	i.processAffiliateFees(b, newBlockHeader.ResultEndBlock.Events, i.AffiliateAddresses)
+	//i.processAffiliateFees(b, newBlockHeader.ResultEndBlock.Events, i.AffiliateAddresses)
 }
 
-func (i *AffiliateFeeIndexer) processAffiliateFees(block thorchain.Block, endBlockEvents []abci.Event, affiliateAddresses []string) {
-	_, typedEvents, err := thorchain.ParseBlockEvents(endBlockEvents)
+func (i *AffiliateFeeIndexer) processAffiliateFees(block thorchain.Block, blockEvents []abci.Event, affiliateAddresses []string) {
+	_, typedEvents, err := thorchain.ParseBlockEvents(blockEvents)
 	if err != nil {
 		logger.Panicf("failed to parse block events for block: %d: %+v", block.Height(), err)
 	}

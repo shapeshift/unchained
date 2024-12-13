@@ -75,11 +75,11 @@ func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService 
 		handler: handler,
 	}
 
-	// runtime check to ensure Handler implements CoinSpecific functionality
+	// compile check to ensure Handler implements necessary interfaces
 	var _ api.BaseAPI = handler
 	var _ cosmos.CoinSpecificHandler = handler
 
-	// runtime check to ensure Handler implements CoinSpecificHandler
+	// runtime check to ensure Handler implements CoinSpecific functionality
 	if err := handler.ValidateCoinSpecific(handler); err != nil {
 		logger.Panicf("%+v", err)
 	}

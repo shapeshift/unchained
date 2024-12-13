@@ -11,7 +11,7 @@ source /tendermint.sh
 
 BLOCK_HEIGHT_TOLERANCE=5
 
-SYNCING=$(curl -sf http://localhost:1317/syncing) || exit 1
+SYNCING=$(curl -sf http://localhost:1317/cosmos/base/tendermint/v1beta1/syncing) || exit 1
 NET_INFO=$(curl -sf http://localhost:27147/net_info) || exit 1
 STATUS=$(curl -sf http://localhost:27147/status) || exit 1
 
@@ -22,7 +22,7 @@ NUM_PEERS=$(echo $NET_INFO | jq -r '.result.n_peers')
 status_curls=(
   "curl -sf -m 3 https://rpc.ninerealms.com/status"
   # referer header now required to avoid being blocked
-  #"curl -sf -m 3 -H \"Referer: https://app.thorswap.finance\" https://rpc.thorswap.net/status"
+  "curl -sf -m 3 -H \"Referer: https://app.thorswap.finance\" https://rpc.thorswap.net/status"
 )
 
 if [[ $IS_SYNCING == false && $CATCHING_UP == false ]]; then

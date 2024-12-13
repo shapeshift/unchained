@@ -5,8 +5,8 @@
     "tendermint_url": "http://localhost:27147/websocket",
     "thornode_url": "http://localhost:1317/thorchain",
     "last_chain_backoff": "7s",
-    "fetch_batch_size": 100,
-    "parallelism": 4,
+    "fetch_batch_size": 10,
+    "parallelism": 2,
     "read_timeout": "32s",
     "fork_infos": [
       {

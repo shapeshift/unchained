@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
+	abci "github.com/cometbft/cometbft/abci/types"
+	cometbftjson "github.com/cometbft/cometbft/libs/json"
 	"github.com/shapeshift/unchained/pkg/cosmos"
-	abci "github.com/tendermint/tendermint/abci/types"
-	tmjson "github.com/tendermint/tendermint/libs/json"
 )
 
 type TypedEvent interface{}
@@ -58,7 +58,7 @@ func ParseBlockEvents(events []abci.Event) (cosmos.EventsByMsgIndex, []TypedEven
 			return nil, nil, err
 		}
 
-		if err := tmjson.Unmarshal(attrBytes, typedEvent); err != nil {
+		if err := cometbftjson.Unmarshal(attrBytes, typedEvent); err != nil {
 			return nil, nil, err
 		}
 

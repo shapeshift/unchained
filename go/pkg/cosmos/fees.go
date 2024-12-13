@@ -1,32 +1,27 @@
 package cosmos
 
 import (
-	"encoding/json"
 	"fmt"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
 )
 
-func (c *HTTPClient) GetGlobalMinimumGasPrices() (map[string]sdk.Dec, error) {
-	gasPrices := make(map[string]sdk.Dec)
+func (c *HTTPClient) GetGlobalMinimumGasPrices() (map[string]sdkmath.LegacyDec, error) {
+	gasPrices := make(map[string]sdkmath.LegacyDec)
 
 	var res struct {
-		Param struct {
-			Amount string `json:"subspace"`
-			Key    string `json:"key"`
-			Value  string `json:"value"`
-		} `json:"param"`
+		Price struct {
+			Amount string `json:"amount"`
+			Denom  string `json:"denom"`
+		} `json:"price"`
 	}
 
 	e := &ErrorResponse{}
 
-	queryParams := map[string]string{
-		"subspace": "globalfee",
-		"key":      "MinimumGasPricesParam",
-	}
-
-	r, err := c.LCD.R().SetResult(&res).SetError(e).SetQueryParams(queryParams).Get("/cosmos/params/v1beta1/params")
+	url := fmt.Sprintf("/feemarket/v1/gas_price/%s", c.denom)
+	r, err := c.LCD.R().SetResult(&res).SetError(e).Get(url)
 	if err != nil {
 		return gasPrices, errors.Wrap(err, "failed to get globalfee params")
 	}
@@ -35,33 +30,18 @@ func (c *HTTPClient) GetGlobalMinimumGasPrices() (map[string]sdk.Dec, error) {
 		return gasPrices, errors.Errorf("failed to get globalfee params: %s", e.Msg)
 	}
 
-	values := []struct {
-		Denom  string `json:"denom"`
-		Amount string `json:"amount"`
-	}{}
-
-	err = json.Unmarshal([]byte(res.Param.Value), &values)
+	amount, err := sdkmath.LegacyNewDecFromStr(res.Price.Amount)
 	if err != nil {
-		return gasPrices, errors.Wrapf(err, "failed to unmarshal value: %s", res.Param.Value)
+		return gasPrices, errors.Errorf("failed to handle amount: %s", err)
 	}
 
-	for _, value := range values {
-		coinStr := fmt.Sprintf("%s%s", value.Amount, value.Denom)
-
-		coin, err := sdk.ParseDecCoin(coinStr)
-		if err != nil {
-			logger.Errorf("failed to parse dec coin: %s: %v", coinStr, err)
-			continue
-		}
-
-		gasPrices[coin.GetDenom()] = coin.Amount
-	}
+	gasPrices[res.Price.Denom] = amount
 
 	return gasPrices, nil
 }
 
-func (c *HTTPClient) GetLocalMinimumGasPrices() (map[string]sdk.Dec, error) {
-	gasPrices := make(map[string]sdk.Dec)
+func (c *HTTPClient) GetLocalMinimumGasPrices() (map[string]sdkmath.LegacyDec, error) {
+	gasPrices := make(map[string]sdkmath.LegacyDec)
 
 	var res struct {
 		MinimumGasPrice string `json:"minimum_gas_price"`

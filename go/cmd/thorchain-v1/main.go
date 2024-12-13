@@ -12,7 +12,7 @@ import (
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/shapeshift/unchained/pkg/metrics"
 
-	thortypes "gitlab.com/thorchain/thornode/x/thorchain/types"
+	thortypes "gitlab.com/thorchain/thornode/v3/x/thorchain/types"
 )
 
 var (

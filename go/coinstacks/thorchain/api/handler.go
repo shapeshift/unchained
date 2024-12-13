@@ -3,14 +3,14 @@ package api
 import (
 	"math/big"
 
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/shapeshift/unchained/pkg/thorchain"
-	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/types"
 )
 
 type Handler struct {
@@ -19,8 +19,8 @@ type Handler struct {
 }
 
 func (h *Handler) StartWebsocket() error {
-	h.WSClient.EndBlockEventHandler(func(eventCache map[string]interface{}, blockHeader types.Header, endBlockEvents []abci.Event, eventIndex int) (interface{}, []string, error) {
-		tx, err := thorchain.GetTxFromEndBlockEvents(eventCache, blockHeader, endBlockEvents, eventIndex, h.BlockService.Latest.Height, h.Denom)
+	h.WSClient.BlockEventHandler(func(eventCache map[string]interface{}, blockHeader types.Header, blockEvents []abci.Event, eventIndex int) (interface{}, []string, error) {
+		tx, err := thorchain.GetTxFromBlockEvents(eventCache, blockHeader, blockEvents, eventIndex, h.BlockService.Latest.Height, h.Denom)
 		if err != nil {
 			return nil, nil, errors.Wrap(err, "failed to get txs from end block events")
 		}
