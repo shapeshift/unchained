@@ -18,7 +18,11 @@ func (c *HTTPClient) GetTotalSupply(denom string) (string, error) {
 		} `json:"amount"`
 	}
 
-	_, err := c.LCD.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/bank/v1beta1/supply/%s", denom))
+	queryParams := map[string]string{
+		"denom": denom,
+	}
+
+	_, err := c.LCD.R().SetResult(&res).SetQueryParams(queryParams).Get(fmt.Sprintf("/cosmos/bank/v1beta1/supply/by_denom", denom))
 	if err != nil {
 		return "0", errors.Wrapf(err, "failed to get total supply of: %s", denom)
 	}

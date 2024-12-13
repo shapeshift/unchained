@@ -5,9 +5,9 @@ import (
 	"context"
 	"net/url"
 
+	"cosmossdk.io/simapp/params"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
-	"github.com/cosmos/cosmos-sdk/simapp/params"
 	stdtypes "github.com/cosmos/cosmos-sdk/std"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
@@ -16,16 +16,13 @@ import (
 	authztypes "github.com/cosmos/cosmos-sdk/x/authz"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	govv1types "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
+	govv1beta1types "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	ibctransfertypes "github.com/cosmos/ibc-go/v4/modules/apps/transfer/types"
-	ibccoretypes "github.com/cosmos/ibc-go/v4/modules/core/types"
-	ibclightclientstypes "github.com/cosmos/ibc-go/v4/modules/light-clients/07-tendermint/types"
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/internal/log"
-	liquiditytypes "github.com/tendermint/liquidity/x/liquidity/types"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
@@ -39,6 +36,7 @@ type Config struct {
 	Bech32ValPrefix   string
 	Bech32PkPrefix    string
 	Bech32PkValPrefix string
+	Denom             string
 	Encoding          *params.EncodingConfig
 	GRPCURL           string
 	LCDURL            string
@@ -49,6 +47,7 @@ type Config struct {
 // HTTPClient allows communicating over http
 type HTTPClient struct {
 	ctx      context.Context
+	denom    string
 	encoding *params.EncodingConfig
 	LCD      *resty.Client
 	RPC      *resty.Client
@@ -76,6 +75,7 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 
 	c := &HTTPClient{
 		ctx:      context.Background(),
+		denom:    conf.Denom,
 		encoding: conf.Encoding,
 		LCD:      lcd,
 		RPC:      rpc,
@@ -158,11 +158,8 @@ func NewEncoding(registerInterfaces ...func(r codectypes.InterfaceRegistry)) *pa
 	authztypes.RegisterInterfaces(registry)
 	banktypes.RegisterInterfaces(registry)
 	distributiontypes.RegisterInterfaces(registry)
-	govtypes.RegisterInterfaces(registry)
-	ibccoretypes.RegisterInterfaces(registry)
-	ibctransfertypes.RegisterInterfaces(registry)
-	ibclightclientstypes.RegisterInterfaces(registry)
-	liquiditytypes.RegisterInterfaces(registry)
+	govv1types.RegisterInterfaces(registry)
+	govv1beta1types.RegisterInterfaces(registry)
 	stakingtypes.RegisterInterfaces(registry)
 	stdtypes.RegisterInterfaces(registry)
 
@@ -171,12 +168,12 @@ func NewEncoding(registerInterfaces ...func(r codectypes.InterfaceRegistry)) *pa
 		r(registry)
 	}
 
-	marshaler := codec.NewProtoCodec(registry)
+	protoCodec := codec.NewProtoCodec(registry)
 
 	return &params.EncodingConfig{
 		InterfaceRegistry: registry,
-		Marshaler:         marshaler,
-		TxConfig:          tx.NewTxConfig(marshaler, tx.DefaultSignModes),
+		Codec:             protoCodec,
+		TxConfig:          tx.NewTxConfig(protoCodec, tx.DefaultSignModes),
 		Amino:             codec.NewLegacyAmino(),
 	}
 }

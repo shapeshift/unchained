@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
+	abci "github.com/cometbft/cometbft/abci/types"
+	tmjson "github.com/cometbft/cometbft/libs/json"
 	"github.com/shapeshift/unchained/pkg/cosmos"
-	abci "github.com/tendermint/tendermint/abci/types"
-	tmjson "github.com/tendermint/tendermint/libs/json"
 )
 
 type TypedEvent interface{}

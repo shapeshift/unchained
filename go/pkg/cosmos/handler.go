@@ -7,14 +7,14 @@ import (
 	"reflect"
 	"strconv"
 
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
+	"github.com/cometbft/cometbft/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	ws "github.com/gorilla/websocket"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/websocket"
-	coretypes "github.com/tendermint/tendermint/rpc/core/types"
-	"github.com/tendermint/tendermint/types"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -86,7 +86,7 @@ func (h *Handler) StartWebsocket() error {
 		}
 
 		txid := fmt.Sprintf("%X", sha256.Sum256(tx.Tx))
-		events := ParseEvents(tx.Result.Log)
+		events := ParseEvents(tx.Result)
 
 		t := Tx{
 			BaseTx: api.BaseTx{
@@ -299,7 +299,7 @@ func (h *Handler) FormatTx(tx *coretypes.ResultTx) (*Tx, error) {
 		return nil, errors.Wrapf(err, "failed to decode tx: %s", tx.Hash.String())
 	}
 
-	events := ParseEvents(tx.TxResult.Log)
+	events := ParseEvents(tx.TxResult)
 
 	t := &Tx{
 		BaseTx: api.BaseTx{

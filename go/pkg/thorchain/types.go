@@ -1,9 +1,9 @@
 package thorchain
 
 import (
+	"github.com/cometbft/cometbft/types"
+	tmtypes "github.com/cometbft/cometbft/types"
 	"github.com/shapeshift/unchained/pkg/cosmos"
-	"github.com/tendermint/tendermint/types"
-	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 type Block interface {

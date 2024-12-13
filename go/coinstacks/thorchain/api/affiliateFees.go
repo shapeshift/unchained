@@ -10,15 +10,15 @@ import (
 	"sync"
 	"time"
 
+	abci "github.com/cometbft/cometbft/abci/types"
+	tendermintjson "github.com/cometbft/cometbft/libs/json"
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
+	tendermint "github.com/cometbft/cometbft/rpc/jsonrpc/client"
+	"github.com/cometbft/cometbft/types"
+	tmtypes "github.com/cometbft/cometbft/types"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/shapeshift/unchained/pkg/thorchain"
-	abci "github.com/tendermint/tendermint/abci/types"
-	tendermintjson "github.com/tendermint/tendermint/libs/json"
-	coretypes "github.com/tendermint/tendermint/rpc/core/types"
-	tendermint "github.com/tendermint/tendermint/rpc/jsonrpc/client"
-	"github.com/tendermint/tendermint/types"
-	tmtypes "github.com/tendermint/tendermint/types"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -245,15 +245,15 @@ func (i *AffiliateFeeIndexer) handleBlock(httpClient *cosmos.HTTPClient, block *
 		Block: block,
 	}
 
-	i.processAffiliateFees(b, blockResult.EndBlockEvents, []string{affiliateAddress})
+	i.processAffiliateFees(b, blockResult.FinalizeBlockEvents, []string{affiliateAddress})
 }
 
 func (i *AffiliateFeeIndexer) handleNewBlockHeader(newBlockHeader types.EventDataNewBlockHeader) {
-	b := &thorchain.NewBlockHeader{
-		EventDataNewBlockHeader: newBlockHeader,
-	}
+	//b := &thorchain.NewBlockHeader{
+	//	EventDataNewBlockHeader: newBlockHeader,
+	//}
 
-	i.processAffiliateFees(b, newBlockHeader.ResultEndBlock.Events, i.AffiliateAddresses)
+	//i.processAffiliateFees(b, newBlockHeader.ResultEndBlock.Events, i.AffiliateAddresses)
 }
 
 func (i *AffiliateFeeIndexer) processAffiliateFees(block thorchain.Block, endBlockEvents []abci.Event, affiliateAddresses []string) {

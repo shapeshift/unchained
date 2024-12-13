@@ -9,14 +9,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/simapp/params"
+	"cosmossdk.io/simapp/params"
+	abci "github.com/cometbft/cometbft/abci/types"
+	tendermintjson "github.com/cometbft/cometbft/libs/json"
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
+	tendermint "github.com/cometbft/cometbft/rpc/jsonrpc/client"
+	"github.com/cometbft/cometbft/types"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/websocket"
-	abci "github.com/tendermint/tendermint/abci/types"
-	tendermintjson "github.com/tendermint/tendermint/libs/json"
-	coretypes "github.com/tendermint/tendermint/rpc/core/types"
-	tendermint "github.com/tendermint/tendermint/rpc/jsonrpc/client"
-	"github.com/tendermint/tendermint/types"
 )
 
 const (
@@ -143,7 +143,7 @@ func (ws *WSClient) listen() {
 	for r := range ws.client.ResponsesCh {
 		if r.Error != nil {
 			// resubscribe if subscription is cancelled by the server for reason: client is not pulling messages fast enough
-			// experimental rpc config available to help mitigate this issue: https://github.com/tendermint/tendermint/blob/main/config/config.go#L373
+			// experimental rpc config available to help mitigate this issue: https://github.com/cometbft/cometbft/blob/main/config/config.go#L373
 			if r.Error.Code == -32000 {
 				ws.reset()
 				continue
@@ -209,21 +209,21 @@ func (ws *WSClient) handleNewBlockHeader(block types.EventDataNewBlockHeader) {
 	ws.blockService.WriteBlock(b, true)
 
 	if ws.endBlockEventHandler != nil {
-		go func(b types.EventDataNewBlockHeader) {
-			eventCache := make(map[string]interface{})
+		//go func(b types.EventDataNewBlockHeader) {
+		//	eventCache := make(map[string]interface{})
 
-			for i := range b.ResultEndBlock.Events {
-				data, addrs, err := ws.endBlockEventHandler(eventCache, b.Header, b.ResultEndBlock.Events, i)
-				if err != nil {
-					logger.Error(err)
-					return
-				}
+		//	for i := range b.ResultEndBlock.Events {
+		//		data, addrs, err := ws.endBlockEventHandler(eventCache, b.Header, b.ResultEndBlock.Events, i)
+		//		if err != nil {
+		//			logger.Error(err)
+		//			return
+		//		}
 
-				if data != nil {
-					ws.Publish(addrs, data)
-				}
-			}
-		}(block)
+		//		if data != nil {
+		//			ws.Publish(addrs, data)
+		//		}
+		//	}
+		//}(block)
 	}
 
 	// process any unhandled transactions

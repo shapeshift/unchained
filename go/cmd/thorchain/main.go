@@ -12,7 +12,7 @@ import (
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/shapeshift/unchained/pkg/metrics"
 
-	thortypes "gitlab.com/thorchain/thornode/x/thorchain/types"
+	thortypes "gitlab.com/thorchain/thornode/v3/x/thorchain/types"
 )
 
 var (
@@ -55,6 +55,7 @@ func main() {
 		Bech32PkPrefix:    "thorpub",
 		Bech32ValPrefix:   "thorv",
 		Bech32PkValPrefix: "thorvpub",
+		Denom:             "rune",
 		Encoding:          encoding,
 		LCDURL:            conf.LCDURL,
 		RPCURL:            conf.RPCURL,

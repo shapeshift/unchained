@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"strconv"
 
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
-	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/types"
-	"gitlab.com/thorchain/thornode/common"
-	thorchaintypes "gitlab.com/thorchain/thornode/x/thorchain/types"
+	"gitlab.com/thorchain/thornode/v3/common"
+	thorchaintypes "gitlab.com/thorchain/thornode/v3/x/thorchain/types"
 )
 
 func GetTxHistory(handler *cosmos.Handler, pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
@@ -32,8 +32,8 @@ func GetTxHistory(handler *cosmos.Handler, pubkey string, cursor string, pageSiz
 
 			eventCache := make(map[string]interface{})
 
-			for i := range blockResult.EndBlockEvents {
-				tx, err := GetTxFromEndBlockEvents(eventCache, b.Block.Header, blockResult.EndBlockEvents, i, handler.BlockService.Latest.Height, handler.Denom)
+			for i := range blockResult.FinalizeBlockEvents {
+				tx, err := GetTxFromEndBlockEvents(eventCache, b.Block.Header, blockResult.FinalizeBlockEvents, i, handler.BlockService.Latest.Height, handler.Denom)
 				if err != nil {
 					return nil, errors.Wrap(err, "failed to get tx from end block events")
 				}
@@ -111,7 +111,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 				Origin:    v.FromAddress.String(),
 				From:      v.FromAddress.String(),
 				To:        v.ToAddress.String(),
-				Type:      v.Type(),
+				Type:      "send",
 				Value:     cosmos.CoinToValue(&v.Amount[0]),
 			}
 			messages = append(messages, message)
@@ -137,7 +137,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 				Origin:    v.Signer.String(),
 				From:      v.Signer.String(),
 				To:        to,
-				Type:      v.Type(),
+				Type:      "deposit",
 				Value:     coinToValue(v.Coins[0]),
 			}
 			messages = append(messages, message)
