@@ -7,12 +7,12 @@ import (
 	"net/url"
 	"time"
 
+	tendermintjson "github.com/cometbft/cometbft/libs/json"
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
+	tendermint "github.com/cometbft/cometbft/rpc/jsonrpc/client"
+	"github.com/cometbft/cometbft/types"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/cosmos"
-	tendermintjson "github.com/tendermint/tendermint/libs/json"
-	coretypes "github.com/tendermint/tendermint/rpc/core/types"
-	tendermint "github.com/tendermint/tendermint/rpc/jsonrpc/client"
-	"github.com/tendermint/tendermint/types"
 )
 
 const (
@@ -109,7 +109,6 @@ func (ws *WSClient) listen() {
 	for r := range ws.client.ResponsesCh {
 		if r.Error != nil {
 			// resubscribe if subscription is cancelled by the server for reason: client is not pulling messages fast enough
-			// experimental rpc config available to help mitigate this issue: https://github.com/tendermint/tendermint/blob/main/config/config.go#L373
 			if r.Error.Code == -32000 {
 				ws.reset()
 				continue
