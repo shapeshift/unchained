@@ -28,20 +28,20 @@ func (b *ResultBlock) Timestamp() int64 {
 	return b.Block.Time.UnixMilli()
 }
 
-type NewBlockHeader struct {
-	types.EventDataNewBlockHeader
+type NewBlock struct {
+	types.EventDataNewBlock
 }
 
-func (b *NewBlockHeader) Hash() string {
-	return b.Header.Hash().String()
+func (b *NewBlock) Hash() string {
+	return b.Block.Hash().String()
 }
 
-func (b *NewBlockHeader) Height() int64 {
-	return b.Header.Height
+func (b *NewBlock) Height() int64 {
+	return b.Block.Height
 }
 
-func (b *NewBlockHeader) Timestamp() int64 {
-	return b.Header.Time.UnixMilli()
+func (b *NewBlock) Timestamp() int64 {
+	return b.Block.Time.UnixMilli()
 }
 
 // ResultTx represents a tx_search ResultTx created from block_result block events

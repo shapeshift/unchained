@@ -738,7 +738,10 @@ commands:
           command: make
       - run:
           working_directory: go
-          command: golangci-lint run --version --verbose
+          command: make build
+      - run:
+          working_directory: go
+          command: golangci-lint run --verbose
 
   postcheck:
     description: perform postcheck operations
