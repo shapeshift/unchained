@@ -1,8 +1,6 @@
 package cosmos
 
 import (
-	"fmt"
-
 	bankTypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	mintTypes "github.com/cosmos/cosmos-sdk/x/mint/types"
@@ -22,7 +20,7 @@ func (c *HTTPClient) GetTotalSupply(denom string) (string, error) {
 		"denom": denom,
 	}
 
-	_, err := c.LCD.R().SetResult(&res).SetQueryParams(queryParams).Get(fmt.Sprintf("/cosmos/bank/v1beta1/supply/by_denom", denom))
+	_, err := c.LCD.R().SetResult(&res).SetQueryParams(queryParams).Get("/cosmos/bank/v1beta1/supply/by_denom")
 	if err != nil {
 		return "0", errors.Wrapf(err, "failed to get total supply of: %s", denom)
 	}
