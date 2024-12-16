@@ -94,7 +94,7 @@ func main() {
 		logger.Panicf("failed to create new websocket client: %+v", err)
 	}
 
-	indexer := api.NewAffiliateFeeIndexer(cfg, []*cosmos.HTTPClient{httpClientV1, httpClient})
+	indexer := api.NewAffiliateFeeIndexer([]*cosmos.HTTPClient{httpClientV1, httpClient}, wsClient)
 	if err := indexer.Sync(); err != nil {
 		logger.Panicf("failed to index affiliate fees: %+v", err)
 	}

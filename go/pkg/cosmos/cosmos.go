@@ -114,11 +114,9 @@ func NewGRPCClient(conf Config) (*GRPCClient, error) {
 	md := metadata.Pairs()
 	ctx := metadata.NewOutgoingContext(context.Background(), md)
 
-	grpcConn, err := grpc.DialContext(
-		context.Background(),
-		grpcURL.String(),
-		grpc.WithTransportCredentials(credentials.NewTLS(nil)), // The Cosmos SDK doesn't support any transport security mechanism.
-	)
+	// The Cosmos SDK doesn't support any transport security mechanism.
+	grpcConn, err := grpc.NewClient(grpcURL.String(), grpc.WithTransportCredentials(credentials.NewTLS(nil)))
+
 	if err != nil {
 		return nil, errors.Wrapf(err, "unable to connect to: %s", grpcURL)
 	}
