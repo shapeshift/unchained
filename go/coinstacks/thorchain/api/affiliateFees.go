@@ -138,11 +138,7 @@ func (i *AffiliateFeeIndexer) handleBlocks(httpClient *cosmos.HTTPClient, affili
 						logger.Panicf("failed to handle block: %d: %+v", b.Block.Height, err)
 					}
 
-					b := &thorchain.ResultBlock{
-						Block: b.Block,
-					}
-
-					i.processAffiliateFees(b, blockResult.GetBlockEvents(), []string{affiliateAddress})
+					i.processAffiliateFees(&thorchain.ResultBlock{Block: b.Block}, blockResult.GetBlockEvents(), []string{affiliateAddress})
 				}
 			}
 		}()

@@ -219,11 +219,11 @@ func (ws *WSClient) handleNewBlock(newBlock types.EventDataNewBlock, blockEvents
 	ws.blockService.WriteBlock(b, true)
 
 	if ws.blockEventHandler != nil {
-		go func(b types.EventDataNewBlock, blockEvents []ABCIEvent) {
+		go func(newBlock types.EventDataNewBlock, blockEvents []ABCIEvent) {
 			eventCache := make(map[string]interface{})
 
 			for i := range blockEvents {
-				data, addrs, err := ws.blockEventHandler(eventCache, b.Block.Header, blockEvents, i)
+				data, addrs, err := ws.blockEventHandler(eventCache, newBlock.Block.Header, blockEvents, i)
 				if err != nil {
 					logger.Error(err)
 					return

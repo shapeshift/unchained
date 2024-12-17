@@ -28,12 +28,12 @@ type EventOutbound struct {
 	Memo   string `json:"memo"`
 }
 
-func ParseBlockEvents(events []cosmos.ABCIEvent) (cosmos.EventsByMsgIndex, []TypedEvent, error) {
-	typedEvents := make([]TypedEvent, len(events))
+func ParseBlockEvents(blockEvents []cosmos.ABCIEvent) (cosmos.EventsByMsgIndex, []TypedEvent, error) {
+	typedEvents := make([]TypedEvent, len(blockEvents))
 	eventsByMsgIndex := cosmos.EventsByMsgIndex{}
 
 	var typedEvent TypedEvent
-	for i, event := range events {
+	for i, event := range blockEvents {
 		switch event.Type {
 		case "fee":
 			typedEvent = &EventFee{}
