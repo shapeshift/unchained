@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strconv"
 
-	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cometbft/cometbft/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
@@ -32,8 +31,8 @@ func GetTxHistory(handler *cosmos.Handler, pubkey string, cursor string, pageSiz
 
 			eventCache := make(map[string]interface{})
 
-			for i := range blockResult.FinalizeBlockEvents {
-				tx, err := GetTxFromBlockEvents(eventCache, b.Block.Header, blockResult.FinalizeBlockEvents, i, handler.BlockService.Latest.Height, handler.Denom)
+			for i := range blockResult.GetBlockEvents() {
+				tx, err := GetTxFromBlockEvents(eventCache, b.Block.Header, blockResult.GetBlockEvents(), i, handler.BlockService.Latest.Height, handler.Denom)
 				if err != nil {
 					return nil, errors.Wrap(err, "failed to get tx from block events")
 				}
@@ -172,7 +171,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 	return messages
 }
 
-func GetTxFromBlockEvents(eventCache map[string]interface{}, blockHeader types.Header, blockEvents []abci.Event, eventIndex int, latestHeight int, denom string) (*ResultTx, error) {
+func GetTxFromBlockEvents(eventCache map[string]interface{}, blockHeader types.Header, blockEvents []cosmos.ABCIEvent, eventIndex int, latestHeight int, denom string) (*ResultTx, error) {
 	// attempt to find matching fee event for txid or use default fee as defined by https://daemon.thorchain.shapeshift.com/lcd/thorchain/constants
 	matchFee := func(txid string, events []TypedEvent) cosmos.Value {
 		for _, e := range events {

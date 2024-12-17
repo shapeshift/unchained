@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"cosmossdk.io/simapp/params"
-	abci "github.com/cometbft/cometbft/abci/types"
 	cometbftjson "github.com/cometbft/cometbft/libs/json"
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	cometbft "github.com/cometbft/cometbft/rpc/jsonrpc/client"
@@ -27,8 +26,8 @@ const (
 )
 
 type TxHandlerFunc = func(tx types.EventDataTx, block *BlockResponse) (interface{}, []string, error)
-type BlockEventHandlerFunc = func(eventCache map[string]interface{}, blockHeader types.Header, blockEvents []abci.Event, eventIndex int) (interface{}, []string, error)
-type NewBlockHandlerFunc = func(newBlock types.EventDataNewBlock)
+type BlockEventHandlerFunc = func(eventCache map[string]interface{}, blockHeader types.Header, blockEvents []ABCIEvent, eventIndex int) (interface{}, []string, error)
+type NewBlockHandlerFunc = func(newBlock types.EventDataNewBlock, blockEvents []ABCIEvent)
 
 type WSClient struct {
 	*websocket.Registry
@@ -173,8 +172,10 @@ func (ws *WSClient) listen() {
 				go ws.handleTx(result.Data.(types.EventDataTx))
 			case types.EventDataNewBlock:
 				ws.t.Reset(resetTimeout)
+				newBlock := result.Data.(types.EventDataNewBlock)
+				blockEvents := ConvertABCIEvents(newBlock.ResultFinalizeBlock.Events)
 				for _, handleNewBlock := range ws.newBlockHandlers {
-					go handleNewBlock(result.Data.(types.EventDataNewBlock))
+					go handleNewBlock(newBlock, blockEvents)
 				}
 			default:
 				fmt.Printf("unsupported result type: %T", result.Data)
@@ -206,7 +207,7 @@ func (ws *WSClient) handleTx(tx types.EventDataTx) {
 	}
 }
 
-func (ws *WSClient) handleNewBlock(newBlock types.EventDataNewBlock) {
+func (ws *WSClient) handleNewBlock(newBlock types.EventDataNewBlock, blockEvents []ABCIEvent) {
 	logger.Debugf("block: %d", newBlock.Block.Height)
 
 	b := &BlockResponse{
@@ -218,11 +219,11 @@ func (ws *WSClient) handleNewBlock(newBlock types.EventDataNewBlock) {
 	ws.blockService.WriteBlock(b, true)
 
 	if ws.blockEventHandler != nil {
-		go func(b types.EventDataNewBlock) {
+		go func(newBlock types.EventDataNewBlock, blockEvents []ABCIEvent) {
 			eventCache := make(map[string]interface{})
 
-			for i := range b.ResultFinalizeBlock.Events {
-				data, addrs, err := ws.blockEventHandler(eventCache, b.Block.Header, b.ResultFinalizeBlock.Events, i)
+			for i := range blockEvents {
+				data, addrs, err := ws.blockEventHandler(eventCache, newBlock.Block.Header, blockEvents, i)
 				if err != nil {
 					logger.Error(err)
 					return
@@ -232,7 +233,7 @@ func (ws *WSClient) handleNewBlock(newBlock types.EventDataNewBlock) {
 					ws.Publish(addrs, data)
 				}
 			}
-		}(newBlock)
+		}(newBlock, blockEvents)
 	}
 
 	// process any unhandled transactions

@@ -8,6 +8,7 @@ require (
 	cosmossdk.io/simapp v0.0.0-20241213164504-256ec4f90277
 	github.com/cometbft/cometbft v1.0.0-rc2.0.20241127125717-4ce33b646ac9
 	github.com/cosmos/cosmos-sdk v0.53.0
+	github.com/tendermint/tendermint v0.34.15
 	github.com/go-resty/resty/v2 v2.16.2
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1

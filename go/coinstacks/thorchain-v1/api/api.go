@@ -24,6 +24,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/cors"
+	thorchainV1 "github.com/shapeshift/unchained/coinstacks/thorchain-v1"
 	"github.com/shapeshift/unchained/internal/log"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
@@ -52,7 +53,7 @@ func New(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService 
 
 	handler := &Handler{
 		Handler: &cosmos.Handler{
-			HTTPClient:   httpClient,
+			HTTPClient:   thorchainV1.NewHTTPClient(httpClient),
 			WSClient:     wsClient,
 			BlockService: blockService,
 			Denom:        "rune",

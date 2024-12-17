@@ -3,7 +3,6 @@ package api
 import (
 	"math/big"
 
-	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cometbft/cometbft/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
@@ -19,7 +18,7 @@ type Handler struct {
 }
 
 func (h *Handler) StartWebsocket() error {
-	h.WSClient.BlockEventHandler(func(eventCache map[string]interface{}, blockHeader types.Header, blockEvents []abci.Event, eventIndex int) (interface{}, []string, error) {
+	h.WSClient.BlockEventHandler(func(eventCache map[string]interface{}, blockHeader types.Header, blockEvents []cosmos.ABCIEvent, eventIndex int) (interface{}, []string, error) {
 		tx, err := thorchain.GetTxFromBlockEvents(eventCache, blockHeader, blockEvents, eventIndex, h.BlockService.Latest.Height, h.Denom)
 		if err != nil {
 			return nil, nil, errors.Wrap(err, "failed to get txs from end block events")

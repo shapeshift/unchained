@@ -29,7 +29,6 @@ func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int, s
 		cursor:   &Cursor{State: make(map[string]*CursorState)},
 		pageSize: pageSize,
 		state:    make(map[string]*TxState),
-		client:   c,
 	}
 
 	// set initial source state
