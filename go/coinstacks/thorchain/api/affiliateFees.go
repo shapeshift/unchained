@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	abci "github.com/cometbft/cometbft/abci/types"
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	"github.com/cometbft/cometbft/types"
 	"github.com/shapeshift/unchained/pkg/cosmos"
@@ -47,12 +46,8 @@ func NewAffiliateFeeIndexer(httpClients []*cosmos.HTTPClient, wsClient *cosmos.W
 		httpClients:        httpClients,
 	}
 
-	wsClient.NewBlockHandler(func(newBlock types.EventDataNewBlock) {
-		b := &thorchain.NewBlock{
-			EventDataNewBlock: newBlock,
-		}
-
-		i.processAffiliateFees(b, newBlock.ResultFinalizeBlock.Events, i.AffiliateAddresses)
+	wsClient.NewBlockHandler(func(newBlock types.EventDataNewBlock, blockEvents []cosmos.ABCIEvent) {
+		i.processAffiliateFees(&thorchain.NewBlock{EventDataNewBlock: newBlock}, blockEvents, i.AffiliateAddresses)
 	})
 
 	return i
@@ -147,7 +142,7 @@ func (i *AffiliateFeeIndexer) handleBlocks(httpClient *cosmos.HTTPClient, affili
 						Block: b.Block,
 					}
 
-					i.processAffiliateFees(b, blockResult.FinalizeBlockEvents, []string{affiliateAddress})
+					i.processAffiliateFees(b, blockResult.GetBlockEvents(), []string{affiliateAddress})
 				}
 			}
 		}()
@@ -156,7 +151,7 @@ func (i *AffiliateFeeIndexer) handleBlocks(httpClient *cosmos.HTTPClient, affili
 	return wg
 }
 
-func (i *AffiliateFeeIndexer) processAffiliateFees(block thorchain.Block, blockEvents []abci.Event, affiliateAddresses []string) {
+func (i *AffiliateFeeIndexer) processAffiliateFees(block thorchain.Block, blockEvents []cosmos.ABCIEvent, affiliateAddresses []string) {
 	_, typedEvents, err := thorchain.ParseBlockEvents(blockEvents)
 	if err != nil {
 		logger.Panicf("failed to parse block events for block: %d: %+v", block.Height(), err)

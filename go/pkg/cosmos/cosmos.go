@@ -3,9 +3,13 @@ package cosmos
 
 import (
 	"context"
+	"math/big"
 	"net/url"
 
+	sdkmath "cosmossdk.io/math"
 	"cosmossdk.io/simapp/params"
+	abci "github.com/cometbft/cometbft/abci/types"
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	stdtypes "github.com/cosmos/cosmos-sdk/std"
@@ -29,6 +33,45 @@ import (
 )
 
 var logger = log.WithoutFields()
+
+type APIClient interface {
+	// Account
+	GetAccount(address string) (*AccountResponse, error)
+	GetBalance(address string, baseDenom string) (*BalanceResponse, error)
+	GetDelegations(address string, apr *big.Float) ([]Delegation, error)
+	GetRedelegations(address string, apr *big.Float) ([]Redelegation, error)
+	GetUnbondings(address string, baseDenom string, apr *big.Float) ([]Unbonding, error)
+	GetRewards(address string, apr *big.Float) ([]Reward, error)
+
+	// Bank
+	GetTotalSupply(denom string) (string, error)
+	GetAnnualProvisions() (string, error)
+	GetCommunityTax() (string, error)
+	GetBondedTokens() (string, error)
+
+	// Block
+	GetBlock(height *int) (*coretypes.ResultBlock, error)
+	BlockSearch(query string, page int, pageSize int) (*coretypes.ResultBlockSearch, error)
+	BlockResults(height int) (BlockResults, error)
+
+	// Fees/Gas
+	GetGlobalMinimumGasPrices() (map[string]sdkmath.LegacyDec, error)
+	GetLocalMinimumGasPrices() (map[string]sdkmath.LegacyDec, error)
+	GetEstimateGas(rawTx string) (string, error)
+
+	// Staking
+	GetValidators(apr *big.Float, cursor string, pageSize int) (*ValidatorsResponse, error)
+	GetValidator(addr string, apr *big.Float) (*Validator, error)
+
+	// Transactions
+	GetTxHistory(address string, cursor string, pageSize int, sources map[string]*TxState) (*TxHistoryResponse, error)
+	GetTx(txid string) (*coretypes.ResultTx, error)
+	TxSearch(query string, page int, pageSize int) (*coretypes.ResultTxSearch, error)
+	BroadcastTx(rawTx string) (string, error)
+
+	// Utility
+	GetEncoding() *params.EncodingConfig
+}
 
 // Config for cosmos
 type Config struct {
@@ -201,4 +244,23 @@ func IsValidValidatorAddress(address string) bool {
 	}
 
 	return true
+}
+
+func ConvertABCIEvents(events []abci.Event) []ABCIEvent {
+	abciEvents := make([]ABCIEvent, len(events))
+	for i, event := range events {
+		attributes := make([]ABCIEventAttribute, len(event.Attributes))
+		for j, attribute := range event.Attributes {
+			attributes[j] = ABCIEventAttribute{
+				Key:   attribute.Key,
+				Value: attribute.Value,
+				Index: attribute.Index,
+			}
+		}
+		abciEvents[i] = ABCIEvent{
+			Type:       event.Type,
+			Attributes: attributes,
+		}
+	}
+	return abciEvents
 }

@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"strings"
 
-	abci "github.com/cometbft/cometbft/abci/types"
 	cometbftjson "github.com/cometbft/cometbft/libs/json"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 )
@@ -29,7 +28,7 @@ type EventOutbound struct {
 	Memo   string `json:"memo"`
 }
 
-func ParseBlockEvents(events []abci.Event) (cosmos.EventsByMsgIndex, []TypedEvent, error) {
+func ParseBlockEvents(events []cosmos.ABCIEvent) (cosmos.EventsByMsgIndex, []TypedEvent, error) {
 	typedEvents := make([]TypedEvent, len(events))
 	eventsByMsgIndex := cosmos.EventsByMsgIndex{}
 
@@ -47,10 +46,10 @@ func ParseBlockEvents(events []abci.Event) (cosmos.EventsByMsgIndex, []TypedEven
 		attrMap := make(map[string]json.RawMessage)
 		attributes := make(cosmos.ValueByAttribute)
 		for _, a := range event.Attributes {
-			attributes[string(a.Key)] = string(a.Value)
+			attributes[a.Key] = a.Value
 
 			// format attribute value as valid json string
-			attrMap[string(a.Key)] = json.RawMessage(strconv.Quote(string(a.Value)))
+			attrMap[a.Key] = json.RawMessage(strconv.Quote(a.Value))
 		}
 
 		attrBytes, err := json.Marshal(attrMap)

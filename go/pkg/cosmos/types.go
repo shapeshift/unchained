@@ -1,6 +1,8 @@
 package cosmos
 
-import coretypes "github.com/cometbft/cometbft/rpc/core/types"
+import (
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
+)
 
 type AccountResponse struct {
 	Address       string
@@ -28,6 +30,29 @@ type ErrorResponse struct {
 type Pagination struct {
 	NextKey *[]byte `json:"next_key,omitempty"`
 	Total   uint64  `json:"total,string,omitempty"`
+}
+
+type ABCIEventAttribute struct {
+	Key   string
+	Value string
+	Index bool
+}
+
+type ABCIEvent struct {
+	Type       string
+	Attributes []ABCIEventAttribute
+}
+
+type BlockResults interface {
+	GetBlockEvents() []ABCIEvent
+}
+
+type ResultBlockResults struct {
+	*coretypes.ResultBlockResults
+}
+
+func (r *ResultBlockResults) GetBlockEvents() []ABCIEvent {
+	return ConvertABCIEvents(r.FinalizeBlockEvents)
 }
 
 type HistoryTx interface {

@@ -129,7 +129,7 @@ func (c *HTTPClient) BlockSearch(query string, page int, pageSize int) (*coretyp
 	return result, nil
 }
 
-func (c *HTTPClient) BlockResults(height int) (*coretypes.ResultBlockResults, error) {
+func (c *HTTPClient) BlockResults(height int) (BlockResults, error) {
 	res := &rpctypes.RPCResponse{}
 
 	_, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParam("height", strconv.Itoa(height)).Get("/block_results")
@@ -146,5 +146,5 @@ func (c *HTTPClient) BlockResults(height int) (*coretypes.ResultBlockResults, er
 		return nil, errors.Wrapf(err, "failed to unmarshal block result: %v", res.Result)
 	}
 
-	return result, nil
+	return &ResultBlockResults{result}, nil
 }

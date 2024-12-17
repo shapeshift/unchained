@@ -28,7 +28,7 @@ func NewTxState(hasMore bool, query string, request RequestFn) *TxState {
 	}
 }
 
-func TxHistorySources(client *HTTPClient, pubkey string, formatTx func(*coretypes.ResultTx) (*Tx, error)) map[string]*TxState {
+func TxHistorySources(client APIClient, pubkey string, formatTx func(*coretypes.ResultTx) (*Tx, error)) map[string]*TxState {
 	request := func(query string, page int, pageSize int) ([]HistoryTx, error) {
 		result, err := client.TxSearch(query, page, pageSize)
 		if err != nil {
@@ -49,7 +49,7 @@ func TxHistorySources(client *HTTPClient, pubkey string, formatTx func(*coretype
 	}
 }
 
-func ValidatorTxHistorySources(client *HTTPClient, pubkey string, formatTx func(*coretypes.ResultTx) (*Tx, error)) map[string]*TxState {
+func ValidatorTxHistorySources(client APIClient, pubkey string, formatTx func(*coretypes.ResultTx) (*Tx, error)) map[string]*TxState {
 	request := func(query string, page int, pageSize int) ([]HistoryTx, error) {
 		result, err := client.TxSearch(query, page, pageSize)
 		if err != nil {
@@ -75,7 +75,6 @@ type History struct {
 	cursor   *Cursor
 	pageSize int
 	state    map[string]*TxState
-	client   *HTTPClient
 }
 
 func (h *History) doRequest(txState *TxState) ([]HistoryTx, error) {
