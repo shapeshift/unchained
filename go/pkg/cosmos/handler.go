@@ -44,8 +44,8 @@ type Handler struct {
 	ParseFee      func(tx signing.Tx, txid string, denom string) Value
 
 	// common cosmossdk values
-	HTTPClient   *HTTPClient
-	GRPCClient   *GRPCClient
+	HTTPClient   APIClient
+	GRPCClient   APIClient
 	WSClient     *WSClient
 	BlockService *BlockService
 	Denom        string
