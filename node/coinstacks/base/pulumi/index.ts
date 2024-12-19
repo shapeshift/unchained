@@ -55,8 +55,9 @@ export = async (): Promise<Outputs> => {
         return {
           ...service,
           ...defaultBlockbookServiceArgs,
-          command: [...defaultBlockbookServiceArgs.command, '-dbmaxaddrcontracts=1024', '-dbprotoaddrcontracts'],
+          command: [...defaultBlockbookServiceArgs.command, '-dbmaxaddrcontracts=512', '-dbprotoaddrcontracts'],
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
+          readinessProbe: { periodSeconds: 30, failureThreshold: 10 },
         }
       default:
         throw new Error(`no support for coin service: ${service.name}`)
