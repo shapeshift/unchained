@@ -225,7 +225,7 @@ aliases:
     service-memory-limit-1: 24Gi
     service-storage-size-1: 1250Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v5.1.2
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v5.2.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 12Gi
@@ -562,13 +562,13 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.29.1
+    service-image-1: nethermind/nethermind:1.30.3
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 6Gi
     service-storage-size-1: 750Gi
     service-name-2: daemon-beacon
-    service-image-2: sigp/lighthouse:v6.0.0
+    service-image-2: sigp/lighthouse:v6.0.1
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 4Gi
@@ -639,22 +639,22 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101411.2
-    service-cpu-limit-1: "4"
-    service-cpu-request-1: "2"
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101411.4
+    service-cpu-limit-1: "16"
+    service-cpu-request-1: "8"
     service-memory-limit-1: 24Gi
     service-storage-size-1: 750Gi
     service-name-2: op-node
-    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.10.0
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.10.2
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 2Gi
     service-storage-size-2: 1Gi
     service-name-3: indexer
     service-image-3: shapeshiftdao/unchained-blockbook:base-cf46dd4
-    service-cpu-limit-3: "4"
-    service-cpu-request-3: "2"
-    service-memory-limit-3: 32Gi
+    service-cpu-limit-3: "8"
+    service-cpu-request-3: "4"
+    service-memory-limit-3: 48Gi
     service-storage-size-3: 100Gi
 
   - &base-dev
