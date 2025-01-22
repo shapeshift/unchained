@@ -172,13 +172,13 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 1
     service-name-1: daemon
-    service-image-1: shapeshiftdao/bitcoin-core:28.0
+    service-image-1: shapeshiftdao/bitcoin-core:28.1
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 8Gi
     service-storage-size-1: 650Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:a55c69a
+    service-image-2: shapeshiftdao/unchained-blockbook:4a7fdb5
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 32Gi
@@ -231,7 +231,7 @@ aliases:
     service-memory-limit-2: 12Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:a55c69a
+    service-image-3: shapeshiftdao/unchained-blockbook:4a7fdb5
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
     service-memory-limit-3: 12Gi
@@ -401,7 +401,7 @@ aliases:
     service-memory-limit-2: 8Gi
     service-storage-size-2: 400Gi
     service-name-3: indexer
-    service-image-3: registry.gitlab.com/thorchain/midgard:2.29.0
+    service-image-3: registry.gitlab.com/thorchain/midgard:2.29.4
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
     service-memory-limit-3: 2Gi
