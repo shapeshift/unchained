@@ -38,7 +38,7 @@ start() {
     --op-network base-mainnet \
     --state.scheme hash \
     --history.transactions 0 \
-    --cache 4096 \
+    --cache 8192 \
     --maxpeers 0 \
     --nodiscover &
   PID="$!"
