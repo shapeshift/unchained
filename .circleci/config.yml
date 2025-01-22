@@ -172,13 +172,13 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 1
     service-name-1: daemon
-    service-image-1: shapeshiftdao/bitcoin-core:28.0
+    service-image-1: shapeshiftdao/bitcoin-core:28.1
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 8Gi
     service-storage-size-1: 650Gi
     service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:a55c69a
+    service-image-2: shapeshiftdao/unchained-blockbook:4a7fdb5
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 32Gi
@@ -225,13 +225,13 @@ aliases:
     service-memory-limit-1: 24Gi
     service-storage-size-1: 1250Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v5.1.2
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v5.2.0
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 12Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:a55c69a
+    service-image-3: shapeshiftdao/unchained-blockbook:4a7fdb5
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
     service-memory-limit-3: 12Gi
@@ -401,7 +401,7 @@ aliases:
     service-memory-limit-2: 8Gi
     service-storage-size-2: 400Gi
     service-name-3: indexer
-    service-image-3: registry.gitlab.com/thorchain/midgard:2.29.0
+    service-image-3: registry.gitlab.com/thorchain/midgard:2.29.4
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
     service-memory-limit-3: 2Gi
@@ -562,13 +562,13 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.29.1
+    service-image-1: nethermind/nethermind:1.30.3
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 6Gi
     service-storage-size-1: 750Gi
     service-name-2: daemon-beacon
-    service-image-2: sigp/lighthouse:v6.0.0
+    service-image-2: sigp/lighthouse:v6.0.1
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 4Gi
@@ -639,21 +639,21 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101411.2
-    service-cpu-limit-1: "4"
-    service-cpu-request-1: "2"
-    service-memory-limit-1: 24Gi
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101411.4
+    service-cpu-limit-1: "8"
+    service-cpu-request-1: "4"
+    service-memory-limit-1: 32Gi
     service-storage-size-1: 750Gi
     service-name-2: op-node
-    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.10.0
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.10.2
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 2Gi
     service-storage-size-2: 1Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:base-cf46dd4
-    service-cpu-limit-3: "4"
-    service-cpu-request-3: "2"
+    service-image-3: shapeshiftdao/unchained-blockbook:base-pub-new-block-txs-932b4b5
+    service-cpu-limit-3: "8"
+    service-cpu-request-3: "4"
     service-memory-limit-3: 32Gi
     service-storage-size-3: 100Gi
 

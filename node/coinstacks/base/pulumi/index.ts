@@ -55,7 +55,12 @@ export = async (): Promise<Outputs> => {
         return {
           ...service,
           ...defaultBlockbookServiceArgs,
-          command: [...defaultBlockbookServiceArgs.command, '-dbmaxaddrcontracts=512', '-dbprotoaddrcontracts'],
+          command: [
+            ...defaultBlockbookServiceArgs.command,
+            '-dbmaxaddrcontracts=1000',
+            '-dbprotoaddrcontracts',
+            '-enablepubnewblocktxsbyaddr',
+          ],
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
           readinessProbe: { periodSeconds: 30, failureThreshold: 10 },
         }

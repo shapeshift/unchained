@@ -5,7 +5,6 @@ export const defaultBlockbookServiceArgs = {
     '-datadir=/data',
     '-sync',
     '-public=:8001',
-    '-enablesubnewtx',
     '-logtostderr',
     '-workers=1',
   ],

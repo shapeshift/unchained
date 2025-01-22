@@ -8,11 +8,10 @@ import {
   ConnectionHandler,
   Registry,
   AddressFormatter,
-  BlockHandler,
   TransactionHandler,
   Prometheus,
 } from '@shapeshiftoss/common-api'
-import { Tx as BlockbookTx, WebsocketClient, getAddresses, NewBlock } from '@shapeshiftoss/blockbook'
+import { Tx as BlockbookTx, WebsocketClient, getAddresses } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
 import { gasOracle, service } from './controller'
 import { RegisterRoutes } from './routes'
@@ -62,25 +61,6 @@ app.use(middleware.errorHandler, middleware.notFoundHandler)
 
 const addressFormatter: AddressFormatter = (address) => evm.formatAddress(address)
 
-const blockHandler: BlockHandler<NewBlock, Array<{ addresses: Array<string>; tx: evm.Tx }>> = async (block) => {
-  const [blockbookTxs, internalTxs] = await Promise.all([
-    service.handleBlock(block.hash),
-    service.fetchInternalTxsByBlockDebug(block.hash),
-  ])
-
-  const txs = blockbookTxs.map((t) => {
-    const tx = service.handleTransaction(t)
-    tx.internalTxs = internalTxs[t.txid]
-
-    const internalAddresses = (tx.internalTxs ?? []).reduce<Array<string>>((prev, tx) => [...prev, tx.to, tx.from], [])
-    const addresses = [...new Set([...getAddresses(t), ...internalAddresses])]
-
-    return { addresses, tx }
-  })
-
-  return { txs }
-}
-
 const transactionHandler: TransactionHandler<BlockbookTx, evm.Tx> = async (blockbookTx) => {
   const tx = await service.handleTransactionWithInternalTrace(blockbookTx)
   const internalAddresses = (tx.internalTxs ?? []).reduce<Array<string>>((prev, tx) => [...prev, tx.to, tx.from], [])
@@ -89,10 +69,10 @@ const transactionHandler: TransactionHandler<BlockbookTx, evm.Tx> = async (block
   return { addresses, tx }
 }
 
-const registry = new Registry({ addressFormatter, blockHandler, transactionHandler })
+const registry = new Registry({ addressFormatter, transactionHandler })
 
 const blockbook = new WebsocketClient(INDEXER_WS_URL, {
-  blockHandler: [registry.onBlock.bind(registry), gasOracle.onBlock.bind(gasOracle)],
+  blockHandler: gasOracle.onBlock.bind(gasOracle),
   transactionHandler: registry.onTransaction.bind(registry),
 })
 
