@@ -7,7 +7,7 @@ RUN apt-get update && \
     libzmq3-dev libgflags-dev libsnappy-dev zlib1g-dev libbz2-dev libzstd-dev liblz4-dev graphviz && \
     apt-get clean
 
-ENV GOLANG_VERSION=go1.21.4.linux-amd64
+ENV GOLANG_VERSION=go1.22.8.linux-amd64
 ENV GOPATH=/go
 ENV PATH=$PATH:$GOPATH/bin
 
@@ -24,7 +24,7 @@ RUN cd /opt && git clone -b $ROCKSDB_VERSION --depth 1 https://github.com/facebo
 RUN cd /opt/rocksdb && CFLAGS=-fPIC CXXFLAGS=-fPIC PORTABLE=$PORTABLE_ROCKSDB make -j 4 static_lib
 
 ENV BLOCKBOOK_VERSION=master
-ENV BLOCKBOOK_COMMIT=a55c69a
+ENV BLOCKBOOK_COMMIT=4a7fdb5
 ENV BLOCKBOOK_URL=https://github.com/trezor/blockbook.git
 
 # set up blockbook
