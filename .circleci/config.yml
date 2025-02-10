@@ -219,7 +219,7 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.14.12
+    service-image-1: ethereum/client-go:v1.15.0
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
@@ -639,7 +639,7 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101411.6
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101411.7
     service-cpu-limit-1: "4"
     service-cpu-request-1: "2"
     service-memory-limit-1: 32Gi
@@ -648,10 +648,10 @@ aliases:
     service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.10.3
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
-    service-memory-limit-2: 2Gi
+    service-memory-limit-2: 4Gi
     service-storage-size-2: 1Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:base-pub-new-block-txs-932b4b5
+    service-image-3: shapeshiftdao/unchained-blockbook:base-pub-new-block-txs-no-erc1155-59e7ad7
     service-cpu-limit-3: "4"
     service-cpu-request-3: "2"
     service-memory-limit-3: 24Gi

@@ -97,7 +97,7 @@ export class WebsocketClient extends BaseWebsocketClient {
       jsonrpc: '2.0',
       id: 'newTx',
       method: 'subscribeAddresses',
-      params: { addresses: this.addresses },
+      params: { addresses: this.addresses, newBlockTxs: true },
     }
   }
 }
