@@ -39,8 +39,7 @@ start() {
     --state.scheme hash \
     --history.transactions 0 \
     --cache 8192 \
-    --maxpeers 0 \
-    --nodiscover &
+    --maxpeers 100 &
   PID="$!"
 }
 
