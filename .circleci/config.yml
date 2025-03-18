@@ -170,25 +170,6 @@ aliases:
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
     api-memory-request: 500Mi
-    stateful-service-replicas: 1
-    service-name-1: daemon
-    service-image-1: shapeshiftdao/bitcoin-core:28.1
-    service-cpu-limit-1: "2"
-    service-cpu-request-1: "1"
-    service-memory-limit-1: 8Gi
-    service-storage-size-1: 650Gi
-    service-name-2: indexer
-    service-image-2: shapeshiftdao/unchained-blockbook:4a7fdb5
-    service-cpu-limit-2: "2"
-    service-cpu-request-2: "1"
-    service-memory-limit-2: 32Gi
-    service-storage-size-2: 500Gi
-
-  - &bitcoin-fallback
-    <<: *bitcoin
-    indexer-url: http://bitcoin-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://bitcoin-svc.unchained.svc.cluster.local:8001/websocket
-    indexer-api-key: ""
 
   - &bitcoin-dev
     <<: *bitcoin
@@ -198,7 +179,6 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    stateful-service-replicas: 0
 
   - &ethereum
     assetName: ethereum
@@ -219,17 +199,17 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.15.3
+    service-image-1: ethereum/client-go:v1.15.5
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
-    service-storage-size-1: 1250Gi
+    service-storage-size-1: 1500Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v5.3.0
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v5.3.1
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 12Gi
-    service-storage-size-2: 500Gi
+    service-storage-size-2: 600Gi
     service-name-3: indexer
     service-image-3: shapeshiftdao/unchained-blockbook:4a7fdb5
     service-cpu-limit-3: "2"
@@ -389,23 +369,23 @@ aliases:
     api-memory-request: 1Gi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-3.2.0
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-3.3.1
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 16Gi
-    service-storage-size-1: 100Gi
+    service-storage-size-1: 1250Gi
     service-name-2: timescaledb
     service-image-2: timescale/timescaledb:2.13.0-pg15
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 8Gi
-    service-storage-size-2: 400Gi
+    service-storage-size-2: 500Gi
     service-name-3: indexer
     service-image-3: registry.gitlab.com/thorchain/midgard:2.29.5
     service-cpu-limit-3: "2"
     service-cpu-request-3: "1"
     service-memory-limit-3: 2Gi
-    service-storage-size-3: 400Gi
+    service-storage-size-3: 500Gi
 
   - &thorchain-dev
     <<: *thorchain
@@ -562,7 +542,7 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.31.2
+    service-image-1: nethermind/nethermind:1.31.5
     service-cpu-limit-1: "2"
     service-cpu-request-1: "1"
     service-memory-limit-1: 6Gi
@@ -572,7 +552,7 @@ aliases:
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 4Gi
-    service-storage-size-2: 100Gi
+    service-storage-size-2: 250Gi
     service-name-3: indexer
     service-image-3: shapeshiftdao/unchained-blockbook:gnosis-no-erc1155-d40a796
     service-cpu-limit-3: "2"
@@ -639,23 +619,23 @@ aliases:
     api-memory-request: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101500.1
-    service-cpu-limit-1: "8"
-    service-cpu-request-1: "4"
-    service-memory-limit-1: 48Gi
-    service-storage-size-1: 750Gi
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101503.1
+    service-cpu-limit-1: "4"
+    service-cpu-request-1: "2"
+    service-memory-limit-1: 42Gi
+    service-storage-size-1: 4000Gi
     service-name-2: op-node
-    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.11.2
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.12.1
     service-cpu-limit-2: "2"
     service-cpu-request-2: "1"
     service-memory-limit-2: 4Gi
     service-storage-size-2: 1Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:base-pub-new-block-txs-no-erc1155-59e7ad7
+    service-image-3: shapeshiftdao/unchained-blockbook:pub-new-block-txs-no-erc1155-32e1293
     service-cpu-limit-3: "4"
     service-cpu-request-3: "2"
     service-memory-limit-3: 24Gi
-    service-storage-size-3: 100Gi
+    service-storage-size-3: 750Gi
 
   - &base-dev
     <<: *base
@@ -1715,22 +1695,6 @@ workflows:
       - lint-and-test-persist:
           name: lint and test project (persist to workspace)
           <<: *only-main
-
-      ####### BITCOIN
-      - approve-coinstack:
-          name: approve bitcoin fallback
-          type: approval
-          requires:
-            - lint and test project (persist to workspace)
-          <<: *only-main
-
-      - deploy-coinstack-node:
-          name: deploy bitcoin fallback
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve bitcoin fallback
-          <<: [*bitcoin-fallback, *only-main]
 
       ####### ETHEREUM
       - approve-coinstack:

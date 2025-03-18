@@ -55,13 +55,7 @@ export = async (): Promise<Outputs> => {
         return {
           ...service,
           ...defaultBlockbookServiceArgs,
-          command: [
-            ...defaultBlockbookServiceArgs.command,
-            '-dbmaxaddrcontracts=1000',
-            '-dbmaxopenfiles=500000',
-            '-dbprotoaddrcontracts',
-            '-processerc1155=false',
-          ],
+          command: [...defaultBlockbookServiceArgs.command, '-processerc1155=false'],
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
           readinessProbe: { periodSeconds: 30, failureThreshold: 10 },
         }
