@@ -165,11 +165,9 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
-    api-cpu-limit: "1"
-    api-cpu-request: 500m
+    api-cpu-limit: 500m
     api-cpu-threshold: 75
-    api-memory-limit: 1Gi
-    api-memory-request: 500Mi
+    api-memory-limit: 500Mi
 
   - &bitcoin-dev
     <<: *bitcoin
@@ -179,6 +177,8 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
+    api-cpu-limit: 250m
+    api-memory-limit: 250Mi
 
   - &ethereum
     assetName: ethereum
@@ -192,28 +192,23 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
-    api-cpu-limit: "1"
-    api-cpu-request: 500m
+    api-cpu-limit: 500m
     api-cpu-threshold: 75
-    api-memory-limit: 1Gi
-    api-memory-request: 500Mi
+    api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: ethereum/client-go:v1.15.6
     service-cpu-limit-1: "2"
-    service-cpu-request-1: "1"
     service-memory-limit-1: 24Gi
     service-storage-size-1: 1500Gi
     service-name-2: daemon-beacon
     service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v5.3.2
     service-cpu-limit-2: "2"
-    service-cpu-request-2: "1"
-    service-memory-limit-2: 12Gi
+    service-memory-limit-2: 16Gi
     service-storage-size-2: 600Gi
     service-name-3: indexer
     service-image-3: shapeshiftdao/unchained-blockbook:4a7fdb5
     service-cpu-limit-3: "2"
-    service-cpu-request-3: "1"
     service-memory-limit-3: 12Gi
     service-storage-size-3: 500Gi
 
@@ -236,6 +231,8 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
+    api-cpu-limit: 250m
+    api-memory-limit: 250Mi
     stateful-service-replicas: 0
 
   - &avalanche
@@ -249,12 +246,10 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
+    api-max-replicas: 4
     api-cpu-limit: 500m
-    api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
-    api-memory-request: 250Mi
 
   - &avalanche-dev
     <<: *avalanche
@@ -267,6 +262,7 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
+    api-cpu-limit: 250m
     api-memory-limit: 250Mi
 
   - &dogecoin
@@ -282,10 +278,8 @@ aliases:
     api-replicas: 2
     api-max-replicas: 4
     api-cpu-limit: 500m
-    api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
-    api-memory-request: 250Mi
 
   - &dogecoin-dev
     <<: *dogecoin
@@ -295,6 +289,8 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
+    api-cpu-limit: 250m
+    api-memory-limit: 250Mi
 
   - &litecoin
     assetName: litecoin
@@ -309,10 +305,8 @@ aliases:
     api-replicas: 2
     api-max-replicas: 4
     api-cpu-limit: 500m
-    api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
-    api-memory-request: 250Mi
 
   - &litecoin-dev
     <<: *litecoin
@@ -322,6 +316,8 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
+    api-cpu-limit: 250m
+    api-memory-limit: 250Mi
 
   - &bitcoincash
     assetName: bitcoincash
@@ -336,10 +332,8 @@ aliases:
     api-replicas: 2
     api-max-replicas: 4
     api-cpu-limit: 500m
-    api-cpu-request: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
-    api-memory-request: 250Mi
 
   - &bitcoincash-dev
     <<: *bitcoincash
@@ -349,6 +343,8 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
+    api-cpu-limit: 250m
+    api-memory-limit: 250Mi
 
   - &thorchain
     assetName: thorchain
@@ -361,29 +357,24 @@ aliases:
     ws-url: ws://thorchain-svc.unchained.svc.cluster.local:27147
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
-    api-cpu-limit: "4"
-    api-cpu-request: "2"
+    api-max-replicas: 4
+    api-cpu-limit: "2"
     api-cpu-threshold: 75
-    api-memory-limit: 2Gi
-    api-memory-request: 1Gi
+    api-memory-limit: 1Gi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-3.3.2
     service-cpu-limit-1: "2"
-    service-cpu-request-1: "1"
-    service-memory-limit-1: 16Gi
+    service-memory-limit-1: 12Gi
     service-storage-size-1: 1250Gi
     service-name-2: timescaledb
     service-image-2: timescale/timescaledb:2.13.0-pg15
     service-cpu-limit-2: "2"
-    service-cpu-request-2: "1"
-    service-memory-limit-2: 8Gi
+    service-memory-limit-2: 6Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
     service-image-3: registry.gitlab.com/thorchain/midgard:2.30.0
     service-cpu-limit-3: "2"
-    service-cpu-request-3: "1"
     service-memory-limit-3: 2Gi
     service-storage-size-3: 500Gi
 
@@ -410,17 +401,14 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
-    api-cpu-limit: "2"
-    api-cpu-request: "1"
+    api-cpu-limit: 500m
     api-cpu-threshold: 75
-    api-memory-limit: 1Gi
-    api-memory-request: 500Mi
+    api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.134.1
     service-cpu-limit-1: "2"
-    service-cpu-request-1: "1"
-    service-memory-limit-1: 16Gi
+    service-memory-limit-1: 12Gi
     service-storage-size-1: 4750Gi
 
   - &thorchain-v1-dev
@@ -433,6 +421,8 @@ aliases:
     api-replicas: 1
     api-max-replicas: 2
     stateful-service-replicas: 1
+    api-cpu-limit: 250m
+    api-memory-limit: 250Mi
 
   - &optimism
     assetName: optimism
@@ -445,12 +435,10 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
+    api-max-replicas: 4
     api-cpu-limit: 500m
-    api-cpu-request: 250m
     api-cpu-threshold: 75
-    api-memory-limit: 1Gi
-    api-memory-request: 500Mi
+    api-memory-limit: 500Mi
 
   - &optimism-dev
     <<: *optimism
@@ -463,7 +451,8 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 500Mi
+    api-cpu-limit: 250m
+    api-memory-limit: 250Mi
 
   - &bnbsmartchain
     assetName: bnbsmartchain
@@ -477,11 +466,9 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
-    api-cpu-limit: "1"
-    api-cpu-request: 500m
+    api-cpu-limit: 500m
     api-cpu-threshold: 75
-    api-memory-limit: 1Gi
-    api-memory-request: 500Mi
+    api-memory-limit: 500Mi
 
   - &bnbsmartchain-dev
     <<: *bnbsmartchain
@@ -494,6 +481,8 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
+    api-cpu-limit: 250m
+    api-memory-limit: 250Mi
 
   - &polygon
     assetName: polygon
@@ -507,11 +496,9 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
-    api-cpu-limit: "1"
-    api-cpu-request: 500m
+    api-cpu-limit: 500m
     api-cpu-threshold: 75
-    api-memory-limit: 1Gi
-    api-memory-request: 500Mi
+    api-memory-limit: 500Mi
 
   - &polygon-dev
     <<: *polygon
@@ -524,6 +511,8 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
+    api-cpu-limit: 250m
+    api-memory-limit: 250Mi
 
   - &gnosis
     assetName: gnosis
@@ -534,30 +523,25 @@ aliases:
     indexer-ws-url: ws://gnosis-svc.unchained.svc.cluster.local:8001/websocket
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
+    api-max-replicas: 4
     api-cpu-limit: 500m
-    api-cpu-request: 250m
     api-cpu-threshold: 75
-    api-memory-limit: 1Gi
-    api-memory-request: 500Mi
+    api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: nethermind/nethermind:1.31.6
     service-cpu-limit-1: "2"
-    service-cpu-request-1: "1"
-    service-memory-limit-1: 6Gi
+    service-memory-limit-1: 8Gi
     service-storage-size-1: 750Gi
     service-name-2: daemon-beacon
     service-image-2: sigp/lighthouse:v6.0.1
     service-cpu-limit-2: "2"
-    service-cpu-request-2: "1"
-    service-memory-limit-2: 4Gi
+    service-memory-limit-2: 6Gi
     service-storage-size-2: 250Gi
     service-name-3: indexer
     service-image-3: shapeshiftdao/unchained-blockbook:gnosis-no-erc1155-d40a796
     service-cpu-limit-3: "2"
-    service-cpu-request-3: "1"
-    service-memory-limit-3: 24Gi
+    service-memory-limit-3: 12Gi
     service-storage-size-3: 500Gi
 
   - &gnosis-dev
@@ -569,7 +553,8 @@ aliases:
     indexer-ws-url: ws://gnosis-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 500Mi
+    api-cpu-limit: 250m
+    api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &arbitrum
@@ -585,10 +570,8 @@ aliases:
     api-replicas: 2
     api-max-replicas: 4
     api-cpu-limit: 750m
-    api-cpu-request: 500m
     api-cpu-threshold: 75
-    api-memory-limit: 1Gi
-    api-memory-request: 500Mi
+    api-memory-limit: 500Mi
 
   - &arbitrum-dev
     <<: *arbitrum
@@ -601,6 +584,8 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
+    api-cpu-limit: 500m
+    api-memory-limit: 250Mi
 
   - &base
     assetName: base
@@ -611,30 +596,25 @@ aliases:
     indexer-ws-url: ws://base-svc.unchained.svc.cluster.local:8001/websocket
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
+    api-max-replicas: 4
     api-cpu-limit: 500m
-    api-cpu-request: 250m
     api-cpu-threshold: 75
-    api-memory-limit: 1Gi
-    api-memory-request: 500Mi
+    api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101503.1
-    service-cpu-limit-1: "4"
-    service-cpu-request-1: "2"
-    service-memory-limit-1: 42Gi
+    service-cpu-limit-1: "2"
+    service-memory-limit-1: 36Gi
     service-storage-size-1: 4000Gi
     service-name-2: op-node
     service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.12.2
     service-cpu-limit-2: "2"
-    service-cpu-request-2: "1"
     service-memory-limit-2: 4Gi
     service-storage-size-2: 1Gi
     service-name-3: indexer
     service-image-3: shapeshiftdao/unchained-blockbook:pub-new-block-txs-no-erc1155-32e1293
     service-cpu-limit-3: "4"
-    service-cpu-request-3: "2"
-    service-memory-limit-3: 24Gi
+    service-memory-limit-3: 16Gi
     service-storage-size-3: 750Gi
 
   - &base-dev
@@ -646,7 +626,8 @@ aliases:
     indexer-ws-url: ws://base-svc.unchained-dev.svc.cluster.local:8001/websocket
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 500Mi
+    api-cpu-limit: 250m
+    api-memory-limit: 250Mi
     stateful-service-replicas: 1
 
   - &solana
@@ -661,12 +642,10 @@ aliases:
     ws-api-key: $HELIUS_API_KEY
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
+    api-max-replicas: 4
     api-cpu-limit: 500m
-    api-cpu-request: 250m
     api-cpu-threshold: 75
-    api-memory-limit: 1Gi
-    api-memory-request: 500Mi
+    api-memory-limit: 500Mi
 
   - &solana-dev
     <<: *solana
@@ -674,7 +653,8 @@ aliases:
     pulumi-stack: public-dev-us-east-2
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 500Mi
+    api-cpu-limit: 250m
+    api-memory-limit: 250Mi
 
   - &proxy
     assetName: proxy
@@ -683,11 +663,9 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
-    api-cpu-limit: "2"
-    api-cpu-request: "1"
+    api-cpu-limit: 500m
     api-cpu-threshold: 75
     api-memory-limit: 4Gi
-    api-memory-request: 2Gi
 
   - &proxy-dev
     <<: *proxy
@@ -696,7 +674,8 @@ aliases:
     pulumi-stack: public-dev-us-east-2
     api-replicas: 1
     api-max-replicas: 2
-    api-memory-limit: 500Mi
+    api-cpu-limit: 250m
+    api-memory-limit: 250Mi
 
 commands:
   precheck:
