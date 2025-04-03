@@ -1111,11 +1111,26 @@ workflows:
           <<: *only-develop
 
       - deploy-dependencies:
+          name: preview dependencies
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - lint and test project (persist to workspace)
+          <<: *only-develop
+
+      - approve-dependencies:
+          name: approve dependencies
+          type: approval
+          requires:
+            - preview dependencies
+          <<: *only-develop
+
+      - deploy-dependencies:
           name: deploy dependencies
           organization: TAXISTAKE
           pulumi-command: up -f --yes
           requires:
-            - lint and test project (persist to workspace)
+            - approve dependencies
           <<: *only-develop
 
       - deploy-coinstack-node:
