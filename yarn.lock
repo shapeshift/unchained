@@ -2782,10 +2782,10 @@
     "@noble/hashes" "~1.5.0"
     "@scure/base" "~1.1.8"
 
-"@shapeshiftoss/cluster-launcher@^0.21.0":
-  version "0.21.0"
-  resolved "https://registry.yarnpkg.com/@shapeshiftoss/cluster-launcher/-/cluster-launcher-0.21.0.tgz#7daa3ae07b17789346e91541e94ff07dd9f4141a"
-  integrity sha512-HVDNl46ZomrKRjoYfPtH9okaQ7UBuLuxQiTDgd8g+egyzmZ0BrUlahhHa9JztnMJIHZJlmCyeWynyPYknKLYfw==
+"@shapeshiftoss/cluster-launcher@^0.21.2":
+  version "0.21.2"
+  resolved "https://registry.yarnpkg.com/@shapeshiftoss/cluster-launcher/-/cluster-launcher-0.21.2.tgz#cd138adb6932b407d4e805b0fd72625326d69356"
+  integrity sha512-b8G76tJRuH9nj2+Hb5tF18pFzVlHBSdQ65dDFWpHuxlqAguMLf3z6wcx01IDDk9Gbu6dT8DQqP7phYha0bcmhw==
   dependencies:
     "@pulumi/aws" "6.72.0"
     "@pulumi/awsx" "2.21.1"

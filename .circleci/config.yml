@@ -12,12 +12,14 @@ aliases:
         ignore:
           - main
           - develop
+          - fix-ci
 
   - &only-develop
     filters:
       branches:
         only:
           - develop
+          - fix-ci
 
   - &only-main
     filters:
@@ -821,9 +823,9 @@ jobs:
             pulumi config set --path unchained:common.eks.cidrBlock 10.0.0.0/16
             pulumi config set --path unchained:common.eks.nodeGroups[0].name spot
             pulumi config set --path unchained:common.eks.nodeGroups[0].type SPOT
-            pulumi config set --path unchained:common.eks.nodeGroups[0].desired 4
-            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 4
-            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 4
+            pulumi config set --path unchained:common.eks.nodeGroups[0].desired 5
+            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 5
+            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 5
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[0] r7a.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r7i.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r7iz.4xlarge
@@ -1111,26 +1113,11 @@ workflows:
           <<: *only-develop
 
       - deploy-dependencies:
-          name: preview dependencies
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - lint and test project (persist to workspace)
-          <<: *only-develop
-
-      - approve-dependencies:
-          name: approve dependencies
-          type: approval
-          requires:
-            - preview dependencies
-          <<: *only-develop
-
-      - deploy-dependencies:
           name: deploy dependencies
           organization: TAXISTAKE
           pulumi-command: up -f --yes
           requires:
-            - approve dependencies
+            - lint and test project (persist to workspace)
           <<: *only-develop
 
       - deploy-coinstack-node:
