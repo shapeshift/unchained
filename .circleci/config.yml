@@ -3,7 +3,7 @@ version: 2.1
 executors:
   pulumi:
     docker:
-      - image: pulumi/pulumi-nodejs:3.111.1
+      - image: pulumi/pulumi-nodejs:3.160.0
 
 aliases:
   - &only-feature
@@ -199,7 +199,7 @@ aliases:
     service-name-1: daemon
     service-image-1: ethereum/client-go:v1.15.6
     service-cpu-limit-1: "2"
-    service-memory-limit-1: 24Gi
+    service-memory-limit-1: 32Gi
     service-storage-size-1: 1500Gi
     service-name-2: daemon-beacon
     service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v5.3.2
@@ -358,12 +358,12 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
-    api-cpu-limit: "2"
+    api-cpu-limit: "4"
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-3.3.2
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-3.4.0
     service-cpu-limit-1: "2"
     service-memory-limit-1: 12Gi
     service-storage-size-1: 1250Gi
@@ -603,8 +603,8 @@ aliases:
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101503.1
-    service-cpu-limit-1: "2"
-    service-memory-limit-1: 36Gi
+    service-cpu-limit-1: "4"
+    service-memory-limit-1: 48Gi
     service-storage-size-1: 4000Gi
     service-name-2: op-node
     service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.12.2
@@ -777,8 +777,6 @@ commands:
             tar -zxvf helm.tar.gz
             mv linux-amd64/helm /usr/local/bin/helm
             helm repo add autoscaler https://kubernetes.github.io/autoscaler
-            helm repo add bitnami https://charts.bitnami.com/bitnami
-            helm repo add eks https://aws.github.io/eks-charts
             helm repo add grafana https://grafana.github.io/helm-charts
             helm repo add traefik https://helm.traefik.io/traefik
             helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
@@ -788,9 +786,9 @@ commands:
       - run:
           name: install pulumi plugin resources
           command: |
-            pulumi plugin install resource aws 5.29.1
-            pulumi plugin install resource kubernetes 3.23.1
-            pulumi plugin install resource eks 1.0.1
+            pulumi plugin install resource aws 6.72.0
+            pulumi plugin install resource kubernetes 4.22.1
+            pulumi plugin install resource eks 2.8.1
 
 jobs:
   deploy-dependencies:
@@ -819,7 +817,6 @@ jobs:
             pulumi config set --path unchained:common.additionalEnvironments[0] dev
             pulumi config set --path unchained:common.additionalEnvironments[1] monitoring
             pulumi config set --path unchained:common.eks.allAZs true
-            pulumi config set --path unchained:common.eks.autoscaling false
             pulumi config set --path unchained:common.eks.region $AWS_REGION
             pulumi config set --path unchained:common.eks.cidrBlock 10.0.0.0/16
             pulumi config set --path unchained:common.eks.nodeGroups[0].name spot
@@ -833,7 +830,6 @@ jobs:
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[3] r6a.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[4] r6i.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[5] r6in.4xlarge
-            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[6] r6idn.4xlarge
             pulumi config set --path unchained:common.eks.traefik.autoscaling.enabled true
             pulumi config set --path unchained:common.eks.traefik.autoscaling.memoryThreshold 50
             pulumi config set --path unchained:common.eks.traefik.autoscaling.cpuThreshold 80

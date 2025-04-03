@@ -35,11 +35,10 @@ export = async (): Promise<Outputs> => {
           dataDir: '/blockstore',
           env: {
             MIDGARD_GENESIS_LOCAL: '/blockstore/genesis.json',
-            MIDGARD_GENESIS_INITIAL_BLOCK_HEIGHT: "4786560",
+            MIDGARD_GENESIS_INITIAL_BLOCK_HEIGHT: '4786560',
             MIDGARD_GENESIS_INITIAL_BLOCK_HASH: '9B86543A5CF5E26E3CE93C8349B2EABE5E238DFFC9EBE8EC6207FE7178FF27AC',
             MIDGARD_BLOCKSTORE_LOCAL: '/blockstore',
-            MIDGARD_BLOCKSTORE_REMOTE:
-              'https://snapshots.ninerealms.com/snapshots/midgard-blockstore/',
+            MIDGARD_BLOCKSTORE_REMOTE: 'https://snapshots.ninerealms.com/snapshots/midgard-blockstore/',
           },
           ports: { midgard: { port: 8080 } },
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },

@@ -1,7 +1,7 @@
 import { createHash } from 'crypto'
 import { parse } from 'dotenv'
 import { hashElement } from 'folder-hash'
-import objectHash from 'object-hash'
+import { sha1 } from 'object-hash'
 import * as k8s from '@pulumi/kubernetes'
 
 export type CoinstackType = 'go' | 'node'
@@ -81,7 +81,7 @@ const getNodeCoinstackApiHash = async (coinstack: string, buildArgs: Record<stri
     hash.update(apiHash)
   }
 
-  hash.update(objectHash(buildArgs))
+  hash.update(sha1(buildArgs))
 
   return hash.digest('hex')
 }
@@ -147,7 +147,7 @@ const getGoCoinstackApiHash = async (coinstack: string, buildArgs: Record<string
   })
   hash.update(coinstackApiHash)
 
-  hash.update(objectHash(buildArgs))
+  hash.update(sha1(buildArgs))
 
   return hash.digest('hex')
 }
