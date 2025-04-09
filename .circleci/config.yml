@@ -424,6 +424,40 @@ aliases:
     api-cpu-limit: 250m
     api-memory-limit: 250Mi
 
+  - &mayachain
+    assetName: mayachain
+    pulumi-stack: public-us-east-2
+    pulumi-dir: coinstacks/mayachain/pulumi
+    lcd-url: http://mayachain-svc.unchained.svc.cluster.local:1317
+    rpc-url: http://mayachain-svc.unchained.svc.cluster.local:27147
+    ws-url: ws://mayachain-svc.unchained.svc.cluster.local:27147
+    api: false
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 4
+    api-cpu-limit: 500m
+    api-cpu-threshold: 75
+    api-memory-limit: 500Mi
+    stateful-service-replicas: 2
+    service-name-1: daemon
+    service-image-1: registry.gitlab.com/mayachain/mayanode:mainnet-1.118.1
+    service-cpu-limit-1: "2"
+    service-memory-limit-1: 12Gi
+    service-storage-size-1: 1500Gi
+
+  - &mayachain-dev
+    <<: *mayachain
+    environment: dev
+    pulumi-stack: public-dev-us-east-2
+    lcd-url: http://mayachain-svc.unchained-dev.svc.cluster.local:1317
+    rpc-url: http://mayachain-svc.unchained-dev.svc.cluster.local:27147
+    ws-url: ws://mayachain-svc.unchained-dev.svc.cluster.local:27147
+    api-replicas: 1
+    api-max-replicas: 2
+    api-cpu-limit: 250m
+    api-memory-limit: 250Mi
+    stateful-service-replicas: 1
+
   - &optimism
     assetName: optimism
     pulumi-stack: public-us-east-2
@@ -1244,6 +1278,14 @@ workflows:
             - deploy dependencies
           <<: [*thorchain-v1-dev, *only-develop]
 
+      - deploy-coinstack-go:
+          name: deploy mayachain develop
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - deploy dependencies
+          <<: [*mayachain-dev, *only-develop]
+
       - deploy-coinstack-node:
           name: deploy proxy develop
           organization: TAXISTAKE
@@ -1640,6 +1682,30 @@ workflows:
           requires:
             - approve thorchain-v1
           <<: [*thorchain-v1, *only-main]
+
+      ####### MAYACHAIN
+      - deploy-coinstack-go:
+          name: preview mayachain
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies
+          <<: [*mayachain, *only-main]
+
+      - approve-coinstack:
+          name: approve mayachain
+          type: approval
+          requires:
+            - preview mayachain
+          <<: *only-main
+
+      - deploy-coinstack-go:
+          name: deploy mayachain
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve mayachain
+          <<: [*mayachain, *only-main]
 
       ####### PROXY
       - deploy-coinstack-node:
