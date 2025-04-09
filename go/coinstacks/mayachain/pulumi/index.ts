@@ -29,6 +29,51 @@ export = async (): Promise<Outputs> => {
           livenessProbe: { periodSeconds: 30, failureThreshold: 5, timeoutSeconds: 10 },
           readinessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
         }
+      case 'indexer':
+        return {
+          ...service,
+          dataDir: '/blockstore',
+          env: {
+            MIDGARD_BLOCKSTORE_LOCAL: '/blockstore',
+            MIDGARD_BLOCKSTORE_REMOTE: 'https://snapshots.mayachain.info/midgard-blockstore/',
+          },
+          ports: { midgard: { port: 8080 } },
+          configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },
+          volumeMounts: [{ name: 'config-map', mountPath: '/config.json', subPath: 'indexer-config.json' }],
+          useMonitorContainer: true,
+          startupProbe: { tcpSocket: { port: 8080 }, periodSeconds: 30, failureThreshold: 60, timeoutSeconds: 10 },
+          livenessProbe: { tcpSocket: { port: 8080 }, periodSeconds: 30, failureThreshold: 5, timeoutSeconds: 10 },
+          readinessProbe: { periodSeconds: 30, failureThreshold: 10, timeoutSeconds: 10 },
+        }
+      case 'timescaledb':
+        return {
+          ...service,
+          dataDir: '/var/lib/postgresql/data',
+          env: {
+            POSTGRES_DB: 'midgard',
+            POSTGRES_USER: 'midgard',
+            POSTGRES_PASSWORD: 'password',
+            PGDATA: '/var/lib/postgresql/data/pgdata',
+          },
+          ports: { postgres: { port: 5432 } },
+          volumeMounts: [{ name: 'dshm', mountPath: '/dev/shm' }],
+          startupProbe: {
+            exec: { command: ['pg_isready', '-U', 'midgard'] },
+            periodSeconds: 30,
+            failureThreshold: 10,
+            timeoutSeconds: 5,
+          },
+          livenessProbe: {
+            exec: { command: ['pg_isready', '-U', 'midgard'] },
+            periodSeconds: 30,
+            timeoutSeconds: 5,
+          },
+          readinessProbe: {
+            exec: { command: ['pg_isready', '-U', 'midgard'] },
+            periodSeconds: 30,
+            timeoutSeconds: 5,
+          },
+        }
       default:
         throw new Error(`no support for coin service: ${service.name}`)
     }
