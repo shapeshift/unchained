@@ -53,6 +53,8 @@ func main() {
 		Bech32PkPrefix:    "thorpub",
 		Bech32ValPrefix:   "thorv",
 		Bech32PkValPrefix: "thorvpub",
+		Denom:             "rune",
+		NativeFee:         2000000, // https://daemon.thorchain.shapeshift.com/lcd/thorchain/constants
 		Encoding:          encoding,
 		LCDURL:            conf.LCDURL,
 		RPCURL:            conf.RPCURL,

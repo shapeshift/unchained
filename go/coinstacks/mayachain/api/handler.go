@@ -1,8 +1,6 @@
 package api
 
 import (
-	"math/big"
-
 	"github.com/cometbft/cometbft/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/signing"
@@ -14,7 +12,6 @@ import (
 
 type Handler struct {
 	*cosmos.Handler
-	indexer *AffiliateFeeIndexer
 }
 
 func (h *Handler) StartWebsocket() error {
@@ -79,35 +76,6 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 
 func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
 	return thorchain.GetTxHistory(h.Handler, pubkey, cursor, pageSize)
-}
-
-// Contains info about the affiliate revenue earned
-// swagger:model AffiliateRevenue
-type AffiliateRevenue struct {
-	// Affiliate addresses
-	// required: true
-	Addresses []string `json:"addresses"`
-	// Amount earned (RUNE)
-	// required: true
-	Amount string `json:"amount"`
-}
-
-func (h *Handler) GetAffiliateRevenue(start int, end int) (*AffiliateRevenue, error) {
-	total := big.NewInt(0)
-	for _, fee := range h.indexer.AffiliateFees {
-		if fee.Timestamp >= int64(start) && fee.Timestamp <= int64(end) {
-			amount := new(big.Int)
-			amount.SetString(fee.Amount, 10)
-			total.Add(total, amount)
-		}
-	}
-
-	a := &AffiliateRevenue{
-		Addresses: h.indexer.AffiliateAddresses,
-		Amount:    total.String(),
-	}
-
-	return a, nil
 }
 
 func (h *Handler) ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Message {

@@ -35,13 +35,13 @@ type RouteHandler interface {
 
 type CoinSpecificHandler interface {
 	ParseMessages([]sdk.Msg, EventsByMsgIndex) []Message
-	ParseFee(tx signing.Tx, txid string, denom string) Value
+	ParseFee(tx signing.Tx, txid string) Value
 }
 
 type Handler struct {
 	// coin specific handler methods
 	ParseMessages func([]sdk.Msg, EventsByMsgIndex) []Message
-	ParseFee      func(tx signing.Tx, txid string, denom string) Value
+	ParseFee      func(tx signing.Tx, txid string) Value
 
 	// common cosmossdk values
 	HTTPClient   APIClient
@@ -49,6 +49,7 @@ type Handler struct {
 	WSClient     *WSClient
 	BlockService *BlockService
 	Denom        string
+	NativeFee    int
 }
 
 // ValidateCoinSpecific performs runtime validation of a handler to ensure it fully implements
@@ -97,7 +98,7 @@ func (h *Handler) StartWebsocket() error {
 			},
 			Confirmations: 1,
 			Events:        events,
-			Fee:           h.ParseFee(signingTx, txid, h.Denom),
+			Fee:           h.ParseFee(signingTx, txid),
 			GasWanted:     strconv.Itoa(int(tx.Result.GasWanted)),
 			GasUsed:       strconv.Itoa(int(tx.Result.GasUsed)),
 			Index:         int(tx.Index),
@@ -310,7 +311,7 @@ func (h *Handler) FormatTx(tx *coretypes.ResultTx) (*Tx, error) {
 		},
 		Confirmations: h.BlockService.Latest.Height - height + 1,
 		Events:        events,
-		Fee:           h.ParseFee(signingTx, tx.Hash.String(), h.Denom),
+		Fee:           h.ParseFee(signingTx, tx.Hash.String()),
 		GasWanted:     strconv.Itoa(int(tx.TxResult.GasWanted)),
 		GasUsed:       strconv.Itoa(int(tx.TxResult.GasUsed)),
 		Index:         int(tx.Index),

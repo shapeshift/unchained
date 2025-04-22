@@ -80,6 +80,7 @@ type Config struct {
 	Bech32PkPrefix    string
 	Bech32PkValPrefix string
 	Denom             string
+	NativeFee         int
 	Encoding          *params.EncodingConfig
 	GRPCURL           string
 	LCDURL            string

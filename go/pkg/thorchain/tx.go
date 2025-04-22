@@ -32,7 +32,7 @@ func GetTxHistory(handler *cosmos.Handler, pubkey string, cursor string, pageSiz
 			eventCache := make(map[string]interface{})
 
 			for i := range blockResult.GetBlockEvents() {
-				tx, err := GetTxFromBlockEvents(eventCache, b.Block.Header, blockResult.GetBlockEvents(), i, handler.BlockService.Latest.Height, handler.Denom)
+				tx, err := GetTxFromBlockEvents(eventCache, b.Block.Header, blockResult.GetBlockEvents(), i, handler.BlockService.Latest.Height, handler.Denom, handler.NativeFee)
 				if err != nil {
 					return nil, errors.Wrap(err, "failed to get tx from block events")
 				}
@@ -171,7 +171,7 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 	return messages
 }
 
-func GetTxFromBlockEvents(eventCache map[string]interface{}, blockHeader types.Header, blockEvents []cosmos.ABCIEvent, eventIndex int, latestHeight int, denom string) (*ResultTx, error) {
+func GetTxFromBlockEvents(eventCache map[string]interface{}, blockHeader types.Header, blockEvents []cosmos.ABCIEvent, eventIndex int, latestHeight int, denom string, nativeFee int) (*ResultTx, error) {
 	// attempt to find matching fee event for txid or use default fee as defined by https://daemon.thorchain.shapeshift.com/lcd/thorchain/constants
 	matchFee := func(txid string, events []TypedEvent) cosmos.Value {
 		for _, e := range events {
@@ -183,7 +183,7 @@ func GetTxFromBlockEvents(eventCache map[string]interface{}, blockHeader types.H
 			}
 		}
 
-		return cosmos.Value{Amount: "2000000", Denom: denom}
+		return cosmos.Value{Amount: strconv.Itoa(nativeFee), Denom: denom}
 	}
 
 	// cache parsed block events for use in all subsequent event indices within the block
