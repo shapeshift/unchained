@@ -47,10 +47,9 @@ services:
       - litecoin_default
       - optimism_default
       - polygon_default
-      - thorchain_default
-      - thorchain-v1_default
       - solana_default
       - zcash_default
+      - mayachain_default
       - proxy_default
     ports:
       # The HTTP port
@@ -88,13 +87,11 @@ networks:
     name: optimism_default
   polygon_default:
     name: polygon_default
-  thorchain_default:
-    name: thorchain_default
-  thorchain-v1_default:
-    name: thorchain-v1_default
   solana_default:
     name: solana_default
   zcash_default:
     name: zcash_default
+  mayachain_default:
+    name: mayachain_default
   proxy_default:
     name: proxy_default

@@ -1,4 +1,4 @@
-FROM golang:1.25.0 as builder
+FROM golang:1.23.4 as builder
 
 ARG COINSTACK
 
@@ -11,6 +11,8 @@ COPY ./cmd/${COINSTACK} /app/cmd/${COINSTACK}
 COPY ./pkg /app/pkg
 COPY ./coinstacks/${COINSTACK}/*.go /app/coinstacks/${COINSTACK}/
 COPY ./coinstacks/${COINSTACK}/api /app/coinstacks/${COINSTACK}/api
+
+COPY ./radix /app/radix
 
 WORKDIR /app/cmd/${COINSTACK}
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o /go/bin/app
