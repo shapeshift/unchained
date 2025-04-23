@@ -1,9 +1,0 @@
-{
-  "name": "@shapeshiftoss/thorchain-v1-pulumi",
-  "version": "10.0.0",
-  "license": "MIT",
-  "private": true,
-  "scripts": {
-    "clean": "rm -rf dist node_modules"
-  }
-}

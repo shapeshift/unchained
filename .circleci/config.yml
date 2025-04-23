@@ -13,20 +13,13 @@ aliases:
     filters:
       branches:
         ignore:
-          - main
-          - develop
+          - mayachain
 
-  - &only-develop
+  - &only-mayachain
     filters:
       branches:
         only:
-          - develop
-
-  - &only-main
-    filters:
-      branches:
-        only:
-          - main
+          - mayachain
 
   - &params
     organization:
@@ -156,40 +149,13 @@ aliases:
       type: string
       default: ""
 
-  - &bitcoin
-    assetName: bitcoin
+  - &mayachain
+    assetName: mayachain
     pulumi-stack: public-us-east-2
-    pulumi-dir: coinstacks/bitcoin/pulumi
-    indexer-url: https://gateway.liquify.com
-    indexer-ws-url: wss://gateway.liquify.com
-    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_BTC
-    rpc-url: https://gateway.liquify.com
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_BTC
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-limit: 500m
-    api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-
-  - &bitcoin-dev
-    <<: *bitcoin
-    environment: dev
-    pulumi-stack: public-dev-us-east-2
-    api-replicas: 1
-    api-max-replicas: 2
-    api-cpu-limit: 250m
-    api-memory-limit: 250Mi
-
-  - &ethereum
-    assetName: ethereum
-    pulumi-stack: public-us-east-2
-    pulumi-dir: coinstacks/ethereum/pulumi
-    indexer-url: https://eth-blockbook.nownodes.io
-    indexer-ws-url: wss://eth-blockbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY
-    rpc-url: https://eth.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY
+    pulumi-dir: coinstacks/mayachain/pulumi
+    lcd-url: http://mayachain-svc.unchained.svc.cluster.local:1317
+    rpc-url: http://mayachain-svc.unchained.svc.cluster.local:27147
+    ws-url: ws://mayachain-svc.unchained.svc.cluster.local:27147
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
@@ -198,464 +164,33 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.16.4
-    service-cpu-limit-1: "2"
-    service-memory-limit-1: 32Gi
-    service-storage-size-1: 1500Gi
-    service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v6.0.5
-    service-cpu-limit-2: "2"
-    service-memory-limit-2: 16Gi
-    service-storage-size-2: 600Gi
-    service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:bb02eb5
-    service-cpu-limit-3: "2"
-    service-memory-limit-3: 12Gi
-    service-storage-size-3: 500Gi
-
-  - &ethereum-fallback
-    <<: *ethereum
-    indexer-url: http://ethereum-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://ethereum-svc.unchained.svc.cluster.local:8001/websocket
-    indexer-api-key: ""
-    rpc-url: http://ethereum-svc.unchained.svc.cluster.local:8545
-    rpc-api-key: ""
-
-  - &ethereum-dev
-    <<: *ethereum
-    environment: dev
-    pulumi-stack: public-dev-us-east-2
-    indexer-url: https://gateway.liquify.com
-    indexer-ws-url: wss://gateway.liquify.com
-    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_ETH
-    rpc-url: https://gateway.liquify.com
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_ETH
-    api-replicas: 1
-    api-max-replicas: 2
-    api-cpu-limit: 250m
-    api-memory-limit: 250Mi
-    stateful-service-replicas: 0
-
-  - &avalanche
-    assetName: avalanche
-    pulumi-stack: public-us-east-2
-    pulumi-dir: coinstacks/avalanche/pulumi
-    indexer-url: https://avax-blockbook.nownodes.io
-    indexer-ws-url: wss://avax-blockbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY
-    rpc-url: https://avax.nownodes.io/ext/bc/C/rpc
-    rpc-api-key: $NOW_NODES_API_KEY
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-limit: 500m
-    api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-
-  - &avalanche-dev
-    <<: *avalanche
-    environment: dev
-    pulumi-stack: public-dev-us-east-2
-    indexer-url: https://avax-blockbook.nownodes.io
-    indexer-ws-url: wss://avax-blockbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY_DEV
-    rpc-url: https://avax.nownodes.io/ext/bc/C/rpc
-    rpc-api-key: $NOW_NODES_API_KEY_DEV
-    api-replicas: 1
-    api-max-replicas: 2
-    api-cpu-limit: 250m
-    api-memory-limit: 250Mi
-
-  - &dogecoin
-    assetName: dogecoin
-    pulumi-stack: public-us-east-2
-    pulumi-dir: coinstacks/dogecoin/pulumi
-    indexer-url: https://gateway.liquify.com
-    indexer-ws-url: wss://gateway.liquify.com
-    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_DOGE
-    rpc-url: https://gateway.liquify.com
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_DOGE
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-limit: 500m
-    api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-
-  - &dogecoin-dev
-    <<: *dogecoin
-    environment: dev
-    pulumi-stack: public-dev-us-east-2
-    api-replicas: 1
-    api-max-replicas: 2
-    api-cpu-limit: 250m
-    api-memory-limit: 250Mi
-
-  - &litecoin
-    assetName: litecoin
-    pulumi-stack: public-us-east-2
-    pulumi-dir: coinstacks/litecoin/pulumi
-    indexer-url: https://gateway.liquify.com
-    indexer-ws-url: wss://gateway.liquify.com
-    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_LTC
-    rpc-url: https://gateway.liquify.com
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_LTC
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-limit: 500m
-    api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-
-  - &litecoin-dev
-    <<: *litecoin
-    environment: dev
-    pulumi-stack: public-dev-us-east-2
-    api-replicas: 1
-    api-max-replicas: 2
-    api-cpu-limit: 250m
-    api-memory-limit: 250Mi
-
-  - &bitcoincash
-    assetName: bitcoincash
-    pulumi-stack: public-us-east-2
-    pulumi-dir: coinstacks/bitcoincash/pulumi
-    indexer-url: https://gateway.liquify.com
-    indexer-ws-url: wss://gateway.liquify.com
-    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_BCH
-    rpc-url: https://gateway.liquify.com
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_BCH
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-limit: 500m
-    api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-
-  - &bitcoincash-dev
-    <<: *bitcoincash
-    environment: dev
-    pulumi-stack: public-dev-us-east-2
-    api-replicas: 1
-    api-max-replicas: 2
-    api-cpu-limit: 250m
-    api-memory-limit: 250Mi
-
-  - &thorchain
-    assetName: thorchain
-    pulumi-stack: public-us-east-2
-    pulumi-dir: coinstacks/thorchain/pulumi
-    lcd-url: http://thorchain-svc.unchained.svc.cluster.local:1317
-    lcd-v1-url: http://thorchain-v1-svc.unchained.svc.cluster.local:1317
-    rpc-url: http://thorchain-svc.unchained.svc.cluster.local:27147
-    rpc-v1-url: http://thorchain-v1-svc.unchained.svc.cluster.local:27147
-    ws-url: ws://thorchain-svc.unchained.svc.cluster.local:27147
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-limit: "4"
-    api-cpu-threshold: 75
-    api-memory-limit: 2Gi
-    stateful-service-replicas: 2
-    service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-3.11.2
+    service-image-1: registry.gitlab.com/mayachain/mayanode:mainnet-1.118.1
     service-cpu-limit-1: "2"
     service-memory-limit-1: 12Gi
-    service-storage-size-1: 1250Gi
+    service-storage-size-1: 1000Gi
     service-name-2: timescaledb
     service-image-2: timescale/timescaledb:2.13.0-pg15
     service-cpu-limit-2: "2"
     service-memory-limit-2: 6Gi
-    service-storage-size-2: 500Gi
+    service-storage-size-2: 100Gi
     service-name-3: indexer
-    service-image-3: registry.gitlab.com/thorchain/midgard:2.32.7
+    service-image-3: registry.gitlab.com/mayachain/midgard:2.21.0
     service-cpu-limit-3: "2"
     service-memory-limit-3: 2Gi
-    service-storage-size-3: 500Gi
+    service-storage-size-3: 100Gi
 
-  - &thorchain-dev
-    <<: *thorchain
+  - &mayachain-dev
+    <<: *mayachain
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    lcd-url: http://thorchain-svc.unchained-dev.svc.cluster.local:1317
-    lcd-v1-url: http://thorchain-v1-svc.unchained-dev.svc.cluster.local:1317
-    rpc-url: http://thorchain-svc.unchained-dev.svc.cluster.local:27147
-    rpc-v1-url: http://thorchain-v1-svc.unchained-dev.svc.cluster.local:27147
-    ws-url: ws://thorchain-svc.unchained-dev.svc.cluster.local:27147
-    api-replicas: 1
-    api-max-replicas: 2
-    stateful-service-replicas: 1
-
-  - &thorchain-v1
-    assetName: thorchain-v1
-    pulumi-stack: public-us-east-2
-    pulumi-dir: coinstacks/thorchain-v1/pulumi
-    lcd-url: http://thorchain-v1-svc.unchained.svc.cluster.local:1317
-    rpc-url: http://thorchain-v1-svc.unchained.svc.cluster.local:27147
-    ws-url: ws://thorchain-svc.unchained.svc.cluster.local:27147
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-limit: 500m
-    api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-    stateful-service-replicas: 2
-    service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.134.1
-    service-cpu-limit-1: "2"
-    service-memory-limit-1: 12Gi
-    service-storage-size-1: 4750Gi
-
-  - &thorchain-v1-dev
-    <<: *thorchain-v1
-    environment: dev
-    pulumi-stack: public-dev-us-east-2
-    lcd-url: http://thorchain-v1-svc.unchained-dev.svc.cluster.local:1317
-    rpc-url: http://thorchain-v1-svc.unchained-dev.svc.cluster.local:27147
-    ws-url: ws://thorchain-svc.unchained-dev.svc.cluster.local:27147
-    api-replicas: 1
-    api-max-replicas: 2
-    stateful-service-replicas: 1
-    api-cpu-limit: 250m
-    api-memory-limit: 250Mi
-
-  - &optimism
-    assetName: optimism
-    pulumi-stack: public-us-east-2
-    pulumi-dir: coinstacks/optimism/pulumi
-    indexer-url: https://gateway.liquify.com
-    indexer-ws-url: wss://gateway.liquify.com
-    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_OP
-    rpc-url: https://gateway.liquify.com
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_OP
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-limit: 500m
-    api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-
-  - &optimism-dev
-    <<: *optimism
-    environment: dev
-    pulumi-stack: public-dev-us-east-2
-    api-replicas: 1
-    api-max-replicas: 2
-    api-cpu-limit: 250m
-    api-memory-limit: 250Mi
-
-  - &bnbsmartchain
-    assetName: bnbsmartchain
-    pulumi-stack: public-us-east-2
-    pulumi-dir: coinstacks/bnbsmartchain/pulumi
-    indexer-url: https://bsc-blockbook.nownodes.io
-    indexer-ws-url: wss://bsc-blockbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY
-    rpc-url: https://bsc.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-limit: 500m
-    api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-
-  - &bnbsmartchain-dev
-    <<: *bnbsmartchain
-    environment: dev
-    pulumi-stack: public-dev-us-east-2
-    indexer-url: https://bsc-blockbook.nownodes.io
-    indexer-ws-url: wss://bsc-blockbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY_DEV
-    rpc-url: https://bsc.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY_DEV
-    api-replicas: 1
-    api-max-replicas: 2
-
-  - &polygon
-    assetName: polygon
-    pulumi-stack: public-us-east-2
-    pulumi-dir: coinstacks/polygon/pulumi
-    indexer-url: https://maticbook.nownodes.io
-    indexer-ws-url: wss://maticbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY
-    rpc-url: https://matic.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-limit: 500m
-    api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-
-  - &polygon-dev
-    <<: *polygon
-    environment: dev
-    pulumi-stack: public-dev-us-east-2
-    indexer-url: https://maticbook.nownodes.io
-    indexer-ws-url: wss://maticbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY_DEV
-    rpc-url: https://matic.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY_DEV
-    api-replicas: 1
-    api-max-replicas: 2
-    api-cpu-limit: 250m
-    api-memory-limit: 250Mi
-
-  - &gnosis
-    assetName: gnosis
-    pulumi-stack: public-us-east-2
-    pulumi-dir: coinstacks/gnosis/pulumi
-    rpc-url: http://gnosis-svc.unchained.svc.cluster.local:8545
-    indexer-url: http://gnosis-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://gnosis-svc.unchained.svc.cluster.local:8001/websocket
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-limit: 500m
-    api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-    stateful-service-replicas: 2
-    service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.34.1
-    service-cpu-limit-1: "2"
-    service-memory-limit-1: 8Gi
-    service-storage-size-1: 750Gi
-    service-name-2: daemon-beacon
-    service-image-2: sigp/lighthouse:v7.1.0
-    service-cpu-limit-2: "2"
-    service-memory-limit-2: 6Gi
-    service-storage-size-2: 250Gi
-    service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:gnosis-no-erc1155-d40a796
-    service-cpu-limit-3: "2"
-    service-memory-limit-3: 12Gi
-    service-storage-size-3: 500Gi
-
-  - &gnosis-dev
-    <<: *gnosis
-    environment: dev
-    pulumi-stack: public-dev-us-east-2
-    rpc-url: http://gnosis-svc.unchained-dev.svc.cluster.local:8545
-    indexer-url: http://gnosis-svc.unchained-dev.svc.cluster.local:8001
-    indexer-ws-url: ws://gnosis-svc.unchained-dev.svc.cluster.local:8001/websocket
+    lcd-url: http://mayachain-svc.unchained-dev.svc.cluster.local:1317
+    rpc-url: http://mayachain-svc.unchained-dev.svc.cluster.local:27147
+    ws-url: ws://mayachain-svc.unchained-dev.svc.cluster.local:27147
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 250m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
-
-  - &arbitrum
-    assetName: arbitrum
-    pulumi-stack: public-us-east-2
-    pulumi-dir: coinstacks/arbitrum/pulumi
-    indexer-url: https://gateway.liquify.com
-    indexer-ws-url: wss://gateway.liquify.com
-    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_ARB
-    rpc-url: https://gateway.liquify.com
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_ARB
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-limit: 750m
-    api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-
-  - &arbitrum-dev
-    <<: *arbitrum
-    environment: dev
-    pulumi-stack: public-dev-us-east-2
-    api-replicas: 1
-    api-max-replicas: 2
-    api-cpu-limit: 500m
-    api-memory-limit: 250Mi
-
-  - &base
-    assetName: base
-    pulumi-stack: public-us-east-2
-    pulumi-dir: coinstacks/base/pulumi
-    indexer-url: https://deep-index.moralis.io/api/v2.2
-    indexer-ws-url: ""
-    indexer-api-key: $MORALIS_INDEXER_API_KEY
-    rpc-url: https://site1.moralis-nodes.com/base
-    rpc-api-key: $MORALIS_RPC_API_KEY_BASE
-    webhook-url: https://api.base.shapeshift.com/api/v1/webhook/moralis
-    api-autoscaling: false
-    api-replicas: 1
-    api-max-replicas: 1
-    api-cpu-limit: "1"
-    api-cpu-threshold: 75
-    api-memory-limit: 1Gi
-
-  - &base-fallback
-    <<: *base
-    indexer-url: https://gateway.liquify.com
-    indexer-ws-url: wss://gateway.liquify.com
-    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_BASE
-    rpc-url: https://gateway.liquify.com
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_BASE
-
-  - &base-dev
-    <<: *base
-    environment: dev
-    pulumi-stack: public-dev-us-east-2
-    indexer-url: https://deep-index.moralis.io/api/v2.2
-    indexer-ws-url: ""
-    indexer-api-key: $MORALIS_INDEXER_API_KEY
-    rpc-url: https://site1.moralis-nodes.com/base
-    rpc-api-key: $MORALIS_RPC_API_KEY_BASE
-    webhook-url: https://dev-api.base.shapeshift.com/api/v1/webhook/moralis
-    api-replicas: 1
-    api-max-replicas: 2
-    api-cpu-limit: 250m
-    api-memory-limit: 250Mi
-
-  - &solana
-    assetName: solana
-    pulumi-stack: public-us-east-2
-    pulumi-dir: coinstacks/solana/pulumi
-    indexer-url: https://api.helius.xyz
-    indexer-api-key: $HELIUS_API_KEY
-    rpc-url: https://mainnet.helius-rpc.com
-    rpc-api-key: $HELIUS_API_KEY
-    ws-url: wss://mainnet.helius-rpc.com
-    ws-api-key: $HELIUS_API_KEY
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-limit: 500m
-    api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-
-  - &solana-dev
-    <<: *solana
-    environment: dev
-    pulumi-stack: public-dev-us-east-2
-    api-replicas: 1
-    api-max-replicas: 2
-    api-cpu-limit: 250m
-    api-memory-limit: 250Mi
-
-  - &proxy
-    assetName: proxy
-    pulumi-stack: public-us-east-2
-    pulumi-dir: proxy/pulumi
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-limit: 500m
-    api-cpu-threshold: 75
-    api-memory-limit: 4Gi
-
-  - &proxy-dev
-    <<: *proxy
-    assetName: proxy
-    environment: dev
-    pulumi-stack: public-dev-us-east-2
-    api-replicas: 1
-    api-max-replicas: 2
-    api-cpu-limit: 250m
-    api-memory-limit: 250Mi
 
 commands:
   precheck:
@@ -840,112 +375,6 @@ jobs:
             pulumi config set --path unchained:common.rootDomainName $<< parameters.organization >>_ROOT_DOMAIN_NAME
             pulumi <<parameters.pulumi-command>> --refresh --suppress-outputs
 
-  deploy-coinstack-node:
-    description: deploy a specific node coinstack
-    executor: pulumi
-    environment:
-      DOCKER_BUILDKIT: 1
-      LOG_LEVEL: info
-    parameters:
-      <<: *params
-      indexer-url:
-        type: string
-        default: ""
-      indexer-ws-url:
-        type: string
-        default: ""
-      indexer-api-key:
-        type: string
-        default: ""
-      rpc-url:
-        type: string
-        default: ""
-      rpc-api-key:
-        type: string
-        default: ""
-      ws-url:
-        type: string
-        default: ""
-      ws-api-key:
-        type: string
-        default: ""
-      etherscan-env-var:
-        type: string
-        default: ETHERSCAN_API_KEY
-      webhook-url:
-        type: string
-        default: ""
-      blocknative-env-var:
-        type: string
-        default: BLOCKNATIVE_API_KEY
-    steps:
-      - setup_remote_docker
-      - attach_workspace:
-          at: ~/
-      - pulumi-dependencies:
-          organization: <<parameters.organization>>
-      - run:
-          name: add custom environment variables
-          command: |
-            echo 'export INDEXER_URL=<< parameters.indexer-url >>' >> $BASH_ENV
-            echo 'export INDEXER_WS_URL=<< parameters.indexer-ws-url >>' >> $BASH_ENV
-            echo 'export INDEXER_API_KEY=<< parameters.indexer-api-key >>' >> $BASH_ENV
-            echo 'export NETWORK=<< parameters.network >>' >> $BASH_ENV
-            echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
-            echo 'export RPC_API_KEY=<< parameters.rpc-api-key >>' >> $BASH_ENV
-            echo 'export WS_URL=<< parameters.ws-url >>' >> $BASH_ENV
-            echo 'export WS_API_KEY=<< parameters.ws-api-key >>' >> $BASH_ENV
-            echo 'export ETHERSCAN_API_KEY=$<< parameters.etherscan-env-var >>' >> $BASH_ENV
-            echo 'export BLOCKNATIVE_API_KEY=$<< parameters.blocknative-env-var >>' >> $BASH_ENV
-            echo 'export WEBHOOK_URL=<< parameters.webhook-url >>' >> $BASH_ENV
-            PARAM="<< parameters.environment >>"; echo "export ENVIRONMENT=${PARAM:-prod}" >> $BASH_ENV
-      - run:
-          name: pulumi
-          working_directory: node/<< parameters.pulumi-dir >>
-          command: |
-            pulumi stack select $<< parameters.organization >>_PULUMI_ORG/<< parameters.pulumi-stack >>
-            pulumi config set --path unchained:coinstack.assetName << parameters.assetName >>
-            pulumi config set --path unchained:coinstack.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies-us-east-2
-            [ -n "<< parameters.environment >>" ] && pulumi config set --path unchained:coinstack.environment << parameters.environment >>
-            pulumi config set --path unchained:coinstack.network << parameters.network >>
-            [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.autoscaling.enabled << parameters.api-autoscaling >>
-            [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.autoscaling.cpuThreshold << parameters.api-cpu-threshold >>
-            [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.autoscaling.maxReplicas << parameters.api-max-replicas >>
-            [ "<< parameters.api >>" = true ] && [ -n "<< parameters.api-cpu-request >>" ] && pulumi config set --path unchained:coinstack.api.cpuRequest << parameters.api-cpu-request >>
-            [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.cpuLimit << parameters.api-cpu-limit >>
-            [ "<< parameters.api >>" = true ] && [ -n "<< parameters.api-memory-request >>" ] && pulumi config set --path unchained:coinstack.api.memoryRequest << parameters.api-memory-request >>
-            [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.memoryLimit << parameters.api-memory-limit >>
-            [ "<< parameters.api >>" = true ] && pulumi config set --path unchained:coinstack.api.replicas << parameters.api-replicas >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && pulumi config set --path unchained:coinstack.statefulService.replicas << parameters.stateful-service-replicas >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-name-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].name << parameters.service-name-1 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-image-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].image << parameters.service-image-1 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-limit-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].cpuLimit << parameters.service-cpu-limit-1 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-request-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].cpuRequest << parameters.service-cpu-request-1 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-limit-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].memoryLimit << parameters.service-memory-limit-1 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-size-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].storageSize << parameters.service-storage-size-1 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-class-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].storageClassName << parameters.service-storage-class-1 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-iops-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].storageIops << parameters.service-storage-iops-1 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-throughput-1 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[0].storageThroughput << parameters.service-storage-throughput-1 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-name-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].name << parameters.service-name-2 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-image-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].image << parameters.service-image-2 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-limit-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].cpuLimit << parameters.service-cpu-limit-2 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-request-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].cpuRequest << parameters.service-cpu-request-2 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-limit-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].memoryLimit << parameters.service-memory-limit-2 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-size-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].storageSize << parameters.service-storage-size-2 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-class-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].storageClassName << parameters.service-storage-class-2 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-iops-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].storageIops << parameters.service-storage-iops-2 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-throughput-2 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[1].storageThroughput << parameters.service-storage-throughput-2 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-name-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].name << parameters.service-name-3 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-image-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].image << parameters.service-image-3 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-limit-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].cpuLimit << parameters.service-cpu-limit-3 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-cpu-request-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].cpuRequest << parameters.service-cpu-request-3 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-memory-limit-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].memoryLimit << parameters.service-memory-limit-3 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-size-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageSize << parameters.service-storage-size-3 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-class-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageClassName << parameters.service-storage-class-3 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-iops-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageIops << parameters.service-storage-iops-3 >>
-            [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-throughput-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageThroughput << parameters.service-storage-throughput-3 >>
-            pulumi << parameters.pulumi-command >> --refresh --suppress-outputs
-
   deploy-coinstack-go:
     description: deploy a specific go coinstack
     executor: pulumi
@@ -955,14 +384,8 @@ jobs:
       <<: *params
       lcd-url:
         type: string
-      lcd-v1-url:
-        type: string
-        default: ""
       rpc-url:
         type: string
-      rpc-v1-url:
-        type: string
-        default: ""
       ws-url:
         type: string
     steps:
@@ -975,9 +398,7 @@ jobs:
           name: add custom environment variables
           command: |
             echo 'export LCD_URL=<< parameters.lcd-url >>' >> $BASH_ENV
-            echo 'export LCD_V1_URL=<< parameters.lcd-v1-url >>' >> $BASH_ENV
             echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
-            echo 'export RPC_V1_URL=<< parameters.rpc-v1-url >>' >> $BASH_ENV
             echo 'export WS_URL=<< parameters.ws-url >>' >> $BASH_ENV
       - run:
           name: pulumi
@@ -1027,30 +448,6 @@ jobs:
             [ << parameters.stateful-service-replicas >> -gt 0 ] && [ -n "<< parameters.service-storage-throughput-3 >>" ] && pulumi config set --path unchained:coinstack.statefulService.services[2].storageThroughput << parameters.service-storage-throughput-3 >>
             pulumi << parameters.pulumi-command >> --refresh --suppress-outputs
 
-  deploy-monitoring-pulumi:
-    description: deploy unchained monitoring stack
-    executor: pulumi
-    parameters:
-      organization:
-        type: string
-      pulumi-command:
-        type: string
-        default: preview
-    steps:
-      - setup_remote_docker
-      - attach_workspace:
-          at: ~/
-      - pulumi-dependencies:
-          organization: <<parameters.organization>>
-      - run:
-          name: pulumi
-          working_directory: monitoring/src
-          command: |
-            pulumi stack select $<< parameters.organization >>_PULUMI_ORG/prod-us-east-2
-            pulumi config set --path unchained:monitoring.stack $<< parameters.organization >>_PULUMI_ORG/common/dependencies-us-east-2
-            pulumi config set --path unchained:monitoring.environment monitoring
-            pulumi <<parameters.pulumi-command>> --suppress-outputs
-
   lint-and-test:
     description: lint and test project
     machine:
@@ -1086,588 +483,46 @@ workflows:
           name: lint and test project
           <<: *only-feature
 
-  deploy-development:
+  deploy-mayachain:
     jobs:
       - lint-and-test-persist:
           name: lint and test project (persist to workspace)
-          <<: *only-develop
+          <<: *only-mayachain
 
-      - deploy-dependencies:
-          name: deploy dependencies
+      - deploy-coinstack-go:
+          name: deploy mayachain develop
           organization: TAXISTAKE
           pulumi-command: up -f --yes
           requires:
             - lint and test project (persist to workspace)
-          <<: *only-develop
+          <<: [*mayachain-dev, *only-mayachain]
 
-      - deploy-coinstack-node:
-          name: deploy bitcoin develop
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
+      - approve-coinstack:
+          name: start prod deployment
+          type: approval
           requires:
-            - deploy dependencies
-          <<: [*bitcoin-dev, *only-develop]
-
-      - deploy-coinstack-node:
-          name: deploy dogecoin develop
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - deploy dependencies
-          <<: [*dogecoin-dev, *only-develop]
-
-      - deploy-coinstack-node:
-          name: deploy litecoin develop
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - deploy dependencies
-          <<: [*litecoin-dev, *only-develop]
-
-      - deploy-coinstack-node:
-          name: deploy bitcoincash develop
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - deploy dependencies
-          <<: [*bitcoincash-dev, *only-develop]
-
-      - deploy-coinstack-node:
-          name: deploy ethereum develop
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - deploy dependencies
-          <<: [*ethereum-dev, *only-develop]
-
-      - deploy-coinstack-node:
-          name: deploy avalanche develop
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - deploy dependencies
-          <<: [*avalanche-dev, *only-develop]
-
-      - deploy-coinstack-node:
-          name: deploy optimism develop
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - deploy dependencies
-          <<: [*optimism-dev, *only-develop]
-
-      - deploy-coinstack-node:
-          name: deploy bnbsmartchain develop
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - deploy dependencies
-          <<: [*bnbsmartchain-dev, *only-develop]
-
-      - deploy-coinstack-node:
-          name: deploy polygon develop
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - deploy dependencies
-          <<: [*polygon-dev, *only-develop]
-
-      - deploy-coinstack-node:
-          name: deploy gnosis develop
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - deploy dependencies
-          <<: [*gnosis-dev, *only-develop]
-
-      - deploy-coinstack-node:
-          name: deploy arbitrum develop
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - deploy dependencies
-          <<: [*arbitrum-dev, *only-develop]
-
-      - deploy-coinstack-node:
-          name: deploy base develop
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - deploy dependencies
-          <<: [*base-dev, *only-develop]
-
-      - deploy-coinstack-node:
-          name: deploy solana develop
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - deploy dependencies
-          <<: [*solana-dev, *only-develop]
+            - deploy mayachain develop
+          <<: *only-mayachain
 
       - deploy-coinstack-go:
-          name: deploy thorchain develop
+          name: preview mayachain
           organization: TAXISTAKE
-          pulumi-command: up -f --yes
+          pulumi-command: preview
           requires:
-            - deploy dependencies
-          <<: [*thorchain-dev, *only-develop]
+            - start prod deployment
+          <<: [*mayachain, *only-mayachain]
+
+      - approve-coinstack:
+          name: approve mayachain
+          type: approval
+          requires:
+            - preview mayachain
+          <<: *only-mayachain
 
       - deploy-coinstack-go:
-          name: deploy thorchain-v1 develop
+          name: deploy mayachain
           organization: TAXISTAKE
           pulumi-command: up -f --yes
           requires:
-            - deploy dependencies
-          <<: [*thorchain-v1-dev, *only-develop]
-
-      - deploy-coinstack-node:
-          name: deploy proxy develop
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - deploy dependencies
-          <<: [*proxy-dev, *only-develop]
-
-      - deploy-monitoring-pulumi:
-          name: deploy monitoring pulumi
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - deploy dependencies
-          <<: *only-develop
-
-  deploy-main:
-    jobs:
-      - lint-and-test-persist:
-          name: lint and test project (persist to workspace)
-          <<: *only-main
-
-      - deploy-dependencies:
-          name: validate dependencies
-          organization: TAXISTAKE
-          pulumi-command: preview --expect-no-changes
-          requires:
-            - lint and test project (persist to workspace)
-          <<: *only-main
-
-      ####### BITCOIN
-      - deploy-coinstack-node:
-          name: preview bitcoin
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - validate dependencies
-          <<: [*bitcoin, *only-main]
-
-      - approve-coinstack:
-          name: approve bitcoin
-          type: approval
-          requires:
-            - preview bitcoin
-          <<: *only-main
-
-      - deploy-coinstack-node:
-          name: deploy bitcoin
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve bitcoin
-          <<: [*bitcoin, *only-main]
-
-      ####### BITCOINCASH
-      - deploy-coinstack-node:
-          name: preview bitcoincash
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - validate dependencies
-          <<: [*bitcoincash, *only-main]
-
-      - approve-coinstack:
-          name: approve bitcoincash
-          type: approval
-          requires:
-            - preview bitcoincash
-          <<: *only-main
-
-      - deploy-coinstack-node:
-          name: deploy bitcoincash
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve bitcoincash
-          <<: [*bitcoincash, *only-main]
-
-      ####### DOGECOIN
-      - deploy-coinstack-node:
-          name: preview dogecoin
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - validate dependencies
-          <<: [*dogecoin, *only-main]
-
-      - approve-coinstack:
-          name: approve dogecoin
-          type: approval
-          requires:
-            - preview dogecoin
-          <<: *only-main
-
-      - deploy-coinstack-node:
-          name: deploy dogecoin
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve dogecoin
-          <<: [*dogecoin, *only-main]
-
-      ####### LITECOIN
-      - deploy-coinstack-node:
-          name: preview litecoin
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - validate dependencies
-          <<: [*litecoin, *only-main]
-
-      - approve-coinstack:
-          name: approve litecoin
-          type: approval
-          requires:
-            - preview litecoin
-          <<: *only-main
-
-      - deploy-coinstack-node:
-          name: deploy litecoin
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve litecoin
-          <<: [*litecoin, *only-main]
-
-      ####### ETHEREUM
-      - deploy-coinstack-node:
-          name: preview ethereum
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - validate dependencies
-          <<: [*ethereum, *only-main]
-
-      - approve-coinstack:
-          name: approve ethereum
-          type: approval
-          requires:
-            - preview ethereum
-          <<: *only-main
-
-      - deploy-coinstack-node:
-          name: deploy ethereum
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve ethereum
-          <<: [*ethereum, *only-main]
-
-      ####### AVALANCHE
-      - deploy-coinstack-node:
-          name: preview avalanche
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - validate dependencies
-          <<: [*avalanche, *only-main]
-
-      - approve-coinstack:
-          name: approve avalanche
-          type: approval
-          requires:
-            - preview avalanche
-          <<: *only-main
-
-      - deploy-coinstack-node:
-          name: deploy avalanche
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve avalanche
-          <<: [*avalanche, *only-main]
-
-      ####### OPTIMISM
-      - deploy-coinstack-node:
-          name: preview optimism
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - validate dependencies
-          <<: [*optimism, *only-main]
-
-      - approve-coinstack:
-          name: approve optimism
-          type: approval
-          requires:
-            - preview optimism
-          <<: *only-main
-
-      - deploy-coinstack-node:
-          name: deploy optimism
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve optimism
-          <<: [*optimism, *only-main]
-
-      ####### BNB SMART CHAIN
-      - deploy-coinstack-node:
-          name: preview bnbsmartchain
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - validate dependencies
-          <<: [*bnbsmartchain, *only-main]
-
-      - approve-coinstack:
-          name: approve bnbsmartchain
-          type: approval
-          requires:
-            - preview bnbsmartchain
-          <<: *only-main
-
-      - deploy-coinstack-node:
-          name: deploy bnbsmartchain
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve bnbsmartchain
-          <<: [*bnbsmartchain, *only-main]
-
-      ####### POLYGON
-      - deploy-coinstack-node:
-          name: preview polygon
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - validate dependencies
-          <<: [*polygon, *only-main]
-
-      - approve-coinstack:
-          name: approve polygon
-          type: approval
-          requires:
-            - preview polygon
-          <<: *only-main
-
-      - deploy-coinstack-node:
-          name: deploy polygon
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve polygon
-          <<: [*polygon, *only-main]
-
-      ####### GNOSIS
-      - deploy-coinstack-node:
-          name: preview gnosis
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - validate dependencies
-          <<: [*gnosis, *only-main]
-
-      - approve-coinstack:
-          name: approve gnosis
-          type: approval
-          requires:
-            - preview gnosis
-          <<: *only-main
-
-      - deploy-coinstack-node:
-          name: deploy gnosis
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve gnosis
-          <<: [*gnosis, *only-main]
-
-      ####### ARBITRUM
-      - deploy-coinstack-node:
-          name: preview arbitrum
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - validate dependencies
-          <<: [*arbitrum, *only-main]
-
-      - approve-coinstack:
-          name: approve arbitrum
-          type: approval
-          requires:
-            - preview arbitrum
-          <<: *only-main
-
-      - deploy-coinstack-node:
-          name: deploy arbitrum
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve arbitrum
-          <<: [*arbitrum, *only-main]
-
-      ####### BASE
-      - deploy-coinstack-node:
-          name: preview base
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - validate dependencies
-          <<: [*base, *only-main]
-
-      - approve-coinstack:
-          name: approve base
-          type: approval
-          requires:
-            - preview base
-          <<: *only-main
-
-      - deploy-coinstack-node:
-          name: deploy base
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve base
-          <<: [*base, *only-main]
-
-      ####### SOLANA
-      - deploy-coinstack-node:
-          name: preview solana
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - validate dependencies
-          <<: [*solana, *only-main]
-
-      - approve-coinstack:
-          name: approve solana
-          type: approval
-          requires:
-            - preview solana
-          <<: *only-main
-
-      - deploy-coinstack-node:
-          name: deploy solana
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve solana
-          <<: [*solana, *only-main]
-
-      ####### THORCHAIN
-      - deploy-coinstack-go:
-          name: preview thorchain
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - validate dependencies
-          <<: [*thorchain, *only-main]
-
-      - approve-coinstack:
-          name: approve thorchain
-          type: approval
-          requires:
-            - preview thorchain
-          <<: *only-main
-
-      - deploy-coinstack-go:
-          name: deploy thorchain
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve thorchain
-          <<: [*thorchain, *only-main]
-
-      ####### THORCHAIN-V1
-      - deploy-coinstack-go:
-          name: preview thorchain-v1
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - validate dependencies
-          <<: [*thorchain-v1, *only-main]
-
-      - approve-coinstack:
-          name: approve thorchain-v1
-          type: approval
-          requires:
-            - preview thorchain-v1
-          <<: *only-main
-
-      - deploy-coinstack-go:
-          name: deploy thorchain-v1
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve thorchain-v1
-          <<: [*thorchain-v1, *only-main]
-
-      ####### PROXY
-      - deploy-coinstack-node:
-          name: preview proxy
-          organization: TAXISTAKE
-          pulumi-command: preview
-          requires:
-            - validate dependencies
-          <<: [*proxy, *only-main]
-
-      - approve-coinstack:
-          name: approve proxy
-          type: approval
-          requires:
-            - preview proxy
-          <<: *only-main
-
-      - deploy-coinstack-node:
-          name: deploy proxy
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve proxy
-          <<: [*proxy, *only-main]
-
-  deploy-fallback:
-    jobs:
-      - lint-and-test-persist:
-          name: lint and test project (persist to workspace)
-          <<: *only-main
-
-      ####### ETHEREUM
-      - approve-coinstack:
-          name: approve ethereum fallback
-          type: approval
-          requires:
-            - lint and test project (persist to workspace)
-          <<: *only-main
-
-      - deploy-coinstack-node:
-          name: deploy ethereum fallback
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve ethereum fallback
-          <<: [*ethereum-fallback, *only-main]
-
-      ####### BASE
-      - approve-coinstack:
-          name: approve base fallback
-          type: approval
-          requires:
-            - lint and test project (persist to workspace)
-          <<: *only-main
-
-      - deploy-coinstack-node:
-          name: deploy base fallback
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve base fallback
-          <<: [*base-fallback, *only-main]
+            - approve mayachain
+          <<: [*mayachain, *only-mayachain]

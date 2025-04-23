@@ -3,8 +3,8 @@ package cosmos
 import (
 	"fmt"
 
-	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	"github.com/pkg/errors"
+	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -46,7 +46,6 @@ func TxHistorySources(client APIClient, pubkey string, formatTx func(*coretypes.
 	return map[string]*TxState{
 		"send":    NewTxState(true, fmt.Sprintf(`"message.sender='%s'"`, pubkey), request),
 		"receive": NewTxState(true, fmt.Sprintf(`"transfer.recipient='%s'"`, pubkey), request),
-		"tcy":     NewTxState(true, fmt.Sprintf(`"tcy_claim.rune_address='%s'"`, pubkey), request),
 	}
 }
 
