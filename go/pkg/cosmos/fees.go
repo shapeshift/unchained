@@ -64,7 +64,7 @@ func (c *HTTPClient) GetLocalMinimumGasPrices() (map[string]sdkmath.LegacyDec, e
 	}
 
 	for _, coin := range coins {
-		gasPrices[coin.GetDenom()] = coin.Amount
+		gasPrices[coin.GetDenom()] = sdkmath.LegacyNewDecFromBigInt(coin.Amount.BigInt())
 	}
 
 	return gasPrices, nil

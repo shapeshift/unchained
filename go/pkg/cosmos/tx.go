@@ -6,21 +6,20 @@ import (
 	"strconv"
 	"strings"
 
-	sdkerrors "cosmossdk.io/errors"
-	sdkmath "cosmossdk.io/math"
-	"cosmossdk.io/simapp/params"
-	abcitypes "github.com/cometbft/cometbft/abci/types"
-	cometbftjson "github.com/cometbft/cometbft/libs/json"
-	coretypes "github.com/cometbft/cometbft/rpc/core/types"
-	rpctypes "github.com/cometbft/cometbft/rpc/jsonrpc/types"
-	cometbfttypes "github.com/cometbft/cometbft/types"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	"github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/pkg/errors"
+	abcitypes "github.com/tendermint/tendermint/abci/types"
+	tendermintjson "github.com/tendermint/tendermint/libs/json"
+	coretypes "github.com/tendermint/tendermint/rpc/core/types"
+	rpctypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
+	tenderminttypes "github.com/tendermint/tendermint/types"
 )
 
 func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int, sources map[string]*TxState) (*TxHistoryResponse, error) {
@@ -72,7 +71,7 @@ func (c *HTTPClient) GetTx(txid string) (*coretypes.ResultTx, error) {
 	}
 
 	tx := &coretypes.ResultTx{}
-	if err := cometbftjson.Unmarshal(res.Result, tx); err != nil {
+	if err := tendermintjson.Unmarshal(res.Result, tx); err != nil {
 		return nil, errors.Errorf("failed to unmarshal tx result: %v: %s", res.Result, res.Error.Error())
 	}
 
@@ -102,7 +101,7 @@ func (c *HTTPClient) TxSearch(query string, page int, pageSize int) (*coretypes.
 	}
 
 	result := &coretypes.ResultTxSearch{}
-	if err := cometbftjson.Unmarshal(res.Result, result); err != nil {
+	if err := tendermintjson.Unmarshal(res.Result, result); err != nil {
 		return nil, errors.Wrapf(err, "failed to unmarshal tx search result: %v", res.Result)
 	}
 
@@ -159,7 +158,7 @@ func (c *GRPCClient) BroadcastTx(rawTx string) (string, error) {
 	return res.TxResponse.TxHash, nil
 }
 
-func ParseEvents(txResult abcitypes.ExecTxResult) EventsByMsgIndex {
+func ParseEvents(txResult abcitypes.ResponseDeliverTx) EventsByMsgIndex {
 	events := make(EventsByMsgIndex)
 
 	if txResult.Log != "" {
@@ -185,7 +184,7 @@ func ParseEvents(txResult abcitypes.ExecTxResult) EventsByMsgIndex {
 			}
 		}
 	} else {
-		for _, e := range txResult.Events {
+		for _, e := range sdk.StringifyEvents(txResult.Events) {
 			attributes := make(ValueByAttribute)
 			for _, a := range e.Attributes {
 				attributes[a.Key] = a.Value
@@ -296,7 +295,7 @@ func Fee(tx SigningTx, txid string, denom string) Value {
 	fees := tx.GetFee()
 
 	if len(fees) == 0 {
-		fees = []sdk.Coin{{Denom: denom, Amount: sdkmath.NewInt(0)}}
+		fees = []sdk.Coin{{Denom: denom, Amount: sdk.NewInt(0)}}
 	} else if len(fees) > 1 {
 		logger.Warnf("txid: %s - multiple fees detected (defaulting to index 0): %+v", txid, fees)
 	}
@@ -322,7 +321,7 @@ func DecodeTx(encoding params.EncodingConfig, rawTx interface{}) (sdk.Tx, Signin
 		}
 	case []byte:
 		txBytes = rawTx
-	case cometbfttypes.Tx:
+	case tenderminttypes.Tx:
 		txBytes = rawTx
 	default:
 		return nil, nil, errors.New("rawTx must be string or []byte")
