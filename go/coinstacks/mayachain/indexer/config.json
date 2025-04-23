@@ -1,0 +1,32 @@
+{
+  "listen_port": 8080,
+  "thorchain": {
+    "tendermint_url": "http://localhost:27147/websocket",
+    "thornode_url": "http://localhost:1317/mayachain",
+    "last_chain_backoff": "7s",
+    "fetch_batch_size": 10,
+    "parallelism": 2,
+    "proxied_whitelisted_endpoints": [
+      "inbound_addresses",
+      "constants",
+      "lastblock",
+      "mimir",
+      "nodes",
+      "queue",
+      "liquidity_auction_tier/:pool/:address"
+    ]
+  },
+  "timescale": {
+    "host": "localhost",
+    "port": 5432,
+    "user_name": "midgard",
+    "password": "password",
+    "database": "midgard",
+    "sslmode": "disable",
+    "max_open_conns": 80
+  },
+  "usdpools": [
+    "ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7",
+    "ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48"
+  ]
+}

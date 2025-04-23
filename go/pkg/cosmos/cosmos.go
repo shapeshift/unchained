@@ -7,11 +7,9 @@ import (
 	"net/url"
 
 	sdkmath "cosmossdk.io/math"
-	"cosmossdk.io/simapp/params"
-	abci "github.com/cometbft/cometbft/abci/types"
-	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	"github.com/cosmos/cosmos-sdk/simapp/params"
 	stdtypes "github.com/cosmos/cosmos-sdk/std"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
@@ -20,13 +18,14 @@ import (
 	authztypes "github.com/cosmos/cosmos-sdk/x/authz"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
-	govv1types "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
-	govv1beta1types "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/internal/log"
+	abci "github.com/tendermint/tendermint/abci/types"
+	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
@@ -200,8 +199,7 @@ func NewEncoding(registerInterfaces ...func(r codectypes.InterfaceRegistry)) *pa
 	authztypes.RegisterInterfaces(registry)
 	banktypes.RegisterInterfaces(registry)
 	distributiontypes.RegisterInterfaces(registry)
-	govv1types.RegisterInterfaces(registry)
-	govv1beta1types.RegisterInterfaces(registry)
+	govtypes.RegisterInterfaces(registry)
 	stakingtypes.RegisterInterfaces(registry)
 	stdtypes.RegisterInterfaces(registry)
 
@@ -214,7 +212,7 @@ func NewEncoding(registerInterfaces ...func(r codectypes.InterfaceRegistry)) *pa
 
 	return &params.EncodingConfig{
 		InterfaceRegistry: registry,
-		Codec:             protoCodec,
+		Marshaler:         protoCodec,
 		TxConfig:          tx.NewTxConfig(protoCodec, tx.DefaultSignModes),
 		Amino:             codec.NewLegacyAmino(),
 	}
@@ -249,7 +247,7 @@ func IsValidValidatorAddress(address string) bool {
 
 func ConvertABCIEvents(events []abci.Event) []ABCIEvent {
 	abciEvents := make([]ABCIEvent, len(events))
-	for i, event := range events {
+	for i, event := range sdk.StringifyEvents(events) {
 		attributes := make([]ABCIEventAttribute, len(event.Attributes))
 		for j, attribute := range event.Attributes {
 			attributes[j] = ABCIEventAttribute{
