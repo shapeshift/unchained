@@ -1,8 +1,8 @@
 package cosmos
 
 import (
-	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
 type AccountResponse struct {
@@ -52,7 +52,7 @@ type ResultBlockResults struct {
 }
 
 func (r *ResultBlockResults) GetBlockEvents() []ABCIEvent {
-	return ConvertABCIEvents(r.FinalizeBlockEvents)
+	return ConvertABCIEvents(r.EndBlockEvents)
 }
 
 type HistoryTx interface {
