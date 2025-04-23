@@ -197,12 +197,12 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.15.6
+    service-image-1: ethereum/client-go:v1.15.9
     service-cpu-limit-1: "2"
     service-memory-limit-1: 32Gi
     service-storage-size-1: 1500Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v5.3.2
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v6.0.0
     service-cpu-limit-2: "2"
     service-memory-limit-2: 16Gi
     service-storage-size-2: 600Gi
@@ -573,12 +573,12 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.31.6
+    service-image-1: nethermind/nethermind:1.31.9
     service-cpu-limit-1: "2"
     service-memory-limit-1: 8Gi
     service-storage-size-1: 750Gi
     service-name-2: daemon-beacon
-    service-image-2: sigp/lighthouse:v6.0.1
+    service-image-2: sigp/lighthouse:v7.0.0
     service-cpu-limit-2: "2"
     service-memory-limit-2: 6Gi
     service-storage-size-2: 250Gi
@@ -646,12 +646,12 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101503.1
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101503.4
     service-cpu-limit-1: "4"
     service-memory-limit-1: 48Gi
     service-storage-size-1: 4000Gi
     service-name-2: op-node
-    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.12.2
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.2
     service-cpu-limit-2: "2"
     service-memory-limit-2: 4Gi
     service-storage-size-2: 1Gi
