@@ -9,13 +9,13 @@ import (
 	"sync"
 	"time"
 
-	"cosmossdk.io/simapp/params"
-	cometbftjson "github.com/cometbft/cometbft/libs/json"
-	coretypes "github.com/cometbft/cometbft/rpc/core/types"
-	cometbft "github.com/cometbft/cometbft/rpc/jsonrpc/client"
-	"github.com/cometbft/cometbft/types"
+	"github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/websocket"
+	tendermintjson "github.com/tendermint/tendermint/libs/json"
+	coretypes "github.com/tendermint/tendermint/rpc/core/types"
+	tendermint "github.com/tendermint/tendermint/rpc/jsonrpc/client"
+	"github.com/tendermint/tendermint/types"
 )
 
 const (
@@ -32,7 +32,7 @@ type NewBlockHandlerFunc = func(newBlock types.EventDataNewBlock, blockEvents []
 type WSClient struct {
 	*websocket.Registry
 	blockService      *BlockService
-	client            *cometbft.WSClient
+	client            *tendermint.WSClient
 	encoding          *params.EncodingConfig
 	errChan           chan<- error
 	m                 sync.RWMutex
@@ -49,7 +49,7 @@ func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- 
 		return nil, errors.Wrapf(err, "failed to parse WSURL: %s", conf.WSURL)
 	}
 
-	client, err := cometbft.NewWS(wsURL.String(), "/websocket")
+	client, err := tendermint.NewWS(wsURL.String(), "/websocket")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create websocket client")
 	}
@@ -68,11 +68,11 @@ func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- 
 
 	ws.NewBlockHandler(ws.handleNewBlock)
 
-	cometbft.ReadWait(readWait)
-	cometbft.WriteWait(writeWait)
-	cometbft.PingPeriod(pingPeriod)
-	cometbft.MaxReconnectAttempts(10)(client)
-	cometbft.OnReconnect(func() {
+	tendermint.ReadWait(readWait)
+	tendermint.WriteWait(writeWait)
+	tendermint.PingPeriod(pingPeriod)
+	tendermint.MaxReconnectAttempts(10)(client)
+	tendermint.OnReconnect(func() {
 		logger.Info("OnReconnect triggered: resubscribing")
 		ws.unhandledTxs = make(map[int][]types.EventDataTx)
 		_ = client.Subscribe(context.Background(), types.EventQueryTx.String())
@@ -160,7 +160,7 @@ func (ws *WSClient) listen() {
 		}
 
 		result := &coretypes.ResultEvent{}
-		if err := cometbftjson.Unmarshal(r.Result, result); err != nil {
+		if err := tendermintjson.Unmarshal(r.Result, result); err != nil {
 			logger.Errorf("failed to unmarshal result event: %v", err)
 			continue
 		}
@@ -173,7 +173,7 @@ func (ws *WSClient) listen() {
 			case types.EventDataNewBlock:
 				ws.t.Reset(resetTimeout)
 				newBlock := result.Data.(types.EventDataNewBlock)
-				blockEvents := ConvertABCIEvents(newBlock.ResultFinalizeBlock.Events)
+				blockEvents := ConvertABCIEvents(newBlock.ResultEndBlock.Events)
 				for _, handleNewBlock := range ws.newBlockHandlers {
 					go handleNewBlock(newBlock, blockEvents)
 				}
