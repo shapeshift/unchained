@@ -197,7 +197,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.15.9
+    service-image-1: ethereum/client-go:v1.15.10
     service-cpu-limit-1: "2"
     service-memory-limit-1: 32Gi
     service-storage-size-1: 1500Gi
