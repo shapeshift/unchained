@@ -50,7 +50,6 @@ export = async (): Promise<Outputs> => {
     cidrBlock: config.eks.cidrBlock,
     email: config.eks.email,
     nodeGroups: config.eks.nodeGroups,
-    logging: config.eks.logging,
     profile: config.eks.profile,
     region: config.eks.region,
     rootDomainName: config.rootDomainName,

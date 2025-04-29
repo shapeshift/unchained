@@ -5,8 +5,8 @@ import { CoinServiceArgs, Outputs, getConfig } from '../../../../pulumi/src'
 //https://www.pulumi.com/docs/intro/languages/javascript/#entrypoint
 export = async (): Promise<Outputs> => {
   const appName = 'unchained'
-  const coinstack = 'thorchain'
-  const sampleEnv = readFileSync('../../../cmd/thorchain/sample.env')
+  const coinstack = 'mayachain'
+  const sampleEnv = readFileSync('../../../cmd/mayachain/sample.env')
   const { kubeconfig, config, namespace } = await getConfig()
 
   const coinServiceArgs = config.statefulService?.services?.map((service): CoinServiceArgs => {
@@ -16,7 +16,7 @@ export = async (): Promise<Outputs> => {
           ...service,
           dataDir: '/root',
           env: {
-            CHAIN_ID: 'thorchain-1',
+            CHAIN_ID: 'mayachain-mainnet-v1',
             NET: config.network,
           },
           ports: {
@@ -34,11 +34,8 @@ export = async (): Promise<Outputs> => {
           ...service,
           dataDir: '/blockstore',
           env: {
-            MIDGARD_GENESIS_LOCAL: '/blockstore/genesis.json',
-            MIDGARD_GENESIS_INITIAL_BLOCK_HEIGHT: '4786560',
-            MIDGARD_GENESIS_INITIAL_BLOCK_HASH: '9B86543A5CF5E26E3CE93C8349B2EABE5E238DFFC9EBE8EC6207FE7178FF27AC',
             MIDGARD_BLOCKSTORE_LOCAL: '/blockstore',
-            MIDGARD_BLOCKSTORE_REMOTE: 'https://snapshots.ninerealms.com/snapshots/midgard-blockstore/',
+            MIDGARD_BLOCKSTORE_REMOTE: 'https://snapshots.mayachain.info/midgard-blockstore/',
           },
           ports: { midgard: { port: 8080 } },
           configMapData: { 'indexer-config.json': readFileSync('../indexer/config.json').toString() },

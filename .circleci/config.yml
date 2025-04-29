@@ -3,7 +3,7 @@ version: 2.1
 executors:
   pulumi:
     docker:
-      - image: pulumi/pulumi-nodejs:3.111.1
+      - image: pulumi/pulumi-nodejs:3.160.0
 
 aliases:
   - &only-feature
@@ -197,12 +197,12 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.15.6
+    service-image-1: ethereum/client-go:v1.15.10
     service-cpu-limit-1: "2"
-    service-memory-limit-1: 24Gi
+    service-memory-limit-1: 32Gi
     service-storage-size-1: 1500Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v5.3.2
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v6.0.0
     service-cpu-limit-2: "2"
     service-memory-limit-2: 16Gi
     service-storage-size-2: 600Gi
@@ -358,12 +358,12 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
-    api-cpu-limit: "2"
+    api-cpu-limit: "4"
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-3.3.2
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-3.4.0
     service-cpu-limit-1: "2"
     service-memory-limit-1: 12Gi
     service-storage-size-1: 1250Gi
@@ -423,6 +423,50 @@ aliases:
     stateful-service-replicas: 1
     api-cpu-limit: 250m
     api-memory-limit: 250Mi
+
+  - &mayachain
+    assetName: mayachain
+    pulumi-stack: public-us-east-2
+    pulumi-dir: coinstacks/mayachain/pulumi
+    lcd-url: http://mayachain-svc.unchained.svc.cluster.local:1317
+    rpc-url: http://mayachain-svc.unchained.svc.cluster.local:27147
+    ws-url: ws://mayachain-svc.unchained.svc.cluster.local:27147
+    api: false
+    api-autoscaling: true
+    api-replicas: 2
+    api-max-replicas: 4
+    api-cpu-limit: 500m
+    api-cpu-threshold: 75
+    api-memory-limit: 500Mi
+    stateful-service-replicas: 2
+    service-name-1: daemon
+    service-image-1: registry.gitlab.com/mayachain/mayanode:mainnet-1.118.1
+    service-cpu-limit-1: "2"
+    service-memory-limit-1: 12Gi
+    service-storage-size-1: 1000Gi
+    service-name-2: timescaledb
+    service-image-2: timescale/timescaledb:2.13.0-pg15
+    service-cpu-limit-2: "2"
+    service-memory-limit-2: 6Gi
+    service-storage-size-2: 100Gi
+    service-name-3: indexer
+    service-image-3: registry.gitlab.com/mayachain/midgard:2.21.0
+    service-cpu-limit-3: "2"
+    service-memory-limit-3: 2Gi
+    service-storage-size-3: 100Gi
+
+  - &mayachain-dev
+    <<: *mayachain
+    environment: dev
+    pulumi-stack: public-dev-us-east-2
+    lcd-url: http://mayachain-svc.unchained-dev.svc.cluster.local:1317
+    rpc-url: http://mayachain-svc.unchained-dev.svc.cluster.local:27147
+    ws-url: ws://mayachain-svc.unchained-dev.svc.cluster.local:27147
+    api-replicas: 1
+    api-max-replicas: 2
+    api-cpu-limit: 250m
+    api-memory-limit: 250Mi
+    stateful-service-replicas: 1
 
   - &optimism
     assetName: optimism
@@ -529,12 +573,12 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.31.6
+    service-image-1: nethermind/nethermind:1.31.9
     service-cpu-limit-1: "2"
     service-memory-limit-1: 8Gi
     service-storage-size-1: 750Gi
     service-name-2: daemon-beacon
-    service-image-2: sigp/lighthouse:v6.0.1
+    service-image-2: sigp/lighthouse:v7.0.0
     service-cpu-limit-2: "2"
     service-memory-limit-2: 6Gi
     service-storage-size-2: 250Gi
@@ -602,12 +646,12 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101503.1
-    service-cpu-limit-1: "2"
-    service-memory-limit-1: 36Gi
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101503.4
+    service-cpu-limit-1: "4"
+    service-memory-limit-1: 48Gi
     service-storage-size-1: 4000Gi
     service-name-2: op-node
-    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.12.2
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.2
     service-cpu-limit-2: "2"
     service-memory-limit-2: 4Gi
     service-storage-size-2: 1Gi
@@ -777,8 +821,6 @@ commands:
             tar -zxvf helm.tar.gz
             mv linux-amd64/helm /usr/local/bin/helm
             helm repo add autoscaler https://kubernetes.github.io/autoscaler
-            helm repo add bitnami https://charts.bitnami.com/bitnami
-            helm repo add eks https://aws.github.io/eks-charts
             helm repo add grafana https://grafana.github.io/helm-charts
             helm repo add traefik https://helm.traefik.io/traefik
             helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
@@ -788,9 +830,9 @@ commands:
       - run:
           name: install pulumi plugin resources
           command: |
-            pulumi plugin install resource aws 5.29.1
-            pulumi plugin install resource kubernetes 3.23.1
-            pulumi plugin install resource eks 1.0.1
+            pulumi plugin install resource aws 6.72.0
+            pulumi plugin install resource kubernetes 4.22.1
+            pulumi plugin install resource eks 2.8.1
 
 jobs:
   deploy-dependencies:
@@ -819,21 +861,19 @@ jobs:
             pulumi config set --path unchained:common.additionalEnvironments[0] dev
             pulumi config set --path unchained:common.additionalEnvironments[1] monitoring
             pulumi config set --path unchained:common.eks.allAZs true
-            pulumi config set --path unchained:common.eks.autoscaling false
             pulumi config set --path unchained:common.eks.region $AWS_REGION
             pulumi config set --path unchained:common.eks.cidrBlock 10.0.0.0/16
             pulumi config set --path unchained:common.eks.nodeGroups[0].name spot
             pulumi config set --path unchained:common.eks.nodeGroups[0].type SPOT
-            pulumi config set --path unchained:common.eks.nodeGroups[0].desired 4
-            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 4
-            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 4
+            pulumi config set --path unchained:common.eks.nodeGroups[0].desired 5
+            pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 5
+            pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 5
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[0] r7a.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r7i.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r7iz.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[3] r6a.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[4] r6i.4xlarge
             pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[5] r6in.4xlarge
-            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[6] r6idn.4xlarge
             pulumi config set --path unchained:common.eks.traefik.autoscaling.enabled true
             pulumi config set --path unchained:common.eks.traefik.autoscaling.memoryThreshold 50
             pulumi config set --path unchained:common.eks.traefik.autoscaling.cpuThreshold 80
@@ -1248,6 +1288,14 @@ workflows:
             - deploy dependencies
           <<: [*thorchain-v1-dev, *only-develop]
 
+      - deploy-coinstack-go:
+          name: deploy mayachain develop
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - deploy dependencies
+          <<: [*mayachain-dev, *only-develop]
+
       - deploy-coinstack-node:
           name: deploy proxy develop
           organization: TAXISTAKE
@@ -1644,6 +1692,30 @@ workflows:
           requires:
             - approve thorchain-v1
           <<: [*thorchain-v1, *only-main]
+
+      ####### MAYACHAIN
+      - deploy-coinstack-go:
+          name: preview mayachain
+          organization: TAXISTAKE
+          pulumi-command: preview
+          requires:
+            - validate dependencies
+          <<: [*mayachain, *only-main]
+
+      - approve-coinstack:
+          name: approve mayachain
+          type: approval
+          requires:
+            - preview mayachain
+          <<: *only-main
+
+      - deploy-coinstack-go:
+          name: deploy mayachain
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve mayachain
+          <<: [*mayachain, *only-main]
 
       ####### PROXY
       - deploy-coinstack-node:
