@@ -158,9 +158,8 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
         },
         spec: {
           secretName: secretName,
-          duration: '2160h',
-          renewBefore: '360h',
-          isCA: false,
+          duration: '2160h0m0s',
+          renewBefore: '360h0m0s',
           privateKey: {
             algorithm: 'RSA',
             encoding: 'PKCS1',
