@@ -41,8 +41,7 @@ export const gasOracle = new GasOracle({ logger, provider, coinstack: 'optimism'
 export const service = new Service({
   blockbook,
   gasOracle,
-  explorerApiKey: ETHERSCAN_API_KEY,
-  explorerApiUrl: 'https://api-optimistic.etherscan.io/api',
+  explorerApiUrl: new URL(`https://api.etherscan.io/v2/api?chainid=10&apikey=${ETHERSCAN_API_KEY}`),
   provider,
   logger,
   rpcUrl: RPC_URL,
