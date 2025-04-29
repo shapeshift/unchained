@@ -40,8 +40,7 @@ export const formatAddress = (address: string): string => ethers.utils.getAddres
 export interface ServiceArgs {
   blockbook: Blockbook
   gasOracle: GasOracle
-  explorerApiKey?: string
-  explorerApiUrl: string
+  explorerApiUrl: URL
   logger: Logger
   provider: ethers.providers.JsonRpcProvider
   rpcUrl: string
@@ -51,8 +50,7 @@ export interface ServiceArgs {
 export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   private readonly blockbook: Blockbook
   private readonly gasOracle: GasOracle
-  private readonly explorerApiKey?: string
-  private readonly explorerApiUrl: string
+  private readonly explorerApiUrl: URL
   private readonly logger: Logger
   private readonly provider: ethers.providers.JsonRpcProvider
   private readonly rpcUrl: string
@@ -65,7 +63,6 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   constructor(args: ServiceArgs) {
     this.blockbook = args.blockbook
     this.gasOracle = args.gasOracle
-    this.explorerApiKey = args.explorerApiKey
     this.explorerApiUrl = args.explorerApiUrl
     this.logger = args.logger.child({ namespace: ['service'] })
     this.provider = args.provider
@@ -594,9 +591,13 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   }
 
   private async fetchInternalTxsByTxid(txid: string): Promise<Array<InternalTx> | undefined> {
-    const { data } = await axiosWithRetry.get<ExplorerApiResponse<Array<ExplorerInternalTxByHash>>>(
-      `${this.explorerApiUrl}?module=account&action=txlistinternal&txhash=${txid}&apikey=${this.explorerApiKey}`
-    )
+    const url = new URL(this.explorerApiUrl.toString())
+
+    url.searchParams.append('module', 'account')
+    url.searchParams.append('action', 'txlistinternal')
+    url.searchParams.append('txhash', txid)
+
+    const { data } = await axiosWithRetry.get<ExplorerApiResponse<Array<ExplorerInternalTxByHash>>>(url.toString())
 
     if (data.status === '0') return []
 
@@ -675,12 +676,19 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     from?: number,
     to?: number
   ): Promise<Array<ExplorerInternalTxByAddress> | undefined> {
-    let url = `${this.explorerApiUrl}?module=account&action=txlistinternal&address=${address}&page=${page}&offset=${pageSize}&sort=desc`
-    if (from) url += `&startblock=${from}`
-    if (to) url += `&endblock=${to}`
-    if (this.explorerApiKey) url += `&apikey=${this.explorerApiKey}`
+    const url = new URL(this.explorerApiUrl.toString())
 
-    const { data } = await axiosWithRetry.get<ExplorerApiResponse<Array<ExplorerInternalTxByAddress>>>(url)
+    url.searchParams.append('module', 'account')
+    url.searchParams.append('action', 'txlistinternal')
+    url.searchParams.append('address', address)
+    url.searchParams.append('page', page.toString())
+    url.searchParams.append('offset', pageSize.toString())
+    url.searchParams.append('sort', 'desc')
+
+    if (from) url.searchParams.append('startblock', from.toString())
+    if (to) url.searchParams.append('endblock', to.toString())
+
+    const { data } = await axiosWithRetry.get<ExplorerApiResponse<Array<ExplorerInternalTxByAddress>>>(url.toString())
 
     if (data.status === '0') return []
 

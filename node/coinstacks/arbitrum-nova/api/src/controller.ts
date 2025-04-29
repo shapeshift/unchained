@@ -8,11 +8,13 @@ import { EVM } from '../../../common/api/src/evm/controller'
 import { Service } from '../../../common/api/src/evm/service'
 import { GasOracle } from '../../../common/api/src/evm/gasOracle'
 
+const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
 const NETWORK = process.env.NETWORK
 const RPC_URL = process.env.RPC_URL
 
+if (!ETHERSCAN_API_KEY) throw new Error('ETHERSCAN_API_KEY env var not set')
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 if (!NETWORK) throw new Error('NETWORK env var not set')
@@ -30,7 +32,7 @@ export const gasOracle = new GasOracle({ logger, provider, coinstack: 'arbitrum-
 export const service = new Service({
   blockbook,
   gasOracle,
-  explorerApiUrl: 'https://api-nova.arbiscan.io/api',
+  explorerApiUrl: new URL(`https://api.etherscan.io/v2/api?chainid=42170&apikey=${ETHERSCAN_API_KEY}`),
   provider,
   logger,
   rpcUrl: RPC_URL,

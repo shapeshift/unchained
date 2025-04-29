@@ -1170,7 +1170,6 @@ workflows:
           name: deploy optimism develop
           organization: TAXISTAKE
           pulumi-command: up -f --yes
-          etherscan-env-var: ETHERSCAN_API_KEY_OPTIMISM
           requires:
             - deploy dependencies
           <<: [*optimism-dev, *only-develop]
@@ -1179,7 +1178,6 @@ workflows:
           name: deploy bnbsmartchain develop
           organization: TAXISTAKE
           pulumi-command: up -f --yes
-          etherscan-env-var: ETHERSCAN_API_KEY_BSC
           requires:
             - deploy dependencies
           <<: [*bnbsmartchain-dev, *only-develop]
@@ -1188,7 +1186,6 @@ workflows:
           name: deploy polygon develop
           organization: TAXISTAKE
           pulumi-command: up -f --yes
-          etherscan-env-var: ETHERSCAN_API_KEY_POLYGON
           requires:
             - deploy dependencies
           <<: [*polygon-dev, *only-develop]
@@ -1197,7 +1194,6 @@ workflows:
           name: deploy gnosis develop
           organization: TAXISTAKE
           pulumi-command: up -f --yes
-          etherscan-env-var: ETHERSCAN_API_KEY_GNOSIS
           requires:
             - deploy dependencies
           <<: [*gnosis-dev, *only-develop]
@@ -1206,7 +1202,6 @@ workflows:
           name: deploy arbitrum develop
           organization: TAXISTAKE
           pulumi-command: up -f --yes
-          etherscan-env-var: ETHERSCAN_API_KEY_ARBITRUM
           requires:
             - deploy dependencies
           <<: [*arbitrum-dev, *only-develop]
@@ -1215,7 +1210,6 @@ workflows:
           name: deploy base develop
           organization: TAXISTAKE
           pulumi-command: up -f --yes
-          etherscan-env-var: ETHERSCAN_API_KEY_BASE
           requires:
             - deploy dependencies
           <<: [*base-dev, *only-develop]
@@ -1423,7 +1417,6 @@ workflows:
           name: preview optimism
           organization: TAXISTAKE
           pulumi-command: preview
-          etherscan-env-var: ETHERSCAN_API_KEY_OPTIMISM
           requires:
             - validate dependencies
           <<: [*optimism, *only-main]
@@ -1439,7 +1432,6 @@ workflows:
           name: deploy optimism
           organization: TAXISTAKE
           pulumi-command: up -f --yes
-          etherscan-env-var: ETHERSCAN_API_KEY_OPTIMISM
           requires:
             - approve optimism
           <<: [*optimism, *only-main]
@@ -1449,7 +1441,6 @@ workflows:
           name: preview bnbsmartchain
           organization: TAXISTAKE
           pulumi-command: preview
-          etherscan-env-var: ETHERSCAN_API_KEY_BSC
           requires:
             - validate dependencies
           <<: [*bnbsmartchain, *only-main]
@@ -1465,7 +1456,6 @@ workflows:
           name: deploy bnbsmartchain
           organization: TAXISTAKE
           pulumi-command: up -f --yes
-          etherscan-env-var: ETHERSCAN_API_KEY_BSC
           requires:
             - approve bnbsmartchain
           <<: [*bnbsmartchain, *only-main]
@@ -1475,7 +1465,6 @@ workflows:
           name: preview polygon
           organization: TAXISTAKE
           pulumi-command: preview
-          etherscan-env-var: ETHERSCAN_API_KEY_POLYGON
           requires:
             - validate dependencies
           <<: [*polygon, *only-main]
@@ -1491,7 +1480,6 @@ workflows:
           name: deploy polygon
           organization: TAXISTAKE
           pulumi-command: up -f --yes
-          etherscan-env-var: ETHERSCAN_API_KEY_POLYGON
           requires:
             - approve polygon
           <<: [*polygon, *only-main]
@@ -1564,7 +1552,6 @@ workflows:
           name: deploy base
           organization: TAXISTAKE
           pulumi-command: up -f --yes
-          etherscan-env-var: ETHERSCAN_API_KEY_BASE
           requires:
             - approve base
           <<: [*base, *only-main]
