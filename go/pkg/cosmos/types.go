@@ -35,7 +35,6 @@ type Pagination struct {
 type ABCIEventAttribute struct {
 	Key   string
 	Value string
-	Index bool
 }
 
 type ABCIEvent struct {

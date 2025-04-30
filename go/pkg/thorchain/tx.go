@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/cometbft/cometbft/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
@@ -32,7 +33,7 @@ func GetTxHistory(handler *cosmos.Handler, pubkey string, cursor string, pageSiz
 			eventCache := make(map[string]interface{})
 
 			for i := range blockResult.GetBlockEvents() {
-				tx, err := GetTxFromBlockEvents(eventCache, b.Block.Header, blockResult.GetBlockEvents(), i, handler.BlockService.Latest.Height, handler.Denom)
+				tx, err := GetTxFromBlockEvents(eventCache, b.Block.Header, blockResult.GetBlockEvents(), i, handler.BlockService.Latest.Height, handler.Denom, handler.NativeFee)
 				if err != nil {
 					return nil, errors.Wrap(err, "failed to get tx from block events")
 				}
@@ -88,18 +89,6 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 		return messages
 	}
 
-	coinToValue := func(c common.Coin) cosmos.Value {
-		denom, ok := assetToDenom[c.Asset.String()]
-		if !ok {
-			denom = c.Asset.String()
-		}
-
-		return cosmos.Value{
-			Amount: c.Amount.String(),
-			Denom:  denom,
-		}
-	}
-
 	unhandledMsgs := []sdk.Msg{}
 	for i, msg := range msgs {
 		switch v := msg.(type) {
@@ -115,6 +104,8 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 			}
 			messages = append(messages, message)
 		case *thorchaintypes.MsgDeposit:
+			coin := v.Coins[0]
+
 			to := events[strconv.Itoa(i)]["transfer"]["recipient"]
 			events[strconv.Itoa(i)]["message"]["memo"] = v.Memo // add memo value from message to events
 
@@ -137,7 +128,10 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 				From:      v.Signer.String(),
 				To:        to,
 				Type:      "deposit",
-				Value:     coinToValue(v.Coins[0]),
+				Value: cosmos.CoinToValue(&sdk.Coin{
+					Denom:  coin.Asset.Native(),
+					Amount: sdkmath.NewIntFromBigInt(coin.Amount.BigInt()),
+				}),
 			}
 			messages = append(messages, message)
 
@@ -156,7 +150,10 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 					From:      outbound["from"],
 					To:        outbound["to"],
 					Type:      "outbound",
-					Value:     coinToValue(coin),
+					Value: cosmos.CoinToValue(&sdk.Coin{
+						Denom:  coin.Asset.Native(),
+						Amount: sdkmath.NewIntFromBigInt(coin.Amount.BigInt()),
+					}),
 				}
 				messages = append(messages, message)
 			}
@@ -171,19 +168,27 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 	return messages
 }
 
-func GetTxFromBlockEvents(eventCache map[string]interface{}, blockHeader types.Header, blockEvents []cosmos.ABCIEvent, eventIndex int, latestHeight int, denom string) (*ResultTx, error) {
-	// attempt to find matching fee event for txid or use default fee as defined by https://daemon.thorchain.shapeshift.com/lcd/thorchain/constants
+func GetTxFromBlockEvents(eventCache map[string]interface{}, blockHeader types.Header, blockEvents []cosmos.ABCIEvent, eventIndex int, latestHeight int, denom string, nativeFee int) (*ResultTx, error) {
+	// attempt to find matching fee event for txid or use native fee
 	matchFee := func(txid string, events []TypedEvent) cosmos.Value {
 		for _, e := range events {
 			switch v := e.(type) {
 			case *EventFee:
 				if txid == v.TxID {
-					return coinToValue(v.Coins)
+					coin, err := common.ParseCoin(v.Coins)
+					if err != nil && v.Coins != "" {
+						logger.Error(err)
+					}
+
+					return cosmos.CoinToValue(&sdk.Coin{
+						Denom:  coin.Asset.Native(),
+						Amount: sdkmath.NewIntFromBigInt(coin.Amount.BigInt()),
+					})
 				}
 			}
 		}
 
-		return cosmos.Value{Amount: "2000000", Denom: denom}
+		return cosmos.Value{Amount: strconv.Itoa(nativeFee), Denom: denom}
 	}
 
 	// cache parsed block events for use in all subsequent event indices within the block

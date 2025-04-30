@@ -19,7 +19,7 @@ type Handler struct {
 
 func (h *Handler) StartWebsocket() error {
 	h.WSClient.BlockEventHandler(func(eventCache map[string]interface{}, blockHeader types.Header, blockEvents []cosmos.ABCIEvent, eventIndex int) (interface{}, []string, error) {
-		tx, err := thorchain.GetTxFromBlockEvents(eventCache, blockHeader, blockEvents, eventIndex, h.BlockService.Latest.Height, h.Denom)
+		tx, err := thorchain.GetTxFromBlockEvents(eventCache, blockHeader, blockEvents, eventIndex, h.BlockService.Latest.Height, h.Denom, h.NativeFee)
 		if err != nil {
 			return nil, nil, errors.Wrap(err, "failed to get txs from end block events")
 		}
@@ -114,6 +114,6 @@ func (h *Handler) ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) 
 	return thorchain.ParseMessages(msgs, events)
 }
 
-func (h *Handler) ParseFee(tx signing.Tx, txid string, denom string) cosmos.Value {
-	return thorchain.ParseFee(tx, txid, denom)
+func (h *Handler) ParseFee(tx signing.Tx, txid string) cosmos.Value {
+	return thorchain.ParseFee(tx, txid, h.Denom, h.NativeFee)
 }
