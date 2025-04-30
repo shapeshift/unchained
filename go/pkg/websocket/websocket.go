@@ -3,6 +3,7 @@ package websocket
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"sync"
 	"time"
 
@@ -176,8 +177,16 @@ func (c *Connection) read() {
 			c.subscriptionIDs[r.SubscriptionID] = struct{}{}
 			c.handler.Subscribe(c.clientID, r.SubscriptionID, r.Data.Addresses, c.msgChan)
 		case "unsubscribe":
-			delete(c.subscriptionIDs, r.SubscriptionID)
-			c.handler.Unsubscribe(c.clientID, r.SubscriptionID, r.Data.Addresses, c.msgChan)
+			if r.SubscriptionID != "" {
+				delete(c.subscriptionIDs, r.SubscriptionID)
+				c.handler.Unsubscribe(c.clientID, r.SubscriptionID, r.Data.Addresses, c.msgChan)
+			} else {
+				subscriptionIDs := maps.Keys(c.subscriptionIDs)
+				for subscriptionID := range subscriptionIDs {
+					delete(c.subscriptionIDs, subscriptionID)
+					c.handler.Unsubscribe(c.clientID, subscriptionID, r.Data.Addresses, c.msgChan)
+				}
+			}
 		default:
 			c.writeError(fmt.Sprintf("%s method not implemented", r.Method), r.SubscriptionID)
 		}
