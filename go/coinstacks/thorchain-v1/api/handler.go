@@ -48,6 +48,6 @@ func (h *Handler) ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) 
 	return thorchain.ParseMessages(msgs, events)
 }
 
-func (h *Handler) ParseFee(tx signing.Tx, txid string, denom string) cosmos.Value {
-	return thorchain.ParseFee(tx, txid, denom)
+func (h *Handler) ParseFee(tx signing.Tx, txid string) cosmos.Value {
+	return thorchain.ParseFee(tx, txid, h.Denom, h.NativeFee)
 }

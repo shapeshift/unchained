@@ -56,6 +56,7 @@ func main() {
 		Bech32ValPrefix:   "thorv",
 		Bech32PkValPrefix: "thorvpub",
 		Denom:             "rune",
+		NativeFee:         2000000, // https://daemon.thorchain.shapeshift.com/lcd/thorchain/constants
 		Encoding:          encoding,
 		LCDURL:            conf.LCDURL,
 		RPCURL:            conf.RPCURL,
@@ -67,6 +68,8 @@ func main() {
 		Bech32PkPrefix:    "thorpub",
 		Bech32ValPrefix:   "thorv",
 		Bech32PkValPrefix: "thorvpub",
+		Denom:             "rune",
+		NativeFee:         2000000, // https://daemon.thorchain.shapeshift.com/lcd/thorchain/constants
 		Encoding:          encoding,
 		LCDURL:            conf.LCDV1URL,
 		RPCURL:            conf.RPCV1URL,
@@ -99,7 +102,7 @@ func main() {
 		logger.Panicf("failed to index affiliate fees: %+v", err)
 	}
 
-	api := api.New(httpClient, wsClient, blockService, indexer, *swaggerPath, prometheus)
+	api := api.New(cfg, httpClient, wsClient, blockService, indexer, *swaggerPath, prometheus)
 	defer api.Shutdown()
 
 	go api.Serve(errChan)
