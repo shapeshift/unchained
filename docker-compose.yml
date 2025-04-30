@@ -41,7 +41,6 @@ services:
       - bitcoin_default
       - bitcoincash_default
       - bnbsmartchain_default
-      - cosmos_default
       - dogecoin_default
       - ethereum_default
       - gnosis_default
@@ -76,8 +75,6 @@ networks:
     name: bitcoincash_default
   bnbsmartchain_default:
     name: bnbsmartchain_default
-  cosmos_default:
-    name: cosmos_default
   dogecoin_default:
     name: dogecoin_default
   ethereum_default:
