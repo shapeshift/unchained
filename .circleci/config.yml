@@ -17,7 +17,7 @@ aliases:
       branches:
         only:
           - cosmos
-  
+
   - &params
     organization:
       type: string
@@ -157,12 +157,10 @@ aliases:
     ws-url: wss://cosmos-tendermint-shapeshift.nownodes.io
     api-autoscaling: true
     api-replicas: 2
-    api-max-replicas: 6
+    api-max-replicas: 4
     api-cpu-limit: 500m
-    api-cpu-request: 250m
     api-cpu-threshold: 75
-    api-memory-limit: 1Gi
-    api-memory-request: 500Mi
+    api-memory-limit: 500Mi
 
   - &cosmos-dev
     <<: *cosmos
@@ -178,10 +176,6 @@ commands:
   precheck:
     description: install dependencies
     steps:
-      - run:
-          command: |
-            wget https://go.dev/dl/go1.22.1.linux-amd64.tar.gz
-            sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.22.1.linux-amd64.tar.gz
       - run:
           command: yarn install --immutable
       - run:
@@ -297,24 +291,19 @@ jobs:
     executor: pulumi
     environment:
       DOCKER_BUILDKIT: 1
+      LOG_LEVEL: info
     parameters:
       <<: *params
       api-key:
         type: string
-        default: ''
+        default: ""
       lcd-url:
         type: string
-      lcd-v1-url:
-        type: string
-        default: ""
       grpc-url:
         type: string
         default: ""
       rpc-url:
         type: string
-      rpc-v1-url:
-        type: string
-        default: ""
       ws-url:
         type: string
     steps:
@@ -328,10 +317,8 @@ jobs:
           command: |
             echo 'export API_KEY=<< parameters.api-key >>' >> $BASH_ENV
             echo 'export LCD_URL=<< parameters.lcd-url >>' >> $BASH_ENV
-            echo 'export LCD_V1_URL=<< parameters.lcd-v1-url >>' >> $BASH_ENV
             echo 'export GRPC_URL=<< parameters.grpc-url >>' >> $BASH_ENV
             echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
-            echo 'export RPC_V1_URL=<< parameters.rpc-v1-url >>' >> $BASH_ENV
             echo 'export WS_URL=<< parameters.ws-url >>' >> $BASH_ENV
       - run:
           name: pulumi

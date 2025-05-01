@@ -142,8 +142,8 @@ func (h *Handler) ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) 
 	return cosmos.ParseMessages(msgs, events)
 }
 
-func (h *Handler) ParseFee(tx signing.Tx, txid string, denom string) cosmos.Value {
-	return cosmos.Fee(tx, txid, denom)
+func (h *Handler) ParseFee(tx signing.Tx, txid string) cosmos.Value {
+	return cosmos.Fee(tx, txid, h.Denom)
 }
 
 type APRData struct {
