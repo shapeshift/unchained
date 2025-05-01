@@ -31,7 +31,7 @@ type TxHandlerFunc = func(tx types.EventDataTx, block *BlockResponse) (interface
 type WSClient struct {
 	*websocket.Registry
 	blockService *BlockService
-	client       *tendermint.WSClient
+	client       *cometbft.WSClient
 	encoding     *params.EncodingConfig
 	errChan      chan<- error
 	m            sync.RWMutex
@@ -68,8 +68,6 @@ func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- 
 		errChan:      errChan,
 		unhandledTxs: make(map[int][]types.EventDataTx),
 	}
-
-	ws.NewBlockHandler(ws.handleNewBlock)
 
 	cometbft.ReadWait(readWait)
 	cometbft.WriteWait(writeWait)
@@ -167,11 +165,7 @@ func (ws *WSClient) listen() {
 				go ws.handleTx(result.Data.(types.EventDataTx))
 			case types.EventDataNewBlock:
 				ws.t.Reset(resetTimeout)
-				newBlock := result.Data.(types.EventDataNewBlock)
-				blockEvents := ConvertABCIEvents(newBlock.ResultFinalizeBlock.Events)
-				for _, handleNewBlock := range ws.newBlockHandlers {
-					go handleNewBlock(newBlock, blockEvents)
-				}
+				go ws.handleNewBlock(result.Data.(types.EventDataNewBlock))
 			default:
 				fmt.Printf("unsupported result type: %T", result.Data)
 			}
@@ -202,7 +196,7 @@ func (ws *WSClient) handleTx(tx types.EventDataTx) {
 	}
 }
 
-func (ws *WSClient) handleNewBlock(newBlock types.EventDataNewBlock, blockEvents []ABCIEvent) {
+func (ws *WSClient) handleNewBlock(newBlock types.EventDataNewBlock) {
 	logger.Debugf("block: %d", newBlock.Block.Height)
 
 	b := &BlockResponse{

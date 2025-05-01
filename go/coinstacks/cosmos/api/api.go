@@ -47,13 +47,12 @@ type API struct {
 	handler *Handler
 }
 
-func New(cfg cosmos.Config, httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, indexer *AffiliateFeeIndexer, swaggerPath string, prometheus *metrics.Prometheus) *API {
+func New(cfg cosmos.Config, httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, swaggerPath string, prometheus *metrics.Prometheus) *API {
 	r := mux.NewRouter()
 
 	handler := &Handler{
 		Handler: &cosmos.Handler{
 			HTTPClient:   httpClient,
-			GRPCClient:   grpcClient,
 			WSClient:     wsClient,
 			BlockService: blockService,
 			Denom:        cfg.Denom,
