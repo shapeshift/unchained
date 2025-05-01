@@ -80,6 +80,7 @@ type Config struct {
 	Bech32PkPrefix    string
 	Bech32PkValPrefix string
 	Denom             string
+	NativeFee         int
 	Encoding          *params.EncodingConfig
 	GRPCURL           string
 	LCDURL            string
@@ -254,7 +255,6 @@ func ConvertABCIEvents(events []abci.Event) []ABCIEvent {
 			attributes[j] = ABCIEventAttribute{
 				Key:   attribute.Key,
 				Value: attribute.Value,
-				Index: attribute.Index,
 			}
 		}
 		abciEvents[i] = ABCIEvent{
