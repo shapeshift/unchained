@@ -98,6 +98,8 @@ func (r *Registry) Publish(addrs []string, data interface{}) {
 		for id, msgChan := range r.addresses[addr] {
 			_, subscriptionID := fromID(id)
 
+			logger.Debugf("Publish: subscriptionID: %s, address: %s", subscriptionID, addr)
+
 			msg, err := json.Marshal(MessageResponse{Address: addr, Data: data, SubscriptionID: subscriptionID})
 			if err != nil {
 				logger.Errorf("failed to marshal tx message: %v", err)
