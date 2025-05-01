@@ -47,8 +47,7 @@ services:
       - litecoin_default
       - optimism_default
       - polygon_default
-      - thorchain_default
-      - thorchain-v1_default
+      - cosmos_default
       - solana_default
       - proxy_default
     ports:
@@ -87,10 +86,8 @@ networks:
     name: optimism_default
   polygon_default:
     name: polygon_default
-  thorchain_default:
-    name: thorchain_default
-  thorchain-v1_default:
-    name: thorchain-v1_default
+  cosmos_default:
+    name: cosmos_default
   solana_default:
     name: solana_default
   proxy_default:
