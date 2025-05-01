@@ -32,7 +32,6 @@ func (r *ResultBlockResults) GetBlockEvents() []cosmos.ABCIEvent {
 			attributes[j] = cosmos.ABCIEventAttribute{
 				Key:   string(attribute.Key),
 				Value: string(attribute.Value),
-				Index: attribute.Index,
 			}
 		}
 		blockEvents[i] = cosmos.ABCIEvent{

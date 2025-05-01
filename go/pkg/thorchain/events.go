@@ -3,10 +3,12 @@ package thorchain
 import (
 	"encoding/json"
 	"strconv"
-	"strings"
 
+	sdkmath "cosmossdk.io/math"
 	cometbftjson "github.com/cometbft/cometbft/libs/json"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/shapeshift/unchained/pkg/cosmos"
+	"gitlab.com/thorchain/thornode/v3/common"
 )
 
 type TypedEvent interface{}
@@ -70,26 +72,17 @@ func ParseBlockEvents(blockEvents []cosmos.ABCIEvent) (cosmos.EventsByMsgIndex, 
 	return eventsByMsgIndex, typedEvents, nil
 }
 
-func coinToValue(coin string) cosmos.Value {
-	coinParts := strings.Fields(coin)
-
-	denom, ok := assetToDenom[coinParts[1]]
-	if !ok {
-		denom = coinParts[1]
-	}
-
-	return cosmos.Value{
-		Amount: coinParts[0],
-		Denom:  denom,
-	}
-}
-
 func typedEventsToMessages(events []TypedEvent) []cosmos.Message {
 	messages := []cosmos.Message{}
 
 	for i, event := range events {
 		switch v := event.(type) {
 		case *EventOutbound:
+			coin, err := common.ParseCoin(v.Coin)
+			if err != nil && v.Coin != "" {
+				logger.Error(err)
+			}
+
 			message := cosmos.Message{
 				Addresses: []string{v.From, v.To},
 				Index:     strconv.Itoa(i),
@@ -97,7 +90,10 @@ func typedEventsToMessages(events []TypedEvent) []cosmos.Message {
 				From:      v.From,
 				To:        v.To,
 				Type:      "outbound",
-				Value:     coinToValue(v.Coin),
+				Value: cosmos.CoinToValue(&sdk.Coin{
+					Denom:  coin.Asset.Native(),
+					Amount: sdkmath.NewIntFromBigInt(coin.Amount.BigInt()),
+				}),
 			}
 			messages = append(messages, message)
 		}
