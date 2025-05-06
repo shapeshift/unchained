@@ -38,7 +38,11 @@ start() {
     --op-network base-mainnet \
     --state.scheme hash \
     --history.transactions 0 \
-    --cache 8192 \
+    --cache 20480 \
+    --cache.database 20 \
+    --cache.gc 12 \
+    --cache.snapshot 24 \
+    --cache.trie 44 \
     --maxpeers 100 &
   PID="$!"
 }

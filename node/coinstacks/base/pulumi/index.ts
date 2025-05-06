@@ -20,6 +20,7 @@ export = async (): Promise<Outputs> => {
             'daemon-rpc': { port: 8545 },
             'daemon-ws': { port: 8546, pathPrefix: '/websocket', stripPathPrefix: true },
             'daemon-auth': { port: 8551, ingressRoute: false },
+            'daemon-p2p': { port: 30303, ingressRoute: false },
           },
           configMapData: {
             'jwt.hex': readFileSync('../daemon/jwt.hex').toString(),
@@ -41,7 +42,10 @@ export = async (): Promise<Outputs> => {
             L1_RPC_ENDPOINT: `http://ethereum-svc.unchained.svc.cluster.local:8545`,
             L1_BEACON_ENDPOINT: `http://ethereum-svc.unchained.svc.cluster.local:3500`,
           },
-          ports: { 'op-node-rpc': { port: 9545, ingressRoute: false } },
+          ports: {
+            'op-node-rpc': { port: 9545, ingressRoute: false },
+            'op-node-p2p': { port: 9222, ingressRoute: false },
+          },
           configMapData: { 'evm.sh': readFileSync('../../../scripts/evm.sh').toString() },
           volumeMounts: [
             { name: 'config-map', mountPath: '/jwt.hex', subPath: 'jwt.hex' },
