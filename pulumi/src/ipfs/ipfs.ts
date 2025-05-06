@@ -123,7 +123,7 @@ export function deployIpfs({ namespace, provider, domain, additionalDomain }: Ip
             },
             {
               name: 'SVC_NAME',
-              value: name,
+              value: `${name}-svc.${namespace}.svc.cluster.local`,
             },
           ],
           ports: [
