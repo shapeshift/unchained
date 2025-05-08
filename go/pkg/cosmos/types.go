@@ -2,6 +2,7 @@ package cosmos
 
 import (
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 type AccountResponse struct {
@@ -90,4 +91,23 @@ type TxHistoryResponse struct {
 type ValidatorsResponse struct {
 	Validators []Validator
 	Pagination PageResponse
+}
+
+type SigningTx interface {
+	GetMemo() string
+	GetFee() sdk.Coins
+}
+
+type signingTx struct {
+	memo string
+	fee  sdk.Coins
+}
+
+// Implement the interface methods
+func (t *signingTx) GetMemo() string {
+	return t.memo
+}
+
+func (t *signingTx) GetFee() sdk.Coins {
+	return t.fee
 }

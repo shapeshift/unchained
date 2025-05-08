@@ -10,7 +10,6 @@ import (
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	"github.com/cometbft/cometbft/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	ws "github.com/gorilla/websocket"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/api"
@@ -35,13 +34,13 @@ type RouteHandler interface {
 
 type CoinSpecificHandler interface {
 	ParseMessages([]sdk.Msg, EventsByMsgIndex) []Message
-	ParseFee(tx signing.Tx, txid string) Value
+	ParseFee(tx SigningTx, txid string) Value
 }
 
 type Handler struct {
 	// coin specific handler methods
 	ParseMessages func([]sdk.Msg, EventsByMsgIndex) []Message
-	ParseFee      func(tx signing.Tx, txid string) Value
+	ParseFee      func(tx SigningTx, txid string) Value
 
 	// common cosmossdk values
 	HTTPClient   APIClient

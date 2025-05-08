@@ -17,7 +17,6 @@ import (
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
-	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
@@ -293,7 +292,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 	return messages
 }
 
-func Fee(tx signing.Tx, txid string, denom string) Value {
+func Fee(tx SigningTx, txid string, denom string) Value {
 	fees := tx.GetFee()
 
 	if len(fees) == 0 {
@@ -310,7 +309,7 @@ func Fee(tx signing.Tx, txid string, denom string) Value {
 
 // DecodeTx will attempt to decode a raw transaction in the form of
 // a base64 encoded string or a protobuf encoded byte slice
-func DecodeTx(encoding params.EncodingConfig, rawTx interface{}) (sdk.Tx, signing.Tx, error) {
+func DecodeTx(encoding params.EncodingConfig, rawTx interface{}) (sdk.Tx, SigningTx, error) {
 	var txBytes []byte
 
 	switch rawTx := rawTx.(type) {
@@ -334,12 +333,16 @@ func DecodeTx(encoding params.EncodingConfig, rawTx interface{}) (sdk.Tx, signin
 		return nil, nil, errors.Wrapf(err, "error decoding transaction from protobuf")
 	}
 
-	builder, err := encoding.TxConfig.WrapTxBuilder(tx)
-	if err != nil {
-		return nil, nil, errors.Wrapf(err, "error making transaction builder")
-	}
+	if _, ok := tx.(SigningTx); ok {
+		builder, err := encoding.TxConfig.WrapTxBuilder(tx)
+		if err != nil {
+			return nil, nil, errors.Wrapf(err, "error making transaction builder")
+		}
 
-	return tx, builder.GetTx(), nil
+		return tx, builder.GetTx(), nil
+	} else {
+		return tx, &signingTx{}, nil
+	}
 }
 
 func GetTxAddrs(events EventsByMsgIndex, messages []Message) []string {

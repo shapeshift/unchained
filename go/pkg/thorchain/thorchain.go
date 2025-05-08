@@ -3,14 +3,13 @@ package thorchain
 import (
 	"math/big"
 
-	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/shapeshift/unchained/internal/log"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 )
 
 var logger = log.WithoutFields()
 
-func ParseFee(tx signing.Tx, txid string, denom string, nativeFee int) cosmos.Value {
+func ParseFee(tx cosmos.SigningTx, txid string, denom string, nativeFee int) cosmos.Value {
 	fee := cosmos.Fee(tx, txid, denom)
 
 	i := new(big.Int)

@@ -104,9 +104,9 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 			}
 			messages = append(messages, message)
 		case *thorchaintypes.MsgDeposit:
+			to := ""
 			coin := v.Coins[0]
 
-			to := events[strconv.Itoa(i)]["transfer"]["recipient"]
 			events[strconv.Itoa(i)]["message"]["memo"] = v.Memo // add memo value from message to events
 
 			// detect withdraw event as a result of the deposit and use this to address instead
@@ -158,6 +158,56 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 				messages = append(messages, message)
 			}
 
+			// detect tcy unstake or rune pool withdraw event as a result of the deposit and create a synthetic message for it
+			tcyUnstake := events[strconv.Itoa(i)]["tcy_unstake"]
+			runePoolWithdraw := events[strconv.Itoa(i)]["rune_pool_withdraw"]
+			if tcyUnstake != nil || runePoolWithdraw != nil {
+				var msgType string
+				switch {
+				case tcyUnstake != nil:
+					msgType = "tcy_unstake"
+				case runePoolWithdraw != nil:
+					msgType = "rune_pool_withdraw"
+				}
+
+				transfer := events[strconv.Itoa(i)]["transfer"]
+				if transfer != nil {
+					coin, err := sdk.ParseCoinNormalized(transfer["amount"])
+					if err != nil {
+						logger.Error(err)
+					}
+
+					message := cosmos.Message{
+						Addresses: []string{transfer["sender"], transfer["recipient"]},
+						Index:     strconv.Itoa(i),
+						Origin:    transfer["sender"],
+						From:      transfer["sender"],
+						To:        transfer["recipient"],
+						Type:      msgType,
+						Value:     cosmos.CoinToValue(&coin),
+					}
+					messages = append(messages, message)
+				}
+			}
+		case *thorchaintypes.MsgObservedTxQuorum:
+			transfer := events[strconv.Itoa(i)]["transfer"]
+			if transfer != nil {
+				coin, err := sdk.ParseCoinNormalized(transfer["amount"])
+				if err != nil {
+					logger.Error(err)
+				}
+
+				message := cosmos.Message{
+					Addresses: []string{transfer["sender"], transfer["recipient"]},
+					Index:     strconv.Itoa(i),
+					Origin:    transfer["sender"],
+					From:      transfer["sender"],
+					To:        transfer["recipient"],
+					Type:      "tcy_claim",
+					Value:     cosmos.CoinToValue(&coin),
+				}
+				messages = append(messages, message)
+			}
 		default:
 			unhandledMsgs = append(unhandledMsgs, msg)
 		}
