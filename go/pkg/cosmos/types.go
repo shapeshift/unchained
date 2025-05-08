@@ -103,7 +103,6 @@ type signingTx struct {
 	fee  sdk.Coins
 }
 
-// Implement the interface methods
 func (t *signingTx) GetMemo() string {
 	return t.memo
 }
