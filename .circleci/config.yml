@@ -202,7 +202,7 @@ aliases:
     service-memory-limit-1: 32Gi
     service-storage-size-1: 1500Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v6.0.1
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v6.0.2
     service-cpu-limit-2: "2"
     service-memory-limit-2: 16Gi
     service-storage-size-2: 600Gi
@@ -363,7 +363,7 @@ aliases:
     api-memory-limit: 1Gi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-3.5.2
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-3.5.6
     service-cpu-limit-1: "2"
     service-memory-limit-1: 12Gi
     service-storage-size-1: 1250Gi
@@ -529,7 +529,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.31.9
+    service-image-1: nethermind/nethermind:1.31.10
     service-cpu-limit-1: "2"
     service-memory-limit-1: 8Gi
     service-storage-size-1: 750Gi
