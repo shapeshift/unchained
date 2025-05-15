@@ -6,12 +6,14 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	"github.com/shapeshift/unchained/coinstacks/thorchain/api"
 	"github.com/shapeshift/unchained/internal/config"
 	"github.com/shapeshift/unchained/internal/log"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/shapeshift/unchained/pkg/metrics"
 
+	"gitlab.com/thorchain/thornode/v3/x/thorchain/ebifrost"
 	thortypes "gitlab.com/thorchain/thornode/v3/x/thorchain/types"
 )
 
@@ -49,6 +51,20 @@ func main() {
 	}
 
 	encoding := cosmos.NewEncoding(thortypes.RegisterInterfaces)
+
+	// custom tx config options to support thorchain inject txs
+	opts := tx.ConfigOptions{
+		EnabledSignModes: tx.DefaultSignModes,
+		ProtoDecoder:     ebifrost.TxDecoder(encoding.Codec, encoding.TxConfig.TxDecoder()),
+	}
+
+	txconfig, err := tx.NewTxConfigWithOptions(encoding.Codec, opts)
+	if err != nil {
+		logger.Panicf("failed to create new tx config: %+v", err)
+	}
+
+	// overwrite standard tx config with the custom inject tx config
+	encoding.TxConfig = txconfig
 
 	cfg := cosmos.Config{
 		Bech32AddrPrefix:  "thor",

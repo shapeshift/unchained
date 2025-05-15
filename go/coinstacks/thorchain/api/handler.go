@@ -5,7 +5,6 @@ import (
 
 	"github.com/cometbft/cometbft/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
@@ -114,6 +113,6 @@ func (h *Handler) ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) 
 	return thorchain.ParseMessages(msgs, events)
 }
 
-func (h *Handler) ParseFee(tx signing.Tx, txid string) cosmos.Value {
+func (h *Handler) ParseFee(tx cosmos.SigningTx, txid string) cosmos.Value {
 	return thorchain.ParseFee(tx, txid, h.Denom, h.NativeFee)
 }
