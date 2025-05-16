@@ -297,7 +297,10 @@ export async function deployStatefulService(
         name: `${assetName}-sts`,
         namespace: namespace,
         labels: labels,
-        annotations: { 'pulumi.com/skipAwait': 'true' },
+        annotations: {
+          'pulumi.com/patchForce': 'true',
+          'pulumi.com/skipAwait': 'true',
+        },
       },
       spec: {
         selector: { matchLabels: labels },
