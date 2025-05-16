@@ -18,7 +18,6 @@ export function deployIpfs({ namespace, provider, domain, additionalDomain }: Ip
       metadata: { name, namespace },
       stringData: {
         ['cluster-secret']: process.env.IPFS_CLUSTER_SECRET as string,
-        ['cluster-priv-key']: process.env.IPFS_CLUSTER_PRIV_KEY as string,
       },
     },
     { provider }
@@ -32,7 +31,7 @@ export function deployIpfs({ namespace, provider, domain, additionalDomain }: Ip
         namespace: namespace,
       },
       data: {
-        ['cluster-id']: '12D3KooWHvJjQLVpjN4h7ySwcAYn5NLEcgtaSTwpNNaeBbsKacT4',
+        ['bootstrap-peer-id']: '12D3KooWMacD9BsuhQgGC4o9LxV9c6zthMCGoo1XXJVd7qjJZZ9C',
         ['entrypoint.sh']: readFileSync(`${__dirname}/entrypoint.sh`).toString(),
         ['configure-ipfs.sh']: readFileSync(`${__dirname}/configure-ipfs.sh`).toString(),
       },
@@ -70,10 +69,10 @@ export function deployIpfs({ namespace, provider, domain, additionalDomain }: Ip
           env: [{ name: 'IPFS_FD_MAX', value: '8192' }],
           ports: [
             { name: 'swarm', containerPort: 4001, protocol: 'TCP' },
-            { name: 'swarm-udp', containerPort: 4002, protocol: 'UDP' },
+            { name: 'swarm-udp', containerPort: 4001, protocol: 'UDP' },
             { name: 'api', containerPort: 5001, protocol: 'TCP' },
-            { name: 'ws', containerPort: 8081, protocol: 'TCP' },
             { name: 'http', containerPort: 8080, protocol: 'TCP' },
+            { name: 'ws', containerPort: 8081, protocol: 'TCP' },
           ],
           livenessProbe: {
             tcpSocket: { port: 'swarm' },
@@ -106,12 +105,8 @@ export function deployIpfs({ namespace, provider, domain, additionalDomain }: Ip
           envFrom: [{ configMapRef: { name: cm.metadata.name } }],
           env: [
             {
-              name: 'CLUSTER_ID',
-              valueFrom: { configMapKeyRef: { name: cm.metadata.name, key: 'cluster-id' } },
-            },
-            {
-              name: 'CLUSTER_PRIVATEKEY',
-              valueFrom: { secretKeyRef: { name: secret.metadata.name, key: 'cluster-priv-key' } },
+              name: 'BOOTSTRAP_PEER_ID',
+              valueFrom: { configMapKeyRef: { name: cm.metadata.name, key: 'bootstrap-peer-id' } },
             },
             {
               name: 'CLUSTER_SECRET',
@@ -168,17 +163,45 @@ export function deployIpfs({ namespace, provider, domain, additionalDomain }: Ip
     },
   }
 
+  const svc = new k8s.core.v1.Service(
+    `${name}-svc`,
+    {
+      metadata: {
+        name: `${name}-svc`,
+        namespace: namespace,
+        labels: labels,
+      },
+      spec: {
+        ports: [
+          { port: 4001, protocol: 'TCP', name: 'swarm' },
+          { port: 4001, protocol: 'UDP', name: 'swarm-udp' },
+          { port: 8081, protocol: 'TCP', name: 'ws' },
+          { port: 8080, protocol: 'TCP', name: 'http' },
+          { port: 9094, protocol: 'TCP', name: 'api-http' },
+          { port: 9095, protocol: 'TCP', name: 'proxy-http' },
+          { port: 9096, protocol: 'TCP', name: 'cluster-swarm' },
+        ],
+        selector: labels,
+        type: 'ClusterIP',
+      },
+    },
+    { provider, deleteBeforeReplace: true }
+  )
+
   new k8s.apps.v1.StatefulSet(
     name,
     {
       metadata: {
         name,
         namespace: namespace,
-        annotations: { 'pulumi.com/skipAwait': 'true' },
+        annotations: {
+          'pulumi.com/patchForce': 'true',
+          'pulumi.com/skipAwait': 'true',
+        },
       },
       spec: {
         selector: { matchLabels: labels },
-        serviceName: `${name}-svc`,
+        serviceName: svc.metadata.name,
         replicas: 3,
         podManagementPolicy: 'Parallel',
         updateStrategy: {
@@ -189,10 +212,6 @@ export function deployIpfs({ namespace, provider, domain, additionalDomain }: Ip
           {
             metadata: {
               name: 'cluster-storage',
-              annotations: {
-                'ebs.csi.aws.com/iops': '3000',
-                'ebs.csi.aws.com/throughput': '125',
-              },
             },
             spec: {
               accessModes: ['ReadWriteOnce'],
@@ -205,10 +224,6 @@ export function deployIpfs({ namespace, provider, domain, additionalDomain }: Ip
           {
             metadata: {
               name: 'ipfs-storage',
-              annotations: {
-                'ebs.csi.aws.com/iops': '3000',
-                'ebs.csi.aws.com/throughput': '125',
-              },
             },
             spec: {
               accessModes: ['ReadWriteOnce'],
@@ -222,31 +237,6 @@ export function deployIpfs({ namespace, provider, domain, additionalDomain }: Ip
       },
     },
     { provider }
-  )
-
-  const svc = new k8s.core.v1.Service(
-    `${name}-svc`,
-    {
-      metadata: {
-        name: `${name}-svc`,
-        namespace: namespace,
-        labels: labels,
-      },
-      spec: {
-        ports: [
-          { port: 4001, name: 'swarm' },
-          { port: 4002, name: 'swarm-udp' },
-          { port: 8081, name: 'ws' },
-          { port: 8080, name: 'http' },
-          { port: 9094, name: 'api-http' },
-          { port: 9095, name: 'proxy-http' },
-          { port: 9096, name: 'cluster-swarm' },
-        ],
-        selector: labels,
-        type: 'ClusterIP',
-      },
-    },
-    { provider, deleteBeforeReplace: true }
   )
 
   const secretName = `${name}-cert-secret`
