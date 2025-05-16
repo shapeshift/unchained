@@ -726,7 +726,6 @@ commands:
             echo 'export ADDITIONAL_ROOT_DOMAIN_NAME=$<< parameters.organization >>_ADDITIONAL_ROOT_DOMAIN_NAME' >> $BASH_ENV
             echo 'export PULUMI_ACCESS_TOKEN=$<< parameters.organization >>_PULUMI_ACCESS_TOKEN' >> $BASH_ENV
             echo 'export IPFS_CLUSTER_SECRET=$IPFS_CLUSTER_SECRET' >> $BASH_ENV
-            echo 'export IPFS_CLUSTER_PRIV_KEY=$IPFS_CLUSTER_PRIV_KEY' >> $BASH_ENV
       - run:
           name: install tools
           command: |
