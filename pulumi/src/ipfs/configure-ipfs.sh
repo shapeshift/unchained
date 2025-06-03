@@ -24,6 +24,7 @@ ipfs config --json Internal.Bitswap.EngineTaskWorkerCount 500
 ipfs config --json Internal.Bitswap.MaxOutstandingBytesPerPeer 1048576
 ipfs config --json Internal.Bitswap.TaskWorkerCount 500
 ipfs config --json Datastore.BloomFilterSize 1048576
+ipfs config --json Peering.Peers '[{ "ID": "Qma8ddFEQWEU8ijWvdxXm3nxU7oHsRtCykAaVz8WUYhiKn", "Addrs": ["/dnsaddr/bitswap.pinata.cloud"] }]'
 ipfs config Datastore.StorageMax 100GB
 
 chown -R "$user" /data/ipfs

@@ -481,8 +481,6 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 250m
-    api-memory-limit: 250Mi
 
   - &polygon
     assetName: polygon
