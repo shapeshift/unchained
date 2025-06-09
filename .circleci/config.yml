@@ -202,12 +202,12 @@ aliases:
     service-memory-limit-1: 32Gi
     service-storage-size-1: 1500Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v6.0.2
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v6.0.3
     service-cpu-limit-2: "2"
     service-memory-limit-2: 16Gi
     service-storage-size-2: 600Gi
     service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:4a7fdb5
+    service-image-3: shapeshiftdao/unchained-blockbook:bb02eb5
     service-cpu-limit-3: "2"
     service-memory-limit-3: 12Gi
     service-storage-size-3: 500Gi
@@ -363,7 +363,7 @@ aliases:
     api-memory-limit: 1Gi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-3.5.6
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-3.6.1
     service-cpu-limit-1: "2"
     service-memory-limit-1: 12Gi
     service-storage-size-1: 1250Gi
@@ -373,7 +373,7 @@ aliases:
     service-memory-limit-2: 6Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: registry.gitlab.com/thorchain/midgard:2.32.1
+    service-image-3: registry.gitlab.com/thorchain/midgard:2.32.4
     service-cpu-limit-3: "2"
     service-memory-limit-3: 2Gi
     service-storage-size-3: 500Gi
@@ -481,8 +481,6 @@ aliases:
     rpc-api-key: $NOW_NODES_API_KEY_DEV
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 250m
-    api-memory-limit: 250Mi
 
   - &polygon
     assetName: polygon
@@ -529,7 +527,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.31.10
+    service-image-1: nethermind/nethermind:1.31.11
     service-cpu-limit-1: "2"
     service-memory-limit-1: 8Gi
     service-storage-size-1: 750Gi
@@ -602,12 +600,12 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101503.4
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101511.0
     service-cpu-limit-1: "4"
     service-memory-limit-1: 48Gi
     service-storage-size-1: 4000Gi
     service-name-2: op-node
-    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.2
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.3
     service-cpu-limit-2: "2"
     service-memory-limit-2: 4Gi
     service-storage-size-2: 1Gi
