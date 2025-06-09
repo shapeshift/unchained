@@ -280,6 +280,9 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
       metadata: {
         namespace: namespace,
         labels: labels,
+        annotations: {
+          'pulumi.com/patchForce': 'true',
+        },
       },
       spec: {
         selector: { matchLabels: labels },
