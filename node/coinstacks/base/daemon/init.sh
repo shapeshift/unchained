@@ -1,49 +1,36 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
-apk add bash curl jq wget
+apt update && apt install -y wget zstd curl jq
 
 DATA_DIR=/data
-CHAINDATA_DIR=$DATA_DIR/geth/chaindata
+CHAINDATA_DIR=$DATA_DIR/db
 
-if [ ! -f "$DATA_DIR/genesis.json" ]; then
-  wget -O /data/genesis.json https://raw.githubusercontent.com/base-org/node/main/mainnet/genesis-l2.json
-fi
-
-if [ -n "$SNAPSHOT" ] && [ ! -d "$CHAINDATA_DIR" ]; then
-  wget -c $SNAPSHOT -O - | tar -xzvf - --strip-components 3 -C $DATA_DIR
+if [[ -n $SNAPSHOT && ! -d "$CHAINDATA_DIR" ]]; then
+  wget -c $SNAPSHOT -O - | zstd -d | tar -xvf - --strip-components=3 -C $DATA_DIR
 fi
 
 start() {
-  geth \
-    --syncmode full \
+  op-reth node \
+    -vvv \
     --datadir $DATA_DIR \
     --authrpc.jwtsecret /jwt.hex \
     --authrpc.port 8551 \
     --http \
     --http.addr 0.0.0.0 \
     --http.port 8545 \
-    --http.api eth,net,web3,debug,txpool,engine \
-    --http.vhosts "*" \
+    --http.api eth,net,debug,txpool \
     --http.corsdomain "*" \
     --ws \
     --ws.addr 0.0.0.0 \
     --ws.port 8546 \
-    --ws.api eth,net,web3,debug,txpool,engine \
+    --ws.api eth,net,debug,txpool \
     --ws.origins "*" \
-    --rollup.disabletxpoolgossip=true \
-    --rollup.sequencerhttp https://mainnet-sequencer.base.org \
-    --rollup.halt major \
-    --op-network base-mainnet \
-    --state.scheme hash \
-    --history.transactions 0 \
-    --cache 20480 \
-    --cache.database 20 \
-    --cache.gc 12 \
-    --cache.snapshot 24 \
-    --cache.trie 44 \
-    --maxpeers 100 &
+    --chain base \
+    --rollup.disable-tx-pool-gossip \
+    --rollup.sequencer-http https://mainnet-sequencer.base.org \
+    --max-outbound-peers=100 &
   PID="$!"
 }
 

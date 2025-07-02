@@ -18,7 +18,7 @@ start() {
     --l1.rpckind debug_geth \
     --l2 http://localhost:8551 \
     --l2.jwt-secret /jwt.hex \
-    --l2.enginekind geth \
+    --l2.enginekind reth \
     --rollup.load-protocol-versions=true \
     --syncmode=execution-layer \
     --verifier.l1-confs 4 \
