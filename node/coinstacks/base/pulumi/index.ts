@@ -15,7 +15,7 @@ export = async (): Promise<Outputs> => {
       case 'daemon':
         return {
           ...service,
-          env: { SNAPSHOT: 'https://mainnet-full-snapshots.base.org/base-mainnet-full-1714543184.tar.gz' },
+          env: { SNAPSHOT: 'https://mainnet-reth-archive-snapshots.base.org/base-mainnet-reth-1749714759.tar.zst' },
           ports: {
             'daemon-rpc': { port: 8545 },
             'daemon-ws': { port: 8546, pathPrefix: '/websocket', stripPathPrefix: true },
