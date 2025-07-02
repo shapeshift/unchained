@@ -165,7 +165,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/mayachain/mayanode:mainnet-1.121.0
+    service-image-1: registry.gitlab.com/mayachain/mayanode:mainnet-1.122.0
     service-cpu-limit-1: "2"
     service-memory-limit-1: 12Gi
     service-storage-size-1: 1000Gi
