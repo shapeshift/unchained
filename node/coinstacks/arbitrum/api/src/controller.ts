@@ -29,10 +29,10 @@ export const logger = new Logger({
 
 const httpURL = `${INDEXER_URL}/api=${INDEXER_API_KEY}`
 const wsURL = `${INDEXER_WS_URL}/api=${INDEXER_API_KEY}`
-const blockbook = new Blockbook({ httpURL, wsURL, logger })
+const rpcUrl = RPC_API_KEY ? `${RPC_URL}/api=${RPC_API_KEY}` : RPC_URL
 
-const url = RPC_API_KEY ? `${RPC_URL}/api=${RPC_API_KEY}` : RPC_URL
-const provider = new ethers.providers.JsonRpcProvider({ url })
+const blockbook = new Blockbook({ httpURL, wsURL, logger })
+const provider = new ethers.providers.JsonRpcProvider({ url: rpcUrl })
 
 export const gasOracle = new GasOracle({ logger, provider, coinstack: 'arbitrum' })
 
@@ -42,8 +42,7 @@ export const service = new Service({
   explorerApiUrl: new URL(`https://api.etherscan.io/v2/api?chainid=42161&apikey=${ETHERSCAN_API_KEY}`),
   provider,
   logger,
-  rpcUrl: RPC_URL,
-  rpcApiKey: RPC_API_KEY,
+  rpcUrl,
 })
 
 // assign service to be used for all instances of EVM
