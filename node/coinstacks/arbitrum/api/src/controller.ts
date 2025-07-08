@@ -27,9 +27,13 @@ export const logger = new Logger({
   level: process.env.LOG_LEVEL,
 })
 
-const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL, apiKey: INDEXER_API_KEY, logger })
-const headers = RPC_API_KEY ? { 'api-key': RPC_API_KEY } : undefined
-const provider = new ethers.providers.JsonRpcProvider({ url: RPC_URL, headers })
+const httpURL = `${INDEXER_URL}/api=${INDEXER_API_KEY}`
+const wsURL = `${INDEXER_WS_URL}/api=${INDEXER_API_KEY}`
+const blockbook = new Blockbook({ httpURL, wsURL, logger })
+
+const url = RPC_API_KEY ? `${RPC_URL}/api=${RPC_API_KEY}` : RPC_URL
+const provider = new ethers.providers.JsonRpcProvider({ url })
+
 export const gasOracle = new GasOracle({ logger, provider, coinstack: 'arbitrum' })
 
 export const service = new Service({

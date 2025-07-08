@@ -89,8 +89,7 @@ const transactionHandler: TransactionHandler<BlockbookTx, evm.Tx> = async (block
 
 const registry = new Registry({ addressFormatter: evm.formatAddress, blockHandler, transactionHandler })
 
-const blockbook = new WebsocketClient(INDEXER_WS_URL, {
-  apiKey: INDEXER_API_KEY,
+const blockbook = new WebsocketClient(`${INDEXER_WS_URL}/api=${INDEXER_API_KEY}`, {
   blockHandler: [registry.onBlock.bind(registry), gasOracle.onBlock.bind(gasOracle)],
   transactionHandler: registry.onTransaction.bind(registry),
 })
