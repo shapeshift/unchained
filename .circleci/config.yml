@@ -600,7 +600,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ghcr.io/paradigmxyz/op-reth:v1.5.0
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101511.0
     service-cpu-limit-1: "4"
     service-memory-limit-1: 48Gi
     service-storage-size-1: 4000Gi
@@ -627,6 +627,21 @@ aliases:
     api-cpu-limit: 250m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
+    service-name-1: daemon
+    service-image-1: ghcr.io/paradigmxyz/op-reth:v1.5.0
+    service-cpu-limit-1: "8"
+    service-memory-limit-1: 72Gi
+    service-storage-size-1: 4000Gi
+    service-name-2: op-node
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.4
+    service-cpu-limit-2: "2"
+    service-memory-limit-2: 4Gi
+    service-storage-size-2: 1Gi
+    service-name-3:
+    service-image-3:
+    service-cpu-limit-3:
+    service-memory-limit-3:
+    service-storage-size-3:
 
   - &solana
     assetName: solana
