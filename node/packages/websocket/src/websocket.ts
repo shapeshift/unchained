@@ -21,6 +21,7 @@ export interface Args {
 export interface Options {
   pingInterval?: number
   retryAttempts?: number
+  resetInterval?: number
 }
 
 export abstract class WebsocketClient {
@@ -34,6 +35,7 @@ export abstract class WebsocketClient {
 
   protected readonly pingInterval: number
   protected readonly retryAttempts: number
+  protected readonly resetInterval: number
 
   protected abstract onOpen(): void
   protected abstract onMessage(message: WebSocket.MessageEvent): Promise<void>
@@ -47,6 +49,7 @@ export abstract class WebsocketClient {
 
     this.pingInterval = opts?.pingInterval ?? 10000
     this.retryAttempts = opts?.retryAttempts ?? MAX_RETRY_ATTEMPTS
+    this.resetInterval = opts?.resetInterval ?? RESET_INTERVAL
   }
 
   protected initialize(): void {
@@ -95,10 +98,12 @@ export abstract class WebsocketClient {
   }
 
   protected reset(): void {
+    if (this.resetInterval === 0) return
+
     this.resetTimeout && clearTimeout(this.resetTimeout)
     this.resetTimeout = setTimeout(() => {
       this.logger.debug({ fn: 'reset' }, 'reset websocket')
       this.socket.terminate()
-    }, RESET_INTERVAL)
+    }, this.resetInterval)
   }
 }

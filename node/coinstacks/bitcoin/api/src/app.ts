@@ -73,11 +73,16 @@ const transactionHandler: TransactionHandler<BlockbookTx, utxo.Tx> = async (bloc
 
 const registry = new Registry({ addressFormatter: formatAddress, blockHandler, transactionHandler })
 
-const blockbook = new WebsocketClient(INDEXER_WS_URL, {
-  apiKey: INDEXER_API_KEY,
-  blockHandler: registry.onBlock.bind(registry),
-  transactionHandler: registry.onTransaction.bind(registry),
-})
+const wsUrl = INDEXER_API_KEY ? `${INDEXER_WS_URL}/api=${INDEXER_API_KEY}` : INDEXER_WS_URL
+
+const blockbook = new WebsocketClient(
+  wsUrl,
+  {
+    blockHandler: registry.onBlock.bind(registry),
+    transactionHandler: registry.onTransaction.bind(registry),
+  },
+  { resetInterval: 15 * 60 * 1000 } // 15 minutes
+)
 
 const server = app.listen(PORT, () => logger.info('Server started'))
 const wsServer = new Server({ server })
