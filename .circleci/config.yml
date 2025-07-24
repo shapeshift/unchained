@@ -173,8 +173,11 @@ aliases:
     <<: *bitcoin
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-api-key: $NOW_NODES_API_KEY_DEV
-    rpc-api-key: $NOW_NODES_API_KEY_DEV
+    indexer-url: https://gateway.liquify.com
+    indexer-ws-url: wss://gateway.liquify.com
+    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_BTC
+    rpc-url: https://gateway.liquify.com
+    rpc-api-key: $LIQUIFY_RPC_API_KEY_BTC
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 250m
@@ -224,8 +227,8 @@ aliases:
     <<: *ethereum
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://gateway-usa.liquify.com
-    indexer-ws-url: wss://gateway-usa.liquify.com
+    indexer-url: https://gateway.liquify.com
+    indexer-ws-url: wss://gateway.liquify.com
     indexer-api-key: $LIQUIFY_INDEXER_API_KEY_ETH
     rpc-url: https://gateway.liquify.com
     rpc-api-key: $LIQUIFY_RPC_API_KEY_ETH
@@ -575,8 +578,8 @@ aliases:
     <<: *arbitrum
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://gateway-usa.liquify.com
-    indexer-ws-url: wss://gateway-usa.liquify.com
+    indexer-url: https://gateway.liquify.com
+    indexer-ws-url: wss://gateway.liquify.com
     indexer-api-key: $LIQUIFY_INDEXER_API_KEY_ARB
     rpc-url: https://gateway.liquify.com
     rpc-api-key: $LIQUIFY_RPC_API_KEY_ARB
