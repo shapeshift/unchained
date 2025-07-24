@@ -27,8 +27,8 @@ export const logger = new Logger({
   level: process.env.LOG_LEVEL,
 })
 
-const httpURL = `${INDEXER_URL}/api=${INDEXER_API_KEY}`
-const wsURL = `${INDEXER_WS_URL}/api=${INDEXER_API_KEY}`
+const httpURL = INDEXER_API_KEY ? `${INDEXER_URL}/api=${INDEXER_API_KEY}` : INDEXER_URL
+const wsURL = INDEXER_API_KEY ? `${INDEXER_WS_URL}/api=${INDEXER_API_KEY}` : INDEXER_WS_URL
 const rpcUrl = RPC_API_KEY ? `${RPC_URL}/api=${RPC_API_KEY}` : RPC_URL
 
 const blockbook = new Blockbook({ httpURL, wsURL, logger })
