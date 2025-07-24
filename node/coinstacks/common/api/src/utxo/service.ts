@@ -1,4 +1,5 @@
 import axios from 'axios'
+import BN from 'bignumber.js'
 import type { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import type { AddressFormatter, BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
 import { ApiError } from '../'
@@ -183,7 +184,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       return Object.entries(blockTimes).reduce<NetworkFees>((prev, [key, val], index) => {
         const networkFee: NetworkFee = {
           blocksUntilConfirmation: val,
-          satsPerKiloByte: Number(result[index]) * 100000000,
+          satsPerKiloByte: new BN(result[index]).times(100000000).toNumber(),
         }
         return { ...prev, [key]: networkFee }
       }, {})
