@@ -173,8 +173,11 @@ aliases:
     <<: *bitcoin
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-api-key: $NOW_NODES_API_KEY_DEV
-    rpc-api-key: $NOW_NODES_API_KEY_DEV
+    indexer-url: https://gateway.liquify.com
+    indexer-ws-url: wss://gateway.liquify.com
+    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_BTC
+    rpc-url: https://gateway.liquify.com
+    rpc-api-key: $LIQUIFY_RPC_API_KEY_BTC
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 250m
@@ -224,11 +227,11 @@ aliases:
     <<: *ethereum
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://eth-blockbook.nownodes.io
-    indexer-ws-url: wss://eth-blockbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY_DEV
-    rpc-url: https://eth.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY_DEV
+    indexer-url: https://gateway.liquify.com
+    indexer-ws-url: wss://gateway.liquify.com
+    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_ETH
+    rpc-url: https://gateway.liquify.com
+    rpc-api-key: $LIQUIFY_RPC_API_KEY_ETH
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 250m
@@ -363,7 +366,7 @@ aliases:
     api-memory-limit: 1Gi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-3.7.0
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-3.8.0
     service-cpu-limit-1: "2"
     service-memory-limit-1: 12Gi
     service-storage-size-1: 1250Gi
@@ -373,7 +376,7 @@ aliases:
     service-memory-limit-2: 6Gi
     service-storage-size-2: 500Gi
     service-name-3: indexer
-    service-image-3: registry.gitlab.com/thorchain/midgard:2.32.6
+    service-image-3: registry.gitlab.com/thorchain/midgard:2.32.7
     service-cpu-limit-3: "2"
     service-memory-limit-3: 2Gi
     service-storage-size-3: 500Gi
@@ -527,12 +530,12 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.32.2
+    service-image-1: nethermind/nethermind:1.32.3
     service-cpu-limit-1: "2"
     service-memory-limit-1: 8Gi
     service-storage-size-1: 750Gi
     service-name-2: daemon-beacon
-    service-image-2: sigp/lighthouse:v7.0.1
+    service-image-2: sigp/lighthouse:v7.1.0
     service-cpu-limit-2: "2"
     service-memory-limit-2: 6Gi
     service-storage-size-2: 250Gi
@@ -575,11 +578,11 @@ aliases:
     <<: *arbitrum
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://arb-blockbook.nownodes.io
-    indexer-ws-url: wss://arb-blockbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY_DEV
-    rpc-url: https://arbitrum.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY_DEV
+    indexer-url: https://gateway.liquify.com
+    indexer-ws-url: wss://gateway.liquify.com
+    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_ARB
+    rpc-url: https://gateway.liquify.com
+    rpc-api-key: $LIQUIFY_RPC_API_KEY_ARB
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 500m
@@ -600,12 +603,12 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ghcr.io/paradigmxyz/op-reth:v1.5.0
+    service-image-1: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:v1.101511.1
     service-cpu-limit-1: "4"
     service-memory-limit-1: 48Gi
     service-storage-size-1: 4000Gi
     service-name-2: op-node
-    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.4
+    service-image-2: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:v1.13.5
     service-cpu-limit-2: "2"
     service-memory-limit-2: 4Gi
     service-storage-size-2: 1Gi
@@ -627,6 +630,16 @@ aliases:
     api-cpu-limit: 250m
     api-memory-limit: 250Mi
     stateful-service-replicas: 1
+    service-name-1: daemon
+    service-image-1: ghcr.io/paradigmxyz/op-reth:v1.6.0
+    service-cpu-limit-1: "8"
+    service-memory-limit-1: 72Gi
+    service-storage-size-1: 4000Gi
+    service-name-3:
+    service-image-3:
+    service-cpu-limit-3:
+    service-memory-limit-3:
+    service-storage-size-3:
 
   - &solana
     assetName: solana
