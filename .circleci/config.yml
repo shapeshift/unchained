@@ -170,15 +170,15 @@ aliases:
     service-memory-limit-1: 12Gi
     service-storage-size-1: 1000Gi
     service-name-2: timescaledb
-    service-image-2: timescale/timescaledb:2.13.0-pg15
+    service-image-2: timescale/timescaledb:2.20.2-pg17
     service-cpu-limit-2: "2"
     service-memory-limit-2: 6Gi
-    service-storage-size-2: 50Gi
+    service-storage-size-2: 100Gi
     service-name-3: indexer
     service-image-3: registry.gitlab.com/mayachain/midgard:2.13.0
     service-cpu-limit-3: "2"
     service-memory-limit-3: 2Gi
-    service-storage-size-3: 50Gi
+    service-storage-size-3: 100Gi
 
   - &mayachain-dev
     <<: *mayachain
