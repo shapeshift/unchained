@@ -3,7 +3,7 @@ import type { Logger } from '@shapeshiftoss/logger'
 import axios, { AxiosError } from 'axios'
 import BigNumber from 'bignumber.js'
 import { ethers } from 'ethers'
-import type { BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
+import type { BadRequestError, BaseAPI, EstimateGasBody, RPCRequest, RPCResponse, SendTxBody } from '../'
 import { ApiError } from '../'
 import { createAxiosRetry, exponentialDelay, handleError, validatePageSize } from '../utils'
 import type {
@@ -270,7 +270,9 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     }
   }
 
-  async estimateGas(data: string, from: string, to: string, value: string): Promise<GasEstimate> {
+  async estimateGas(body: EstimateGasBody): Promise<GasEstimate> {
+    const { data, from, to, value } = body
+
     try {
       const tx: ethers.providers.TransactionRequest = { data, from, to, value: ethers.utils.parseUnits(value, 'wei') }
       const gasLimit = await this.provider.estimateGas(tx)
