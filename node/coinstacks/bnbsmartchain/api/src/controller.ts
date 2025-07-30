@@ -1,8 +1,8 @@
 import { ethers } from 'ethers'
-import { Example, Get, Query, Response, Route, Tags } from 'tsoa'
+import { Body, Example, Get, Post, Query, Response, Route, Tags } from 'tsoa'
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
-import { BaseAPI, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
+import { BaseAPI, EstimateGasBody, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { API, GasEstimate, GasFees } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { EVM } from '../../../common/api/src/evm/controller'
 import { Service } from '../../../common/api/src/evm/service'
@@ -67,13 +67,35 @@ export class BNBSmartChain extends EVM implements BaseAPI, API {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/estimate')
-  async estimateGas(
+  async getGasEstimate(
     @Query() data: string,
     @Query() from: string,
     @Query() to: string,
     @Query() value: string
   ): Promise<GasEstimate> {
-    return service.estimateGas(data, from, to, value)
+    return service.estimateGas({ data, from, to, value })
+  }
+
+  /**
+   * Estimate gas cost of a transaction
+   *
+   * @param {EstimateGasBody} body transaction data to estimate gas cost
+   *
+   * @returns {Promise<GasEstimate>} estimated gas cost
+   *
+   * @example body {
+   *    "data": "0x",
+   *    "from": "0x0000000000000000000000000000000000000000",
+   *    "to": "0xC480394241c76F3993ec5D121ce4F198f7844443",
+   *    "value": "1337"
+   * }
+   */
+  @Example<GasEstimate>({ gasLimit: '21000' })
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Post('/gas/estimate')
+  async estimateGas(@Body() body: EstimateGasBody): Promise<GasEstimate> {
+    return service.estimateGas(body)
   }
 
   /**

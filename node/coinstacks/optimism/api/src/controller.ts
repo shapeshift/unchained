@@ -1,10 +1,10 @@
 import { serialize } from '@ethersproject/transactions'
 import { ethers, Contract, BigNumber } from 'ethers'
-import { Example, Get, Query, Response, Route, Tags } from 'tsoa'
+import { Body, Example, Get, Post, Query, Response, Route, Tags } from 'tsoa'
 import BN from 'bignumber.js'
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
-import { BaseAPI, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
+import { BaseAPI, EstimateGasBody, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { API, GAS_PRICE_ORACLE_ABI } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { EVM } from '../../../common/api/src/evm/controller'
 import { Service } from '../../../common/api/src/evm/service'
@@ -76,14 +76,53 @@ export class Optimism extends EVM implements BaseAPI, API {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/estimate')
-  async estimateGas(
+  async getEstimateGas(
     @Query() data: string,
     @Query() from: string,
     @Query() to: string,
     @Query() value: string
   ): Promise<OptimismGasEstimate> {
     // l2 gas limit
-    const { gasLimit } = await service.estimateGas(data, from, to, value)
+    const { gasLimit } = await service.estimateGas({ data, from, to, value })
+
+    // l1 gas limit
+    const unsignedTxHash = serialize({
+      data,
+      to,
+      value: ethers.utils.parseUnits(value, 'wei'),
+      gasLimit: BigNumber.from(gasLimit),
+      chainId: CHAIN_ID[NETWORK as string],
+      nonce: await provider.getTransactionCount(from),
+    })
+
+    const l1GasLimit = ((await gpo.getL1GasUsed(unsignedTxHash)) as BigNumber).toString()
+
+    return { gasLimit, l1GasLimit }
+  }
+
+  /**
+   * Estimate gas cost of a transaction
+   *
+   * @param {EstimateGasBody} body transaction data to estimate gas cost
+   *
+   * @returns {Promise<GasEstimate>} estimated gas cost
+   *
+   * @example body {
+   *    "data": "0x",
+   *    "from": "0x0000000000000000000000000000000000000000",
+   *    "to": "0x15E03a18349cA885482F59935Af48C5fFbAb8DE1",
+   *    "value": "1337"
+   * }
+   */
+  @Example<OptimismGasEstimate>({ gasLimit: '21000', l1GasLimit: '1664' })
+  @Response<ValidationError>(422, 'Validation Error')
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Post('/gas/estimate')
+  async estimateGas(@Body() body: EstimateGasBody): Promise<OptimismGasEstimate> {
+    const { data, from, to, value } = body
+
+    // l2 gas limit
+    const { gasLimit } = await service.estimateGas(body)
 
     // l1 gas limit
     const unsignedTxHash = serialize({
