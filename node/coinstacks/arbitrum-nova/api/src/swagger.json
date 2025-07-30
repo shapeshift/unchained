@@ -463,6 +463,31 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"EstimateGasBody": {
+				"description": "Contains the transaction data to estimate gas cost",
+				"properties": {
+					"data": {
+						"type": "string"
+					},
+					"from": {
+						"type": "string"
+					},
+					"to": {
+						"type": "string"
+					},
+					"value": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"data",
+					"from",
+					"to",
+					"value"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"Fees": {
 				"description": "Contains info about legacy and/or EIP-1559 fees",
 				"properties": {
@@ -1061,7 +1086,7 @@
 		},
 		"/api/v1/gas/estimate": {
 			"get": {
-				"operationId": "EstimateGas",
+				"operationId": "GetGasEstimate",
 				"responses": {
 					"200": {
 						"description": "estimated gas cost",
@@ -1148,6 +1173,72 @@
 						"example": "1337"
 					}
 				]
+			},
+			"post": {
+				"operationId": "EstimateGas",
+				"responses": {
+					"200": {
+						"description": "estimated gas cost",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GasEstimate"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"gasLimit": "30641"
+										}
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Estimate gas cost of a transaction",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"description": "transaction data to estimate gas cost",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/EstimateGasBody",
+								"description": "transaction data to estimate gas cost"
+							},
+							"example": {
+								"data": "0x",
+								"from": "0x0000000000000000000000000000000000000000",
+								"to": "0x6e249a692314bceb8ac43b296262df1800915bf4",
+								"value": "1337"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/api/v1/gas/fees": {
