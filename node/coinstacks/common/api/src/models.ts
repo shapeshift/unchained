@@ -58,6 +58,16 @@ export interface SendTxBody {
 }
 
 /**
+ * Contains the transaction data to estimate gas cost
+ */
+export interface EstimateGasBody {
+  data: string
+  from: string
+  to: string
+  value: string
+}
+
+/**
  * Contains base transaction details
  */
 export interface BaseTx {
