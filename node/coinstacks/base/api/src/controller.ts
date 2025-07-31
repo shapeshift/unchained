@@ -1,9 +1,19 @@
-import { serialize } from '@ethersproject/transactions'
-import { ethers, Contract, BigNumber } from 'ethers'
-import { Body, Example, Get, Post, Query, Response, Route, Tags } from 'tsoa'
-import BN from 'bignumber.js'
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
+import { BigNumber } from 'bignumber.js'
+import { Body, Example, Get, Post, Response, Route, Tags } from 'tsoa'
+import {
+  createPublicClient,
+  getAddress,
+  getContract,
+  http,
+  isHex,
+  parseUnits,
+  PublicClient,
+  serializeTransaction,
+  toHex,
+} from 'viem'
+import { base } from 'viem/chains'
 import { BaseAPI, EstimateGasBody, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { API, GAS_PRICE_ORACLE_ABI } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { EVM } from '../../../common/api/src/evm/controller'
@@ -28,18 +38,16 @@ export const logger = new Logger({
   level: process.env.LOG_LEVEL,
 })
 
-const CHAIN_ID: Record<string, number> = { mainnet: 8453 }
-const GAS_PRICE_ORACLE_ADDRESS = '0x420000000000000000000000000000000000000F'
+const client = createPublicClient({ chain: base, transport: http(RPC_URL) }) as PublicClient
 
-const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL, logger })
-const provider = new ethers.providers.JsonRpcProvider(RPC_URL)
-export const gasOracle = new GasOracle({ logger, provider, coinstack: 'base' })
+export const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL, logger })
+export const gasOracle = new GasOracle({ logger, client, coinstack: 'base' })
 
 export const service = new Service({
   blockbook,
   gasOracle,
   explorerApiUrl: new URL(`https://api.etherscan.io/v2/api?chainid=8453&apikey=${ETHERSCAN_API_KEY}`),
-  provider,
+  client,
   logger,
   rpcUrl: RPC_URL,
 })
@@ -48,54 +56,11 @@ export const service = new Service({
 EVM.service = service
 
 // gas price oracle contract to query current l1 and l2 values
-const gpo = new Contract(GAS_PRICE_ORACLE_ADDRESS, GAS_PRICE_ORACLE_ABI, provider)
+const gpo = getContract({ address: base.contracts.gasPriceOracle.address, abi: GAS_PRICE_ORACLE_ABI, client: client })
 
 @Route('api/v1')
 @Tags('v1')
 export class Base extends EVM implements BaseAPI, API {
-  /**
-   * Get the estimated gas cost of a transaction
-   *
-   * @param {string} data input data
-   * @param {string} from from address
-   * @param {string} to to address
-   * @param {string} value transaction value in wei
-   *
-   * @returns {Promise<BaseGasEstimate>} estimated gas cost
-   *
-   * @example data "0x"
-   * @example from "0x0000000000000000000000000000000000000000"
-   * @example to "0x15E03a18349cA885482F59935Af48C5fFbAb8DE1"
-   * @example value "1337"
-   */
-  @Example<BaseGasEstimate>({ gasLimit: '21000', l1GasLimit: '1664' })
-  @Response<ValidationError>(422, 'Validation Error')
-  @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('/gas/estimate')
-  async getGasEstimate(
-    @Query() data: string,
-    @Query() from: string,
-    @Query() to: string,
-    @Query() value: string
-  ): Promise<BaseGasEstimate> {
-    // l2 gas limit
-    const { gasLimit } = await service.estimateGas({ data, from, to, value })
-
-    // l1 gas limit
-    const unsignedTxHash = serialize({
-      data,
-      to,
-      value: ethers.utils.parseUnits(value, 'wei'),
-      gasLimit: BigNumber.from(gasLimit),
-      chainId: CHAIN_ID[NETWORK as string],
-      nonce: await provider.getTransactionCount(from),
-    })
-
-    const l1GasLimit = ((await gpo.getL1GasUsed(unsignedTxHash)) as BigNumber).toString()
-
-    return { gasLimit, l1GasLimit }
-  }
-
   /**
    * Estimate gas cost of a transaction
    *
@@ -121,16 +86,17 @@ export class Base extends EVM implements BaseAPI, API {
     const { gasLimit } = await service.estimateGas(body)
 
     // l1 gas limit
-    const unsignedTxHash = serialize({
-      data,
-      to,
-      value: ethers.utils.parseUnits(value, 'wei'),
-      gasLimit: BigNumber.from(gasLimit),
-      chainId: CHAIN_ID[NETWORK as string],
-      nonce: await provider.getTransactionCount(from),
+    const unsignedTxHash = serializeTransaction({
+      data: isHex(data) ? data : toHex(data),
+      to: getAddress(to),
+      value: parseUnits(value, 0),
+      gasLimit: gasLimit,
+      chainId: base.id,
+      nonce: await client.getTransactionCount({ address: getAddress(from) }),
+      type: 'legacy',
     })
 
-    const l1GasLimit = ((await gpo.getL1GasUsed(unsignedTxHash)) as BigNumber).toString()
+    const l1GasLimit = (await gpo.read.getL1GasUsed([unsignedTxHash])).toString()
 
     return { gasLimit, l1GasLimit }
   }
@@ -163,37 +129,37 @@ export class Base extends EVM implements BaseAPI, API {
   @Get('/gas/fees')
   async getGasFees(): Promise<BaseGasFees> {
     const gasFees = await service.getGasFees()
-    const isEcotone = await gpo.isEcotone()
+    const isEcotone = await gpo.read.isEcotone()
 
     // ecotone l1GasPrice = ((l1BaseFee * baseFeeScalar * 16) + (blobBaseFee * baseFeeScalar)) / (16 * 10^decimals)
     if (isEcotone) {
       const [l1BaseFee, baseFeeScalar, blobBaseFee, blobBaseFeeScalar, decimals] = (
         await Promise.all([
-          gpo.l1BaseFee(),
-          gpo.baseFeeScalar(),
-          gpo.blobBaseFeeScalar(),
-          gpo.blobBaseFeeScalar(),
-          gpo.decimals(),
+          gpo.read.l1BaseFee(),
+          gpo.read.baseFeeScalar(),
+          gpo.read.blobBaseFeeScalar(),
+          gpo.read.blobBaseFeeScalar(),
+          gpo.read.decimals(),
         ])
-      ).map((value) => BigNumber.from(value))
+      ).map((value) => BigNumber(value.toString()))
 
-      const scaledBaseFee = l1BaseFee.mul(baseFeeScalar).mul(16)
-      const scaledBlobBaseFee = blobBaseFee.mul(blobBaseFeeScalar)
+      const scaledBaseFee = l1BaseFee.times(baseFeeScalar).times(16)
+      const scaledBlobBaseFee = blobBaseFee.times(blobBaseFeeScalar)
 
-      const l1GasPrice = new BN(scaledBaseFee.add(scaledBlobBaseFee).toString()).div(
-        new BN(16).times(new BN(10).exponentiatedBy(decimals.toString()))
+      const l1GasPrice = BigNumber(scaledBaseFee.plus(scaledBlobBaseFee).toString()).div(
+        BigNumber(16).times(BigNumber(10).exponentiatedBy(decimals.toString()))
       )
 
       return { l1GasPrice: l1GasPrice.toFixed(), ...gasFees }
     }
 
     // legacy l1GasPrice = l1BaseFee * scalar
-    const [l1BaseFee, scalar] = (await Promise.all([gpo.l1BaseFee(), gpo.scalar()])).map((value) =>
-      BigNumber.from(value)
+    const [l1BaseFee, scalar] = (await Promise.all([gpo.read.l1BaseFee(), gpo.read.scalar()])).map((value) =>
+      BigNumber(value.toString())
     )
 
-    const l1GasPrice = l1BaseFee.mul(scalar)
+    const l1GasPrice = l1BaseFee.times(scalar)
 
-    return { l1GasPrice: l1GasPrice.toString(), ...gasFees }
+    return { l1GasPrice: l1GasPrice.toFixed(), ...gasFees }
   }
 }

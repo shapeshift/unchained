@@ -1,7 +1,8 @@
-import { ethers } from 'ethers'
-import { Body, Example, Get, Post, Query, Response, Route, Tags } from 'tsoa'
 import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
+import { Body, Example, Get, Post, Response, Route, Tags } from 'tsoa'
+import { createPublicClient, http } from 'viem'
+import { bsc } from 'viem/chains'
 import { BaseAPI, EstimateGasBody, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { API, GasEstimate, GasFees } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { EVM } from '../../../common/api/src/evm/controller'
@@ -27,16 +28,18 @@ export const logger = new Logger({
   level: process.env.LOG_LEVEL,
 })
 
-const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL, apiKey: INDEXER_API_KEY, logger })
 const headers = RPC_API_KEY ? { 'api-key': RPC_API_KEY } : undefined
-const provider = new ethers.providers.JsonRpcProvider({ url: RPC_URL, headers })
-export const gasOracle = new GasOracle({ logger, provider, coinstack: 'bnbsmartchain' })
+
+const client = createPublicClient({ chain: bsc, transport: http(RPC_URL, { fetchOptions: { headers } }) })
+
+export const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL, apiKey: INDEXER_API_KEY, logger })
+export const gasOracle = new GasOracle({ logger, client, coinstack: 'bnbsmartchain' })
 
 export const service = new Service({
   blockbook,
   gasOracle,
   explorerApiUrl: new URL(`https://api.etherscan.io/v2/api?chainid=56&apikey=${ETHERSCAN_API_KEY}`),
-  provider,
+  client,
   logger,
   rpcUrl: RPC_URL,
   rpcApiKey: RPC_API_KEY,
@@ -48,34 +51,6 @@ EVM.service = service
 @Route('api/v1')
 @Tags('v1')
 export class BNBSmartChain extends EVM implements BaseAPI, API {
-  /**
-   * Get the estimated gas cost of a transaction
-   *
-   * @param {string} data input data
-   * @param {string} from from address
-   * @param {string} to to address
-   * @param {string} value transaction value in wei
-   *
-   * @returns {Promise<GasEstimate>} estimated gas cost
-   *
-   * @example data "0x"
-   * @example from "0x0000000000000000000000000000000000000000"
-   * @example to "0xC480394241c76F3993ec5D121ce4F198f7844443"
-   * @example value "1337"
-   */
-  @Example<GasEstimate>({ gasLimit: '21000' })
-  @Response<ValidationError>(422, 'Validation Error')
-  @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('/gas/estimate')
-  async getGasEstimate(
-    @Query() data: string,
-    @Query() from: string,
-    @Query() to: string,
-    @Query() value: string
-  ): Promise<GasEstimate> {
-    return service.estimateGas({ data, from, to, value })
-  }
-
   /**
    * Estimate gas cost of a transaction
    *

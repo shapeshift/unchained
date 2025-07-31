@@ -1,6 +1,4 @@
-import type { JsonFragment } from '@ethersproject/abi/lib/fragments'
-
-export const GAS_PRICE_ORACLE_ABI: Array<JsonFragment> = [
+export const GAS_PRICE_ORACLE_ABI = [
   {
     inputs: [],
     name: 'DECIMALS',
@@ -100,4 +98,4 @@ export const GAS_PRICE_ORACLE_ABI: Array<JsonFragment> = [
     stateMutability: 'view',
     type: 'function',
   },
-]
+] as const
