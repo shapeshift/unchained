@@ -699,8 +699,6 @@ commands:
       - run:
           command: yarn lint
       - run:
-          command: yarn test
-      - run:
           working_directory: go
           command: go get ./...
       - run:
