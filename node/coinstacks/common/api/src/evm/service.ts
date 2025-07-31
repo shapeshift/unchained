@@ -2,7 +2,7 @@ import type { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import type { Logger } from '@shapeshiftoss/logger'
 import axios, { AxiosError } from 'axios'
 import BigNumber from 'bignumber.js'
-import { ethers } from 'ethers'
+import { erc1155Abi, erc721Abi, getAddress, getContract, isHex, parseUnits, PublicClient, toHex } from 'viem'
 import type { BadRequestError, BaseAPI, EstimateGasBody, RPCRequest, RPCResponse, SendTxBody } from '../'
 import { ApiError } from '../'
 import { createAxiosRetry, exponentialDelay, handleError, validatePageSize } from '../utils'
@@ -27,22 +27,20 @@ import type {
   ExplorerInternalTxByAddress,
 } from './types'
 import type { GasOracle } from './gasOracle'
-import { ERC1155_ABI } from './abi/erc1155'
-import { ERC721_ABI } from './abi/erc721'
 
 const axiosNoRetry = axios.create({ timeout: 5000 })
 const axiosWithRetry = createAxiosRetry({}, { timeout: 10000 })
 
 type InternalTxFetchMethod = 'trace_transaction' | 'debug_traceTransaction'
 
-export const formatAddress = (address: string): string => ethers.utils.getAddress(address)
+export const formatAddress = (address: string): string => getAddress(address)
 
 export interface ServiceArgs {
   blockbook: Blockbook
   gasOracle: GasOracle
   explorerApiUrl: URL
   logger: Logger
-  provider: ethers.providers.JsonRpcProvider
+  client: PublicClient
   rpcUrl: string
   rpcApiKey?: string
 }
@@ -52,20 +50,16 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   private readonly gasOracle: GasOracle
   private readonly explorerApiUrl: URL
   private readonly logger: Logger
-  private readonly provider: ethers.providers.JsonRpcProvider
+  private readonly client: PublicClient
   private readonly rpcUrl: string
   private readonly rpcApiKey?: string
-  private readonly abiInterface: Record<TokenType, ethers.utils.Interface> = {
-    erc721: new ethers.utils.Interface(ERC721_ABI),
-    erc1155: new ethers.utils.Interface(ERC1155_ABI),
-  }
 
   constructor(args: ServiceArgs) {
     this.blockbook = args.blockbook
     this.gasOracle = args.gasOracle
     this.explorerApiUrl = args.explorerApiUrl
     this.logger = args.logger.child({ namespace: ['service'] })
-    this.provider = args.provider
+    this.client = args.client
     this.rpcUrl = args.rpcUrl
     this.rpcApiKey = args.rpcApiKey
 
@@ -274,8 +268,12 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     const { data, from, to, value } = body
 
     try {
-      const tx: ethers.providers.TransactionRequest = { data, from, to, value: ethers.utils.parseUnits(value, 'wei') }
-      const gasLimit = await this.provider.estimateGas(tx)
+      const gasLimit = await this.client.estimateGas({
+        account: getAddress(from),
+        to: getAddress(to),
+        data: isHex(data) ? data : toHex(data),
+        value: parseUnits(value, 0),
+      })
       return { gasLimit: gasLimit.toString() }
     } catch (err) {
       throw handleError(err)
@@ -796,14 +794,16 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     }
 
     try {
-      const contract = new ethers.Contract(address, this.abiInterface[type], this.provider)
-
       const uri = (await (() => {
         switch (type) {
           case 'erc721':
-            return contract.tokenURI(id)
+            return getContract({ address: getAddress(address), abi: erc721Abi, client: this.client }).read.tokenURI([
+              BigInt(id),
+            ])
           case 'erc1155':
-            return contract.uri(id)
+            return getContract({ address: getAddress(address), abi: erc1155Abi, client: this.client }).read.uri([
+              BigInt(id),
+            ])
           default:
             throw new Error(`invalid token type: ${type}`)
         }

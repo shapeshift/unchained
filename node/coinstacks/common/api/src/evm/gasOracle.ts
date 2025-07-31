@@ -1,13 +1,12 @@
 import { NewBlock } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
-import { ethers } from 'ethers'
 import { exponentialDelay } from '../utils'
 import { Fees } from './models'
-import { NodeBlock, NodeTransaction } from './types'
+import { Chain, fromHex, Hex, PublicClient, Transport } from 'viem'
 
 export interface GasOracleArgs {
   logger: Logger
-  provider: ethers.providers.JsonRpcProvider
+  client: PublicClient
   coinstack: string
   totalBlocks?: number
 }
@@ -42,7 +41,12 @@ export class GasOracle {
 
   private readonly totalBlocks: number
   private readonly logger: Logger
-  private readonly provider: ethers.providers.JsonRpcProvider
+  private readonly client: PublicClient<
+    Transport,
+    Chain | undefined,
+    undefined,
+    readonly [{ Method: 'eth_baseFee'; Parameters: undefined; ReturnType: Hex }]
+  >
 
   private feesByBlock = new Map<string, BlockFees>()
   private newBlocksQueue: Array<NewBlock> = []
@@ -54,7 +58,7 @@ export class GasOracle {
 
   constructor(args: GasOracleArgs) {
     this.logger = args.logger.child({ namespace: ['gasOracle'] })
-    this.provider = args.provider
+    this.client = args.client
     this.coinstack = args.coinstack
     this.totalBlocks = args.totalBlocks ?? 20
 
@@ -107,7 +111,7 @@ export class GasOracle {
   }
 
   async start() {
-    const { number } = (await this.provider.send('eth_getBlockByNumber', [this.latestBlockTag, false])) as NodeBlock
+    const { number } = await this.client.getBlock({ blockTag: this.latestBlockTag, includeTransactions: false })
 
     const height = Number(number)
     const length = this.totalBlocks
@@ -189,14 +193,12 @@ export class GasOracle {
   private async update(blockNumber: number, blockTag?: BlockTag, retryCount = 0): Promise<void> {
     try {
       const numOrTag = (() => {
-        if (!this.canQueryPendingBlockByHeight && blockTag === 'pending') return blockTag
-        if (this.coinstack === 'avalanche' && blockTag === 'latest') return blockTag
-        return ethers.utils.hexValue(blockNumber)
+        if (!this.canQueryPendingBlockByHeight && blockTag === 'pending') return { blockTag }
+        if (this.coinstack === 'avalanche' && blockTag === 'latest') return { blockTag }
+        return { blockNumber: BigInt(blockNumber) }
       })()
 
-      const block = (await this.provider.send('eth_getBlockByNumber', [numOrTag, true])) as NodeBlock<
-        Array<NodeTransaction>
-      >
+      const block = await this.client.getBlock({ ...numOrTag, includeTransactions: true })
 
       if (!block) {
         if (++retryCount >= 5) throw new Error('block not found')
@@ -207,7 +209,7 @@ export class GasOracle {
       const txFees = block.transactions.reduce<TxFees>(
         (txFees, tx) => {
           // omit non standard tx types that pays no gas
-          if (Number(tx.type) > 2 && Number(tx.gasPrice) === 0) return txFees
+          if ((tx.type === 'eip4844' || tx.type === 'eip7702') && tx.gasPrice === 0n) return txFees
           tx.gasPrice && txFees.gasPrices.push(Number(tx.gasPrice))
           tx.maxPriorityFeePerGas && txFees.maxPriorityFees.push(Number(tx.maxPriorityFeePerGas))
           return txFees
@@ -227,8 +229,8 @@ export class GasOracle {
         switch (this.coinstack) {
           // avalanche exposes baseFeePerGas at a different rpc endpoint
           case 'avalanche': {
-            const baseFee = (await this.provider.send('eth_baseFee', [])) as string
-            this.baseFeePerGas = Number(baseFee).toString()
+            const baseFee = await this.client.request({ method: 'eth_baseFee' })
+            this.baseFeePerGas = fromHex(baseFee, 'bigint').toString()
             break
           }
           default:
@@ -243,7 +245,7 @@ export class GasOracle {
   // sync oracle state by adding any missing blocks and pruning any excess blocks
   private async sync() {
     try {
-      const { number } = (await this.provider.send('eth_getBlockByNumber', [this.latestBlockTag, false])) as NodeBlock
+      const { number } = await this.client.getBlock({ blockTag: this.latestBlockTag, includeTransactions: false })
 
       const length = this.totalBlocks
       const latest = Number(number)
