@@ -363,7 +363,7 @@ aliases:
     api-max-replicas: 4
     api-cpu-limit: "4"
     api-cpu-threshold: 75
-    api-memory-limit: 1Gi
+    api-memory-limit: 2Gi
     stateful-service-replicas: 2
     service-name-1: daemon
     service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-3.9.0
