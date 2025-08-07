@@ -426,11 +426,11 @@ aliases:
     assetName: optimism
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/optimism/pulumi
-    indexer-url: https://optimism-index.nownodes.io
-    indexer-ws-url: wss://optimism-index.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY
-    rpc-url: https://optimism.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY
+    indexer-url: https://gateway.liquify.com
+    indexer-ws-url: wss://gateway.liquify.com
+    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_OP
+    rpc-url: https://gateway.liquify.com
+    rpc-api-key: $LIQUIFY_RPC_API_KEY_ARB_OP
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
@@ -442,11 +442,6 @@ aliases:
     <<: *optimism
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://gateway.liquify.com
-    indexer-ws-url: wss://gateway.liquify.com
-    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_OP
-    rpc-url: https://gateway.liquify.com
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_ARB_OP
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 250m
@@ -557,11 +552,11 @@ aliases:
     assetName: arbitrum
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/arbitrum/pulumi
-    indexer-url: https://arb-blockbook.nownodes.io
-    indexer-ws-url: wss://arb-blockbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY
-    rpc-url: https://arbitrum.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY
+    indexer-url: https://gateway.liquify.com
+    indexer-ws-url: wss://gateway.liquify.com
+    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_ARB
+    rpc-url: https://gateway.liquify.com
+    rpc-api-key: $LIQUIFY_RPC_API_KEY_ARB
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
@@ -573,11 +568,6 @@ aliases:
     <<: *arbitrum
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://gateway.liquify.com
-    indexer-ws-url: wss://gateway.liquify.com
-    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_ARB
-    rpc-url: https://gateway.liquify.com
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_ARB
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 500m
