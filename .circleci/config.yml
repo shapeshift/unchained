@@ -430,7 +430,7 @@ aliases:
     indexer-ws-url: wss://gateway.liquify.com
     indexer-api-key: $LIQUIFY_INDEXER_API_KEY_OP
     rpc-url: https://gateway.liquify.com
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_ARB_OP
+    rpc-api-key: $LIQUIFY_RPC_API_KEY_OP
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
