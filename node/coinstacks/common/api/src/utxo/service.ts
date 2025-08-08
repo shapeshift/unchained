@@ -4,7 +4,7 @@ import type { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import type { AddressFormatter, BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
 import { ApiError } from '../'
 import type { Account, Address, API, NetworkFee, NetworkFees, RawTx, Tx, TxHistory, Utxo } from './models'
-import { handleError, validatePageSize } from '../utils'
+import { handleError, rpcId, validatePageSize } from '../utils'
 import type { Cursor } from './types'
 
 const axiosNoRetry = axios.create({ timeout: 5000 })
@@ -161,7 +161,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     try {
       const request: RPCRequest = {
         jsonrpc: '2.0',
-        id: 'sendrawtransaction',
+        id: rpcId(),
         method: 'sendrawtransaction',
         params: [body.hex],
       }
