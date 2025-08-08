@@ -84,7 +84,7 @@ const blockHandler: BlockHandler<NewBlock, Array<{ addresses: Array<string>; tx:
 
 const transactionHandler: TransactionHandler<BlockbookTx, evm.Tx> = async (blockbookTx) => {
   const tx = IS_LIQUIFY
-    ? await service.handleTransactionWithInternalTrace(blockbookTx, 'debug_traceTransaction')
+    ? await service.handleTransactionWithInternalTrace(blockbookTx, 'trace_transaction')
     : await service.handleTransactionWithInternalTrace(blockbookTx)
 
   const internalAddresses = (tx.internalTxs ?? []).reduce<Array<string>>((prev, tx) => [...prev, tx.to, tx.from], [])
