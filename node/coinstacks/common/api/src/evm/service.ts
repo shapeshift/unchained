@@ -300,7 +300,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     try {
       const request: RPCRequest = {
         jsonrpc: '2.0',
-        id: 'eth_sendRawTransaction',
+        id: Date.now(),
         method: 'eth_sendRawTransaction',
         params: [body.hex],
       }
@@ -335,7 +335,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   ): Promise<Record<string, Array<InternalTx> | undefined>> {
     const request: RPCRequest = {
       jsonrpc: '2.0',
-      id: `debug_traceBlockByHash${blockHash}`,
+      id: Date.now(),
       method: 'debug_traceBlockByHash',
       params: [blockHash, { tracer: 'callTracer' }],
     }
@@ -364,7 +364,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   ): Promise<Record<string, Array<InternalTx> | undefined>> {
     const request: RPCRequest = {
       jsonrpc: '2.0',
-      id: `trace_block${blockHash}`,
+      id: Date.now(),
       method: 'trace_block',
       params: [blockHash],
     }
@@ -482,7 +482,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   private async fetchInternalTxsByTxTrace(txid: string, retryCount = 0): Promise<Array<InternalTx> | undefined> {
     const request: RPCRequest = {
       jsonrpc: '2.0',
-      id: `trace_transaction${txid}`,
+      id: Date.now(),
       method: 'trace_transaction',
       params: [txid],
     }
@@ -506,7 +506,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   private async fetchInternalTxsByTxDebug(txid: string, retryCount = 0): Promise<Array<InternalTx> | undefined> {
     const request: RPCRequest = {
       jsonrpc: '2.0',
-      id: `debug_traceTransaction${txid}`,
+      id: Date.now(),
       method: 'debug_traceTransaction',
       params: [txid, { tracer: 'callTracer' }],
     }

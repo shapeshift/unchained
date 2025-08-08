@@ -66,7 +66,7 @@ app.use(middleware.errorHandler, middleware.notFoundHandler)
 const blockHandler: BlockHandler<NewBlock, Array<{ addresses: Array<string>; tx: evm.Tx }>> = async (block) => {
   const [blockbookTxs, internalTxs] = await Promise.all([
     service.handleBlock(block.hash),
-    service.fetchInternalTxsByBlockDebug(block.hash),
+    IS_LIQUIFY ? service.fetchInternalTxsByBlockTrace(block.hash) : service.fetchInternalTxsByBlockDebug(block.hash),
   ])
 
   const txs = blockbookTxs.map((t) => {
@@ -83,7 +83,10 @@ const blockHandler: BlockHandler<NewBlock, Array<{ addresses: Array<string>; tx:
 }
 
 const transactionHandler: TransactionHandler<BlockbookTx, evm.Tx> = async (blockbookTx) => {
-  const tx = await service.handleTransactionWithInternalTrace(blockbookTx)
+  const tx = IS_LIQUIFY
+    ? await service.handleTransactionWithInternalTrace(blockbookTx, 'debug_traceTransaction')
+    : await service.handleTransactionWithInternalTrace(blockbookTx)
+
   const internalAddresses = (tx.internalTxs ?? []).reduce<Array<string>>((prev, tx) => [...prev, tx.to, tx.from], [])
   const addresses = [...new Set([...getAddresses(blockbookTx), ...internalAddresses])]
 

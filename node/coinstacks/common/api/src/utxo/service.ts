@@ -161,7 +161,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     try {
       const request: RPCRequest = {
         jsonrpc: '2.0',
-        id: 'sendrawtransaction',
+        id: Date.now(),
         method: 'sendrawtransaction',
         params: [body.hex],
       }
