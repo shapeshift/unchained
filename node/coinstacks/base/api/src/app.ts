@@ -18,6 +18,7 @@ import { RegisterRoutes } from './routes'
 
 const PORT = process.env.PORT ?? 3000
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
+const INDEXER_API_KEY = process.env.INDEXER_API_KEY
 
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 
@@ -71,8 +72,8 @@ const transactionHandler: TransactionHandler<BlockbookTx, evm.Tx> = async (block
 
 const registry = new Registry({ addressFormatter, transactionHandler })
 
-const blockbook = new WebsocketClient(INDEXER_WS_URL, {
-  blockHandler: gasOracle.onBlock.bind(gasOracle),
+const blockbook = new WebsocketClient(`${INDEXER_WS_URL}/api=${INDEXER_API_KEY}`, {
+  blockHandler: [gasOracle.onBlock.bind(gasOracle)],
   transactionHandler: registry.onTransaction.bind(registry),
 })
 
