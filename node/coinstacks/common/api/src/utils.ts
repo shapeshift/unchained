@@ -59,3 +59,10 @@ export const createAxiosRetry = (config: RetryConfig, axiosParams?: CreateAxiosD
 
 export const exponentialDelay = async (retryCount: number) =>
   new Promise((resolve) => setTimeout(resolve, axiosRetry.exponentialDelay(retryCount, undefined, 500)))
+
+let _rpcId = Math.floor(Math.random() * 1e6)
+export const rpcId = (): number => {
+  _rpcId = (_rpcId + 1) & 0x7fffffff
+  if (_rpcId === 0) _rpcId = 1
+  return _rpcId
+}

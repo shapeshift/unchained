@@ -24,8 +24,10 @@ import { BaseGasEstimate, BaseGasFees } from './models'
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
 const INDEXER_WS_URL = process.env.INDEXER_WS_URL
+const INDEXER_API_KEY = process.env.INDEXER_API_KEY
 const NETWORK = process.env.NETWORK
 const RPC_URL = process.env.RPC_URL
+const RPC_API_KEY = process.env.RPC_API_KEY
 
 if (!ETHERSCAN_API_KEY) throw new Error('ETHERSCAN_API_KEY env var not set')
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
@@ -38,9 +40,13 @@ export const logger = new Logger({
   level: process.env.LOG_LEVEL,
 })
 
-const client = createPublicClient({ chain: base, transport: http(RPC_URL) }) as PublicClient
+const httpURL = `${INDEXER_URL}/api=${INDEXER_API_KEY}`
+const wsURL = `${INDEXER_WS_URL}/api=${INDEXER_API_KEY}`
+const rpcUrl = `${RPC_URL}/api=${RPC_API_KEY}`
 
-export const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL, logger })
+const client = createPublicClient({ chain: base, transport: http(rpcUrl) }) as PublicClient
+
+export const blockbook = new Blockbook({ httpURL, wsURL, logger })
 export const gasOracle = new GasOracle({ logger, client, coinstack: 'base' })
 
 export const service = new Service({
@@ -49,7 +55,7 @@ export const service = new Service({
   explorerApiUrl: new URL(`https://api.etherscan.io/v2/api?chainid=8453&apikey=${ETHERSCAN_API_KEY}`),
   client,
   logger,
-  rpcUrl: RPC_URL,
+  rpcUrl,
 })
 
 // assign service to be used for all instances of EVM

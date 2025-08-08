@@ -238,7 +238,12 @@ export class GasOracle {
         }
       }
     } catch (err) {
-      this.logger.error(err, { blockNumber, blockTag, retryCount }, 'failed to update')
+      if (++retryCount >= 5) {
+        this.logger.error(err, { blockNumber, blockTag, retryCount }, 'failed to update')
+      } else {
+        await exponentialDelay(retryCount)
+        return this.update(blockNumber, blockTag, retryCount)
+      }
     }
   }
 
