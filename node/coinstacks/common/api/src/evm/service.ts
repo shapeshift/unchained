@@ -5,7 +5,7 @@ import BigNumber from 'bignumber.js'
 import { erc1155Abi, erc721Abi, getAddress, getContract, isHex, parseUnits, PublicClient, toHex } from 'viem'
 import type { BadRequestError, BaseAPI, EstimateGasBody, RPCRequest, RPCResponse, SendTxBody } from '../'
 import { ApiError } from '../'
-import { createAxiosRetry, exponentialDelay, handleError, validatePageSize } from '../utils'
+import { createAxiosRetry, exponentialDelay, handleError, rpcId, validatePageSize } from '../utils'
 import type {
   Account,
   API,
@@ -300,7 +300,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     try {
       const request: RPCRequest = {
         jsonrpc: '2.0',
-        id: Date.now(),
+        id: rpcId(),
         method: 'eth_sendRawTransaction',
         params: [body.hex],
       }
@@ -335,7 +335,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   ): Promise<Record<string, Array<InternalTx> | undefined>> {
     const request: RPCRequest = {
       jsonrpc: '2.0',
-      id: Date.now(),
+      id: rpcId(),
       method: 'debug_traceBlockByHash',
       params: [blockHash, { tracer: 'callTracer' }],
     }
@@ -364,7 +364,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   ): Promise<Record<string, Array<InternalTx> | undefined>> {
     const request: RPCRequest = {
       jsonrpc: '2.0',
-      id: Date.now(),
+      id: rpcId(),
       method: 'trace_block',
       params: [blockHash],
     }
@@ -482,7 +482,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   private async fetchInternalTxsByTxTrace(txid: string, retryCount = 0): Promise<Array<InternalTx> | undefined> {
     const request: RPCRequest = {
       jsonrpc: '2.0',
-      id: Date.now(),
+      id: rpcId(),
       method: 'trace_transaction',
       params: [txid],
     }
@@ -506,7 +506,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   private async fetchInternalTxsByTxDebug(txid: string, retryCount = 0): Promise<Array<InternalTx> | undefined> {
     const request: RPCRequest = {
       jsonrpc: '2.0',
-      id: Date.now(),
+      id: rpcId(),
       method: 'debug_traceTransaction',
       params: [txid, { tracer: 'callTracer' }],
     }
