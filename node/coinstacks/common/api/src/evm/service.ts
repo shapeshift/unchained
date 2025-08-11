@@ -33,7 +33,7 @@ const axiosWithRetry = createAxiosRetry({}, { timeout: 10000 })
 
 type InternalTxFetchMethod = 'trace_transaction' | 'debug_traceTransaction'
 
-export const formatAddress = (address: string): string => getAddress(address)
+export const formatAddress = (address: string | undefined): string => (address ? getAddress(address) : '')
 
 export interface ServiceArgs {
   blockbook: Blockbook
