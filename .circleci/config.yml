@@ -267,11 +267,11 @@ aliases:
     assetName: dogecoin
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/dogecoin/pulumi
-    indexer-url: https://dogebook.nownodes.io
-    indexer-ws-url: wss://dogebook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY
-    rpc-url: https://doge.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY
+    indexer-url: https://gateway.liquify.com
+    indexer-ws-url: wss://gateway.liquify.com
+    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_DOGE
+    rpc-url: https://gateway.liquify.com
+    rpc-api-key: $LIQUIFY_RPC_API_KEY_DOGE
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
@@ -283,11 +283,6 @@ aliases:
     <<: *dogecoin
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://gateway.liquify.com
-    indexer-ws-url: wss://gateway.liquify.com
-    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_DOGE
-    rpc-url: https://gateway.liquify.com
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_DOGE
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 250m
