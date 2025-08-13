@@ -42,7 +42,7 @@ export const createAxiosRetry = (config: RetryConfig, axiosParams?: CreateAxiosD
 
   axiosRetry(axiosWithRetry, {
     shouldResetTimeout: true,
-    retries: config.retries ?? 5,
+    retries: config.retries ?? 3,
     retryDelay: (retryCount, err) => {
       // don't add delay on top of request timeout
       if (err.code === 'ECONNABORTED') return 0
@@ -51,7 +51,8 @@ export const createAxiosRetry = (config: RetryConfig, axiosParams?: CreateAxiosD
     },
     retryCondition: (err) =>
       isNetworkOrIdempotentRequestError(err) ||
-      (!!err.response && err.response.status >= 400 && err.response.status < 600),
+      (err.response && err.response.status > 404 && err.response.status < 600) ||
+      err.code === 'ECONNABORTED',
   })
 
   return axiosWithRetry
