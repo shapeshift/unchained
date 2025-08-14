@@ -18,7 +18,7 @@ export class Blockbook extends Controller {
   wsURL: string
   logger: Logger
 
-  constructor(args: BlockbookArgs = defaultArgs, timeout?: number, retries = 5) {
+  constructor(args: BlockbookArgs = defaultArgs, timeout?: number, retries = 3) {
     super()
     this.logger = args.logger.child({ namespace: ['blockbook'] })
     this.wsURL = args.apiKey ? `${args.wsURL}/${args.apiKey}` : args.wsURL
@@ -42,7 +42,7 @@ export class Blockbook extends Controller {
       },
       retryCondition: (err) =>
         isNetworkOrIdempotentRequestError(err) ||
-        (!!err.response && err.response.status >= 400 && err.response.status < 600) ||
+        (err.response && err.response.status > 404 && err.response.status < 600) ||
         err.code === 'ECONNABORTED',
     })
   }
