@@ -936,9 +936,6 @@ jobs:
       lcd-v1-url:
         type: string
         default: ""
-      grpc-url:
-        type: string
-        default: ""
       rpc-url:
         type: string
       rpc-v1-url:
@@ -957,7 +954,6 @@ jobs:
           command: |
             echo 'export LCD_URL=<< parameters.lcd-url >>' >> $BASH_ENV
             echo 'export LCD_V1_URL=<< parameters.lcd-v1-url >>' >> $BASH_ENV
-            echo 'export GRPC_URL=<< parameters.grpc-url >>' >> $BASH_ENV
             echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
             echo 'export RPC_V1_URL=<< parameters.rpc-v1-url >>' >> $BASH_ENV
             echo 'export WS_URL=<< parameters.ws-url >>' >> $BASH_ENV
