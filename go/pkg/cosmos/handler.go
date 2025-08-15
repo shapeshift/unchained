@@ -44,7 +44,6 @@ type Handler struct {
 
 	// common cosmossdk values
 	HTTPClient   APIClient
-	GRPCClient   APIClient
 	WSClient     *WSClient
 	BlockService *BlockService
 	Denom        string

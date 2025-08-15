@@ -2,7 +2,6 @@ package cosmos
 
 import (
 	"encoding/base64"
-	"strconv"
 
 	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/pkg/errors"
@@ -32,18 +31,4 @@ func (c *HTTPClient) GetEstimateGas(rawTx string) (string, error) {
 	}
 
 	return res.GasInfo.GasUsed, nil
-}
-
-func (c *GRPCClient) GetEstimateGas(rawTx string) (string, error) {
-	txBytes, err := base64.StdEncoding.DecodeString(rawTx)
-	if err != nil {
-		return "", errors.Wrapf(err, "failed to decode rawTx: %s", rawTx)
-	}
-
-	res, err := c.tx.Simulate(c.ctx, &txtypes.SimulateRequest{TxBytes: txBytes})
-	if err != nil {
-		return "", errors.Wrap(err, "failed to estimate gas")
-	}
-
-	return strconv.FormatUint(res.GasInfo.GasUsed, 10), nil
 }
