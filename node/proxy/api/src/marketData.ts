@@ -107,7 +107,6 @@ export class MarketDataWebSocket {
       const parsedData = this.provider.parseMessage(rawData)
 
       if (!parsedData) {
-        this.logger.debug({ rawData }, 'Provider message could not be parsed, skipping')
         return
       }
 
@@ -119,7 +118,6 @@ export class MarketDataWebSocket {
       }
 
       this.broadcastToClients(message)
-      this.logger.debug({ data: parsedData }, 'Forwarded price update to clients')
     } catch (error) {
       this.logger.error(
         {
@@ -208,7 +206,7 @@ export class MarketDataWebSocket {
       this.connect()
     }
 
-    this.logger.info(
+    this.logger.debug(
       {
         clientId,
         requestedAssets,
@@ -230,7 +228,7 @@ export class MarketDataWebSocket {
   private removeClient(clientId: string): void {
     if (this.clients.has(clientId)) {
       this.clients.delete(clientId)
-      this.logger.info({ clientId, totalClients: this.clients.size }, 'Client disconnected from market data')
+      this.logger.debug({ clientId, totalClients: this.clients.size }, 'Client disconnected from market data')
 
       // Disconnect from provider if no more clients
       if (this.clients.size === 0) {
