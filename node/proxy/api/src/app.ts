@@ -7,6 +7,7 @@ import { RegisterRoutes } from './routes'
 import { CoinGecko } from './coingecko'
 import { Zerion } from './zerion'
 import { Zrx } from './zrx'
+import { MarketDataWebSocket } from './marketData'
 
 const PORT = process.env.PORT ?? 3000
 
@@ -50,4 +51,25 @@ app.get('/', async (_, res) => {
 
 app.use(middleware.errorHandler, middleware.notFoundHandler)
 
-app.listen(PORT, () => logger.info('Server started'))
+const server = app.listen(PORT, () => logger.info('Server started'))
+
+const marketDataWS = new MarketDataWebSocket(logger, process.env.MARKET_DATA_PROVIDER, process.env.MARKET_DATA_API_KEY)
+marketDataWS.setupWebSocketServer(server)
+
+process.on('SIGTERM', () => {
+  logger.info('Received SIGTERM, shutting down gracefully')
+  marketDataWS.disconnect()
+  server.close(() => {
+    logger.info('Server closed')
+    process.exit(0)
+  })
+})
+
+process.on('SIGINT', () => {
+  logger.info('Received SIGINT, shutting down gracefully')
+  marketDataWS.disconnect()
+  server.close(() => {
+    logger.info('Server closed')
+    process.exit(0)
+  })
+})
