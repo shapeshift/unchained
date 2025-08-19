@@ -2,40 +2,34 @@ import { Logger } from '@shapeshiftoss/logger'
 import WebSocket, { Server } from 'ws'
 import { v4 } from 'uuid'
 import { Server as HttpServer } from 'http'
+import { IncomingMessage } from 'http'
+import { URL } from 'url'
 
-export interface MarketDataMessage {
+export interface CoinCapMessage {
   type: 'price_update'
   source: 'coincap'
   data: Record<string, string>
   timestamp: number
 }
 
-export interface MarketDataClient {
+export interface CoinCapClient {
   id: string
   websocket: WebSocket
   assets: string[]
 }
 
-export class MarketDataWebSocket {
-  private clients = new Map<string, MarketDataClient>()
+export class CoinCapWebSocket {
+  private clients = new Map<string, CoinCapClient>()
   private coinCapSocket?: WebSocket
   private reconnectTimeout?: NodeJS.Timeout
   private readonly logger: Logger
   private readonly coinCapUrl: string
-  private readonly assets: string[] = ['bitcoin']
   private readonly reconnectDelayMs = 5000
 
   constructor(logger: Logger, apiKey?: string) {
-    this.logger = logger.child({ namespace: ['proxy', 'marketData'] })
-    this.coinCapUrl = this.buildCoinCapUrl(apiKey)
+    this.logger = logger.child({ namespace: ['proxy', 'coincap'] })
+    this.coinCapUrl = `wss://wss.coincap.io/prices?assets=ALL&apiKey=${apiKey}`
     this.connect()
-  }
-
-  private buildCoinCapUrl(apiKey?: string): string {
-    const baseUrl = 'wss://wss.coincap.io/prices'
-    const assetsParam = `assets=${this.assets.join(',')}`
-    const keyParam = apiKey ? `&apiKey=${apiKey}` : ''
-    return `${baseUrl}?${assetsParam}${keyParam}`
   }
 
   private connect(): void {
@@ -71,7 +65,7 @@ export class MarketDataWebSocket {
   private handleCoinCapMessage(event: WebSocket.MessageEvent): void {
     try {
       const data = JSON.parse(event.data.toString())
-      const message: MarketDataMessage = {
+      const message: CoinCapMessage = {
         type: 'price_update',
         source: 'coincap',
         data,
@@ -85,13 +79,26 @@ export class MarketDataWebSocket {
     }
   }
 
-  private broadcastToClients(message: MarketDataMessage): void {
-    const messageStr = JSON.stringify(message)
-
+  private broadcastToClients(message: CoinCapMessage): void {
     for (const [clientId, client] of this.clients) {
       try {
         if (client.websocket.readyState === WebSocket.OPEN) {
-          client.websocket.send(messageStr)
+          // Filter data to only include assets this client requested
+          const filteredData: Record<string, string> = {}
+          for (const asset of client.assets) {
+            if (message.data[asset] !== undefined) {
+              filteredData[asset] = message.data[asset]
+            }
+          }
+
+          // Only send if there's relevant data for this client
+          if (Object.keys(filteredData).length > 0) {
+            const filteredMessage: CoinCapMessage = {
+              ...message,
+              data: filteredData,
+            }
+            client.websocket.send(JSON.stringify(filteredMessage))
+          }
         } else {
           this.removeClient(clientId)
         }
@@ -113,15 +120,22 @@ export class MarketDataWebSocket {
     }, this.reconnectDelayMs)
   }
 
-  addClient(websocket: WebSocket, clientId: string): void {
-    const client: MarketDataClient = {
+  addClient(websocket: WebSocket, clientId: string, requestedAssets: string[]): void {
+    const client: CoinCapClient = {
       id: clientId,
       websocket,
-      assets: [...this.assets], // Copy of supported assets
+      assets: requestedAssets,
     }
 
     this.clients.set(clientId, client)
-    this.logger.info({ clientId, totalClients: this.clients.size }, 'Client connected to market data')
+    this.logger.info(
+      {
+        clientId,
+        requestedAssets,
+        totalClients: this.clients.size,
+      },
+      'Client connected to CoinCap'
+    )
 
     websocket.on('close', () => {
       this.removeClient(clientId)
@@ -136,7 +150,7 @@ export class MarketDataWebSocket {
   private removeClient(clientId: string): void {
     if (this.clients.has(clientId)) {
       this.clients.delete(clientId)
-      this.logger.info({ clientId, totalClients: this.clients.size }, 'Client disconnected from market data')
+      this.logger.info({ clientId, totalClients: this.clients.size }, 'Client disconnected from CoinCap')
     }
   }
 
@@ -149,14 +163,42 @@ export class MarketDataWebSocket {
   }
 
   /**
+   * Parse assets from WebSocket URL query parameters
+   * Handles both full URLs and relative paths from different environments
+   */
+  private parseAssetsFromUrl(request: IncomingMessage): string[] {
+    try {
+      const rawUrl = request.url || ''
+      // Use dummy base to handle relative URLs like "/ws/market-data?assets=bitcoin"
+      const url = new URL(rawUrl, 'ws://dummy.com')
+      const assetsParam = url.searchParams.get('assets')
+
+      if (!assetsParam) {
+        return ['bitcoin'] // default
+      }
+
+      // Simple split and clean - let CoinCap handle invalid assets
+      return assetsParam
+        .split(',')
+        .map((asset) => asset.trim().toLowerCase())
+        .filter((asset) => asset.length > 0)
+        
+    } catch (error) {
+      this.logger.error({ error, url: request.url }, 'Error parsing assets from URL')
+      return ['bitcoin'] // fallback
+    }
+  }
+
+  /**
    * Setup WebSocket server on the given HTTP server - similar to handler pattern used by other proxy services
    */
-  setupWebSocketServer(server: HttpServer, path = '/ws/market-data'): Server {
+  setupWebSocketServer(server: HttpServer, path = '/coincap'): Server {
     const wsServer = new Server({ server, path })
 
-    wsServer.on('connection', (ws) => {
+    wsServer.on('connection', (ws, request) => {
       const clientId = v4()
-      this.addClient(ws, clientId)
+      const requestedAssets = this.parseAssetsFromUrl(request)
+      this.addClient(ws, clientId, requestedAssets)
     })
 
     this.logger.info({ path }, 'WebSocket server setup complete')
@@ -164,7 +206,7 @@ export class MarketDataWebSocket {
   }
 
   disconnect(): void {
-    this.logger.info('Shutting down market data WebSocket')
+    this.logger.info('Shutting down CoinCap WebSocket')
 
     if (this.reconnectTimeout) {
       clearTimeout(this.reconnectTimeout)
