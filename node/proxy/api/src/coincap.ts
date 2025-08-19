@@ -29,7 +29,7 @@ export class CoinCapWebSocket {
   constructor(logger: Logger, apiKey?: string) {
     this.logger = logger.child({ namespace: ['proxy', 'coincap'] })
     this.coinCapUrl = `wss://wss.coincap.io/prices?assets=ALL&apiKey=${apiKey}`
-    this.connect()
+    // Don't auto-connect - only connect when we have clients
   }
 
   private connect(): void {
@@ -114,10 +114,29 @@ export class CoinCapWebSocket {
       return
     }
 
+    // Only reconnect if we still have clients
     this.reconnectTimeout = setTimeout(() => {
-      this.logger.info('Attempting to reconnect to CoinCap WebSocket')
-      this.connect()
+      if (this.clients.size > 0) {
+        this.logger.info('Attempting to reconnect to CoinCap WebSocket')
+        this.connect()
+      } else {
+        this.logger.info('No clients connected, skipping CoinCap reconnect')
+      }
     }, this.reconnectDelayMs)
+  }
+
+  private disconnectFromCoinCap(): void {
+    this.logger.info('Disconnecting from CoinCap - no more clients')
+
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout)
+      this.reconnectTimeout = undefined
+    }
+
+    if (this.coinCapSocket) {
+      this.coinCapSocket.close()
+      this.coinCapSocket = undefined
+    }
   }
 
   addClient(websocket: WebSocket, clientId: string, requestedAssets: string[]): void {
@@ -127,7 +146,15 @@ export class CoinCapWebSocket {
       assets: requestedAssets,
     }
 
+    const wasEmpty = this.clients.size === 0
     this.clients.set(clientId, client)
+
+    // Connect to CoinCap if this is our first client
+    if (wasEmpty) {
+      this.logger.info('First client connected, establishing CoinCap connection')
+      this.connect()
+    }
+
     this.logger.info(
       {
         clientId,
@@ -151,6 +178,11 @@ export class CoinCapWebSocket {
     if (this.clients.has(clientId)) {
       this.clients.delete(clientId)
       this.logger.info({ clientId, totalClients: this.clients.size }, 'Client disconnected from CoinCap')
+
+      // Disconnect from CoinCap if no more clients
+      if (this.clients.size === 0) {
+        this.disconnectFromCoinCap()
+      }
     }
   }
 
@@ -182,7 +214,6 @@ export class CoinCapWebSocket {
         .split(',')
         .map((asset) => asset.trim().toLowerCase())
         .filter((asset) => asset.length > 0)
-        
     } catch (error) {
       this.logger.error({ error, url: request.url }, 'Error parsing assets from URL')
       return ['bitcoin'] // fallback
@@ -208,15 +239,10 @@ export class CoinCapWebSocket {
   disconnect(): void {
     this.logger.info('Shutting down CoinCap WebSocket')
 
-    if (this.reconnectTimeout) {
-      clearTimeout(this.reconnectTimeout)
-      this.reconnectTimeout = undefined
-    }
+    // Disconnect from CoinCap
+    this.disconnectFromCoinCap()
 
-    if (this.coinCapSocket) {
-      this.coinCapSocket.close()
-    }
-
+    // Close all client connections
     for (const [, client] of this.clients) {
       client.websocket.close()
     }
