@@ -41,15 +41,24 @@ type WSClient struct {
 }
 
 func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- error) (*WSClient, error) {
+	isLiquify := strings.Contains(conf.WSURL, "liquify")
+	isNownodes := strings.Contains(conf.WSURL, "nownodes")
+
 	wsURL, err := url.Parse(conf.WSURL)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to parse WSURL: %s", conf.WSURL)
 	}
 
 	endpoint := "/websocket"
-	if conf.APIKEY != "" {
-		parts := strings.Split(conf.APIKEY, ":")
-		endpoint = fmt.Sprintf("/%s/websocket", parts[1])
+	if conf.RPCAPIKEY != "" {
+		if isNownodes {
+			parts := strings.Split(conf.RPCAPIKEY, ":")
+			endpoint = fmt.Sprintf("/%s/websocket", parts[1])
+		}
+
+		if isLiquify {
+			endpoint = fmt.Sprintf("/api=%s/websocket", conf.RPCAPIKEY)
+		}
 	}
 
 	client, err := cometbft.NewWS(wsURL.String(), endpoint)
