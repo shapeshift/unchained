@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@shapeshiftoss/blockbook": "^10.0.0",
-    "@shapeshiftoss/common-api": "^10.0.0"
+    "@shapeshiftoss/common-api": "^10.0.0",
+    "@shapeshiftoss/prometheus": "^10.0.0"
   }
 }
