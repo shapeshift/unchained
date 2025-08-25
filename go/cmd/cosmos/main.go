@@ -22,10 +22,11 @@ var (
 
 // Config for running application
 type Config struct {
-	APIKEY string `mapstructure:"API_KEY"`
-	LCDURL string `mapstructure:"LCD_URL"`
-	RPCURL string `mapstructure:"RPC_URL"`
-	WSURL  string `mapstructure:"WS_URL"`
+	LCDAPIKEY string `mapstructure:"LCD_API_KEY"`
+	RPCAPIKEY string `mapstructure:"RPC_API_KEY"`
+	LCDURL    string `mapstructure:"LCD_URL"`
+	RPCURL    string `mapstructure:"RPC_URL"`
+	WSURL     string `mapstructure:"WS_URL"`
 }
 
 func main() {
@@ -37,7 +38,7 @@ func main() {
 
 	conf := &Config{}
 	if *envPath == "" {
-		if err := config.LoadFromEnv(conf, "API_KEY", "LCD_URL", "RPC_URL", "WS_URL"); err != nil {
+		if err := config.LoadFromEnv(conf, "LCD_API_KEY", "RPC_API_KEY", "LCD_URL", "RPC_URL", "WS_URL"); err != nil {
 			logger.Panicf("failed to load config from env: %+v", err)
 		}
 	} else {
@@ -55,7 +56,8 @@ func main() {
 		Bech32PkValPrefix: "cosmosvalpub",
 		Denom:             "uatom",
 		Encoding:          encoding,
-		APIKEY:            conf.APIKEY,
+		LCDAPIKEY:         conf.LCDAPIKEY,
+		RPCAPIKEY:         conf.RPCAPIKEY,
 		LCDURL:            conf.LCDURL,
 		RPCURL:            conf.RPCURL,
 		WSURL:             conf.WSURL,

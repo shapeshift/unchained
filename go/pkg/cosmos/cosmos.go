@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"math/big"
 	"net/url"
+	"path"
+	"strings"
 
 	sdkmath "cosmossdk.io/math"
 	"cosmossdk.io/simapp/params"
@@ -82,7 +84,8 @@ type Config struct {
 	Denom             string
 	NativeFee         int
 	Encoding          *params.EncodingConfig
-	APIKEY            string
+	LCDAPIKEY         string
+	RPCAPIKEY         string
 	LCDURL            string
 	RPCURL            string
 	WSURL             string
@@ -102,6 +105,9 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 	sdk.GetConfig().SetBech32PrefixForAccount(conf.Bech32AddrPrefix, conf.Bech32PkPrefix)
 	sdk.GetConfig().SetBech32PrefixForValidator(conf.Bech32ValPrefix, conf.Bech32PkValPrefix)
 
+	isLiquify := strings.Contains(conf.LCDURL, "liquify") && strings.Contains(conf.RPCURL, "liquify")
+	isNownodes := strings.Contains(conf.LCDURL, "nownodes") && strings.Contains(conf.RPCURL, "nownodes")
+
 	lcdURL, err := url.Parse(conf.LCDURL)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to parse LCDURL: %s", conf.LCDURL)
@@ -112,14 +118,30 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 		return nil, errors.Wrapf(err, "failed to parse RPCURL: %s", conf.RPCURL)
 	}
 
-	// untyped resty http clients
-	headers := map[string]string{"Accept": "application/json"}
-	if conf.APIKEY != "" {
-		headers["Authorization"] = fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(conf.APIKEY)))
+	lcdHeaders := map[string]string{"Content-Type": "application/json"}
+	if conf.LCDAPIKEY != "" {
+		if isNownodes {
+			lcdHeaders["Authorization"] = fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(conf.LCDAPIKEY)))
+		}
+
+		if isLiquify {
+			lcdURL.Path = path.Join(lcdURL.Path, fmt.Sprintf("api=%s", conf.LCDAPIKEY))
+		}
 	}
 
-	lcd := resty.New().SetBaseURL(lcdURL.String()).SetHeaders(headers)
-	rpc := resty.New().SetBaseURL(rpcURL.String()).SetHeaders(headers)
+	rpcHeaders := map[string]string{"Content-Type": "application/json"}
+	if conf.RPCAPIKEY != "" {
+		if isNownodes {
+			rpcHeaders["Authorization"] = fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(conf.RPCAPIKEY)))
+		}
+
+		if isLiquify {
+			rpcURL.Path = path.Join(rpcURL.Path, fmt.Sprintf("api=%s", conf.RPCAPIKEY))
+		}
+	}
+
+	lcd := resty.New().SetBaseURL(lcdURL.String()).SetHeaders(lcdHeaders)
+	rpc := resty.New().SetBaseURL(rpcURL.String()).SetHeaders(rpcHeaders)
 
 	c := &HTTPClient{
 		ctx:      context.Background(),

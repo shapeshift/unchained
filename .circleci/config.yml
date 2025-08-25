@@ -150,9 +150,9 @@ aliases:
     assetName: cosmos
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/cosmos/pulumi
-    api-key: $NOW_NODES_API_KEY_COSMOS
+    lcd-api-key: $NOW_NODES_API_KEY_COSMOS
+    rpc-api-key: $NOW_NODES_API_KEY_COSMOS
     lcd-url: https://cosmos-shapeshift.nownodes.io
-    grpc-url: cosmos-shapeshift.nownodes.io
     rpc-url: https://cosmos-tendermint-shapeshift.nownodes.io
     ws-url: wss://cosmos-tendermint-shapeshift.nownodes.io
     api-autoscaling: true
@@ -166,7 +166,11 @@ aliases:
     <<: *cosmos
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    api-key: $NOW_NODES_API_KEY_COSMOS
+    lcd-api-key: $LIQUIFY_LCD_API_KEY_COSMOS
+    rpc-api-key: $LIQUIFY_RPC_API_KEY_COSMOS
+    lcd-url: https://gateway.liquify.com
+    rpc-url: https://gateway.liquify.com
+    ws-url: wss://gateway.liquify.com
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 250m
@@ -291,7 +295,10 @@ jobs:
       LOG_LEVEL: info
     parameters:
       <<: *params
-      api-key:
+      lcd-api-key:
+        type: string
+        default: ""
+      rpc-api-key:
         type: string
         default: ""
       lcd-url:
@@ -309,7 +316,8 @@ jobs:
       - run:
           name: add custom environment variables
           command: |
-            echo 'export API_KEY=<< parameters.api-key >>' >> $BASH_ENV
+            echo 'export RPC_API_KEY=<< parameters.rpc-api-key >>' >> $BASH_ENV
+            echo 'export LCD_API_KEY=<< parameters.lcd-api-key >>' >> $BASH_ENV
             echo 'export LCD_URL=<< parameters.lcd-url >>' >> $BASH_ENV
             echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
             echo 'export WS_URL=<< parameters.ws-url >>' >> $BASH_ENV
