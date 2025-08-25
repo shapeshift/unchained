@@ -145,20 +145,6 @@ func (c *HTTPClient) BroadcastTx(rawTx string) (string, error) {
 	return res.TxResponse.TxHash, nil
 }
 
-func (c *GRPCClient) BroadcastTx(rawTx string) (string, error) {
-	txBytes, err := base64.StdEncoding.DecodeString(rawTx)
-	if err != nil {
-		return "", errors.Wrapf(err, "failed to decode rawTx: %s", rawTx)
-	}
-
-	res, err := c.tx.BroadcastTx(c.ctx, &txtypes.BroadcastTxRequest{TxBytes: txBytes, Mode: txtypes.BroadcastMode_BROADCAST_MODE_SYNC})
-	if err != nil {
-		return "", errors.Wrap(err, "failed to broadcast transaction")
-	}
-
-	return res.TxResponse.TxHash, nil
-}
-
 func ParseEvents(txResult abcitypes.ExecTxResult) EventsByMsgIndex {
 	events := make(EventsByMsgIndex)
 

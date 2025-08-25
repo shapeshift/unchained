@@ -575,9 +575,11 @@ aliases:
     assetName: base
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/base/pulumi
-    rpc-url: http://base-svc.unchained.svc.cluster.local:8545
-    indexer-url: http://base-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://base-svc.unchained.svc.cluster.local:8001/websocket
+    indexer-url: https://gateway.liquify.com
+    indexer-ws-url: wss://gateway.liquify.com
+    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_BASE
+    rpc-url: https://gateway.liquify.com
+    rpc-api-key: $LIQUIFY_RPC_API_KEY_BASE
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
@@ -589,11 +591,6 @@ aliases:
     <<: *base
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://gateway.liquify.com
-    indexer-ws-url: wss://gateway.liquify.com
-    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_BASE
-    rpc-url: https://gateway.liquify.com
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_BASE
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 250m
@@ -936,9 +933,6 @@ jobs:
       lcd-v1-url:
         type: string
         default: ""
-      grpc-url:
-        type: string
-        default: ""
       rpc-url:
         type: string
       rpc-v1-url:
@@ -957,7 +951,6 @@ jobs:
           command: |
             echo 'export LCD_URL=<< parameters.lcd-url >>' >> $BASH_ENV
             echo 'export LCD_V1_URL=<< parameters.lcd-v1-url >>' >> $BASH_ENV
-            echo 'export GRPC_URL=<< parameters.grpc-url >>' >> $BASH_ENV
             echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
             echo 'export RPC_V1_URL=<< parameters.rpc-v1-url >>' >> $BASH_ENV
             echo 'export WS_URL=<< parameters.ws-url >>' >> $BASH_ENV
