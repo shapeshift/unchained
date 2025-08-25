@@ -3,18 +3,24 @@ import { join } from 'path'
 import swaggerUi from 'swagger-ui-express'
 import { middleware } from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
+import { Prometheus } from '@shapeshiftoss/prometheus'
+import { Server } from 'ws'
 import { RegisterRoutes } from './routes'
 import { CoinGecko } from './coingecko'
 import { Zerion } from './zerion'
 import { Zrx } from './zrx'
-import { MarketDataWebSocket } from './marketData'
+import { MarketDataConnectionHandler } from './marketData'
+import { CoincapWebsocketClient } from './coincap'
 
 const PORT = process.env.PORT ?? 3000
+const COINCAP_API_KEY = process.env.COINCAP_API_KEY
 
 export const logger = new Logger({
   namespace: ['unchained', 'proxy', 'api'],
   level: process.env.LOG_LEVEL,
 })
+
+const prometheus = new Prometheus({ coinstack: 'proxy' })
 
 const app = express()
 
@@ -53,23 +59,12 @@ app.use(middleware.errorHandler, middleware.notFoundHandler)
 
 const server = app.listen(PORT, () => logger.info('Server started'))
 
-const marketDataWS = new MarketDataWebSocket(logger, process.env.MARKET_DATA_PROVIDER, process.env.MARKET_DATA_API_KEY)
-marketDataWS.setupWebSocketServer(server)
-
-process.on('SIGTERM', () => {
-  logger.info('Received SIGTERM, shutting down gracefully')
-  marketDataWS.disconnect()
-  server.close(() => {
-    logger.info('Server closed')
-    process.exit(0)
-  })
+const coincap = new CoincapWebsocketClient(`wss://wss.coincap.io/prices?assets=ALL&apiKey=${COINCAP_API_KEY}`, {
+  logger,
 })
 
-process.on('SIGINT', () => {
-  logger.info('Received SIGINT, shutting down gracefully')
-  marketDataWS.disconnect()
-  server.close(() => {
-    logger.info('Server closed')
-    process.exit(0)
-  })
+const wsServer = new Server({ server })
+
+wsServer.on('connection', (connection) => {
+  MarketDataConnectionHandler.start(connection, coincap, prometheus, logger)
 })

@@ -1,5 +1,5 @@
 {
-  "name": "@shapeshiftoss/websocket",
+  "name": "@shapeshiftoss/prometheus",
   "version": "10.0.0",
   "license": "MIT",
   "main": "dist/index.js",
@@ -15,10 +15,6 @@
     "watch": "nodemon -e ts --watch src -x yarn build"
   },
   "dependencies": {
-    "@shapeshiftoss/prometheus": "^10.0.0",
-    "ws": "^8.15.0"
-  },
-  "devDependencies": {
-    "@types/ws": "^8.5.10"
+    "prom-client": "^15.0.0"
   }
 }

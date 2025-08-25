@@ -1,10 +1,10 @@
+import { Prometheus } from '@shapeshiftoss/prometheus'
 import { json, urlencoded, NextFunction, Request, Response } from 'express'
 import compression from 'compression'
 import morgan from 'morgan'
 import cors from 'cors'
 import { ValidateError } from 'tsoa'
 import { ApiError, NotFoundError } from '.'
-import { Prometheus } from './prometheus'
 
 export function errorHandler(err: Error, req: Request, res: Response, next: NextFunction): Response | void {
   if (err instanceof ValidateError) {
