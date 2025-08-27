@@ -150,11 +150,11 @@ aliases:
     assetName: cosmos
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/cosmos/pulumi
-    lcd-api-key: $NOW_NODES_API_KEY_COSMOS
-    rpc-api-key: $NOW_NODES_API_KEY_COSMOS
-    lcd-url: https://cosmos-shapeshift.nownodes.io
-    rpc-url: https://cosmos-tendermint-shapeshift.nownodes.io
-    ws-url: wss://cosmos-tendermint-shapeshift.nownodes.io
+    lcd-api-key: $LIQUIFY_LCD_API_KEY_COSMOS
+    rpc-api-key: $LIQUIFY_RPC_API_KEY_COSMOS
+    lcd-url: https://gateway.liquify.com
+    rpc-url: https://gateway.liquify.com
+    ws-url: wss://gateway.liquify.com
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
@@ -166,11 +166,6 @@ aliases:
     <<: *cosmos
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    lcd-api-key: $LIQUIFY_LCD_API_KEY_COSMOS
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_COSMOS
-    lcd-url: https://gateway.liquify.com
-    rpc-url: https://gateway.liquify.com
-    ws-url: wss://gateway.liquify.com
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 250m
