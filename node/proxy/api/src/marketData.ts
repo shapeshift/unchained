@@ -26,7 +26,7 @@ export interface MarketDataClient {
     connection: MarketDataConnectionHandler,
     assets: Array<string>
   ): void
-  unsubscribe(clientId: string, subscriptionId: string, assets: Array<string>): void
+  unsubscribe(clientId: string, subscriptionId?: string): void
 }
 
 export class MarketDataConnectionHandler extends BaseConnectionHandler {
@@ -65,19 +65,14 @@ export class MarketDataConnectionHandler extends BaseConnectionHandler {
 
     if (subscriptionId) {
       this.subscriptionIds.delete(subscriptionId)
-      this.client.unsubscribe(this.clientId, subscriptionId, data.assets)
+      this.client.unsubscribe(this.clientId, subscriptionId)
     } else {
-      for (const subscriptionId of this.subscriptionIds) {
-        this.client.unsubscribe(this.clientId, subscriptionId, [])
-      }
-
       this.subscriptionIds.clear()
+      this.client.unsubscribe(this.clientId)
     }
   }
 
   onClose(): void {
-    for (const subscriptionId of this.subscriptionIds) {
-      this.client.unsubscribe(this.clientId, subscriptionId, [])
-    }
+    this.client.unsubscribe(this.clientId)
   }
 }
