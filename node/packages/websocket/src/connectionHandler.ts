@@ -31,7 +31,7 @@ export abstract class BaseConnectionHandler {
   protected subscriptionIds = new Set<string>()
 
   abstract onSubscribe(subscriptionId: string, data?: unknown): void
-  abstract onUnsubscribe(subscriptionId: string, data?: unknown): void
+  abstract onUnsubscribe(subscriptionId: string): void
   abstract onClose(): void
 
   constructor(websocket: WebSocket, prometheus: Prometheus, logger: Logger) {
@@ -89,7 +89,7 @@ export abstract class BaseConnectionHandler {
         case 'subscribe':
           return this.onSubscribe(payload.subscriptionId, payload.data)
         case 'unsubscribe':
-          return this.onUnsubscribe(payload.subscriptionId, payload.data)
+          return this.onUnsubscribe(payload.subscriptionId)
       }
     } catch (err) {
       this.logger.error(err, { clientId: this.clientId, fn: 'onMessage', event }, 'Error processing message')

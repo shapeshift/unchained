@@ -57,12 +57,7 @@ export class MarketDataConnectionHandler extends BaseConnectionHandler {
     this.client.subscribe(this.clientId, subscriptionId, this, data.assets)
   }
 
-  onUnsubscribe(subscriptionId: string, data?: unknown): void {
-    if (!isSubscribePayload(data)) {
-      this.sendError(`invalid subscription payload, no assets provided`, subscriptionId)
-      return
-    }
-
+  onUnsubscribe(subscriptionId: string): void {
     if (subscriptionId) {
       this.subscriptionIds.delete(subscriptionId)
       this.client.unsubscribe(this.clientId, subscriptionId)
