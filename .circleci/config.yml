@@ -152,6 +152,7 @@ aliases:
     pulumi-dir: coinstacks/mayachain/pulumi
     lcd-url: http://mayachain-svc.unchained.svc.cluster.local:1317
     rpc-url: http://mayachain-svc.unchained.svc.cluster.local:27147
+    indexer-url: http://mayachain-svc.unchained.svc.cluster.local:8080
     ws-url: ws://mayachain-svc.unchained.svc.cluster.local:27147
     api-autoscaling: true
     api-replicas: 2
@@ -180,14 +181,18 @@ aliases:
     <<: *mayachain
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    lcd-url: http://mayachain-svc.unchained-dev.svc.cluster.local:1317
-    rpc-url: http://mayachain-svc.unchained-dev.svc.cluster.local:27147
-    ws-url: ws://mayachain-svc.unchained-dev.svc.cluster.local:27147
+    lcd-url: https://gateway.liquify.com
+    lcd-api-key: $LIQUIFY_LCD_API_KEY_MAYA
+    rpc-url: https://gateway.liquify.com
+    rpc-api-key: $LIQUIFY_RPC_API_KEY_MAYA
+    indexer-url: https://gateway.liquify.com
+    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_MAYA
+    ws-url: wss://gateway.liquify.com
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 250m
     api-memory-limit: 250Mi
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
 commands:
   precheck:
@@ -379,8 +384,19 @@ jobs:
       <<: *params
       lcd-url:
         type: string
+      lcd-api-key:
+        type: string
+        default: ""
       rpc-url:
         type: string
+      rpc-api-key:
+        type: string
+        default: ""
+      indexer-url:
+        type: string
+      indexer-api-key:
+        type: string
+        default: ""
       ws-url:
         type: string
     steps:
@@ -393,7 +409,11 @@ jobs:
           name: add custom environment variables
           command: |
             echo 'export LCD_URL=<< parameters.lcd-url >>' >> $BASH_ENV
+            echo 'export LCD_API_KEY=<< parameters.lcd-api-key >>' >> $BASH_ENV
             echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
+            echo 'export RPC_API_KEY=<< parameters.rpc-api-key >>' >> $BASH_ENV
+            echo 'export INDEXER_URL=<< parameters.indexer-url >>' >> $BASH_ENV
+            echo 'export INDEXER_API_KEY=<< parameters.indexer-api-key >>' >> $BASH_ENV
             echo 'export WS_URL=<< parameters.ws-url >>' >> $BASH_ENV
       - run:
           name: pulumi
