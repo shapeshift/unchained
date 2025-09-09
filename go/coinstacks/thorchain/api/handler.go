@@ -89,21 +89,36 @@ type AffiliateRevenue struct {
 	// Amount earned (RUNE)
 	// required: true
 	Amount string `json:"amount"`
+	// Revenue earned by denom
+	// required: true
+	Revenue map[string]string `json:"revenue"`
 }
 
 func (h *Handler) GetAffiliateRevenue(start int, end int) (*AffiliateRevenue, error) {
 	total := big.NewInt(0)
+	revenueTotal := make(map[string]*big.Int)
 	for _, fee := range h.indexer.AffiliateFees {
 		if fee.Timestamp >= int64(start) && fee.Timestamp <= int64(end) {
-			amount := new(big.Int)
-			amount.SetString(fee.Amount, 10)
-			total.Add(total, amount)
+			if amount, ok := new(big.Int).SetString(fee.Amount, 10); ok {
+				if _, ok := revenueTotal[fee.Asset]; !ok {
+					revenueTotal[fee.Asset] = big.NewInt(0)
+				}
+
+				total.Add(total, amount)
+				revenueTotal[fee.Asset].Add(revenueTotal[fee.Asset], amount)
+			}
 		}
+	}
+
+	revenue := make(map[string]string)
+	for asset, amount := range revenueTotal {
+		revenue[asset] = amount.String()
 	}
 
 	a := &AffiliateRevenue{
 		Addresses: h.indexer.AffiliateAddresses,
 		Amount:    total.String(),
+		Revenue:   revenue,
 	}
 
 	return a, nil

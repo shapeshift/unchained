@@ -335,7 +335,8 @@
       "type": "object",
       "required": [
         "addresses",
-        "amount"
+        "amount",
+        "revenue"
       ],
       "properties": {
         "addresses": {
@@ -350,6 +351,14 @@
           "description": "Amount earned (RUNE)",
           "type": "string",
           "x-go-name": "Amount"
+        },
+        "revenue": {
+          "description": "Revenue earned by denom",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "x-go-name": "Revenue"
         }
       },
       "x-go-package": "github.com/shapeshift/unchained/coinstacks/thorchain/api"

@@ -30,6 +30,15 @@ type EventOutbound struct {
 	Memo   string `json:"memo"`
 }
 
+type EventSwap struct {
+	Pool  string `json:"pool"`
+	Id    string `json:"id"`
+	Chain string `json:"chain"`
+	From  string `json:"from"`
+	To    string `json:"to"`
+	Memo  string `json:"memo"`
+}
+
 func ParseBlockEvents(blockEvents []cosmos.ABCIEvent) (cosmos.EventsByMsgIndex, []TypedEvent, error) {
 	typedEvents := make([]TypedEvent, len(blockEvents))
 	eventsByMsgIndex := cosmos.EventsByMsgIndex{}
@@ -41,6 +50,8 @@ func ParseBlockEvents(blockEvents []cosmos.ABCIEvent) (cosmos.EventsByMsgIndex, 
 			typedEvent = &EventFee{}
 		case "outbound":
 			typedEvent = &EventOutbound{}
+		case "swap":
+			typedEvent = &EventSwap{}
 		default:
 			continue
 		}

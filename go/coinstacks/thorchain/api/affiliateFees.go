@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"math"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -60,11 +61,7 @@ func (i *AffiliateFeeIndexer) Sync() error {
 	g := new(errgroup.Group)
 
 	for _, affiliateAddress := range i.AffiliateAddresses {
-		affiliateAddress := affiliateAddress
-
 		for _, httpClient := range i.httpClients {
-			httpClient := httpClient
-
 			g.Go(func() error {
 				result, err := httpClient.BlockSearch(fmt.Sprintf(`"outbound.to='%s'"`, affiliateAddress), 1, pageSize)
 				if err != nil {
@@ -105,7 +102,7 @@ func (i *AffiliateFeeIndexer) fetchBlocks(httpClient *cosmos.HTTPClient, affilia
 	wg := new(sync.WaitGroup)
 	wg.Add(blockWorkers)
 
-	for w := 0; w < blockWorkers; w++ {
+	for range blockWorkers {
 		go func() {
 			defer wg.Done()
 
@@ -127,7 +124,7 @@ func (i *AffiliateFeeIndexer) handleBlocks(httpClient *cosmos.HTTPClient, affili
 	wg := new(sync.WaitGroup)
 	wg.Add(resultWorkers)
 
-	for w := 0; w < resultWorkers; w++ {
+	for range resultWorkers {
 		go func() {
 			defer wg.Done()
 
@@ -153,31 +150,40 @@ func (i *AffiliateFeeIndexer) processAffiliateFees(block thorchain.Block, blockE
 		logger.Panicf("failed to parse block events for block: %d: %+v", block.Height(), err)
 	}
 
+	swaps := make(map[string]*thorchain.EventSwap)
+	affiliateFees := make([]*AffiliateFee, 0)
 	for _, event := range typedEvents {
-		affiliateFee := &AffiliateFee{
-			BlockHash:   block.Hash(),
-			BlockHeight: block.Height(),
-			Timestamp:   block.Timestamp(),
-		}
-
 		switch v := event.(type) {
 		case *thorchain.EventOutbound:
 			coinParts := strings.Fields(v.Coin)
-			affiliateFee.TxID = v.InTxID
-			affiliateFee.Address = v.To
-			affiliateFee.Amount = coinParts[0]
-			affiliateFee.Asset = coinParts[1]
+			affiliateFee := &AffiliateFee{
+				BlockHash:   block.Hash(),
+				BlockHeight: block.Height(),
+				Timestamp:   block.Timestamp(),
+				TxID:        v.InTxID,
+				Address:     v.To,
+				Amount:      coinParts[0],
+				Asset:       coinParts[1],
+			}
+			affiliateFees = append(affiliateFees, affiliateFee)
+		case *thorchain.EventSwap:
+			swaps[v.Id] = v
 		default:
 			continue
 		}
+	}
 
-		for _, affiliateAddress := range affiliateAddresses {
-			if affiliateFee.Address == affiliateAddress {
-				i.mu.Lock()
-				i.AffiliateFees = append(i.AffiliateFees, affiliateFee)
-				i.mu.Unlock()
-				break
+	for _, affiliateFee := range affiliateFees {
+		if swap, ok := swaps[affiliateFee.TxID]; ok {
+			if slices.Contains(affiliateAddresses, swap.To) {
+				continue
 			}
+		}
+
+		if slices.Contains(affiliateAddresses, affiliateFee.Address) {
+			i.mu.Lock()
+			i.AffiliateFees = append(i.AffiliateFees, affiliateFee)
+			i.mu.Unlock()
 		}
 	}
 }
