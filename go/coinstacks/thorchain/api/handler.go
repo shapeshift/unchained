@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"math/big"
 
 	"github.com/cometbft/cometbft/types"
@@ -97,6 +98,7 @@ type AffiliateRevenue struct {
 func (h *Handler) GetAffiliateRevenue(start int, end int) (*AffiliateRevenue, error) {
 	total := big.NewInt(0)
 	revenueTotal := make(map[string]*big.Int)
+	assetInRune := make(map[string]*big.Float)
 	for _, fee := range h.indexer.AffiliateFees {
 		if fee.Timestamp >= int64(start) && fee.Timestamp <= int64(end) {
 			if amount, ok := new(big.Int).SetString(fee.Amount, 10); ok {
@@ -104,7 +106,44 @@ func (h *Handler) GetAffiliateRevenue(start int, end int) (*AffiliateRevenue, er
 					revenueTotal[fee.Asset] = big.NewInt(0)
 				}
 
-				total.Add(total, amount)
+				if _, ok := assetInRune[fee.Asset]; !ok {
+					if fee.Asset == "THOR.RUNE" {
+						assetInRune[fee.Asset] = big.NewFloat(1)
+					} else {
+						var res struct {
+							Asset        string `json:"asset"`
+							BalanceAsset string `json:"balance_asset"`
+							BalanceRune  string `json:"balance_rune"`
+						}
+
+						var errRes struct {
+							Code    string `json:"code"`
+							Message string `json:"message"`
+						}
+
+						if _, err := h.HTTPClient.(*cosmos.HTTPClient).LCD.R().SetResult(&res).SetError(&errRes).Get(fmt.Sprintf("/thorchain/pool/%s", fee.Asset)); err != nil {
+							return nil, errors.Wrapf(err, "failed to get pool details for %s", fee.Asset)
+						}
+						if errRes.Message != "" {
+							return nil, errors.New(errRes.Message)
+						}
+
+						balanceRune, ok := new(big.Float).SetString(res.BalanceRune)
+						if !ok {
+							return nil, errors.Errorf("failed convert balance rune: %s", res.BalanceRune)
+						}
+
+						balanceAsset, ok := new(big.Float).SetString(res.BalanceAsset)
+						if !ok {
+							return nil, errors.Errorf("failed convert balance asset: %s", res.BalanceAsset)
+						}
+
+						assetInRune[fee.Asset] = new(big.Float).Quo(balanceRune, balanceAsset)
+					}
+				}
+
+				amountInRune, _ := new(big.Float).Mul(assetInRune[fee.Asset], new(big.Float).SetInt(amount)).Int(nil)
+				total.Add(total, amountInRune)
 				revenueTotal[fee.Asset].Add(revenueTotal[fee.Asset], amount)
 			}
 		}

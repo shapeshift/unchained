@@ -23,6 +23,7 @@ const (
 
 type AffiliateFeeIndexer struct {
 	AffiliateAddresses []string
+	AffiliateFeeDenoms []string
 	AffiliateFees      []*AffiliateFee
 	httpClients        []*cosmos.HTTPClient
 	mu                 sync.Mutex
@@ -40,9 +41,11 @@ type AffiliateFee struct {
 
 func NewAffiliateFeeIndexer(httpClients []*cosmos.HTTPClient, wsClient *cosmos.WSClient) *AffiliateFeeIndexer {
 	affiliateAddresses := []string{"thor1xmaggkcln5m5fnha2780xrdrulmplvfrz6wj3l", "thor1crs0y53jfg224mettqeg883e6ume49tllktg2s", "thor122h9hlrugzdny9ct95z6g7afvpzu34s73uklju"}
+	affilateFeeDenoms := []string{"THOR.RUNE", "ETH.WBTC-0X2260FAC5E5542A773AA44FBCFEDF7C193BC2C599"}
 
 	i := &AffiliateFeeIndexer{
 		AffiliateAddresses: affiliateAddresses,
+		AffiliateFeeDenoms: affilateFeeDenoms,
 		AffiliateFees:      []*AffiliateFee{},
 		httpClients:        httpClients,
 	}
@@ -156,34 +159,35 @@ func (i *AffiliateFeeIndexer) processAffiliateFees(block thorchain.Block, blockE
 		switch v := event.(type) {
 		case *thorchain.EventOutbound:
 			coinParts := strings.Fields(v.Coin)
-			affiliateFee := &AffiliateFee{
-				BlockHash:   block.Hash(),
-				BlockHeight: block.Height(),
-				Timestamp:   block.Timestamp(),
-				TxID:        v.InTxID,
-				Address:     v.To,
-				Amount:      coinParts[0],
-				Asset:       coinParts[1],
+			if slices.Contains(affiliateAddresses, v.To) && slices.Contains(i.AffiliateFeeDenoms, coinParts[1]) {
+				affiliateFee := &AffiliateFee{
+					BlockHash:   block.Hash(),
+					BlockHeight: block.Height(),
+					Timestamp:   block.Timestamp(),
+					TxID:        v.InTxID,
+					Address:     v.To,
+					Amount:      coinParts[0],
+					Asset:       coinParts[1],
+				}
+				affiliateFees = append(affiliateFees, affiliateFee)
 			}
-			affiliateFees = append(affiliateFees, affiliateFee)
 		case *thorchain.EventSwap:
-			swaps[v.Id] = v
+			parts := strings.Split(v.Memo, ":")
+			if len(parts) > 4 && parts[4] == "ss" {
+				swaps[v.Id] = v
+			}
 		default:
 			continue
 		}
 	}
 
 	for _, affiliateFee := range affiliateFees {
-		if swap, ok := swaps[affiliateFee.TxID]; ok {
-			if slices.Contains(affiliateAddresses, swap.To) {
-				continue
-			}
+		if _, ok := swaps[affiliateFee.TxID]; !ok {
+			continue
 		}
 
-		if slices.Contains(affiliateAddresses, affiliateFee.Address) {
-			i.mu.Lock()
-			i.AffiliateFees = append(i.AffiliateFees, affiliateFee)
-			i.mu.Unlock()
-		}
+		i.mu.Lock()
+		i.AffiliateFees = append(i.AffiliateFees, affiliateFee)
+		i.mu.Unlock()
 	}
 }
