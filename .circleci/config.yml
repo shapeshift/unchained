@@ -195,7 +195,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.16.1
+    service-image-1: ethereum/client-go:v1.16.3
     service-cpu-limit-1: "2"
     service-memory-limit-1: 32Gi
     service-storage-size-1: 1500Gi
@@ -516,7 +516,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.32.3
+    service-image-1: nethermind/nethermind:1.33.1
     service-cpu-limit-1: "2"
     service-memory-limit-1: 8Gi
     service-storage-size-1: 750Gi
