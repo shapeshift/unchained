@@ -14,12 +14,22 @@ if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
 
+const IS_LIQUIFY = RPC_URL.toLowerCase().includes('liquify') && INDEXER_URL.toLowerCase().includes('liquify')
+const IS_NOWNODES = RPC_URL.toLowerCase().includes('nownodes') && INDEXER_URL.toLowerCase().includes('nownodes')
+
 export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'litecoin', 'api'],
   level: process.env.LOG_LEVEL,
 })
 
-const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL, apiKey: INDEXER_API_KEY, logger })
+const httpURL = INDEXER_API_KEY && IS_LIQUIFY ? `${INDEXER_URL}/api=${INDEXER_API_KEY}` : INDEXER_URL
+const wsURL = INDEXER_API_KEY && IS_LIQUIFY ? `${INDEXER_WS_URL}/api=${INDEXER_API_KEY}` : INDEXER_WS_URL
+const rpcUrl = RPC_API_KEY && IS_LIQUIFY ? `${RPC_URL}/api=${RPC_API_KEY}` : RPC_URL
+
+const apiKey = INDEXER_API_KEY && IS_NOWNODES ? INDEXER_API_KEY : undefined
+const rpcApiKey = RPC_API_KEY && IS_NOWNODES ? RPC_API_KEY : undefined
+
+const blockbook = new Blockbook({ httpURL, wsURL, logger, apiKey })
 
 const isXpub = (pubkey: string): boolean => {
   return pubkey.startsWith('Ltub') || pubkey.startsWith('Mtub') || pubkey.startsWith('zpub')
@@ -33,8 +43,8 @@ export const formatAddress = (address: string): string => {
 
 export const service = new Service({
   blockbook,
-  rpcUrl: RPC_URL,
-  rpcApiKey: RPC_API_KEY,
+  rpcUrl,
+  rpcApiKey,
   isXpub,
   addressFormatter: formatAddress,
 })
