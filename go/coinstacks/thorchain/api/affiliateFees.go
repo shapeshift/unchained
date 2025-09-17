@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"math"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -22,6 +23,7 @@ const (
 
 type AffiliateFeeIndexer struct {
 	AffiliateAddresses []string
+	AffiliateFeeDenoms []string
 	AffiliateFees      []*AffiliateFee
 	httpClients        []*cosmos.HTTPClient
 	mu                 sync.Mutex
@@ -39,9 +41,11 @@ type AffiliateFee struct {
 
 func NewAffiliateFeeIndexer(httpClients []*cosmos.HTTPClient, wsClient *cosmos.WSClient) *AffiliateFeeIndexer {
 	affiliateAddresses := []string{"thor1xmaggkcln5m5fnha2780xrdrulmplvfrz6wj3l", "thor1crs0y53jfg224mettqeg883e6ume49tllktg2s", "thor122h9hlrugzdny9ct95z6g7afvpzu34s73uklju"}
+	affilateFeeDenoms := []string{"THOR.RUNE", "ETH.WBTC-0X2260FAC5E5542A773AA44FBCFEDF7C193BC2C599"}
 
 	i := &AffiliateFeeIndexer{
 		AffiliateAddresses: affiliateAddresses,
+		AffiliateFeeDenoms: affilateFeeDenoms,
 		AffiliateFees:      []*AffiliateFee{},
 		httpClients:        httpClients,
 	}
@@ -60,11 +64,7 @@ func (i *AffiliateFeeIndexer) Sync() error {
 	g := new(errgroup.Group)
 
 	for _, affiliateAddress := range i.AffiliateAddresses {
-		affiliateAddress := affiliateAddress
-
 		for _, httpClient := range i.httpClients {
-			httpClient := httpClient
-
 			g.Go(func() error {
 				result, err := httpClient.BlockSearch(fmt.Sprintf(`"outbound.to='%s'"`, affiliateAddress), 1, pageSize)
 				if err != nil {
@@ -105,7 +105,7 @@ func (i *AffiliateFeeIndexer) fetchBlocks(httpClient *cosmos.HTTPClient, affilia
 	wg := new(sync.WaitGroup)
 	wg.Add(blockWorkers)
 
-	for w := 0; w < blockWorkers; w++ {
+	for range blockWorkers {
 		go func() {
 			defer wg.Done()
 
@@ -127,7 +127,7 @@ func (i *AffiliateFeeIndexer) handleBlocks(httpClient *cosmos.HTTPClient, affili
 	wg := new(sync.WaitGroup)
 	wg.Add(resultWorkers)
 
-	for w := 0; w < resultWorkers; w++ {
+	for range resultWorkers {
 		go func() {
 			defer wg.Done()
 
@@ -153,31 +153,41 @@ func (i *AffiliateFeeIndexer) processAffiliateFees(block thorchain.Block, blockE
 		logger.Panicf("failed to parse block events for block: %d: %+v", block.Height(), err)
 	}
 
+	swaps := make(map[string]*thorchain.EventSwap)
+	affiliateFees := make([]*AffiliateFee, 0)
 	for _, event := range typedEvents {
-		affiliateFee := &AffiliateFee{
-			BlockHash:   block.Hash(),
-			BlockHeight: block.Height(),
-			Timestamp:   block.Timestamp(),
-		}
-
 		switch v := event.(type) {
 		case *thorchain.EventOutbound:
 			coinParts := strings.Fields(v.Coin)
-			affiliateFee.TxID = v.InTxID
-			affiliateFee.Address = v.To
-			affiliateFee.Amount = coinParts[0]
-			affiliateFee.Asset = coinParts[1]
+			if slices.Contains(affiliateAddresses, v.To) && slices.Contains(i.AffiliateFeeDenoms, coinParts[1]) {
+				affiliateFee := &AffiliateFee{
+					BlockHash:   block.Hash(),
+					BlockHeight: block.Height(),
+					Timestamp:   block.Timestamp(),
+					TxID:        v.InTxID,
+					Address:     v.To,
+					Amount:      coinParts[0],
+					Asset:       coinParts[1],
+				}
+				affiliateFees = append(affiliateFees, affiliateFee)
+			}
+		case *thorchain.EventSwap:
+			parts := strings.Split(v.Memo, ":")
+			if len(parts) > 4 && parts[4] == "ss" {
+				swaps[v.Id] = v
+			}
 		default:
 			continue
 		}
+	}
 
-		for _, affiliateAddress := range affiliateAddresses {
-			if affiliateFee.Address == affiliateAddress {
-				i.mu.Lock()
-				i.AffiliateFees = append(i.AffiliateFees, affiliateFee)
-				i.mu.Unlock()
-				break
-			}
+	for _, affiliateFee := range affiliateFees {
+		if _, ok := swaps[affiliateFee.TxID]; !ok {
+			continue
 		}
+
+		i.mu.Lock()
+		i.AffiliateFees = append(i.AffiliateFees, affiliateFee)
+		i.mu.Unlock()
 	}
 }
