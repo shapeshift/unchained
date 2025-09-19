@@ -3,16 +3,10 @@ import { join } from 'path'
 import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
 import { Logger } from '@shapeshiftoss/logger'
-import {
-  middleware,
-  ConnectionHandler,
-  Registry,
-  BlockHandler,
-  TransactionHandler,
-  Prometheus,
-} from '@shapeshiftoss/common-api'
+import { middleware, ConnectionHandler, Registry, BlockHandler, TransactionHandler } from '@shapeshiftoss/common-api'
 import { getAddresses, NewBlock, Tx as BlockbookTx, WebsocketClient } from '@shapeshiftoss/blockbook'
 import { utxo } from '@shapeshiftoss/common-api'
+import { Prometheus } from '@shapeshiftoss/prometheus'
 import { formatAddress, service } from './controller'
 import { RegisterRoutes } from './routes'
 

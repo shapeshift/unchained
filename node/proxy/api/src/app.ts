@@ -3,17 +3,24 @@ import { join } from 'path'
 import swaggerUi from 'swagger-ui-express'
 import { middleware } from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
+import { Prometheus } from '@shapeshiftoss/prometheus'
+import { Server } from 'ws'
 import { RegisterRoutes } from './routes'
 import { CoinGecko } from './coingecko'
 import { Zerion } from './zerion'
 import { Zrx } from './zrx'
+import { MarketDataConnectionHandler } from './marketData'
+import { CoincapWebsocketClient } from './coincap'
 
 const PORT = process.env.PORT ?? 3000
+const COINCAP_API_KEY = process.env.COINCAP_API_KEY
 
 export const logger = new Logger({
   namespace: ['unchained', 'proxy', 'api'],
   level: process.env.LOG_LEVEL,
 })
+
+const prometheus = new Prometheus({ coinstack: 'proxy' })
 
 const app = express()
 
@@ -50,4 +57,14 @@ app.get('/', async (_, res) => {
 
 app.use(middleware.errorHandler, middleware.notFoundHandler)
 
-app.listen(PORT, () => logger.info('Server started'))
+const server = app.listen(PORT, () => logger.info('Server started'))
+
+const coincap = new CoincapWebsocketClient(`wss://wss.coincap.io/prices?assets=ALL&apiKey=${COINCAP_API_KEY}`, {
+  logger,
+})
+
+const wsServer = new Server({ server })
+
+wsServer.on('connection', (connection) => {
+  MarketDataConnectionHandler.start(connection, coincap, prometheus, logger)
+})

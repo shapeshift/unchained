@@ -1,5 +1,6 @@
-import { ConnectionHandler, middleware, Prometheus, Registry, TransactionHandler } from '@shapeshiftoss/common-api'
+import { ConnectionHandler, middleware, Registry, TransactionHandler } from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
+import { Prometheus } from '@shapeshiftoss/prometheus'
 import { Logs } from '@solana/web3.js'
 import express from 'express'
 import { join } from 'path'

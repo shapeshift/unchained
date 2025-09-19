@@ -42,7 +42,6 @@
     "lerna": "^8.0.0",
     "morgan": "^1.10.0",
     "object-hash": "^3.0.0",
-    "prom-client": "^15.0.0",
     "swagger-ui-express": "^5.0.0",
     "tsoa": "^5.1.1",
     "viem": "^2.33.2"

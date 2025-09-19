@@ -154,7 +154,7 @@ export class Registry {
 
       for (const [id, connection] of this.addresses[address].entries()) {
         const { subscriptionId } = Registry.fromId(id)
-        connection.publish(subscriptionId, address, tx)
+        connection.publish(subscriptionId, { address, data: tx })
       }
     })
   }

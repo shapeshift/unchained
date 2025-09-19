@@ -1,5 +1,5 @@
 import { Logger } from '@shapeshiftoss/logger'
-import { WebsocketClient as BaseWebsocketClient, Args, Options, Subscription } from '@shapeshiftoss/websocket'
+import { Args, Options, Subscription, AddressSubscriptionWebsocketClient } from '@shapeshiftoss/websocket'
 import WebSocket from 'ws'
 import { Tx } from './models'
 import { NewBlock, WebsocketRepsonse } from '.'
@@ -14,7 +14,7 @@ interface WebsocketArgs extends Omit<Args, 'logger'> {
   blockHandler: BlockHandler | Array<BlockHandler>
 }
 
-export class WebsocketClient extends BaseWebsocketClient {
+export class WebsocketClient extends AddressSubscriptionWebsocketClient {
   private handleTransaction: TransactionHandler | Array<TransactionHandler>
   private handleBlock: BlockHandler | Array<BlockHandler>
 
@@ -27,16 +27,16 @@ export class WebsocketClient extends BaseWebsocketClient {
     this.handleTransaction = args.transactionHandler
     this.handleBlock = args.blockHandler
 
-    super.initialize()
+    super.connect()
   }
 
   protected onOpen(): void {
     const subscribeNewBlock: Subscription = { jsonrpc: '2.0', id: 'newBlock', method: 'subscribeNewBlock', params: {} }
-    this.socket.send(JSON.stringify(subscribeNewBlock))
+    this.socket?.send(JSON.stringify(subscribeNewBlock))
 
     if (this.addresses.length) {
       const subscribeAddresses = this.getAddressesSubscription()
-      this.socket.send(JSON.stringify(subscribeAddresses))
+      this.socket?.send(JSON.stringify(subscribeAddresses))
     }
   }
 
@@ -86,7 +86,7 @@ export class WebsocketClient extends BaseWebsocketClient {
     const subscribeAddresses = this.getAddressesSubscription()
 
     try {
-      this.socket.send(JSON.stringify(subscribeAddresses))
+      this.socket?.send(JSON.stringify(subscribeAddresses))
     } catch (err) {
       this.logger.debug(err, `failed to subscribe addresses: ${JSON.stringify(subscribeAddresses)}`)
     }
