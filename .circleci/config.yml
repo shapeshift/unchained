@@ -461,11 +461,11 @@ aliases:
     <<: *bnbsmartchain
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://bsc-blockbook.nownodes.io
-    indexer-ws-url: wss://bsc-blockbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY_DEV
-    rpc-url: https://bsc.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY_DEV
+    indexer-url: https://gateway.liquify.com
+    indexer-ws-url: wss://gateway.liquify.com
+    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_BSC
+    rpc-url: https://gateway.liquify.com
+    rpc-api-key: $LIQUIFY_RPC_API_KEY_BSC
     api-replicas: 1
     api-max-replicas: 2
 
