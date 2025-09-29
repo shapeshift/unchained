@@ -7,6 +7,7 @@ import { RegisterRoutes } from './routes'
 import { CoinGecko } from './coingecko'
 import { Zerion } from './zerion'
 import { Zrx } from './zrx'
+import { Portals } from './portals'
 
 const PORT = process.env.PORT ?? 3000
 
@@ -42,6 +43,9 @@ app.get('/api/v1/zerion/*', zerion.handler.bind(zerion))
 
 const zrx = new Zrx()
 app.get('/api/v1/zrx/*', zrx.handler.bind(zrx))
+
+const portals = new Portals()
+app.get('/api/v1/portals/*', portals.handler.bind(portals))
 
 // redirect any unmatched routes to docs
 app.get('/', async (_, res) => {
