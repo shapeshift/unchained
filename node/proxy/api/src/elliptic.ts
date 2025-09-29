@@ -71,7 +71,7 @@ export class Elliptic {
       throw err
     } finally {
       if (this.addressCache[address] === true) {
-        setInterval(() => delete this.addressCache[address], CACHE_TTL_MS)
+        setTimeout(() => delete this.addressCache[address], CACHE_TTL_MS)
       }
     }
   }

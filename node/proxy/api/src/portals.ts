@@ -1,5 +1,6 @@
 import axios, { AxiosResponse, isAxiosError } from 'axios'
 import { Axios } from 'axios'
+import Bottleneck from 'bottleneck'
 import { Request, Response } from 'express'
 
 const PORTALS_API_KEY = process.env.PORTALS_API_KEY
@@ -20,6 +21,7 @@ type RequestCache = Partial<Record<string, AxiosResponse>>
 export class Portals {
   private axiosInstance: Axios
   private requestCache: RequestCache
+  private limiter: Bottleneck
 
   constructor() {
     this.requestCache = {}
@@ -27,6 +29,13 @@ export class Portals {
       headers: {
         Authorization: `Bearer ${PORTALS_API_KEY}`,
       },
+    })
+    this.limiter = new Bottleneck({
+      reservoir: 3000,
+      reservoirRefreshAmount: 3000,
+      reservoirRefreshInterval: 60 * 1000,
+      maxConcurrent: 50,
+      minTime: 100,
     })
   }
 
@@ -49,8 +58,13 @@ export class Portals {
     }
 
     try {
-      const response = await this.axiosInstance.get(`${BASE_URL}${url}`)
-      if (ttl) this.requestCache[req.url] = response
+      const response = await this.limiter.schedule(() => this.axiosInstance.get(`${BASE_URL}${url}`))
+
+      if (ttl) {
+        this.requestCache[req.url] = response
+        setTimeout(() => delete this.requestCache[req.url], ttl)
+      }
+
       Object.entries(response.headers).forEach(([k, v]) => res.set(k, v))
       res.status(response.status).send(response.data)
     } catch (err) {
@@ -61,8 +75,6 @@ export class Portals {
       } else {
         res.status(500).send('Internal Server Error')
       }
-    } finally {
-      if (ttl) setInterval(() => delete this.requestCache[req.url], ttl)
     }
   }
 }
