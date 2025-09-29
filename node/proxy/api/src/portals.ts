@@ -35,7 +35,6 @@ export class Portals {
       reservoirRefreshAmount: 3000,
       reservoirRefreshInterval: 60 * 1000,
       maxConcurrent: 50,
-      minTime: 100,
     })
   }
 
