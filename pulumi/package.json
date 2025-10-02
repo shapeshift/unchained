@@ -9,6 +9,6 @@
     "clean": "rm -rf dist node_modules"
   },
   "dependencies": {
-    "@shapeshiftoss/cluster-launcher": "^0.21.2"
+    "@shapeshiftoss/cluster-launcher": "^0.22.2"
   }
 }
