@@ -745,9 +745,9 @@ commands:
       - run:
           name: install pulumi plugin resources
           command: |
-            pulumi plugin install resource aws 6.72.0
-            pulumi plugin install resource kubernetes 4.22.1
-            pulumi plugin install resource eks 2.8.1
+            pulumi plugin install resource aws 6.83.0
+            pulumi plugin install resource kubernetes 4.23.0
+            pulumi plugin install resource eks 3.9.1
 
 jobs:
   deploy-dependencies:
