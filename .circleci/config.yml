@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  go: circleci/go@3.0.3
+
 executors:
   pulumi:
     docker:
@@ -643,6 +646,8 @@ commands:
   precheck:
     description: install dependencies
     steps:
+      - go/install:
+          version: "1.23.4"
       - run:
           command: yarn install --immutable
       - run:
