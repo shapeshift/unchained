@@ -23,12 +23,13 @@ var (
 )
 
 type Config struct {
-	LCDURL    string `mapstructure:"LCD_URL"`
-	LCDAPIKEY string `mapstructure:"LCD_API_KEY"`
-	RPCURL    string `mapstructure:"RPC_URL"`
-	RPCAPIKEY string `mapstructure:"RPC_API_KEY"`
-	WSURL     string `mapstructure:"WS_URL"`
-	WSAPIKEY  string `mapstructure:"WS_API_KEY"`
+	LCDAPIKEY     string `mapstructure:"LCD_API_KEY"`
+	LCDURL        string `mapstructure:"LCD_URL"`
+	RPCAPIKEY     string `mapstructure:"RPC_API_KEY"`
+	RPCURL        string `mapstructure:"RPC_URL"`
+	INDEXERAPIKEY string `mapstructure:"INDEXER_API_KEY"`
+	INDEXERURL    string `mapstructure:"INDEXER_URL"`
+	WSURL         string `mapstructure:"WS_URL"`
 }
 
 func main() {
@@ -40,7 +41,7 @@ func main() {
 
 	conf := &Config{}
 	if *envPath == "" {
-		if err := config.LoadFromEnv(conf, "LCD_URL", "LCD_API_KEY", "RPC_URL", "RPC_API_KEY", "WS_URL", "WS_API_KEY"); err != nil {
+		if err := config.LoadFromEnv(conf, "LCD_API_KEY", "LCD_URL", "RPC_API_KEY", "RPC_URL", "INDEXER_API_KEY", "INDEXER_URL", "WS_URL"); err != nil {
 			logger.Panicf("failed to load config from env: %+v", err)
 		}
 	} else {
@@ -51,25 +52,28 @@ func main() {
 
 	encoding := cosmos.NewEncoding(mayatypes.RegisterInterfaces)
 
-	cfg := cosmos.Config{
-		Bech32AddrPrefix:  "maya",
-		Bech32PkPrefix:    "mayapub",
-		Bech32ValPrefix:   "mayav",
-		Bech32PkValPrefix: "mayavpub",
-		Denom:             "cacao",
-		NativeFee:         2000000000, // https://daemon.mayachain.shapeshift.com/lcd/mayachain/constants
-		Encoding:          encoding,
-		LCDURL:            conf.LCDURL,
-		LCDAPIKEY:         conf.LCDAPIKEY,
-		RPCURL:            conf.RPCURL,
-		RPCAPIKEY:         conf.RPCAPIKEY,
-		WSURL:             conf.WSURL,
-		WSAPIKEY:          conf.WSAPIKEY,
+	cfg := api.Config{
+		Config: cosmos.Config{
+			Bech32AddrPrefix:  "maya",
+			Bech32PkPrefix:    "mayapub",
+			Bech32ValPrefix:   "mayav",
+			Bech32PkValPrefix: "mayavpub",
+			Denom:             "cacao",
+			NativeFee:         2000000000, // https://daemon.mayachain.shapeshift.com/lcd/mayachain/constants
+			Encoding:          encoding,
+			LCDAPIKEY:         conf.LCDAPIKEY,
+			LCDURL:            conf.LCDURL,
+			RPCAPIKEY:         conf.RPCAPIKEY,
+			RPCURL:            conf.RPCURL,
+			WSURL:             conf.WSURL,
+		},
+		INDEXERURL:    conf.INDEXERURL,
+		INDEXERAPIKEY: conf.INDEXERAPIKEY,
 	}
 
 	prometheus := metrics.NewPrometheus("mayachain")
 
-	httpClient, err := cosmos.NewHTTPClient(cfg)
+	httpClient, err := api.NewHTTPClient(cfg)
 	if err != nil {
 		logger.Panicf("failed to create new http client: %+v", err)
 	}
@@ -79,12 +83,12 @@ func main() {
 		logger.Panicf("failed to create new block service: %+v", err)
 	}
 
-	wsClient, err := cosmos.NewWebsocketClient(cfg, blockService, errChan)
+	wsClient, err := cosmos.NewWebsocketClient(cfg.Config, blockService, errChan)
 	if err != nil {
 		logger.Panicf("failed to create new websocket client: %+v", err)
 	}
 
-	api := api.New(cfg, httpClient, wsClient, blockService, *swaggerPath, prometheus)
+	api := api.New(cfg.Config, httpClient, wsClient, blockService, *swaggerPath, prometheus)
 	defer api.Shutdown()
 
 	go api.Serve(errChan)

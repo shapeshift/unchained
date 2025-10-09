@@ -21,12 +21,7 @@
           "Websocket"
         ],
         "summary": "Subscribe to pending and confirmed transactions.",
-        "operationId": "Websocket",
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
+        "operationId": "Websocket"
       }
     },
     "/api/v1/account/{pubkey}": {
@@ -279,13 +274,8 @@
         "tags": [
           "Proxy"
         ],
-        "summary": "Thorchain lcd rest api endpoints.",
-        "operationId": "LCD",
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
+        "summary": "Mayanode lcd rest api endpoints.",
+        "operationId": "Proxy"
       }
     },
     "/midgard": {
@@ -293,39 +283,8 @@
         "tags": [
           "Proxy"
         ],
-        "summary": "Thorchain midgard rest api endpoints.",
-        "operationId": "Midgard",
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/rpc": {
-      "get": {
-        "tags": [
-          "Proxy"
-        ],
-        "summary": "Thorchain rpc rest api endpoints.",
-        "operationId": "GetRPC",
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Proxy"
-        ],
-        "summary": "Thorchain rpc jsonrpc endpoints.",
-        "operationId": "PostRPC",
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
+        "summary": "Mayachain midgard rest api endpoints.",
+        "operationId": "Proxy"
       }
     }
   },
