@@ -3,7 +3,7 @@
   "license": "MIT",
   "private": true,
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "workspaces": [
     "monitoring",
@@ -26,6 +26,8 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@moralisweb3/common-evm-utils": "^2.27.2",
+    "@moralisweb3/common-streams-utils": "^2.27.2",
     "@pulumi/kubernetes": "4.23.0",
     "@pulumi/pulumi": "3.160.0",
     "@shapeshiftoss/logger": "^1.1.2",
@@ -40,8 +42,10 @@
     "express": "^4.18.2",
     "folder-hash": "^4.0.4",
     "lerna": "^8.0.0",
+    "moralis": "^2.27.2",
     "morgan": "^1.10.0",
     "object-hash": "^3.0.0",
+    "p-queue": "^9.0.0",
     "prom-client": "^15.0.0",
     "swagger-ui-express": "^5.0.0",
     "tsoa": "^5.1.1",

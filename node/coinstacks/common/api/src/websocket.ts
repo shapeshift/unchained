@@ -1,5 +1,4 @@
 import { Logger } from '@shapeshiftoss/logger'
-import { WebsocketClient } from '@shapeshiftoss/websocket'
 import { v4 } from 'uuid'
 import WebSocket from 'ws'
 import { Prometheus } from './prometheus'
@@ -30,6 +29,11 @@ export interface MessageResponse {
   subscriptionId: string
 }
 
+export interface SubscriptionClient {
+  subscribeAddresses(currentAddresses: Array<string>, addressesToAdd: Array<string>): void
+  unsubscribeAddresses(currentAddresses: Array<string>, addressesToRemove: Array<string>): void
+}
+
 export interface Methods {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   subscribe: (subscriptionId: string, data?: any) => void
@@ -42,7 +46,7 @@ export class ConnectionHandler {
 
   private readonly websocket: WebSocket
   private readonly registry: Registry
-  private readonly client: WebsocketClient
+  private readonly client: SubscriptionClient
   private readonly prometheus: Prometheus
   private readonly logger: Logger
   private readonly routes: Record<Topics, Methods>
@@ -54,7 +58,7 @@ export class ConnectionHandler {
   private constructor(
     websocket: WebSocket,
     registry: Registry,
-    client: WebsocketClient,
+    client: SubscriptionClient,
     prometheus: Prometheus,
     logger: Logger
   ) {
@@ -96,7 +100,7 @@ export class ConnectionHandler {
   static start(
     websocket: WebSocket,
     registry: Registry,
-    client: WebsocketClient,
+    client: SubscriptionClient,
     prometheus: Prometheus,
     logger: Logger
   ): void {
@@ -159,7 +163,7 @@ export class ConnectionHandler {
     }
 
     this.subscriptionIds.clear()
-    this.client.subscribeAddresses(this.registry.getAddresses())
+    this.client.subscribeAddresses(this.registry.getAddresses(), this.registry.getAddresses())
   }
 
   private handleSubscribeTxs(subscriptionId: string, data?: TxsTopicData): void {
@@ -174,23 +178,29 @@ export class ConnectionHandler {
     }
 
     this.subscriptionIds.add(subscriptionId)
-    this.registry.subscribe(this.clientId, subscriptionId, this, data.addresses)
-    this.client.subscribeAddresses(this.registry.getAddresses())
+
+    const subscribedAddresses = this.registry.subscribe(this.clientId, subscriptionId, this, data.addresses)
+
+    this.client.subscribeAddresses(this.registry.getAddresses(), subscribedAddresses)
   }
 
   private handleUnsubscribeTxs(subscriptionId: string, data?: TxsTopicData): void {
+    const unsubscribedAddresses: Array<string> = []
+
     if (subscriptionId) {
       this.subscriptionIds.delete(subscriptionId)
-      this.registry.unsubscribe(this.clientId, subscriptionId, data?.addresses ?? [])
+      const addresses = this.registry.unsubscribe(this.clientId, subscriptionId, data?.addresses ?? [])
+      unsubscribedAddresses.push(...addresses)
     } else {
       for (const subscriptionId of this.subscriptionIds) {
-        this.registry.unsubscribe(this.clientId, subscriptionId, [])
+        const addresses = this.registry.unsubscribe(this.clientId, subscriptionId, [])
+        unsubscribedAddresses.push(...addresses)
       }
 
       this.subscriptionIds.clear()
     }
 
-    this.client.subscribeAddresses(this.registry.getAddresses())
+    this.client.subscribeAddresses(this.registry.getAddresses(), unsubscribedAddresses)
   }
 
   publish(subscriptionId: string, address: string, data: unknown): void {

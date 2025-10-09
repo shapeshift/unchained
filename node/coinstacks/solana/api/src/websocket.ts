@@ -102,6 +102,10 @@ export class WebsocketClient extends BaseWebsocketClient {
     })
   }
 
+  unsubscribeAddresses(addresses: string[]): void {
+    this.subscribeAddresses(addresses)
+  }
+
   private unsubscribe(subscriptionId: number): void {
     this.socket.send(
       JSON.stringify({

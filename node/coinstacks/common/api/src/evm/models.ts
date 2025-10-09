@@ -53,6 +53,9 @@ export type TokenType = 'erc721' | 'erc1155'
  * Contains info about token metadata (ERC-721/ERC-1155)
  */
 export interface TokenMetadata {
+  address: string
+  id: string
+  type: string
   name: string
   description: string
   media: {

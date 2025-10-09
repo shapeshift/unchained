@@ -3,8 +3,8 @@ import type { Logger } from '@shapeshiftoss/logger'
 import axios, { AxiosError } from 'axios'
 import BigNumber from 'bignumber.js'
 import { erc1155Abi, erc721Abi, getAddress, getContract, isHex, parseUnits, PublicClient, toHex } from 'viem'
-import type { BadRequestError, BaseAPI, EstimateGasBody, RPCRequest, RPCResponse, SendTxBody } from '../'
-import { ApiError } from '../'
+import type { BadRequestError, BaseAPI, EstimateGasBody, RPCRequest, RPCResponse, SendTxBody } from '..'
+import { ApiError } from '..'
 import { createAxiosRetry, exponentialDelay, handleError, rpcId, validatePageSize } from '../utils'
 import type {
   Account,
@@ -35,7 +35,7 @@ type InternalTxFetchMethod = 'trace_transaction' | 'debug_traceTransaction'
 
 export const formatAddress = (address: string | undefined): string => (address ? getAddress(address) : '')
 
-export interface ServiceArgs {
+export interface BlockbookServiceArgs {
   blockbook: Blockbook
   gasOracle: GasOracle
   explorerApiUrl: URL
@@ -45,7 +45,7 @@ export interface ServiceArgs {
   rpcApiKey?: string
 }
 
-export class Service implements Omit<BaseAPI, 'getInfo'>, API {
+export class BlockbookService implements Omit<BaseAPI, 'getInfo'>, API {
   private readonly blockbook: Blockbook
   private readonly gasOracle: GasOracle
   private readonly explorerApiUrl: URL
@@ -54,7 +54,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   private readonly rpcUrl: string
   private readonly rpcApiKey?: string
 
-  constructor(args: ServiceArgs) {
+  constructor(args: BlockbookServiceArgs) {
     this.blockbook = args.blockbook
     this.gasOracle = args.gasOracle
     this.explorerApiUrl = args.explorerApiUrl
@@ -849,6 +849,9 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       })()
 
       return {
+        address,
+        id,
+        type,
         name: metadata?.name ?? '',
         description: metadata?.description ?? '',
         media: {
@@ -860,6 +863,9 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       this.logger.error(err, 'failed to fetch token metadata')
 
       return {
+        address,
+        id,
+        type,
         name: '',
         description: '',
         media: { url: '' },

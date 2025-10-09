@@ -60,19 +60,31 @@ export class Registry {
    * @param connection websocket client connection
    * @param addresses list of addresses to subscribe to
    */
-  subscribe(clientId: string, subscriptionId: string, connection: ConnectionHandler, addresses: Array<string>) {
+  subscribe(
+    clientId: string,
+    subscriptionId: string,
+    connection: ConnectionHandler,
+    addresses: Array<string>
+  ): Array<string> {
     const id = Registry.toId(clientId, subscriptionId)
 
     if (!this.clients[id]) this.clients[id] = new Set<string>()
 
+    const subscribedAddresses: Array<string> = []
+
     addresses.forEach((address) => {
       address = this.formatAddress(address)
 
-      if (!this.addresses[address]) this.addresses[address] = new Map<string, ConnectionHandler>()
+      if (!this.addresses[address]) {
+        this.addresses[address] = new Map<string, ConnectionHandler>()
+        subscribedAddresses.push(address)
+      }
 
       this.clients[id].add(address)
       this.addresses[address].set(id, connection)
     })
+
+    return subscribedAddresses
   }
 
   /**
@@ -82,10 +94,12 @@ export class Registry {
    * @param subscriptionId unique identifier for a set of addresses
    * @param addresses list of addresses to unsubscribe (empty array will unsubscribe from all currently registered addresses)
    */
-  unsubscribe(clientId: string, subscriptionId: string, addresses: Array<string>) {
+  unsubscribe(clientId: string, subscriptionId: string, addresses: Array<string>): Array<string> {
     const id = Registry.toId(clientId, subscriptionId)
 
-    if (!this.clients[id]) return
+    if (!this.clients[id]) return []
+
+    const unsubscribedAddresses: Array<string> = []
 
     const unregister = (id: string, address: string) => {
       address = this.formatAddress(address)
@@ -101,7 +115,10 @@ export class Registry {
         this.addresses[address].delete(id)
 
         // delete address from registery if no clients are registered anymore
-        if (!this.addresses[address].size) delete this.addresses[address]
+        if (!this.addresses[address].size) {
+          delete this.addresses[address]
+          unsubscribedAddresses.push(address)
+        }
       }
     }
 
@@ -114,6 +131,8 @@ export class Registry {
         unregister(id, address)
       }
     }
+
+    return unsubscribedAddresses
   }
 
   async onBlock(msg: unknown): Promise<void> {
@@ -136,7 +155,7 @@ export class Registry {
   }
 
   async onTransaction(msg: unknown): Promise<void> {
-    if (!Object.keys(this.clients).length) return
+    //if (!Object.keys(this.clients).length) return
 
     try {
       const { addresses, tx } = await this.handleTransaction(msg)

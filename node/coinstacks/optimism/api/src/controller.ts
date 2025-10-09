@@ -17,7 +17,7 @@ import { optimism } from 'viem/chains'
 import { BaseAPI, EstimateGasBody, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { API, GAS_PRICE_ORACLE_ABI } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { EVM } from '../../../common/api/src/evm/controller'
-import { Service } from '../../../common/api/src/evm/service'
+import { BlockbookService } from '../../../common/api/src/evm/blockbookService'
 import { GasOracle } from '../../../common/api/src/evm/gasOracle'
 import { OptimismGasEstimate, OptimismGasFees } from './models'
 
@@ -59,7 +59,7 @@ const client = createPublicClient({
 export const blockbook = new Blockbook({ httpURL, wsURL, logger, apiKey })
 export const gasOracle = new GasOracle({ logger, client, coinstack: 'optimism' })
 
-export const service = new Service({
+export const service = new BlockbookService({
   blockbook,
   gasOracle,
   explorerApiUrl: new URL(`https://api.etherscan.io/v2/api?chainid=10&apikey=${ETHERSCAN_API_KEY}`),
