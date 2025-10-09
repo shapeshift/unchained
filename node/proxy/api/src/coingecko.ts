@@ -50,7 +50,7 @@ export class CoinGecko {
         res.status(500).send('Internal Server Error')
       }
     } finally {
-      setInterval(() => delete this.requestCache[req.url], CACHE_TTL_MS)
+      setTimeout(() => delete this.requestCache[req.url], CACHE_TTL_MS)
     }
   }
 }

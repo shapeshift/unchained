@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  go: circleci/go@3.0.3
+
 executors:
   pulumi:
     docker:
@@ -162,7 +165,7 @@ aliases:
     api-memory-limit: 500Mi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/mayachain/mayanode:mainnet-1.122.0
+    service-image-1: registry.gitlab.com/mayachain/mayanode:mainnet-1.123.2
     service-cpu-limit-1: "2"
     service-memory-limit-1: 12Gi
     service-storage-size-1: 1000Gi
@@ -198,6 +201,8 @@ commands:
   precheck:
     description: install dependencies
     steps:
+      - go/install:
+          version: "1.23.4"
       - run:
           command: yarn install --immutable
       - run:
@@ -300,9 +305,9 @@ commands:
       - run:
           name: install pulumi plugin resources
           command: |
-            pulumi plugin install resource aws 6.72.0
-            pulumi plugin install resource kubernetes 4.22.1
-            pulumi plugin install resource eks 2.8.1
+            pulumi plugin install resource aws 6.83.0
+            pulumi plugin install resource kubernetes 4.23.0
+            pulumi plugin install resource eks 3.9.1
 
 jobs:
   deploy-dependencies:
