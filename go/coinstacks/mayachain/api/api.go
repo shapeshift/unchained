@@ -178,6 +178,10 @@ func New(cfg cosmos.Config, httpClient *HTTPClient, wsClient *cosmos.WSClient, b
 // swagger:route GET / Websocket Websocket
 //
 // Subscribe to pending and confirmed transactions.
+//
+// responses:
+//
+//	200:
 func (a *API) Websocket(w http.ResponseWriter, r *http.Request) {
 	a.API.Websocket(w, r)
 }
@@ -258,9 +262,13 @@ func (a *API) EstimateGas(w http.ResponseWriter, r *http.Request) {
 	a.API.EstimateGas(w, r)
 }
 
-// swagger:route GET /lcd Proxy Proxy
+// swagger:route GET /lcd Proxy LCD
 //
 // Mayanode lcd rest api endpoints.
+//
+// responses:
+//
+//	200:
 func (a *API) LCD(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/lcd")
 	if path == "" {
@@ -284,9 +292,13 @@ func (a *API) LCD(w http.ResponseWriter, r *http.Request) {
 	api.HandleResponse(w, http.StatusOK, result)
 }
 
-// swagger:route GET /midgard Proxy Proxy
+// swagger:route GET /midgard Proxy Midgard
 //
 // Mayachain midgard rest api endpoints.
+//
+// responses:
+//
+//	200:
 func (a *API) Midgard(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/midgard")
 	if path == "" {

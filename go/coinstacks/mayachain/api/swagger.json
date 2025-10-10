@@ -21,7 +21,12 @@
           "Websocket"
         ],
         "summary": "Subscribe to pending and confirmed transactions.",
-        "operationId": "Websocket"
+        "operationId": "Websocket",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
       }
     },
     "/api/v1/account/{pubkey}": {
@@ -275,7 +280,12 @@
           "Proxy"
         ],
         "summary": "Mayanode lcd rest api endpoints.",
-        "operationId": "Proxy"
+        "operationId": "LCD",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
       }
     },
     "/midgard": {
@@ -284,7 +294,12 @@
           "Proxy"
         ],
         "summary": "Mayachain midgard rest api endpoints.",
-        "operationId": "Proxy"
+        "operationId": "Midgard",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
       }
     }
   },
