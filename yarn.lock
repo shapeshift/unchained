@@ -2202,10 +2202,10 @@
     "@noble/hashes" "~1.5.0"
     "@scure/base" "~1.1.8"
 
-"@shapeshiftoss/cluster-launcher@^0.22.2":
-  version "0.22.2"
-  resolved "https://registry.yarnpkg.com/@shapeshiftoss/cluster-launcher/-/cluster-launcher-0.22.2.tgz#0f81cb1711b116188f2b27a10684717bb4d0a192"
-  integrity sha512-iATPc4S8siuXADszmOs8fI9I5l1eA87t2oNEP1o6Ff+P7FjolY5bQ4NU8lGtrRUep7GdELdkv30K1wV7IFW2Rw==
+"@shapeshiftoss/cluster-launcher@^0.22.3":
+  version "0.22.3"
+  resolved "https://registry.yarnpkg.com/@shapeshiftoss/cluster-launcher/-/cluster-launcher-0.22.3.tgz#da84eb240a157a22ab6771faaff1c02fbc477696"
+  integrity sha512-yXYJNb2j4ZNIat7CN29tFKvdAFw5wVC1r8mnZwVyoFnaTOZ6htgKiDaBMNxKuJf4H2jXMmYMNGaB61v5BdJyJQ==
   dependencies:
     "@pulumi/aws" "6.83.0"
     "@pulumi/awsx" "2.22.0"
