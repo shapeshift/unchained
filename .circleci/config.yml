@@ -590,6 +590,11 @@ aliases:
     <<: *base
     environment: dev
     pulumi-stack: public-dev-us-east-2
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/base
+    rpc-api-key: $MORALIS_RPC_API_KEY_BASE
+    webhook-url: https://dev-api.base.shapeshift.com/api/v1/webhook/moralis
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 250m
@@ -854,9 +859,15 @@ jobs:
       ws-api-key:
         type: string
         default: ""
-      etherscan-env-var:
+      etherscan-api-key:
         type: string
         default: ETHERSCAN_API_KEY
+      webhook-url:
+        type: string
+        default: ""
+      blocknative-api-key:
+        type: string
+        default: BLOCKNATIVE_API_KEY
     steps:
       - setup_remote_docker
       - attach_workspace:
@@ -874,7 +885,10 @@ jobs:
             echo 'export RPC_API_KEY=<< parameters.rpc-api-key >>' >> $BASH_ENV
             echo 'export WS_URL=<< parameters.ws-url >>' >> $BASH_ENV
             echo 'export WS_API_KEY=<< parameters.ws-api-key >>' >> $BASH_ENV
-            echo 'export ETHERSCAN_API_KEY=$<< parameters.etherscan-env-var >>' >> $BASH_ENV
+            echo 'export ETHERSCAN_API_KEY=$<< parameters.etherscan-api-key >>' >> $BASH_ENV
+            echo 'export BLOCKNATIVE_API_KEY=$<< parameters.blocknative-api-key >>' >> $BASH_ENV
+            echo 'export WEBHOOK_URL=$<< parameters.webhook-url >>' >> $BASH_ENV
+            echo 'export ENVIRONMENT=$<< parameters.environment >>:-prod' >> $BASH_ENV
       - run:
           name: pulumi
           working_directory: node/<< parameters.pulumi-dir >>
