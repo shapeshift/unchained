@@ -7,7 +7,7 @@ services:
       - 'traefik.http.routers.avalanche-api.rule=Host(`api.avalanche.localhost`)'
       - 'traefik.http.services.avalanche-api.loadbalancer.server.port=3000'
     working_dir: /app/node/coinstacks/avalanche/api
-    command: yarn nodemon
+    command: yarn run -T nodemon
     volumes:
       - ../../..:/app
     networks:

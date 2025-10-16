@@ -7,7 +7,7 @@ services:
       - 'traefik.http.routers.bitcoin-api.rule=Host(`api.bitcoin.localhost`)'
       - 'traefik.http.services.bitcoin-api.loadbalancer.server.port=3000'
     working_dir: /app/node/coinstacks/bitcoin/api
-    command: yarn nodemon
+    command: yarn run -T nodemon
     volumes:
       - ../../..:/app
     networks:

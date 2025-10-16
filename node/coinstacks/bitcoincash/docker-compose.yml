@@ -7,7 +7,7 @@ services:
       - 'traefik.http.routers.bitcoincash-api.rule=Host(`api.bitcoincash.localhost`)'
       - 'traefik.http.services.bitcoincash-api.loadbalancer.server.port=3000'
     working_dir: /app/node/coinstacks/bitcoincash/api
-    command: yarn nodemon
+    command: yarn run -T nodemon
     volumes:
       - ../../..:/app
     networks:

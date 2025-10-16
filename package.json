@@ -3,7 +3,7 @@
   "license": "MIT",
   "private": true,
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "workspaces": [
     "monitoring",
@@ -14,15 +14,12 @@
     "go/coinstacks/**/pulumi"
   ],
   "scripts": {
-    "build": "lerna run build --scope @shapeshiftoss/*",
-    "clean": "lerna run clean --scope @shapeshiftoss/* && rm -rf coverage dist node_modules",
+    "build": "yarn workspaces foreach -Apt run build",
+    "clean": "yarn workspaces foreach -Ap run clean && rm -rf dist node_modules",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
     "lint": "eslint '*/**/*.{js,ts}' && yarn lint:ts",
     "lint:ts": "tsc --noEmit",
-    "version:major": "lerna version major --force-publish --no-push",
-    "version:minor": "lerna version minor --force-publish --no-push",
-    "version:patch": "lerna version patch --force-publish --no-push",
     "prepare": "husky install"
   },
   "dependencies": {
@@ -39,7 +36,6 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "folder-hash": "^4.0.4",
-    "lerna": "^8.0.0",
     "morgan": "^1.10.0",
     "object-hash": "^3.0.0",
     "prom-client": "^15.0.0",

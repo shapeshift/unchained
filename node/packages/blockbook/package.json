@@ -9,12 +9,12 @@
     "dist"
   ],
   "scripts": {
-    "build": "yarn generate && tsc",
+    "build": "yarn generate && yarn run -T tsc",
     "clean": "rm -rf dist node_modules src/routes.ts src/swagger.json",
-    "dev": "nodemon -e ts --watch src --ignore src/routes.ts -x 'yarn build && node dist/app.js'",
-    "generate": "tsoa spec-and-routes",
+    "dev": "yarn run -T nodemon -e ts --watch src --ignore src/routes.ts -x 'yarn build && node dist/app.js'",
+    "generate": "yarn run -T tsoa spec-and-routes",
     "start": "node dist/app.js",
-    "watch": "nodemon -e ts --watch src --ignore src/routes.ts -x yarn build"
+    "watch": "yarn run -T nodemon -e ts --watch src --ignore src/routes.ts -x yarn build"
   },
   "dependencies": {
     "@shapeshiftoss/websocket": "^10.0.0",

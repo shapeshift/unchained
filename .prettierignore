@@ -7,7 +7,6 @@ swaggerui
 k6
 swagger.json
 generated
-lerna.json
 *.md
 *.yml
 *.yaml

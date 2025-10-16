@@ -9,10 +9,10 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "yarn run -T tsc",
     "clean": "rm -rf dist node_modules",
-    "dev": "nodemon -e ts --watch src -x yarn build",
-    "watch": "nodemon -e ts --watch src -x yarn build"
+    "dev": "yarn run -T nodemon -e ts --watch src -x yarn build",
+    "watch": "yarn run -T nodemon -e ts --watch src -x yarn build"
   },
   "dependencies": {
     "ws": "^8.15.0"

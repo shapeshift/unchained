@@ -1047,7 +1047,7 @@ jobs:
       - postcheck
       - run:
           name: Remove devDependencies
-          command: yarn --production --ignore-scripts --prefer-offline --silent --frozen-lockfile
+          command: yarn workspaces focus --all --production
       - persist_to_workspace:
           root: "~"
           paths:
