@@ -203,7 +203,7 @@ aliases:
     service-memory-limit-1: 32Gi
     service-storage-size-1: 1500Gi
     service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v6.1.2
+    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v6.0.5
     service-cpu-limit-2: "2"
     service-memory-limit-2: 16Gi
     service-storage-size-2: 600Gi
@@ -1061,7 +1061,7 @@ jobs:
       - postcheck
       - run:
           name: Remove devDependencies
-          command: yarn --production --ignore-scripts --prefer-offline --silent --frozen-lockfile
+          command: yarn workspaces focus --all --production
       - persist_to_workspace:
           root: "~"
           paths:

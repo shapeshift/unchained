@@ -7,7 +7,7 @@ services:
       - 'traefik.http.routers.base-api.rule=Host(`api.base.localhost`)'
       - 'traefik.http.services.base-api.loadbalancer.server.port=3000'
     working_dir: /app/node/coinstacks/base/api
-    command: yarn nodemon
+    command: yarn run -T nodemon
     volumes:
       - ../../..:/app
     networks:

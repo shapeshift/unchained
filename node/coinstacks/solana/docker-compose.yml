@@ -7,7 +7,7 @@ services:
       - 'traefik.http.routers.solana-api.rule=Host(`api.solana.localhost`)'
       - 'traefik.http.services.solana-api.loadbalancer.server.port=3000'
     working_dir: /app/node/coinstacks/solana/api
-    command: yarn nodemon
+    command: yarn run -T nodemon
     volumes:
       - ../../..:/app
     networks:

@@ -7,7 +7,7 @@ services:
       - 'traefik.http.routers.arbitrum-nova-api.rule=Host(`api.arbitrum-nova.localhost`)'
       - 'traefik.http.services.arbitrum-nova-api.loadbalancer.server.port=3000'
     working_dir: /app/node/coinstacks/arbitrum-nova/api
-    command: yarn nodemon
+    command: yarn run -T nodemon
     volumes:
       - ../../..:/app
     networks:
