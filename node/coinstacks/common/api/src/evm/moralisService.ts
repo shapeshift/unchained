@@ -12,17 +12,19 @@ import { Fees, TokenBalance, TokenTransfer, TokenType } from './models'
 import type { BlockNativeResponse, TraceCall } from './types'
 import { Logger } from '@shapeshiftoss/logger'
 
-const MORALIS_API_KEY = process.env.MORALIS_API_KEY
+const INDEXER_URL = process.env.INDEXER_URL
+const INDEXER_API_KEY = process.env.INDEXER_API_KEY
 const BLOCK_NATIVE_API_KEY = process.env.BLOCK_NATIVE_API_KEY
 const WEBHOOK_URL = process.env.WEBHOOK_URL as string
 const ENVIRONMENT = process.env.ENVIRONMENT as string
 
-if (!MORALIS_API_KEY) throw new Error('MORALIS_API_KEY env var not set')
+if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
+if (!INDEXER_API_KEY) throw new Error('INDEXER_API_KEY env var not set')
 if (!BLOCK_NATIVE_API_KEY) throw new Error('BLOCK_NATIVE_API_KEY env var not set')
 if (!WEBHOOK_URL) throw new Error('WEBHOOK_URL env var not set')
 if (!ENVIRONMENT) throw new Error('ENVIRONMENT env var not set')
 
-void Moralis.start({ apiKey: MORALIS_API_KEY })
+void Moralis.start({ evmApiBaseUrl: INDEXER_URL, apiKey: INDEXER_API_KEY })
 
 const axiosNoRetry = axios.create({ timeout: 5000 })
 const axiosWithRetry = createAxiosRetry({}, { timeout: 10000 })
@@ -90,7 +92,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
   async getSecret() {
     if (!this.secret) {
       const { data } = await axios.get<{ secretKey: string }>('https://api.moralis-streams.com/settings', {
-        headers: { 'X-API-Key': MORALIS_API_KEY },
+        headers: { 'X-API-Key': INDEXER_API_KEY },
       })
 
       this.secret = data.secretKey
