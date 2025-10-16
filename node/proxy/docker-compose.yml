@@ -7,7 +7,7 @@ services:
       - 'traefik.http.routers.proxy-api.rule=Host(`api.proxy.localhost`)'
       - 'traefik.http.services.proxy-api.loadbalancer.server.port=3000'
     working_dir: /app/node/proxy/api
-    command: yarn nodemon
+    command: yarn run -T nodemon
     volumes:
       - ../..:/app
     networks:
