@@ -250,6 +250,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
 
       if (!data) throw new Error(`Transaction ${txid} not found`)
 
+      const currentBlock = await this.client.getBlockNumber()
+
       const tx = data.result
 
       const internalTxs = tx.internalTransactions?.map<InternalTx>((tx) => ({
@@ -264,7 +266,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
         blockHeight: Number(tx.blockNumber.toString()),
         timestamp: Math.floor(tx.blockTimestamp.getTime() / 1000),
         status: Number(tx.receiptStatus),
-        confirmations: 1,
+        confirmations: Number(currentBlock - tx.blockNumber.toBigInt()),
         from: tx.from.checksum,
         to: tx.to?.checksum ?? '',
         value: tx.value?.wei ?? '0',
@@ -463,7 +465,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
       // allow transaction to be handled even if we fail to get internal transactions (some better than none)
       const internalTxs = await (async () => {
         try {
-          return await this.fetchInternalTxsByTxTrace('')
+          return await this.fetchInternalTxsByTxTrace(tx.txid)
         } catch (err) {
           return undefined
         }
