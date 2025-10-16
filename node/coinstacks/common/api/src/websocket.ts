@@ -158,12 +158,15 @@ export class ConnectionHandler {
     this.pingTimeout && clearTimeout(this.pingTimeout)
     clearInterval(interval)
 
+    const unsubscribedAddresses: Array<string> = []
+
     for (const subscriptionId of this.subscriptionIds) {
-      this.registry.unsubscribe(this.clientId, subscriptionId, [])
+      const addresses = this.registry.unsubscribe(this.clientId, subscriptionId, [])
+      unsubscribedAddresses.push(...addresses)
     }
 
     this.subscriptionIds.clear()
-    this.client.subscribeAddresses(this.registry.getAddresses(), this.registry.getAddresses())
+    this.client.unsubscribeAddresses(this.registry.getAddresses(), unsubscribedAddresses)
   }
 
   private handleSubscribeTxs(subscriptionId: string, data?: TxsTopicData): void {
@@ -200,7 +203,7 @@ export class ConnectionHandler {
       this.subscriptionIds.clear()
     }
 
-    this.client.subscribeAddresses(this.registry.getAddresses(), unsubscribedAddresses)
+    this.client.unsubscribeAddresses(this.registry.getAddresses(), unsubscribedAddresses)
   }
 
   publish(subscriptionId: string, address: string, data: unknown): void {

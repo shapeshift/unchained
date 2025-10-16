@@ -58,7 +58,7 @@ export class BlockbookService implements Omit<BaseAPI, 'getInfo'>, API {
     this.blockbook = args.blockbook
     this.gasOracle = args.gasOracle
     this.explorerApiUrl = args.explorerApiUrl
-    this.logger = args.logger.child({ namespace: ['service'] })
+    this.logger = args.logger.child({ namespace: ['blockbookService'] })
     this.client = args.client
     this.rpcUrl = args.rpcUrl
     this.rpcApiKey = args.rpcApiKey

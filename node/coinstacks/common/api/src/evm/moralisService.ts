@@ -10,12 +10,17 @@ import { createAxiosRetry, exponentialDelay, handleError, rpcId, validatePageSiz
 import type { Account, API, Tx, TxHistory, GasFees, InternalTx, GasEstimate, TokenMetadata } from './models'
 import { Fees, TokenBalance, TokenTransfer, TokenType } from './models'
 import type { BlockNativeResponse, TraceCall } from './types'
+import { Logger } from '@shapeshiftoss/logger'
 
 const MORALIS_API_KEY = process.env.MORALIS_API_KEY
 const BLOCK_NATIVE_API_KEY = process.env.BLOCK_NATIVE_API_KEY
+const WEBHOOK_URL = process.env.WEBHOOK_URL as string
+const ENVIRONMENT = process.env.ENVIRONMENT as string
 
 if (!MORALIS_API_KEY) throw new Error('MORALIS_API_KEY env var not set')
 if (!BLOCK_NATIVE_API_KEY) throw new Error('BLOCK_NATIVE_API_KEY env var not set')
+if (!WEBHOOK_URL) throw new Error('WEBHOOK_URL env var not set')
+if (!ENVIRONMENT) throw new Error('ENVIRONMENT env var not set')
 
 void Moralis.start({ apiKey: MORALIS_API_KEY })
 
@@ -29,66 +34,57 @@ type TransactionHandler = (tx: Tx) => Promise<void>
 export interface MoralisServiceArgs {
   chain: EvmChain
   explorerApiUrl: URL
+  logger: Logger
   client: PublicClient
   rpcUrl: string
 }
 
 export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, SubscriptionClient {
   private readonly chain: EvmChain
+  private readonly logger: Logger
   private readonly client: PublicClient
   private readonly rpcUrl: string
 
-  private streamId?: string
   private secret?: string
+  private streamId?: string
   private queue = new PQueue({ concurrency: 1 })
 
   transactionHandler?: TransactionHandler
 
-  // TODO: environment arg (local, dev, prod) and webhook url arg
   constructor(args: MoralisServiceArgs) {
     this.chain = args.chain
+    this.logger = args.logger.child({ namespace: ['moralisService'] })
     this.client = args.client
     this.rpcUrl = args.rpcUrl
-
-    const stream: CreateStreamEvmRequest = {
-      chains: [args.chain],
-      description: `${args.chain.display()} stream`,
-      tag: args.chain.display(),
-      webhookUrl: 'https://week-floor-yen-shaved.trycloudflare.com/api/v1/webhook/moralis',
-      includeNativeTxs: true,
-      includeInternalTxs: true,
-      includeContractLogs: true,
-    }
-
-    this.streamIdPromise = this.initializeStream(args)
-
-    Moralis.Streams.add(stream).then((currentStream) => {
-      Moralis.Streams.delete({ id: currentStream.result.id, networkType: 'evm' }).then(() => {
-        Moralis.Streams.add(stream).then((newStream) => {
-          this.streamId = newStream.result.id
-        })
-      })
-    })
   }
 
-  private async initializeStream(args: MoralisServiceArgs): Promise<string> {
-    const stream: CreateStreamEvmRequest = {
-      chains: [args.chain],
-      description: `${args.chain.display()} stream`,
-      tag: args.chain.display(),
-      webhookUrl: 'https://week-floor-yen-shaved.trycloudflare.com/api/v1/webhook/moralis',
-      includeNativeTxs: true,
-      includeInternalTxs: true,
-      includeContractLogs: true,
+  private async initializeStream() {
+    try {
+      const stream: CreateStreamEvmRequest = {
+        chains: [this.chain],
+        description: `${this.chain.display()} Stream`,
+        tag: `${this.chain.display()} - ${ENVIRONMENT}`,
+        webhookUrl: WEBHOOK_URL,
+        includeNativeTxs: true,
+        includeInternalTxs: true,
+        includeContractLogs: true,
+      }
+
+      const currentStream = await Moralis.Streams.add(stream)
+
+      await Moralis.Streams.delete({ id: currentStream.result.id, networkType: 'evm' })
+
+      const newStream = await Moralis.Streams.add(stream)
+
+      this.streamId = newStream.result.id
+    } catch (err) {
+      if (err instanceof Error) {
+        this.logger.error({ error: err.message }, 'Failed to initialize MoralisService')
+      } else {
+        this.logger.error('Failed to initialize MoralisService')
+      }
+      process.exit(1)
     }
-
-    const currentStream = await Moralis.Streams.add(stream)
-
-    await Moralis.Streams.delete({ id: currentStream.result.id, networkType: 'evm' })
-
-    const newStream = await Moralis.Streams.add(stream)
-
-    return newStream.result.id
   }
 
   async getSecret() {
@@ -169,62 +165,74 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
         }
       }
 
-      const txs = result.reduce<Array<Tx>>((prev, tx) => {
-        const isNftOnly =
-          tx.nftTransfers.length &&
-          !tx.erc20Transfers.length &&
-          !tx.nativeTransfers.length &&
-          !tx.internalTransactions?.length
+      const currentBlock = await this.client.getBlockNumber()
 
-        const isInvalid =
-          !tx.nftTransfers.length &&
-          !tx.erc20Transfers.length &&
-          !tx.nativeTransfers.length &&
-          !tx.internalTransactions?.length
+      const txs = await Promise.all(
+        result
+          .filter((tx) => {
+            const isNftOnly =
+              tx.nftTransfers.length &&
+              !tx.erc20Transfers.length &&
+              !tx.nativeTransfers.length &&
+              !tx.internalTransactions?.length
 
-        if (isNftOnly || isInvalid) return prev
+            const isInvalid =
+              !tx.nftTransfers.length &&
+              !tx.erc20Transfers.length &&
+              !tx.nativeTransfers.length &&
+              !tx.internalTransactions?.length
 
-        const tokenTransfers = tx.erc20Transfers.map<TokenTransfer>((transfer) => ({
-          from: transfer.fromAddress.checksum,
-          to: transfer.toAddress?.checksum ?? '',
-          value: transfer.value,
-          contract: transfer.address.checksum,
-          decimals: transfer.tokenDecimals,
-          name: transfer.tokenName,
-          symbol: transfer.tokenSymbol,
-          type: 'ERC20',
-        }))
+            return !isNftOnly && !isInvalid
+          })
+          .map<Promise<Tx | undefined>>(async (tx) => {
+            const tokenTransfers = tx.erc20Transfers.map<TokenTransfer>((transfer) => ({
+              from: transfer.fromAddress.checksum,
+              to: transfer.toAddress?.checksum ?? '',
+              value: transfer.value,
+              contract: transfer.address.checksum,
+              decimals: transfer.tokenDecimals,
+              name: transfer.tokenName,
+              symbol: transfer.tokenSymbol,
+              type: 'ERC20',
+            }))
 
-        const internalTxs = tx.internalTransactions?.map<InternalTx>((tx) => ({
-          from: tx.from.checksum,
-          to: tx.to.checksum,
-          value: tx.value.toString(),
-        }))
+            const internalTxs = tx.internalTransactions?.map<InternalTx>((tx) => ({
+              from: tx.from.checksum,
+              to: tx.to.checksum,
+              value: tx.value.toString(),
+            }))
 
-        prev.push({
-          txid: tx.hash,
-          blockHash: tx.blockHash,
-          blockHeight: Number(tx.blockNumber.toString()),
-          timestamp: Math.floor(new Date(tx.blockTimestamp).getTime() / 1000),
-          status: Number(tx.receiptStatus),
-          confirmations: 1,
-          from: tx.fromAddress.checksum,
-          to: tx.toAddress?.checksum ?? '',
-          value: tx.value,
-          fee: BigNumber(tx.transactionFee ?? '0')
-            .times(1e18)
-            .toFixed(0),
-          gasLimit: tx.gas ?? '0',
-          gasPrice: tx.gasPrice,
-          gasUsed: tx.receiptGasUsed,
-          tokenTransfers: tokenTransfers.length ? tokenTransfers : undefined,
-          internalTxs: internalTxs?.length ? internalTxs : undefined,
-        })
+            const transaction = await Moralis.EvmApi.transaction.getTransaction({
+              chain: this.chain,
+              transactionHash: tx.hash,
+            })
 
-        return prev
-      }, [])
+            if (!transaction) return
 
-      return { pubkey, txs, cursor: pagination.cursor }
+            return {
+              txid: tx.hash,
+              blockHash: tx.blockHash,
+              blockHeight: Number(tx.blockNumber.toString()),
+              timestamp: Math.floor(new Date(tx.blockTimestamp).getTime() / 1000),
+              status: Number(tx.receiptStatus),
+              confirmations: Number(currentBlock - tx.blockNumber.toBigInt()),
+              from: tx.fromAddress.checksum,
+              to: tx.toAddress?.checksum ?? '',
+              value: tx.value,
+              inputData: transaction.result.data,
+              fee: BigNumber(tx.transactionFee ?? '0')
+                .times(1e18)
+                .toFixed(0),
+              gasLimit: tx.gas ?? '0',
+              gasPrice: tx.gasPrice,
+              gasUsed: tx.receiptGasUsed,
+              tokenTransfers: tokenTransfers.length ? tokenTransfers : undefined,
+              internalTxs: internalTxs?.length ? internalTxs : undefined,
+            }
+          })
+      )
+
+      return { pubkey, txs: txs.filter<Tx>((tx) => tx !== undefined), cursor: pagination.cursor }
     } catch (err) {
       throw handleError(err)
     }
@@ -367,10 +375,17 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
     return Array.from(addresses)
   }
 
-  handleStreamResult(result: EvmStreamResult): Array<Tx> {
+  async handleStreamResult(result: EvmStreamResult): Promise<Array<Tx>> {
     const txs: Record<string, Tx> = {}
 
-    result.txs.forEach((tx) => {
+    for (const tx of result.txs) {
+      const transaction = await Moralis.EvmApi.transaction.getTransactionVerbose({
+        chain: this.chain,
+        transactionHash: tx.hash,
+      })
+
+      if (!transaction) continue
+
       txs[tx.hash] = {
         blockHash: result.confirmed ? result.block.hash : undefined,
         blockHeight: Number(result.block.number.toString()),
@@ -378,7 +393,10 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
           ? Math.floor(result.block.timestamp.getTime() / 1000)
           : Math.floor(Date.now() / 1000),
         confirmations: Number(result.confirmed),
-        fee: '',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        fee: BigNumber((transaction.toJSON() as any).transaction_fee ?? '0')
+          .times(1e18)
+          .toFixed(0),
         from: tx.fromAddress.checksum,
         to: tx.toAddress?.checksum ?? '',
         gasLimit: tx.gas?.toString() ?? '',
@@ -389,7 +407,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
         gasUsed: tx.receiptGasUsed?.toString() ?? '0',
         inputData: tx.input,
       }
-    })
+    }
 
     result.erc20Transfers.forEach((transfer) => {
       const tx = txs[transfer.transactionHash]
@@ -433,7 +451,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
    * __not suitable for use on historical transactions when using a full node as the evm state is purged__
    */
   async handleStreamResultWithInternalTrace(result: EvmStreamResult): Promise<Array<Tx>> {
-    const txs = this.handleStreamResult(result)
+    const txs = await this.handleStreamResult(result)
 
     for (const tx of txs) {
       // don't trace pending transactions as they have no committed state to trace
@@ -565,23 +583,39 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
 
   subscribeAddresses(_: Array<string>, addressesToAdd: Array<string>): void {
     this.queue.add(async () => {
-      if (!this.streamId) return
+      try {
+        if (!this.streamId) await this.initializeStream()
 
-      await Moralis.Streams.addAddress({
-        id: this.streamId,
-        address: addressesToAdd,
-      })
+        await Moralis.Streams.addAddress({
+          id: this.streamId!,
+          address: addressesToAdd,
+        })
+      } catch (err) {
+        if (err instanceof Error) {
+          this.logger.error({ error: err.message, addresses: addressesToAdd }, 'failed to subscribe addresses')
+        } else {
+          this.logger.error({ addresses: addressesToAdd }, 'failed to subscribe addresses')
+        }
+      }
     })
   }
 
   unsubscribeAddresses(_: Array<string>, addressesToRemove: Array<string>): void {
     this.queue.add(async () => {
-      if (!this.streamId) return
+      try {
+        if (!this.streamId) await this.initializeStream()
 
-      await Moralis.Streams.deleteAddress({
-        id: this.streamId,
-        address: addressesToRemove,
-      })
+        await Moralis.Streams.deleteAddress({
+          id: this.streamId!,
+          address: addressesToRemove,
+        })
+      } catch (err) {
+        if (err instanceof Error) {
+          this.logger.error({ error: err.message, addresses: addressesToRemove }, 'failed to unsubscribe addresses')
+        } else {
+          this.logger.error({ addresses: addressesToRemove }, 'failed to unsubscribe addresses')
+        }
+      }
     })
   }
 }

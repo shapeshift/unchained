@@ -46,6 +46,7 @@ const client = createPublicClient({ chain: base, transport: http(rpcUrl) }) as P
 export const service = new MoralisService({
   chain: EvmChain.BASE,
   explorerApiUrl: new URL(`https://api.etherscan.io/v2/api?chainid=8453&apikey=${ETHERSCAN_API_KEY}`),
+  logger,
   client,
   rpcUrl,
 })
@@ -176,7 +177,13 @@ export class Base extends EVM implements BaseAPI, API {
       throw new ApiError('Unauthorized', 401, 'Signature is not valid')
     }
 
-    const txs = service.handleStreamResult(EvmStreamResult.create(body as EvmStreamResultish))
+    const txs = await service.handleStreamResult(EvmStreamResult.create(body as EvmStreamResultish))
+
+    if (txs.length) {
+      logger.debug(`handleMoralisStream: ${{ txs }}`)
+    } else {
+      logger.debug(`handleMoralisStream: ${{ body }}`)
+    }
 
     for (const tx of txs) {
       await service.transactionHandler(tx)

@@ -155,7 +155,7 @@ export class Registry {
   }
 
   async onTransaction(msg: unknown): Promise<void> {
-    //if (!Object.keys(this.clients).length) return
+    if (!Object.keys(this.clients).length) return
 
     try {
       const { addresses, tx } = await this.handleTransaction(msg)
