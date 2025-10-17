@@ -1,0 +1,107 @@
+diff --git a/lib/cjs/index.cjs b/lib/cjs/index.cjs
+index 3890ff00a2affac86818f839ef8a23e1b04b937e..cdac792944f49c7492bce7846b55bae4cc547e40 100644
+--- a/lib/cjs/index.cjs
++++ b/lib/cjs/index.cjs
+@@ -4197,6 +4197,7 @@ var EvmTransaction = /** @class */ (function () {
+                 return EvmInternalTransaction.create(transaction);
+             }),
+             signature: commonCore.maybe(data.signature, EvmSignature.create),
++            transactionFee: commonCore.maybe(data.transactionFee),
+         };
+     };
+     /**
+@@ -4573,6 +4574,13 @@ var EvmTransaction = /** @class */ (function () {
+         enumerable: false,
+         configurable: true
+     });
++    Object.defineProperty(EvmTransaction.prototype, "transactionFee", {
++        get: function () {
++            return this._data.transactionFee;
++        },
++        enumerable: false,
++        configurable: true
++    });
+     return EvmTransaction;
+ }());
+ 
+@@ -4700,7 +4708,7 @@ var EvmSimpleBlock = /** @class */ (function () {
+         configurable: true
+     });
+     EvmSimpleBlock.parse = function (data) { return ({
+-        timestamp: commonCore.dateInputToDate(data.timestamp),
++        timestamp: typeof data.timestamp === 'string' || typeof data.timestamp === 'number' ? Date(data.timestamp) : data.timestamp,
+         number: commonCore.BigNumber.create(data.number),
+         chain: EvmChain.create(data.chain),
+         hash: data.hash,
+@@ -9988,7 +9996,7 @@ var GetWalletHistoryOperation = {
+     groupName: "wallets",
+     httpMethod: "get",
+     routePattern: "/wallets/{address}/history",
+-    parameterNames: ["chain", "from_block", "to_block", "from_date", "to_date", "address", "include_internal_transactions", "nft_metadata", "cursor", "order", "limit"],
++    parameterNames: ["chain", "from_block", "to_block", "from_date", "to_date", "address", "include_input_data", "include_internal_transactions", "nft_metadata", "cursor", "order", "limit"],
+     hasResponse: true,
+     hasBody: false,
+     parseResponse: function (json) {
+@@ -10001,6 +10009,7 @@ var GetWalletHistoryOperation = {
+         var fromDate = request.fromDate;
+         var toDate = request.toDate;
+         var address = EvmAddress.create(request.address);
++        var includeInputData = request.includeInputData;
+         var includeInternalTransactions = request.includeInternalTransactions;
+         var nftMetadata = request.nftMetadata;
+         var cursor = request.cursor;
+@@ -10013,6 +10022,7 @@ var GetWalletHistoryOperation = {
+             from_date: fromDate !== undefined ? fromDate.toISOString() : undefined,
+             to_date: toDate !== undefined ? toDate.toISOString() : undefined,
+             address: address.toJSON(),
++            include_input_data: includeInputData,
+             include_internal_transactions: includeInternalTransactions,
+             nft_metadata: nftMetadata,
+             cursor: cursor,
+@@ -12820,6 +12830,7 @@ function deserializeResponse$7(jsonResponse, request, core) {
+         }),
+         receiptRoot: jsonResponse.receipt_root,
+         receiptStatus: jsonResponse.receipt_status,
++        transactionFee: jsonResponse.transaction_fee,
+     });
+ }
+ 
+diff --git a/lib/index.d.ts b/lib/index.d.ts
+index 3d3af1aaefedd12ea3ffaad9d717a61cf67a447d..41a02d33ea4720691c38684e0e47a5dc19a3661c 100644
+--- a/lib/index.d.ts
++++ b/lib/index.d.ts
+@@ -2359,6 +2359,7 @@ interface EvmTransactionData {
+     logs: EvmTransactionLog[];
+     internalTransactions: EvmInternalTransaction[];
+     signature?: EvmSignature;
++    transactionFee?: string;
+ }
+ 
+ /**
+@@ -2655,6 +2656,7 @@ declare class EvmTransaction {
+     get v(): number | undefined;
+     get r(): string | undefined;
+     get s(): string | undefined;
++    get transactionFee(): string | undefined;
+ }
+ 
+ /**
+@@ -13418,6 +13420,10 @@ interface GetWalletHistoryOperationRequest {
+      * @description The address of the wallet
+      */
+     readonly address: EvmAddressInput | EvmAddress;
++    /**
++     * @description If the result should contain the input data.
++     */
++    readonly includeInputData?: boolean;
+     /**
+      * @description If the result should contain the internal transactions.
+      */
+@@ -13446,6 +13452,7 @@ interface GetWalletHistoryOperationRequestJSON {
+     readonly from_date?: string;
+     readonly to_date?: string;
+     readonly address: EvmAddressJSON;
++    readonly include_input_data?: boolean;
+     readonly include_internal_transactions?: boolean;
+     readonly nft_metadata?: boolean;
+     readonly cursor?: string;

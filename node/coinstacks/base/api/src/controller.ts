@@ -1,25 +1,31 @@
-import { Blockbook } from '@shapeshiftoss/blockbook'
+import { EvmChain } from '@moralisweb3/common-evm-utils'
+import { EvmStreamResult, EvmStreamResultish } from '@moralisweb3/common-streams-utils'
+import { ApiError } from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
 import { BigNumber } from 'bignumber.js'
-import { Body, Example, Get, Post, Response, Route, Tags } from 'tsoa'
+import express from 'express'
+import { Body, Example, Get, Hidden, Post, Response, Request, Route, Tags } from 'tsoa'
 import {
   createPublicClient,
   getAddress,
   getContract,
   http,
   isHex,
+  keccak256,
   parseUnits,
   PublicClient,
   serializeTransaction,
+  toBytes,
   toHex,
 } from 'viem'
 import { base } from 'viem/chains'
 import { BaseAPI, EstimateGasBody, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { API, GAS_PRICE_ORACLE_ABI } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
+import { API, GAS_PRICE_ORACLE_ABI, GasOracle } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { EVM } from '../../../common/api/src/evm/controller'
-import { Service } from '../../../common/api/src/evm/service'
-import { GasOracle } from '../../../common/api/src/evm/gasOracle'
+import { BlockbookService } from '../../../common/api/src/evm/blockbookService'
+import { MoralisService } from '../../../common/api/src/evm/moralisService'
 import { BaseGasEstimate, BaseGasFees } from './models'
+import { Blockbook } from '@shapeshiftoss/blockbook'
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
@@ -29,34 +35,44 @@ const NETWORK = process.env.NETWORK
 const RPC_URL = process.env.RPC_URL
 const RPC_API_KEY = process.env.RPC_API_KEY
 
-if (!ETHERSCAN_API_KEY) throw new Error('ETHERSCAN_API_KEY env var not set')
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
-if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 if (!NETWORK) throw new Error('NETWORK env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
+if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
+
+const IS_LIQUIFY = [INDEXER_URL, INDEXER_WS_URL, RPC_URL].every((url) => url?.toLowerCase().includes('liquify'))
 
 export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'base', 'api'],
   level: process.env.LOG_LEVEL,
 })
 
-const httpURL = `${INDEXER_URL}/api=${INDEXER_API_KEY}`
-const wsURL = `${INDEXER_WS_URL}/api=${INDEXER_API_KEY}`
-const rpcUrl = `${RPC_URL}/api=${RPC_API_KEY}`
+const rpcUrl = IS_LIQUIFY ? `${RPC_URL}/api=${RPC_API_KEY}` : `${RPC_URL}/${RPC_API_KEY}`
 
 const client = createPublicClient({ chain: base, transport: http(rpcUrl) }) as PublicClient
 
-export const blockbook = new Blockbook({ httpURL, wsURL, logger })
-export const gasOracle = new GasOracle({ logger, client, coinstack: 'base' })
+const httpURL = `${INDEXER_URL}/api=${INDEXER_API_KEY}`
+const wsURL = `${INDEXER_WS_URL}/api=${INDEXER_API_KEY}`
 
-export const service = new Service({
-  blockbook,
-  gasOracle,
-  explorerApiUrl: new URL(`https://api.etherscan.io/v2/api?chainid=8453&apikey=${ETHERSCAN_API_KEY}`),
-  client,
-  logger,
-  rpcUrl,
-})
+export const blockbook = IS_LIQUIFY ? new Blockbook({ httpURL, wsURL, logger }) : undefined
+export const gasOracle = IS_LIQUIFY ? new GasOracle({ logger, client, coinstack: 'base' }) : undefined
+
+export const service = (() => {
+  if (IS_LIQUIFY) {
+    if (!ETHERSCAN_API_KEY) throw new Error('ETHERSCAN_API_KEY env var not set')
+
+    return new BlockbookService({
+      blockbook: blockbook!,
+      gasOracle: gasOracle!,
+      explorerApiUrl: new URL(`https://api.etherscan.io/v2/api?chainid=8453&apikey=${ETHERSCAN_API_KEY}`),
+      client,
+      logger,
+      rpcUrl,
+    })
+  }
+
+  return new MoralisService({ chain: EvmChain.BASE, logger, client, rpcUrl })
+})()
 
 // assign service to be used for all instances of EVM
 EVM.service = service
@@ -143,7 +159,7 @@ export class Base extends EVM implements BaseAPI, API {
         await Promise.all([
           gpo.read.l1BaseFee(),
           gpo.read.baseFeeScalar(),
-          gpo.read.blobBaseFeeScalar(),
+          gpo.read.blobBaseFee(),
           gpo.read.blobBaseFeeScalar(),
           gpo.read.decimals(),
         ])
@@ -167,5 +183,35 @@ export class Base extends EVM implements BaseAPI, API {
     const l1GasPrice = l1BaseFee.times(scalar)
 
     return { l1GasPrice: l1GasPrice.toFixed(), ...gasFees }
+  }
+
+  @Hidden()
+  @Post('/webhook/moralis')
+  async handleMoralisStream(@Body() body: unknown, @Request() req: express.Request) {
+    if (!(service instanceof MoralisService)) throw new ApiError('Not Found', 404, 'Endpoint not available')
+
+    if (!service.transactionHandler) return
+
+    const signature = req.headers['x-signature']
+    if (!signature || typeof signature !== 'string') throw new ApiError('Bad Request', 422, 'Invalid signature')
+
+    const secret = await service.getSecret()
+    const generatedSignature = keccak256(toBytes(JSON.stringify(body) + secret))
+
+    if (signature !== generatedSignature) {
+      throw new ApiError('Unauthorized', 401, 'Signature is not valid')
+    }
+
+    const data = body as EvmStreamResultish
+
+    // confirmed === false: transaction has just confirmed in the latest block
+    // confirmed === true: transaction has is still confirmed after N block confirmations
+    if (data.confirmed === true) return
+
+    const txs = await service.handleStreamResult(EvmStreamResult.create(data))
+
+    for (const tx of txs) {
+      await service.transactionHandler(tx)
+    }
   }
 }
