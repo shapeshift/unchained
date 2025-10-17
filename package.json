@@ -63,5 +63,8 @@
     "nodemon": "^3.0.2",
     "prettier": "^3.1.1",
     "typescript": "5.9.3"
+  },
+  "resolutions": {
+    "@moralisweb3/common-evm-utils@npm:^2.27.2": "patch:@moralisweb3/common-evm-utils@npm%3A2.27.2#~/.yarn/patches/@moralisweb3-common-evm-utils-npm-2.27.2-e6cbe4fc9a.patch"
   }
 }

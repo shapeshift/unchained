@@ -1473,7 +1473,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@moralisweb3/common-evm-utils@npm:^2.27.2":
+"@moralisweb3/common-evm-utils@npm:2.27.2":
   version: 2.27.2
   resolution: "@moralisweb3/common-evm-utils@npm:2.27.2"
   dependencies:
@@ -1482,6 +1482,18 @@ __metadata:
     "@ethersproject/transactions": "npm:^5.7.0"
     "@moralisweb3/common-core": "npm:^2.27.2"
   checksum: 10c0/f1cb6c7e2e50b4a36e67ed0098368a675487a054d141a8dec5648d7809014fafb4a3532bae894c9c3f88f0631d5fd6110273c4a869050705b1c87510e084462d
+  languageName: node
+  linkType: hard
+
+"@moralisweb3/common-evm-utils@patch:@moralisweb3/common-evm-utils@npm%3A2.27.2#~/.yarn/patches/@moralisweb3-common-evm-utils-npm-2.27.2-e6cbe4fc9a.patch":
+  version: 2.27.2
+  resolution: "@moralisweb3/common-evm-utils@patch:@moralisweb3/common-evm-utils@npm%3A2.27.2#~/.yarn/patches/@moralisweb3-common-evm-utils-npm-2.27.2-e6cbe4fc9a.patch::version=2.27.2&hash=af54f9"
+  dependencies:
+    "@ethersproject/address": "npm:^5.7.0"
+    "@ethersproject/bytes": "npm:^5.7.0"
+    "@ethersproject/transactions": "npm:^5.7.0"
+    "@moralisweb3/common-core": "npm:^2.27.2"
+  checksum: 10c0/6197a01443902aeb01d8090a716fc1b94614f6ee036fa5d670293e8682d2ee088f4f5cbf43fe0adcdf7b604f656ee1abb11fbe52cbe0dbd1102a8bf5dbf7cb25
   languageName: node
   linkType: hard
 

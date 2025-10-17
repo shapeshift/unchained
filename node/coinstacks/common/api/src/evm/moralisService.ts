@@ -154,6 +154,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
         chain: this.chain,
         cursor: cursor,
         fromBlock: from,
+        includeInputData: true,
         includeInternalTransactions: true,
         limit: pageSize,
         order: 'DESC',
@@ -169,72 +170,63 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
 
       const currentBlock = await this.client.getBlockNumber()
 
-      const txs = await Promise.all(
-        result
-          .filter((tx) => {
-            const isNftOnly =
-              tx.nftTransfers.length &&
-              !tx.erc20Transfers.length &&
-              !tx.nativeTransfers.length &&
-              !tx.internalTransactions?.length
+      const txs = result.reduce<Array<Tx>>((prev, tx) => {
+        const isNftOnly =
+          tx.nftTransfers.length &&
+          !tx.erc20Transfers.length &&
+          !tx.nativeTransfers.length &&
+          !tx.internalTransactions?.length
 
-            const isInvalid =
-              !tx.nftTransfers.length &&
-              !tx.erc20Transfers.length &&
-              !tx.nativeTransfers.length &&
-              !tx.internalTransactions?.length
+        const isInvalid =
+          !tx.nftTransfers.length &&
+          !tx.erc20Transfers.length &&
+          !tx.nativeTransfers.length &&
+          !tx.internalTransactions?.length
 
-            return !isNftOnly && !isInvalid
-          })
-          .map<Promise<Tx | undefined>>(async (tx) => {
-            const tokenTransfers = tx.erc20Transfers.map<TokenTransfer>((transfer) => ({
-              from: transfer.fromAddress.checksum,
-              to: transfer.toAddress?.checksum ?? '',
-              value: transfer.value,
-              contract: transfer.address.checksum,
-              decimals: transfer.tokenDecimals,
-              name: transfer.tokenName,
-              symbol: transfer.tokenSymbol,
-              type: 'ERC20',
-            }))
+        if (isNftOnly || isInvalid) return prev
 
-            const internalTxs = tx.internalTransactions?.map<InternalTx>((tx) => ({
-              from: tx.from.checksum,
-              to: tx.to.checksum,
-              value: tx.value.toString(),
-            }))
+        const tokenTransfers = tx.erc20Transfers.map<TokenTransfer>((transfer) => ({
+          from: transfer.fromAddress.checksum,
+          to: transfer.toAddress?.checksum ?? '',
+          value: transfer.value,
+          contract: transfer.address.checksum,
+          decimals: transfer.tokenDecimals,
+          name: transfer.tokenName,
+          symbol: transfer.tokenSymbol,
+          type: 'ERC20',
+        }))
 
-            const transaction = await Moralis.EvmApi.transaction.getTransaction({
-              chain: this.chain,
-              transactionHash: tx.hash,
-            })
+        const internalTxs = tx.internalTransactions?.map<InternalTx>((tx) => ({
+          from: tx.from.checksum,
+          to: tx.to.checksum,
+          value: tx.value.toString(),
+        }))
 
-            if (!transaction) return
+        prev.push({
+          txid: tx.hash,
+          blockHash: tx.blockHash,
+          blockHeight: Number(tx.blockNumber.toString()),
+          timestamp: Math.floor(new Date(tx.blockTimestamp).getTime() / 1000),
+          status: Number(tx.receiptStatus),
+          confirmations: Number(currentBlock - tx.blockNumber.toBigInt()),
+          from: tx.fromAddress.checksum,
+          to: tx.toAddress?.checksum ?? '',
+          value: tx.value,
+          inputData: tx.input ?? '0x',
+          fee: BigNumber(tx.transactionFee ?? '0')
+            .times(1e18)
+            .toFixed(0),
+          gasLimit: tx.gas ?? '0',
+          gasPrice: tx.gasPrice,
+          gasUsed: tx.receiptGasUsed,
+          tokenTransfers: tokenTransfers.length ? tokenTransfers : undefined,
+          internalTxs: internalTxs?.length ? internalTxs : undefined,
+        })
 
-            return {
-              txid: tx.hash,
-              blockHash: tx.blockHash,
-              blockHeight: Number(tx.blockNumber.toString()),
-              timestamp: Math.floor(new Date(tx.blockTimestamp).getTime() / 1000),
-              status: Number(tx.receiptStatus),
-              confirmations: Number(currentBlock - tx.blockNumber.toBigInt()),
-              from: tx.fromAddress.checksum,
-              to: tx.toAddress?.checksum ?? '',
-              value: tx.value,
-              inputData: transaction.result.data,
-              fee: BigNumber(tx.transactionFee ?? '0')
-                .times(1e18)
-                .toFixed(0),
-              gasLimit: tx.gas ?? '0',
-              gasPrice: tx.gasPrice,
-              gasUsed: tx.receiptGasUsed,
-              tokenTransfers: tokenTransfers.length ? tokenTransfers : undefined,
-              internalTxs: internalTxs?.length ? internalTxs : undefined,
-            }
-          })
-      )
+        return prev
+      }, [])
 
-      return { pubkey, txs: txs.filter<Tx>((tx) => tx !== undefined), cursor: pagination.cursor }
+      return { pubkey, txs, cursor: pagination.cursor }
     } catch (err) {
       throw handleError(err)
     }
@@ -270,8 +262,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
         from: tx.from.checksum,
         to: tx.to?.checksum ?? '',
         value: tx.value?.wei ?? '0',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        fee: BigNumber((data.toJSON() as any).transaction_fee ?? '0')
+        inputData: tx.data,
+        fee: BigNumber(tx.transactionFee ?? '0')
           .times(1e18)
           .toFixed(0),
         gasLimit: tx.gas?.toString() ?? '0',
@@ -383,7 +375,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
     const txs: Record<string, Tx> = {}
 
     for (const tx of result.txs) {
-      const transaction = await Moralis.EvmApi.transaction.getTransactionVerbose({
+      const transaction = await Moralis.EvmApi.transaction.getTransaction({
         chain: this.chain,
         transactionHash: tx.hash,
       })
@@ -397,8 +389,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
           ? Math.floor(result.block.timestamp.getTime() / 1000)
           : Math.floor(Date.now() / 1000),
         confirmations: Number(result.confirmed),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        fee: BigNumber((transaction.toJSON() as any).transaction_fee ?? '0')
+        fee: BigNumber(transaction.result.transactionFee ?? '0')
           .times(1e18)
           .toFixed(0),
         from: tx.fromAddress.checksum,
