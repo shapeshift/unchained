@@ -35,7 +35,6 @@ type TransactionHandler = (tx: Tx) => Promise<void>
 
 export interface MoralisServiceArgs {
   chain: EvmChain
-  explorerApiUrl: URL
   logger: Logger
   client: PublicClient
   rpcUrl: string
@@ -208,7 +207,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
           blockHeight: Number(tx.blockNumber.toString()),
           timestamp: Math.floor(new Date(tx.blockTimestamp).getTime() / 1000),
           status: Number(tx.receiptStatus),
-          confirmations: Number(currentBlock - tx.blockNumber.toBigInt()),
+          confirmations: Number(currentBlock - tx.blockNumber.toBigInt() + 1n),
           from: tx.fromAddress.checksum,
           to: tx.toAddress?.checksum ?? '',
           value: tx.value,
@@ -258,7 +257,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
         blockHeight: Number(tx.blockNumber.toString()),
         timestamp: Math.floor(tx.blockTimestamp.getTime() / 1000),
         status: Number(tx.receiptStatus),
-        confirmations: Number(currentBlock - tx.blockNumber.toBigInt()),
+        confirmations: Number(currentBlock - tx.blockNumber.toBigInt() + 1n),
         from: tx.from.checksum,
         to: tx.to?.checksum ?? '',
         value: tx.value?.wei ?? '0',
@@ -386,7 +385,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
         blockHash: result.block.hash,
         blockHeight: Number(result.block.number.toString()),
         timestamp: Math.floor(result.block.timestamp.getTime() / 1000),
-        confirmations: Number(currentBlock - result.block.number.toBigInt()),
+        confirmations: Number(currentBlock - result.block.number.toBigInt() + 1n),
         fee: BigNumber(transaction?.result.transactionFee ?? '0')
           .times(1e18)
           .toFixed(0),

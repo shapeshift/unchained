@@ -25,12 +25,10 @@ import { EVM } from '../../../common/api/src/evm/controller'
 import { MoralisService } from '../../../common/api/src/evm/moralisService'
 import { BaseGasEstimate, BaseGasFees } from './models'
 
-const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const NETWORK = process.env.NETWORK
 const RPC_URL = process.env.RPC_URL
 const RPC_API_KEY = process.env.RPC_API_KEY
 
-if (!ETHERSCAN_API_KEY) throw new Error('ETHERSCAN_API_KEY env var not set')
 if (!NETWORK) throw new Error('NETWORK env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
 
@@ -45,7 +43,6 @@ const client = createPublicClient({ chain: base, transport: http(rpcUrl) }) as P
 
 export const service = new MoralisService({
   chain: EvmChain.BASE,
-  explorerApiUrl: new URL(`https://api.etherscan.io/v2/api?chainid=8453&apikey=${ETHERSCAN_API_KEY}`),
   logger,
   client,
   rpcUrl,
