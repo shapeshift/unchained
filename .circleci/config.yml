@@ -888,7 +888,7 @@ jobs:
             echo 'export ETHERSCAN_API_KEY=$<< parameters.etherscan-api-key >>' >> $BASH_ENV
             echo 'export BLOCKNATIVE_API_KEY=$<< parameters.blocknative-api-key >>' >> $BASH_ENV
             echo 'export WEBHOOK_URL=$<< parameters.webhook-url >>' >> $BASH_ENV
-            echo 'export ENVIRONMENT=$<< parameters.environment >>:-prod' >> $BASH_ENV
+            PARAM=$<< parameters.environment >>; echo 'export ENVIRONMENT=${PARAM:-prod}' >> $BASH_ENV
       - run:
           name: pulumi
           working_directory: node/<< parameters.pulumi-dir >>
