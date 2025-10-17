@@ -1,5 +1,5 @@
 diff --git a/lib/cjs/index.cjs b/lib/cjs/index.cjs
-index 3890ff00a2affac86818f839ef8a23e1b04b937e..cdac792944f49c7492bce7846b55bae4cc547e40 100644
+index 3890ff00a2affac86818f839ef8a23e1b04b937e..1fab743c95425846fa9357ba8ce8574c056a2514 100644
 --- a/lib/cjs/index.cjs
 +++ b/lib/cjs/index.cjs
 @@ -4197,6 +4197,7 @@ var EvmTransaction = /** @class */ (function () {
@@ -29,7 +29,7 @@ index 3890ff00a2affac86818f839ef8a23e1b04b937e..cdac792944f49c7492bce7846b55bae4
      });
      EvmSimpleBlock.parse = function (data) { return ({
 -        timestamp: commonCore.dateInputToDate(data.timestamp),
-+        timestamp: typeof data.timestamp === 'string' || typeof data.timestamp === 'number' ? Date(data.timestamp) : data.timestamp,
++        timestamp: typeof data.timestamp === 'string' || typeof data.timestamp === 'number' ? new Date(data.timestamp) : data.timestamp,
          number: commonCore.BigNumber.create(data.number),
          chain: EvmChain.create(data.chain),
          hash: data.hash,
