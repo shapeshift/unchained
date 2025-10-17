@@ -374,22 +374,20 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
   async handleStreamResult(result: EvmStreamResult): Promise<Array<Tx>> {
     const txs: Record<string, Tx> = {}
 
+    const currentBlock = await this.client.getBlockNumber()
+
     for (const tx of result.txs) {
       const transaction = await Moralis.EvmApi.transaction.getTransaction({
         chain: this.chain,
         transactionHash: tx.hash,
       })
 
-      if (!transaction) continue
-
       txs[tx.hash] = {
-        blockHash: result.confirmed ? result.block.hash : undefined,
+        blockHash: result.block.hash,
         blockHeight: Number(result.block.number.toString()),
-        timestamp: result.block.timestamp
-          ? Math.floor(result.block.timestamp.getTime() / 1000)
-          : Math.floor(Date.now() / 1000),
-        confirmations: Number(result.confirmed),
-        fee: BigNumber(transaction.result.transactionFee ?? '0')
+        timestamp: Math.floor(result.block.timestamp.getTime() / 1000),
+        confirmations: Number(currentBlock - result.block.number.toBigInt()),
+        fee: BigNumber(transaction?.result.transactionFee ?? '0')
           .times(1e18)
           .toFixed(0),
         from: tx.fromAddress.checksum,
@@ -400,7 +398,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
         txid: tx.hash,
         value: tx.value?.toString() ?? '0',
         gasUsed: tx.receiptGasUsed?.toString() ?? '0',
-        inputData: tx.input,
+        inputData: tx.input ?? '0x',
       }
     }
 

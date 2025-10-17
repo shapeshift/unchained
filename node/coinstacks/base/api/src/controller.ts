@@ -177,13 +177,13 @@ export class Base extends EVM implements BaseAPI, API {
       throw new ApiError('Unauthorized', 401, 'Signature is not valid')
     }
 
-    const txs = await service.handleStreamResult(EvmStreamResult.create(body as EvmStreamResultish))
+    const data = body as EvmStreamResultish
 
-    if (txs.length) {
-      logger.debug(`handleMoralisStream: ${{ txs }}`)
-    } else {
-      logger.debug(`handleMoralisStream: ${{ body }}`)
-    }
+    // confirmed === false: transaction has just confirmed in the latest block
+    // confirmed === true: transaction has is still confirmed after N block confirmations
+    if (data.confirmed === true) return
+
+    const txs = await service.handleStreamResult(EvmStreamResult.create(data))
 
     for (const tx of txs) {
       await service.transactionHandler(tx)
