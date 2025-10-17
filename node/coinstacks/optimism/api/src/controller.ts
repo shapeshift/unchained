@@ -158,7 +158,7 @@ export class Optimism extends EVM implements BaseAPI, API {
         await Promise.all([
           gpo.read.l1BaseFee(),
           gpo.read.baseFeeScalar(),
-          gpo.read.blobBaseFeeScalar(),
+          gpo.read.blobBaseFee(),
           gpo.read.blobBaseFeeScalar(),
           gpo.read.decimals(),
         ])
