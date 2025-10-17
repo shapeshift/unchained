@@ -27,13 +27,12 @@ import type {
   ExplorerInternalTxByAddress,
 } from './types'
 import type { GasOracle } from './gasOracle'
+import { formatAddress } from '.'
 
 const axiosNoRetry = axios.create({ timeout: 5000 })
 const axiosWithRetry = createAxiosRetry({}, { timeout: 10000 })
 
 type InternalTxFetchMethod = 'trace_transaction' | 'debug_traceTransaction'
-
-export const formatAddress = (address: string | undefined): string => (address ? getAddress(address) : '')
 
 export interface BlockbookServiceArgs {
   blockbook: Blockbook

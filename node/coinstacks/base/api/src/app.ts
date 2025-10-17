@@ -11,11 +11,19 @@ import {
   TransactionHandler,
   Prometheus,
 } from '@shapeshiftoss/common-api'
+import { Tx as BlockbookTx, WebsocketClient, getAddresses } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
-import { service } from './controller'
+import { BlockbookService } from '../../../common/api/src/evm/blockbookService'
+import { MoralisService } from '../../../common/api/src/evm/moralisService'
+import { gasOracle, service } from './controller'
 import { RegisterRoutes } from './routes'
 
 const PORT = process.env.PORT ?? 3000
+
+const INDEXER_WS_URL = process.env.INDEXER_WS_URL
+const INDEXER_API_KEY = process.env.INDEXER_API_KEY
+
+const IS_LIQUIFY = INDEXER_WS_URL?.toLowerCase().includes('liquify')
 
 export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'base', 'api'],
@@ -57,17 +65,58 @@ app.use(middleware.errorHandler, middleware.notFoundHandler)
 
 const addressFormatter: AddressFormatter = (address) => evm.formatAddress(address)
 
-const transactionHandler: TransactionHandler<evm.Tx, evm.Tx> = async (tx) => {
-  return { addresses: service.getAddresses(tx), tx }
-}
+const transactionHandler = (() => {
+  if (service instanceof BlockbookService) {
+    const blockbookService = service
+    return (async (blockbookTx) => {
+      const tx = await blockbookService.handleTransactionWithInternalTrace(blockbookTx)
+      const internalAddresses = (tx.internalTxs ?? []).reduce<Array<string>>(
+        (prev, tx) => [...prev, tx.to, tx.from],
+        []
+      )
+      const addresses = [...new Set([...getAddresses(blockbookTx), ...internalAddresses])]
+
+      return { addresses, tx }
+    }) satisfies TransactionHandler<BlockbookTx, evm.Tx>
+  }
+
+  if (service instanceof MoralisService) {
+    const moralisService = service
+    return (async (tx) => {
+      return { addresses: moralisService.getAddresses(tx), tx }
+    }) satisfies TransactionHandler<evm.Tx, evm.Tx>
+  }
+
+  return
+})()
+
+if (!transactionHandler) throw new Error('invalid transaction handler')
 
 const registry = new Registry({ addressFormatter, transactionHandler })
 
-service.transactionHandler = registry.onTransaction.bind(registry)
+const subscriptionClient = (() => {
+  if (IS_LIQUIFY && gasOracle) {
+    if (!INDEXER_API_KEY) throw new Error('INDEXER_API_KEY env var not set')
+
+    return new WebsocketClient(`${INDEXER_WS_URL}/api=${INDEXER_API_KEY}`, {
+      blockHandler: [gasOracle.onBlock.bind(gasOracle)],
+      transactionHandler: registry.onTransaction.bind(registry),
+    })
+  }
+
+  if (service instanceof MoralisService) {
+    service.transactionHandler = registry.onTransaction.bind(registry)
+    return service
+  }
+
+  return
+})()
+
+if (!subscriptionClient) throw new Error('invalid transaction handler')
 
 const server = app.listen(PORT, () => logger.info('Server started'))
 const wsServer = new Server({ server })
 
 wsServer.on('connection', (connection) => {
-  ConnectionHandler.start(connection, registry, service, prometheus, logger)
+  ConnectionHandler.start(connection, registry, subscriptionClient, prometheus, logger)
 })

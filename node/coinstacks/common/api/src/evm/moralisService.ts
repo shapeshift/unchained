@@ -1,5 +1,6 @@
 import { EvmChain } from '@moralisweb3/common-evm-utils'
 import { CreateStreamEvmRequest, EvmStreamResult } from '@moralisweb3/common-streams-utils'
+import { Logger } from '@shapeshiftoss/logger'
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
 import Moralis from 'moralis'
@@ -10,26 +11,16 @@ import { createAxiosRetry, exponentialDelay, handleError, rpcId, validatePageSiz
 import type { Account, API, Tx, TxHistory, GasFees, InternalTx, GasEstimate, TokenMetadata } from './models'
 import { Fees, TokenBalance, TokenTransfer, TokenType } from './models'
 import type { BlockNativeResponse, TraceCall } from './types'
-import { Logger } from '@shapeshiftoss/logger'
+import { formatAddress } from '.'
 
-const INDEXER_URL = process.env.INDEXER_URL
-const INDEXER_API_KEY = process.env.INDEXER_API_KEY
-const BLOCKNATIVE_API_KEY = process.env.BLOCKNATIVE_API_KEY
-const ENVIRONMENT = process.env.ENVIRONMENT
+const INDEXER_URL = process.env.INDEXER_URL as string
+const INDEXER_API_KEY = process.env.INDEXER_API_KEY as string
+const BLOCKNATIVE_API_KEY = process.env.BLOCKNATIVE_API_KEY as string
+const ENVIRONMENT = process.env.ENVIRONMENT as string
 const WEBHOOK_URL = process.env.WEBHOOK_URL as string
-
-if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
-if (!INDEXER_API_KEY) throw new Error('INDEXER_API_KEY env var not set')
-if (!BLOCKNATIVE_API_KEY) throw new Error('BLOCKNATIVE_API_KEY env var not set')
-if (!ENVIRONMENT) throw new Error('ENVIRONMENT env var not set')
-if (!WEBHOOK_URL) throw new Error('WEBHOOK_URL env var not set')
-
-void Moralis.start({ evmApiBaseUrl: INDEXER_URL, apiKey: INDEXER_API_KEY })
 
 const axiosNoRetry = axios.create({ timeout: 5000 })
 const axiosWithRetry = createAxiosRetry({}, { timeout: 10000 })
-
-export const formatAddress = (address: string | undefined): string => (address ? getAddress(address) : '')
 
 type TransactionHandler = (tx: Tx) => Promise<void>
 
@@ -53,10 +44,18 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
   transactionHandler?: TransactionHandler
 
   constructor(args: MoralisServiceArgs) {
+    if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
+    if (!INDEXER_API_KEY) throw new Error('INDEXER_API_KEY env var not set')
+    if (!BLOCKNATIVE_API_KEY) throw new Error('BLOCKNATIVE_API_KEY env var not set')
+    if (!WEBHOOK_URL) throw new Error('WEBHOOK_URL env var not set')
+    if (!ENVIRONMENT) throw new Error('ENVIRONMENT env var not set')
+
     this.chain = args.chain
     this.logger = args.logger.child({ namespace: ['moralisService'] })
     this.client = args.client
     this.rpcUrl = args.rpcUrl
+
+    void Moralis.start({ evmApiBaseUrl: INDEXER_URL, apiKey: INDEXER_API_KEY })
   }
 
   private async initializeStream() {
