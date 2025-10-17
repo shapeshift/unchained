@@ -31,6 +31,7 @@ const RPC_API_KEY = process.env.RPC_API_KEY
 
 if (!NETWORK) throw new Error('NETWORK env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
+if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
 
 export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'base', 'api'],
