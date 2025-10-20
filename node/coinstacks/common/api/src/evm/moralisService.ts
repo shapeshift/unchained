@@ -374,7 +374,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
 
     const currentBlock = await this.client.getBlockNumber()
 
-    this.logger.debug('handleStreamResult', JSON.stringify(result))
+    this.logger.debug({ result }, 'handleStreamResult')
 
     await Promise.allSettled(
       result.txs.map(async (tx) => {
@@ -385,21 +385,19 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
               transactionHash: tx.hash,
             })
 
-            this.logger.debug('getTransaction', { retryCount }, JSON.stringify(transaction?.raw ?? {}))
+            this.logger.debug({ retryCount, tx: transaction?.raw }, 'getTransaction')
 
             if (!transaction) throw Error()
 
             return transaction
           } catch (err) {
             if (++retryCount >= 5) throw new Error(`failed to get transaction: ${tx.hash}`)
-            await exponentialDelay(retryCount)
+            await exponentialDelay(retryCount, 1_000)
             return getTransaction(retryCount)
           }
         }
 
         const transaction = await getTransaction()
-
-        this.logger.debug('transaction', transaction.toJSON(), '')
 
         txs[tx.hash] = {
           blockHash: result.block.hash,
@@ -595,6 +593,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
   }
 
   subscribeAddresses(_: Array<string>, addressesToAdd: Array<string>): void {
+    if (!addressesToAdd.length) return
+
     this.queue.add(async () => {
       try {
         if (!this.streamId) await this.initializeStream()
@@ -614,6 +614,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
   }
 
   unsubscribeAddresses(_: Array<string>, addressesToRemove: Array<string>): void {
+    if (!addressesToRemove.length) return
+
     this.queue.add(async () => {
       try {
         if (!this.streamId) await this.initializeStream()
