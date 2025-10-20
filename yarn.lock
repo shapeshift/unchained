@@ -1487,13 +1487,13 @@ __metadata:
 
 "@moralisweb3/common-evm-utils@patch:@moralisweb3/common-evm-utils@npm%3A2.27.2#~/.yarn/patches/@moralisweb3-common-evm-utils-npm-2.27.2-e6cbe4fc9a.patch":
   version: 2.27.2
-  resolution: "@moralisweb3/common-evm-utils@patch:@moralisweb3/common-evm-utils@npm%3A2.27.2#~/.yarn/patches/@moralisweb3-common-evm-utils-npm-2.27.2-e6cbe4fc9a.patch::version=2.27.2&hash=69aaeb"
+  resolution: "@moralisweb3/common-evm-utils@patch:@moralisweb3/common-evm-utils@npm%3A2.27.2#~/.yarn/patches/@moralisweb3-common-evm-utils-npm-2.27.2-e6cbe4fc9a.patch::version=2.27.2&hash=260061"
   dependencies:
     "@ethersproject/address": "npm:^5.7.0"
     "@ethersproject/bytes": "npm:^5.7.0"
     "@ethersproject/transactions": "npm:^5.7.0"
     "@moralisweb3/common-core": "npm:^2.27.2"
-  checksum: 10c0/e43b92835f7977e2dcde2eb52a2d1474a3c613c50562649ca356feef6e07286acfc3562e1ab752e792a4d0ea792c478e087234b6b4ae4b37ef0634e8d1e45a61
+  checksum: 10c0/cdfd56ea660d10a73bbfddb9a27d6a6a35a44f9f3e48a18b0a31f059f67b9c44104fa50bde5b233f384bfb96d22374c751d9f5419188580850c829b148727ca3
   languageName: node
   linkType: hard
 
