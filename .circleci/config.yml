@@ -15,14 +15,12 @@ aliases:
         ignore:
           - main
           - develop
-          - debug-circle
 
   - &only-develop
     filters:
       branches:
         only:
           - develop
-          - debug-circle
 
   - &only-main
     filters:
