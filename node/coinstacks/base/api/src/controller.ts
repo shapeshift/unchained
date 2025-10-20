@@ -204,6 +204,8 @@ export class Base extends EVM implements BaseAPI, API {
 
     const data = body as EvmStreamResultish
 
+    logger.debug('handleMoralisStream', JSON.stringify(data))
+
     // confirmed === false: transaction has just confirmed in the latest block
     // confirmed === true: transaction has is still confirmed after N block confirmations
     if (data.confirmed === true) return

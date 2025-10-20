@@ -374,6 +374,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
 
     const currentBlock = await this.client.getBlockNumber()
 
+    this.logger.debug('handleStreamResult', JSON.stringify(result))
+
     await Promise.allSettled(
       result.txs.map(async (tx) => {
         const getTransaction = async (retryCount = 0) => {
@@ -382,6 +384,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
               chain: this.chain,
               transactionHash: tx.hash,
             })
+
+            this.logger.debug('getTransaction', { retryCount }, JSON.stringify(transaction?.raw ?? {}))
 
             if (!transaction) throw Error()
 
@@ -394,6 +398,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
         }
 
         const transaction = await getTransaction()
+
+        this.logger.debug('transaction', transaction.toJSON(), '')
 
         txs[tx.hash] = {
           blockHash: result.block.hash,
