@@ -374,31 +374,51 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
 
     const currentBlock = await this.client.getBlockNumber()
 
-    for (const tx of result.txs) {
-      const transaction = await Moralis.EvmApi.transaction.getTransaction({
-        chain: this.chain,
-        transactionHash: tx.hash,
-      })
+    this.logger.debug({ result }, 'handleStreamResult')
 
-      txs[tx.hash] = {
-        blockHash: result.block.hash,
-        blockHeight: Number(result.block.number.toString()),
-        timestamp: Math.floor(result.block.timestamp.getTime() / 1000),
-        confirmations: Number(currentBlock - result.block.number.toBigInt() + 1n),
-        fee: BigNumber(transaction?.result.transactionFee ?? '0')
-          .times(1e18)
-          .toFixed(0),
-        from: tx.fromAddress.checksum,
-        to: tx.toAddress?.checksum ?? '',
-        gasLimit: tx.gas?.toString() ?? '',
-        gasPrice: tx.gasPrice?.toString() ?? '',
-        status: tx.receiptStatus ?? 0,
-        txid: tx.hash,
-        value: tx.value?.toString() ?? '0',
-        gasUsed: tx.receiptGasUsed?.toString() ?? '0',
-        inputData: tx.input ?? '0x',
-      }
-    }
+    await Promise.allSettled(
+      result.txs.map(async (tx) => {
+        const getTransaction = async (retryCount = 0) => {
+          try {
+            const transaction = await Moralis.EvmApi.transaction.getTransaction({
+              chain: this.chain,
+              transactionHash: tx.hash,
+            })
+
+            this.logger.debug({ retryCount, tx: transaction?.raw }, 'getTransaction')
+
+            if (!transaction) throw Error()
+
+            return transaction
+          } catch (err) {
+            if (++retryCount >= 5) throw new Error(`failed to get transaction: ${tx.hash}`)
+            await exponentialDelay(retryCount, 1_000)
+            return getTransaction(retryCount)
+          }
+        }
+
+        const transaction = await getTransaction()
+
+        txs[tx.hash] = {
+          blockHash: result.block.hash,
+          blockHeight: Number(result.block.number.toString()),
+          timestamp: Number(result.block.timestamp),
+          confirmations: Number(currentBlock - result.block.number.toBigInt() + 1n),
+          fee: BigNumber(transaction.result.transactionFee ?? '0')
+            .times(1e18)
+            .toFixed(0),
+          from: tx.fromAddress.checksum,
+          to: tx.toAddress?.checksum ?? '',
+          gasLimit: tx.gas?.toString() ?? '',
+          gasPrice: tx.gasPrice?.toString() ?? '',
+          status: tx.receiptStatus ?? 0,
+          txid: tx.hash,
+          value: tx.value?.toString() ?? '0',
+          gasUsed: tx.receiptGasUsed?.toString() ?? '0',
+          inputData: tx.input ?? '0x',
+        }
+      })
+    )
 
     result.erc20Transfers.forEach((transfer) => {
       const tx = txs[transfer.transactionHash]
@@ -573,6 +593,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
   }
 
   subscribeAddresses(_: Array<string>, addressesToAdd: Array<string>): void {
+    if (!addressesToAdd.length) return
+
     this.queue.add(async () => {
       try {
         if (!this.streamId) await this.initializeStream()
@@ -592,6 +614,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
   }
 
   unsubscribeAddresses(_: Array<string>, addressesToRemove: Array<string>): void {
+    if (!addressesToRemove.length) return
+
     this.queue.add(async () => {
       try {
         if (!this.streamId) await this.initializeStream()
