@@ -72,7 +72,20 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 		return nil, err
 	}
 
-	a := Account{Account: account.(cosmos.Account)}
+	acc := account.(cosmos.Account)
+
+	denoms := make(map[string]bool)
+	for _, asset := range acc.Assets {
+		denoms[asset.Denom] = true
+	}
+
+	for _, denom := range []string{"tcy", "x/ruji"} {
+		if !denoms[denom] {
+			acc.Assets = append(acc.Assets, cosmos.Value{Amount: "0", Denom: denom})
+		}
+	}
+
+	a := Account{Account: acc}
 
 	return a, nil
 }
