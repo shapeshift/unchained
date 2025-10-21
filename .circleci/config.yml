@@ -574,17 +574,26 @@ aliases:
     assetName: base
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/base/pulumi
-    indexer-url: https://gateway.liquify.com
-    indexer-ws-url: wss://gateway.liquify.com
-    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_BASE
-    rpc-url: https://gateway.liquify.com
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_BASE
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/base
+    rpc-api-key: $MORALIS_RPC_API_KEY_BASE
+    webhook-url: https://api.base.shapeshift.com/api/v1/webhook/moralis
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
     api-cpu-limit: 500m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
+
+  - &base-fallback
+    <<: *base
+    indexer-url: https://gateway.liquify.com
+    indexer-ws-url: wss://gateway.liquify.com
+    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_BASE
+    rpc-url: https://gateway.liquify.com
+    rpc-api-key: $LIQUIFY_RPC_API_KEY_BASE
 
   - &base-dev
     <<: *base
@@ -1646,3 +1655,19 @@ workflows:
           requires:
             - approve ethereum fallback
           <<: [*ethereum-fallback, *only-main]
+
+      ####### BASE
+      - approve-coinstack:
+          name: approve base fallback
+          type: approval
+          requires:
+            - lint and test project (persist to workspace)
+          <<: *only-main
+
+      - deploy-coinstack-node:
+          name: deploy base fallback
+          organization: TAXISTAKE
+          pulumi-command: up -f --yes
+          requires:
+            - approve base fallback
+          <<: [*base-fallback, *only-main]
