@@ -47,7 +47,7 @@ const getNodeCoinstackApiHash = async (coinstack: string, buildArgs: Record<stri
   // hash root level unchained files
   const { hash: unchainedHash } = await hashElement(rootDir, {
     folders: { exclude: ['.*', '*'] },
-    files: { include: ['package.json', 'lerna.json', 'yarn.lock', 'Dockerfile.node'] },
+    files: { include: ['package.json', 'yarn.lock', 'Dockerfile.node'] },
   })
   hash.update(unchainedHash)
 

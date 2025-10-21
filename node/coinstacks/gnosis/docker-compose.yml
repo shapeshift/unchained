@@ -7,7 +7,7 @@ services:
       - 'traefik.http.routers.gnosis-api.rule=Host(`api.gnosis.localhost`)'
       - 'traefik.http.services.gnosis-api.loadbalancer.server.port=3000'
     working_dir: /app/node/coinstacks/gnosis/api
-    command: yarn nodemon
+    command: yarn run -T nodemon
     volumes:
       - ../../..:/app
     networks:

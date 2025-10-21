@@ -58,8 +58,8 @@ export const createAxiosRetry = (config: RetryConfig, axiosParams?: CreateAxiosD
   return axiosWithRetry
 }
 
-export const exponentialDelay = async (retryCount: number) =>
-  new Promise((resolve) => setTimeout(resolve, axiosRetry.exponentialDelay(retryCount, undefined, 500)))
+export const exponentialDelay = async (retryCount: number, delayFactor = 500) =>
+  new Promise((resolve) => setTimeout(resolve, axiosRetry.exponentialDelay(retryCount, undefined, delayFactor)))
 
 let _rpcId = Math.floor(Math.random() * 1e6)
 export const rpcId = (): number => {

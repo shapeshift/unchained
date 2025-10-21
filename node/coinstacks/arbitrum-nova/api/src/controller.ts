@@ -6,7 +6,7 @@ import { arbitrumNova } from 'viem/chains'
 import { BaseAPI, EstimateGasBody, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { API, GasEstimate, GasFees } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { EVM } from '../../../common/api/src/evm/controller'
-import { Service } from '../../../common/api/src/evm/service'
+import { BlockbookService } from '../../../common/api/src/evm/blockbookService'
 import { GasOracle } from '../../../common/api/src/evm/gasOracle'
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
@@ -31,7 +31,7 @@ const client = createPublicClient({ chain: arbitrumNova, transport: http(RPC_URL
 export const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL, logger })
 export const gasOracle = new GasOracle({ logger, client, coinstack: 'arbitrum-nova' })
 
-export const service = new Service({
+export const service = new BlockbookService({
   blockbook,
   gasOracle,
   explorerApiUrl: new URL(`https://api.etherscan.io/v2/api?chainid=42170&apikey=${ETHERSCAN_API_KEY}`),

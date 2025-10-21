@@ -3,7 +3,7 @@
   "license": "MIT",
   "private": true,
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "workspaces": [
     "monitoring",
@@ -14,18 +14,17 @@
     "go/coinstacks/**/pulumi"
   ],
   "scripts": {
-    "build": "lerna run build --scope @shapeshiftoss/*",
-    "clean": "lerna run clean --scope @shapeshiftoss/* && rm -rf coverage dist node_modules",
+    "build": "yarn workspaces foreach -Apt run build",
+    "clean": "yarn workspaces foreach -Ap run clean && rm -rf dist node_modules",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
     "lint": "eslint '*/**/*.{js,ts}' && yarn lint:ts",
     "lint:ts": "tsc --noEmit",
-    "version:major": "lerna version major --force-publish --no-push",
-    "version:minor": "lerna version minor --force-publish --no-push",
-    "version:patch": "lerna version patch --force-publish --no-push",
     "prepare": "husky install"
   },
   "dependencies": {
+    "@moralisweb3/common-evm-utils": "^2.27.2",
+    "@moralisweb3/common-streams-utils": "^2.27.2",
     "@pulumi/kubernetes": "4.23.0",
     "@pulumi/pulumi": "3.160.0",
     "@shapeshiftoss/logger": "^1.1.2",
@@ -39,9 +38,10 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "folder-hash": "^4.0.4",
-    "lerna": "^8.0.0",
+    "moralis": "^2.27.2",
     "morgan": "^1.10.0",
     "object-hash": "^3.0.0",
+    "p-queue": "^9.0.0",
     "prom-client": "^15.0.0",
     "swagger-ui-express": "^5.0.0",
     "tsoa": "^5.1.1",
@@ -63,5 +63,8 @@
     "nodemon": "^3.0.2",
     "prettier": "^3.1.1",
     "typescript": "5.9.3"
+  },
+  "resolutions": {
+    "@moralisweb3/common-evm-utils@npm:^2.27.2": "patch:@moralisweb3/common-evm-utils@npm%3A2.27.2#~/.yarn/patches/@moralisweb3-common-evm-utils-npm-2.27.2-e6cbe4fc9a.patch"
   }
 }

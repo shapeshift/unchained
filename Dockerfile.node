@@ -4,7 +4,6 @@ WORKDIR /app
 
 # Include build artifacts
 COPY package.json ./package.json
-COPY lerna.json ./lerna.json
 COPY node_modules ./node_modules
 
 # Include common node packages
