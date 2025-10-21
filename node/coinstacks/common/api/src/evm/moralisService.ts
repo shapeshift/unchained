@@ -62,7 +62,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
     try {
       const stream: CreateStreamEvmRequest = {
         chains: [this.chain],
-        description: `${this.chain.display()} Stream`,
+        description: this.chain.display(),
         tag: `${this.chain.display()} - ${ENVIRONMENT}`,
         webhookUrl: WEBHOOK_URL,
         includeNativeTxs: true,
