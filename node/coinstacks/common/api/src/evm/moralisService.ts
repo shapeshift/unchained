@@ -5,6 +5,7 @@ import axios from 'axios'
 import BigNumber from 'bignumber.js'
 import Moralis from 'moralis'
 import PQueue from 'p-queue'
+import { v4 } from 'uuid'
 import { getAddress, isHex, parseUnits, PublicClient, toHex } from 'viem'
 import type { BaseAPI, EstimateGasBody, RPCRequest, RPCResponse, SendTxBody, SubscriptionClient } from '..'
 import { createAxiosRetry, exponentialDelay, handleError, rpcId, validatePageSize } from '../utils'
@@ -62,8 +63,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
     try {
       const stream: CreateStreamEvmRequest = {
         chains: [this.chain],
-        description: `${this.chain.display()} Stream`,
-        tag: `${this.chain.display()} - ${ENVIRONMENT}`,
+        description: `${this.chain.display()} - ${ENVIRONMENT}`,
+        tag: v4(),
         webhookUrl: WEBHOOK_URL,
         includeNativeTxs: true,
         includeInternalTxs: true,
