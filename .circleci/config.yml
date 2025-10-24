@@ -580,12 +580,10 @@ aliases:
     rpc-url: https://site1.moralis-nodes.com/base
     rpc-api-key: $MORALIS_RPC_API_KEY_BASE
     webhook-url: https://api.base.shapeshift.com/api/v1/webhook/moralis
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-limit: 500m
+    api-replicas: 1
+    api-cpu-limit: "1"
     api-cpu-threshold: 75
-    api-memory-limit: 500Mi
+    api-memory-limit: 1Gi
 
   - &base-fallback
     <<: *base
