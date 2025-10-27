@@ -2975,6 +2975,12 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@shapeshiftoss/mayachain-pulumi@workspace:go/coinstacks/mayachain/pulumi":
+  version: 0.0.0-use.local
+  resolution: "@shapeshiftoss/mayachain-pulumi@workspace:go/coinstacks/mayachain/pulumi"
+  languageName: unknown
+  linkType: soft
+
 "@shapeshiftoss/optimism-api@workspace:node/coinstacks/optimism/api":
   version: 0.0.0-use.local
   resolution: "@shapeshiftoss/optimism-api@workspace:node/coinstacks/optimism/api"
@@ -3025,18 +3031,6 @@ __metadata:
 "@shapeshiftoss/solana-pulumi@workspace:node/coinstacks/solana/pulumi":
   version: 0.0.0-use.local
   resolution: "@shapeshiftoss/solana-pulumi@workspace:node/coinstacks/solana/pulumi"
-  languageName: unknown
-  linkType: soft
-
-"@shapeshiftoss/thorchain-pulumi@workspace:go/coinstacks/thorchain/pulumi":
-  version: 0.0.0-use.local
-  resolution: "@shapeshiftoss/thorchain-pulumi@workspace:go/coinstacks/thorchain/pulumi"
-  languageName: unknown
-  linkType: soft
-
-"@shapeshiftoss/thorchain-v1-pulumi@workspace:go/coinstacks/thorchain-v1/pulumi":
-  version: 0.0.0-use.local
-  resolution: "@shapeshiftoss/thorchain-v1-pulumi@workspace:go/coinstacks/thorchain-v1/pulumi"
   languageName: unknown
   linkType: soft
 
