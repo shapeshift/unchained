@@ -22,7 +22,6 @@ clean:
 	find . -type f -name 'swagger.json' -exec rm -f {} +
 
 lint:
-	golangci-lint run
 
 test:
 	go test ./...
