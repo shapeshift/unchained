@@ -167,32 +167,6 @@ aliases:
     api-cpu-limit: 500m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
-    stateful-service-replicas: 2
-    service-name-1: daemon
-    service-image-1: registry.gitlab.com/mayachain/mayanode:mainnet-1.124.0
-    service-cpu-limit-1: "2"
-    service-memory-limit-1: 12Gi
-    service-storage-size-1: 1000Gi
-    service-name-2: timescaledb
-    service-image-2: timescale/timescaledb:2.20.2-pg17
-    service-cpu-limit-2: "2"
-    service-memory-limit-2: 6Gi
-    service-storage-size-2: 100Gi
-    service-name-3: indexer
-    service-image-3: registry.gitlab.com/mayachain/midgard:2.13.0
-    service-cpu-limit-3: "2"
-    service-memory-limit-3: 2Gi
-    service-storage-size-3: 100Gi
-
-  - &mayachain-fallback
-    <<: *mayachain
-    lcd-url: http://mayachain-svc.unchained.svc.cluster.local:1317
-    lcd-api-key: ""
-    rpc-url: http://mayachain-svc.unchained.svc.cluster.local:27147
-    rpc-api-key: ""
-    indexer-url: http://mayachain-svc.unchained.svc.cluster.local:8080
-    indexer-api-key: ""
-    ws-url: ws://mayachain-svc.unchained.svc.cluster.local:27147
 
   - &mayachain-dev
     <<: *mayachain
@@ -202,7 +176,6 @@ aliases:
     api-max-replicas: 2
     api-cpu-limit: 250m
     api-memory-limit: 250Mi
-    stateful-service-replicas: 0
 
 commands:
   precheck:
@@ -556,24 +529,3 @@ workflows:
           requires:
             - approve mayachain
           <<: [*mayachain, *only-mayachain]
-
-  deploy-fallback:
-    jobs:
-      - lint-and-test-persist:
-          name: lint and test project (persist to workspace)
-          <<: *only-mayachain
-
-      - approve-coinstack:
-          name: approve mayachain fallback
-          type: approval
-          requires:
-            - lint and test project (persist to workspace)
-          <<: *only-mayachain
-
-      - deploy-coinstack-go:
-          name: deploy mayachain fallback
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve mayachain fallback
-          <<: [*mayachain-fallback, *only-mayachain]
