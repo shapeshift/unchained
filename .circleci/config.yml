@@ -582,6 +582,7 @@ aliases:
     webhook-url: https://api.base.shapeshift.com/api/v1/webhook/moralis
     api-autoscaling: false
     api-replicas: 1
+    api-max-replicas: 1
     api-cpu-limit: "1"
     api-cpu-threshold: 75
     api-memory-limit: 1Gi
