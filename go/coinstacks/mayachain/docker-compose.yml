@@ -3,11 +3,12 @@ services:
     image: unchained-local-go
     environment:
       - GOCACHE=/tmp
+      - LD_LIBRARY_PATH=/app/lib
     labels:
       - 'traefik.enable=true'
       - 'traefik.http.routers.mayachain-api.rule=Host(`api.mayachain.localhost`)'
       - 'traefik.http.services.mayachain-api.loadbalancer.server.port=3000'
-    command: ["sh", "-c", "reflex -r '(pkg|internal|mayachain)' -R 'swagger' -s -- sh -c 'swagger generate spec -w coinstacks/mayachain -o coinstacks/mayachain/api/swagger.json -x protoc-gen-openapiv2 -m && go run cmd/mayachain/main.go -env cmd/mayachain/.env'"]
+    command: ["sh", "-c", "reflex -r '(pkg|internal|mayachain)' -R 'swagger' -s -- sh -c 'swagger generate spec -w coinstacks/mayachain -o coinstacks/mayachain/api/swagger.json -x protoc-gen-openapiv2 -m && CGO_LDFLAGS=\"-L/app/lib -lzec\" go run cmd/mayachain/main.go -env cmd/mayachain/.env'"]
     working_dir: /app
     volumes:
       - ../..:/app

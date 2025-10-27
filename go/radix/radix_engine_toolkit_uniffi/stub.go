@@ -22,6 +22,10 @@ type PublicKeySecp256k1 struct {
 	Value []byte
 }
 
+type PublicKeyEd25519 struct {
+	Value []byte
+}
+
 func DeriveVirtualAccountAddressFromPublicKey(publicKey PublicKey, networkId uint8) (*Address, error) {
 	return nil, nil
 }
