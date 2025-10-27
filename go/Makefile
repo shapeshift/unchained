@@ -11,7 +11,7 @@ $(COINSTACKS):; $(MAKE) -C $@ generate
 install:
 	go install gotest.tools/gotestsum@latest
 	go install golang.org/x/tools/cmd/goimports@latest
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v2.6.1
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.62.2
 	docker build -t unchained-local-go -f ./build/Dockerfile.local .
 
 build:

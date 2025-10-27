@@ -1,4 +1,4 @@
-FROM golang:1.23.4 as builder
+FROM golang:1.23.4 AS builder
 
 ARG COINSTACK
 
@@ -18,11 +18,9 @@ COPY ./radix /app/radix
 WORKDIR /app/cmd/${COINSTACK}
 RUN CGO_ENABLED=1 CGO_LDFLAGS="-L/app/lib -lzec" GOOS=linux GOARCH=amd64 go build -a -o /go/bin/app
 
-FROM alpine
+FROM gcr.io/distroless/cc-debian12
 
 ARG COINSTACK
-
-RUN apk add --no-cache libgcc libstdc++
 
 COPY --from=builder /app/lib /lib
 COPY --from=builder /app/static static
