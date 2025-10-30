@@ -1,6 +1,6 @@
 export interface Cursor {
   blockHeight?: number
-  blockbookPage: number
+  moralisPage: number
   blockbookTxid?: string
   explorerPage: number
   explorerTxid?: string

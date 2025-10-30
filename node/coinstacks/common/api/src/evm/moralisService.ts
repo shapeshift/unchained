@@ -6,11 +6,20 @@ import BigNumber from 'bignumber.js'
 import Moralis from 'moralis'
 import PQueue from 'p-queue'
 import { getAddress, isHex, parseUnits, PublicClient, toHex } from 'viem'
-import type { BaseAPI, EstimateGasBody, RPCRequest, RPCResponse, SendTxBody, SubscriptionClient } from '..'
+import {
+  ApiError,
+  BadRequestError,
+  type BaseAPI,
+  type EstimateGasBody,
+  type RPCRequest,
+  type RPCResponse,
+  type SendTxBody,
+  type SubscriptionClient,
+} from '..'
 import { createAxiosRetry, exponentialDelay, handleError, rpcId, validatePageSize } from '../utils'
 import type { Account, API, Tx, TxHistory, GasFees, InternalTx, GasEstimate, TokenMetadata } from './models'
 import { Fees, TokenBalance, TokenTransfer, TokenType } from './models'
-import type { BlockNativeResponse, TraceCall } from './types'
+import type { BlockNativeResponse, Cursor, ExplorerApiResponse, ExplorerInternalTxByAddress, TraceCall } from './types'
 import { formatAddress } from '.'
 
 const INDEXER_URL = process.env.INDEXER_URL as string
@@ -29,6 +38,8 @@ export interface MoralisServiceArgs {
   logger: Logger
   client: PublicClient
   rpcUrl: string
+  explorerApiUrl?: URL
+  minPriorityFee?: string
 }
 
 export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, SubscriptionClient {
@@ -36,6 +47,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
   private readonly logger: Logger
   private readonly client: PublicClient
   private readonly rpcUrl: string
+  private readonly explorerApiUrl?: URL
+  private readonly minPriorityFee: string
 
   private secret?: string
   private streamId?: string
@@ -54,6 +67,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
     this.logger = args.logger.child({ namespace: ['moralisService'] })
     this.client = args.client
     this.rpcUrl = args.rpcUrl
+    this.explorerApiUrl = args.explorerApiUrl
+    this.minPriorityFee = args.minPriorityFee ?? '0'
 
     void Moralis.start({ evmApiBaseUrl: INDEXER_URL, apiKey: INDEXER_API_KEY })
   }
@@ -230,6 +245,133 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
     }
   }
 
+  async getTxHistoryWithEtherescanInternalTxs(
+    pubkey: string,
+    cursor?: string,
+    pageSize = 10,
+    from?: number,
+    to?: number
+  ): Promise<TxHistory> {
+    validatePageSize(pageSize)
+
+    const curCursor = ((): Cursor => {
+      try {
+        if (!cursor) return { moralisPage: 1, explorerPage: 1 }
+
+        return JSON.parse(Buffer.from(cursor, 'base64').toString('binary'))
+      } catch (err) {
+        const e: BadRequestError = { error: `invalid base64 cursor: ${cursor}` }
+        throw new ApiError('Bad Request', 422, JSON.stringify(e))
+      }
+    })()
+
+    try {
+      let { hasMore: hasMoreMoralisTxs, txs: moralisTxs } = await this.getTxs(pubkey, pageSize, curCursor, from, to)
+      let { hasMore: hasMoreInternalTxs, internalTxs } = await this.getInternalTxs(
+        pubkey,
+        pageSize,
+        curCursor,
+        from,
+        to
+      )
+
+      if (!moralisTxs.size && !internalTxs.size) {
+        return {
+          pubkey: pubkey,
+          txs: [],
+        }
+      }
+
+      const txs: Array<Tx> = []
+      for (let i = 0; i < pageSize; i++) {
+        if (!moralisTxs.size && hasMoreMoralisTxs) {
+          curCursor.moralisPage++
+          ;({ hasMore: hasMoreMoralisTxs, txs: moralisTxs } = await this.getTxs(pubkey, pageSize, curCursor, from, to))
+        }
+
+        if (!internalTxs.size && hasMoreInternalTxs) {
+          curCursor.explorerPage++
+          ;({ hasMore: hasMoreInternalTxs, internalTxs } = await this.getInternalTxs(
+            pubkey,
+            pageSize,
+            curCursor,
+            from,
+            to
+          ))
+        }
+
+        if (!internalTxs.size && !moralisTxs.size) break
+
+        const [internalTx] = internalTxs.values()
+        const [moralisTx] = moralisTxs.values()
+
+        if (moralisTx?.blockHeight === -1) {
+          // process pending txs first, no associated internal txs
+
+          txs.push({ ...moralisTx })
+          moralisTxs.delete(moralisTx.txid)
+          curCursor.blockbookTxid = moralisTx.txid
+          curCursor.blockHeight = moralisTx.blockHeight
+        } else if (moralisTx && moralisTx.blockHeight >= (internalTx?.blockHeight ?? -2)) {
+          // process transactions in descending order prioritizing confirmed, include associated internal txs
+
+          txs.push({ ...moralisTx, internalTxs: internalTxs.get(moralisTx.txid)?.txs })
+
+          moralisTxs.delete(moralisTx.txid)
+          curCursor.blockbookTxid = moralisTx.txid
+          curCursor.blockHeight = moralisTx.blockHeight
+
+          // if there was a matching internal tx, delete it and track as last internal txid seen
+          if (internalTxs.has(moralisTx.txid)) {
+            internalTxs.delete(moralisTx.txid)
+            curCursor.explorerTxid = moralisTx.txid
+          }
+        } else {
+          // attempt to get matching moralis tx or fetch if not found
+          // if fetch fails, treat internal tx as handled and remove from set
+          try {
+            const moralisTx =
+              moralisTxs.get(internalTx.txid) ??
+              this.handleTransaction(await this.blockbook.getTransaction(internalTx.txid))
+
+            txs.push({ ...moralisTx, internalTxs: internalTx.txs })
+          } catch (err) {
+            this.logger.warn(err, `failed to get tx: ${internalTx.txid}`)
+          }
+
+          internalTxs.delete(internalTx.txid)
+          curCursor.explorerTxid = internalTx.txid
+          curCursor.blockHeight = internalTx.blockHeight
+
+          // if there was a matching blockbook tx, delete it and track as last blockbook txid seen
+          if (moralisTxs.has(internalTx.txid)) {
+            moralisTxs.delete(internalTx.txid)
+            curCursor.blockbookTxid = internalTx.txid
+          }
+        }
+      }
+
+      // if we processed through the whole set of transactions, increase the page number for next fetch
+      if (!moralisTxs.size) curCursor.moralisPage++
+      if (!internalTxs.size) curCursor.explorerPage++
+
+      curCursor.blockHeight = txs[txs.length - 1]?.blockHeight
+
+      const nextCursor = (() => {
+        if (!hasMoreMoralisTxs && !hasMoreInternalTxs) return
+        return Buffer.from(JSON.stringify(curCursor), 'binary').toString('base64')
+      })()
+
+      return {
+        pubkey: pubkey,
+        cursor: nextCursor,
+        txs: txs,
+      }
+    } catch (err) {
+      throw handleError(err)
+    }
+  }
+
   async getTransaction(txid: string): Promise<Tx> {
     try {
       const data = await Moralis.EvmApi.transaction.getTransaction({
@@ -309,19 +451,27 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
 
       const blockPrices = data.blockPrices[0]
 
+      const baseFeePerGas = BigNumber(blockPrices.baseFeePerGas).times(1e9)
+
       const estimatedFees = Object.fromEntries<Fees>(
-        blockPrices.estimatedPrices.map((v) => [
-          v.confidence,
-          {
-            gasPrice: BigNumber(v.price).times(1e9).toFixed(0),
-            maxFeePerGas: BigNumber(v.maxFeePerGas).times(1e9).toFixed(0),
-            maxPriorityFeePerGas: BigNumber(v.maxPriorityFeePerGas).times(1e9).toFixed(0),
-          },
-        ])
+        blockPrices.estimatedPrices.map((v) => {
+          const maxPriorityFeePerGas = BigNumber.max(BigNumber(v.maxPriorityFeePerGas).times(1e9), this.minPriorityFee)
+          const minMaxFeePerGas = BigNumber(baseFeePerGas).plus(maxPriorityFeePerGas)
+          const maxFeePerGas = BigNumber.max(BigNumber(v.maxFeePerGas).times(1e9), minMaxFeePerGas)
+
+          return [
+            v.confidence,
+            {
+              gasPrice: BigNumber(v.price).times(1e9).toFixed(0),
+              maxFeePerGas: maxFeePerGas.toFixed(0),
+              maxPriorityFeePerGas: maxPriorityFeePerGas.toFixed(0),
+            },
+          ]
+        })
       )
 
       return {
-        baseFeePerGas: BigNumber(blockPrices.baseFeePerGas).times(1e9).toFixed(0),
+        baseFeePerGas: baseFeePerGas.toFixed(0),
         slow: estimatedFees['50'],
         average: estimatedFees['70'],
         fast: estimatedFees['95'],
@@ -372,8 +522,6 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
   async handleStreamResult(result: EvmStreamResult): Promise<Array<Tx>> {
     const txs: Record<string, Tx> = {}
 
-    const currentBlock = await this.client.getBlockNumber()
-
     this.logger.debug({ result }, 'handleStreamResult')
 
     await Promise.allSettled(
@@ -403,7 +551,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
           blockHash: result.block.hash,
           blockHeight: Number(result.block.number.toString()),
           timestamp: Number(result.block.timestamp),
-          confirmations: Number(currentBlock - result.block.number.toBigInt() + 1n),
+          confirmations: 1,
           fee: BigNumber(transaction.result.transactionFee ?? '0')
             .times(1e18)
             .toFixed(0),
@@ -524,6 +672,93 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
 
       return prev
     }, {})
+  }
+
+  private async getInternalTxs(
+    address: string,
+    pageSize: number,
+    cursor: Cursor,
+    from?: number,
+    to?: number
+  ): Promise<{
+    hasMore: boolean
+    internalTxs: Map<string, { blockHeight: number; txid: string; txs: Array<InternalTx> }>
+  }> {
+    const internalTxs = await this.fetchInternalTxsByAddress(address, cursor.explorerPage, pageSize, from, to)
+
+    const data = new Map<string, { blockHeight: number; txid: string; txs: Array<InternalTx> }>()
+
+    if (!internalTxs?.length) return { hasMore: false, internalTxs: data }
+
+    let doneFiltering = false
+    const filteredInternalTxs = internalTxs.reduce((prev, internalTx) => {
+      if (!internalTx.value || internalTx.value === '0') return prev
+
+      if (!doneFiltering && cursor.blockHeight && cursor.explorerTxid) {
+        // skip any transactions from blocks that we have already returned
+        if (Number(internalTx.blockNumber) > cursor.blockHeight) return prev
+
+        // skip any transaction that we have already returned within the same block
+        // this assumes transactions are ordered in the same position within the block on every request
+        if (Number(internalTx.blockNumber) === cursor.blockHeight) {
+          if (cursor.explorerTxid === internalTx.hash) {
+            doneFiltering = true
+          }
+          return prev
+        }
+      }
+
+      const formattedInternalTx: InternalTx = {
+        from: formatAddress(internalTx.from),
+        to: formatAddress(internalTx.to),
+        value: internalTx.value,
+      }
+
+      prev.set(internalTx.hash, {
+        blockHeight: Number(internalTx.blockNumber),
+        txid: internalTx.hash,
+        txs: [...(prev.get(internalTx.hash)?.txs ?? []), formattedInternalTx],
+      })
+
+      return prev
+    }, data)
+
+    // if no txs exist after filtering out already seen transactions, fetch the next page
+    if (!filteredInternalTxs.size) {
+      cursor.explorerPage++
+      return this.getInternalTxs(address, pageSize, cursor, from, to)
+    }
+
+    return {
+      hasMore: internalTxs.length < pageSize ? false : true,
+      internalTxs: filteredInternalTxs,
+    }
+  }
+
+  private async fetchInternalTxsByAddress(
+    address: string,
+    page: number,
+    pageSize: number,
+    from?: number,
+    to?: number
+  ): Promise<Array<ExplorerInternalTxByAddress> | undefined> {
+    const url = new URL(this.explorerApiUrl.toString())
+
+    url.searchParams.append('module', 'account')
+    url.searchParams.append('action', 'txlistinternal')
+    url.searchParams.append('address', address)
+    url.searchParams.append('page', page.toString())
+    url.searchParams.append('offset', pageSize.toString())
+    url.searchParams.append('sort', 'desc')
+
+    if (from) url.searchParams.append('startblock', from.toString())
+    if (to) url.searchParams.append('endblock', to.toString())
+
+    const { data } = await axiosWithRetry.get<ExplorerApiResponse<Array<ExplorerInternalTxByAddress>>>(url.toString())
+
+    if (data.status === '0') return []
+
+    return data.result
   }
 
   async getTokenMetadata(address: string, id: string, type: TokenType): Promise<TokenMetadata> {
