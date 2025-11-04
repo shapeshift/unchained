@@ -146,7 +146,7 @@ func (c *Connection) cleanup() {
 	<-c.doneChan
 	c.ticker.Stop()
 	_ = c.send(websocket.CloseMessage, []byte{})
-	c.conn.Close()
+	_ = c.conn.Close()
 	close(c.msgChan)
 }
 
