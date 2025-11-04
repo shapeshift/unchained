@@ -1,49 +1,30 @@
-import { Blockbook } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
 import { Body, Example, Get, Post, Response, Route, Tags } from 'tsoa'
 import { createPublicClient, http } from 'viem'
 import { polygon } from 'viem/chains'
 import { BaseAPI, EstimateGasBody, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { API, GasEstimate, GasFees } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
+import { API, GasEstimate, GasFees, MoralisService } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { EVM } from '../../../common/api/src/evm/controller'
-import { BlockbookService } from '../../../common/api/src/evm/blockbookService'
-import { GasOracle } from '../../../common/api/src/evm/gasOracle'
+import { EvmChain } from '@moralisweb3/common-evm-utils'
 
-const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
-const INDEXER_WS_URL = process.env.INDEXER_WS_URL
-const INDEXER_API_KEY = process.env.INDEXER_API_KEY
-const NETWORK = process.env.NETWORK
 const RPC_URL = process.env.RPC_URL
 const RPC_API_KEY = process.env.RPC_API_KEY
 
-if (!ETHERSCAN_API_KEY) throw new Error('ETHERSCAN_API_KEY env var not set')
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
-if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
-if (!NETWORK) throw new Error('NETWORK env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
+if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
 
 export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'polygon', 'api'],
   level: process.env.LOG_LEVEL,
 })
 
-const headers = RPC_API_KEY ? { 'api-key': RPC_API_KEY } : undefined
+const rpcUrl = `${RPC_URL}/${RPC_API_KEY}`
 
-const client = createPublicClient({ chain: polygon, transport: http(RPC_URL, { fetchOptions: { headers } }) })
+const client = createPublicClient({ chain: polygon, transport: http(rpcUrl) })
 
-export const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL, apiKey: INDEXER_API_KEY, logger })
-export const gasOracle = new GasOracle({ logger, client, coinstack: 'polygon' })
-
-export const service = new BlockbookService({
-  blockbook,
-  gasOracle,
-  explorerApiUrl: new URL(`https://api.etherscan.io/v2/api?chainid=137&apikey=${ETHERSCAN_API_KEY}`),
-  client,
-  logger,
-  rpcUrl: RPC_URL,
-  rpcApiKey: RPC_API_KEY,
-})
+export const service = new MoralisService({ chain: EvmChain.POLYGON, logger, client, rpcUrl })
 
 // assign service to be used for all instances of EVM
 EVM.service = service

@@ -492,11 +492,12 @@ aliases:
     <<: *polygon
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://maticbook.nownodes.io
-    indexer-ws-url: wss://maticbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY_DEV
-    rpc-url: https://matic.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY_DEV
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/polygon
+    rpc-api-key: $MORALIS_RPC_API_KEY_POLYGON
+    webhook-url: https://dev-api.polygon.shapeshift.com/api/v1/webhook/moralis
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 250m
