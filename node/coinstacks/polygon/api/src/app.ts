@@ -8,9 +8,6 @@ import { service } from './controller'
 import { RegisterRoutes } from './routes'
 
 const PORT = process.env.PORT ?? 3000
-const INDEXER_API_KEY = process.env.INDEXER_API_KEY
-
-if (!INDEXER_API_KEY) throw new Error('INDEXER_API_KEY env var not set')
 
 export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'polygon', 'api'],

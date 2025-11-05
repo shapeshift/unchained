@@ -1,11 +1,14 @@
+import { EvmChain } from '@moralisweb3/common-evm-utils'
+import { EvmStreamResult, EvmStreamResultish } from '@moralisweb3/common-streams-utils'
+import { ApiError } from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
-import { Body, Example, Get, Post, Response, Route, Tags } from 'tsoa'
-import { createPublicClient, http } from 'viem'
+import express from 'express'
+import { Body, Example, Get, Hidden, Post, Response, Request, Route, Tags } from 'tsoa'
+import { createPublicClient, http, keccak256, toBytes } from 'viem'
 import { polygon } from 'viem/chains'
 import { BaseAPI, EstimateGasBody, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { API, GasEstimate, GasFees, MoralisService } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { EVM } from '../../../common/api/src/evm/controller'
-import { EvmChain } from '@moralisweb3/common-evm-utils'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const RPC_URL = process.env.RPC_URL
@@ -84,5 +87,37 @@ export class Polygon extends EVM implements BaseAPI, API {
   @Get('/gas/fees')
   async getGasFees(): Promise<GasFees> {
     return service.getGasFees()
+  }
+
+  @Hidden()
+  @Post('/webhook/moralis')
+  async handleMoralisStream(@Body() body: unknown, @Request() req: express.Request) {
+    if (!(service instanceof MoralisService)) throw new ApiError('Not Found', 404, 'Endpoint not available')
+
+    if (!service.transactionHandler) return
+
+    const signature = req.headers['x-signature']
+    if (!signature || typeof signature !== 'string') throw new ApiError('Bad Request', 422, 'Invalid signature')
+
+    const secret = await service.getSecret()
+    const generatedSignature = keccak256(toBytes(JSON.stringify(body) + secret))
+
+    if (signature !== generatedSignature) {
+      throw new ApiError('Unauthorized', 401, 'Signature is not valid')
+    }
+
+    const data = body as EvmStreamResultish
+
+    logger.debug({ data }, 'handleMoralisStream')
+
+    // confirmed === false: transaction has just confirmed in the latest block
+    // confirmed === true: transaction has is still confirmed after N block confirmations
+    if (data.confirmed === true) return
+
+    const txs = await service.handleStreamResult(EvmStreamResult.create(data))
+
+    for (const tx of txs) {
+      await service.transactionHandler(tx)
+    }
   }
 }
