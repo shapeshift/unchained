@@ -256,11 +256,12 @@ aliases:
     <<: *avalanche
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://avax-blockbook.nownodes.io
-    indexer-ws-url: wss://avax-blockbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY_DEV
-    rpc-url: https://avax.nownodes.io/ext/bc/C/rpc
-    rpc-api-key: $NOW_NODES_API_KEY_DEV
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/avalanche
+    rpc-api-key: $MORALIS_RPC_API_KEY_AVALANCHE
+    webhook-url: https://dev-api.avalanche.shapeshift.com/api/v1/webhook/moralis
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 250m
