@@ -566,6 +566,12 @@ aliases:
     <<: *arbitrum
     environment: dev
     pulumi-stack: public-dev-us-east-2
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/arbitrum
+    rpc-api-key: $MORALIS_RPC_API_KEY_ARBITRUM
+    webhook-url: https://dev-api.arbitrum.shapeshift.com/api/v1/webhook/moralis
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 500m
