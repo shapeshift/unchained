@@ -225,11 +225,12 @@ aliases:
     <<: *ethereum
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://gateway.liquify.com
-    indexer-ws-url: wss://gateway.liquify.com
-    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_ETH
-    rpc-url: https://gateway.liquify.com
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_ETH
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/eth
+    rpc-api-key: $MORALIS_RPC_API_KEY_ETH
+    webhook-url: https://dev-api.ethereum.shapeshift.com/api/v1/webhook/moralis
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 250m
