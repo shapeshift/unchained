@@ -465,11 +465,12 @@ aliases:
     <<: *bnbsmartchain
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://bsc-blockbook.nownodes.io
-    indexer-ws-url: wss://bsc-blockbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY_DEV
-    rpc-url: https://bsc.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY_DEV
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/bsc
+    rpc-api-key: $MORALIS_RPC_API_KEY_BSC
+    webhook-url: https://dev-api.bnbsmartchain.shapeshift.com/api/v1/webhook/moralis
     api-replicas: 1
     api-max-replicas: 2
 
@@ -477,12 +478,11 @@ aliases:
     assetName: polygon
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/polygon/pulumi
-    indexer-url: https://deep-index.moralis.io/api/v2.2
-    indexer-ws-url: ""
-    indexer-api-key: $MORALIS_INDEXER_API_KEY
-    rpc-url: https://site1.moralis-nodes.com/bsc
-    rpc-api-key: $MORALIS_RPC_API_KEY_BSC
-    webhook-url: https://dev-api.bnbsmartchain.shapeshift.com/api/v1/webhook/moralis
+    indexer-url: https://maticbook.nownodes.io
+    indexer-ws-url: wss://maticbook.nownodes.io/wss
+    indexer-api-key: $NOW_NODES_API_KEY
+    rpc-url: https://matic.nownodes.io
+    rpc-api-key: $NOW_NODES_API_KEY
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
