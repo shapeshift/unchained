@@ -29,7 +29,7 @@ interface Cursor {
   blockHeight?: number
   moralisCursor?: string
   moralisTxid?: string
-  explorerPage?: number
+  explorerPage: number
   explorerTxid?: string
 }
 
@@ -163,7 +163,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
 
     const curCursor = ((): Cursor => {
       try {
-        if (!cursor) return {}
+        if (!cursor) return { explorerPage: 0 }
 
         return JSON.parse(Buffer.from(cursor, 'base64').toString('binary'))
       } catch (err) {
@@ -225,7 +225,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
 
     const curCursor = ((): Cursor => {
       try {
-        if (!cursor) return {}
+        if (!cursor) return { explorerPage: 1 }
 
         return JSON.parse(Buffer.from(cursor, 'base64').toString('binary'))
       } catch (err) {
@@ -250,7 +250,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
         }
 
         if (!internal.txs.size && internal.hasMore) {
-          curCursor.explorerPage ? curCursor.explorerPage++ : 1
+          curCursor.explorerPage++
           internal = await this.getInternalTxs(pubkey, curCursor, pageSize, from, to)
         }
 
@@ -294,7 +294,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
 
       // if we processed through the whole set of transactions, update cursor/page for next fetch
       if (!moralis.txs.size) curCursor.moralisCursor = moralis.cursor
-      if (!internal.txs.size) curCursor.explorerPage ? curCursor.explorerPage++ : 1
+      if (!internal.txs.size) curCursor.explorerPage++
 
       curCursor.blockHeight = txs[txs.length - 1]?.blockHeight
 
@@ -619,7 +619,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
     hasMore: boolean
     txs: Map<string, { blockHeight: number; txid: string; txs: Array<InternalTx> }>
   }> {
-    const internalTxs = await this.fetchInternalTxsByAddress(address, cursor.explorerPage ?? 1, pageSize, from, to)
+    const internalTxs = await this.fetchInternalTxsByAddress(address, cursor.explorerPage, pageSize, from, to)
 
     const data = new Map<string, { blockHeight: number; txid: string; txs: Array<InternalTx> }>()
 
@@ -658,7 +658,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
 
     // if no txs exist after filtering out already seen transactions, fetch the next page
     if (!filteredInternalTxs.size) {
-      cursor.explorerPage ? cursor.explorerPage++ : 1
+      cursor.explorerPage++
       return this.getInternalTxs(address, cursor, pageSize, from, to)
     }
 
