@@ -184,17 +184,19 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
       const currentBlock = await this.client.getBlockNumber()
 
       const txs = result.reduce<Array<Tx>>((prev, tx) => {
-        const isNftOnly =
+        const isNftOnly = Boolean(
           tx.nftTransfers.length &&
-          !tx.erc20Transfers.length &&
-          !tx.nativeTransfers.length &&
-          !tx.internalTransactions?.length
+            !tx.erc20Transfers.length &&
+            !tx.nativeTransfers.length &&
+            !tx.internalTransactions?.length
+        )
 
-        const isInvalid =
+        const isInvalid = Boolean(
           !tx.nftTransfers.length &&
-          !tx.erc20Transfers.length &&
-          !tx.nativeTransfers.length &&
-          !tx.internalTransactions?.length
+            !tx.erc20Transfers.length &&
+            !tx.nativeTransfers.length &&
+            !tx.internalTransactions?.length
+        )
 
         if (isNftOnly || isInvalid) return prev
 

@@ -225,11 +225,12 @@ aliases:
     <<: *ethereum
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://gateway.liquify.com
-    indexer-ws-url: wss://gateway.liquify.com
-    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_ETH
-    rpc-url: https://gateway.liquify.com
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_ETH
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/eth
+    rpc-api-key: $MORALIS_RPC_API_KEY_ETH
+    webhook-url: https://dev-api.ethereum.shapeshift.com/api/v1/webhook/moralis
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 250m
@@ -256,11 +257,12 @@ aliases:
     <<: *avalanche
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://avax-blockbook.nownodes.io
-    indexer-ws-url: wss://avax-blockbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY_DEV
-    rpc-url: https://avax.nownodes.io/ext/bc/C/rpc
-    rpc-api-key: $NOW_NODES_API_KEY_DEV
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/avalanche
+    rpc-api-key: $MORALIS_RPC_API_KEY_AVALANCHE
+    webhook-url: https://dev-api.avalanche.shapeshift.com/api/v1/webhook/moralis
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 250m
@@ -358,7 +360,7 @@ aliases:
     api-memory-limit: 2Gi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-3.11.2
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-3.12.0
     service-cpu-limit-1: "2"
     service-memory-limit-1: 12Gi
     service-storage-size-1: 1250Gi
@@ -439,6 +441,12 @@ aliases:
     <<: *optimism
     environment: dev
     pulumi-stack: public-dev-us-east-2
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/optimism
+    rpc-api-key: $MORALIS_RPC_API_KEY_OP
+    webhook-url: https://dev-api.optimism.shapeshift.com/api/v1/webhook/moralis
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 250m
@@ -464,11 +472,12 @@ aliases:
     <<: *bnbsmartchain
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://bsc-blockbook.nownodes.io
-    indexer-ws-url: wss://bsc-blockbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY_DEV
-    rpc-url: https://bsc.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY_DEV
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/bsc
+    rpc-api-key: $MORALIS_RPC_API_KEY_BSC
+    webhook-url: https://dev-api.bnbsmartchain.shapeshift.com/api/v1/webhook/moralis
     api-replicas: 1
     api-max-replicas: 2
 
@@ -492,11 +501,12 @@ aliases:
     <<: *polygon
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://maticbook.nownodes.io
-    indexer-ws-url: wss://maticbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY_DEV
-    rpc-url: https://matic.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY_DEV
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/polygon
+    rpc-api-key: $MORALIS_RPC_API_KEY_POLYGON
+    webhook-url: https://dev-api.polygon.shapeshift.com/api/v1/webhook/moralis
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 250m
@@ -565,6 +575,12 @@ aliases:
     <<: *arbitrum
     environment: dev
     pulumi-stack: public-dev-us-east-2
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/arbitrum
+    rpc-api-key: $MORALIS_RPC_API_KEY_ARB
+    webhook-url: https://dev-api.arbitrum.shapeshift.com/api/v1/webhook/moralis
     api-replicas: 1
     api-max-replicas: 2
     api-cpu-limit: 500m
@@ -662,7 +678,7 @@ commands:
     description: install dependencies
     steps:
       - go/install:
-          version: "1.23.4"
+          version: "1.25.0"
       - run:
           command: yarn install --immutable
       - run:
