@@ -19,7 +19,6 @@ import type {
   TokenType,
 } from './models'
 import type {
-  Cursor,
   DebugCallStack,
   ExplorerApiResponse,
   TraceCall,
@@ -33,6 +32,14 @@ const axiosNoRetry = axios.create({ timeout: 5000 })
 const axiosWithRetry = createAxiosRetry({}, { timeout: 10000 })
 
 type InternalTxFetchMethod = 'trace_transaction' | 'debug_traceTransaction'
+
+interface Cursor {
+  blockHeight?: number
+  blockbookPage: number
+  blockbookTxid?: string
+  explorerPage: number
+  explorerTxid?: string
+}
 
 export interface BlockbookServiceArgs {
   blockbook: Blockbook
@@ -132,7 +139,7 @@ export class BlockbookService implements Omit<BaseAPI, 'getInfo'>, API {
 
     const curCursor = ((): Cursor => {
       try {
-        if (!cursor) return { moralisPage: 1, explorerPage: 1 }
+        if (!cursor) return { blockbookPage: 1, explorerPage: 1 }
 
         return JSON.parse(Buffer.from(cursor, 'base64').toString('binary'))
       } catch (err) {
@@ -161,7 +168,7 @@ export class BlockbookService implements Omit<BaseAPI, 'getInfo'>, API {
       const txs: Array<Tx> = []
       for (let i = 0; i < pageSize; i++) {
         if (!blockbookTxs.size && hasMoreBlockbookTxs) {
-          curCursor.moralisPage++
+          curCursor.blockbookPage++
           ;({ hasMore: hasMoreBlockbookTxs, txs: blockbookTxs } = await this.getTxs(
             pubkey,
             pageSize,
@@ -234,7 +241,7 @@ export class BlockbookService implements Omit<BaseAPI, 'getInfo'>, API {
       }
 
       // if we processed through the whole set of transactions, increase the page number for next fetch
-      if (!blockbookTxs.size) curCursor.moralisPage++
+      if (!blockbookTxs.size) curCursor.blockbookPage++
       if (!internalTxs.size) curCursor.explorerPage++
 
       curCursor.blockHeight = txs[txs.length - 1]?.blockHeight
@@ -701,7 +708,7 @@ export class BlockbookService implements Omit<BaseAPI, 'getInfo'>, API {
     from?: number,
     to?: number
   ): Promise<{ hasMore: boolean; txs: Map<string, Tx> }> {
-    const blockbookData = await this.blockbook.getAddress(address, cursor.moralisPage, pageSize, from, to, 'txs')
+    const blockbookData = await this.blockbook.getAddress(address, cursor.blockbookPage, pageSize, from, to, 'txs')
 
     const data = new Map<string, Tx>()
 
@@ -710,9 +717,9 @@ export class BlockbookService implements Omit<BaseAPI, 'getInfo'>, API {
     if (
       !blockbookData?.transactions?.length ||
       // page will not increment past the last page for all queries, we can use this to detect "totalPages" for range queries
-      (blockbookData.page && cursor.moralisPage > blockbookData.page) ||
+      (blockbookData.page && cursor.blockbookPage > blockbookData.page) ||
       // blockbook does not provide total pages for range queries
-      (!rangeQuery && cursor.moralisPage > (blockbookData.totalPages ?? -1))
+      (!rangeQuery && cursor.blockbookPage > (blockbookData.totalPages ?? -1))
     ) {
       return { hasMore: false, txs: data }
     }
@@ -757,16 +764,16 @@ export class BlockbookService implements Omit<BaseAPI, 'getInfo'>, API {
 
     // if no txs exist after filtering out already seen transactions, fetch the next page
     if (!blockbookTxs.size) {
-      cursor.moralisPage++
+      cursor.blockbookPage++
       return this.getTxs(address, pageSize, cursor, from, to)
     }
 
     return {
       hasMore:
         // use total pages for non range queries
-        (!rangeQuery && cursor.moralisPage < (blockbookData.totalPages ?? -1)) ||
+        (!rangeQuery && cursor.blockbookPage < (blockbookData.totalPages ?? -1)) ||
         // use page for range queries which should exists (if this is not enough, we can look at blockbook.Txs.length)
-        (rangeQuery && blockbookData.page && cursor.moralisPage <= blockbookData.page)
+        (rangeQuery && blockbookData.page && cursor.blockbookPage <= blockbookData.page)
           ? true
           : false,
       txs: blockbookTxs,

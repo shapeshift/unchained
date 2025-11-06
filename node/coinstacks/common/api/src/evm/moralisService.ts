@@ -6,20 +6,12 @@ import BigNumber from 'bignumber.js'
 import Moralis from 'moralis'
 import PQueue from 'p-queue'
 import { getAddress, isHex, parseUnits, PublicClient, toHex } from 'viem'
-import {
-  ApiError,
-  BadRequestError,
-  type BaseAPI,
-  type EstimateGasBody,
-  type RPCRequest,
-  type RPCResponse,
-  type SendTxBody,
-  type SubscriptionClient,
-} from '..'
+import type { BaseAPI, EstimateGasBody, RPCRequest, RPCResponse, SendTxBody, SubscriptionClient } from '..'
+import { ApiError, BadRequestError } from '..'
 import { createAxiosRetry, exponentialDelay, handleError, rpcId, validatePageSize } from '../utils'
 import type { Account, API, Tx, TxHistory, GasFees, InternalTx, GasEstimate, TokenMetadata } from './models'
 import { Fees, TokenBalance, TokenTransfer, TokenType } from './models'
-import type { BlockNativeResponse, Cursor, ExplorerApiResponse, ExplorerInternalTxByAddress, TraceCall } from './types'
+import type { BlockNativeResponse, ExplorerApiResponse, ExplorerInternalTxByAddress, TraceCall } from './types'
 import { formatAddress } from '.'
 
 const INDEXER_URL = process.env.INDEXER_URL as string
@@ -32,6 +24,14 @@ const axiosNoRetry = axios.create({ timeout: 5000 })
 const axiosWithRetry = createAxiosRetry({}, { timeout: 10000 })
 
 type TransactionHandler = (tx: Tx) => Promise<void>
+
+interface Cursor {
+  blockHeight?: number
+  moralisCursor?: string
+  moralisTxid?: string
+  explorerPage?: number
+  explorerTxid?: string
+}
 
 export interface MoralisServiceArgs {
   chain: EvmChain
@@ -47,7 +47,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
   private readonly logger: Logger
   private readonly client: PublicClient
   private readonly rpcUrl: string
-  private readonly explorerApiUrl?: URL
+  private readonly explorerApiUrl: URL
   private readonly minPriorityFee: string
 
   private secret?: string
@@ -67,7 +67,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
     this.logger = args.logger.child({ namespace: ['moralisService'] })
     this.client = args.client
     this.rpcUrl = args.rpcUrl
-    this.explorerApiUrl = args.explorerApiUrl
+    this.explorerApiUrl = args.explorerApiUrl ?? new URL('about:blank')
     this.minPriorityFee = args.minPriorityFee ?? '0'
 
     void Moralis.start({ evmApiBaseUrl: INDEXER_URL, apiKey: INDEXER_API_KEY })
@@ -161,93 +161,60 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
   async getTxHistory(pubkey: string, cursor?: string, pageSize = 10, from?: number, to?: number): Promise<TxHistory> {
     validatePageSize(pageSize)
 
-    try {
-      const { pagination, result } = await Moralis.EvmApi.wallets.getWalletHistory({
-        address: pubkey,
-        chain: this.chain,
-        cursor: cursor,
-        fromBlock: from,
-        includeInputData: true,
-        includeInternalTransactions: true,
-        limit: pageSize,
-        order: 'DESC',
-        toBlock: to,
-      })
+    const curCursor = ((): Cursor => {
+      try {
+        if (!cursor) return {}
 
-      if (!result.length) {
-        return {
-          pubkey: pubkey,
-          txs: [],
-        }
+        return JSON.parse(Buffer.from(cursor, 'base64').toString('binary'))
+      } catch (err) {
+        const e: BadRequestError = { error: `invalid base64 cursor: ${cursor}` }
+        throw new ApiError('Bad Request', 422, JSON.stringify(e))
       }
+    })()
 
+    try {
       const currentBlock = await this.client.getBlockNumber()
 
-      const txs = result.reduce<Array<Tx>>((prev, tx) => {
-        const isNftOnly = Boolean(
-          tx.nftTransfers.length &&
-            !tx.erc20Transfers.length &&
-            !tx.nativeTransfers.length &&
-            !tx.internalTransactions?.length
-        )
+      let moralis = await this.getTxs(pubkey, curCursor, currentBlock, pageSize, from, to)
 
-        const isInvalid = Boolean(
-          !tx.nftTransfers.length &&
-            !tx.erc20Transfers.length &&
-            !tx.nativeTransfers.length &&
-            !tx.internalTransactions?.length
-        )
+      if (!moralis.txs.size) return { pubkey: pubkey, txs: [] }
 
-        if (isNftOnly || isInvalid) return prev
+      const txs: Array<Tx> = []
+      for (let i = 0; i < pageSize; i++) {
+        if (!moralis.txs.size && moralis.hasMore) {
+          curCursor.moralisCursor = moralis.cursor
+          moralis = await this.getTxs(pubkey, curCursor, currentBlock, pageSize, from, to)
+        }
 
-        const tokenTransfers = tx.erc20Transfers.map<TokenTransfer>((transfer) => ({
-          from: transfer.fromAddress.checksum,
-          to: transfer.toAddress?.checksum ?? '',
-          value: transfer.value,
-          contract: transfer.address.checksum,
-          decimals: transfer.tokenDecimals,
-          name: transfer.tokenName,
-          symbol: transfer.tokenSymbol,
-          type: 'ERC20',
-        }))
+        if (!moralis.txs.size) break
 
-        const internalTxs = tx.internalTransactions?.map<InternalTx>((tx) => ({
-          from: tx.from.checksum,
-          to: tx.to.checksum,
-          value: tx.value.toString(),
-        }))
+        const [tx] = moralis.txs.values()
 
-        prev.push({
-          txid: tx.hash,
-          blockHash: tx.blockHash,
-          blockHeight: Number(tx.blockNumber.toString()),
-          timestamp: Math.floor(new Date(tx.blockTimestamp).getTime() / 1000),
-          status: Number(tx.receiptStatus),
-          confirmations: Number(currentBlock - tx.blockNumber.toBigInt() + 1n),
-          from: tx.fromAddress.checksum,
-          to: tx.toAddress?.checksum ?? '',
-          value: tx.value,
-          inputData: tx.input ?? '0x',
-          fee: BigNumber(tx.transactionFee ?? '0')
-            .times(1e18)
-            .toFixed(0),
-          gasLimit: tx.gas ?? '0',
-          gasPrice: tx.gasPrice,
-          gasUsed: tx.receiptGasUsed,
-          tokenTransfers: tokenTransfers.length ? tokenTransfers : undefined,
-          internalTxs: internalTxs?.length ? internalTxs : undefined,
-        })
+        txs.push(tx)
 
-        return prev
-      }, [])
+        moralis.txs.delete(tx.txid)
 
-      return { pubkey, txs, cursor: pagination.cursor }
+        curCursor.moralisTxid = tx.txid
+        curCursor.blockHeight = tx.blockHeight
+      }
+
+      // if we processed through the whole set of transactions, increase the page number for next fetch
+      if (!moralis.txs.size) curCursor.moralisCursor = moralis.cursor
+
+      curCursor.blockHeight = txs[txs.length - 1]?.blockHeight
+
+      const nextCursor = (() => {
+        if (!moralis.txs.size && !moralis.hasMore) return
+        return Buffer.from(JSON.stringify(curCursor), 'binary').toString('base64')
+      })()
+
+      return { pubkey, cursor: nextCursor, txs }
     } catch (err) {
       throw handleError(err)
     }
   }
 
-  async getTxHistoryWithEtherescanInternalTxs(
+  async getTxHistoryWithEtherscanInternalTxs(
     pubkey: string,
     cursor?: string,
     pageSize = 10,
@@ -258,7 +225,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
 
     const curCursor = ((): Cursor => {
       try {
-        if (!cursor) return { moralisPage: 1, explorerPage: 1 }
+        if (!cursor) return {}
 
         return JSON.parse(Buffer.from(cursor, 'base64').toString('binary'))
       } catch (err) {
@@ -268,107 +235,76 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
     })()
 
     try {
-      let { hasMore: hasMoreMoralisTxs, txs: moralisTxs } = await this.getTxs(pubkey, pageSize, curCursor, from, to)
-      let { hasMore: hasMoreInternalTxs, internalTxs } = await this.getInternalTxs(
-        pubkey,
-        pageSize,
-        curCursor,
-        from,
-        to
-      )
+      const currentBlock = await this.client.getBlockNumber()
 
-      if (!moralisTxs.size && !internalTxs.size) {
-        return {
-          pubkey: pubkey,
-          txs: [],
-        }
-      }
+      let moralis = await this.getTxs(pubkey, curCursor, currentBlock, pageSize, from, to)
+      let internal = await this.getInternalTxs(pubkey, curCursor, pageSize, from, to)
+
+      if (!moralis.txs.size && !internal.txs.size) return { pubkey: pubkey, txs: [] }
 
       const txs: Array<Tx> = []
       for (let i = 0; i < pageSize; i++) {
-        if (!moralisTxs.size && hasMoreMoralisTxs) {
-          curCursor.moralisPage++
-          ;({ hasMore: hasMoreMoralisTxs, txs: moralisTxs } = await this.getTxs(pubkey, pageSize, curCursor, from, to))
+        if (!moralis.txs.size && moralis.hasMore) {
+          curCursor.moralisCursor = moralis.cursor
+          moralis = await this.getTxs(pubkey, curCursor, currentBlock, pageSize, from, to)
         }
 
-        if (!internalTxs.size && hasMoreInternalTxs) {
-          curCursor.explorerPage++
-          ;({ hasMore: hasMoreInternalTxs, internalTxs } = await this.getInternalTxs(
-            pubkey,
-            pageSize,
-            curCursor,
-            from,
-            to
-          ))
+        if (!internal.txs.size && internal.hasMore) {
+          curCursor.explorerPage ? curCursor.explorerPage++ : 1
+          internal = await this.getInternalTxs(pubkey, curCursor, pageSize, from, to)
         }
 
-        if (!internalTxs.size && !moralisTxs.size) break
+        if (!internal.txs.size && !moralis.txs.size) break
 
-        const [internalTx] = internalTxs.values()
-        const [moralisTx] = moralisTxs.values()
+        const [internalTx] = internal.txs.values()
+        const [moralisTx] = moralis.txs.values()
 
-        if (moralisTx?.blockHeight === -1) {
-          // process pending txs first, no associated internal txs
+        if (moralisTx && moralisTx.blockHeight >= (internalTx?.blockHeight ?? -2)) {
+          txs.push({ ...moralisTx, internalTxs: internal.txs.get(moralisTx.txid)?.txs })
 
-          txs.push({ ...moralisTx })
-          moralisTxs.delete(moralisTx.txid)
-          curCursor.blockbookTxid = moralisTx.txid
-          curCursor.blockHeight = moralisTx.blockHeight
-        } else if (moralisTx && moralisTx.blockHeight >= (internalTx?.blockHeight ?? -2)) {
-          // process transactions in descending order prioritizing confirmed, include associated internal txs
-
-          txs.push({ ...moralisTx, internalTxs: internalTxs.get(moralisTx.txid)?.txs })
-
-          moralisTxs.delete(moralisTx.txid)
-          curCursor.blockbookTxid = moralisTx.txid
+          moralis.txs.delete(moralisTx.txid)
+          curCursor.moralisTxid = moralisTx.txid
           curCursor.blockHeight = moralisTx.blockHeight
 
           // if there was a matching internal tx, delete it and track as last internal txid seen
-          if (internalTxs.has(moralisTx.txid)) {
-            internalTxs.delete(moralisTx.txid)
+          if (internal.txs.has(moralisTx.txid)) {
+            internal.txs.delete(moralisTx.txid)
             curCursor.explorerTxid = moralisTx.txid
           }
         } else {
-          // attempt to get matching moralis tx or fetch if not found
-          // if fetch fails, treat internal tx as handled and remove from set
           try {
-            const moralisTx =
-              moralisTxs.get(internalTx.txid) ??
-              this.handleTransaction(await this.blockbook.getTransaction(internalTx.txid))
+            const moralisTx = moralis.txs.get(internalTx.txid) ?? (await this.getTransaction(internalTx.txid))
 
             txs.push({ ...moralisTx, internalTxs: internalTx.txs })
           } catch (err) {
             this.logger.warn(err, `failed to get tx: ${internalTx.txid}`)
           }
 
-          internalTxs.delete(internalTx.txid)
+          internal.txs.delete(internalTx.txid)
           curCursor.explorerTxid = internalTx.txid
           curCursor.blockHeight = internalTx.blockHeight
 
           // if there was a matching blockbook tx, delete it and track as last blockbook txid seen
-          if (moralisTxs.has(internalTx.txid)) {
-            moralisTxs.delete(internalTx.txid)
-            curCursor.blockbookTxid = internalTx.txid
+          if (moralis.txs.has(internalTx.txid)) {
+            moralis.txs.delete(internalTx.txid)
+            curCursor.moralisTxid = internalTx.txid
           }
         }
       }
 
       // if we processed through the whole set of transactions, increase the page number for next fetch
-      if (!moralisTxs.size) curCursor.moralisPage++
-      if (!internalTxs.size) curCursor.explorerPage++
+      if (!moralis.txs.size) curCursor.moralisCursor = moralis.cursor
+      if (!internal.txs.size) curCursor.explorerPage ? curCursor.explorerPage++ : 1
 
       curCursor.blockHeight = txs[txs.length - 1]?.blockHeight
 
       const nextCursor = (() => {
-        if (!hasMoreMoralisTxs && !hasMoreInternalTxs) return
+        if (!moralis.txs.size && !moralis.hasMore) return
+        if (!internal.txs.size && !internal.hasMore) return
         return Buffer.from(JSON.stringify(curCursor), 'binary').toString('base64')
       })()
 
-      return {
-        pubkey: pubkey,
-        cursor: nextCursor,
-        txs: txs,
-      }
+      return { pubkey: pubkey, cursor: nextCursor, txs: txs }
     } catch (err) {
       throw handleError(err)
     }
@@ -524,6 +460,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
   async handleStreamResult(result: EvmStreamResult): Promise<Array<Tx>> {
     const txs: Record<string, Tx> = {}
 
+    const currentBlock = await this.client.getBlockNumber()
+
     this.logger.debug({ result }, 'handleStreamResult')
 
     await Promise.allSettled(
@@ -553,7 +491,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
           blockHash: result.block.hash,
           blockHeight: Number(result.block.number.toString()),
           timestamp: Number(result.block.timestamp),
-          confirmations: 1,
+          confirmations: Number(currentBlock - result.block.number.toBigInt() + 1n),
           fee: BigNumber(transaction.result.transactionFee ?? '0')
             .times(1e18)
             .toFixed(0),
@@ -606,11 +544,6 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
     return Object.values(txs)
   }
 
-  /**
-   * format transaction and call trace_transaction to extract internal transactions on newly confirmed transactions only.
-   *
-   * __not suitable for use on historical transactions when using a full node as the evm state is purged__
-   */
   async handleStreamResultWithInternalTrace(result: EvmStreamResult): Promise<Array<Tx>> {
     const txs = await this.handleStreamResult(result)
 
@@ -678,19 +611,19 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
 
   private async getInternalTxs(
     address: string,
-    pageSize: number,
     cursor: Cursor,
+    pageSize: number,
     from?: number,
     to?: number
   ): Promise<{
     hasMore: boolean
-    internalTxs: Map<string, { blockHeight: number; txid: string; txs: Array<InternalTx> }>
+    txs: Map<string, { blockHeight: number; txid: string; txs: Array<InternalTx> }>
   }> {
-    const internalTxs = await this.fetchInternalTxsByAddress(address, cursor.explorerPage, pageSize, from, to)
+    const internalTxs = await this.fetchInternalTxsByAddress(address, cursor.explorerPage ?? 1, pageSize, from, to)
 
     const data = new Map<string, { blockHeight: number; txid: string; txs: Array<InternalTx> }>()
 
-    if (!internalTxs?.length) return { hasMore: false, internalTxs: data }
+    if (!internalTxs?.length) return { hasMore: false, txs: data }
 
     let doneFiltering = false
     const filteredInternalTxs = internalTxs.reduce((prev, internalTx) => {
@@ -703,9 +636,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
         // skip any transaction that we have already returned within the same block
         // this assumes transactions are ordered in the same position within the block on every request
         if (Number(internalTx.blockNumber) === cursor.blockHeight) {
-          if (cursor.explorerTxid === internalTx.hash) {
-            doneFiltering = true
-          }
+          if (cursor.explorerTxid === internalTx.hash) doneFiltering = true
           return prev
         }
       }
@@ -727,13 +658,13 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
 
     // if no txs exist after filtering out already seen transactions, fetch the next page
     if (!filteredInternalTxs.size) {
-      cursor.explorerPage++
-      return this.getInternalTxs(address, pageSize, cursor, from, to)
+      cursor.explorerPage ? cursor.explorerPage++ : 1
+      return this.getInternalTxs(address, cursor, pageSize, from, to)
     }
 
     return {
       hasMore: internalTxs.length < pageSize ? false : true,
-      internalTxs: filteredInternalTxs,
+      txs: filteredInternalTxs,
     }
   }
 
@@ -761,6 +692,108 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
     if (data.status === '0') return []
 
     return data.result
+  }
+
+  async getTxs(
+    pubkey: string,
+    cursor: Cursor,
+    currentBlock: bigint,
+    pageSize: number,
+    from?: number,
+    to?: number
+  ): Promise<{ cursor?: string; hasMore: boolean; txs: Map<string, Tx> }> {
+    const { pagination, result } = await Moralis.EvmApi.wallets.getWalletHistory({
+      address: pubkey,
+      chain: this.chain,
+      cursor: cursor.moralisCursor,
+      fromBlock: from,
+      includeInputData: true,
+      includeInternalTransactions: true,
+      limit: pageSize,
+      order: 'DESC',
+      toBlock: to,
+    })
+
+    if (!result.length) return { hasMore: false, txs: new Map<string, Tx>() }
+
+    let doneFiltering = false
+    const txs = result.reduce((prev, tx) => {
+      if (!doneFiltering && cursor.blockHeight && cursor.moralisTxid) {
+        // skip any transactions from blocks that we have already returned
+        if (cursor.blockHeight >= 0 && tx.blockNumber.toBigInt() > cursor.blockHeight) return prev
+
+        // skip any transaction that we have already returned within the same block
+        // this assumes transactions are ordered the same (by nonce) on every request
+        if (Number(tx.blockNumber.toBigInt()) === cursor.blockHeight) {
+          if (cursor.moralisTxid === tx.hash) doneFiltering = true
+          return prev
+        }
+      }
+
+      const isNftOnly = Boolean(
+        tx.nftTransfers.length &&
+          !tx.erc20Transfers.length &&
+          !tx.nativeTransfers.length &&
+          !tx.internalTransactions?.length
+      )
+
+      const isInvalid = Boolean(
+        !tx.nftTransfers.length &&
+          !tx.erc20Transfers.length &&
+          !tx.nativeTransfers.length &&
+          !tx.internalTransactions?.length
+      )
+
+      if (isNftOnly || isInvalid) return prev
+
+      const tokenTransfers = tx.erc20Transfers.map<TokenTransfer>((transfer) => ({
+        from: transfer.fromAddress.checksum,
+        to: transfer.toAddress?.checksum ?? '',
+        value: transfer.value,
+        contract: transfer.address.checksum,
+        decimals: transfer.tokenDecimals,
+        name: transfer.tokenName,
+        symbol: transfer.tokenSymbol,
+        type: 'ERC20',
+      }))
+
+      const internalTxs = tx.internalTransactions?.map<InternalTx>((tx) => ({
+        from: tx.from.checksum,
+        to: tx.to.checksum,
+        value: tx.value.toString(),
+      }))
+
+      prev.set(tx.hash, {
+        txid: tx.hash,
+        blockHash: tx.blockHash,
+        blockHeight: Number(tx.blockNumber.toString()),
+        timestamp: Math.floor(new Date(tx.blockTimestamp).getTime() / 1000),
+        status: Number(tx.receiptStatus),
+        confirmations: Number(currentBlock - tx.blockNumber.toBigInt() + 1n),
+        from: tx.fromAddress.checksum,
+        to: tx.toAddress?.checksum ?? '',
+        value: tx.value,
+        inputData: tx.input ?? '0x',
+        fee: BigNumber(tx.transactionFee ?? '0')
+          .times(1e18)
+          .toFixed(0),
+        gasLimit: tx.gas ?? '0',
+        gasPrice: tx.gasPrice,
+        gasUsed: tx.receiptGasUsed,
+        tokenTransfers: tokenTransfers.length ? tokenTransfers : undefined,
+        internalTxs: internalTxs?.length ? internalTxs : undefined,
+      })
+
+      return prev
+    }, new Map<string, Tx>())
+
+    // if no txs exist after filtering out already seen transactions, fetch the next page
+    if (!txs.size) {
+      cursor.moralisCursor = pagination.cursor
+      return this.getTxs(pubkey, cursor, currentBlock, pageSize, from, to)
+    }
+
+    return { cursor: pagination.cursor, hasMore: Boolean(pagination.cursor), txs }
   }
 
   async getTokenMetadata(address: string, id: string, type: TokenType): Promise<TokenMetadata> {
