@@ -198,7 +198,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
         curCursor.blockHeight = tx.blockHeight
       }
 
-      // if we processed through the whole set of transactions, increase the page number for next fetch
+      // if we processed through the whole set of transactions, update cursor for next fetch
       if (!moralis.txs.size) curCursor.moralisCursor = moralis.cursor
 
       curCursor.blockHeight = txs[txs.length - 1]?.blockHeight
@@ -284,7 +284,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
           curCursor.explorerTxid = internalTx.txid
           curCursor.blockHeight = internalTx.blockHeight
 
-          // if there was a matching blockbook tx, delete it and track as last blockbook txid seen
+          // if there was a matching moralis tx, delete it and track as last moralis txid seen
           if (moralis.txs.has(internalTx.txid)) {
             moralis.txs.delete(internalTx.txid)
             curCursor.moralisTxid = internalTx.txid
@@ -292,7 +292,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
         }
       }
 
-      // if we processed through the whole set of transactions, increase the page number for next fetch
+      // if we processed through the whole set of transactions, update cursor/page for next fetch
       if (!moralis.txs.size) curCursor.moralisCursor = moralis.cursor
       if (!internal.txs.size) curCursor.explorerPage ? curCursor.explorerPage++ : 1
 
@@ -304,7 +304,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
         return Buffer.from(JSON.stringify(curCursor), 'binary').toString('base64')
       })()
 
-      return { pubkey: pubkey, cursor: nextCursor, txs: txs }
+      return { pubkey, cursor: nextCursor, txs }
     } catch (err) {
       throw handleError(err)
     }
