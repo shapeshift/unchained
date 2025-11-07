@@ -960,10 +960,17 @@ jobs:
           name: add custom environment variables
           command: |
             echo 'export LCD_URL=<< parameters.lcd-url >>' >> $BASH_ENV
+            echo 'export LCD_API_KEY=<< parameters.lcd-api-key >>' >> $BASH_ENV
             echo 'export LCD_V1_URL=<< parameters.lcd-v1-url >>' >> $BASH_ENV
+            echo 'export LCD_V1_API_KEY=<< parameters.lcd-v1-api-key >>' >> $BASH_ENV
+            echo 'export INDEXER_URL=<< parameters.indexer-url >>' >> $BASH_ENV
+            echo 'export INDEXER_API_KEY=<< parameters.indexer-api-key >>' >> $BASH_ENV
             echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
+            echo 'export RPC_API_KEY=<< parameters.rpc-api-key >>' >> $BASH_ENV
             echo 'export RPC_V1_URL=<< parameters.rpc-v1-url >>' >> $BASH_ENV
+            echo 'export RPC_V1_API_KEY=<< parameters.rpc-v1-api-key >>' >> $BASH_ENV
             echo 'export WS_URL=<< parameters.ws-url >>' >> $BASH_ENV
+            echo 'export WS_API_KEY=<< parameters.ws-api-key >>' >> $BASH_ENV
       - run:
           name: pulumi
           working_directory: go/<< parameters.pulumi-dir >>
