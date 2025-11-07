@@ -263,7 +263,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
           },
           livenessProbe: {
             httpGet: { path: '/health', port },
-            initialDelaySeconds: coinstack === 'thorchain' ? 120 : 30,
+            initialDelaySeconds: coinstack === 'thorchain' ? 300 : 30,
             periodSeconds: 5,
             failureThreshold: 3,
             successThreshold: 1,
