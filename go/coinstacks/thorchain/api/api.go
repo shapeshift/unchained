@@ -68,7 +68,7 @@ type Config struct {
 func NewHTTPClient(conf Config) (*HTTPClient, error) {
 	httpClient, err := cosmos.NewHTTPClient(conf.Config)
 	if err != nil {
-		logger.Panicf("failed to create new http client: %+v", err)
+		return nil, errors.WithStack(err)
 	}
 
 	indexerURL, err := url.Parse(conf.INDEXERURL)
