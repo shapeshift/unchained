@@ -327,9 +327,15 @@ func (a *API) LCD(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if res.StatusCode() != http.StatusOK {
+		api.HandleError(w, res.StatusCode(), string(res.Body()))
+		return
+	}
+
 	var result any
 	if err := json.Unmarshal(res.Body(), &result); err != nil {
 		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		return
 	}
 
 	api.HandleResponse(w, http.StatusOK, result)
@@ -357,9 +363,15 @@ func (a *API) Midgard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if res.StatusCode() != http.StatusOK {
+		api.HandleError(w, res.StatusCode(), string(res.Body()))
+		return
+	}
+
 	var result any
 	if err := json.Unmarshal(res.Body(), &result); err != nil {
 		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		return
 	}
 
 	api.HandleResponse(w, http.StatusOK, result)
