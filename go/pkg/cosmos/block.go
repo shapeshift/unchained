@@ -93,7 +93,7 @@ func (c *HTTPClient) GetBlock(height *int) (*coretypes.ResultBlock, error) {
 
 	result := &coretypes.ResultBlock{}
 	if err := cometbftjson.Unmarshal(res.Result, result); err != nil {
-		return nil, errors.Errorf("failed to unmarshal block result: %v: %s", res.Result, res.Error.Error())
+		return nil, errors.Errorf("failed to unmarshal block result: %v", res.Result)
 	}
 
 	return result, nil
