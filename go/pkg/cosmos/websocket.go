@@ -49,7 +49,12 @@ func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- 
 		return nil, errors.Wrapf(err, "failed to parse WSURL: %s", conf.WSURL)
 	}
 
-	client, err := cometbft.NewWS(wsURL.String(), "/websocket")
+	endpoint := "/websocket"
+	if conf.WSAPIKEY != "" {
+		endpoint = fmt.Sprintf("/api=%s/websocket", conf.WSAPIKEY)
+	}
+
+	client, err := cometbft.NewWS(wsURL.String(), endpoint)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create websocket client")
 	}

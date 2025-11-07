@@ -19,7 +19,6 @@ import type {
   TokenType,
 } from './models'
 import type {
-  Cursor,
   DebugCallStack,
   ExplorerApiResponse,
   TraceCall,
@@ -33,6 +32,14 @@ const axiosNoRetry = axios.create({ timeout: 5000 })
 const axiosWithRetry = createAxiosRetry({}, { timeout: 10000 })
 
 type InternalTxFetchMethod = 'trace_transaction' | 'debug_traceTransaction'
+
+interface Cursor {
+  blockHeight?: number
+  blockbookPage: number
+  blockbookTxid?: string
+  explorerPage: number
+  explorerTxid?: string
+}
 
 export interface BlockbookServiceArgs {
   blockbook: Blockbook

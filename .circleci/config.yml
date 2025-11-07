@@ -57,6 +57,7 @@ aliases:
       type: boolean
     api-cpu-threshold:
       type: integer
+      default: 100
     api-max-replicas:
       type: integer
     api-cpu-limit:
@@ -185,84 +186,57 @@ aliases:
     assetName: ethereum
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/ethereum/pulumi
-    indexer-url: https://eth-blockbook.nownodes.io
-    indexer-ws-url: wss://eth-blockbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY
-    rpc-url: https://eth.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-limit: 500m
-    api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-    stateful-service-replicas: 2
-    service-name-1: daemon
-    service-image-1: ethereum/client-go:v1.16.4
-    service-cpu-limit-1: "2"
-    service-memory-limit-1: 32Gi
-    service-storage-size-1: 1500Gi
-    service-name-2: daemon-beacon
-    service-image-2: gcr.io/prysmaticlabs/prysm/beacon-chain:v6.0.5
-    service-cpu-limit-2: "2"
-    service-memory-limit-2: 16Gi
-    service-storage-size-2: 600Gi
-    service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:bb02eb5
-    service-cpu-limit-3: "2"
-    service-memory-limit-3: 12Gi
-    service-storage-size-3: 500Gi
-
-  - &ethereum-fallback
-    <<: *ethereum
-    indexer-url: http://ethereum-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://ethereum-svc.unchained.svc.cluster.local:8001/websocket
-    indexer-api-key: ""
-    rpc-url: http://ethereum-svc.unchained.svc.cluster.local:8545
-    rpc-api-key: ""
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/eth
+    rpc-api-key: $MORALIS_RPC_API_KEY_ETH
+    webhook-url: https://api.ethereum.shapeshift.com/api/v1/webhook/moralis
+    api-autoscaling: false
+    api-replicas: 1
+    api-max-replicas: 1
+    api-cpu-limit: "1"
+    api-memory-limit: 1Gi
 
   - &ethereum-dev
     <<: *ethereum
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://gateway.liquify.com
-    indexer-ws-url: wss://gateway.liquify.com
-    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_ETH
-    rpc-url: https://gateway.liquify.com
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_ETH
-    api-replicas: 1
-    api-max-replicas: 2
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/eth
+    rpc-api-key: $MORALIS_RPC_API_KEY_ETH
+    webhook-url: https://dev-api.ethereum.shapeshift.com/api/v1/webhook/moralis
     api-cpu-limit: 250m
     api-memory-limit: 250Mi
-    stateful-service-replicas: 0
 
   - &avalanche
     assetName: avalanche
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/avalanche/pulumi
-    indexer-url: https://avax-blockbook.nownodes.io
-    indexer-ws-url: wss://avax-blockbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY
-    rpc-url: https://avax.nownodes.io/ext/bc/C/rpc
-    rpc-api-key: $NOW_NODES_API_KEY
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-limit: 500m
-    api-cpu-threshold: 75
-    api-memory-limit: 500Mi
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/avalanche
+    rpc-api-key: $MORALIS_RPC_API_KEY_AVALANCHE
+    webhook-url: https://api.avalanche.shapeshift.com/api/v1/webhook/moralis
+    api-autoscaling: false
+    api-replicas: 1
+    api-max-replicas: 1
+    api-cpu-limit: "1"
+    api-memory-limit: 1Gi
 
   - &avalanche-dev
     <<: *avalanche
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://avax-blockbook.nownodes.io
-    indexer-ws-url: wss://avax-blockbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY_DEV
-    rpc-url: https://avax.nownodes.io/ext/bc/C/rpc
-    rpc-api-key: $NOW_NODES_API_KEY_DEV
-    api-replicas: 1
-    api-max-replicas: 2
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/avalanche
+    rpc-api-key: $MORALIS_RPC_API_KEY_AVALANCHE
+    webhook-url: https://dev-api.avalanche.shapeshift.com/api/v1/webhook/moralis
     api-cpu-limit: 250m
     api-memory-limit: 250Mi
 
@@ -347,6 +321,7 @@ aliases:
     pulumi-dir: coinstacks/thorchain/pulumi
     lcd-url: http://thorchain-svc.unchained.svc.cluster.local:1317
     lcd-v1-url: http://thorchain-v1-svc.unchained.svc.cluster.local:1317
+    indexer-url: http://thorchain-svc.unchained.svc.cluster.local:8080
     rpc-url: http://thorchain-svc.unchained.svc.cluster.local:27147
     rpc-v1-url: http://thorchain-v1-svc.unchained.svc.cluster.local:27147
     ws-url: ws://thorchain-svc.unchained.svc.cluster.local:27147
@@ -358,7 +333,7 @@ aliases:
     api-memory-limit: 2Gi
     stateful-service-replicas: 2
     service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-3.11.2
+    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-3.12.0
     service-cpu-limit-1: "2"
     service-memory-limit-1: 12Gi
     service-storage-size-1: 1250Gi
@@ -377,14 +352,21 @@ aliases:
     <<: *thorchain
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    lcd-url: http://thorchain-svc.unchained-dev.svc.cluster.local:1317
-    lcd-v1-url: http://thorchain-v1-svc.unchained-dev.svc.cluster.local:1317
-    rpc-url: http://thorchain-svc.unchained-dev.svc.cluster.local:27147
-    rpc-v1-url: http://thorchain-v1-svc.unchained-dev.svc.cluster.local:27147
-    ws-url: ws://thorchain-svc.unchained-dev.svc.cluster.local:27147
+    lcd-url: https://gateway.liquify.com
+    lcd-api-key: $LIQUIFY_LCD_API_KEY_THORCHAIN
+    lcd-v1-url: https://gateway.liquify.com
+    lcd-v1-api-key: $LIQUIFY_LCD_API_KEY_THORCHAIN_V1
+    indexer-url: https://gateway.liquify.com
+    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_THORCHAIN
+    rpc-url: https://gateway.liquify.com
+    rpc-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN
+    rpc-v1-url: https://gateway.liquify.com
+    rpc-v1-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN_V1
+    ws-url: wss://gateway.liquify.com
+    ws-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN
     api-replicas: 1
     api-max-replicas: 2
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &thorchain-v1
     assetName: thorchain-v1
@@ -410,37 +392,42 @@ aliases:
     <<: *thorchain-v1
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    lcd-url: http://thorchain-v1-svc.unchained-dev.svc.cluster.local:1317
-    rpc-url: http://thorchain-v1-svc.unchained-dev.svc.cluster.local:27147
-    ws-url: ws://thorchain-svc.unchained-dev.svc.cluster.local:27147
+    lcd-url: https://gateway.liquify.com
+    lcd-api-key: $LIQUIFY_LCD_API_KEY_THORCHAIN_V1
+    rpc-url: https://gateway.liquify.com
+    rpc-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN_V1
+    ws-url: wss://gateway.liquify.com
+    ws-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN
     api-replicas: 1
     api-max-replicas: 2
-    stateful-service-replicas: 1
-    api-cpu-limit: 250m
-    api-memory-limit: 250Mi
+    stateful-service-replicas: 0
 
   - &optimism
     assetName: optimism
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/optimism/pulumi
-    indexer-url: https://gateway.liquify.com
-    indexer-ws-url: wss://gateway.liquify.com
-    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_OP
-    rpc-url: https://gateway.liquify.com
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_OP
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-limit: 500m
-    api-cpu-threshold: 75
-    api-memory-limit: 500Mi
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/optimism
+    rpc-api-key: $MORALIS_RPC_API_KEY_OP
+    webhook-url: https://api.optimism.shapeshift.com/api/v1/webhook/moralis
+    api-autoscaling: false
+    api-replicas: 1
+    api-max-replicas: 1
+    api-cpu-limit: "1"
+    api-memory-limit: 1Gi
 
   - &optimism-dev
     <<: *optimism
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    api-replicas: 1
-    api-max-replicas: 2
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/optimism
+    rpc-api-key: $MORALIS_RPC_API_KEY_OP
+    webhook-url: https://dev-api.optimism.shapeshift.com/api/v1/webhook/moralis
     api-cpu-limit: 250m
     api-memory-limit: 250Mi
 
@@ -448,57 +435,55 @@ aliases:
     assetName: bnbsmartchain
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/bnbsmartchain/pulumi
-    indexer-url: https://bsc-blockbook.nownodes.io
-    indexer-ws-url: wss://bsc-blockbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY
-    rpc-url: https://bsc.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-limit: 500m
-    api-cpu-threshold: 75
-    api-memory-limit: 500Mi
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/bsc
+    rpc-api-key: $MORALIS_RPC_API_KEY_BSC
+    webhook-url: https://api.bnbsmartchain.shapeshift.com/api/v1/webhook/moralis
+    api-autoscaling: false
+    api-replicas: 1
+    api-max-replicas: 1
+    api-cpu-limit: "1"
+    api-memory-limit: 1Gi
 
   - &bnbsmartchain-dev
     <<: *bnbsmartchain
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://bsc-blockbook.nownodes.io
-    indexer-ws-url: wss://bsc-blockbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY_DEV
-    rpc-url: https://bsc.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY_DEV
-    api-replicas: 1
-    api-max-replicas: 2
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/bsc
+    rpc-api-key: $MORALIS_RPC_API_KEY_BSC
+    webhook-url: https://dev-api.bnbsmartchain.shapeshift.com/api/v1/webhook/moralis
 
   - &polygon
     assetName: polygon
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/polygon/pulumi
-    indexer-url: https://maticbook.nownodes.io
-    indexer-ws-url: wss://maticbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY
-    rpc-url: https://matic.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-limit: 500m
-    api-cpu-threshold: 75
-    api-memory-limit: 500Mi
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/polygon
+    rpc-api-key: $MORALIS_RPC_API_KEY_POLYGON
+    webhook-url: https://api.polygon.shapeshift.com/api/v1/webhook/moralis
+    api-autoscaling: false
+    api-replicas: 1
+    api-max-replicas: 1
+    api-cpu-limit: "1"
+    api-memory-limit: 1Gi
 
   - &polygon-dev
     <<: *polygon
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://maticbook.nownodes.io
-    indexer-ws-url: wss://maticbook.nownodes.io/wss
-    indexer-api-key: $NOW_NODES_API_KEY_DEV
-    rpc-url: https://matic.nownodes.io
-    rpc-api-key: $NOW_NODES_API_KEY_DEV
-    api-replicas: 1
-    api-max-replicas: 2
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/polygon
+    rpc-api-key: $MORALIS_RPC_API_KEY_POLYGON
+    webhook-url: https://dev-api.polygon.shapeshift.com/api/v1/webhook/moralis
     api-cpu-limit: 250m
     api-memory-limit: 250Mi
 
@@ -506,68 +491,58 @@ aliases:
     assetName: gnosis
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/gnosis/pulumi
-    rpc-url: http://gnosis-svc.unchained.svc.cluster.local:8545
-    indexer-url: http://gnosis-svc.unchained.svc.cluster.local:8001
-    indexer-ws-url: ws://gnosis-svc.unchained.svc.cluster.local:8001/websocket
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-limit: 500m
-    api-cpu-threshold: 75
-    api-memory-limit: 500Mi
-    stateful-service-replicas: 2
-    service-name-1: daemon
-    service-image-1: nethermind/nethermind:1.34.1
-    service-cpu-limit-1: "2"
-    service-memory-limit-1: 8Gi
-    service-storage-size-1: 750Gi
-    service-name-2: daemon-beacon
-    service-image-2: sigp/lighthouse:v7.1.0
-    service-cpu-limit-2: "2"
-    service-memory-limit-2: 6Gi
-    service-storage-size-2: 250Gi
-    service-name-3: indexer
-    service-image-3: shapeshiftdao/unchained-blockbook:gnosis-no-erc1155-d40a796
-    service-cpu-limit-3: "2"
-    service-memory-limit-3: 12Gi
-    service-storage-size-3: 500Gi
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/gnosis
+    rpc-api-key: $MORALIS_RPC_API_KEY_GNOSIS
+    webhook-url: https://api.gnosis.shapeshift.com/api/v1/webhook/moralis
+    api-autoscaling: false
+    api-replicas: 1
+    api-max-replicas: 1
+    api-cpu-limit: "1"
+    api-memory-limit: 1Gi
 
   - &gnosis-dev
     <<: *gnosis
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    rpc-url: http://gnosis-svc.unchained-dev.svc.cluster.local:8545
-    indexer-url: http://gnosis-svc.unchained-dev.svc.cluster.local:8001
-    indexer-ws-url: ws://gnosis-svc.unchained-dev.svc.cluster.local:8001/websocket
-    api-replicas: 1
-    api-max-replicas: 2
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/gnosis
+    rpc-api-key: $MORALIS_RPC_API_KEY_GNOSIS
+    webhook-url: https://dev-api.gnosis.shapeshift.com/api/v1/webhook/moralis
     api-cpu-limit: 250m
     api-memory-limit: 250Mi
-    stateful-service-replicas: 1
 
   - &arbitrum
     assetName: arbitrum
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/arbitrum/pulumi
-    indexer-url: https://gateway.liquify.com
-    indexer-ws-url: wss://gateway.liquify.com
-    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_ARB
-    rpc-url: https://gateway.liquify.com
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_ARB
-    api-autoscaling: true
-    api-replicas: 2
-    api-max-replicas: 4
-    api-cpu-limit: 750m
-    api-cpu-threshold: 75
-    api-memory-limit: 500Mi
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/arbitrum
+    rpc-api-key: $MORALIS_RPC_API_KEY_ARB
+    webhook-url: https://api.arbitrum.shapeshift.com/api/v1/webhook/moralis
+    api-autoscaling: false
+    api-replicas: 1
+    api-max-replicas: 1
+    api-cpu-limit: "1"
+    api-memory-limit: 1Gi
 
   - &arbitrum-dev
     <<: *arbitrum
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    api-replicas: 1
-    api-max-replicas: 2
-    api-cpu-limit: 500m
+    indexer-url: https://deep-index.moralis.io/api/v2.2
+    indexer-ws-url: ""
+    indexer-api-key: $MORALIS_INDEXER_API_KEY
+    rpc-url: https://site1.moralis-nodes.com/arbitrum
+    rpc-api-key: $MORALIS_RPC_API_KEY_ARB
+    webhook-url: https://dev-api.arbitrum.shapeshift.com/api/v1/webhook/moralis
+    api-cpu-limit: 250m
     api-memory-limit: 250Mi
 
   - &base
@@ -584,16 +559,7 @@ aliases:
     api-replicas: 1
     api-max-replicas: 1
     api-cpu-limit: "1"
-    api-cpu-threshold: 75
     api-memory-limit: 1Gi
-
-  - &base-fallback
-    <<: *base
-    indexer-url: https://gateway.liquify.com
-    indexer-ws-url: wss://gateway.liquify.com
-    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_BASE
-    rpc-url: https://gateway.liquify.com
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_BASE
 
   - &base-dev
     <<: *base
@@ -605,8 +571,6 @@ aliases:
     rpc-url: https://site1.moralis-nodes.com/base
     rpc-api-key: $MORALIS_RPC_API_KEY_BASE
     webhook-url: https://dev-api.base.shapeshift.com/api/v1/webhook/moralis
-    api-replicas: 1
-    api-max-replicas: 2
     api-cpu-limit: 250m
     api-memory-limit: 250Mi
 
@@ -662,7 +626,7 @@ commands:
     description: install dependencies
     steps:
       - go/install:
-          version: "1.23.4"
+          version: "1.25.0"
       - run:
           command: yarn install --immutable
       - run:
@@ -955,16 +919,37 @@ jobs:
       <<: *params
       lcd-url:
         type: string
+      lcd-api-key:
+        type: string
+        default: ""
       lcd-v1-url:
+        type: string
+        default: ""
+      lcd-v1-api-key:
+        type: string
+        default: ""
+      indexer-url:
+        type: string
+        default: ""
+      indexer-api-key:
         type: string
         default: ""
       rpc-url:
         type: string
+      rpc-api-key:
+        type: string
+        default: ""
       rpc-v1-url:
+        type: string
+        default: ""
+      rpc-v1-api-key:
         type: string
         default: ""
       ws-url:
         type: string
+      ws-api-key:
+        type: string
+        default: ""
     steps:
       - setup_remote_docker
       - attach_workspace:
@@ -975,10 +960,17 @@ jobs:
           name: add custom environment variables
           command: |
             echo 'export LCD_URL=<< parameters.lcd-url >>' >> $BASH_ENV
+            echo 'export LCD_API_KEY=<< parameters.lcd-api-key >>' >> $BASH_ENV
             echo 'export LCD_V1_URL=<< parameters.lcd-v1-url >>' >> $BASH_ENV
+            echo 'export LCD_V1_API_KEY=<< parameters.lcd-v1-api-key >>' >> $BASH_ENV
+            echo 'export INDEXER_URL=<< parameters.indexer-url >>' >> $BASH_ENV
+            echo 'export INDEXER_API_KEY=<< parameters.indexer-api-key >>' >> $BASH_ENV
             echo 'export RPC_URL=<< parameters.rpc-url >>' >> $BASH_ENV
+            echo 'export RPC_API_KEY=<< parameters.rpc-api-key >>' >> $BASH_ENV
             echo 'export RPC_V1_URL=<< parameters.rpc-v1-url >>' >> $BASH_ENV
+            echo 'export RPC_V1_API_KEY=<< parameters.rpc-v1-api-key >>' >> $BASH_ENV
             echo 'export WS_URL=<< parameters.ws-url >>' >> $BASH_ENV
+            echo 'export WS_API_KEY=<< parameters.ws-api-key >>' >> $BASH_ENV
       - run:
           name: pulumi
           working_directory: go/<< parameters.pulumi-dir >>
@@ -1633,41 +1625,3 @@ workflows:
           requires:
             - approve proxy
           <<: [*proxy, *only-main]
-
-  deploy-fallback:
-    jobs:
-      - lint-and-test-persist:
-          name: lint and test project (persist to workspace)
-          <<: *only-main
-
-      ####### ETHEREUM
-      - approve-coinstack:
-          name: approve ethereum fallback
-          type: approval
-          requires:
-            - lint and test project (persist to workspace)
-          <<: *only-main
-
-      - deploy-coinstack-node:
-          name: deploy ethereum fallback
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve ethereum fallback
-          <<: [*ethereum-fallback, *only-main]
-
-      ####### BASE
-      - approve-coinstack:
-          name: approve base fallback
-          type: approval
-          requires:
-            - lint and test project (persist to workspace)
-          <<: *only-main
-
-      - deploy-coinstack-node:
-          name: deploy base fallback
-          organization: TAXISTAKE
-          pulumi-command: up -f --yes
-          requires:
-            - approve base fallback
-          <<: [*base-fallback, *only-main]

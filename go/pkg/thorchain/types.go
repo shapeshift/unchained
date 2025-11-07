@@ -1,7 +1,6 @@
 package thorchain
 
 import (
-	"github.com/cometbft/cometbft/types"
 	cometbfttypes "github.com/cometbft/cometbft/types"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 )
@@ -25,11 +24,11 @@ func (b *ResultBlock) Height() int64 {
 }
 
 func (b *ResultBlock) Timestamp() int64 {
-	return b.Block.Time.UnixMilli()
+	return b.Time.UnixMilli()
 }
 
 type NewBlock struct {
-	types.EventDataNewBlock
+	cometbfttypes.EventDataNewBlock
 }
 
 func (b *NewBlock) Hash() string {
