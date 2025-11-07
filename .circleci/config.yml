@@ -349,6 +349,7 @@ aliases:
     pulumi-dir: coinstacks/thorchain/pulumi
     lcd-url: http://thorchain-svc.unchained.svc.cluster.local:1317
     lcd-v1-url: http://thorchain-v1-svc.unchained.svc.cluster.local:1317
+    indexer-url: http://thorchain-svc.unchained.svc.cluster.local:8080
     rpc-url: http://thorchain-svc.unchained.svc.cluster.local:27147
     rpc-v1-url: http://thorchain-v1-svc.unchained.svc.cluster.local:27147
     ws-url: ws://thorchain-svc.unchained.svc.cluster.local:27147
@@ -379,14 +380,21 @@ aliases:
     <<: *thorchain
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    lcd-url: http://thorchain-svc.unchained-dev.svc.cluster.local:1317
-    lcd-v1-url: http://thorchain-v1-svc.unchained-dev.svc.cluster.local:1317
-    rpc-url: http://thorchain-svc.unchained-dev.svc.cluster.local:27147
-    rpc-v1-url: http://thorchain-v1-svc.unchained-dev.svc.cluster.local:27147
-    ws-url: ws://thorchain-svc.unchained-dev.svc.cluster.local:27147
+    lcd-url: https://gateway.liquify.com
+    lcd-api-key: $LIQUIFY_LCD_API_KEY_THORCHAIN
+    lcd-v1-url: https://gateway.liquify.com
+    lcd-v1-api-key: $LIQUIFY_LCD_API_KEY_THORCHAIN_V1
+    indexer-url: https://gateway.liquify.com
+    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_THORCHAIN
+    rpc-url: https://gateway.liquify.com
+    rpc-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN
+    rpc-v1-url: https://gateway.liquify.com
+    rpc-v1-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN_V1
+    ws-url: wss://gateway.liquify.com
+    ws-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN
     api-replicas: 1
     api-max-replicas: 2
-    stateful-service-replicas: 1
+    stateful-service-replicas: 0
 
   - &thorchain-v1
     assetName: thorchain-v1
@@ -412,14 +420,15 @@ aliases:
     <<: *thorchain-v1
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    lcd-url: http://thorchain-v1-svc.unchained-dev.svc.cluster.local:1317
-    rpc-url: http://thorchain-v1-svc.unchained-dev.svc.cluster.local:27147
-    ws-url: ws://thorchain-svc.unchained-dev.svc.cluster.local:27147
+    lcd-url: https://gateway.liquify.com
+    lcd-api-key: $LIQUIFY_LCD_API_KEY_THORCHAIN_V1
+    rpc-url: https://gateway.liquify.com
+    rpc-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN_V1
+    ws-url: wss://gateway.liquify.com
+    ws-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN
     api-replicas: 1
     api-max-replicas: 2
-    stateful-service-replicas: 1
-    api-cpu-limit: 250m
-    api-memory-limit: 250Mi
+    stateful-service-replicas: 0
 
   - &optimism
     assetName: optimism
@@ -974,16 +983,37 @@ jobs:
       <<: *params
       lcd-url:
         type: string
+      lcd-api-key:
+        type: string
+        default: ""
       lcd-v1-url:
+        type: string
+        default: ""
+      lcd-v1-api-key:
+        type: string
+        default: ""
+      indexer-url:
+        type: string
+        default: ""
+      indexer-api-key:
         type: string
         default: ""
       rpc-url:
         type: string
+      rpc-api-key:
+        type: string
+        default: ""
       rpc-v1-url:
+        type: string
+        default: ""
+      rpc-v1-api-key:
         type: string
         default: ""
       ws-url:
         type: string
+      ws-api-key:
+        type: string
+        default: ""
     steps:
       - setup_remote_docker
       - attach_workspace:
