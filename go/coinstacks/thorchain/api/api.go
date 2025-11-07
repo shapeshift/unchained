@@ -305,7 +305,7 @@ func (a *API) AffiliateRevenue(w http.ResponseWriter, r *http.Request) {
 	api.HandleResponse(w, http.StatusOK, affiliateRevenue)
 }
 
-// swagger:route GET /lcd Proxy Proxy
+// swagger:route GET /lcd Proxy LCD
 //
 // Thorchain lcd rest api endpoints.
 //
@@ -341,7 +341,7 @@ func (a *API) LCD(w http.ResponseWriter, r *http.Request) {
 	api.HandleResponse(w, http.StatusOK, result)
 }
 
-// swagger:route GET /midgard Proxy Proxy
+// swagger:route GET /midgard Proxy Midgard
 //
 // Thorchain midgard rest api endpoints.
 //
