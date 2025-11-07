@@ -14,14 +14,20 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	_ "net/http/pprof"
+	"net/url"
+	"path"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/cors"
 	"github.com/shapeshift/unchained/internal/log"
@@ -42,12 +48,48 @@ const (
 
 var logger = log.WithoutFields()
 
-type API struct {
-	*cosmos.API
-	handler *Handler
+type HTTPClient struct {
+	*cosmos.HTTPClient
+	Indexer *resty.Client
 }
 
-func New(cfg cosmos.Config, httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, indexer *AffiliateFeeIndexer, swaggerPath string, prometheus *metrics.Prometheus) *API {
+type API struct {
+	*cosmos.API
+	handler    *Handler
+	httpClient *HTTPClient
+}
+
+type Config struct {
+	cosmos.Config
+	INDEXERURL    string
+	INDEXERAPIKEY string
+}
+
+func NewHTTPClient(conf Config) (*HTTPClient, error) {
+	httpClient, err := cosmos.NewHTTPClient(conf.Config)
+	if err != nil {
+		logger.Panicf("failed to create new http client: %+v", err)
+	}
+
+	indexerURL, err := url.Parse(conf.INDEXERURL)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse INDEXERURL: %s", conf.INDEXERURL)
+	}
+
+	if conf.INDEXERAPIKEY != "" {
+		indexerURL.Path = path.Join(indexerURL.Path, fmt.Sprintf("api=%s", conf.INDEXERAPIKEY))
+	}
+
+	headers := map[string]string{"Accept": "application/json"}
+	indexer := resty.New().SetBaseURL(indexerURL.String()).SetHeaders(headers)
+
+	return &HTTPClient{
+		HTTPClient: httpClient,
+		Indexer:    indexer,
+	}, nil
+}
+
+func New(cfg cosmos.Config, httpClient *HTTPClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, indexer *AffiliateFeeIndexer, swaggerPath string, prometheus *metrics.Prometheus) *API {
 	r := mux.NewRouter()
 
 	handler := &Handler{
@@ -72,8 +114,9 @@ func New(cfg cosmos.Config, httpClient *cosmos.HTTPClient, wsClient *cosmos.WSCl
 	}
 
 	a := &API{
-		API:     cosmos.New(handler, manager, server),
-		handler: handler,
+		API:        cosmos.New(handler, manager, server),
+		handler:    handler,
+		httpClient: httpClient,
 	}
 
 	// compile check to ensure Handler implements necessary interfaces
@@ -123,6 +166,10 @@ func New(cfg cosmos.Config, httpClient *cosmos.HTTPClient, wsClient *cosmos.WSCl
 
 	v1Affiliate := v1.PathPrefix("/affiliate").Subrouter()
 	v1Affiliate.HandleFunc("/revenue", a.AffiliateRevenue).Methods("GET")
+
+	// proxy endpoints
+	r.PathPrefix("/lcd").HandlerFunc(a.LCD).Methods("GET")
+	r.PathPrefix("/midgard").HandlerFunc(a.Midgard).Methods("GET")
 
 	// docs redirect paths
 	r.HandleFunc("/docs", api.DocsRedirect).Methods("GET")
@@ -256,4 +303,64 @@ func (a *API) AffiliateRevenue(w http.ResponseWriter, r *http.Request) {
 	}
 
 	api.HandleResponse(w, http.StatusOK, affiliateRevenue)
+}
+
+// swagger:route GET /lcd Proxy Proxy
+//
+// Thorchain lcd rest api endpoints.
+//
+// responses:
+//
+//	200:
+func (a *API) LCD(w http.ResponseWriter, r *http.Request) {
+	path := strings.TrimPrefix(r.URL.Path, "/lcd")
+	if path == "" {
+		path = "/"
+	}
+
+	req := a.httpClient.LCD.R()
+	req.QueryParam = r.URL.Query()
+
+	res, err := req.Get(path)
+	if err != nil {
+		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	var result any
+	if err := json.Unmarshal(res.Body(), &result); err != nil {
+		api.HandleError(w, http.StatusInternalServerError, err.Error())
+	}
+
+	api.HandleResponse(w, http.StatusOK, result)
+}
+
+// swagger:route GET /midgard Proxy Proxy
+//
+// Thorchain midgard rest api endpoints.
+//
+// responses:
+//
+//	200:
+func (a *API) Midgard(w http.ResponseWriter, r *http.Request) {
+	path := strings.TrimPrefix(r.URL.Path, "/midgard")
+	if path == "" {
+		path = "/"
+	}
+
+	req := a.httpClient.Indexer.R()
+	req.QueryParam = r.URL.Query()
+
+	res, err := req.Get(path)
+	if err != nil {
+		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	var result any
+	if err := json.Unmarshal(res.Body(), &result); err != nil {
+		api.HandleError(w, http.StatusInternalServerError, err.Error())
+	}
+
+	api.HandleResponse(w, http.StatusOK, result)
 }
