@@ -51,7 +51,7 @@ func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- 
 
 	endpoint := "/websocket"
 	if conf.WSAPIKEY != "" {
-		endpoint = fmt.Sprintf("/api=%s/websocket", conf.RPCAPIKEY)
+		endpoint = fmt.Sprintf("/api=%s/websocket", conf.WSAPIKEY)
 	}
 
 	client, err := cometbft.NewWS(wsURL.String(), endpoint)
