@@ -325,7 +325,7 @@
           "Proxy"
         ],
         "summary": "Thorchain lcd rest api endpoints.",
-        "operationId": "Proxy",
+        "operationId": "LCD",
         "responses": {
           "200": {
             "description": ""
@@ -339,7 +339,7 @@
           "Proxy"
         ],
         "summary": "Thorchain midgard rest api endpoints.",
-        "operationId": "Proxy",
+        "operationId": "Midgard",
         "responses": {
           "200": {
             "description": ""
