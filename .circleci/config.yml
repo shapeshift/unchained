@@ -319,12 +319,18 @@ aliases:
     assetName: thorchain
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/thorchain/pulumi
-    lcd-url: http://thorchain-svc.unchained.svc.cluster.local:1317
-    lcd-v1-url: http://thorchain-v1-svc.unchained.svc.cluster.local:1317
-    indexer-url: http://thorchain-svc.unchained.svc.cluster.local:8080
-    rpc-url: http://thorchain-svc.unchained.svc.cluster.local:27147
-    rpc-v1-url: http://thorchain-v1-svc.unchained.svc.cluster.local:27147
-    ws-url: ws://thorchain-svc.unchained.svc.cluster.local:27147
+    lcd-url: https://gateway.liquify.com
+    lcd-api-key: $LIQUIFY_LCD_API_KEY_THORCHAIN
+    lcd-v1-url: https://gateway.liquify.com
+    lcd-v1-api-key: $LIQUIFY_LCD_API_KEY_THORCHAIN_V1
+    indexer-url: https://gateway.liquify.com
+    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_THORCHAIN
+    rpc-url: https://gateway.liquify.com
+    rpc-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN
+    rpc-v1-url: https://gateway.liquify.com
+    rpc-v1-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN_V1
+    ws-url: wss://gateway.liquify.com
+    ws-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
@@ -372,9 +378,12 @@ aliases:
     assetName: thorchain-v1
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/thorchain-v1/pulumi
-    lcd-url: http://thorchain-v1-svc.unchained.svc.cluster.local:1317
-    rpc-url: http://thorchain-v1-svc.unchained.svc.cluster.local:27147
-    ws-url: ws://thorchain-svc.unchained.svc.cluster.local:27147
+    lcd-url: https://gateway.liquify.com
+    lcd-api-key: $LIQUIFY_LCD_API_KEY_THORCHAIN_V1
+    rpc-url: https://gateway.liquify.com
+    rpc-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN_V1
+    ws-url: wss://gateway.liquify.com
+    ws-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
