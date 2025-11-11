@@ -161,54 +161,21 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
   async getTxHistory(pubkey: string, cursor?: string, pageSize = 10, from?: number, to?: number): Promise<TxHistory> {
     validatePageSize(pageSize)
 
-    const curCursor = ((): Cursor => {
-      try {
-        if (!cursor) return { explorerPage: 0 }
-
-        return JSON.parse(Buffer.from(cursor, 'base64').toString('binary'))
-      } catch (err) {
-        const e: BadRequestError = { error: `invalid base64 cursor: ${cursor}` }
-        throw new ApiError('Bad Request', 422, JSON.stringify(e))
-      }
-    })()
-
     try {
       const currentBlock = await this.client.getBlockNumber()
 
-      let moralis = await this.getTxs(pubkey, curCursor, currentBlock, pageSize, from, to)
+      const moralis = await this.getTxs(
+        pubkey,
+        { explorerPage: 0, moralisCursor: cursor },
+        currentBlock,
+        pageSize,
+        from,
+        to
+      )
 
       if (!moralis.txs.size) return { pubkey: pubkey, txs: [] }
 
-      const txs: Array<Tx> = []
-      for (let i = 0; i < pageSize; i++) {
-        if (!moralis.txs.size && moralis.hasMore) {
-          curCursor.moralisCursor = moralis.cursor
-          moralis = await this.getTxs(pubkey, curCursor, currentBlock, pageSize, from, to)
-        }
-
-        if (!moralis.txs.size) break
-
-        const [tx] = moralis.txs.values()
-
-        txs.push(tx)
-
-        moralis.txs.delete(tx.txid)
-
-        curCursor.moralisTxid = tx.txid
-        curCursor.blockHeight = tx.blockHeight
-      }
-
-      // if we processed through the whole set of transactions, update cursor for next fetch
-      if (!moralis.txs.size) curCursor.moralisCursor = moralis.cursor
-
-      curCursor.blockHeight = txs[txs.length - 1]?.blockHeight
-
-      const nextCursor = (() => {
-        if (!moralis.txs.size && !moralis.hasMore) return
-        return Buffer.from(JSON.stringify(curCursor), 'binary').toString('base64')
-      })()
-
-      return { pubkey, cursor: nextCursor, txs }
+      return { pubkey, cursor: moralis.cursor, txs: Array.from(moralis.txs.values()) }
     } catch (err) {
       throw handleError(err)
     }
@@ -730,38 +697,26 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
         }
       }
 
-      const isNftOnly = Boolean(
-        tx.nftTransfers.length &&
-          !tx.erc20Transfers.length &&
-          !tx.nativeTransfers.length &&
-          !tx.internalTransactions?.length
-      )
+      const tokenTransfers = tx.possibleSpam
+        ? []
+        : tx.erc20Transfers.map<TokenTransfer>((transfer) => ({
+            from: transfer.fromAddress.checksum,
+            to: transfer.toAddress?.checksum ?? '',
+            value: transfer.value,
+            contract: transfer.address.checksum,
+            decimals: transfer.tokenDecimals,
+            name: transfer.tokenName,
+            symbol: transfer.tokenSymbol,
+            type: 'ERC20',
+          }))
 
-      const isInvalid = Boolean(
-        !tx.nftTransfers.length &&
-          !tx.erc20Transfers.length &&
-          !tx.nativeTransfers.length &&
-          !tx.internalTransactions?.length
-      )
-
-      if (isNftOnly || isInvalid) return prev
-
-      const tokenTransfers = tx.erc20Transfers.map<TokenTransfer>((transfer) => ({
-        from: transfer.fromAddress.checksum,
-        to: transfer.toAddress?.checksum ?? '',
-        value: transfer.value,
-        contract: transfer.address.checksum,
-        decimals: transfer.tokenDecimals,
-        name: transfer.tokenName,
-        symbol: transfer.tokenSymbol,
-        type: 'ERC20',
-      }))
-
-      const internalTxs = tx.internalTransactions?.map<InternalTx>((tx) => ({
-        from: tx.from.checksum,
-        to: tx.to.checksum,
-        value: tx.value.toString(),
-      }))
+      const internalTxs = tx.possibleSpam
+        ? []
+        : tx.internalTransactions?.map<InternalTx>((tx) => ({
+            from: tx.from.checksum,
+            to: tx.to.checksum,
+            value: tx.value.toString(),
+          }))
 
       prev.set(tx.hash, {
         txid: tx.hash,
