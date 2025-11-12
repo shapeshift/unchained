@@ -195,8 +195,8 @@ aliases:
     api-autoscaling: false
     api-replicas: 1
     api-max-replicas: 1
-    api-cpu-limit: "1"
-    api-memory-limit: 1Gi
+    api-cpu-limit: 500m
+    api-memory-limit: 500Mi
 
   - &ethereum-dev
     <<: *ethereum
@@ -219,8 +219,8 @@ aliases:
     api-autoscaling: false
     api-replicas: 1
     api-max-replicas: 1
-    api-cpu-limit: "1"
-    api-memory-limit: 1Gi
+    api-cpu-limit: 500m
+    api-memory-limit: 500Mi
 
   - &avalanche-dev
     <<: *avalanche
@@ -373,8 +373,8 @@ aliases:
     api-autoscaling: false
     api-replicas: 1
     api-max-replicas: 1
-    api-cpu-limit: "1"
-    api-memory-limit: 1Gi
+    api-cpu-limit: 500m
+    api-memory-limit: 500Mi
 
   - &optimism-dev
     <<: *optimism
@@ -397,8 +397,8 @@ aliases:
     api-autoscaling: false
     api-replicas: 1
     api-max-replicas: 1
-    api-cpu-limit: "1"
-    api-memory-limit: 1Gi
+    api-cpu-limit: 500m
+    api-memory-limit: 500Mi
 
   - &bnbsmartchain-dev
     <<: *bnbsmartchain
@@ -419,8 +419,8 @@ aliases:
     api-autoscaling: false
     api-replicas: 1
     api-max-replicas: 1
-    api-cpu-limit: "1"
-    api-memory-limit: 1Gi
+    api-cpu-limit: 500m
+    api-memory-limit: 500Mi
 
   - &polygon-dev
     <<: *polygon
@@ -443,8 +443,8 @@ aliases:
     api-autoscaling: false
     api-replicas: 1
     api-max-replicas: 1
-    api-cpu-limit: "1"
-    api-memory-limit: 1Gi
+    api-cpu-limit: 500m
+    api-memory-limit: 500Mi
 
   - &gnosis-dev
     <<: *gnosis
@@ -467,8 +467,8 @@ aliases:
     api-autoscaling: false
     api-replicas: 1
     api-max-replicas: 1
-    api-cpu-limit: "1"
-    api-memory-limit: 1Gi
+    api-cpu-limit: 500m
+    api-memory-limit: 500Mi
 
   - &arbitrum-dev
     <<: *arbitrum
@@ -496,8 +496,8 @@ aliases:
     api-autoscaling: false
     api-replicas: 1
     api-max-replicas: 1
-    api-cpu-limit: "1"
-    api-memory-limit: 1Gi
+    api-cpu-limit: 500m
+    api-memory-limit: 500Mi
 
   - &base-dev
     <<: *base
