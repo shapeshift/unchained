@@ -202,11 +202,6 @@ aliases:
     <<: *ethereum
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://deep-index.moralis.io/api/v2.2
-    indexer-ws-url: ""
-    indexer-api-key: $MORALIS_INDEXER_API_KEY
-    rpc-url: https://site1.moralis-nodes.com/eth
-    rpc-api-key: $MORALIS_RPC_API_KEY_ETH
     webhook-url: https://dev-api.ethereum.shapeshift.com/api/v1/webhook/moralis
     api-cpu-limit: 250m
     api-memory-limit: 250Mi
@@ -231,11 +226,6 @@ aliases:
     <<: *avalanche
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://deep-index.moralis.io/api/v2.2
-    indexer-ws-url: ""
-    indexer-api-key: $MORALIS_INDEXER_API_KEY
-    rpc-url: https://site1.moralis-nodes.com/avalanche
-    rpc-api-key: $MORALIS_RPC_API_KEY_AVALANCHE
     webhook-url: https://dev-api.avalanche.shapeshift.com/api/v1/webhook/moralis
     api-cpu-limit: 250m
     api-memory-limit: 250Mi
@@ -319,17 +309,17 @@ aliases:
     assetName: thorchain
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/thorchain/pulumi
-    lcd-url: https://gateway.liquify.com
+    lcd-url: https://gateway-lon.liquify.com
     lcd-api-key: $LIQUIFY_LCD_API_KEY_THORCHAIN
-    lcd-v1-url: https://gateway.liquify.com
+    lcd-v1-url: https://gateway-lon.liquify.com
     lcd-v1-api-key: $LIQUIFY_LCD_API_KEY_THORCHAIN_V1
-    indexer-url: https://gateway.liquify.com
+    indexer-url: https://gateway-lon.liquify.com
     indexer-api-key: $LIQUIFY_INDEXER_API_KEY_THORCHAIN
-    rpc-url: https://gateway.liquify.com
+    rpc-url: https://gateway-lon.liquify.com
     rpc-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN
-    rpc-v1-url: https://gateway.liquify.com
+    rpc-v1-url: https://gateway-lon.liquify.com
     rpc-v1-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN_V1
-    ws-url: wss://gateway.liquify.com
+    ws-url: wss://gateway-lon.liquify.com
     ws-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN
     api-autoscaling: true
     api-replicas: 2
@@ -337,52 +327,23 @@ aliases:
     api-cpu-limit: "4"
     api-cpu-threshold: 75
     api-memory-limit: 2Gi
-    stateful-service-replicas: 2
-    service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-3.12.0
-    service-cpu-limit-1: "2"
-    service-memory-limit-1: 12Gi
-    service-storage-size-1: 1250Gi
-    service-name-2: timescaledb
-    service-image-2: timescale/timescaledb:2.13.0-pg15
-    service-cpu-limit-2: "2"
-    service-memory-limit-2: 6Gi
-    service-storage-size-2: 500Gi
-    service-name-3: indexer
-    service-image-3: registry.gitlab.com/thorchain/midgard:2.32.7
-    service-cpu-limit-3: "2"
-    service-memory-limit-3: 2Gi
-    service-storage-size-3: 500Gi
 
   - &thorchain-dev
     <<: *thorchain
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    lcd-url: https://gateway.liquify.com
-    lcd-api-key: $LIQUIFY_LCD_API_KEY_THORCHAIN
-    lcd-v1-url: https://gateway.liquify.com
-    lcd-v1-api-key: $LIQUIFY_LCD_API_KEY_THORCHAIN_V1
-    indexer-url: https://gateway.liquify.com
-    indexer-api-key: $LIQUIFY_INDEXER_API_KEY_THORCHAIN
-    rpc-url: https://gateway.liquify.com
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN
-    rpc-v1-url: https://gateway.liquify.com
-    rpc-v1-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN_V1
-    ws-url: wss://gateway.liquify.com
-    ws-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN
     api-replicas: 1
     api-max-replicas: 2
-    stateful-service-replicas: 0
 
   - &thorchain-v1
     assetName: thorchain-v1
     pulumi-stack: public-us-east-2
     pulumi-dir: coinstacks/thorchain-v1/pulumi
-    lcd-url: https://gateway.liquify.com
+    lcd-url: https://gateway-lon.liquify.com
     lcd-api-key: $LIQUIFY_LCD_API_KEY_THORCHAIN_V1
-    rpc-url: https://gateway.liquify.com
+    rpc-url: https://gateway-lon.liquify.com
     rpc-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN_V1
-    ws-url: wss://gateway.liquify.com
+    ws-url: wss://gateway-lon.liquify.com
     ws-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN
     api-autoscaling: true
     api-replicas: 2
@@ -390,23 +351,11 @@ aliases:
     api-cpu-limit: 500m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
-    stateful-service-replicas: 2
-    service-name-1: daemon
-    service-image-1: registry.gitlab.com/thorchain/thornode:mainnet-1.134.1
-    service-cpu-limit-1: "2"
-    service-memory-limit-1: 12Gi
-    service-storage-size-1: 4750Gi
 
   - &thorchain-v1-dev
     <<: *thorchain-v1
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    lcd-url: https://gateway.liquify.com
-    lcd-api-key: $LIQUIFY_LCD_API_KEY_THORCHAIN_V1
-    rpc-url: https://gateway.liquify.com
-    rpc-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN_V1
-    ws-url: wss://gateway.liquify.com
-    ws-api-key: $LIQUIFY_RPC_API_KEY_THORCHAIN
     api-replicas: 1
     api-max-replicas: 2
     stateful-service-replicas: 0
@@ -431,11 +380,6 @@ aliases:
     <<: *optimism
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://deep-index.moralis.io/api/v2.2
-    indexer-ws-url: ""
-    indexer-api-key: $MORALIS_INDEXER_API_KEY
-    rpc-url: https://site1.moralis-nodes.com/optimism
-    rpc-api-key: $MORALIS_RPC_API_KEY_OP
     webhook-url: https://dev-api.optimism.shapeshift.com/api/v1/webhook/moralis
     api-cpu-limit: 250m
     api-memory-limit: 250Mi
@@ -460,11 +404,6 @@ aliases:
     <<: *bnbsmartchain
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://deep-index.moralis.io/api/v2.2
-    indexer-ws-url: ""
-    indexer-api-key: $MORALIS_INDEXER_API_KEY
-    rpc-url: https://site1.moralis-nodes.com/bsc
-    rpc-api-key: $MORALIS_RPC_API_KEY_BSC
     webhook-url: https://dev-api.bnbsmartchain.shapeshift.com/api/v1/webhook/moralis
 
   - &polygon
@@ -487,11 +426,6 @@ aliases:
     <<: *polygon
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://deep-index.moralis.io/api/v2.2
-    indexer-ws-url: ""
-    indexer-api-key: $MORALIS_INDEXER_API_KEY
-    rpc-url: https://site1.moralis-nodes.com/polygon
-    rpc-api-key: $MORALIS_RPC_API_KEY_POLYGON
     webhook-url: https://dev-api.polygon.shapeshift.com/api/v1/webhook/moralis
     api-cpu-limit: 250m
     api-memory-limit: 250Mi
@@ -516,11 +450,6 @@ aliases:
     <<: *gnosis
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://deep-index.moralis.io/api/v2.2
-    indexer-ws-url: ""
-    indexer-api-key: $MORALIS_INDEXER_API_KEY
-    rpc-url: https://site1.moralis-nodes.com/gnosis
-    rpc-api-key: $MORALIS_RPC_API_KEY_GNOSIS
     webhook-url: https://dev-api.gnosis.shapeshift.com/api/v1/webhook/moralis
     api-cpu-limit: 250m
     api-memory-limit: 250Mi
@@ -574,11 +503,6 @@ aliases:
     <<: *base
     environment: dev
     pulumi-stack: public-dev-us-east-2
-    indexer-url: https://deep-index.moralis.io/api/v2.2
-    indexer-ws-url: ""
-    indexer-api-key: $MORALIS_INDEXER_API_KEY
-    rpc-url: https://site1.moralis-nodes.com/base
-    rpc-api-key: $MORALIS_RPC_API_KEY_BASE
     webhook-url: https://dev-api.base.shapeshift.com/api/v1/webhook/moralis
     api-cpu-limit: 250m
     api-memory-limit: 250Mi
