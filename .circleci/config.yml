@@ -169,7 +169,7 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
-    api-cpu-limit: 500m
+    api-cpu-limit: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
 
@@ -179,7 +179,7 @@ aliases:
     pulumi-stack: public-dev-us-east-2
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 250m
+    api-cpu-limit: 100m
     api-memory-limit: 250Mi
 
   - &ethereum
@@ -195,7 +195,7 @@ aliases:
     api-autoscaling: false
     api-replicas: 1
     api-max-replicas: 1
-    api-cpu-limit: 500m
+    api-cpu-limit: 250m
     api-memory-limit: 500Mi
 
   - &ethereum-dev
@@ -203,7 +203,7 @@ aliases:
     environment: dev
     pulumi-stack: public-dev-us-east-2
     webhook-url: https://dev-api.ethereum.shapeshift.com/api/v1/webhook/moralis
-    api-cpu-limit: 250m
+    api-cpu-limit: 100m
     api-memory-limit: 250Mi
 
   - &avalanche
@@ -219,7 +219,7 @@ aliases:
     api-autoscaling: false
     api-replicas: 1
     api-max-replicas: 1
-    api-cpu-limit: 500m
+    api-cpu-limit: 250m
     api-memory-limit: 500Mi
 
   - &avalanche-dev
@@ -227,7 +227,7 @@ aliases:
     environment: dev
     pulumi-stack: public-dev-us-east-2
     webhook-url: https://dev-api.avalanche.shapeshift.com/api/v1/webhook/moralis
-    api-cpu-limit: 250m
+    api-cpu-limit: 100m
     api-memory-limit: 250Mi
 
   - &dogecoin
@@ -242,7 +242,7 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
-    api-cpu-limit: 500m
+    api-cpu-limit: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
 
@@ -252,7 +252,7 @@ aliases:
     pulumi-stack: public-dev-us-east-2
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 250m
+    api-cpu-limit: 100m
     api-memory-limit: 250Mi
 
   - &litecoin
@@ -267,7 +267,7 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
-    api-cpu-limit: 500m
+    api-cpu-limit: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
 
@@ -277,7 +277,7 @@ aliases:
     pulumi-stack: public-dev-us-east-2
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 250m
+    api-cpu-limit: 100m
     api-memory-limit: 250Mi
 
   - &bitcoincash
@@ -292,7 +292,7 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
-    api-cpu-limit: 500m
+    api-cpu-limit: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
 
@@ -302,7 +302,7 @@ aliases:
     pulumi-stack: public-dev-us-east-2
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 250m
+    api-cpu-limit: 100m
     api-memory-limit: 250Mi
 
   - &thorchain
@@ -324,7 +324,7 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
-    api-cpu-limit: "4"
+    api-cpu-limit: "2"
     api-cpu-threshold: 75
     api-memory-limit: 2Gi
 
@@ -373,7 +373,7 @@ aliases:
     api-autoscaling: false
     api-replicas: 1
     api-max-replicas: 1
-    api-cpu-limit: 500m
+    api-cpu-limit: 250m
     api-memory-limit: 500Mi
 
   - &optimism-dev
@@ -381,7 +381,7 @@ aliases:
     environment: dev
     pulumi-stack: public-dev-us-east-2
     webhook-url: https://dev-api.optimism.shapeshift.com/api/v1/webhook/moralis
-    api-cpu-limit: 250m
+    api-cpu-limit: 100m
     api-memory-limit: 250Mi
 
   - &bnbsmartchain
@@ -405,6 +405,8 @@ aliases:
     environment: dev
     pulumi-stack: public-dev-us-east-2
     webhook-url: https://dev-api.bnbsmartchain.shapeshift.com/api/v1/webhook/moralis
+    api-cpu-limit: 250m
+    api-memory-limit: 250Mi
 
   - &polygon
     assetName: polygon
@@ -419,7 +421,7 @@ aliases:
     api-autoscaling: false
     api-replicas: 1
     api-max-replicas: 1
-    api-cpu-limit: 500m
+    api-cpu-limit: 250m
     api-memory-limit: 500Mi
 
   - &polygon-dev
@@ -427,7 +429,7 @@ aliases:
     environment: dev
     pulumi-stack: public-dev-us-east-2
     webhook-url: https://dev-api.polygon.shapeshift.com/api/v1/webhook/moralis
-    api-cpu-limit: 250m
+    api-cpu-limit: 100m
     api-memory-limit: 250Mi
 
   - &gnosis
@@ -443,7 +445,7 @@ aliases:
     api-autoscaling: false
     api-replicas: 1
     api-max-replicas: 1
-    api-cpu-limit: 500m
+    api-cpu-limit: 300m
     api-memory-limit: 500Mi
 
   - &gnosis-dev
@@ -451,7 +453,7 @@ aliases:
     environment: dev
     pulumi-stack: public-dev-us-east-2
     webhook-url: https://dev-api.gnosis.shapeshift.com/api/v1/webhook/moralis
-    api-cpu-limit: 250m
+    api-cpu-limit: 150m
     api-memory-limit: 250Mi
 
   - &arbitrum
@@ -496,7 +498,7 @@ aliases:
     api-autoscaling: false
     api-replicas: 1
     api-max-replicas: 1
-    api-cpu-limit: 500m
+    api-cpu-limit: 250m
     api-memory-limit: 500Mi
 
   - &base-dev
@@ -504,7 +506,7 @@ aliases:
     environment: dev
     pulumi-stack: public-dev-us-east-2
     webhook-url: https://dev-api.base.shapeshift.com/api/v1/webhook/moralis
-    api-cpu-limit: 250m
+    api-cpu-limit: 100m
     api-memory-limit: 250Mi
 
   - &solana
@@ -520,7 +522,7 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
-    api-cpu-limit: 500m
+    api-cpu-limit: 250m
     api-cpu-threshold: 75
     api-memory-limit: 500Mi
 
@@ -530,7 +532,7 @@ aliases:
     pulumi-stack: public-dev-us-east-2
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 250m
+    api-cpu-limit: 100m
     api-memory-limit: 250Mi
 
   - &proxy
@@ -540,9 +542,9 @@ aliases:
     api-autoscaling: true
     api-replicas: 2
     api-max-replicas: 4
-    api-cpu-limit: 500m
+    api-cpu-limit: 250m
     api-cpu-threshold: 75
-    api-memory-limit: 4Gi
+    api-memory-limit: 2Gi
 
   - &proxy-dev
     <<: *proxy
@@ -551,7 +553,7 @@ aliases:
     pulumi-stack: public-dev-us-east-2
     api-replicas: 1
     api-max-replicas: 2
-    api-cpu-limit: 250m
+    api-cpu-limit: 100m
     api-memory-limit: 250Mi
 
 commands:
@@ -700,10 +702,9 @@ jobs:
             pulumi config set --path unchained:common.eks.nodeGroups[0].desired 4
             pulumi config set --path unchained:common.eks.nodeGroups[0].minSize 4
             pulumi config set --path unchained:common.eks.nodeGroups[0].maxSize 4
-            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[0] r7a.4xlarge
-            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] r6a.4xlarge
-            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] r6i.4xlarge
-            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[3] r6in.4xlarge
+            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[0] m8i.xlarge
+            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[1] m7a.xlarge
+            pulumi config set --path unchained:common.eks.nodeGroups[0].instanceTypes[2] m6a.xlarge
             pulumi config set --path unchained:common.eks.traefik.autoscaling.enabled true
             pulumi config set --path unchained:common.eks.traefik.autoscaling.memoryThreshold 50
             pulumi config set --path unchained:common.eks.traefik.autoscaling.cpuThreshold 80
