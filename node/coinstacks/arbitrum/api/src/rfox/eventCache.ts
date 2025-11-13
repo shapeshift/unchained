@@ -37,7 +37,7 @@ export class EventCache {
 
   async initialize() {
     try {
-      this.logger.info('Event cache initalizing')
+      this.logger.info('Event cache initializing')
       for (const contractAddress of Array.from(this.cache.keys())) {
         await this.indexContractEvents(contractAddress)
       }
