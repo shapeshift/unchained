@@ -346,6 +346,20 @@
           }
         }
       }
+    },
+    "/rpc": {
+      "get": {
+        "tags": [
+          "Proxy"
+        ],
+        "summary": "Thorchain rpc rest api endpoints.",
+        "operationId": "RPC",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
     }
   },
   "definitions": {
