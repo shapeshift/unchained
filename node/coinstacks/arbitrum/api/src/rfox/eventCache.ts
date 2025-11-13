@@ -5,7 +5,7 @@ import { Logger } from '@shapeshiftoss/logger'
 const FOX_PROXY_CONTRACT: Address = '0xaC2a4fD70BCD8Bab0662960455c363735f0e2b56'
 const UNI_V2_ETH_FOX_PROXY_CONTRACT: Address = '0x83B51B7605d2E277E03A7D6451B1efc0e5253A2F'
 
-export type StakingDuration = Record<Address, number>
+export type StakingDuration = Record<string, number>
 export type Event = GetContractEventsReturnType<typeof RFOX_ABI, 'Stake' | 'Unstake'>[number]
 
 interface Events {

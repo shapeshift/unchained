@@ -543,13 +543,13 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Record_Address.number_": {
+			"Record_string.number_": {
 				"properties": {},
 				"type": "object",
 				"description": "Construct a type with a set of properties K of type T"
 			},
 			"StakingDuration": {
-				"$ref": "#/components/schemas/Record_Address.number_"
+				"$ref": "#/components/schemas/Record_string.number_"
 			}
 		},
 		"securitySchemes": {}
