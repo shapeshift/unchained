@@ -14,6 +14,7 @@ import { EventCache, StakingDuration } from './rfox'
 const INDEXER_URL = process.env.INDEXER_URL
 const RPC_URL = process.env.RPC_URL
 const RPC_API_KEY = process.env.RPC_API_KEY
+const INFURA_API_KEY = 'a6eddff9714e4aebbf30b6a6b93e4ece'
 
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
@@ -28,8 +29,11 @@ const rpcUrl = `${RPC_URL}/${RPC_API_KEY}`
 
 const client = createPublicClient({ chain: arbitrum, transport: http(rpcUrl) })
 
-export const cache = new EventCache(client)
 export const service = new MoralisService({ chain: EvmChain.ARBITRUM, logger, client, rpcUrl })
+
+export const cache = new EventCache(
+  createPublicClient({ chain: arbitrum, transport: http(`https://arbitrum-mainnet.infura.io/v3/${INFURA_API_KEY}`) })
+)
 
 // assign service to be used for all instances of EVM
 EVM.service = service
