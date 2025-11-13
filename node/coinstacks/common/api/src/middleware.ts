@@ -71,7 +71,7 @@ export const metrics =
   }
 
 export const common = (prometheus?: Prometheus) => {
-  const _default = [compression(), json(), urlencoded({ extended: false }), cors(), requestLogger]
+  const _default = [compression(), json({ limit: '1mb' }), urlencoded({ extended: false }), cors(), requestLogger]
 
   if (!prometheus) return _default
   return _default.concat(metrics(prometheus))
