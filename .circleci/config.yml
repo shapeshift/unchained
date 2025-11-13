@@ -776,6 +776,9 @@ jobs:
       blocknative-env-var:
         type: string
         default: BLOCKNATIVE_API_KEY
+      infura-env-var:
+        type: string
+        default: INFURA_API_KEY
     steps:
       - setup_remote_docker
       - attach_workspace:
@@ -795,6 +798,7 @@ jobs:
             echo 'export WS_API_KEY=<< parameters.ws-api-key >>' >> $BASH_ENV
             echo 'export ETHERSCAN_API_KEY=$<< parameters.etherscan-env-var >>' >> $BASH_ENV
             echo 'export BLOCKNATIVE_API_KEY=$<< parameters.blocknative-env-var >>' >> $BASH_ENV
+            echo 'export INFURA_API_KEY=$<< parameters.infura-env-var >>' >> $BASH_ENV
             echo 'export WEBHOOK_URL=<< parameters.webhook-url >>' >> $BASH_ENV
             PARAM="<< parameters.environment >>"; echo "export ENVIRONMENT=${PARAM:-prod}" >> $BASH_ENV
       - run:
