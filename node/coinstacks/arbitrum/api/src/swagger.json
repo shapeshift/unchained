@@ -542,6 +542,14 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"Record_string.number_": {
+				"properties": {},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"StakingDuration": {
+				"$ref": "#/components/schemas/Record_string.number_"
 			}
 		},
 		"securitySchemes": {}
@@ -1220,6 +1228,57 @@
 				],
 				"security": [],
 				"parameters": []
+			}
+		},
+		"/api/v1/rfox/staking-duration/{address}": {
+			"get": {
+				"operationId": "GetRfoxStakingDuration",
+				"responses": {
+					"200": {
+						"description": "staking duration in seconds by staking contract address",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/StakingDuration"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"0xaC2a4fD70BCD8Bab0662960455c363735f0e2b56": 0,
+											"0x83B51B7605d2E277E03A7D6451B1efc0e5253A2F": 0
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/InternalServerError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get rFOX staking duration by contract address",
+				"tags": [
+					"v1"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "account address",
+						"in": "path",
+						"name": "address",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		}
 	},
