@@ -1,4 +1,5 @@
 {
+	"openapi": "3.0.0",
 	"components": {
 		"examples": {},
 		"headers": {},
@@ -545,6 +546,10 @@
 			},
 			"Record_string.number_": {
 				"properties": {},
+				"additionalProperties": {
+					"type": "number",
+					"format": "double"
+				},
 				"type": "object",
 				"description": "Construct a type with a set of properties K of type T"
 			},
@@ -562,7 +567,6 @@
 		},
 		"contact": {}
 	},
-	"openapi": "3.0.0",
 	"paths": {
 		"/api/v1/info": {
 			"get": {
