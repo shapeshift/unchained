@@ -1,4 +1,5 @@
 {
+	"openapi": "3.0.0",
 	"components": {
 		"examples": {},
 		"headers": {},
@@ -637,31 +638,17 @@
 				"type": "string"
 			},
 			"Token": {
-				"description": "Contains info about a token",
 				"properties": {
-					"id": {
+					"mint": {
 						"type": "string"
 					},
-					"decimals": {
-						"type": "number",
-						"format": "double"
-					},
-					"name": {
-						"type": "string"
-					},
-					"symbol": {
-						"type": "string"
-					},
-					"type": {
-						"type": "string"
+					"tokenStandard": {
+						"$ref": "#/components/schemas/TokenStandard"
 					}
 				},
 				"required": [
-					"id",
-					"decimals",
-					"name",
-					"symbol",
-					"type"
+					"mint",
+					"tokenStandard"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -1383,6 +1370,36 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"TokenDetails": {
+				"description": "Contains info about a token",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"decimals": {
+						"type": "number",
+						"format": "double"
+					},
+					"name": {
+						"type": "string"
+					},
+					"symbol": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"decimals",
+					"name",
+					"symbol",
+					"type"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
@@ -1395,7 +1412,6 @@
 		},
 		"contact": {}
 	},
-	"openapi": "3.0.0",
 	"paths": {
 		"/api/v1/info": {
 			"get": {
@@ -2042,7 +2058,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Token"
+									"$ref": "#/components/schemas/TokenDetails"
 								},
 								"examples": {
 									"Example 1": {
