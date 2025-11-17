@@ -169,6 +169,7 @@ func New(cfg cosmos.Config, httpClient *HTTPClient, wsClient *cosmos.WSClient, b
 
 	// proxy endpoints
 	r.PathPrefix("/lcd").HandlerFunc(a.LCD).Methods("GET")
+	r.PathPrefix("/rpc").HandlerFunc(a.RPC).Methods("GET")
 	r.PathPrefix("/midgard").HandlerFunc(a.Midgard).Methods("GET")
 
 	// docs redirect paths
@@ -319,6 +320,42 @@ func (a *API) LCD(w http.ResponseWriter, r *http.Request) {
 	}
 
 	req := a.httpClient.LCD.R()
+	req.QueryParam = r.URL.Query()
+
+	res, err := req.Get(path)
+	if err != nil {
+		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if res.StatusCode() != http.StatusOK {
+		api.HandleError(w, res.StatusCode(), string(res.Body()))
+		return
+	}
+
+	var result any
+	if err := json.Unmarshal(res.Body(), &result); err != nil {
+		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	api.HandleResponse(w, http.StatusOK, result)
+}
+
+// swagger:route GET /rpc Proxy RPC
+//
+// Thorchain rpc rest api endpoints.
+//
+// responses:
+//
+//	200:
+func (a *API) RPC(w http.ResponseWriter, r *http.Request) {
+	path := strings.TrimPrefix(r.URL.Path, "/rpc")
+	if path == "" {
+		path = "/"
+	}
+
+	req := a.httpClient.RPC.R()
 	req.QueryParam = r.URL.Query()
 
 	res, err := req.Get(path)

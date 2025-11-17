@@ -1,20 +1,23 @@
 import { EvmChain } from '@moralisweb3/common-evm-utils'
 import { EvmStreamResult, EvmStreamResultish } from '@moralisweb3/common-streams-utils'
-import { ApiError } from '@shapeshiftoss/common-api'
+import { ApiError, handleError } from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
 import express from 'express'
-import { Body, Example, Get, Hidden, Post, Response, Request, Route, Tags } from 'tsoa'
+import { Body, Example, Get, Hidden, Post, Response, Request, Route, Tags, Path } from 'tsoa'
 import { createPublicClient, http, keccak256, toBytes } from 'viem'
 import { arbitrum } from 'viem/chains'
 import { BaseAPI, EstimateGasBody, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { API, GasEstimate, GasFees, MoralisService } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { EVM } from '../../../common/api/src/evm/controller'
+import { EventCache, StakingDuration } from './rfox'
 
 const INDEXER_URL = process.env.INDEXER_URL
+const INFURA_API_KEY = process.env.INFURA_API_KEY
 const RPC_URL = process.env.RPC_URL
 const RPC_API_KEY = process.env.RPC_API_KEY
 
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
+if (!INFURA_API_KEY) throw new Error('INFURA_API_KEY env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
 if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
 
@@ -26,8 +29,13 @@ export const logger = new Logger({
 const rpcUrl = `${RPC_URL}/${RPC_API_KEY}`
 
 const client = createPublicClient({ chain: arbitrum, transport: http(rpcUrl) })
+const infuraClient = createPublicClient({
+  chain: arbitrum,
+  transport: http(`https://arbitrum-mainnet.infura.io/v3/${INFURA_API_KEY}`),
+})
 
 export const service = new MoralisService({ chain: EvmChain.ARBITRUM, logger, client, rpcUrl })
+export const cache = new EventCache({ client, infuraClient, logger })
 
 // assign service to be used for all instances of EVM
 EVM.service = service
@@ -87,6 +95,27 @@ export class Arbitrum extends EVM implements BaseAPI, API {
   @Get('/gas/fees')
   async getGasFees(): Promise<GasFees> {
     return service.getGasFees()
+  }
+
+  /**
+   * Get rFOX staking duration by contract address
+   *
+   * @param {string} address account address
+   *
+   * @returns {Promise<StakingDuration>} staking duration in seconds by staking contract address
+   */
+  @Example<StakingDuration>({
+    '0xaC2a4fD70BCD8Bab0662960455c363735f0e2b56': 0,
+    '0x83B51B7605d2E277E03A7D6451B1efc0e5253A2F': 0,
+  })
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Get('/rfox/staking-duration/{address}')
+  async getRfoxStakingDuration(@Path() address: string): Promise<StakingDuration> {
+    try {
+      return await cache.getStakingDuration(address)
+    } catch (err) {
+      throw handleError(err)
+    }
   }
 
   @Hidden()
