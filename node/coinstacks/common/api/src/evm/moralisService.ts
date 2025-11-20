@@ -1,5 +1,5 @@
 import { EvmChain } from '@moralisweb3/common-evm-utils'
-import { CreateStreamEvmRequest, EvmStreamResult } from '@moralisweb3/common-streams-utils'
+import { EvmStreamResult } from '@moralisweb3/common-streams-utils'
 import { Logger } from '@shapeshiftoss/logger'
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
@@ -53,6 +53,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
   private secret?: string
   private streamId?: string
   private queue = new PQueue({ concurrency: 1 })
+  private currentAddresses = new Set<string>()
+  private canUpdateStream = true
 
   transactionHandler?: TransactionHandler
 
@@ -71,11 +73,17 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
     this.minPriorityFee = args.minPriorityFee ?? '0'
 
     void Moralis.start({ evmApiBaseUrl: INDEXER_URL, apiKey: INDEXER_API_KEY })
+    void Moralis.Streams.setSettings({ region: 'us-east-1' })
+
+    setInterval(async () => {
+      this.canUpdateStream = true
+      await this.updateStream()
+    }, 60_000)
   }
 
   private async initializeStream() {
     try {
-      const stream: CreateStreamEvmRequest = {
+      const stream = await Moralis.Streams.add({
         chains: [this.chain],
         description: this.chain.display(),
         tag: `${this.chain.display()} - ${ENVIRONMENT}`,
@@ -83,15 +91,10 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
         includeNativeTxs: true,
         includeInternalTxs: true,
         includeContractLogs: true,
-      }
+        networkType: 'evm',
+      })
 
-      const currentStream = await Moralis.Streams.add(stream)
-
-      await Moralis.Streams.delete({ id: currentStream.result.id, networkType: 'evm' })
-
-      const newStream = await Moralis.Streams.add(stream)
-
-      this.streamId = newStream.result.id
+      this.streamId = stream.result.id
     } catch (err) {
       if (err instanceof Error) {
         this.logger.error({ error: err.message }, 'Failed to initialize MoralisService')
@@ -817,45 +820,50 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, Subscripti
     }
   }
 
-  subscribeAddresses(_: Array<string>, addressesToAdd: Array<string>): void {
-    if (!addressesToAdd.length) return
-
+  subscribeAddresses(addresses: Array<string>): void {
     this.queue.add(async () => {
-      try {
-        if (!this.streamId) await this.initializeStream()
-
-        await Moralis.Streams.addAddress({
-          id: this.streamId!,
-          address: addressesToAdd,
-        })
-      } catch (err) {
-        if (err instanceof Error) {
-          this.logger.error({ error: err.message, addresses: addressesToAdd }, 'failed to subscribe addresses')
-        } else {
-          this.logger.error({ addresses: addressesToAdd }, 'failed to subscribe addresses')
-        }
-      }
+      this.currentAddresses = new Set(addresses)
+      await this.updateStream()
     })
   }
 
-  unsubscribeAddresses(_: Array<string>, addressesToRemove: Array<string>): void {
-    if (!addressesToRemove.length) return
+  unsubscribeAddresses(addresses: Array<string>): void {
+    this.subscribeAddresses(addresses)
+  }
 
-    this.queue.add(async () => {
-      try {
-        if (!this.streamId) await this.initializeStream()
+  async updateStream() {
+    try {
+      if (!this.canUpdateStream) return
 
-        await Moralis.Streams.deleteAddress({
-          id: this.streamId!,
-          address: addressesToRemove,
-        })
-      } catch (err) {
-        if (err instanceof Error) {
-          this.logger.error({ error: err.message, addresses: addressesToRemove }, 'failed to unsubscribe addresses')
-        } else {
-          this.logger.error({ addresses: addressesToRemove }, 'failed to unsubscribe addresses')
-        }
+      if (!this.streamId) await this.initializeStream()
+
+      const baseArgs = { id: this.streamId!, networkType: 'evm' } as const
+      let response = await Moralis.Streams.getAddresses({ ...baseArgs, limit: 100 })
+
+      const existingAddresses = new Set(response.result.flatMap(({ address }) => address?.checksum ?? []))
+      while (response.pagination.cursor) {
+        response = await response.next()
+        response.result.forEach(({ address }) => address && existingAddresses.add(address.checksum))
       }
-    })
+
+      const toAdd = Array.from(this.currentAddresses).filter((addr) => !existingAddresses.has(addr))
+      const toRemove = Array.from(existingAddresses).filter((addr) => !this.currentAddresses.has(addr))
+
+      if (!toAdd.length && !toRemove.length) return
+
+      if (toRemove.length) await Moralis.Streams.deleteAddress({ ...baseArgs, address: toRemove })
+      if (toAdd.length) await Moralis.Streams.addAddress({ ...baseArgs, address: toAdd })
+
+      this.canUpdateStream = false
+    } catch (err) {
+      if (err instanceof Error) {
+        this.logger.error(
+          { error: err.message, currentAddresses: Array.from(this.currentAddresses) },
+          'failed to update stream'
+        )
+      } else {
+        this.logger.error({ currentAddresses: Array.from(this.currentAddresses) }, 'failed to update stream')
+      }
+    }
   }
 }
