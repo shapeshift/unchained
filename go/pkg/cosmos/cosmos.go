@@ -3,8 +3,10 @@ package cosmos
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 	"net/url"
+	"path"
 
 	sdkmath "cosmossdk.io/math"
 	"cosmossdk.io/simapp/params"
@@ -76,9 +78,12 @@ type Config struct {
 	Denom             string
 	NativeFee         int
 	Encoding          *params.EncodingConfig
+	LCDAPIKEY         string
 	LCDURL            string
+	RPCAPIKEY         string
 	RPCURL            string
 	WSURL             string
+	WSAPIKEY          string
 }
 
 // HTTPClient allows communicating over http
@@ -105,8 +110,16 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 		return nil, errors.Wrapf(err, "failed to parse RPCURL: %s", conf.RPCURL)
 	}
 
-	// untyped resty http clients
+	if conf.LCDAPIKEY != "" {
+		lcdURL.Path = path.Join(lcdURL.Path, fmt.Sprintf("api=%s", conf.LCDAPIKEY))
+	}
+
+	if conf.RPCAPIKEY != "" {
+		rpcURL.Path = path.Join(rpcURL.Path, fmt.Sprintf("api=%s", conf.RPCAPIKEY))
+	}
+
 	headers := map[string]string{"Accept": "application/json"}
+
 	lcd := resty.New().SetBaseURL(lcdURL.String()).SetHeaders(headers)
 	rpc := resty.New().SetBaseURL(rpcURL.String()).SetHeaders(headers)
 

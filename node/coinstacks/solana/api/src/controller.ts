@@ -13,7 +13,7 @@ import {
   ValidationError,
   handleError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { Account, API, EstimateFeesBody, PriorityFees, Token, TokenBalance, Tx, TxHistory } from './models'
+import { Account, API, EstimateFeesBody, PriorityFees, TokenDetails, TokenBalance, Tx, TxHistory } from './models'
 import { axiosNoRetry, axiosWithRetry, getTransaction } from './utils'
 import { NativeBalance } from './types'
 
@@ -30,7 +30,7 @@ if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
 const rpcUrl = RPC_API_KEY ? `${RPC_URL}?api-key=${RPC_API_KEY}` : `${RPC_URL}`
 const heliusSdk = new Helius(RPC_API_KEY)
 
-const tokens: Record<string, Token> = {}
+const tokens: Record<string, TokenDetails> = {}
 
 @Route('api/v1')
 @Tags('v1')
@@ -410,11 +410,11 @@ export class Solana implements BaseAPI, API {
    *
    * @param {string} id token id
    *
-   * @returns {Promise<Token>} token details
+   * @returns {Promise<TokenDetails>} token details
    *
    * @example id "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
    */
-  @Example<Token>({
+  @Example<TokenDetails>({
     id: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
     name: 'USD Coin',
     symbol: 'USDC',
@@ -424,7 +424,7 @@ export class Solana implements BaseAPI, API {
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/token/{id}')
-  async getToken(@Path() id: string): Promise<Token> {
+  async getToken(@Path() id: string): Promise<TokenDetails> {
     try {
       if (tokens[id]) return tokens[id]
 
@@ -433,7 +433,7 @@ export class Solana implements BaseAPI, API {
       if (asset.content?.metadata === undefined) throw new Error('token metadata undefined')
       if (asset.token_info?.decimals === undefined) throw new Error('token decimals undefined')
 
-      const token: Token = {
+      const token: TokenDetails = {
         id: asset.id,
         name: asset.content.metadata.name,
         symbol: asset.content.metadata.symbol,

@@ -25,11 +25,18 @@ var (
 )
 
 type Config struct {
-	LCDURL   string `mapstructure:"LCD_URL"`
-	LCDV1URL string `mapstructure:"LCD_V1_URL"`
-	RPCURL   string `mapstructure:"RPC_URL"`
-	RPCV1URL string `mapstructure:"RPC_V1_URL"`
-	WSURL    string `mapstructure:"WS_URL"`
+	LCDURL        string `mapstructure:"LCD_URL"`
+	LCDAPIKEY     string `mapstructure:"LCD_API_KEY"`
+	LCDV1URL      string `mapstructure:"LCD_V1_URL"`
+	LCDV1APIKEY   string `mapstructure:"LCD_V1_API_KEY"`
+	RPCURL        string `mapstructure:"RPC_URL"`
+	RPCAPIKEY     string `mapstructure:"RPC_API_KEY"`
+	RPCV1URL      string `mapstructure:"RPC_V1_URL"`
+	RPCV1APIKEY   string `mapstructure:"RPC_V1_API_KEY"`
+	INDEXERURL    string `mapstructure:"INDEXER_URL"`
+	INDEXERAPIKEY string `mapstructure:"INDEXER_API_KEY"`
+	WSURL         string `mapstructure:"WS_URL"`
+	WSAPIKEY      string `mapstructure:"WS_API_KEY"`
 }
 
 func main() {
@@ -41,7 +48,7 @@ func main() {
 
 	conf := &Config{}
 	if *envPath == "" {
-		if err := config.LoadFromEnv(conf, "LCD_URL", "LCD_V1_URL", "RPC_URL", "RPC_V1_URL", "WS_URL"); err != nil {
+		if err := config.LoadFromEnv(conf, "LCD_URL", "LCD_API_KEY", "LCD_V1_URL", "LCD_V1_API_KEY", "RPC_URL", "RPC_API_KEY", "RPC_V1_URL", "RPC_V1_API_KEY", "INDEXER_URL", "INDEXER_API_KEY", "WS_URL", "WS_API_KEY"); err != nil {
 			logger.Panicf("failed to load config from env: %+v", err)
 		}
 	} else {
@@ -66,17 +73,24 @@ func main() {
 	// overwrite standard tx config with the custom inject tx config
 	encoding.TxConfig = txconfig
 
-	cfg := cosmos.Config{
-		Bech32AddrPrefix:  "thor",
-		Bech32PkPrefix:    "thorpub",
-		Bech32ValPrefix:   "thorv",
-		Bech32PkValPrefix: "thorvpub",
-		Denom:             "rune",
-		NativeFee:         2000000, // https://daemon.thorchain.shapeshift.com/lcd/thorchain/constants
-		Encoding:          encoding,
-		LCDURL:            conf.LCDURL,
-		RPCURL:            conf.RPCURL,
-		WSURL:             conf.WSURL,
+	cfg := api.Config{
+		Config: cosmos.Config{
+			Bech32AddrPrefix:  "thor",
+			Bech32PkPrefix:    "thorpub",
+			Bech32ValPrefix:   "thorv",
+			Bech32PkValPrefix: "thorvpub",
+			Denom:             "rune",
+			NativeFee:         2000000, // https://daemon.thorchain.shapeshift.com/lcd/thorchain/constants
+			Encoding:          encoding,
+			LCDURL:            conf.LCDURL,
+			LCDAPIKEY:         conf.LCDAPIKEY,
+			RPCURL:            conf.RPCURL,
+			RPCAPIKEY:         conf.RPCAPIKEY,
+			WSURL:             conf.WSURL,
+			WSAPIKEY:          conf.WSAPIKEY,
+		},
+		INDEXERURL:    conf.INDEXERURL,
+		INDEXERAPIKEY: conf.INDEXERAPIKEY,
 	}
 
 	cfgV1 := cosmos.Config{
@@ -88,12 +102,14 @@ func main() {
 		NativeFee:         2000000, // https://daemon.thorchain.shapeshift.com/lcd/thorchain/constants
 		Encoding:          encoding,
 		LCDURL:            conf.LCDV1URL,
+		LCDAPIKEY:         conf.LCDV1APIKEY,
 		RPCURL:            conf.RPCV1URL,
+		RPCAPIKEY:         conf.RPCV1APIKEY,
 	}
 
 	prometheus := metrics.NewPrometheus("thorchain")
 
-	httpClient, err := cosmos.NewHTTPClient(cfg)
+	httpClient, err := api.NewHTTPClient(cfg)
 	if err != nil {
 		logger.Panicf("failed to create new http client: %+v", err)
 	}
@@ -108,17 +124,17 @@ func main() {
 		logger.Panicf("failed to create new block service: %+v", err)
 	}
 
-	wsClient, err := cosmos.NewWebsocketClient(cfg, blockService, errChan)
+	wsClient, err := cosmos.NewWebsocketClient(cfg.Config, blockService, errChan)
 	if err != nil {
 		logger.Panicf("failed to create new websocket client: %+v", err)
 	}
 
-	indexer := api.NewAffiliateFeeIndexer([]*cosmos.HTTPClient{httpClientV1, httpClient}, wsClient)
+	indexer := api.NewAffiliateFeeIndexer([]*cosmos.HTTPClient{httpClientV1, httpClient.HTTPClient}, wsClient)
 	if err := indexer.Sync(); err != nil {
 		logger.Panicf("failed to index affiliate fees: %+v", err)
 	}
 
-	api := api.New(cfg, httpClient, wsClient, blockService, indexer, *swaggerPath, prometheus)
+	api := api.New(cfg.Config, httpClient, wsClient, blockService, indexer, *swaggerPath, prometheus)
 	defer api.Shutdown()
 
 	go api.Serve(errChan)

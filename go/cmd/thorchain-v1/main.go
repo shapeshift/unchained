@@ -23,9 +23,12 @@ var (
 )
 
 type Config struct {
-	LCDURL string `mapstructure:"LCD_URL"`
-	RPCURL string `mapstructure:"RPC_URL"`
-	WSURL  string `mapstructure:"WS_URL"`
+	LCDURL    string `mapstructure:"LCD_URL"`
+	LCDAPIKEY string `mapstructure:"LCD_API_KEY"`
+	RPCURL    string `mapstructure:"RPC_URL"`
+	RPCAPIKEY string `mapstructure:"RPC_API_KEY"`
+	WSURL     string `mapstructure:"WS_URL"`
+	WSAPIKEY  string `mapstructure:"WS_API_KEY"`
 }
 
 func main() {
@@ -37,7 +40,7 @@ func main() {
 
 	conf := &Config{}
 	if *envPath == "" {
-		if err := config.LoadFromEnv(conf, "LCD_URL", "RPC_URL", "WS_URL"); err != nil {
+		if err := config.LoadFromEnv(conf, "LCD_URL", "LCD_API_KEY", "RPC_URL", "RPC_API_KEY", "WS_URL", "WS_API_KEY"); err != nil {
 			logger.Panicf("failed to load config from env: %+v", err)
 		}
 	} else {
@@ -57,8 +60,11 @@ func main() {
 		NativeFee:         2000000, // https://daemon.thorchain.shapeshift.com/lcd/thorchain/constants
 		Encoding:          encoding,
 		LCDURL:            conf.LCDURL,
+		LCDAPIKEY:         conf.LCDAPIKEY,
 		RPCURL:            conf.RPCURL,
+		RPCAPIKEY:         conf.RPCAPIKEY,
 		WSURL:             conf.WSURL,
+		WSAPIKEY:          conf.WSAPIKEY,
 	}
 
 	prometheus := metrics.NewPrometheus("thorchain-v1")

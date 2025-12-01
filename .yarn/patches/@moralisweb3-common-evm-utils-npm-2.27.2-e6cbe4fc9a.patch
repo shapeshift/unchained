@@ -1,7 +1,16 @@
 diff --git a/lib/cjs/index.cjs b/lib/cjs/index.cjs
-index 3890ff00a2affac86818f839ef8a23e1b04b937e..1363daba52b2b32c5965fa7f9bd89599e3767021 100644
+index 3890ff00a2affac86818f839ef8a23e1b04b937e..50ae5d395eb90663fb1d883e0032c15a3f564ec6 100644
 --- a/lib/cjs/index.cjs
 +++ b/lib/cjs/index.cjs
+@@ -4136,7 +4136,7 @@ var EvmInternalTransaction = /** @class */ (function () {
+         transactionHash: data.transactionHash,
+         gas: commonCore.BigNumber.create(data.gas),
+         gasUsed: commonCore.BigNumber.create(data.gasUsed),
+-        blockNumber: commonCore.BigNumber.create(data.blockNumber),
++        blockNumber: commonCore.maybe(data.blockNumber, commonCore.BigNumber.create),
+         blockHash: data.blockHash,
+         input: data.input,
+         output: data.output,
 @@ -4197,6 +4197,7 @@ var EvmTransaction = /** @class */ (function () {
                  return EvmInternalTransaction.create(transaction);
              }),

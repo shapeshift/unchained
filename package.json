@@ -30,7 +30,6 @@
     "@shapeshiftoss/logger": "^1.1.2",
     "@types/folder-hash": "^4.0.4",
     "@types/node": "^22.18.8",
-    "@types/object-hash": "^3.0.6",
     "axios": "^1.6.2",
     "axios-retry": "^4.0.0",
     "compression": "^1.7.4",
@@ -40,11 +39,10 @@
     "folder-hash": "^4.0.4",
     "moralis": "^2.27.2",
     "morgan": "^1.10.0",
-    "object-hash": "^3.0.0",
     "p-queue": "^9.0.0",
     "prom-client": "^15.0.0",
     "swagger-ui-express": "^5.0.0",
-    "tsoa": "^5.1.1",
+    "tsoa": "^6.6.0",
     "viem": "^2.33.2"
   },
   "devDependencies": {

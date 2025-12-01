@@ -1,11 +1,3 @@
-export interface Cursor {
-  blockHeight?: number
-  blockbookPage: number
-  blockbookTxid?: string
-  explorerPage: number
-  explorerTxid?: string
-}
-
 export interface TraceCall {
   action: {
     callType: string

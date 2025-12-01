@@ -318,6 +318,48 @@
           }
         }
       }
+    },
+    "/lcd": {
+      "get": {
+        "tags": [
+          "Proxy"
+        ],
+        "summary": "Thorchain lcd rest api endpoints.",
+        "operationId": "LCD",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/midgard": {
+      "get": {
+        "tags": [
+          "Proxy"
+        ],
+        "summary": "Thorchain midgard rest api endpoints.",
+        "operationId": "Midgard",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/rpc": {
+      "get": {
+        "tags": [
+          "Proxy"
+        ],
+        "summary": "Thorchain rpc rest api endpoints.",
+        "operationId": "RPC",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
     }
   },
   "definitions": {

@@ -1,7 +1,7 @@
 import * as k8s from '@pulumi/kubernetes'
 import { Input, Resource } from '@pulumi/pulumi'
 import { buildAndPushImage, Config, hasTag } from './index'
-import { CoinstackType, getCoinstackHash, secretEnvs } from './hash'
+import { secretEnvs } from './hash'
 
 export interface Autoscaling {
   enabled: boolean
@@ -21,35 +21,19 @@ export interface DeployApiArgs {
   appName: string
   assetName: string
   coinstack: string
-  coinstackType: CoinstackType
-  baseImageName?: string
   sampleEnv: Buffer
   config: Pick<Config, 'api' | 'dockerhub' | 'rootDomainName' | 'environment'>
   deployDependencies?: Input<Array<Resource>>
   namespace: string
   provider: k8s.Provider
   port?: number
-}
-
-const getbuildAndPushImageArgs = (coinstackType: CoinstackType) => {
-  switch (coinstackType) {
-    case 'go':
-      return { context: '../../../', dockerFile: '../../../build/Dockerfile' }
-    case 'node':
-      return { context: `../api` }
-    default:
-      throw new Error('invalid coinstack type')
-  }
-}
-
-const getContainer = (coinstackType: CoinstackType, coinstack: string) => {
-  switch (coinstackType) {
-    case 'go':
-      return { args: ['-swagger', 'swagger.json'] }
-    case 'node':
-      return { command: ['node', `dist/${coinstack}/api/src/app.js`] }
-    default:
-      throw new Error('invalid coinstack type')
+  docker: {
+    args?: Array<string>
+    baseImageName?: string
+    command?: Array<string>
+    context: string
+    dockerFile?: string
+    tag: string
   }
 }
 
@@ -58,8 +42,7 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
     appName,
     assetName,
     coinstack,
-    coinstackType,
-    baseImageName,
+    docker,
     sampleEnv,
     config,
     deployDependencies = [],
@@ -75,21 +58,20 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
   const name = `${assetName}-${tier}`
 
   const buildArgs: Record<string, string> = { BUILDKIT_INLINE_CACHE: '1', COINSTACK: coinstack }
-  if (baseImageName) buildArgs.BASE_IMAGE = baseImageName
+  if (docker.baseImageName) buildArgs.BASE_IMAGE = docker.baseImageName
 
-  const tag = await getCoinstackHash(coinstack, buildArgs, coinstackType)
   const repositoryName = `${appName}-${coinstack}-${tier}`
 
-  let imageName = `shapeshiftdao/${repositoryName}:${tag}` // default public image
+  let imageName = `shapeshiftdao/${repositoryName}:${docker.tag}` // default public image
   if (config.dockerhub) {
     const image = `${config.dockerhub.username}/${repositoryName}`
 
-    const cacheFroms = [`${image}:${tag}`, `${image}:latest`]
-    if (baseImageName) cacheFroms.push(baseImageName)
+    const cacheFroms = [`${image}:${docker.tag}`, `${image}:latest`]
+    if (docker.baseImageName) cacheFroms.push(docker.baseImageName)
 
-    imageName = `${image}:${tag}` // configured dockerhub image
+    imageName = `${image}:${docker.tag}` // configured dockerhub image
 
-    if (!(await hasTag(image, tag))) {
+    if (!(await hasTag(image, docker.tag))) {
       await buildAndPushImage({
         image,
         auth: {
@@ -99,9 +81,10 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
         },
         buildArgs,
         env: { DOCKER_BUILDKIT: '1' },
-        tags: [tag],
+        tags: [docker.tag],
         cacheFroms,
-        ...getbuildAndPushImageArgs(coinstackType),
+        context: docker.context,
+        dockerFile: docker.dockerFile,
       })
     }
   }
@@ -243,6 +226,8 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
           image: imageName,
           ports: [{ containerPort: port, name: 'http' }],
           env: [...secretEnvs(coinstack, sampleEnv)],
+          args: docker.args,
+          command: docker.command,
           resources: {
             limits: {
               cpu: config.api.cpuLimit,
@@ -263,12 +248,11 @@ export async function deployApi(args: DeployApiArgs): Promise<k8s.apps.v1.Deploy
           },
           livenessProbe: {
             httpGet: { path: '/health', port },
-            initialDelaySeconds: coinstack === 'thorchain' ? 120 : 30,
+            initialDelaySeconds: coinstack === 'thorchain' ? 600 : 30,
             periodSeconds: 5,
             failureThreshold: 3,
             successThreshold: 1,
           },
-          ...getContainer(coinstackType, coinstack),
         },
       ],
     },

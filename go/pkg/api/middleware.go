@@ -77,10 +77,7 @@ func Scheme(next http.Handler) http.Handler {
 		// added to the client/server handshake
 		upgrade := http.CanonicalHeaderKey("Upgrade")
 
-		tls := false
-		if r.TLS != nil {
-			tls = true
-		}
+		tls := r.TLS != nil
 
 		// default scheme to http and update if any applicable headers are set
 		var scheme string
