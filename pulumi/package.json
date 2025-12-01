@@ -1,9 +1,11 @@
 {
   "name": "@shapeshiftoss/unchained-pulumi",
-  "version": "10.0.0",
+  "version": "1.0.0",
   "license": "MIT",
-  "private": true,
   "main": "src/index.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "yarn run -T tsc",
     "clean": "rm -rf dist node_modules"
