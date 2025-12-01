@@ -4479,13 +4479,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/object-hash@npm:^3.0.6":
-  version: 3.0.6
-  resolution: "@types/object-hash@npm:3.0.6"
-  checksum: 10c0/a5450cafdbc33c840be2c36fb1ace96cce7aa580177cf68dbdbda80f18938207692d74c76403321c99f43460ac31981c4af7fe8b49eca1570f8e9a4c01eaf33d
-  languageName: node
-  linkType: hard
-
 "@types/pbkdf2@npm:^3.0.0":
   version: 3.1.2
   resolution: "@types/pbkdf2@npm:3.1.2"
@@ -9876,13 +9869,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"object-hash@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "object-hash@npm:3.0.0"
-  checksum: 10c0/a06844537107b960c1c8b96cd2ac8592a265186bfa0f6ccafe0d34eabdb526f6fa81da1f37c43df7ed13b12a4ae3457a16071603bcd39d8beddb5f08c37b0f47
-  languageName: node
-  linkType: hard
-
 "object-inspect@npm:^1.13.3":
   version: 1.13.4
   resolution: "object-inspect@npm:1.13.4"
@@ -12199,7 +12185,6 @@ __metadata:
     "@types/folder-hash": "npm:^4.0.4"
     "@types/morgan": "npm:^1.9.9"
     "@types/node": "npm:^22.18.8"
-    "@types/object-hash": "npm:^3.0.6"
     "@types/swagger-ui-express": "npm:^4.1.6"
     "@typescript-eslint/eslint-plugin": "npm:^6.14.0"
     "@typescript-eslint/parser": "npm:^6.14.0"
@@ -12218,7 +12203,6 @@ __metadata:
     moralis: "npm:^2.27.2"
     morgan: "npm:^1.10.0"
     nodemon: "npm:^3.0.2"
-    object-hash: "npm:^3.0.0"
     p-queue: "npm:^9.0.0"
     prettier: "npm:^3.1.1"
     prom-client: "npm:^15.0.0"
