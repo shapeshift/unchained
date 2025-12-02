@@ -15,6 +15,7 @@ if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
 if (!INDEXER_API_KEY) throw new Error('INDEXER_API_KEY env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
+if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
 
 export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'zcash', 'api'],

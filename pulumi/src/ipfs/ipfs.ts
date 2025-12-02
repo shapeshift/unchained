@@ -48,7 +48,7 @@ export function deployIpfs({ namespace, provider, domain, additionalDomain }: Ip
       initContainers: [
         {
           name: 'configure-ipfs',
-          image: 'ipfs/go-ipfs:latest',
+          image: 'ipfs/kubo:latest',
           command: ['sh', '/custom/configure-ipfs.sh'],
           volumeMounts: [
             {
@@ -65,7 +65,7 @@ export function deployIpfs({ namespace, provider, domain, additionalDomain }: Ip
       containers: [
         {
           name: 'ipfs',
-          image: 'ipfs/go-ipfs:latest',
+          image: 'ipfs/kubo:latest',
           env: [{ name: 'IPFS_FD_MAX', value: '8192' }],
           ports: [
             { name: 'swarm', containerPort: 4001, protocol: 'TCP' },
