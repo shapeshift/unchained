@@ -3381,6 +3381,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@shapeshiftoss/zcash-api@workspace:node/coinstacks/zcash/api":
+  version: 0.0.0-use.local
+  resolution: "@shapeshiftoss/zcash-api@workspace:node/coinstacks/zcash/api"
+  dependencies:
+    "@shapeshiftoss/blockbook": "npm:^10.0.0"
+    "@shapeshiftoss/common-api": "npm:^10.0.0"
+    bech32: "npm:^2.0.0"
+  languageName: unknown
+  linkType: soft
+
+"@shapeshiftoss/zcash-pulumi@workspace:node/coinstacks/zcash/pulumi":
+  version: 0.0.0-use.local
+  resolution: "@shapeshiftoss/zcash-pulumi@workspace:node/coinstacks/zcash/pulumi"
+  languageName: unknown
+  linkType: soft
+
 "@sigstore/bundle@npm:^2.3.2":
   version: 2.3.2
   resolution: "@sigstore/bundle@npm:2.3.2"
