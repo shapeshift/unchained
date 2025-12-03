@@ -332,7 +332,7 @@ func (a *API) LCD(w http.ResponseWriter, r *http.Request) {
 	a.handleProxyResponse(w, res)
 }
 
-// swagger:route GET /rpc Proxy RPC
+// swagger:route GET /rpc Proxy GetRPC
 //
 // Thorchain rpc rest api endpoints.
 //
@@ -340,7 +340,7 @@ func (a *API) LCD(w http.ResponseWriter, r *http.Request) {
 //
 //	200:
 
-// swagger:route POST /rpc Proxy RPC
+// swagger:route POST /rpc Proxy PostRPC
 //
 // Thorchain rpc jsonrpc endpoints.
 //
