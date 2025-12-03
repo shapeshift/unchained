@@ -359,6 +359,18 @@
             "description": ""
           }
         }
+      },
+      "post": {
+        "tags": [
+          "Proxy"
+        ],
+        "summary": "Thorchain rpc jsonrpc endpoints.",
+        "operationId": "RPC",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
       }
     }
   },

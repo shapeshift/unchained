@@ -1,0 +1,19 @@
+services:
+  api:
+    image: unchained-local-node
+    env_file: .env
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.zcash-api.rule=Host(`api.zcash.localhost`)'
+      - 'traefik.http.services.zcash-api.loadbalancer.server.port=3000'
+    working_dir: /app/node/coinstacks/zcash/api
+    command: yarn run -T nodemon
+    volumes:
+      - ../../..:/app
+    networks:
+      - zcash
+
+networks:
+  zcash:
+    name: zcash_default
+    external: true
