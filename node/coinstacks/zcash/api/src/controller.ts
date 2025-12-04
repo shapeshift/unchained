@@ -1,6 +1,6 @@
 import { Blockbook } from '@shapeshiftoss/blockbook'
-import { Get, Response } from 'tsoa'
-import { BadRequestError, BaseAPI, InternalServerError, utxo } from '../../../common/api'
+import { Get, Response, Route, Tags } from 'tsoa'
+import { BadRequestError, BaseAPI, InternalServerError, utxo } from '../../../common/api/src'
 import { Service } from '../../../common/api/src/utxo/service'
 import { UTXO } from '../../../common/api/src/utxo/controller'
 import { Logger } from '@shapeshiftoss/logger'
@@ -44,6 +44,8 @@ export const service = new Service({
 // assign service to be used for all instances of UTXO
 UTXO.service = service
 
+@Route('api/v1')
+@Tags('v1')
 export class Zcash extends UTXO implements BaseAPI, utxo.API {
   /**
    * Get current recommended network fees to use in a transaction
@@ -55,9 +57,9 @@ export class Zcash extends UTXO implements BaseAPI, utxo.API {
   @Get('/fees')
   async getNetworkFees(): Promise<utxo.NetworkFees> {
     return {
-      fast: { blocksUntilConfirmation: 2, satsPerKiloByte: 0 },
-      average: { blocksUntilConfirmation: 5, satsPerKiloByte: 0 },
-      slow: { blocksUntilConfirmation: 10, satsPerKiloByte: 0 },
+      fast: { blocksUntilConfirmation: 1, satsPerKiloByte: 1 },
+      average: { blocksUntilConfirmation: 1, satsPerKiloByte: 1 },
+      slow: { blocksUntilConfirmation: 1, satsPerKiloByte: 1 },
     }
   }
 }

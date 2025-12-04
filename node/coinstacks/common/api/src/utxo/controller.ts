@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
 import { BadRequestError, BaseAPI, BaseInfo, InternalServerError, SendTxBody, ValidationError } from '../'
-import { API, Account, Tx, RawTx, NetworkFees, Utxo, TxHistory } from './models'
+import { API, Account, Tx, RawTx, Utxo, TxHistory } from './models'
 import { Service } from './service'
 
 const NETWORK = process.env.NETWORK
@@ -9,7 +9,7 @@ if (!NETWORK) throw new Error('NETWORK env var not set')
 
 @Route('api/v1')
 @Tags('v1')
-export class UTXO extends Controller implements BaseAPI, API {
+export class UTXO extends Controller implements BaseAPI, Omit<API, 'getNetworkFees'> {
   static service: Service
 
   /**
@@ -114,17 +114,5 @@ export class UTXO extends Controller implements BaseAPI, API {
   @Post('send/')
   async sendTx(@Body() body: SendTxBody): Promise<string> {
     return UTXO.service.sendTx(body)
-  }
-
-  /**
-   * Get current recommended network fees to use in a transaction
-   *
-   * @returns {Promise<NetworkFees>} current network fees
-   */
-  @Response<BadRequestError>(400, 'Bad Request')
-  @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('/fees')
-  async getNetworkFees(): Promise<NetworkFees> {
-    return UTXO.service.getNetworkFees()
   }
 }
