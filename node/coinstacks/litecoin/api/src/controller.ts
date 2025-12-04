@@ -51,7 +51,7 @@ UTXO.service = service
 
 @Route('api/v1')
 @Tags('v1')
-export class Litcoin extends UTXO implements BaseAPI, utxo.API {
+export class Litecoin extends UTXO implements BaseAPI, utxo.API {
   /**
    * Get current recommended network fees to use in a transaction
    *
