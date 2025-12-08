@@ -353,7 +353,7 @@
           "Proxy"
         ],
         "summary": "Thorchain rpc rest api endpoints.",
-        "operationId": "RPC",
+        "operationId": "GetRPC",
         "responses": {
           "200": {
             "description": ""
@@ -365,7 +365,7 @@
           "Proxy"
         ],
         "summary": "Thorchain rpc jsonrpc endpoints.",
-        "operationId": "RPC",
+        "operationId": "PostRPC",
         "responses": {
           "200": {
             "description": ""
