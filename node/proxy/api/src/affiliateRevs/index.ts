@@ -1,10 +1,11 @@
 import * as zrx from './zrx'
+import * as bebop from './bebop'
 
 const period24h = 86400
 const period7d = 86400 * 7
 const period30d = 86400 * 30
 
-type Service = 'zrx'
+type Service = 'zrx' | 'bebop'
 
 export type AffiliateRevenue = {
   amount: string
@@ -76,6 +77,9 @@ async function main() {
 
   const zrxRevenues = await zrx.getAffiliateRevenue(startTimestamp, endTimestamp)
   aggregator.addRevenues(zrxRevenues)
+
+  const bebopRevenues = await bebop.getAffiliateRevenue(startTimestamp, endTimestamp)
+  aggregator.addRevenues(bebopRevenues)
 
   console.log('=== Affiliate Revenue ===')
   aggregator.printRevenue('24H', period24h)
