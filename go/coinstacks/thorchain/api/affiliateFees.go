@@ -30,13 +30,13 @@ type AffiliateFeeIndexer struct {
 }
 
 type AffiliateFee struct {
-	Amount      string
-	Asset       string
-	BlockHeight int64
-	BlockHash   string
-	Timestamp   int64
-	Address     string
-	TxID        string
+	Amount      string `json:"amount"`
+	Asset       string `json:"asset"`
+	BlockHeight int64  `json:"blockHeight"`
+	BlockHash   string `json:"blockHash"`
+	Timestamp   int64  `json:"timestamp"`
+	Address     string `json:"address"`
+	TxID        string `json:"txId"`
 }
 
 func NewAffiliateFeeIndexer(httpClients []*cosmos.HTTPClient, wsClient *cosmos.WSClient) *AffiliateFeeIndexer {
