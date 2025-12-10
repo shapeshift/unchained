@@ -89,7 +89,7 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 	}, nil
 }
 
-func New(cfg cosmos.Config, httpClient *HTTPClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, swaggerPath string, prometheus *metrics.Prometheus) *API {
+func New(cfg cosmos.Config, httpClient *HTTPClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, indexer *AffiliateFeeIndexer, swaggerPath string, prometheus *metrics.Prometheus) *API {
 	r := mux.NewRouter()
 
 	handler := &Handler{
@@ -100,6 +100,7 @@ func New(cfg cosmos.Config, httpClient *HTTPClient, wsClient *cosmos.WSClient, b
 			Denom:        cfg.Denom,
 			NativeFee:    cfg.NativeFee,
 		},
+		indexer: indexer,
 	}
 
 	manager := websocket.NewManager(prometheus)
@@ -162,6 +163,9 @@ func New(cfg cosmos.Config, httpClient *HTTPClient, wsClient *cosmos.WSClient, b
 
 	v1Gas := v1.PathPrefix("/gas").Subrouter()
 	v1Gas.HandleFunc("/estimate", a.EstimateGas).Methods("POST")
+
+	v1Affiliate := v1.PathPrefix("/affiliate").Subrouter()
+	v1Affiliate.HandleFunc("/fees", a.AffiliateFees).Methods("GET")
 
 	// proxy endpoints
 	r.PathPrefix("/lcd").HandlerFunc(a.LCD).Methods("GET")
@@ -260,6 +264,45 @@ func (a *API) SendTx(w http.ResponseWriter, r *http.Request) {
 //	500: InternalServerError
 func (a *API) EstimateGas(w http.ResponseWriter, r *http.Request) {
 	a.API.EstimateGas(w, r)
+}
+
+// swagger:parameters GetAffiliateFees
+type GetAffiliateFeesParams struct {
+	// Start timestamp
+	// in: query
+	Start string `json:"start"`
+	// End timestamp
+	// in: query
+	End string `json:"end"`
+}
+
+// swagger:route Get /api/v1/affiliate/fees v1 GetAffiliateFees
+//
+// Get ss affiliate fee history.
+//
+// responses:
+//
+//	200: AffiliateFees
+//	400: BadRequestError
+//	500: InternalServerError
+func (a *API) AffiliateFees(w http.ResponseWriter, r *http.Request) {
+	start, err := strconv.Atoi(r.URL.Query().Get("start"))
+	if err != nil {
+		start = 0
+	}
+
+	end, err := strconv.Atoi(r.URL.Query().Get("end"))
+	if err != nil {
+		end = int(time.Now().UnixMilli())
+	}
+
+	affiliateFees, err := a.handler.GetAffiliateFees(start, end)
+	if err != nil {
+		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	api.HandleResponse(w, http.StatusOK, affiliateFees)
 }
 
 // swagger:route GET /lcd Proxy LCD
