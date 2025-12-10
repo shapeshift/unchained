@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { AffiliateRevenue } from '.'
 
-const URL = 'http://api.thorchain.localhost'
+const URL = 'https://dev-api.thorchain.shapeshift.com'
 
 type Fee = {
   address: string
@@ -17,20 +17,18 @@ type FeesResponse = {
   fees: Fee[]
 }
 
-type Pool = {
-  asset_tor_price: string
-  balance_asset: string
-  balance_rune: string
-}
-
 const getRunePriceUsd = async (): Promise<number> => {
-  const { data } = await axios.get<Pool>(`${URL}/lcd/thorchain/pool/BTC.BTC`)
+  const { data } = await axios.get<{ thorchain: { usd: string } }>(
+    'https://api.proxy.shapeshift.com/api/v1/markets/simple/price',
+    {
+      params: {
+        vs_currencies: 'usd',
+        ids: 'thorchain',
+      },
+    }
+  )
 
-  const assetPriceUsd = Number(data.asset_tor_price) / 1e8
-  const runeInAsset = Number(data.balance_asset) / Number(data.balance_rune)
-  const runePriceUsd = runeInAsset * assetPriceUsd
-
-  return runePriceUsd
+  return Number(data.thorchain.usd)
 }
 
 export const getAffiliateRevenue = async (
@@ -43,7 +41,7 @@ export const getAffiliateRevenue = async (
   const end = endTimestamp * 1_000 // milliseconds
 
   const { data } = await axios.get<FeesResponse>(`${URL}/api/v1/affiliate/fees`, {
-    params: { source: 'shapeshift', start, end },
+    params: { start, end },
   })
 
   fees.push(...data.fees)
