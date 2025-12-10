@@ -1,11 +1,13 @@
 import * as zrx from './zrx'
 import * as bebop from './bebop'
+import * as thorchain from './thorchain'
 
 const period24h = 86400
 const period7d = 86400 * 7
 const period30d = 86400 * 30
 
-type Service = 'zrx' | 'bebop'
+const services = ['zrx', 'bebop', 'thorchain'] as const
+type Service = (typeof services)[number]
 
 export type AffiliateRevenue = {
   amount: string
@@ -37,14 +39,18 @@ class RevenueAggregator {
   }
 
   getRevenueByService(revenues = this.revenues) {
-    const byService = new Map<Service, number>()
+    const revenueByService = new Map<Service, number>()
 
-    for (const revenue of revenues) {
-      const current = byService.get(revenue.service) ?? 0
-      byService.set(revenue.service, current + parseFloat(revenue.amountUsd || '0'))
+    for (const service of services) {
+      revenueByService.set(service, 0)
     }
 
-    return Object.fromEntries(byService)
+    for (const revenue of revenues) {
+      const current = revenueByService.get(revenue.service) ?? 0
+      revenueByService.set(revenue.service, current + parseFloat(revenue.amountUsd || '0'))
+    }
+
+    return Object.fromEntries(revenueByService)
   }
 
   getRevenueByPeriod(periodSeconds: number) {
@@ -81,10 +87,13 @@ async function main() {
   const bebopRevenues = await bebop.getAffiliateRevenue(startTimestamp, endTimestamp)
   aggregator.addRevenues(bebopRevenues)
 
+  const thorchainRevenues = await thorchain.getAffiliateRevenue(startTimestamp, endTimestamp)
+  aggregator.addRevenues(thorchainRevenues)
+
   console.log('=== Affiliate Revenue ===')
-  aggregator.printRevenue('24H', period24h)
-  aggregator.printRevenue('7D', period7d)
-  aggregator.printRevenue('30D', period30d)
+  aggregator.printRevenue('24h', period24h)
+  aggregator.printRevenue('7d', period7d)
+  aggregator.printRevenue('30d', period30d)
 
   if (aggregator.missingUsdValues.size > 0) {
     console.log('\nMissing USD values for:')
