@@ -3,12 +3,13 @@ import * as bebop from './bebop'
 import * as thorchain from './thorchain'
 import * as mayachain from './mayachain'
 import * as chainflip from './chainflip'
+import * as portals from './portals'
 
 const period24h = 86400
 const period7d = 86400 * 7
 const period30d = 86400 * 30
 
-const services = ['zrx', 'bebop', 'thorchain', 'mayachain', 'chainflip'] as const
+const services = ['zrx', 'bebop', 'thorchain', 'mayachain', 'chainflip', 'portals'] as const
 type Service = (typeof services)[number]
 
 export type AffiliateRevenue = {
@@ -99,6 +100,9 @@ async function main() {
 
   const chainflipRevenues = await chainflip.getAffiliateRevenue(startTimestamp, endTimestamp)
   aggregator.addRevenues(chainflipRevenues)
+
+  const portalsRevenues = await portals.getAffiliateRevenue(startTimestamp, endTimestamp)
+  aggregator.addRevenues(portalsRevenues)
 
   console.log('=== Affiliate Revenue ===')
   aggregator.printRevenue('24h', period24h)
