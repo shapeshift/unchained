@@ -88,7 +88,12 @@ func main() {
 		logger.Panicf("failed to create new websocket client: %+v", err)
 	}
 
-	api := api.New(cfg.Config, httpClient, wsClient, blockService, *swaggerPath, prometheus)
+	indexer := api.NewAffiliateFeeIndexer(httpClient.HTTPClient, wsClient)
+	if err := indexer.Sync(); err != nil {
+		logger.Panicf("failed to index affiliate fees: %+v", err)
+	}
+
+	api := api.New(cfg.Config, httpClient, wsClient, blockService, indexer, *swaggerPath, prometheus)
 	defer api.Shutdown()
 
 	go api.Serve(errChan)
