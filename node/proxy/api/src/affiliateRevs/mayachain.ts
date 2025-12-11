@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { AffiliateRevenue } from '.'
 
-const URL = 'https://api.mayachain.shapeshift.com'
+const URL = 'https://dev-api.mayachain.shapeshift.com'
 
 type Fee = {
   address: string

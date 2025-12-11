@@ -2,12 +2,13 @@ import * as zrx from './zrx'
 import * as bebop from './bebop'
 import * as thorchain from './thorchain'
 import * as mayachain from './mayachain'
+import * as chainflip from './chainflip'
 
 const period24h = 86400
 const period7d = 86400 * 7
 const period30d = 86400 * 30
 
-const services = ['zrx', 'bebop', 'thorchain', 'mayachain'] as const
+const services = ['zrx', 'bebop', 'thorchain', 'mayachain', 'chainflip'] as const
 type Service = (typeof services)[number]
 
 export type AffiliateRevenue = {
@@ -68,9 +69,11 @@ class RevenueAggregator {
     const { total, byService } = this.getRevenueByPeriod(periodSeconds)
 
     console.log(`\n${label}: $${total.toFixed(2)}`)
-    Object.entries(byService).forEach(([service, amount]) => {
-      console.log(`  ${service}: $${amount.toFixed(2)}`)
-    })
+    Object.entries(byService)
+      .sort(([, a], [, b]) => b - a) // Sort by amount descending
+      .forEach(([service, amount]) => {
+        console.log(`  ${service}: $${amount.toFixed(2)}`)
+      })
   }
 }
 
@@ -93,6 +96,9 @@ async function main() {
 
   const mayachainRevenues = await mayachain.getAffiliateRevenue(startTimestamp, endTimestamp)
   aggregator.addRevenues(mayachainRevenues)
+
+  const chainflipRevenues = await chainflip.getAffiliateRevenue(startTimestamp, endTimestamp)
+  aggregator.addRevenues(chainflipRevenues)
 
   console.log('=== Affiliate Revenue ===')
   aggregator.printRevenue('24h', period24h)
