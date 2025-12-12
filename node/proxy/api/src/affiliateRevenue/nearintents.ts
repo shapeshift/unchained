@@ -1,36 +1,34 @@
 import axios from 'axios'
-import { AffiliateRevenue } from '.'
+import { Fees } from '.'
 
 const API_KEY = ''
 
-type Transaction = {
-  originAsset: string
-  destinationAsset: string
-  depositAddress: string
-  recipient: string
-  status: string
-  createdAt: string
-  createdAtTimestamp: number
-  intentHashes: string
-  referral: string
-  amountInFormatted: string
-  amountOutFormatted: string
-  appFees: Array<{
-    fee: number
-    recipient: string
-  }>
-  nearTxHashes: string[]
-  originChainTxHashes: string[]
-  destinationChainTxHashes: string[]
-  amountIn: string
-  amountInUsd: string
-  amountOut: string
-  amountOutUsd: string
-  refundTo: string
-}
-
 type TransactionsResponse = {
-  data: Transaction[]
+  data: Array<{
+    originAsset: string
+    destinationAsset: string
+    depositAddress: string
+    recipient: string
+    status: string
+    createdAt: string
+    createdAtTimestamp: number
+    intentHashes: string
+    referral: string
+    amountInFormatted: string
+    amountOutFormatted: string
+    appFees: Array<{
+      fee: number
+      recipient: string
+    }>
+    nearTxHashes: string[]
+    originChainTxHashes: string[]
+    destinationChainTxHashes: string[]
+    amountIn: string
+    amountInUsd: string
+    amountOut: string
+    amountOutUsd: string
+    refundTo: string
+  }>
   totalPages: number
   page: number
   perPage: number
@@ -39,11 +37,9 @@ type TransactionsResponse = {
   prevPage?: number
 }
 
-export const getAffiliateRevenue = async (
-  startTimestamp: number,
-  endTimestamp: number
-): Promise<Array<AffiliateRevenue>> => {
-  const revenues: Array<AffiliateRevenue> = []
+// https://docs.near-intents.org/near-intents/integration/distribution-channels/intents-explorer-api
+export const getFees = async (startTimestamp: number, endTimestamp: number): Promise<Array<Fees>> => {
+  const fees: Array<Fees> = []
 
   let page: number | undefined = 1
   while (page) {
@@ -68,7 +64,7 @@ export const getAffiliateRevenue = async (
         const chainId = ''
         const assetId = `${chainId}/`
 
-        revenues.push({
+        fees.push({
           chainId,
           assetId,
           service: 'nearintents',
@@ -83,7 +79,7 @@ export const getAffiliateRevenue = async (
     page = data.nextPage
   }
 
-  console.log(`Near Intents: Found ${revenues.length} affiliate fees`)
+  console.log(`Near Intents: Found ${fees.length} affiliate fees`)
 
-  return revenues
+  return fees
 }

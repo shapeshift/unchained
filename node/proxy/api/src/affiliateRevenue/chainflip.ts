@@ -1,7 +1,5 @@
 import axios from 'axios'
-import { AffiliateRevenue } from '.'
-
-const URL = 'https://reporting-service.chainflip.io/graphql'
+import { Fees } from '.'
 
 const pageSize = 100
 const affiliateBrokerId = 'cFMeDPtPHccVYdBSJKTtCYuy7rewFNpro3xZBKaCGbSS2xhRi'
@@ -41,12 +39,6 @@ const GET_AFFILIATE_SWAPS_QUERY = `
   }
 `
 
-type SwapNode = {
-  swapRequestNativeId: string
-  completedBlockTimestamp: string
-  affiliateBroker1FeeValueUsd?: string
-}
-
 type GraphQLResponse = {
   data: {
     allSwapRequests: {
@@ -54,18 +46,19 @@ type GraphQLResponse = {
         hasNextPage: boolean
       }
       edges: Array<{
-        node: SwapNode
+        node: {
+          swapRequestNativeId: string
+          completedBlockTimestamp: string
+          affiliateBroker1FeeValueUsd?: string
+        }
       }>
       totalCount: number
     }
   }
 }
 
-export const getAffiliateRevenue = async (
-  startTimestamp: number,
-  endTimestamp: number
-): Promise<Array<AffiliateRevenue>> => {
-  const revenues: Array<AffiliateRevenue> = []
+export const getFees = async (startTimestamp: number, endTimestamp: number): Promise<Array<Fees>> => {
+  const fees: Array<Fees> = []
 
   const startDate = new Date(startTimestamp * 1000).toISOString()
   const endDate = new Date(endTimestamp * 1000).toISOString()
@@ -73,7 +66,7 @@ export const getAffiliateRevenue = async (
   let offset = 0
   let hasNextPage = true
   do {
-    const { data } = await axios.post<GraphQLResponse>(URL, {
+    const { data } = await axios.post<GraphQLResponse>('https://reporting-service.chainflip.io/graphql', {
       query: GET_AFFILIATE_SWAPS_QUERY,
       variables: {
         affiliateBrokerId,
@@ -94,7 +87,7 @@ export const getAffiliateRevenue = async (
       const chainId = 'eip155:1'
       const assetId = `${chainId}/erc20:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48`
 
-      revenues.push({
+      fees.push({
         chainId,
         assetId,
         service: 'chainflip',
@@ -109,5 +102,5 @@ export const getAffiliateRevenue = async (
     offset += pageSize
   } while (hasNextPage)
 
-  return revenues
+  return fees
 }
