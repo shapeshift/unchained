@@ -1,7 +1,9 @@
 import axios from 'axios'
 import { Fees } from '.'
 
-const API_KEY = ''
+const NEAR_INTENTS_API_KEY = process.env.NEAR_INTENTS_API_KEY
+
+if (!NEAR_INTENTS_API_KEY) throw new Error('NEAR_INTENTS_API_KEY env var not set')
 
 type TransactionsResponse = {
   data: Array<{
@@ -54,7 +56,7 @@ export const getFees = async (startTimestamp: number, endTimestamp: number): Pro
           startTimestampUnix: startTimestamp,
           endTimestampUnix: endTimestamp,
         },
-        headers: { Authorization: `Bearer ${API_KEY}` },
+        headers: { Authorization: `Bearer ${NEAR_INTENTS_API_KEY}` },
       }
     )) as { data: TransactionsResponse }
 
@@ -78,8 +80,6 @@ export const getFees = async (startTimestamp: number, endTimestamp: number): Pro
 
     page = data.nextPage
   }
-
-  console.log(`Near Intents: Found ${fees.length} affiliate fees`)
 
   return fees
 }

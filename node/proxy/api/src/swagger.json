@@ -212,7 +212,7 @@
 		},
 		"/api/v1/affiliate/revenue": {
 			"get": {
-				"operationId": "GetAffilitateRevenue",
+				"operationId": "GetAffiliateRevenue",
 				"responses": {
 					"200": {
 						"description": "affiliate revenue",

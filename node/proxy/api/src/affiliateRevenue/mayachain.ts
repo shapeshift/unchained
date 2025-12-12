@@ -33,7 +33,7 @@ export const getFees = async (startTimestamp: number, endTimestamp: number): Pro
   const start = startTimestamp * 1_000 // milliseconds
   const end = endTimestamp * 1_000 // milliseconds
 
-  const { data } = await axios.get<FeesResponse>('https://dev-api.mayachain.shapeshift.com/api/v1/affiliate/fees', {
+  const { data } = await axios.get<FeesResponse>('https://api.mayachain.shapeshift.com/api/v1/affiliate/fees', {
     params: { start, end },
   })
 
