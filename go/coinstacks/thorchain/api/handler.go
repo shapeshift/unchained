@@ -176,6 +176,29 @@ func (h *Handler) GetAffiliateRevenue(start int, end int) (*AffiliateRevenue, er
 	return a, nil
 }
 
+// Contains info about affiliate fee history
+// swagger:model AffiliateFees
+type AffiliateFees struct {
+	// Affiliate fees
+	// required: true
+	Fees []*AffiliateFee `json:"fees"`
+}
+
+func (h *Handler) GetAffiliateFees(start int, end int) (*AffiliateFees, error) {
+	fees := []*AffiliateFee{}
+	for _, fee := range h.indexer.AffiliateFees {
+		if fee.Timestamp >= int64(start) && fee.Timestamp <= int64(end) {
+			fees = append(fees, fee)
+		}
+	}
+
+	a := &AffiliateFees{
+		Fees: fees,
+	}
+
+	return a, nil
+}
+
 func (h *Handler) ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Message {
 	return thorchain.ParseMessages(msgs, events)
 }

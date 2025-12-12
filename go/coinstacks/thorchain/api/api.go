@@ -167,6 +167,7 @@ func New(cfg cosmos.Config, httpClient *HTTPClient, wsClient *cosmos.WSClient, b
 
 	v1Affiliate := v1.PathPrefix("/affiliate").Subrouter()
 	v1Affiliate.HandleFunc("/revenue", a.AffiliateRevenue).Methods("GET")
+	v1Affiliate.HandleFunc("/fees", a.AffiliateFees).Methods("GET")
 
 	// proxy endpoints
 	r.PathPrefix("/lcd").HandlerFunc(a.LCD).Methods("GET")
@@ -305,6 +306,45 @@ func (a *API) AffiliateRevenue(w http.ResponseWriter, r *http.Request) {
 	}
 
 	api.HandleResponse(w, http.StatusOK, affiliateRevenue)
+}
+
+// swagger:parameters GetAffiliateFees
+type GetAffiliateFeesParams struct {
+	// Start timestamp
+	// in: query
+	Start string `json:"start"`
+	// End timestamp
+	// in: query
+	End string `json:"end"`
+}
+
+// swagger:route Get /api/v1/affiliate/fees v1 GetAffiliateFees
+//
+// Get ss affiliate fee history.
+//
+// responses:
+//
+//	200: AffiliateFees
+//	400: BadRequestError
+//	500: InternalServerError
+func (a *API) AffiliateFees(w http.ResponseWriter, r *http.Request) {
+	start, err := strconv.Atoi(r.URL.Query().Get("start"))
+	if err != nil {
+		start = 0
+	}
+
+	end, err := strconv.Atoi(r.URL.Query().Get("end"))
+	if err != nil {
+		end = int(time.Now().UnixMilli())
+	}
+
+	affiliateFees, err := a.handler.GetAffiliateFees(start, end)
+	if err != nil {
+		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	api.HandleResponse(w, http.StatusOK, affiliateFees)
 }
 
 // swagger:route GET /lcd Proxy LCD
