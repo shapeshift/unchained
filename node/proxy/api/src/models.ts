@@ -7,5 +7,6 @@ export type Service = (typeof services)[number]
 
 export interface AffiliateRevenueResponse {
   byService: Record<Service, number>
+  failedProviders: Service[]
   totalUsd: number
 }
