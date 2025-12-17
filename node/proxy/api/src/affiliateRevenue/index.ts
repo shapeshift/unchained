@@ -1,12 +1,27 @@
+import axios from 'axios'
 import * as zrx from './zrx'
 import * as bebop from './bebop'
 import * as thorchain from './thorchain'
 import * as mayachain from './mayachain'
 import * as chainflip from './chainflip'
 import * as portals from './portals'
+import * as nearintents from './nearIntents'
 import { AffiliateRevenueResponse, Service, services } from '../models'
 
-const providerNames: Service[] = ['zrx', 'bebop', 'thorchain', 'mayachain', 'chainflip', 'portals']
+const providerNames: Service[] = ['zrx', 'bebop', 'thorchain', 'mayachain', 'chainflip', 'portals', 'nearintents']
+
+const formatError = (error: unknown): string => {
+  if (axios.isAxiosError(error)) {
+    const status = error.response?.status ?? 'no response'
+    const data = error.response?.data
+    const message = typeof data === 'object' ? JSON.stringify(data) : data ?? error.message
+    return `HTTP ${status}: ${message}`
+  }
+  if (error instanceof Error) {
+    return error.message
+  }
+  return String(error)
+}
 
 export type Fees = {
   amount: string
@@ -30,6 +45,7 @@ export class AffiliateRevenue {
       mayachain.getFees(startTimestamp, endTimestamp),
       chainflip.getFees(startTimestamp, endTimestamp),
       portals.getFees(startTimestamp, endTimestamp),
+      nearintents.getFees(startTimestamp, endTimestamp),
     ])
 
     results.forEach((result, index) => {
@@ -38,7 +54,7 @@ export class AffiliateRevenue {
       } else {
         const provider = providerNames[index]
         failedProviders.push(provider)
-        console.error(`[AffiliateRevenue] ${provider} failed:`, result.reason)
+        console.error(`[AffiliateRevenue] ${provider} failed: ${formatError(result.reason)}`)
       }
     })
 
