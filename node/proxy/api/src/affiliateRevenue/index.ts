@@ -6,6 +6,8 @@ import * as chainflip from './chainflip'
 import * as portals from './portals'
 import { AffiliateRevenueResponse, Service, services } from '../models'
 
+const providerNames: Service[] = ['zrx', 'bebop', 'thorchain', 'mayachain', 'chainflip', 'portals']
+
 export type Fees = {
   amount: string
   amountUsd?: string
@@ -19,8 +21,9 @@ export type Fees = {
 export class AffiliateRevenue {
   async getAffiliateRevenue(startTimestamp: number, endTimestamp: number): Promise<AffiliateRevenueResponse> {
     const fees: Array<Fees> = []
+    const failedProviders: Service[] = []
 
-    const [zrxFees, bebopFees, thorchainFees, mayachainFees, chainflipFees, portalsFees] = await Promise.all([
+    const results = await Promise.allSettled([
       zrx.getFees(startTimestamp, endTimestamp),
       bebop.getFees(startTimestamp, endTimestamp),
       thorchain.getFees(startTimestamp, endTimestamp),
@@ -29,7 +32,15 @@ export class AffiliateRevenue {
       portals.getFees(startTimestamp, endTimestamp),
     ])
 
-    fees.push(...zrxFees, ...bebopFees, ...thorchainFees, ...mayachainFees, ...chainflipFees, ...portalsFees)
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        fees.push(...result.value)
+      } else {
+        const provider = providerNames[index]
+        failedProviders.push(provider)
+        console.error(`[AffiliateRevenue] ${provider} failed:`, result.reason)
+      }
+    })
 
     const byService: Record<Service, number> = {} as Record<Service, number>
 
@@ -46,6 +57,7 @@ export class AffiliateRevenue {
     return {
       totalUsd,
       byService,
+      failedProviders,
     }
   }
 }

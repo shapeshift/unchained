@@ -111,10 +111,28 @@
 				"type": "object",
 				"description": "Construct a type with a set of properties K of type T"
 			},
+			"Service": {
+				"type": "string",
+				"enum": [
+					"bebop",
+					"chainflip",
+					"mayachain",
+					"nearintents",
+					"portals",
+					"thorchain",
+					"zrx"
+				]
+			},
 			"AffiliateRevenueResponse": {
 				"properties": {
 					"byService": {
 						"$ref": "#/components/schemas/Record_Service.number_"
+					},
+					"failedProviders": {
+						"items": {
+							"$ref": "#/components/schemas/Service"
+						},
+						"type": "array"
 					},
 					"totalUsd": {
 						"type": "number",
@@ -123,6 +141,7 @@
 				},
 				"required": [
 					"byService",
+					"failedProviders",
 					"totalUsd"
 				],
 				"type": "object",
