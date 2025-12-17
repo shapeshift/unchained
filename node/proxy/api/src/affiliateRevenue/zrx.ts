@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { Fees } from '.'
-import { NATIVE_TOKEN_ADDRESS } from './constants'
+import { NATIVE_TOKEN_ADDRESS, SLIP44 } from './constants'
 
 const ZRX_API_KEY = process.env.ZRX_API_KEY
 
@@ -66,7 +66,7 @@ export const getFees = async (startTimestamp: number, endTimestamp: number): Pro
 
         const chainId = `eip155:${trade.chainId}`
         const assetId =
-          token.toLowerCase() === NATIVE_TOKEN_ADDRESS ? `${chainId}/slip44:60` : `${chainId}/erc20:${token}`
+          token.toLowerCase() === NATIVE_TOKEN_ADDRESS ? `${chainId}/slip44:${SLIP44.ETHEREUM}` : `${chainId}/erc20:${token}`
 
         fees.push({
           chainId,

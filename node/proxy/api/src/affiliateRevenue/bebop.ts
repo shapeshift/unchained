@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { Fees } from '.'
+import { SLIP44 } from './constants'
 
 const BEBOP_API_KEY = process.env.BEBOP_API_KEY
 
@@ -59,7 +60,7 @@ export const getFees = async (startTimestamp: number, endTimestamp: number): Pro
     if (!trade.partnerFeeBps || !trade.partnerFeeNative) continue
 
     const chainId = `eip155:${trade.chain_id}`
-    const assetId = `${chainId}/slip44:60`
+    const assetId = `${chainId}/slip44:${SLIP44.ETHEREUM}`
 
     fees.push({
       chainId,

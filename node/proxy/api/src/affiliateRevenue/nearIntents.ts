@@ -1,5 +1,14 @@
 import axios from 'axios'
 import { Fees } from '.'
+import {
+  BITCOIN_CHAIN_ID,
+  DOGECOIN_CHAIN_ID,
+  SLIP44,
+  SOLANA_CHAIN_ID,
+  SUI_CHAIN_ID,
+  TRON_CHAIN_ID,
+  ZCASH_CHAIN_ID,
+} from './constants'
 
 const NEAR_INTENTS_API_KEY = process.env.NEAR_INTENTS_API_KEY
 
@@ -14,22 +23,22 @@ const NEAR_INTENTS_TO_CHAIN_ID: Record<string, string> = {
   pol: 'eip155:137',
   avax: 'eip155:43114',
   op: 'eip155:10',
-  btc: 'bip122:000000000019d6689c085ae165831e93',
-  doge: 'bip122:00000000001a91e3dace36e2be3bf030',
-  zec: 'bip122:00040fe8ec8471911baa1db1266ea15d',
-  sol: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
-  tron: 'tron:0x2b6653dc',
-  sui: 'sui:35834a8a',
+  btc: BITCOIN_CHAIN_ID,
+  doge: DOGECOIN_CHAIN_ID,
+  zec: ZCASH_CHAIN_ID,
+  sol: SOLANA_CHAIN_ID,
+  tron: TRON_CHAIN_ID,
+  sui: SUI_CHAIN_ID,
   monad: 'eip155:143',
 }
 
 const SLIP44_BY_NETWORK: Record<string, number> = {
-  btc: 0,
-  doge: 3,
-  zec: 133,
-  sol: 501,
-  tron: 195,
-  sui: 784,
+  btc: SLIP44.BITCOIN,
+  doge: SLIP44.DOGECOIN,
+  zec: SLIP44.ZCASH,
+  sol: SLIP44.SOLANA,
+  tron: SLIP44.TRON,
+  sui: SLIP44.SUI,
 }
 
 const parseNearIntentsAsset = (asset: string): { chainId: string; assetId: string } | null => {
@@ -56,7 +65,7 @@ const parseNearIntentsAsset = (asset: string): { chainId: string; assetId: strin
   if (!chainId) return null
 
   if (chainId.startsWith('eip155:')) {
-    return { chainId, assetId: `${chainId}/slip44:60` }
+    return { chainId, assetId: `${chainId}/slip44:${SLIP44.ETHEREUM}` }
   }
 
   const slip44 = SLIP44_BY_NETWORK[network] ?? 0

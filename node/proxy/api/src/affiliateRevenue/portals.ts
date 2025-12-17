@@ -9,6 +9,7 @@ import {
   DAO_TREASURY_GNOSIS,
   DAO_TREASURY_OPTIMISM,
   DAO_TREASURY_POLYGON,
+  SLIP44,
 } from './constants'
 
 const NETWORK_TO_CHAIN_ID: Record<string, string> = {
@@ -95,7 +96,7 @@ export const getFees = async (startTimestamp: number, endTimestamp: number): Pro
       const chainId = NETWORK_TO_CHAIN_ID[token.network]
       if (!chainId) throw new Error(`unsupported network: ${token.network}`)
 
-      const assetId = token.platform === 'native' ? `${chainId}/slip44:60` : `${chainId}/erc20:${token.address}`
+      const assetId = token.platform === 'native' ? `${chainId}/slip44:${SLIP44.ETHEREUM}` : `${chainId}/erc20:${token.address}`
 
       fees.push({
         chainId,

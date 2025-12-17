@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { Fees } from '.'
+import { SLIP44, THORCHAIN_CHAIN_ID } from './constants'
 
 type FeesResponse = {
   fees: Array<{
@@ -39,8 +40,8 @@ export const getFees = async (startTimestamp: number, endTimestamp: number): Pro
 
   const runePriceUsd = await getRunePriceUsd()
 
-  const chainId = 'cosmos:thorchain-1'
-  const assetId = `${chainId}/slip44:931`
+  const chainId = THORCHAIN_CHAIN_ID
+  const assetId = `${chainId}/slip44:${SLIP44.THORCHAIN}`
 
   for (const fee of data.fees) {
     fees.push({

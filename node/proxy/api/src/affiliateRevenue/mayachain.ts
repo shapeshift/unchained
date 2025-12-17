@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { Fees } from '.'
+import { MAYACHAIN_CHAIN_ID, SLIP44 } from './constants'
 
 type FeesResponse = {
   fees: Array<{
@@ -39,8 +40,8 @@ export const getFees = async (startTimestamp: number, endTimestamp: number): Pro
 
   const cacaoPriceUsd = await getCacaoPriceUsd()
 
-  const chainId = 'cosmos:mayachain-mainnet-v1'
-  const assetId = `${chainId}/slip44:931`
+  const chainId = MAYACHAIN_CHAIN_ID
+  const assetId = `${chainId}/slip44:${SLIP44.MAYACHAIN}`
 
   for (const fee of data.fees) {
     revenues.push({
