@@ -6,9 +6,19 @@ import * as mayachain from './mayachain'
 import * as chainflip from './chainflip'
 import * as portals from './portals'
 import * as nearintents from './nearIntents'
+import * as relay from './relay'
 import { AffiliateRevenueResponse, Service, services } from '../models'
 
-const providerNames: Service[] = ['zrx', 'bebop', 'thorchain', 'mayachain', 'chainflip', 'portals', 'nearintents']
+const providerNames: Service[] = [
+  'zrx',
+  'bebop',
+  'thorchain',
+  'mayachain',
+  'chainflip',
+  'portals',
+  'nearintents',
+  'relay',
+]
 
 const formatError = (error: unknown): string => {
   if (axios.isAxiosError(error)) {
@@ -46,6 +56,7 @@ export class AffiliateRevenue {
       chainflip.getFees(startTimestamp, endTimestamp),
       portals.getFees(startTimestamp, endTimestamp),
       nearintents.getFees(startTimestamp, endTimestamp),
+      relay.getFees(startTimestamp, endTimestamp),
     ])
 
     results.forEach((result, index) => {
