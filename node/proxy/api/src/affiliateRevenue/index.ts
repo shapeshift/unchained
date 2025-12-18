@@ -1,6 +1,7 @@
 import axios from 'axios'
 import * as bebop from './bebop'
 import * as butterswap from './butterswap'
+import { affiliateRevenueCache } from './cache'
 import * as chainflip from './chainflip'
 import * as mayachain from './mayachain'
 import * as nearintents from './nearIntents'
@@ -47,6 +48,10 @@ export type Fees = {
 
 export class AffiliateRevenue {
   async getAffiliateRevenue(startTimestamp: number, endTimestamp: number): Promise<AffiliateRevenueResponse> {
+    if (affiliateRevenueCache.isInitialized()) {
+      return await affiliateRevenueCache.getRevenue(startTimestamp, endTimestamp)
+    }
+
     const fees: Array<Fees> = []
     const failedProviders: Service[] = []
 

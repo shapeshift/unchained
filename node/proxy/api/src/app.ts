@@ -3,6 +3,7 @@ import { join } from 'path'
 import swaggerUi from 'swagger-ui-express'
 import { middleware } from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
+import { affiliateRevenueCache } from './affiliateRevenue/cache'
 import { RegisterRoutes } from './routes'
 import { CoinGecko } from './coingecko'
 import { Zerion } from './zerion'
@@ -46,6 +47,10 @@ app.get('/api/v1/zrx/*', zrx.handler.bind(zrx))
 
 const portals = new Portals()
 app.get('/api/v1/portals/*', portals.handler.bind(portals))
+
+affiliateRevenueCache.initialize().catch((err) => {
+  logger.error(err, 'Failed to initialize affiliate revenue cache')
+})
 
 // redirect any unmatched routes to docs
 app.get('/', async (_, res) => {
