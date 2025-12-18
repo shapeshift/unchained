@@ -1,23 +1,25 @@
 import axios from 'axios'
-import * as zrx from './zrx'
 import * as bebop from './bebop'
-import * as thorchain from './thorchain'
-import * as mayachain from './mayachain'
+import * as butterswap from './butterswap'
 import * as chainflip from './chainflip'
-import * as portals from './portals'
+import * as mayachain from './mayachain'
 import * as nearintents from './nearIntents'
+import * as portals from './portals'
 import * as relay from './relay'
+import * as thorchain from './thorchain'
+import * as zrx from './zrx'
 import { AffiliateRevenueResponse, Service, services } from '../models'
 
 const providerNames: Service[] = [
-  'zrx',
   'bebop',
-  'thorchain',
-  'mayachain',
+  'butterswap',
   'chainflip',
-  'portals',
+  'mayachain',
   'nearintents',
+  'portals',
   'relay',
+  'thorchain',
+  'zrx',
 ]
 
 const formatError = (error: unknown): string => {
@@ -49,14 +51,15 @@ export class AffiliateRevenue {
     const failedProviders: Service[] = []
 
     const results = await Promise.allSettled([
-      zrx.getFees(startTimestamp, endTimestamp),
       bebop.getFees(startTimestamp, endTimestamp),
-      thorchain.getFees(startTimestamp, endTimestamp),
-      mayachain.getFees(startTimestamp, endTimestamp),
+      butterswap.getFees(startTimestamp, endTimestamp),
       chainflip.getFees(startTimestamp, endTimestamp),
-      portals.getFees(startTimestamp, endTimestamp),
+      mayachain.getFees(startTimestamp, endTimestamp),
       nearintents.getFees(startTimestamp, endTimestamp),
+      portals.getFees(startTimestamp, endTimestamp),
       relay.getFees(startTimestamp, endTimestamp),
+      thorchain.getFees(startTimestamp, endTimestamp),
+      zrx.getFees(startTimestamp, endTimestamp),
     ])
 
     results.forEach((result, index) => {

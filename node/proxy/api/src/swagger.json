@@ -74,6 +74,10 @@
 						"type": "number",
 						"format": "double"
 					},
+					"butterswap": {
+						"type": "number",
+						"format": "double"
+					},
 					"chainflip": {
 						"type": "number",
 						"format": "double"
@@ -105,6 +109,7 @@
 				},
 				"required": [
 					"bebop",
+					"butterswap",
 					"chainflip",
 					"mayachain",
 					"nearintents",
@@ -120,6 +125,7 @@
 				"type": "string",
 				"enum": [
 					"bebop",
+					"butterswap",
 					"chainflip",
 					"mayachain",
 					"nearintents",

@@ -4,6 +4,7 @@ export interface ValidationResult {
 
 export const services = [
   'bebop',
+  'butterswap',
   'chainflip',
   'mayachain',
   'nearintents',
