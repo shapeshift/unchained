@@ -1,57 +1,17 @@
 import axios from 'axios'
-import { Fees } from '.'
-import { NATIVE_TOKEN_ADDRESS, SLIP44 } from './constants'
-
-const ZRX_API_KEY = process.env.ZRX_API_KEY
-
-if (!ZRX_API_KEY) throw new Error('ZRX_API_KEY env var not set')
-
-type Fee = {
-  token?: string
-  amount?: string
-  amountUsd?: string
-}
-
-type TradesResponse = {
-  nextCursor?: string
-  trades: Array<{
-    appName: string
-    blockNumber: string
-    buyToken: string
-    buyAmount?: string
-    chainId: number
-    chainName: string
-    fees: {
-      integratorFee?: Fee
-      zeroExFee?: Fee
-    }
-    gasUsed: string
-    protocolVersion: '0xv4' | 'Settler'
-    sellToken: string
-    sellAmount?: string
-    slippageBps?: string
-    taker: string
-    timestamp: number
-    tokens: Array<{
-      address: string
-      symbol?: string
-    }>
-    transactionHash: string
-    volumeUsd?: string
-    zid: string
-    service: 'gasless' | 'swap'
-  }>
-  zid: string
-}
+import { Fees } from '..'
+import { SLIP44 } from '../constants'
+import { NATIVE_TOKEN_ADDRESS, SERVICES, ZRX_API_KEY, ZRX_API_URL } from './constants'
+import type { TradesResponse } from './types'
 
 export const getFees = async (startTimestamp: number, endTimestamp: number): Promise<Array<Fees>> => {
   const fees: Array<Fees> = []
 
-  for (const service of ['swap', 'gasless']) {
+  for (const service of SERVICES) {
     let cursor: string | undefined
 
     do {
-      const { data } = await axios.get<TradesResponse>(`https://api.0x.org/trade-analytics/${service}`, {
+      const { data } = await axios.get<TradesResponse>(`${ZRX_API_URL}/${service}`, {
         params: { cursor, startTimestamp, endTimestamp },
         headers: {
           '0x-api-key': ZRX_API_KEY,
