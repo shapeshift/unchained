@@ -37,3 +37,6 @@ export const SLIP44 = {
   THORCHAIN: 931,
   MAYACHAIN: 931,
 } as const
+
+// Portals.fi - PortalsMulticall sends fee tokens to treasury after each swap
+export const PORTALS_MULTICALL = '0x89c30E3Af15D210736b2918fbD655c9842Fd74f7'
