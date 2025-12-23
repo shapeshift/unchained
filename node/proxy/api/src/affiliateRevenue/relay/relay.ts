@@ -1,12 +1,21 @@
 import axios from 'axios'
 import { Fees } from '..'
+import {
+  getCacheableThreshold,
+  getDateEndTimestamp,
+  getDateStartTimestamp,
+  groupFeesByDate,
+  saveCachedFees,
+  splitDateRange,
+  tryGetCachedFees,
+} from '../cache'
 import { DAO_TREASURY_BASE } from '../constants'
 import { RELAY_API_URL, SHAPESHIFT_REFERRER } from './constants'
 import type { RelayResponse } from './types'
 import { buildAssetId, getChainConfig } from './utils'
 
-export const getFees = async (startTimestamp: number, endTimestamp: number): Promise<Array<Fees>> => {
-  const fees: Array<Fees> = []
+const fetchFeesFromAPI = async (startTimestamp: number, endTimestamp: number): Promise<Fees[]> => {
+  const fees: Fees[] = []
   let continuation: string | undefined
 
   do {
@@ -56,4 +65,47 @@ export const getFees = async (startTimestamp: number, endTimestamp: number): Pro
   } while (continuation)
 
   return fees
+}
+
+export const getFees = async (startTimestamp: number, endTimestamp: number): Promise<Fees[]> => {
+  const threshold = getCacheableThreshold()
+  const { cacheableDates, recentStart } = splitDateRange(startTimestamp, endTimestamp, threshold)
+
+  const cachedFees: Fees[] = []
+  const datesToFetch: string[] = []
+  let cacheHits = 0
+  let cacheMisses = 0
+
+  for (const date of cacheableDates) {
+    const cached = tryGetCachedFees('relay', 'all', date)
+    if (cached) {
+      cachedFees.push(...cached)
+      cacheHits++
+    } else {
+      datesToFetch.push(date)
+      cacheMisses++
+    }
+  }
+
+  const newFees: Fees[] = []
+  if (datesToFetch.length > 0) {
+    const fetchStart = getDateStartTimestamp(datesToFetch[0])
+    const fetchEnd = getDateEndTimestamp(datesToFetch[datesToFetch.length - 1])
+    const fetched = await fetchFeesFromAPI(fetchStart, fetchEnd)
+
+    const feesByDate = groupFeesByDate(fetched)
+    for (const date of datesToFetch) {
+      saveCachedFees('relay', 'all', date, feesByDate[date] || [])
+    }
+    newFees.push(...fetched)
+  }
+
+  const recentFees: Fees[] = []
+  if (recentStart !== null) {
+    recentFees.push(...(await fetchFeesFromAPI(recentStart, endTimestamp)))
+  }
+
+  console.log(`[relay] Cache stats: ${cacheHits} hits, ${cacheMisses} misses`)
+
+  return [...cachedFees, ...newFees, ...recentFees]
 }
