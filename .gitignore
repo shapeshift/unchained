@@ -36,3 +36,4 @@ monitoring/my-kube-prometheus/alertmanager-config.yaml
 
 # misc
 .DS_Store
+docker-compose.override.yml

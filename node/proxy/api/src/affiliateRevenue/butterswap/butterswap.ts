@@ -1,5 +1,7 @@
+import { createHash } from 'crypto'
 import { encodeAbiParameters, parseAbiParameters } from 'viem'
 import { Fees } from '..'
+import { getDateRange, getDateStartTimestamp } from '../cache'
 import {
   API_SUCCESS_CODE,
   BUTTERSWAP_AFFILIATE_ID,
@@ -63,6 +65,10 @@ const getTotalBalance = async (blockNumber: number, tokens: string[]): Promise<b
   return BigInt(result.slice(0, UINT256_HEX_LENGTH))
 }
 
+const generateSyntheticTxHash = (service: string, date: string): string => {
+  return '0x' + createHash('sha256').update(`${service}-${date}`).digest('hex')
+}
+
 export const getFees = async (startTimestamp: number, endTimestamp: number): Promise<Array<Fees>> => {
   const tokens = await fetchTokenList()
 
@@ -72,18 +78,13 @@ export const getFees = async (startTimestamp: number, endTimestamp: number): Pro
   const startBlock = estimateBlockFromTimestamp(currentBlock, now, startTimestamp)
   const endBlock = estimateBlockFromTimestamp(currentBlock, now, endTimestamp)
 
-  let balanceAtStart: bigint
-  let balanceAtEnd: bigint
-
-  try {
-    ;[balanceAtStart, balanceAtEnd] = await Promise.all([
-      getTotalBalance(startBlock, tokens),
-      getTotalBalance(endBlock, tokens),
-    ])
-  } catch (error) {
+  const [balanceAtStart, balanceAtEnd] = await Promise.all([
+    getTotalBalance(startBlock, tokens),
+    getTotalBalance(endBlock, tokens),
+  ]).catch(error => {
     const message = error instanceof Error ? error.message : String(error)
     throw new Error(`Failed to query ButterSwap balance: ${message}`)
-  }
+  })
 
   const feesForPeriod = balanceAtEnd - balanceAtStart
 
@@ -91,17 +92,19 @@ export const getFees = async (startTimestamp: number, endTimestamp: number): Pro
     return []
   }
 
-  const feesUsd = Number(feesForPeriod) / 10 ** USDT_DECIMALS
+  const dates = getDateRange(startTimestamp, endTimestamp)
+  const numDays = dates.length
 
-  return [
-    {
-      service: 'butterswap',
-      amount: feesForPeriod.toString(),
-      amountUsd: feesUsd.toString(),
-      chainId: MAP_CHAIN_ID,
-      assetId: `${MAP_CHAIN_ID}/erc20:${MAP_USDT_ADDRESS}`,
-      timestamp: endTimestamp,
-      txHash: '',
-    },
-  ]
+  const feesPerDay = feesForPeriod / BigInt(numDays)
+  const feesPerDayUsd = Number(feesPerDay) / 10 ** USDT_DECIMALS
+
+  return dates.map((date) => ({
+    service: 'butterswap',
+    amount: feesPerDay.toString(),
+    amountUsd: feesPerDayUsd.toString(),
+    chainId: MAP_CHAIN_ID,
+    assetId: `${MAP_CHAIN_ID}/erc20:${MAP_USDT_ADDRESS}`,
+    timestamp: getDateStartTimestamp(date),
+    txHash: generateSyntheticTxHash('butterswap', date),
+  }))
 }

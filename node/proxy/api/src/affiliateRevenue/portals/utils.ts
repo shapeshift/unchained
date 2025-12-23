@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { decodeAbiParameters, zeroAddress } from 'viem'
+import { getCachedDecimals, saveCachedDecimals } from '../cache'
 import { SLIP44 } from '../constants'
 import { AFFILIATE_FEE_BPS, COINGECKO_API_BASE, COINGECKO_CHAINS, FEE_BPS_DENOMINATOR, PORTAL_EVENT_ABI } from './constants'
 import type { BlockscoutTransaction, DecodedPortalEvent, ExplorerType } from './types'
@@ -39,17 +40,26 @@ export const getTokenDecimals = async (
 ): Promise<number> => {
   if (tokenAddress.toLowerCase() === zeroAddress) return 18
 
+  const cacheKey = `${explorerUrl}:${tokenAddress.toLowerCase()}`
+  const cached = getCachedDecimals(cacheKey)
+  if (cached !== undefined) return cached
+
   try {
     if (explorerType === 'blockscout') {
       const { data } = await axios.get<{ decimals?: string }>(`${explorerUrl}/api/v2/tokens/${tokenAddress}`)
-      return parseInt(data.decimals ?? '18')
+      const decimals = parseInt(data.decimals ?? '18')
+      saveCachedDecimals(cacheKey, decimals)
+      return decimals
     }
 
     const { data } = await axios.get<{ result?: Array<{ divisor?: string }> }>(`${explorerUrl}/api`, {
       params: { module: 'token', action: 'tokeninfo', contractaddress: tokenAddress },
     })
-    return parseInt(data.result?.[0]?.divisor ?? '18')
+    const decimals = parseInt(data.result?.[0]?.divisor ?? '18')
+    saveCachedDecimals(cacheKey, decimals)
+    return decimals
   } catch {
+    saveCachedDecimals(cacheKey, 18)
     return 18
   }
 }
@@ -60,7 +70,16 @@ export const buildAssetId = (chainId: string, tokenAddress: string): string => {
   return isNative ? `${chainId}/slip44:${SLIP44.ETHEREUM}` : `${chainId}/erc20:${tokenLower}`
 }
 
+const priceCache: Record<string, { price: number | null; timestamp: number }> = {}
+const PRICE_CACHE_TTL = 1000 * 60 * 5 // 5 minutes
+
 export const getTokenPrice = async (chainId: string, tokenAddress: string): Promise<number | null> => {
+  const cacheKey = `${chainId}:${tokenAddress.toLowerCase()}`
+  const cached = priceCache[cacheKey]
+  if (cached && Date.now() - cached.timestamp < PRICE_CACHE_TTL) {
+    return cached.price
+  }
+
   try {
     const networkId = chainId.split(':')[1]
     const chainConfig = COINGECKO_CHAINS[networkId]
@@ -74,14 +93,19 @@ export const getTokenPrice = async (chainId: string, tokenAddress: string): Prom
         `${COINGECKO_API_BASE}/simple/price`,
         { params: { vs_currencies: 'usd', ids: chainConfig.nativeCoinId } }
       )
-      return data[chainConfig.nativeCoinId]?.usd ?? null
+      const price = data[chainConfig.nativeCoinId]?.usd ?? null
+      priceCache[cacheKey] = { price, timestamp: Date.now() }
+      return price
     }
 
     const { data } = await axios.get<{ market_data?: { current_price?: { usd?: number } } }>(
       `${COINGECKO_API_BASE}/coins/${chainConfig.platform}/contract/${tokenLower}`
     )
-    return data.market_data?.current_price?.usd ?? null
+    const price = data.market_data?.current_price?.usd ?? null
+    priceCache[cacheKey] = { price, timestamp: Date.now() }
+    return price
   } catch {
+    priceCache[cacheKey] = { price: null, timestamp: Date.now() }
     return null
   }
 }
