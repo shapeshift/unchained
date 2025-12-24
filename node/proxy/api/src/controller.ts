@@ -34,8 +34,8 @@ export class Proxy extends Controller {
   /**
    * Get affiliate revenue
    *
-   * @param {number} startTimestamp start timestamp (unix seconds)
-   * @param {number} endTimestamp end timestamp (unix seconds)
+   * @param {string} startDate start date (YYYY-MM-DD)
+   * @param {string} endDate end date (YYYY-MM-DD)
    *
    * @returns {Promise<AffiliateRevenueResponse>} affiliate revenue
    */
@@ -45,10 +45,12 @@ export class Proxy extends Controller {
   @Tags('Affiliate Revenue')
   @Get('/affiliate/revenue')
   async getAffiliateRevenue(
-    @Query() startTimestamp: number,
-    @Query() endTimestamp: number
+    @Query() startDate: string,
+    @Query() endDate: string
   ): Promise<AffiliateRevenueResponse> {
     try {
+      const startTimestamp = Math.floor(new Date(`${startDate}T00:00:00Z`).getTime() / 1000)
+      const endTimestamp = Math.floor(new Date(`${endDate}T23:59:59Z`).getTime() / 1000)
       return await affiliateRevenue.getAffiliateRevenue(startTimestamp, endTimestamp)
     } catch (err) {
       throw handleError(err)

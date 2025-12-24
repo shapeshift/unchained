@@ -121,6 +121,31 @@
 				"type": "object",
 				"description": "Construct a type with a set of properties K of type T"
 			},
+			"DailyRevenue": {
+				"properties": {
+					"totalUsd": {
+						"type": "number",
+						"format": "double"
+					},
+					"byService": {
+						"$ref": "#/components/schemas/Record_Service.number_"
+					}
+				},
+				"required": [
+					"totalUsd",
+					"byService"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Record_string.DailyRevenue_": {
+				"properties": {},
+				"additionalProperties": {
+					"$ref": "#/components/schemas/DailyRevenue"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
 			"Service": {
 				"type": "string",
 				"enum": [
@@ -137,24 +162,28 @@
 			},
 			"AffiliateRevenueResponse": {
 				"properties": {
+					"totalUsd": {
+						"type": "number",
+						"format": "double"
+					},
 					"byService": {
 						"$ref": "#/components/schemas/Record_Service.number_"
+					},
+					"byDate": {
+						"$ref": "#/components/schemas/Record_string.DailyRevenue_"
 					},
 					"failedProviders": {
 						"items": {
 							"$ref": "#/components/schemas/Service"
 						},
 						"type": "array"
-					},
-					"totalUsd": {
-						"type": "number",
-						"format": "double"
 					}
 				},
 				"required": [
+					"totalUsd",
 					"byService",
-					"failedProviders",
-					"totalUsd"
+					"byDate",
+					"failedProviders"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -293,23 +322,21 @@
 				"security": [],
 				"parameters": [
 					{
-						"description": "start timestamp (unix seconds)",
+						"description": "start date (YYYY-MM-DD)",
 						"in": "query",
-						"name": "startTimestamp",
+						"name": "startDate",
 						"required": true,
 						"schema": {
-							"format": "double",
-							"type": "number"
+							"type": "string"
 						}
 					},
 					{
-						"description": "end timestamp (unix seconds)",
+						"description": "end date (YYYY-MM-DD)",
 						"in": "query",
-						"name": "endTimestamp",
+						"name": "endDate",
 						"required": true,
 						"schema": {
-							"format": "double",
-							"type": "number"
+							"type": "string"
 						}
 					}
 				]

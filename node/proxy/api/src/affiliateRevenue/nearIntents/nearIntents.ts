@@ -1,5 +1,14 @@
 import axios from 'axios'
 import { Fees } from '..'
+import {
+  getCacheableThreshold,
+  getDateEndTimestamp,
+  getDateStartTimestamp,
+  groupFeesByDate,
+  saveCachedFees,
+  splitDateRange,
+  tryGetCachedFees,
+} from '../cache'
 import { FEE_BPS_DENOMINATOR, NEAR_INTENTS_API_KEY } from './constants'
 import type { TransactionsResponse } from './types'
 import { parseNearIntentsAsset, sleep } from './utils'
@@ -36,9 +45,8 @@ const fetchPage = async (
   }
 }
 
-export const getFees = async (startTimestamp: number, endTimestamp: number): Promise<Array<Fees>> => {
-  const fees: Array<Fees> = []
-
+const fetchFeesFromAPI = async (startTimestamp: number, endTimestamp: number): Promise<Fees[]> => {
+  const fees: Fees[] = []
   let page: number | undefined = 1
 
   while (page) {
@@ -76,4 +84,47 @@ export const getFees = async (startTimestamp: number, endTimestamp: number): Pro
   }
 
   return fees
+}
+
+export const getFees = async (startTimestamp: number, endTimestamp: number): Promise<Fees[]> => {
+  const threshold = getCacheableThreshold()
+  const { cacheableDates, recentStart } = splitDateRange(startTimestamp, endTimestamp, threshold)
+
+  const cachedFees: Fees[] = []
+  const datesToFetch: string[] = []
+  let cacheHits = 0
+  let cacheMisses = 0
+
+  for (const date of cacheableDates) {
+    const cached = tryGetCachedFees('nearintents', 'all', date)
+    if (cached) {
+      cachedFees.push(...cached)
+      cacheHits++
+    } else {
+      datesToFetch.push(date)
+      cacheMisses++
+    }
+  }
+
+  const newFees: Fees[] = []
+  if (datesToFetch.length > 0) {
+    const fetchStart = getDateStartTimestamp(datesToFetch[0])
+    const fetchEnd = getDateEndTimestamp(datesToFetch[datesToFetch.length - 1])
+    const fetched = await fetchFeesFromAPI(fetchStart, fetchEnd)
+
+    const feesByDate = groupFeesByDate(fetched)
+    for (const date of datesToFetch) {
+      saveCachedFees('nearintents', 'all', date, feesByDate[date] || [])
+    }
+    newFees.push(...fetched)
+  }
+
+  const recentFees: Fees[] = []
+  if (recentStart !== null) {
+    recentFees.push(...(await fetchFeesFromAPI(recentStart, endTimestamp)))
+  }
+
+  console.log(`[nearintents] Cache stats: ${cacheHits} hits, ${cacheMisses} misses`)
+
+  return [...cachedFees, ...newFees, ...recentFees]
 }
