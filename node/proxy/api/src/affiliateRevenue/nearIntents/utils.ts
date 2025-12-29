@@ -41,6 +41,13 @@ export const parseNearIntentsAsset = (asset: string): ParseResult => {
     return { chainId, assetId: buildAssetId(chainId, network) }
   }
 
+  const nep141NativeMatch = asset.match(/^nep141:(.+)\.near$/)
+  if (nep141NativeMatch) {
+    const tokenAddress = nep141NativeMatch[1]
+    const chainId = resolveChainId('near') ?? 'near:mainnet'
+    return { chainId, assetId: `${chainId}/nep141:${tokenAddress}` }
+  }
+
   const nep245Match = asset.match(/^nep245:v2_1\.omni\.hot\.tg:(\d+)_.+$/)
   if (nep245Match) {
     const chainId = `eip155:${nep245Match[1]}`

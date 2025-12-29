@@ -1,6 +1,7 @@
 import axios from 'axios'
 import * as bebop from './bebop'
 import * as butterswap from './butterswap'
+import { timestampToDate } from './cache'
 import * as chainflip from './chainflip'
 import * as mayachain from './mayachain'
 import * as nearintents from './nearIntents'
@@ -72,21 +73,37 @@ export class AffiliateRevenue {
       }
     })
 
-    const byService: Record<Service, number> = {} as Record<Service, number>
+    const byDate: AffiliateRevenueResponse['byDate'] = {}
 
-    for (const service of services) {
-      byService[service] = 0
+    for (const fee of fees) {
+      const date = timestampToDate(fee.timestamp)
+
+      if (!byDate[date]) {
+        byDate[date] = {
+          totalUsd: 0,
+          byService: Object.fromEntries(services.map((s) => [s, 0])) as Record<Service, number>,
+        }
+      }
+
+      const amountUsd = parseFloat(fee.amountUsd || '0')
+      byDate[date].totalUsd += amountUsd
+      byDate[date].byService[fee.service] += amountUsd
     }
 
-    for (const revenue of fees) {
-      byService[revenue.service] = (byService[revenue.service] || 0) + parseFloat(revenue.amountUsd || '0')
+    const byService = Object.fromEntries(services.map((s) => [s, 0])) as Record<Service, number>
+
+    for (const daily of Object.values(byDate)) {
+      for (const service of services) {
+        byService[service] += daily.byService[service]
+      }
     }
 
-    const totalUsd = fees.reduce((sum, rev) => sum + parseFloat(rev.amountUsd || '0'), 0)
+    const totalUsd = Object.values(byDate).reduce((sum, daily) => sum + daily.totalUsd, 0)
 
     return {
       totalUsd,
       byService,
+      byDate,
       failedProviders,
     }
   }
