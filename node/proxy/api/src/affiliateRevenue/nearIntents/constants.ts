@@ -1,0 +1,55 @@
+import {
+  ARBITRUM_CHAIN_ID,
+  AVALANCHE_CHAIN_ID,
+  BASE_CHAIN_ID,
+  BITCOIN_CHAIN_ID,
+  BSC_CHAIN_ID,
+  DOGECOIN_CHAIN_ID,
+  ETHEREUM_CHAIN_ID,
+  GNOSIS_CHAIN_ID,
+  NEAR_CHAIN_ID,
+  OPTIMISM_CHAIN_ID,
+  POLYGON_CHAIN_ID,
+  SLIP44,
+  SOLANA_CHAIN_ID,
+  STARKNET_CHAIN_ID,
+  SUI_CHAIN_ID,
+  TRON_CHAIN_ID,
+  ZCASH_CHAIN_ID,
+} from '../constants'
+
+export const NEAR_INTENTS_API_KEY = process.env.NEAR_INTENTS_API_KEY
+export const FEE_BPS_DENOMINATOR = 10000
+
+if (!NEAR_INTENTS_API_KEY) throw new Error('NEAR_INTENTS_API_KEY env var not set')
+
+export const NEAR_INTENTS_TO_CHAIN_ID: Record<string, string> = {
+  eth: ETHEREUM_CHAIN_ID,
+  arb: ARBITRUM_CHAIN_ID,
+  base: BASE_CHAIN_ID,
+  gnosis: GNOSIS_CHAIN_ID,
+  bsc: BSC_CHAIN_ID,
+  pol: POLYGON_CHAIN_ID,
+  avax: AVALANCHE_CHAIN_ID,
+  op: OPTIMISM_CHAIN_ID,
+  btc: BITCOIN_CHAIN_ID,
+  doge: DOGECOIN_CHAIN_ID,
+  zec: ZCASH_CHAIN_ID,
+  sol: SOLANA_CHAIN_ID,
+  tron: TRON_CHAIN_ID,
+  sui: SUI_CHAIN_ID,
+  near: NEAR_CHAIN_ID,
+  starknet: STARKNET_CHAIN_ID,
+  monad: 'eip155:143',
+}
+
+export const SLIP44_BY_NETWORK: Record<string, number> = {
+  btc: SLIP44.BITCOIN,
+  doge: SLIP44.DOGECOIN,
+  zec: SLIP44.ZCASH,
+  near: SLIP44.NEAR,
+  sol: SLIP44.SOLANA,
+  tron: SLIP44.TRON,
+  sui: SLIP44.SUI,
+  starknet: SLIP44.STARKNET,
+}

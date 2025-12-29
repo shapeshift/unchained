@@ -14,6 +14,8 @@
   "dependencies": {
     "@shapeshiftoss/common-api": "^10.0.0",
     "bottleneck": "^2.19.5",
-    "elliptic-sdk": "^0.7.2"
+    "elliptic-sdk": "^0.7.2",
+    "lru-cache": "^10.2.0",
+    "viem": "^2.33.2"
   }
 }
