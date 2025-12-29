@@ -17,6 +17,25 @@ export const TRON_CHAIN_ID = 'tron:0x2b6653dc'
 export const SUI_CHAIN_ID = 'sui:35834a8a'
 export const THORCHAIN_CHAIN_ID = 'cosmos:thorchain-1'
 export const MAYACHAIN_CHAIN_ID = 'cosmos:mayachain-mainnet-v1'
+export const NEAR_CHAIN_ID = 'near:mainnet'
+export const STARKNET_CHAIN_ID = 'starknet:SN_MAIN'
+
+// EVM Chain IDs (CAIP-2 format)
+export const ETHEREUM_CHAIN_ID = 'eip155:1'
+export const OPTIMISM_CHAIN_ID = 'eip155:10'
+export const BSC_CHAIN_ID = 'eip155:56'
+export const GNOSIS_CHAIN_ID = 'eip155:100'
+export const POLYGON_CHAIN_ID = 'eip155:137'
+export const BASE_CHAIN_ID = 'eip155:8453'
+export const MAP_CHAIN_ID = 'eip155:22776'
+export const ARBITRUM_CHAIN_ID = 'eip155:42161'
+export const AVALANCHE_CHAIN_ID = 'eip155:43114'
+
+// ButterSwap on MAP Protocol
+export const BUTTERSWAP_CONTRACT = '0x4De2ADb9cB88c10Bf200F76c18035cbB8906b6bC'
+export const MAP_USDT_ADDRESS = '0x33daba9618a75a7aff103e53afe530fbacf4a3dd'
+export const MAP_RPC_URL = 'https://rpc.maplabs.io/'
+export const BUTTERSWAP_AFFILIATE_ID = 26
 
 // Slip44 coin type values for native assets
 export const SLIP44 = {
@@ -25,8 +44,13 @@ export const SLIP44 = {
   ETHEREUM: 60,
   ZCASH: 133,
   TRON: 195,
+  NEAR: 397,
   SOLANA: 501,
   SUI: 784,
   THORCHAIN: 931,
   MAYACHAIN: 931,
+  STARKNET: 9004,
 } as const
+
+// Portals.fi - PortalsMulticall sends fee tokens to treasury after each swap
+export const PORTALS_MULTICALL = '0x89c30E3Af15D210736b2918fbD655c9842Fd74f7'

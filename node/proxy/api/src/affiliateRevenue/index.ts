@@ -1,23 +1,26 @@
 import axios from 'axios'
-import * as zrx from './zrx'
 import * as bebop from './bebop'
-import * as thorchain from './thorchain'
-import * as mayachain from './mayachain'
+import * as butterswap from './butterswap'
+import { timestampToDate } from './cache'
 import * as chainflip from './chainflip'
-import * as portals from './portals'
+import * as mayachain from './mayachain'
 import * as nearintents from './nearIntents'
+import * as portals from './portals'
 import * as relay from './relay'
+import * as thorchain from './thorchain'
+import * as zrx from './zrx'
 import { AffiliateRevenueResponse, Service, services } from '../models'
 
 const providerNames: Service[] = [
-  'zrx',
   'bebop',
-  'thorchain',
-  'mayachain',
+  'butterswap',
   'chainflip',
-  'portals',
+  'mayachain',
   'nearintents',
+  'portals',
   'relay',
+  'thorchain',
+  'zrx',
 ]
 
 const formatError = (error: unknown): string => {
@@ -49,14 +52,15 @@ export class AffiliateRevenue {
     const failedProviders: Service[] = []
 
     const results = await Promise.allSettled([
-      zrx.getFees(startTimestamp, endTimestamp),
       bebop.getFees(startTimestamp, endTimestamp),
-      thorchain.getFees(startTimestamp, endTimestamp),
-      mayachain.getFees(startTimestamp, endTimestamp),
+      butterswap.getFees(startTimestamp, endTimestamp),
       chainflip.getFees(startTimestamp, endTimestamp),
-      portals.getFees(startTimestamp, endTimestamp),
+      mayachain.getFees(startTimestamp, endTimestamp),
       nearintents.getFees(startTimestamp, endTimestamp),
+      portals.getFees(startTimestamp, endTimestamp),
       relay.getFees(startTimestamp, endTimestamp),
+      thorchain.getFees(startTimestamp, endTimestamp),
+      zrx.getFees(startTimestamp, endTimestamp),
     ])
 
     results.forEach((result, index) => {
@@ -69,21 +73,37 @@ export class AffiliateRevenue {
       }
     })
 
-    const byService: Record<Service, number> = {} as Record<Service, number>
+    const byDate: AffiliateRevenueResponse['byDate'] = {}
 
-    for (const service of services) {
-      byService[service] = 0
+    for (const fee of fees) {
+      const date = timestampToDate(fee.timestamp)
+
+      if (!byDate[date]) {
+        byDate[date] = {
+          totalUsd: 0,
+          byService: Object.fromEntries(services.map((s) => [s, 0])) as Record<Service, number>,
+        }
+      }
+
+      const amountUsd = parseFloat(fee.amountUsd || '0')
+      byDate[date].totalUsd += amountUsd
+      byDate[date].byService[fee.service] += amountUsd
     }
 
-    for (const revenue of fees) {
-      byService[revenue.service] = (byService[revenue.service] || 0) + parseFloat(revenue.amountUsd || '0')
+    const byService = Object.fromEntries(services.map((s) => [s, 0])) as Record<Service, number>
+
+    for (const daily of Object.values(byDate)) {
+      for (const service of services) {
+        byService[service] += daily.byService[service]
+      }
     }
 
-    const totalUsd = fees.reduce((sum, rev) => sum + parseFloat(rev.amountUsd || '0'), 0)
+    const totalUsd = Object.values(byDate).reduce((sum, daily) => sum + daily.totalUsd, 0)
 
     return {
       totalUsd,
       byService,
+      byDate,
       failedProviders,
     }
   }
