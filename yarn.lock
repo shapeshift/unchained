@@ -3361,6 +3361,8 @@ __metadata:
     "@shapeshiftoss/common-api": "npm:^10.0.0"
     bottleneck: "npm:^2.19.5"
     elliptic-sdk: "npm:^0.7.2"
+    lru-cache: "npm:^10.2.0"
+    viem: "npm:^2.33.2"
   languageName: unknown
   linkType: soft
 
