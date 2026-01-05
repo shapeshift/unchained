@@ -1,0 +1,20 @@
+{
+  "name": "@shapeshiftoss/prometheus",
+  "version": "10.0.0",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "source": "src/index.ts",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist node_modules",
+    "dev": "nodemon -e ts --watch src -x yarn build",
+    "watch": "nodemon -e ts --watch src -x yarn build"
+  },
+  "dependencies": {
+    "prom-client": "^15.0.0"
+  }
+}

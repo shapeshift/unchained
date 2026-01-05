@@ -1,5 +1,5 @@
 import { Logger } from '@shapeshiftoss/logger'
-import { WebsocketClient as BaseWebsocketClient, Args, Options, Subscription } from '@shapeshiftoss/websocket'
+import { Args, Options, Subscription, AddressSubscriptionWebsocketClient } from '@shapeshiftoss/websocket'
 import WebSocket from 'ws'
 import {
   isWebsocketResponse,
@@ -17,7 +17,7 @@ interface WebsocketArgs extends Omit<Args, 'logger'> {
 
 type TransactionHandler = (data: Logs) => Promise<void>
 
-export class WebsocketClient extends BaseWebsocketClient {
+export class WebsocketClient extends AddressSubscriptionWebsocketClient {
   private handleTransaction: TransactionHandler | Array<TransactionHandler>
   private addresses: Array<string> = []
   private subscriptionIds: Array<number> = []
@@ -29,7 +29,7 @@ export class WebsocketClient extends BaseWebsocketClient {
 
     this.handleTransaction = args.transactionHandler
 
-    this.initialize()
+    super.connect()
   }
 
   protected onOpen(): void {
@@ -95,7 +95,7 @@ export class WebsocketClient extends BaseWebsocketClient {
       }
 
       try {
-        this.socket.send(JSON.stringify(subscription))
+        this.socket?.send(JSON.stringify(subscription))
       } catch (err) {
         this.logger.debug(err, `failed to subscribe address: ${JSON.stringify(subscription)}`)
       }
@@ -107,7 +107,7 @@ export class WebsocketClient extends BaseWebsocketClient {
   }
 
   private unsubscribe(subscriptionId: number): void {
-    this.socket.send(
+    this.socket?.send(
       JSON.stringify({
         jsonrpc: '2.0',
         id: 'unsubscribe',
