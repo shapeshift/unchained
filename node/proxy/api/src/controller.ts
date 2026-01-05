@@ -34,8 +34,8 @@ export class Proxy extends Controller {
   /**
    * Get affiliate revenue
    *
-   * @param {number} startTimestamp start timestamp (unix seconds)
-   * @param {number} endTimestamp end timestamp (unix seconds)
+   * @param {string} startDate start date (YYYY-MM-DD)
+   * @param {string} endDate end date (YYYY-MM-DD)
    *
    * @returns {Promise<AffiliateRevenueResponse>} affiliate revenue
    */
@@ -45,10 +45,30 @@ export class Proxy extends Controller {
   @Tags('Affiliate Revenue')
   @Get('/affiliate/revenue')
   async getAffiliateRevenue(
-    @Query() startTimestamp: number,
-    @Query() endTimestamp: number
+    @Query() startDate: string,
+    @Query() endDate: string
   ): Promise<AffiliateRevenueResponse> {
     try {
+      // Validate date format (YYYY-MM-DD)
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/
+      if (!dateRegex.test(startDate)) {
+        throw new Error('Invalid startDate format, expected YYYY-MM-DD')
+      }
+      if (!dateRegex.test(endDate)) {
+        throw new Error('Invalid endDate format, expected YYYY-MM-DD')
+      }
+
+      // Validate dates are valid calendar dates
+      const startTimestamp = Math.floor(new Date(`${startDate}T00:00:00Z`).getTime() / 1000)
+      const endTimestamp = Math.floor(new Date(`${endDate}T23:59:59Z`).getTime() / 1000)
+
+      if (isNaN(startTimestamp)) {
+        throw new Error('Invalid startDate value')
+      }
+      if (isNaN(endTimestamp)) {
+        throw new Error('Invalid endDate value')
+      }
+
       return await affiliateRevenue.getAffiliateRevenue(startTimestamp, endTimestamp)
     } catch (err) {
       throw handleError(err)
