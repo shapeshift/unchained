@@ -1,49 +1,33 @@
-import { Blockbook } from '@shapeshiftoss/blockbook'
+import { EvmChain } from '@moralisweb3/common-evm-utils'
+import { EvmStreamResult, EvmStreamResultish } from '@moralisweb3/common-streams-utils'
+import { ApiError } from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
-import { Body, Example, Get, Post, Response, Route, Tags } from 'tsoa'
-import { createPublicClient, http } from 'viem'
+import express from 'express'
+import { Body, Example, Get, Hidden, Post, Response, Request, Route, Tags } from 'tsoa'
+import { createPublicClient, http, keccak256, toBytes } from 'viem'
 import { bsc } from 'viem/chains'
 import { BaseAPI, EstimateGasBody, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { API, GasEstimate, GasFees } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
+import { API, GasEstimate, GasFees, MoralisService } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { EVM } from '../../../common/api/src/evm/controller'
-import { Service } from '../../../common/api/src/evm/service'
-import { GasOracle } from '../../../common/api/src/evm/gasOracle'
 
-const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
-const INDEXER_WS_URL = process.env.INDEXER_WS_URL
-const INDEXER_API_KEY = process.env.INDEXER_API_KEY
-const NETWORK = process.env.NETWORK
 const RPC_URL = process.env.RPC_URL
 const RPC_API_KEY = process.env.RPC_API_KEY
 
-if (!ETHERSCAN_API_KEY) throw new Error('ETHERSCAN_API_KEY env var not set')
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
-if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
-if (!NETWORK) throw new Error('NETWORK env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
+if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
 
 export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'bnbsmartchain', 'api'],
   level: process.env.LOG_LEVEL,
 })
 
-const headers = RPC_API_KEY ? { 'api-key': RPC_API_KEY } : undefined
+const rpcUrl = `${RPC_URL}/${RPC_API_KEY}`
 
-const client = createPublicClient({ chain: bsc, transport: http(RPC_URL, { fetchOptions: { headers } }) })
+const client = createPublicClient({ chain: bsc, transport: http(rpcUrl) })
 
-export const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL, apiKey: INDEXER_API_KEY, logger })
-export const gasOracle = new GasOracle({ logger, client, coinstack: 'bnbsmartchain' })
-
-export const service = new Service({
-  blockbook,
-  gasOracle,
-  explorerApiUrl: new URL(`https://api.etherscan.io/v2/api?chainid=56&apikey=${ETHERSCAN_API_KEY}`),
-  client,
-  logger,
-  rpcUrl: RPC_URL,
-  rpcApiKey: RPC_API_KEY,
-})
+export const service = new MoralisService({ chain: EvmChain.BSC, logger, client, rpcUrl })
 
 // assign service to be used for all instances of EVM
 EVM.service = service
@@ -100,5 +84,37 @@ export class BNBSmartChain extends EVM implements BaseAPI, API {
   @Get('/gas/fees')
   async getGasFees(): Promise<GasFees> {
     return service.getGasFees()
+  }
+
+  @Hidden()
+  @Post('/webhook/moralis')
+  async handleMoralisStream(@Body() body: unknown, @Request() req: express.Request) {
+    if (!(service instanceof MoralisService)) throw new ApiError('Not Found', 404, 'Endpoint not available')
+
+    if (!service.transactionHandler) return
+
+    const signature = req.headers['x-signature']
+    if (!signature || typeof signature !== 'string') throw new ApiError('Bad Request', 422, 'Invalid signature')
+
+    const secret = await service.getSecret()
+    const generatedSignature = keccak256(toBytes(JSON.stringify(body) + secret))
+
+    if (signature !== generatedSignature) {
+      throw new ApiError('Unauthorized', 401, 'Signature is not valid')
+    }
+
+    const data = body as EvmStreamResultish
+
+    logger.debug({ data }, 'handleMoralisStream')
+
+    // confirmed === false: transaction has just confirmed in the latest block
+    // confirmed === true: transaction has is still confirmed after N block confirmations
+    if (data.confirmed === true) return
+
+    const txs = await service.handleStreamResult(EvmStreamResult.create(data))
+
+    for (const tx of txs) {
+      await service.transactionHandler(tx)
+    }
   }
 }

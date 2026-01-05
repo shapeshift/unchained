@@ -1,11 +1,3 @@
-export interface Cursor {
-  blockHeight?: number
-  blockbookPage: number
-  blockbookTxid?: string
-  explorerPage: number
-  explorerTxid?: string
-}
-
 export interface TraceCall {
   action: {
     callType: string
@@ -77,4 +69,25 @@ export interface ExplorerInternalTxByAddress {
   traceId: string
   isError: string
   errCode: string
+}
+
+export interface BlockNativeResponse {
+  system: string
+  network: string
+  unit: string
+  maxPrice: number
+  currentBlockNumber: number
+  msSinceLastBlock: number
+  blockPrices: Array<{
+    blockNumber: number
+    estimatedTransactionCount: number
+    baseFeePerGas: number
+    blobBaseFeePerGas: number
+    estimatedPrices: Array<{
+      confidence: number
+      price: number
+      maxPriorityFeePerGas: number
+      maxFeePerGas: number
+    }>
+  }>
 }

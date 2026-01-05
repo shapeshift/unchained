@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"math/big"
 
 	"github.com/cometbft/cometbft/types"
@@ -71,7 +72,20 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 		return nil, err
 	}
 
-	a := Account{Account: account.(cosmos.Account)}
+	acc := account.(cosmos.Account)
+
+	denoms := make(map[string]bool)
+	for _, asset := range acc.Assets {
+		denoms[asset.Denom] = true
+	}
+
+	for _, denom := range []string{"tcy", "x/ruji"} {
+		if !denoms[denom] {
+			acc.Assets = append(acc.Assets, cosmos.Value{Amount: "0", Denom: denom})
+		}
+	}
+
+	a := Account{Account: acc}
 
 	return a, nil
 }
@@ -89,21 +103,97 @@ type AffiliateRevenue struct {
 	// Amount earned (RUNE)
 	// required: true
 	Amount string `json:"amount"`
+	// Revenue earned by denom
+	// required: true
+	Revenue map[string]string `json:"revenue"`
 }
 
 func (h *Handler) GetAffiliateRevenue(start int, end int) (*AffiliateRevenue, error) {
 	total := big.NewInt(0)
+	revenueTotal := make(map[string]*big.Int)
+	assetInRune := make(map[string]*big.Float)
 	for _, fee := range h.indexer.AffiliateFees {
 		if fee.Timestamp >= int64(start) && fee.Timestamp <= int64(end) {
-			amount := new(big.Int)
-			amount.SetString(fee.Amount, 10)
-			total.Add(total, amount)
+			if amount, ok := new(big.Int).SetString(fee.Amount, 10); ok {
+				if _, ok := revenueTotal[fee.Asset]; !ok {
+					revenueTotal[fee.Asset] = big.NewInt(0)
+				}
+
+				if _, ok := assetInRune[fee.Asset]; !ok {
+					if fee.Asset == "THOR.RUNE" {
+						assetInRune[fee.Asset] = big.NewFloat(1)
+					} else {
+						var res struct {
+							Asset        string `json:"asset"`
+							BalanceAsset string `json:"balance_asset"`
+							BalanceRune  string `json:"balance_rune"`
+						}
+
+						var errRes struct {
+							Code    string `json:"code"`
+							Message string `json:"message"`
+						}
+
+						if _, err := h.HTTPClient.(*cosmos.HTTPClient).LCD.R().SetResult(&res).SetError(&errRes).Get(fmt.Sprintf("/thorchain/pool/%s", fee.Asset)); err != nil {
+							return nil, errors.Wrapf(err, "failed to get pool details for %s", fee.Asset)
+						}
+						if errRes.Message != "" {
+							return nil, errors.New(errRes.Message)
+						}
+
+						balanceRune, ok := new(big.Float).SetString(res.BalanceRune)
+						if !ok {
+							return nil, errors.Errorf("failed convert balance rune: %s", res.BalanceRune)
+						}
+
+						balanceAsset, ok := new(big.Float).SetString(res.BalanceAsset)
+						if !ok {
+							return nil, errors.Errorf("failed convert balance asset: %s", res.BalanceAsset)
+						}
+
+						assetInRune[fee.Asset] = new(big.Float).Quo(balanceRune, balanceAsset)
+					}
+				}
+
+				amountInRune, _ := new(big.Float).Mul(assetInRune[fee.Asset], new(big.Float).SetInt(amount)).Int(nil)
+				total.Add(total, amountInRune)
+				revenueTotal[fee.Asset].Add(revenueTotal[fee.Asset], amount)
+			}
 		}
+	}
+
+	revenue := make(map[string]string)
+	for asset, amount := range revenueTotal {
+		revenue[asset] = amount.String()
 	}
 
 	a := &AffiliateRevenue{
 		Addresses: h.indexer.AffiliateAddresses,
 		Amount:    total.String(),
+		Revenue:   revenue,
+	}
+
+	return a, nil
+}
+
+// Contains info about affiliate fee history
+// swagger:model AffiliateFees
+type AffiliateFees struct {
+	// Affiliate fees
+	// required: true
+	Fees []*AffiliateFee `json:"fees"`
+}
+
+func (h *Handler) GetAffiliateFees(start int, end int) (*AffiliateFees, error) {
+	fees := []*AffiliateFee{}
+	for _, fee := range h.indexer.AffiliateFees {
+		if fee.Timestamp >= int64(start) && fee.Timestamp <= int64(end) {
+			fees = append(fees, fee)
+		}
+	}
+
+	a := &AffiliateFees{
+		Fees: fees,
 	}
 
 	return a, nil

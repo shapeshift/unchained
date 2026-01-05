@@ -1,6 +1,6 @@
 import { Logger } from '@shapeshiftoss/logger'
 import { Prometheus } from '@shapeshiftoss/prometheus'
-import { AddressSubscriptionWebsocketClient, BaseConnectionHandler } from '@shapeshiftoss/websocket'
+import { AddressSubscriptionClient, BaseConnectionHandler } from '@shapeshiftoss/websocket'
 import WebSocket from 'ws'
 import { Registry } from './registry'
 
@@ -20,18 +20,18 @@ export interface Methods {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isTxsTopicData(data: any): data is TxsTopicData {
-  return data && 'topic' in data
+  return data && typeof data === 'object' && data.topic === 'txs' && Array.isArray(data.addresses)
 }
 
 export class ConnectionHandler extends BaseConnectionHandler {
   private readonly registry: Registry
-  private readonly client: AddressSubscriptionWebsocketClient
+  private readonly client: AddressSubscriptionClient
   private readonly routes: Record<Topics, Methods>
 
   private constructor(
     websocket: WebSocket,
     registry: Registry,
-    client: AddressSubscriptionWebsocketClient,
+    client: AddressSubscriptionClient,
     prometheus: Prometheus,
     logger: Logger
   ) {
@@ -50,7 +50,7 @@ export class ConnectionHandler extends BaseConnectionHandler {
   static start(
     websocket: WebSocket,
     registry: Registry,
-    client: AddressSubscriptionWebsocketClient,
+    client: AddressSubscriptionClient,
     prometheus: Prometheus,
     logger: Logger
   ): void {
@@ -63,12 +63,14 @@ export class ConnectionHandler extends BaseConnectionHandler {
       return
     }
 
-    const callback = this.routes[data.topic].subscribe
-    if (callback) {
-      callback(subscriptionId, data)
-    } else {
+    const route = this.routes[data.topic]
+
+    if (!route || typeof route.subscribe !== 'function') {
       this.sendError(`subscribe method not implemented for topic: ${data.topic}`, subscriptionId)
+      return
     }
+
+    route.subscribe(subscriptionId, data)
   }
 
   onUnsubscribe(subscriptionId: string, data?: unknown): void {
@@ -77,20 +79,25 @@ export class ConnectionHandler extends BaseConnectionHandler {
       return
     }
 
-    const callback = this.routes[data.topic].unsubscribe
-    if (callback) {
-      callback(subscriptionId, data)
-    } else {
+    const route = this.routes[data.topic]
+
+    if (!route || typeof route.unsubscribe !== 'function') {
       this.sendError(`unsubscribe method not implemented for topic: ${data.topic}`, subscriptionId)
+      return
     }
+
+    route.unsubscribe(subscriptionId, data)
   }
 
   onClose(): void {
+    const unsubscribedAddresses: Array<string> = []
+
     for (const subscriptionId of this.subscriptionIds) {
-      this.registry.unsubscribe(this.clientId, subscriptionId, [])
+      const addresses = this.registry.unsubscribe(this.clientId, subscriptionId, [])
+      unsubscribedAddresses.push(...addresses)
     }
 
-    this.client.subscribeAddresses(this.registry.getAddresses())
+    this.client.unsubscribeAddresses(this.registry.getAddresses(), unsubscribedAddresses)
   }
 
   private handleSubscribeTxs(subscriptionId: string, data?: TxsTopicData): void {
@@ -105,22 +112,28 @@ export class ConnectionHandler extends BaseConnectionHandler {
     }
 
     this.subscriptionIds.add(subscriptionId)
-    this.registry.subscribe(this.clientId, subscriptionId, this, data.addresses)
-    this.client.subscribeAddresses(this.registry.getAddresses())
+
+    const subscribedAddresses = this.registry.subscribe(this.clientId, subscriptionId, this, data.addresses)
+
+    this.client.subscribeAddresses(this.registry.getAddresses(), subscribedAddresses)
   }
 
   private handleUnsubscribeTxs(subscriptionId: string, data?: TxsTopicData): void {
+    const unsubscribedAddresses: Array<string> = []
+
     if (subscriptionId) {
       this.subscriptionIds.delete(subscriptionId)
-      this.registry.unsubscribe(this.clientId, subscriptionId, data?.addresses ?? [])
+      const addresses = this.registry.unsubscribe(this.clientId, subscriptionId, data?.addresses ?? [])
+      unsubscribedAddresses.push(...addresses)
     } else {
       for (const subscriptionId of this.subscriptionIds) {
-        this.registry.unsubscribe(this.clientId, subscriptionId, [])
+        const addresses = this.registry.unsubscribe(this.clientId, subscriptionId, [])
+        unsubscribedAddresses.push(...addresses)
       }
 
       this.subscriptionIds.clear()
     }
 
-    this.client.subscribeAddresses(this.registry.getAddresses())
+    this.client.unsubscribeAddresses(this.registry.getAddresses(), unsubscribedAddresses)
   }
 }

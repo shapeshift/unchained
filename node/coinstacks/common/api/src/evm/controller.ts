@@ -10,7 +10,10 @@ import {
   ValidationError,
 } from '../'
 import { API, Account, Tx, TxHistory, TokenMetadata, TokenType } from './models'
-import { Service } from './service'
+import { BlockbookService } from './blockbookService'
+import { MoralisService } from './moralisService'
+import { Chain } from 'viem'
+import { gnosis } from 'viem/chains'
 
 const NETWORK = process.env.NETWORK
 
@@ -19,7 +22,8 @@ if (!NETWORK) throw new Error('NETWORK env var not set')
 @Route('api/v1')
 @Tags('v1')
 export class EVM extends Controller implements BaseAPI, Omit<API, 'getGasFees' | 'estimateGas'> {
-  static service: Service
+  static chain: Chain
+  static service: BlockbookService | MoralisService
 
   /**
    * Get information about the running coinstack
@@ -109,7 +113,15 @@ export class EVM extends Controller implements BaseAPI, Omit<API, 'getGasFees' |
     @Query() from?: number,
     @Query() to?: number
   ): Promise<TxHistory> {
-    return EVM.service.getTxHistory(pubkey, cursor, pageSize, from, to)
+    if (EVM.chain === gnosis) {
+      if (EVM.service instanceof BlockbookService) {
+        return EVM.service.getTxHistory(pubkey, cursor, pageSize, from, to)
+      } else {
+        return EVM.service.getTxHistoryWithEtherscanInternalTxs(pubkey, cursor, pageSize, from, to)
+      }
+    } else {
+      return EVM.service.getTxHistory(pubkey, cursor, pageSize, from, to)
+    }
   }
 
   /**
@@ -191,6 +203,9 @@ export class EVM extends Controller implements BaseAPI, Omit<API, 'getGasFees' |
    * @returns {Promise<TokenMetadata>} token metadata
    */
   @Example<TokenMetadata>({
+    address: '0x0000000000000000000000000000000000000000',
+    id: '123456789',
+    type: 'ERC721',
     name: 'FoxyFox',
     description: 'FOXatars are a cyber-fox NFT project created by ShapeShift and Mercle',
     media: {

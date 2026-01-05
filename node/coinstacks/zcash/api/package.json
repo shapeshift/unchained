@@ -1,0 +1,20 @@
+{
+  "name": "@shapeshiftoss/zcash-api",
+  "version": "10.0.0",
+  "license": "MIT",
+  "private": true,
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "yarn generate && yarn run -T tsc",
+    "clean": "rm -rf dist node_modules src/routes.ts src/swagger.json",
+    "generate": "yarn run -T tsoa spec-and-routes"
+  },
+  "dependencies": {
+    "@shapeshiftoss/blockbook": "^10.0.0",
+    "@shapeshiftoss/common-api": "^10.0.0",
+    "@shapeshiftoss/prometheus": "^10.0.0",
+    "bech32": "^2.0.0"
+  }
+}

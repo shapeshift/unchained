@@ -108,5 +108,11 @@ export abstract class BaseWebsocketClient {
 }
 
 export abstract class AddressSubscriptionWebsocketClient extends BaseWebsocketClient {
-  abstract subscribeAddresses(addresses: string[]): void
+  abstract subscribeAddresses(currentAddresses: Array<string>, addressesToAdd: Array<string>): void
+  abstract unsubscribeAddresses(currentAddresses: Array<string>, addressesToRemove: Array<string>): void
 }
+
+export type AddressSubscriptionClient = Pick<
+  AddressSubscriptionWebsocketClient,
+  'subscribeAddresses' | 'unsubscribeAddresses'
+>

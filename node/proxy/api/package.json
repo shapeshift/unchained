@@ -7,12 +7,14 @@
     "dist"
   ],
   "scripts": {
-    "build": "yarn generate && tsc",
+    "build": "yarn generate && yarn run -T tsc",
     "clean": "rm -rf dist node_modules src/routes.ts src/swagger.json",
-    "generate": "tsoa spec-and-routes"
+    "generate": "yarn run -T tsoa spec-and-routes"
   },
   "dependencies": {
     "@shapeshiftoss/common-api": "^10.0.0",
+    "@shapeshiftoss/prometheus": "^10.0.0",
+    "bottleneck": "^2.19.5",
     "elliptic-sdk": "^0.7.2"
   }
 }

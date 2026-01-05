@@ -122,6 +122,51 @@
         }
       }
     },
+    "/api/v1/affiliate/fees": {
+      "get": {
+        "tags": [
+          "v1"
+        ],
+        "summary": "Get ss affiliate fee history.",
+        "operationId": "GetAffiliateFees",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Start",
+            "description": "Start timestamp",
+            "name": "start",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "End",
+            "description": "End timestamp",
+            "name": "end",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AffiliateFees",
+            "schema": {
+              "$ref": "#/definitions/AffiliateFees"
+            }
+          },
+          "400": {
+            "description": "BadRequestError",
+            "schema": {
+              "$ref": "#/definitions/BadRequestError"
+            }
+          },
+          "500": {
+            "description": "InternalServerError",
+            "schema": {
+              "$ref": "#/definitions/InternalServerError"
+            }
+          }
+        }
+      }
+    },
     "/api/v1/affiliate/revenue": {
       "get": {
         "tags": [
@@ -318,6 +363,60 @@
           }
         }
       }
+    },
+    "/lcd": {
+      "get": {
+        "tags": [
+          "Proxy"
+        ],
+        "summary": "Thorchain lcd rest api endpoints.",
+        "operationId": "LCD",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/midgard": {
+      "get": {
+        "tags": [
+          "Proxy"
+        ],
+        "summary": "Thorchain midgard rest api endpoints.",
+        "operationId": "Midgard",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/rpc": {
+      "get": {
+        "tags": [
+          "Proxy"
+        ],
+        "summary": "Thorchain rpc rest api endpoints.",
+        "operationId": "GetRPC",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Proxy"
+        ],
+        "summary": "Thorchain rpc jsonrpc endpoints.",
+        "operationId": "PostRPC",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -330,12 +429,67 @@
       ],
       "x-go-package": "github.com/shapeshift/unchained/coinstacks/thorchain/api"
     },
+    "AffiliateFee": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string",
+          "x-go-name": "Address"
+        },
+        "amount": {
+          "type": "string",
+          "x-go-name": "Amount"
+        },
+        "asset": {
+          "type": "string",
+          "x-go-name": "Asset"
+        },
+        "blockHash": {
+          "type": "string",
+          "x-go-name": "BlockHash"
+        },
+        "blockHeight": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "BlockHeight"
+        },
+        "timestamp": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Timestamp"
+        },
+        "txId": {
+          "type": "string",
+          "x-go-name": "TxID"
+        }
+      },
+      "x-go-package": "github.com/shapeshift/unchained/coinstacks/thorchain/api"
+    },
+    "AffiliateFees": {
+      "description": "Contains info about affiliate fee history",
+      "type": "object",
+      "required": [
+        "fees"
+      ],
+      "properties": {
+        "fees": {
+          "description": "Affiliate fees",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AffiliateFee"
+          },
+          "x-go-name": "Fees"
+        }
+      },
+      "x-go-package": "github.com/shapeshift/unchained/coinstacks/thorchain/api"
+    },
     "AffiliateRevenue": {
       "description": "Contains info about the affiliate revenue earned",
       "type": "object",
       "required": [
         "addresses",
-        "amount"
+        "amount",
+        "revenue"
       ],
       "properties": {
         "addresses": {
@@ -350,6 +504,14 @@
           "description": "Amount earned (RUNE)",
           "type": "string",
           "x-go-name": "Amount"
+        },
+        "revenue": {
+          "description": "Revenue earned by denom",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "x-go-name": "Revenue"
         }
       },
       "x-go-package": "github.com/shapeshift/unchained/coinstacks/thorchain/api"

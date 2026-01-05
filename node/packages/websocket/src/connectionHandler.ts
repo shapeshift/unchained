@@ -43,6 +43,7 @@ export abstract class BaseConnectionHandler {
     this.prometheus?.metrics.websocketCount.inc()
     this.websocket = websocket
     this.websocket.ping()
+    this.heartbeat()
 
     const pingInterval = setInterval(() => {
       this.websocket.ping()
@@ -84,12 +85,15 @@ export abstract class BaseConnectionHandler {
       switch (payload.method) {
         // browsers do not support ping/pong frame, handle message instead
         case 'ping': {
-          return this.websocket.send('pong')
+          this.websocket.send('pong')
+          return
         }
         case 'subscribe':
-          return this.onSubscribe(payload.subscriptionId, payload.data)
+          this.onSubscribe(payload.subscriptionId, payload.data)
+          return
         case 'unsubscribe':
-          return this.onUnsubscribe(payload.subscriptionId)
+          this.onUnsubscribe(payload.subscriptionId)
+          return
       }
     } catch (err) {
       this.logger.error(err, { clientId: this.clientId, fn: 'onMessage', event }, 'Error processing message')

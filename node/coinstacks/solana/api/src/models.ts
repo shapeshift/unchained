@@ -22,7 +22,7 @@ export interface Address {
 /**
  * Contains info about a token
  */
-export interface Token {
+export interface TokenDetails {
   id: string
   decimals: number
   name: string
@@ -33,7 +33,7 @@ export interface Token {
 /**
  * Contains info about a token including balance for an address
  */
-export interface TokenBalance extends Token {
+export interface TokenBalance extends TokenDetails {
   balance: string
 }
 

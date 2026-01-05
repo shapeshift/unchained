@@ -1,4 +1,9 @@
+import { getAddress } from 'viem'
+
 export * from './abi'
 export * from './models'
 export * from './gasOracle'
-export { formatAddress } from './service'
+export * from './blockbookService'
+export * from './moralisService'
+
+export const formatAddress = (address: string | undefined): string => (address ? getAddress(address) : '')

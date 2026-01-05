@@ -7,7 +7,7 @@ services:
       - 'traefik.http.routers.optimism-api.rule=Host(`api.optimism.localhost`)'
       - 'traefik.http.services.optimism-api.loadbalancer.server.port=3000'
     working_dir: /app/node/coinstacks/optimism/api
-    command: yarn nodemon
+    command: yarn run -T nodemon
     volumes:
       - ../../..:/app
     networks:

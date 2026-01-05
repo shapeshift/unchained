@@ -7,9 +7,9 @@
     "dist"
   ],
   "scripts": {
-    "build": "yarn generate && tsc",
+    "build": "yarn generate && yarn run -T tsc",
     "clean": "rm -rf dist node_modules src/routes.ts src/swagger.json",
-    "generate": "tsoa spec-and-routes"
+    "generate": "yarn run -T tsoa spec-and-routes"
   },
   "dependencies": {
     "@shapeshiftoss/blockbook": "^10.0.0",

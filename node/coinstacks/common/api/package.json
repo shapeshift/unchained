@@ -9,9 +9,9 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "yarn run -T tsc",
     "clean": "rm -rf dist node_modules",
-    "watch": "tsc --watch"
+    "watch": "yarn run -T tsc --watch"
   },
   "dependencies": {
     "@shapeshiftoss/blockbook": "^10.0.0",

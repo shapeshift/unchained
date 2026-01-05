@@ -1,7 +1,6 @@
 import { createHash } from 'crypto'
 import { parse } from 'dotenv'
 import { hashElement } from 'folder-hash'
-import { sha1 } from 'object-hash'
 import * as k8s from '@pulumi/kubernetes'
 
 export type CoinstackType = 'go' | 'node'
@@ -10,13 +9,6 @@ const rootDir = `${__dirname}/../..`
 
 export const secretEnvs = (assetName: string, sampleEnv: Buffer) => {
   return Object.keys(parse(sampleEnv)).reduce<Array<k8s.types.input.core.v1.EnvVar>>((prev, key) => {
-    const value = process.env[key]
-
-    // handles updating secret envs for fallback deployments (self-hosted) to trigger spec update
-    if (['INDEXER_API_KEY', 'RPC_API_KEY'].some((envVar) => key === envVar) && value === '') {
-      return prev
-    }
-
     return prev.concat({
       name: key,
       valueFrom: { secretKeyRef: { name: assetName, key: key } },
@@ -24,30 +16,26 @@ export const secretEnvs = (assetName: string, sampleEnv: Buffer) => {
   }, [])
 }
 
-export const getCoinstackHash = async (
-  coinstack: string,
-  buildArgs: Record<string, string>,
-  coinstackType: CoinstackType
-): Promise<string> => {
+export const getCoinstackHash = async (coinstack: string, coinstackType: CoinstackType): Promise<string> => {
   switch (coinstackType) {
     case 'node':
-      return await getNodeCoinstackApiHash(coinstack, buildArgs)
+      return await getNodeCoinstackApiHash(coinstack)
     case 'go':
-      return await getGoCoinstackApiHash(coinstack, buildArgs)
+      return await getGoCoinstackApiHash(coinstack)
     default:
       throw new Error('invalid coinstack type')
   }
 }
 
 // creates a hash of the content included in the final build image
-const getNodeCoinstackApiHash = async (coinstack: string, buildArgs: Record<string, string>): Promise<string> => {
+const getNodeCoinstackApiHash = async (coinstack: string): Promise<string> => {
   const hash = createHash('sha1')
   const nodeBasePath = `${rootDir}/node`
 
   // hash root level unchained files
   const { hash: unchainedHash } = await hashElement(rootDir, {
     folders: { exclude: ['.*', '*'] },
-    files: { include: ['package.json', 'lerna.json', 'yarn.lock', 'Dockerfile.node'] },
+    files: { include: ['package.json', 'yarn.lock', 'Dockerfile.node'] },
   })
   hash.update(unchainedHash)
 
@@ -81,13 +69,11 @@ const getNodeCoinstackApiHash = async (coinstack: string, buildArgs: Record<stri
     hash.update(apiHash)
   }
 
-  hash.update(sha1(buildArgs))
-
   return hash.digest('hex')
 }
 
 // creates a hash of the content included in the final build image
-const getGoCoinstackApiHash = async (coinstack: string, buildArgs: Record<string, string>): Promise<string> => {
+const getGoCoinstackApiHash = async (coinstack: string): Promise<string> => {
   const hash = createHash('sha1')
   const goBasePath = `${rootDir}/go`
 
@@ -146,8 +132,6 @@ const getGoCoinstackApiHash = async (coinstack: string, buildArgs: Record<string
     files: { include: ['*.go', '*.json'] },
   })
   hash.update(coinstackApiHash)
-
-  hash.update(sha1(buildArgs))
 
   return hash.digest('hex')
 }

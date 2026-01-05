@@ -76,7 +76,7 @@ export class WebsocketClient extends AddressSubscriptionWebsocketClient {
     }
   }
 
-  subscribeAddresses(addresses: string[]): void {
+  subscribeAddresses(addresses: Array<string>): void {
     this.addresses = addresses
     this.currentId++
 
@@ -100,6 +100,10 @@ export class WebsocketClient extends AddressSubscriptionWebsocketClient {
         this.logger.debug(err, `failed to subscribe address: ${JSON.stringify(subscription)}`)
       }
     })
+  }
+
+  unsubscribeAddresses(addresses: Array<string>): void {
+    this.subscribeAddresses(addresses)
   }
 
   private unsubscribe(subscriptionId: number): void {

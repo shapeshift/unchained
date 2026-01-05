@@ -1,58 +1,41 @@
-import { Blockbook } from '@shapeshiftoss/blockbook'
+import { EvmChain } from '@moralisweb3/common-evm-utils'
+import { EvmStreamResult, EvmStreamResultish } from '@moralisweb3/common-streams-utils'
+import { ApiError, handleError } from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
-import { Body, Example, Get, Post, Response, Route, Tags } from 'tsoa'
-import { createPublicClient, http } from 'viem'
+import express from 'express'
+import { Body, Example, Get, Hidden, Post, Response, Request, Route, Tags, Path } from 'tsoa'
+import { createPublicClient, http, keccak256, toBytes } from 'viem'
 import { arbitrum } from 'viem/chains'
 import { BaseAPI, EstimateGasBody, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { API, GasEstimate, GasFees } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
+import { API, GasEstimate, GasFees, MoralisService } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { EVM } from '../../../common/api/src/evm/controller'
-import { Service } from '../../../common/api/src/evm/service'
-import { GasOracle } from '../../../common/api/src/evm/gasOracle'
+import { EventCache, StakingDuration } from './rfox'
 
-const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
-const INDEXER_WS_URL = process.env.INDEXER_WS_URL
-const INDEXER_API_KEY = process.env.INDEXER_API_KEY
-const NETWORK = process.env.NETWORK
+const INFURA_API_KEY = process.env.INFURA_API_KEY
 const RPC_URL = process.env.RPC_URL
 const RPC_API_KEY = process.env.RPC_API_KEY
 
-if (!ETHERSCAN_API_KEY) throw new Error('ETHERSCAN_API_KEY env var not set')
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
-if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
-if (!NETWORK) throw new Error('NETWORK env var not set')
+if (!INFURA_API_KEY) throw new Error('INFURA_API_KEY env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
-
-const IS_LIQUIFY = RPC_URL.toLowerCase().includes('liquify') && INDEXER_URL.toLowerCase().includes('liquify')
-const IS_NOWNODES = RPC_URL.toLowerCase().includes('nownodes') && INDEXER_URL.toLowerCase().includes('nownodes')
+if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
 
 export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'arbitrum', 'api'],
   level: process.env.LOG_LEVEL,
 })
 
-const httpURL = INDEXER_API_KEY && IS_LIQUIFY ? `${INDEXER_URL}/api=${INDEXER_API_KEY}` : INDEXER_URL
-const wsURL = INDEXER_API_KEY && IS_LIQUIFY ? `${INDEXER_WS_URL}/api=${INDEXER_API_KEY}` : INDEXER_WS_URL
-const rpcUrl = RPC_API_KEY && IS_LIQUIFY ? `${RPC_URL}/api=${RPC_API_KEY}` : RPC_URL
+const rpcUrl = `${RPC_URL}/${RPC_API_KEY}`
 
-const apiKey = INDEXER_API_KEY && IS_NOWNODES ? INDEXER_API_KEY : undefined
-const headers = RPC_API_KEY && IS_NOWNODES ? { 'api-key': RPC_API_KEY } : undefined
-const rpcApiKey = RPC_API_KEY && IS_NOWNODES ? RPC_API_KEY : undefined
-
-const client = createPublicClient({ chain: arbitrum, transport: http(rpcUrl, { fetchOptions: { headers } }) })
-
-export const blockbook = new Blockbook({ httpURL, wsURL, logger, apiKey })
-export const gasOracle = new GasOracle({ logger, client, coinstack: 'arbitrum' })
-
-export const service = new Service({
-  blockbook,
-  gasOracle,
-  explorerApiUrl: new URL(`https://api.etherscan.io/v2/api?chainid=42161&apikey=${ETHERSCAN_API_KEY}`),
-  client,
-  logger,
-  rpcUrl,
-  rpcApiKey,
+const client = createPublicClient({ chain: arbitrum, transport: http(rpcUrl) })
+const infuraClient = createPublicClient({
+  chain: arbitrum,
+  transport: http(`https://arbitrum-mainnet.infura.io/v3/${INFURA_API_KEY}`),
 })
+
+export const service = new MoralisService({ chain: EvmChain.ARBITRUM, logger, client, rpcUrl })
+export const cache = new EventCache({ client, infuraClient, logger })
 
 // assign service to be used for all instances of EVM
 EVM.service = service
@@ -112,5 +95,58 @@ export class Arbitrum extends EVM implements BaseAPI, API {
   @Get('/gas/fees')
   async getGasFees(): Promise<GasFees> {
     return service.getGasFees()
+  }
+
+  /**
+   * Get rFOX staking duration by contract address
+   *
+   * @param {string} address account address
+   *
+   * @returns {Promise<StakingDuration>} staking duration in seconds by staking contract address
+   */
+  @Example<StakingDuration>({
+    '0xaC2a4fD70BCD8Bab0662960455c363735f0e2b56': 0,
+    '0x83B51B7605d2E277E03A7D6451B1efc0e5253A2F': 0,
+  })
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Get('/rfox/staking-duration/{address}')
+  async getRfoxStakingDuration(@Path() address: string): Promise<StakingDuration> {
+    try {
+      return await cache.getStakingDuration(address)
+    } catch (err) {
+      throw handleError(err)
+    }
+  }
+
+  @Hidden()
+  @Post('/webhook/moralis')
+  async handleMoralisStream(@Body() body: unknown, @Request() req: express.Request) {
+    if (!(service instanceof MoralisService)) throw new ApiError('Not Found', 404, 'Endpoint not available')
+
+    if (!service.transactionHandler) return
+
+    const signature = req.headers['x-signature']
+    if (!signature || typeof signature !== 'string') throw new ApiError('Bad Request', 422, 'Invalid signature')
+
+    const secret = await service.getSecret()
+    const generatedSignature = keccak256(toBytes(JSON.stringify(body) + secret))
+
+    if (signature !== generatedSignature) {
+      throw new ApiError('Unauthorized', 401, 'Signature is not valid')
+    }
+
+    const data = body as EvmStreamResultish
+
+    logger.debug({ data }, 'handleMoralisStream')
+
+    // confirmed === false: transaction has just confirmed in the latest block
+    // confirmed === true: transaction has is still confirmed after N block confirmations
+    if (data.confirmed === true) return
+
+    const txs = await service.handleStreamResult(EvmStreamResult.create(data))
+
+    for (const tx of txs) {
+      await service.transactionHandler(tx)
+    }
   }
 }

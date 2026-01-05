@@ -19,13 +19,13 @@ services:
     # the additional yarn install here allows for platform specific packages to be install in the container
     # previously this would fail when copying over node_modules from the host on macos due to 
     # @nx/nx-linux-arm64-musl not being installed
-    command: sh -c "yarn install && yarn lerna run watch --scope @shapeshiftoss/* --parallel"
+    command: sh -c "yarn install && yarn workspaces foreach -Api run watch"
     volumes:
       - ./:/app
 
   reverse-proxy:
     # The official v2 Traefik docker image
-    image: traefik:v2.5
+    image: traefik:v2.11
     # Enables the web UI and tells Traefik to listen to docker
     command:
       - "--api.insecure=true"
@@ -50,6 +50,7 @@ services:
       - thorchain_default
       - thorchain-v1_default
       - solana_default
+      - zcash_default
       - proxy_default
     ports:
       # The HTTP port
@@ -93,5 +94,7 @@ networks:
     name: thorchain-v1_default
   solana_default:
     name: solana_default
+  zcash_default:
+    name: zcash_default
   proxy_default:
     name: proxy_default

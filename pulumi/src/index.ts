@@ -4,8 +4,8 @@ import { ApiConfig } from './api'
 export * from './config'
 export * from './api'
 export * from './docker'
+export * from './secret'
 export * from './statefulService'
-export * from './hasher'
 
 export interface Dockerhub {
   username: string
