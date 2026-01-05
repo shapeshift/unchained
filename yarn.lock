@@ -3076,6 +3076,7 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
+    "@shapeshiftoss/prometheus": "npm:^10.0.0"
   languageName: unknown
   linkType: soft
 
@@ -3085,6 +3086,7 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
+    "@shapeshiftoss/prometheus": "npm:^10.0.0"
   languageName: unknown
   linkType: soft
 
@@ -3106,6 +3108,7 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
+    "@shapeshiftoss/prometheus": "npm:^10.0.0"
   languageName: unknown
   linkType: soft
 
@@ -3121,6 +3124,7 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
+    "@shapeshiftoss/prometheus": "npm:^10.0.0"
   languageName: unknown
   linkType: soft
 
@@ -3136,6 +3140,7 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
+    "@shapeshiftoss/prometheus": "npm:^10.0.0"
     bech32: "npm:^2.0.0"
   languageName: unknown
   linkType: soft
@@ -3152,6 +3157,7 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
+    "@shapeshiftoss/prometheus": "npm:^10.0.0"
     bech32: "npm:^2.0.0"
   languageName: unknown
   linkType: soft
@@ -3178,6 +3184,7 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
+    "@shapeshiftoss/prometheus": "npm:^10.0.0"
   languageName: unknown
   linkType: soft
 
@@ -3205,6 +3212,7 @@ __metadata:
   resolution: "@shapeshiftoss/common-api@workspace:node/coinstacks/common/api"
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
+    "@shapeshiftoss/prometheus": "npm:^10.0.0"
     "@shapeshiftoss/websocket": "npm:^10.0.0"
     "@types/uuid": "npm:^9.0.7"
     "@types/ws": "npm:^8.5.10"
@@ -3220,6 +3228,7 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
+    "@shapeshiftoss/prometheus": "npm:^10.0.0"
     bech32: "npm:^2.0.0"
   languageName: unknown
   linkType: soft
@@ -3236,6 +3245,7 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
+    "@shapeshiftoss/prometheus": "npm:^10.0.0"
   languageName: unknown
   linkType: soft
 
@@ -3251,6 +3261,7 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
+    "@shapeshiftoss/prometheus": "npm:^10.0.0"
   languageName: unknown
   linkType: soft
 
@@ -3266,6 +3277,7 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
+    "@shapeshiftoss/prometheus": "npm:^10.0.0"
     bech32: "npm:^2.0.0"
   languageName: unknown
   linkType: soft
@@ -3289,6 +3301,7 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
+    "@shapeshiftoss/prometheus": "npm:^10.0.0"
   languageName: unknown
   linkType: soft
 
@@ -3304,12 +3317,21 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
+    "@shapeshiftoss/prometheus": "npm:^10.0.0"
   languageName: unknown
   linkType: soft
 
 "@shapeshiftoss/polygon-pulumi@workspace:node/coinstacks/polygon/pulumi":
   version: 0.0.0-use.local
   resolution: "@shapeshiftoss/polygon-pulumi@workspace:node/coinstacks/polygon/pulumi"
+  languageName: unknown
+  linkType: soft
+
+"@shapeshiftoss/prometheus@npm:^10.0.0, @shapeshiftoss/prometheus@workspace:node/packages/prometheus":
+  version: 0.0.0-use.local
+  resolution: "@shapeshiftoss/prometheus@workspace:node/packages/prometheus"
+  dependencies:
+    prom-client: "npm:^15.0.0"
   languageName: unknown
   linkType: soft
 
@@ -3324,6 +3346,7 @@ __metadata:
   resolution: "@shapeshiftoss/solana-api@workspace:node/coinstacks/solana/api"
   dependencies:
     "@shapeshiftoss/common-api": "npm:^10.0.0"
+    "@shapeshiftoss/prometheus": "npm:^10.0.0"
     "@shapeshiftoss/websocket": "npm:^10.0.0"
     "@solana/web3.js": "npm:^1.95.3"
     helius-sdk: "npm:^1.4.0"
@@ -3359,6 +3382,7 @@ __metadata:
   resolution: "@shapeshiftoss/unchained-proxy@workspace:node/proxy/api"
   dependencies:
     "@shapeshiftoss/common-api": "npm:^10.0.0"
+    "@shapeshiftoss/prometheus": "npm:^10.0.0"
     bottleneck: "npm:^2.19.5"
     elliptic-sdk: "npm:^0.7.2"
     lru-cache: "npm:^10.2.0"
@@ -3378,6 +3402,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@shapeshiftoss/websocket@workspace:node/packages/websocket"
   dependencies:
+    "@shapeshiftoss/prometheus": "npm:^10.0.0"
     "@types/ws": "npm:^8.5.10"
     ws: "npm:^8.15.0"
   languageName: unknown
@@ -3389,6 +3414,7 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
+    "@shapeshiftoss/prometheus": "npm:^10.0.0"
     bech32: "npm:^2.0.0"
   languageName: unknown
   linkType: soft
@@ -12223,7 +12249,6 @@ __metadata:
     nodemon: "npm:^3.0.2"
     p-queue: "npm:^9.0.0"
     prettier: "npm:^3.1.1"
-    prom-client: "npm:^15.0.0"
     swagger-ui-express: "npm:^5.0.0"
     tsoa: "npm:^6.6.0"
     typescript: "npm:5.9.3"

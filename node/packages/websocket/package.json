@@ -15,6 +15,7 @@
     "watch": "yarn run -T nodemon -e ts --watch src -x yarn build"
   },
   "dependencies": {
+    "@shapeshiftoss/prometheus": "^10.0.0",
     "ws": "^8.15.0"
   },
   "devDependencies": {

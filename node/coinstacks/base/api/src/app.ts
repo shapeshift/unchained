@@ -9,10 +9,10 @@ import {
   Registry,
   AddressFormatter,
   TransactionHandler,
-  Prometheus,
 } from '@shapeshiftoss/common-api'
 import { Tx as BlockbookTx, WebsocketClient, getAddresses } from '@shapeshiftoss/blockbook'
 import { Logger } from '@shapeshiftoss/logger'
+import { Prometheus } from '@shapeshiftoss/prometheus'
 import { BlockbookService } from '../../../common/api/src/evm/blockbookService'
 import { MoralisService } from '../../../common/api/src/evm/moralisService'
 import { gasOracle, service } from './controller'

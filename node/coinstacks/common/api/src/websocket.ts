@@ -1,37 +1,14 @@
 import { Logger } from '@shapeshiftoss/logger'
-import { v4 } from 'uuid'
+import { Prometheus } from '@shapeshiftoss/prometheus'
+import { AddressSubscriptionClient, BaseConnectionHandler } from '@shapeshiftoss/websocket'
 import WebSocket from 'ws'
-import { Prometheus } from './prometheus'
 import { Registry } from './registry'
-
-export interface RequestPayload {
-  subscriptionId: string
-  method: 'subscribe' | 'unsubscribe' | 'ping'
-  data?: TxsTopicData
-}
-
-export interface ErrorResponse {
-  subscriptionId: string
-  type: 'error'
-  message: string
-}
 
 export type Topics = 'txs'
 
 export interface TxsTopicData {
   topic: 'txs'
   addresses: Array<string>
-}
-
-export interface MessageResponse {
-  address: string
-  data: unknown
-  subscriptionId: string
-}
-
-export interface SubscriptionClient {
-  subscribeAddresses(currentAddresses: Array<string>, addressesToAdd: Array<string>): void
-  unsubscribeAddresses(currentAddresses: Array<string>, addressesToRemove: Array<string>): void
 }
 
 export interface Methods {
@@ -41,123 +18,78 @@ export interface Methods {
   unsubscribe: (subscriptionId: string, data?: any) => void
 }
 
-export class ConnectionHandler {
-  public readonly clientId: string
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isTxsTopicData(data: any): data is TxsTopicData {
+  return data && typeof data === 'object' && data.topic === 'txs' && Array.isArray(data.addresses)
+}
 
-  private readonly websocket: WebSocket
+export class ConnectionHandler extends BaseConnectionHandler {
   private readonly registry: Registry
-  private readonly client: SubscriptionClient
-  private readonly prometheus: Prometheus
-  private readonly logger: Logger
+  private readonly client: AddressSubscriptionClient
   private readonly routes: Record<Topics, Methods>
-  private readonly pingIntervalMs = 10000
-
-  private pingTimeout?: NodeJS.Timeout
-  private subscriptionIds = new Set<string>()
 
   private constructor(
     websocket: WebSocket,
     registry: Registry,
-    client: SubscriptionClient,
+    client: AddressSubscriptionClient,
     prometheus: Prometheus,
     logger: Logger
   ) {
-    this.clientId = v4()
+    super(websocket, prometheus, logger)
+
     this.registry = registry
     this.client = client
-    this.prometheus = prometheus
-    this.logger = logger.child({ namespace: ['websocket'] })
     this.routes = {
       txs: {
         subscribe: (subscriptionId: string, data?: TxsTopicData) => this.handleSubscribeTxs(subscriptionId, data),
         unsubscribe: (subscriptionId: string, data?: TxsTopicData) => this.handleUnsubscribeTxs(subscriptionId, data),
       },
     }
-
-    this.pingTimeout = undefined
-    this.prometheus.metrics.websocketCount.inc()
-    this.websocket = websocket
-    this.websocket.ping()
-
-    const pingInterval = setInterval(() => {
-      this.websocket.ping()
-    }, this.pingIntervalMs)
-
-    this.websocket.onerror = (error) => {
-      this.logger.error({ clientId: this.clientId, error, fn: 'ws.onerror' }, 'websocket error')
-      this.close(pingInterval)
-    }
-    this.websocket.onclose = ({ code, reason }) => {
-      this.prometheus.metrics.websocketCount.dec()
-      this.logger.debug({ clientId: this.clientId, code, reason, fn: 'ws.close' }, 'websocket closed')
-      this.close(pingInterval)
-    }
-    this.websocket.on('pong', () => this.heartbeat())
-    this.websocket.on('ping', () => this.websocket.pong())
-    this.websocket.onmessage = (event) => this.onMessage(event)
   }
 
   static start(
     websocket: WebSocket,
     registry: Registry,
-    client: SubscriptionClient,
+    client: AddressSubscriptionClient,
     prometheus: Prometheus,
     logger: Logger
   ): void {
     new ConnectionHandler(websocket, registry, client, prometheus, logger)
   }
 
-  private heartbeat(): void {
-    if (this.pingTimeout) {
-      clearTimeout(this.pingTimeout)
+  onSubscribe(subscriptionId: string, data?: unknown): void {
+    if (!isTxsTopicData(data)) {
+      this.sendError(`no topic specified for subscribe`, subscriptionId)
+      return
     }
 
-    this.pingTimeout = setTimeout(() => {
-      this.logger.debug({ clientId: this.clientId, fn: 'pingTimeout' }, 'heartbeat failed')
-      this.websocket.terminate()
-    }, this.pingIntervalMs + 1000)
-  }
+    const route = this.routes[data.topic]
 
-  private sendError(message: string, subscriptionId: string): void {
-    this.websocket.send(JSON.stringify({ subscriptionId, type: 'error', message } as ErrorResponse))
-  }
-
-  private onMessage(event: WebSocket.MessageEvent): void {
-    try {
-      const payload: RequestPayload = JSON.parse(event.data.toString())
-
-      switch (payload.method) {
-        // browsers do not support ping/pong frame, handle message instead
-        case 'ping': {
-          this.websocket.send('pong')
-          break
-        }
-        case 'subscribe':
-        case 'unsubscribe': {
-          const topic = payload.data?.topic
-
-          if (!topic) {
-            this.sendError(`no topic specified for method: ${payload.method}`, payload.subscriptionId)
-            break
-          }
-
-          const callback = this.routes[topic][payload.method]
-          if (callback) {
-            callback(payload.subscriptionId, payload.data)
-          } else {
-            this.sendError(`${payload.method} method not implemented for topic: ${topic}`, payload.subscriptionId)
-          }
-        }
-      }
-    } catch (err) {
-      this.logger.error(err, { clientId: this.clientId, fn: 'onMessage', event }, 'Error processing message')
+    if (!route || typeof route.subscribe !== 'function') {
+      this.sendError(`subscribe method not implemented for topic: ${data.topic}`, subscriptionId)
+      return
     }
+
+    route.subscribe(subscriptionId, data)
   }
 
-  private close(interval: NodeJS.Timeout): void {
-    this.pingTimeout && clearTimeout(this.pingTimeout)
-    clearInterval(interval)
+  onUnsubscribe(subscriptionId: string, data?: unknown): void {
+    if (!isTxsTopicData(data)) {
+      this.sendError(`no topic specified for unsubscribe`, subscriptionId)
+      return
+    }
 
+    const route = this.routes[data.topic]
+
+    if (!route || typeof route.unsubscribe !== 'function') {
+      this.sendError(`unsubscribe method not implemented for topic: ${data.topic}`, subscriptionId)
+      return
+    }
+
+    route.unsubscribe(subscriptionId, data)
+  }
+
+  onClose(): void {
     const unsubscribedAddresses: Array<string> = []
 
     for (const subscriptionId of this.subscriptionIds) {
@@ -165,7 +97,6 @@ export class ConnectionHandler {
       unsubscribedAddresses.push(...addresses)
     }
 
-    this.subscriptionIds.clear()
     this.client.unsubscribeAddresses(this.registry.getAddresses(), unsubscribedAddresses)
   }
 
@@ -204,10 +135,5 @@ export class ConnectionHandler {
     }
 
     this.client.unsubscribeAddresses(this.registry.getAddresses(), unsubscribedAddresses)
-  }
-
-  publish(subscriptionId: string, address: string, data: unknown): void {
-    const message: MessageResponse = { address, data, subscriptionId }
-    this.websocket.send(JSON.stringify(message))
   }
 }
