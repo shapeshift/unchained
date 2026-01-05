@@ -18,8 +18,6 @@ export class CoincapWebsocketClient extends BaseWebsocketClient implements Marke
     try {
       const res = JSON.parse(message.data.toString()) as Record<string, string>
 
-      if (!res) return
-
       super.reset()
       this.handleMessage(res)
     } catch (err) {
@@ -31,22 +29,17 @@ export class CoincapWebsocketClient extends BaseWebsocketClient implements Marke
     if (!this.clients.size) this.connect()
     this.clients.set(clientId, connection)
 
-    // Get or create the client's subscription map
-    let clientSubscriptions = this.subscriptions.get(clientId)
-    if (!clientSubscriptions) {
-      clientSubscriptions = new Map<string, string[]>()
-      this.subscriptions.set(clientId, clientSubscriptions)
+    if (!this.subscriptions.has(clientId)) {
+      this.subscriptions.set(clientId, new Map<string, string[]>())
     }
 
-    // Add this subscription
-    clientSubscriptions.set(subscriptionId, assets)
+    this.subscriptions.get(clientId)!.set(subscriptionId, assets)
   }
 
   unsubscribe(clientId: string, subscriptionId?: string) {
     const clientSubscriptions = this.subscriptions.get(clientId)
-    if (!clientSubscriptions) return
 
-    if (subscriptionId) {
+    if (clientSubscriptions && subscriptionId) {
       // Remove specific subscription
       clientSubscriptions.delete(subscriptionId)
 

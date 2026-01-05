@@ -25,9 +25,14 @@ const prometheus = new Prometheus({ coinstack: 'proxy' })
 
 const app = express()
 
-app.use(...middleware.common())
+app.use(...middleware.common(prometheus))
 
 app.get('/health', async (_, res) => res.json({ status: 'ok' }))
+
+app.get('/metrics', async (_, res) => {
+  res.setHeader('Content-Type', prometheus.register.contentType)
+  res.send(await prometheus.register.metrics())
+})
 
 const options: swaggerUi.SwaggerUiOptions = {
   customCss: '.swagger-ui .topbar { display: none }',

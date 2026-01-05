@@ -49,7 +49,12 @@ export class MarketDataConnectionHandler extends BaseConnectionHandler {
     }
 
     if (!isSubscribePayload(data)) {
-      this.sendError(`invalid subscription payload, no assets provided`, subscriptionId)
+      this.sendError(`invalid subscription payload`, subscriptionId)
+      return
+    }
+
+    if (!data.assets.length) {
+      this.sendError(`assets required`, subscriptionId)
       return
     }
 
