@@ -1,12 +1,13 @@
 import { EvmChain } from '@moralisweb3/common-evm-utils'
 import { EvmStreamResult } from '@moralisweb3/common-streams-utils'
 import { Logger } from '@shapeshiftoss/logger'
+import { AddressSubscriptionClient } from '@shapeshiftoss/websocket'
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
 import Moralis from 'moralis'
 import PQueue from 'p-queue'
 import { getAddress, isHex, parseUnits, PublicClient, toHex } from 'viem'
-import type { BaseAPI, EstimateGasBody, RPCRequest, RPCResponse, SendTxBody, SubscriptionClient } from '..'
+import type { BaseAPI, EstimateGasBody, RPCRequest, RPCResponse, SendTxBody } from '..'
 import { ApiError, BadRequestError } from '..'
 import { createAxiosRetry, exponentialDelay, handleError, rpcId, validatePageSize } from '../utils'
 import type { Account, API, Tx, TxHistory, GasFees, InternalTx, GasEstimate, TokenMetadata } from './models'
@@ -42,7 +43,7 @@ export interface MoralisServiceArgs {
   minPriorityFee?: string
 }
 
-export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, SubscriptionClient {
+export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSubscriptionClient {
   private readonly chain: EvmChain
   private readonly logger: Logger
   private readonly client: PublicClient

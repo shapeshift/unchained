@@ -1,8 +1,12 @@
 {
   "name": "@shapeshiftoss/unchained-pulumi",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "license": "MIT",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "publishConfig": {
     "access": "public"
   },
@@ -11,6 +15,10 @@
     "clean": "rm -rf dist node_modules"
   },
   "dependencies": {
-    "@shapeshiftoss/cluster-launcher": "^0.22.3"
+    "@shapeshiftoss/cluster-launcher": "^0.22.5",
+    "folder-hash": "^4.0.4"
+  },
+  "devDependencies": {
+    "@types/folder-hash": "^4.0.4"
   }
 }

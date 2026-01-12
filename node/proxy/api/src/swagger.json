@@ -85,7 +85,7 @@
 				"operationId": "ValidateAddress",
 				"responses": {
 					"200": {
-						"description": "transaction payload",
+						"description": "validation result",
 						"content": {
 							"application/json": {
 								"schema": {

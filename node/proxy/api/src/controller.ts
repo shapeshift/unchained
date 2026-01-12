@@ -13,7 +13,7 @@ export class Proxy extends Controller {
    *
    * @param {string} address address
    *
-   * @returns {Promise<Tx>} transaction payload
+   * @returns {Promise<ValidationResult>} validation result
    */
   @Example<ValidationResult>({ valid: true })
   @Response<BadRequestError>(400, 'Bad Request')

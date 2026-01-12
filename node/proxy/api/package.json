@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@shapeshiftoss/common-api": "^10.0.0",
+    "@shapeshiftoss/prometheus": "^10.0.0",
     "bottleneck": "^2.19.5",
     "elliptic-sdk": "^0.7.2"
   }
