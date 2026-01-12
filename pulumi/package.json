@@ -16,9 +16,7 @@
   },
   "dependencies": {
     "@shapeshiftoss/cluster-launcher": "^0.22.5",
+    "@types/folder-hash": "^4.0.4",
     "folder-hash": "^4.0.4"
-  },
-  "devDependencies": {
-    "@types/folder-hash": "^4.0.4"
   }
 }
