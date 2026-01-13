@@ -312,7 +312,7 @@ export class BlockbookService implements Omit<BaseAPI, 'getInfo'>, API {
       }
 
       const config = this.rpcApiKey ? { headers: { 'api-key': this.rpcApiKey } } : undefined
-      const { data } = await axiosNoRetry.post<RPCResponse>(this.rpcUrl, request, config)
+      const { data } = await axiosNoRetry.post<RPCResponse>(this.rpcUrl, request, { ...config, timeout: 0 })
 
       if (!data.result) throw new Error(JSON.stringify(data.error))
 

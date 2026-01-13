@@ -14,6 +14,10 @@ export const handleError = (err: unknown): ApiError => {
   if (err instanceof ApiError) return err
 
   if (isAxiosError(err)) {
+    if (err.code === 'ECONNABORTED' || err.code === 'ETIMEDOUT') {
+      return new ApiError('Gateway Timeout', 504, err.message || 'Request timeout')
+    }
+
     return new ApiError(
       err.response?.statusText || 'Internal Server Error',
       err.response?.status ?? 500,

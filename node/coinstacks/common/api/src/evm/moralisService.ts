@@ -399,7 +399,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
         params: [body.hex],
       }
 
-      const { data } = await axiosNoRetry.post<RPCResponse>(this.rpcUrl, request)
+      const { data } = await axiosNoRetry.post<RPCResponse>(this.rpcUrl, request, { timeout: 0 })
 
       if (!data.result) throw new Error(JSON.stringify(data.error))
 
