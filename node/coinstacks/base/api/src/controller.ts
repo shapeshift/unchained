@@ -20,59 +20,28 @@ import {
 } from 'viem'
 import { base } from 'viem/chains'
 import { BaseAPI, EstimateGasBody, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { API, GAS_PRICE_ORACLE_ABI, GasOracle } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
+import { API, GAS_PRICE_ORACLE_ABI, MoralisService } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { EVM } from '../../../common/api/src/evm/controller'
-import { BlockbookService } from '../../../common/api/src/evm/blockbookService'
-import { MoralisService } from '../../../common/api/src/evm/moralisService'
 import { BaseGasEstimate, BaseGasFees } from './models'
-import { Blockbook } from '@shapeshiftoss/blockbook'
 
-const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
-const INDEXER_WS_URL = process.env.INDEXER_WS_URL
-const INDEXER_API_KEY = process.env.INDEXER_API_KEY
-const NETWORK = process.env.NETWORK
 const RPC_URL = process.env.RPC_URL
 const RPC_API_KEY = process.env.RPC_API_KEY
 
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
-if (!NETWORK) throw new Error('NETWORK env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
 if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
-
-const IS_LIQUIFY = [INDEXER_URL, INDEXER_WS_URL, RPC_URL].every((url) => url?.toLowerCase().includes('liquify'))
 
 export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'base', 'api'],
   level: process.env.LOG_LEVEL,
 })
 
-const rpcUrl = IS_LIQUIFY ? `${RPC_URL}/api=${RPC_API_KEY}` : `${RPC_URL}/${RPC_API_KEY}`
+const rpcUrl = `${RPC_URL}/${RPC_API_KEY}`
 
 const client = createPublicClient({ chain: base, transport: http(rpcUrl) }) as PublicClient
 
-const httpURL = `${INDEXER_URL}/api=${INDEXER_API_KEY}`
-const wsURL = `${INDEXER_WS_URL}/api=${INDEXER_API_KEY}`
-
-export const blockbook = IS_LIQUIFY ? new Blockbook({ httpURL, wsURL, logger }) : undefined
-export const gasOracle = IS_LIQUIFY ? new GasOracle({ logger, client, coinstack: 'base' }) : undefined
-
-export const service = (() => {
-  if (IS_LIQUIFY) {
-    if (!ETHERSCAN_API_KEY) throw new Error('ETHERSCAN_API_KEY env var not set')
-
-    return new BlockbookService({
-      blockbook: blockbook!,
-      gasOracle: gasOracle!,
-      explorerApiUrl: new URL(`https://api.etherscan.io/v2/api?chainid=8453&apikey=${ETHERSCAN_API_KEY}`),
-      client,
-      logger,
-      rpcUrl,
-    })
-  }
-
-  return new MoralisService({ chain: EvmChain.BASE, logger, client, rpcUrl })
-})()
+export const service = new MoralisService({ chain: EvmChain.BASE, logger, client, rpcUrl })
 
 // assign service to be used for all instances of EVM
 EVM.service = service
