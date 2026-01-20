@@ -1,7 +1,0 @@
-FROM node:22.14.0-alpine
-
-RUN apk add --no-cache curl jq bash
-
-COPY ./scripts/probe.sh /probe.sh
-
-CMD /probe.sh

@@ -1,4 +1,0 @@
-name: common
-runtime: nodejs
-description: common project resources
-main: ./index.ts
