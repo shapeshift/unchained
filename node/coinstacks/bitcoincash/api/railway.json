@@ -1,0 +1,27 @@
+{
+  "build": {
+    "builder": "dockerfile",
+    "dockerfilePath": "Dockerfile",
+    "buildArgs": {
+      "DIR": "coinstacks/bitcoincash/api",
+      "PACKAGE": "@shapeshiftoss/bitcoincash-api"
+    },
+    "watchPatterns": [
+      "node/coinstacks/bitcoincash/api/**",
+      "node/coinstacks/common/**",
+      "node/packages/**",
+      "yarn.lock"
+    ]
+  },
+  "deploy": {
+    "startCommand": "node dist/bitcoincash/api/src/app.js",
+    "healthcheckPath": "/health",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3,
+    "multiRegionConfig": {
+      "us-west2": {
+        "numReplicas": 1
+      }
+    }
+  }
+}
