@@ -1,0 +1,22 @@
+{
+  "build": {
+    "builder": "dockerfile",
+    "dockerfilePath": "Dockerfile",
+    "buildArgs": {
+      "DIR": "coinstacks/zcash/api",
+      "PACKAGE": "@shapeshiftoss/zcash-api"
+    },
+    "watchPatterns": ["node/coinstacks/zcash/api/**", "node/coinstacks/common/**", "node/packages/**", "yarn.lock"]
+  },
+  "deploy": {
+    "startCommand": "node dist/zcash/api/src/app.js",
+    "healthcheckPath": "/health",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3,
+    "multiRegionConfig": {
+      "us-west2": {
+        "numReplicas": 1
+      }
+    }
+  }
+}
