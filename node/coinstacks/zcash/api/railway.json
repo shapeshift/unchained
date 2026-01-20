@@ -1,11 +1,7 @@
 {
   "build": {
     "builder": "dockerfile",
-    "dockerfilePath": "Dockerfile",
-    "buildArgs": {
-      "DIR": "coinstacks/zcash/api",
-      "PACKAGE": "@shapeshiftoss/zcash-api"
-    },
+    "dockerfilePath": "node/Dockerfile",
     "watchPatterns": ["node/coinstacks/zcash/api/**", "node/coinstacks/common/**", "node/packages/**", "yarn.lock"]
   },
   "deploy": {

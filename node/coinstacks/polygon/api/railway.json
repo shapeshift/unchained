@@ -1,11 +1,7 @@
 {
   "build": {
     "builder": "dockerfile",
-    "dockerfilePath": "Dockerfile",
-    "buildArgs": {
-      "DIR": "coinstacks/polygon/api",
-      "PACKAGE": "@shapeshiftoss/polygon-api"
-    },
+    "dockerfilePath": "node/Dockerfile",
     "watchPatterns": ["node/coinstacks/polygon/api/**", "node/coinstacks/common/**", "node/packages/**", "yarn.lock"]
   },
   "deploy": {

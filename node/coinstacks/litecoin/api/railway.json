@@ -1,11 +1,7 @@
 {
   "build": {
     "builder": "dockerfile",
-    "dockerfilePath": "Dockerfile",
-    "buildArgs": {
-      "DIR": "coinstacks/litecoin/api",
-      "PACKAGE": "@shapeshiftoss/litecoin-api"
-    },
+    "dockerfilePath": "node/Dockerfile",
     "watchPatterns": ["node/coinstacks/litecoin/api/**", "node/coinstacks/common/**", "node/packages/**", "yarn.lock"]
   },
   "deploy": {

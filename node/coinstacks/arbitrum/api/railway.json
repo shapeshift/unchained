@@ -1,11 +1,7 @@
 {
   "build": {
     "builder": "dockerfile",
-    "dockerfilePath": "Dockerfile",
-    "buildArgs": {
-      "DIR": "coinstacks/arbitrum/api",
-      "PACKAGE": "@shapeshiftoss/arbitrum-api"
-    },
+    "dockerfilePath": "node/Dockerfile",
     "watchPatterns": ["node/coinstacks/arbitrum/api/**", "node/coinstacks/common/**", "node/packages/**", "yarn.lock"]
   },
   "deploy": {

@@ -1,11 +1,7 @@
 {
   "build": {
     "builder": "dockerfile",
-    "dockerfilePath": "Dockerfile",
-    "buildArgs": {
-      "DIR": "coinstacks/solana/api",
-      "PACKAGE": "@shapeshiftoss/solana-api"
-    },
+    "dockerfilePath": "node/Dockerfile",
     "watchPatterns": ["node/coinstacks/solana/api/**", "node/coinstacks/common/**", "node/packages/**", "yarn.lock"]
   },
   "deploy": {

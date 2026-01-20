@@ -1,11 +1,7 @@
 {
   "build": {
     "builder": "dockerfile",
-    "dockerfilePath": "Dockerfile",
-    "buildArgs": {
-      "DIR": "coinstacks/bnbsmartchain/api",
-      "PACKAGE": "@shapeshiftoss/bnbsmartchain-api"
-    },
+    "dockerfilePath": "node/Dockerfile",
     "watchPatterns": [
       "node/coinstacks/bnbsmartchain/api/**",
       "node/coinstacks/common/**",

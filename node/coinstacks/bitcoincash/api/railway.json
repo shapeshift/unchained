@@ -1,11 +1,7 @@
 {
   "build": {
     "builder": "dockerfile",
-    "dockerfilePath": "Dockerfile",
-    "buildArgs": {
-      "DIR": "coinstacks/bitcoincash/api",
-      "PACKAGE": "@shapeshiftoss/bitcoincash-api"
-    },
+    "dockerfilePath": "node/Dockerfile",
     "watchPatterns": [
       "node/coinstacks/bitcoincash/api/**",
       "node/coinstacks/common/**",

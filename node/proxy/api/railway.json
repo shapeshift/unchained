@@ -1,11 +1,7 @@
 {
   "build": {
     "builder": "dockerfile",
-    "dockerfilePath": "Dockerfile",
-    "buildArgs": {
-      "DIR": "proxy/api",
-      "PACKAGE": "@shapeshiftoss/unchained-proxy"
-    },
+    "dockerfilePath": "node/Dockerfile",
     "watchPatterns": ["node/coinstacks/common/**", "node/packages/**", "node/proxy/api/**", "yarn.lock"]
   },
   "deploy": {
