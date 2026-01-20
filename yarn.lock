@@ -3335,12 +3335,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@shapeshiftoss/proxy-pulumi@workspace:node/proxy/pulumi":
-  version: 0.0.0-use.local
-  resolution: "@shapeshiftoss/proxy-pulumi@workspace:node/proxy/pulumi"
-  languageName: unknown
-  linkType: soft
-
 "@shapeshiftoss/solana-api@workspace:node/coinstacks/solana/api":
   version: 0.0.0-use.local
   resolution: "@shapeshiftoss/solana-api@workspace:node/coinstacks/solana/api"

@@ -1,0 +1,21 @@
+{
+  "build": {
+    "builder": "dockerfile",
+    "dockerfilePath": "Dockerfile",
+    "buildArgs": {
+      "DIR": "proxy/api",
+      "PACKAGE": "@shapeshiftoss/unchained-proxy"
+    },
+    "watchPatterns": ["node/coinstacks/common/**", "node/packages/**", "node/proxy/api/**", "yarn.lock"]
+  },
+  "deploy": {
+    "healthcheckPath": "/health",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3,
+    "multiRegionConfig": {
+      "us-west2": {
+        "numReplicas": 1
+      }
+    }
+  }
+}
