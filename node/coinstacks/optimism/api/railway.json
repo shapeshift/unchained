@@ -1,0 +1,22 @@
+{
+  "build": {
+    "builder": "dockerfile",
+    "dockerfilePath": "Dockerfile",
+    "buildArgs": {
+      "DIR": "coinstacks/optimism/api",
+      "PACKAGE": "@shapeshiftoss/optimism-api"
+    },
+    "watchPatterns": ["node/coinstacks/optimism/api/**", "node/coinstacks/common/**", "node/packages/**", "yarn.lock"]
+  },
+  "deploy": {
+    "startCommand": "node dist/optimism/api/src/app.js",
+    "healthcheckPath": "/health",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3,
+    "multiRegionConfig": {
+      "us-west2": {
+        "numReplicas": 1
+      }
+    }
+  }
+}
