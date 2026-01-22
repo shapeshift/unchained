@@ -2,25 +2,24 @@ FROM golang:1.25.0 as builder
 
 ARG COINSTACK
 
-COPY ./go.mod /app/go.mod
-COPY ./go.sum /app/go.sum
+WORKDIR /app
 
-COPY ./static /app/static
-COPY ./internal /app/internal
-COPY ./cmd/${COINSTACK} /app/cmd/${COINSTACK}
-COPY ./pkg /app/pkg
-COPY ./coinstacks/${COINSTACK}/*.go /app/coinstacks/${COINSTACK}/
-COPY ./coinstacks/${COINSTACK}/api /app/coinstacks/${COINSTACK}/api
+COPY go/go.mod go/go.sum go/
 
-WORKDIR /app/cmd/${COINSTACK}
+COPY go/static go/static
+COPY go/internal go/internal
+COPY go/cmd/${COINSTACK} go/cmd/${COINSTACK}
+COPY go/pkg go/pkg
+COPY go/coinstacks/${COINSTACK}/*.go go/coinstacks/${COINSTACK}/
+COPY go/coinstacks/${COINSTACK}/api go/coinstacks/${COINSTACK}/api
+
+WORKDIR /app/go/cmd/${COINSTACK}
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o /go/bin/app
 
 FROM alpine
 
 ARG COINSTACK
 
-COPY --from=builder /app/static static
-COPY --from=builder /app/coinstacks/${COINSTACK}/api/swagger.json swagger.json
+COPY --from=builder /app/go/static static
+COPY --from=builder /app/go/coinstacks/${COINSTACK}/api/swagger.json swagger.json
 COPY --from=builder /go/bin/app /go/bin/app
-
-ENTRYPOINT [ "/go/bin/app" ]

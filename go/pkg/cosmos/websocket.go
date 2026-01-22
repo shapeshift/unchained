@@ -2,7 +2,6 @@ package cosmos
 
 import (
 	"context"
-	"crypto/sha256"
 	"fmt"
 	"net"
 	"net/url"
@@ -190,8 +189,6 @@ func (ws *WSClient) listen() {
 }
 
 func (ws *WSClient) handleTx(tx types.EventDataTx) {
-	logger.Debugf("tx: %X", sha256.Sum256(tx.Tx))
-
 	// queue up any transactions detected before block details are available
 	block, ok := ws.blockService.Blocks[int(tx.Height)]
 	if !ok {
@@ -213,8 +210,6 @@ func (ws *WSClient) handleTx(tx types.EventDataTx) {
 }
 
 func (ws *WSClient) handleNewBlock(newBlock types.EventDataNewBlock, blockEvents []ABCIEvent) {
-	logger.Debugf("block: %d", newBlock.Block.Height)
-
 	b := &BlockResponse{
 		Height:    int(newBlock.Block.Height),
 		Hash:      newBlock.Block.Hash().String(),
