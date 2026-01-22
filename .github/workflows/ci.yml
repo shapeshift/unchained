@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main, develop]
 
+permissions:
+  contents: write
+
 jobs:
   node:
     name: Lint (Node)
@@ -28,6 +31,9 @@ jobs:
 
       - name: Lint
         run: yarn lint
+
+      - name: Postcheck
+        uses: ./.github/actions/postcheck
 
   go:
     name: Lint (Go)
@@ -56,3 +62,6 @@ jobs:
 
       - name: Lint
         run: make lint
+
+      - name: Postcheck
+        uses: ./.github/actions/postcheck
