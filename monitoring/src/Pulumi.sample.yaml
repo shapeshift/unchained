@@ -1,8 +1,0 @@
-## Unchained Monitoring
-
-config:
-  unchained:monitoring:
-    ## - Global
-    stack: # run `pulumi stack ls` in `unchained/pulumi` and reference the url
-    # If you want to specify a different environment name, you'll need to add the environment to pulumi common additionalEnvironments
-    environment: monitoring
