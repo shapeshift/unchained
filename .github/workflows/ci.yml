@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop, railway]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  node:
+    name: Lint (Node)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build
+        run: yarn build
+
+      - name: Lint
+        run: yarn lint
+
+  go:
+    name: Lint (Go)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: go
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.0'
+          cache-dependency-path: go/go.sum
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Make
+        run: make
+
+      - name: Build
+        run: make build
+
+      - name: Lint
+        run: make lint
