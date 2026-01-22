@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
 	"path/filepath"
 	"strconv"
 	"time"
@@ -33,7 +34,6 @@ import (
 )
 
 const (
-	PORT              = 3000
 	PPROF_PORT        = 3001
 	GRACEFUL_SHUTDOWN = 15 * time.Second
 	WRITE_TIMEOUT     = 15 * time.Second
@@ -42,6 +42,15 @@ const (
 )
 
 var logger = log.WithoutFields()
+
+var PORT = func() int {
+	if port := os.Getenv("PORT"); port != "" {
+		if p, err := strconv.Atoi(port); err == nil {
+			return p
+		}
+	}
+	return 3000
+}()
 
 type API struct {
 	*cosmos.API
