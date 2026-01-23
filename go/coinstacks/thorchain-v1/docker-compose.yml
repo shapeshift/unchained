@@ -1,13 +1,19 @@
 services:
+  unchained-local-go-thorchain-v1:
+    image: unchained-local-go-thorchain-v1
+    build:
+      context: build
+      dockerfile: Dockerfile.local
+
   api:
-    image: unchained-local-go
+    image: unchained-local-go-thorchain-v1
     environment:
       - GOCACHE=/tmp
     labels:
       - 'traefik.enable=true'
       - 'traefik.http.routers.thorchain-v1-api.rule=Host(`api.thorchain-v1.localhost`)'
       - 'traefik.http.services.thorchain-v1-api.loadbalancer.server.port=3000'
-    command: ["sh", "-c", "reflex -s -r '(pkg|internal|thorchain-v1)' -R 'swagger' -- sh -c 'swagger generate spec -w coinstacks/thorchain-v1 -o coinstacks/thorchain-v1/api/swagger.json -x protoc-gen-openapiv2 -m && go run cmd/thorchain-v1/main.go -env cmd/thorchain-v1/.env'"]
+    command: ["sh", "-c", "reflex -s -r '(pkg|shared|thorchain-v1)' -R 'swagger' -- sh -c 'swagger generate spec -w coinstacks/thorchain-v1 -o coinstacks/thorchain-v1/api/swagger.json -x protoc-gen-openapiv2 -m && go run coinstacks/thorchain-v1/cmd/main.go -env coinstacks/thorchain-v1/.env'"]
     working_dir: /app
     volumes:
       - ../..:/app
@@ -17,5 +23,5 @@ services:
 
 networks:
   thorchain-v1:
-    name: thorchain-v1_default
+    name: thorchain-v1
     external: true

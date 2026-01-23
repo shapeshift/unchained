@@ -1,4 +1,5 @@
-COINSTACKS := $(wildcard coinstacks/*)
+MODULES := $(shell grep -E '^\s+\./' go.work | tr -d '\t ')
+COINSTACKS := $(filter ./coinstacks/%,$(MODULES))
 MAKEFLAGS += --no-print-directory
 GOPATH=$(firstword $(subst :, ,$(shell go env GOPATH)))
 
@@ -6,29 +7,25 @@ GOPATH=$(firstword $(subst :, ,$(shell go env GOPATH)))
 
 all: install $(COINSTACKS)
 
-$(COINSTACKS):; $(MAKE) -C $@ generate
+$(COINSTACKS):; $(MAKE) -C $@ install generate
 
 install:
 	go install gotest.tools/gotestsum@latest
 	go install golang.org/x/tools/cmd/goimports@latest
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v2.6.1
-	docker build -t unchained-local-go -f ./build/Dockerfile.local .
 
 build:
-	go build ./...
+	go build $(addsuffix /...,$(MODULES))
 
 clean:
-	go clean ./...
+	go clean $(addsuffix /...,$(MODULES))
 	find . -type f -name 'swagger.json' -exec rm -f {} +
 
 lint:
 	golangci-lint run
 
 test:
-	go test ./...
+	go test $(addsuffix /...,$(MODULES))
 
 tidy:
-	@for dir in shared pkg/cosmos pkg/thorchain coinstacks/thorchain coinstacks/thorchain-v1; do \
-		echo "Tidying $$dir..."; \
-		(cd $$dir && go mod tidy); \
-	done
+	@for mod in $(MODULES); do (cd $$mod && go mod tidy); done

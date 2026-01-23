@@ -140,7 +140,7 @@
         }
       },
       "x-go-name": "Error",
-      "x-go-package": "github.com/shapeshift/unchained/pkg/api"
+      "x-go-package": "github.com/shapeshift/unchained/shared/api"
     },
     "Attribute": {
       "description": "Contains info about a transaction log event key/val attribute",
@@ -183,7 +183,7 @@
           "x-go-name": "Error"
         }
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/api"
+      "x-go-package": "github.com/shapeshift/unchained/shared/api"
     },
     "BaseAccount": {
       "description": "Contains info about required base account details for an address or xpub",
@@ -209,7 +209,7 @@
           "example": "0"
         }
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/api"
+      "x-go-package": "github.com/shapeshift/unchained/shared/api"
     },
     "BaseInfo": {
       "description": "Contains required base info about the running coinstack",
@@ -224,7 +224,7 @@
           "example": "mainnet"
         }
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/api"
+      "x-go-package": "github.com/shapeshift/unchained/shared/api"
     },
     "BaseTx": {
       "description": "Contains info about required base transaction details",
@@ -256,7 +256,7 @@
           "x-go-name": "TxID"
         }
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/api"
+      "x-go-package": "github.com/shapeshift/unchained/shared/api"
     },
     "BaseTxHistory": {
       "description": "Contains info about required base transaction history details",
@@ -285,7 +285,7 @@
           }
         }
       ],
-      "x-go-package": "github.com/shapeshift/unchained/pkg/api"
+      "x-go-package": "github.com/shapeshift/unchained/shared/api"
     },
     "CosmosSDKAccount": {
       "description": "Contains common cosmossdk info about account details for an address or xpub",
@@ -392,7 +392,7 @@
     },
     "GasAmount": {
       "type": "string",
-      "x-go-package": "github.com/shapeshift/unchained/pkg/api"
+      "x-go-package": "github.com/shapeshift/unchained/shared/api"
     },
     "Info": {
       "description": "Contains info about the running coinstack",
@@ -412,7 +412,7 @@
           "x-go-name": "Message"
         }
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/api"
+      "x-go-package": "github.com/shapeshift/unchained/shared/api"
     },
     "Message": {
       "description": "Contains info about a transaction message",
@@ -467,7 +467,7 @@
           "example": "d2l0aGRyYXdfZGVsZWdhdG9yX3Jld2FyZA=="
         }
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/api"
+      "x-go-package": "github.com/shapeshift/unchained/shared/api"
     },
     "Redelegation": {
       "description": "Contains info about a staking redelegation",
@@ -585,7 +585,7 @@
     },
     "TransactionHash": {
       "type": "string",
-      "x-go-package": "github.com/shapeshift/unchained/pkg/api"
+      "x-go-package": "github.com/shapeshift/unchained/shared/api"
     },
     "Tx": {
       "description": "Contains info about a transaction",
@@ -652,7 +652,7 @@
           }
         }
       ],
-      "x-go-package": "github.com/shapeshift/unchained/pkg/api"
+      "x-go-package": "github.com/shapeshift/unchained/shared/api"
     },
     "TxHistory": {
       "description": "Contains info about transaction history for an address or xpub",
@@ -739,7 +739,7 @@
           "example": "Validation failed"
         }
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/api"
+      "x-go-package": "github.com/shapeshift/unchained/shared/api"
     },
     "Validator": {
       "description": "Contains info about a validator",

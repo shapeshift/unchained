@@ -11,7 +11,7 @@ require (
 	github.com/prometheus/client_golang v1.23.2
 	github.com/rs/cors v1.11.1
 	github.com/shapeshift/unchained/pkg/cosmos v0.0.0
-	github.com/shapeshift/unchained/pkg/thorchain v0.0.0-00010101000000-000000000000
+	github.com/shapeshift/unchained/pkg/thorchain v0.0.0
 	github.com/shapeshift/unchained/shared v0.0.0
 	gitlab.com/thorchain/thornode/v3 v3.12.0
 	golang.org/x/sync v0.17.0
