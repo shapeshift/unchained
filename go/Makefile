@@ -1,13 +1,14 @@
-MODULES := $(shell grep -E '^\s+\./' go.work | tr -d '\t ')
+MODULES := $(shell find . -name go.mod -not -path './vendor/*' -exec dirname {} \;)
 COINSTACKS := $(filter ./coinstacks/%,$(MODULES))
 MAKEFLAGS += --no-print-directory
 GOPATH=$(firstword $(subst :, ,$(shell go env GOPATH)))
 
-.PHONY: all build clean $(COINSTACKS)
+.PHONY: all build clean generate
 
-all: install $(COINSTACKS)
+all: install generate
 
-$(COINSTACKS):; $(MAKE) -C $@ install generate
+generate:
+	@for cs in $(COINSTACKS); do $(MAKE) -C $$cs install generate & done; wait
 
 install:
 	go install gotest.tools/gotestsum@latest
@@ -15,17 +16,17 @@ install:
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v2.6.1
 
 build:
-	go build $(addsuffix /...,$(MODULES))
+	@for mod in $(MODULES); do (cd $$mod && go build ./...) & done; wait
 
 clean:
-	go clean $(addsuffix /...,$(MODULES))
+	@for mod in $(MODULES); do (cd $$mod && go clean ./...) & done; wait
 	find . -type f -name 'swagger.json' -exec rm -f {} +
 
 lint:
-	golangci-lint run
+	@for mod in $(MODULES); do (cd $$mod && golangci-lint run) & done; wait
 
 test:
-	go test $(addsuffix /...,$(MODULES))
+	@for mod in $(MODULES); do (cd $$mod && go test ./...) & done; wait
 
 tidy:
-	@for mod in $(MODULES); do (cd $$mod && go mod tidy); done
+	@for mod in $(MODULES); do (cd $$mod && go mod tidy) & done; wait
