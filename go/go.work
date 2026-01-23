@@ -1,9 +1,0 @@
-go 1.25.0
-
-use (
-	./coinstacks/thorchain
-	./coinstacks/thorchain-v1
-	./pkg/cosmos
-	./pkg/thorchain
-	./shared
-)

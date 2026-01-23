@@ -13,7 +13,7 @@ services:
       - 'traefik.enable=true'
       - 'traefik.http.routers.thorchain-v1-api.rule=Host(`api.thorchain-v1.localhost`)'
       - 'traefik.http.services.thorchain-v1-api.loadbalancer.server.port=3000'
-    command: ["sh", "-c", "reflex -s -r '(pkg|shared|thorchain-v1)' -R 'swagger' -- sh -c 'swagger generate spec -w coinstacks/thorchain-v1 -o coinstacks/thorchain-v1/api/swagger.json -x protoc-gen-openapiv2 -m && go run coinstacks/thorchain-v1/cmd/main.go -env coinstacks/thorchain-v1/.env'"]
+    command: ["sh", "-c", "reflex -s -r '(pkg|shared|thorchain-v1)' -R 'swagger' -- sh -c 'swagger generate spec -w coinstacks/thorchain-v1 -o coinstacks/thorchain-v1/api/swagger.json -x protoc-gen-openapiv2 -m && cd coinstacks/thorchain-v1 && go run cmd/main.go -env .env'"]
     working_dir: /app
     volumes:
       - ../..:/app

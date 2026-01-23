@@ -207,7 +207,6 @@ require (
 )
 
 replace (
-	cosmossdk.io/core => cosmossdk.io/core v0.11.3
 	github.com/btcsuite/btcd => github.com/btcsuite/btcd v0.22.1
 	github.com/cometbft/cometbft => github.com/cometbft/cometbft v0.38.19
 	github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.53.0
