@@ -8,8 +8,8 @@ import (
 	"github.com/cometbft/cometbft/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
-	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
+	"github.com/shapeshift/unchained/shared/api"
 	"gitlab.com/thorchain/thornode/v3/common"
 	thorchaintypes "gitlab.com/thorchain/thornode/v3/x/thorchain/types"
 )

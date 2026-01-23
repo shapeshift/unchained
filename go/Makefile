@@ -26,3 +26,9 @@ lint:
 
 test:
 	go test ./...
+
+tidy:
+	@for dir in shared pkg/cosmos pkg/thorchain coinstacks/thorchain coinstacks/thorchain-v1; do \
+		echo "Tidying $$dir..."; \
+		(cd $$dir && go mod tidy); \
+	done

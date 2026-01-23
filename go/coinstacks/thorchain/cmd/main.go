@@ -8,10 +8,10 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	"github.com/shapeshift/unchained/coinstacks/thorchain/api"
-	"github.com/shapeshift/unchained/internal/config"
-	"github.com/shapeshift/unchained/internal/log"
 	"github.com/shapeshift/unchained/pkg/cosmos"
-	"github.com/shapeshift/unchained/pkg/metrics"
+	"github.com/shapeshift/unchained/shared/config"
+	"github.com/shapeshift/unchained/shared/log"
+	"github.com/shapeshift/unchained/shared/metrics"
 
 	"gitlab.com/thorchain/thornode/v3/x/thorchain/ebifrost"
 	thortypes "gitlab.com/thorchain/thornode/v3/x/thorchain/types"

@@ -1,6 +1,6 @@
 package websocket
 
-import "github.com/shapeshift/unchained/pkg/metrics"
+import "github.com/shapeshift/unchained/shared/metrics"
 
 // Manager manages registering, unregistering, and signaling cleanup of client connections
 type Manager struct {

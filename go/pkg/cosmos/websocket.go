@@ -14,7 +14,7 @@ import (
 	cometbft "github.com/cometbft/cometbft/rpc/jsonrpc/client"
 	"github.com/cometbft/cometbft/types"
 	"github.com/pkg/errors"
-	"github.com/shapeshift/unchained/pkg/websocket"
+	"github.com/shapeshift/unchained/shared/websocket"
 )
 
 const (

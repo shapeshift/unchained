@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/shapeshift/unchained/internal/log"
-	"github.com/shapeshift/unchained/pkg/metrics"
+	"github.com/shapeshift/unchained/shared/log"
+	"github.com/shapeshift/unchained/shared/metrics"
 )
 
 type statusWriter struct {

@@ -32,11 +32,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/cors"
-	"github.com/shapeshift/unchained/internal/log"
-	"github.com/shapeshift/unchained/pkg/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
-	"github.com/shapeshift/unchained/pkg/metrics"
-	"github.com/shapeshift/unchained/pkg/websocket"
+	"github.com/shapeshift/unchained/shared/api"
+	"github.com/shapeshift/unchained/shared/log"
+	"github.com/shapeshift/unchained/shared/metrics"
+	"github.com/shapeshift/unchained/shared/websocket"
 )
 
 const (

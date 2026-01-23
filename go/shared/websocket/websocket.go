@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
-	"github.com/shapeshift/unchained/internal/log"
+	"github.com/shapeshift/unchained/shared/log"
 )
 
 const (

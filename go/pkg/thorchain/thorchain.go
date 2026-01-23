@@ -3,8 +3,8 @@ package thorchain
 import (
 	"math/big"
 
-	"github.com/shapeshift/unchained/internal/log"
 	"github.com/shapeshift/unchained/pkg/cosmos"
+	"github.com/shapeshift/unchained/shared/log"
 )
 
 var logger = log.WithoutFields()

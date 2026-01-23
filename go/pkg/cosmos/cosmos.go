@@ -25,7 +25,7 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
-	"github.com/shapeshift/unchained/internal/log"
+	"github.com/shapeshift/unchained/shared/log"
 )
 
 var logger = log.WithoutFields()

@@ -12,8 +12,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	ws "github.com/gorilla/websocket"
 	"github.com/pkg/errors"
-	"github.com/shapeshift/unchained/pkg/api"
-	"github.com/shapeshift/unchained/pkg/websocket"
+	"github.com/shapeshift/unchained/shared/api"
+	"github.com/shapeshift/unchained/shared/websocket"
 	"golang.org/x/sync/errgroup"
 )
 
