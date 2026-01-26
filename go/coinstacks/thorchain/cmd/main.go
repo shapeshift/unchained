@@ -8,7 +8,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	"github.com/shapeshift/unchained/coinstacks/thorchain/api"
-	"github.com/shapeshift/unchained/pkg/cosmos"
+	"github.com/shapeshift/unchained/pkg/thorchain/cosmos"
 	"github.com/shapeshift/unchained/shared/config"
 	"github.com/shapeshift/unchained/shared/log"
 	"github.com/shapeshift/unchained/shared/metrics"

@@ -10,8 +10,8 @@ import (
 
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	"github.com/cometbft/cometbft/types"
-	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/shapeshift/unchained/pkg/thorchain"
+	"github.com/shapeshift/unchained/pkg/thorchain/cosmos"
 	"golang.org/x/sync/errgroup"
 )
 

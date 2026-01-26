@@ -2,8 +2,6 @@ FROM golang:1.25.0 as builder
 
 WORKDIR /app
 
-COPY go/go.work go/go.work.sum go/
-
 COPY go/shared/go.mod go/shared/go.sum go/shared/
 COPY go/pkg/thorchain/go.mod go/pkg/thorchain/go.sum go/pkg/thorchain/
 COPY go/coinstacks/thorchain/go.mod go/coinstacks/thorchain/go.sum go/coinstacks/thorchain/

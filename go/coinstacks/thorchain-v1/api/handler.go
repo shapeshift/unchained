@@ -3,8 +3,8 @@ package api
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
-	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/shapeshift/unchained/pkg/thorchain"
+	"github.com/shapeshift/unchained/pkg/thorchain/cosmos"
 	"github.com/shapeshift/unchained/shared/api"
 )
 

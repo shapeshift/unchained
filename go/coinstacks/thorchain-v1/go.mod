@@ -8,7 +8,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.23.2
 	github.com/rs/cors v1.11.1
-	github.com/shapeshift/unchained/pkg/cosmos v0.0.0
 	github.com/shapeshift/unchained/pkg/thorchain v0.0.0
 	github.com/shapeshift/unchained/shared v0.0.0
 	github.com/tendermint/tendermint v0.34.15
@@ -212,7 +211,6 @@ replace (
 	github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.53.0
 	github.com/cosmos/iavl => github.com/cosmos/iavl v1.2.4
 	github.com/gogo/protobuf => github.com/gogo/protobuf v1.3.2
-	github.com/shapeshift/unchained/pkg/cosmos => ../../pkg/cosmos
 	github.com/shapeshift/unchained/pkg/thorchain => ../../pkg/thorchain
 	github.com/shapeshift/unchained/shared => ../../shared
 )

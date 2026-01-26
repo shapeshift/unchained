@@ -4,7 +4,7 @@ import (
 	"strconv"
 
 	"github.com/pkg/errors"
-	"github.com/shapeshift/unchained/pkg/cosmos"
+	"github.com/shapeshift/unchained/pkg/thorchain/cosmos"
 	tendermintjson "github.com/tendermint/tendermint/libs/json"
 	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 	rpctypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
