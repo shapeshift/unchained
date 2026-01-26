@@ -16,8 +16,7 @@
   "deploy": {
     "startCommand": "/go/bin/app -swagger swagger.json",
     "healthcheckPath": "/health",
-    "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 3,
+    "restartPolicyType": "ALWAYS",
     "multiRegionConfig": {
       "us-west2": {
         "numReplicas": 1
