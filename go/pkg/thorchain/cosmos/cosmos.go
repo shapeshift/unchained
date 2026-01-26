@@ -3,12 +3,10 @@ package cosmos
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"math/big"
 	"net/url"
 	"path"
-	"strings"
 
 	sdkmath "cosmossdk.io/math"
 	"cosmossdk.io/simapp/params"
@@ -25,10 +23,6 @@ import (
 	govv1types "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	govv1beta1types "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	metaprotocolstypes "github.com/cosmos/gaia/v23/x/metaprotocols/types"
-	ibctransfertypes "github.com/cosmos/ibc-go/v10/modules/apps/transfer/types"
-	ibccoretypes "github.com/cosmos/ibc-go/v10/modules/core/types"
-	ibclightclientstypes "github.com/cosmos/ibc-go/v10/modules/light-clients/07-tendermint"
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/shared/log"
@@ -106,9 +100,6 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 	sdk.GetConfig().SetBech32PrefixForAccount(conf.Bech32AddrPrefix, conf.Bech32PkPrefix)
 	sdk.GetConfig().SetBech32PrefixForValidator(conf.Bech32ValPrefix, conf.Bech32PkValPrefix)
 
-	isLiquify := strings.Contains(conf.LCDURL, "liquify") && strings.Contains(conf.RPCURL, "liquify")
-	isNownodes := strings.Contains(conf.LCDURL, "nownodes") && strings.Contains(conf.RPCURL, "nownodes")
-
 	lcdURL, err := url.Parse(conf.LCDURL)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to parse LCDURL: %s", conf.LCDURL)
@@ -119,30 +110,18 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 		return nil, errors.Wrapf(err, "failed to parse RPCURL: %s", conf.RPCURL)
 	}
 
-	lcdHeaders := map[string]string{"Content-Type": "application/json"}
 	if conf.LCDAPIKEY != "" {
-		if isNownodes {
-			lcdHeaders["Authorization"] = fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(conf.LCDAPIKEY)))
-		}
-
-		if isLiquify {
-			lcdURL.Path = path.Join(lcdURL.Path, fmt.Sprintf("api=%s", conf.LCDAPIKEY))
-		}
+		lcdURL.Path = path.Join(lcdURL.Path, fmt.Sprintf("api=%s", conf.LCDAPIKEY))
 	}
 
-	rpcHeaders := map[string]string{"Content-Type": "application/json"}
 	if conf.RPCAPIKEY != "" {
-		if isNownodes {
-			rpcHeaders["Authorization"] = fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(conf.RPCAPIKEY)))
-		}
-
-		if isLiquify {
-			rpcURL.Path = path.Join(rpcURL.Path, fmt.Sprintf("api=%s", conf.RPCAPIKEY))
-		}
+		rpcURL.Path = path.Join(rpcURL.Path, fmt.Sprintf("api=%s", conf.RPCAPIKEY))
 	}
 
-	lcd := resty.New().SetBaseURL(lcdURL.String()).SetHeaders(lcdHeaders)
-	rpc := resty.New().SetBaseURL(rpcURL.String()).SetHeaders(rpcHeaders)
+	headers := map[string]string{"Accept": "application/json"}
+
+	lcd := resty.New().SetBaseURL(lcdURL.String()).SetHeaders(headers)
+	rpc := resty.New().SetBaseURL(rpcURL.String()).SetHeaders(headers)
 
 	c := &HTTPClient{
 		ctx:      context.Background(),
@@ -169,10 +148,6 @@ func NewEncoding(registerInterfaces ...func(r codectypes.InterfaceRegistry)) *pa
 	distributiontypes.RegisterInterfaces(registry)
 	govv1types.RegisterInterfaces(registry)
 	govv1beta1types.RegisterInterfaces(registry)
-	metaprotocolstypes.RegisterInterfaces(registry)
-	ibccoretypes.RegisterInterfaces(registry)
-	ibctransfertypes.RegisterInterfaces(registry)
-	ibclightclientstypes.RegisterInterfaces(registry)
 	stakingtypes.RegisterInterfaces(registry)
 	stdtypes.RegisterInterfaces(registry)
 

@@ -2,7 +2,7 @@ package thorchain
 
 import (
 	cometbfttypes "github.com/cometbft/cometbft/types"
-	"github.com/shapeshift/unchained/pkg/cosmos"
+	"github.com/shapeshift/unchained/pkg/thorchain/cosmos"
 )
 
 type Block interface {

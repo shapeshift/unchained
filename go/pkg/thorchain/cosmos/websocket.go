@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"net/url"
-	"strings"
 	"sync"
 	"time"
 
@@ -26,38 +25,32 @@ const (
 )
 
 type TxHandlerFunc = func(tx types.EventDataTx, block *BlockResponse) (interface{}, []string, error)
+type BlockEventHandlerFunc = func(eventCache map[string]interface{}, blockHeader types.Header, blockEvents []ABCIEvent, eventIndex int) (interface{}, []string, error)
+type NewBlockHandlerFunc = func(newBlock types.EventDataNewBlock, blockEvents []ABCIEvent)
 
 type WSClient struct {
 	*websocket.Registry
-	blockService *BlockService
-	client       *cometbft.WSClient
-	encoding     *params.EncodingConfig
-	errChan      chan<- error
-	m            sync.RWMutex
-	t            *time.Timer
-	txHandler    TxHandlerFunc
-	unhandledTxs map[int][]types.EventDataTx
+	blockService      *BlockService
+	client            *cometbft.WSClient
+	encoding          *params.EncodingConfig
+	errChan           chan<- error
+	m                 sync.RWMutex
+	t                 *time.Timer
+	txHandler         TxHandlerFunc
+	blockEventHandler BlockEventHandlerFunc
+	newBlockHandlers  []NewBlockHandlerFunc
+	unhandledTxs      map[int][]types.EventDataTx
 }
 
 func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- error) (*WSClient, error) {
-	isLiquify := strings.Contains(conf.WSURL, "liquify")
-	isNownodes := strings.Contains(conf.WSURL, "nownodes")
-
 	wsURL, err := url.Parse(conf.WSURL)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to parse WSURL: %s", conf.WSURL)
 	}
 
 	endpoint := "/websocket"
-	if conf.RPCAPIKEY != "" {
-		if isNownodes {
-			parts := strings.Split(conf.RPCAPIKEY, ":")
-			endpoint = fmt.Sprintf("/%s/websocket", parts[1])
-		}
-
-		if isLiquify {
-			endpoint = fmt.Sprintf("/api=%s/websocket", conf.RPCAPIKEY)
-		}
+	if conf.WSAPIKEY != "" {
+		endpoint = fmt.Sprintf("/api=%s/websocket", conf.WSAPIKEY)
 	}
 
 	client, err := cometbft.NewWS(wsURL.String(), endpoint)
@@ -76,6 +69,8 @@ func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- 
 		errChan:      errChan,
 		unhandledTxs: make(map[int][]types.EventDataTx),
 	}
+
+	ws.NewBlockHandler(ws.handleNewBlock)
 
 	cometbft.ReadWait(readWait)
 	cometbft.WriteWait(writeWait)
@@ -113,6 +108,14 @@ func (ws *WSClient) Stop() {
 
 func (ws *WSClient) TxHandler(fn TxHandlerFunc) {
 	ws.txHandler = fn
+}
+
+func (ws *WSClient) BlockEventHandler(fn BlockEventHandlerFunc) {
+	ws.blockEventHandler = fn
+}
+
+func (ws *WSClient) NewBlockHandler(fn NewBlockHandlerFunc) {
+	ws.newBlockHandlers = append(ws.newBlockHandlers, fn)
 }
 
 func (ws *WSClient) EncodingConfig() params.EncodingConfig {
@@ -173,7 +176,11 @@ func (ws *WSClient) listen() {
 				go ws.handleTx(result.Data.(types.EventDataTx))
 			case types.EventDataNewBlock:
 				ws.t.Reset(resetTimeout)
-				go ws.handleNewBlock(result.Data.(types.EventDataNewBlock))
+				newBlock := result.Data.(types.EventDataNewBlock)
+				blockEvents := ConvertABCIEvents(newBlock.ResultFinalizeBlock.Events)
+				for _, handleNewBlock := range ws.newBlockHandlers {
+					go handleNewBlock(newBlock, blockEvents)
+				}
 			default:
 				fmt.Printf("unsupported result type: %T", result.Data)
 			}
@@ -202,7 +209,7 @@ func (ws *WSClient) handleTx(tx types.EventDataTx) {
 	}
 }
 
-func (ws *WSClient) handleNewBlock(newBlock types.EventDataNewBlock) {
+func (ws *WSClient) handleNewBlock(newBlock types.EventDataNewBlock, blockEvents []ABCIEvent) {
 	b := &BlockResponse{
 		Height:    int(newBlock.Block.Height),
 		Hash:      newBlock.Block.Hash().String(),
@@ -210,6 +217,24 @@ func (ws *WSClient) handleNewBlock(newBlock types.EventDataNewBlock) {
 	}
 
 	ws.blockService.WriteBlock(b, true)
+
+	if ws.blockEventHandler != nil {
+		go func(newBlock types.EventDataNewBlock, blockEvents []ABCIEvent) {
+			eventCache := make(map[string]interface{})
+
+			for i := range blockEvents {
+				data, addrs, err := ws.blockEventHandler(eventCache, newBlock.Block.Header, blockEvents, i)
+				if err != nil {
+					logger.Error(err)
+					return
+				}
+
+				if data != nil {
+					ws.Publish(addrs, data)
+				}
+			}
+		}(newBlock, blockEvents)
+	}
 
 	// process any unhandled transactions
 	for _, tx := range ws.unhandledTxs[b.Height] {

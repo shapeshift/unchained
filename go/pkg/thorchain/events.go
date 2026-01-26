@@ -7,7 +7,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 	cometbftjson "github.com/cometbft/cometbft/libs/json"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/shapeshift/unchained/pkg/cosmos"
+	"github.com/shapeshift/unchained/pkg/thorchain/cosmos"
 	"gitlab.com/thorchain/thornode/v3/common"
 )
 

@@ -3,13 +3,18 @@ module github.com/shapeshift/unchained/pkg/thorchain
 go 1.25.0
 
 require (
+	cosmossdk.io/errors v1.0.2
 	cosmossdk.io/math v1.5.3
+	cosmossdk.io/simapp v0.0.0-20251103172611-84e841aea2cc
 	github.com/cometbft/cometbft v1.0.1
 	github.com/cosmos/cosmos-sdk v0.54.0-beta.0
+	github.com/go-resty/resty/v2 v2.16.5
+	github.com/gorilla/mux v1.8.1
+	github.com/gorilla/websocket v1.5.3
 	github.com/pkg/errors v0.9.1
-	github.com/shapeshift/unchained/pkg/cosmos v0.0.0
 	github.com/shapeshift/unchained/shared v0.0.0
 	gitlab.com/thorchain/thornode/v3 v3.12.0
+	golang.org/x/sync v0.17.0
 )
 
 require (
@@ -17,10 +22,8 @@ require (
 	cosmossdk.io/collections v1.3.1 // indirect
 	cosmossdk.io/core v0.11.3 // indirect
 	cosmossdk.io/depinject v1.2.1 // indirect
-	cosmossdk.io/errors v1.0.2 // indirect
 	cosmossdk.io/log v1.6.1 // indirect
 	cosmossdk.io/schema v1.1.0 // indirect
-	cosmossdk.io/simapp v0.0.0-20251103172611-84e841aea2cc // indirect
 	cosmossdk.io/store v1.3.0-beta.0 // indirect
 	cosmossdk.io/x/tx v0.14.0 // indirect
 	cosmossdk.io/x/upgrade v0.2.0 // indirect
@@ -90,7 +93,6 @@ require (
 	github.com/go-logfmt/logfmt v0.6.1 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/go-resty/resty/v2 v2.16.5 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2 // indirect
 	github.com/gogo/googleapis v1.4.1 // indirect
@@ -102,8 +104,6 @@ require (
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/handlers v1.5.2 // indirect
-	github.com/gorilla/mux v1.8.1 // indirect
-	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
 	github.com/gsterjov/go-libsecret v0.0.0-20161001094733-a6f4afe4910c // indirect
@@ -183,7 +183,6 @@ require (
 	golang.org/x/exp v0.0.0-20250506013437-ce4c2cf36ca6 // indirect
 	golang.org/x/net v0.46.0 // indirect
 	golang.org/x/oauth2 v0.31.0 // indirect
-	golang.org/x/sync v0.17.0 // indirect
 	golang.org/x/sys v0.37.0 // indirect
 	golang.org/x/term v0.36.0 // indirect
 	golang.org/x/text v0.30.0 // indirect
@@ -208,6 +207,5 @@ replace (
 	github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.53.0
 	github.com/cosmos/iavl => github.com/cosmos/iavl v1.2.4
 	github.com/gogo/protobuf => github.com/gogo/protobuf v1.3.2
-	github.com/shapeshift/unchained/pkg/cosmos => ../cosmos
 	github.com/shapeshift/unchained/shared => ../../shared
 )
