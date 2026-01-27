@@ -1,0 +1,28 @@
+services:
+  unchained-local-go-mayachain:
+    image: unchained-local-go-mayachain
+    build:
+      context: ./build
+      dockerfile: Dockerfile.local
+
+  api:
+    image: unchained-local-go-mayachain
+    environment:
+      - GOCACHE=/tmp
+      - LD_LIBRARY_PATH=/app/lib
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.mayachain-api.rule=Host(`api.mayachain.localhost`)'
+      - 'traefik.http.services.mayachain-api.loadbalancer.server.port=3000'
+    command: ["sh", "-c", "reflex -r '(pkg|shared|mayachain)' -R 'swagger' -s -- sh -c 'swagger generate spec -w coinstacks/mayachain -o coinstacks/mayachain/api/swagger.json -x protoc-gen-openapiv2 -m && cd coinstacks/mayachain && CGO_LDFLAGS=\"-L/app/lib -lzec\" go run cmd/main.go -env .env'"]
+    working_dir: /app
+    volumes:
+      - ../..:/app
+      - $GOPATH/pkg/mod/cache:/go/pkg/mod/cache
+    networks:
+      - mayachain
+
+networks:
+  mayachain:
+    name: mayachain
+    external: true
