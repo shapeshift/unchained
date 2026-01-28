@@ -1,4 +1,4 @@
-package cosmos
+package cosmossdk
 
 import (
 	"encoding/base64"
@@ -30,7 +30,7 @@ func (c *Cursor) encode() (string, error) {
 }
 
 // decode base64 string and unmarshal value into Cursor struct
-func (c *Cursor) decode(b64 string) error {
+func (c *Cursor) Decode(b64 string) error {
 	bytes, err := base64.StdEncoding.DecodeString(b64)
 	if err != nil {
 		return errors.Wrapf(err, "failed to base64 decode cursor: %s", b64)

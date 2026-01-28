@@ -1,4 +1,4 @@
-package cosmos
+package cosmossdk
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
 )
 
@@ -45,7 +44,7 @@ func (c *HTTPClient) GetAccount(address string) (*AccountResponse, error) {
 
 func (c *HTTPClient) GetBalance(address string, baseDenom string) (*BalanceResponse, error) {
 	var res struct {
-		Balances   sdk.Coins  `json:"balances"`
+		Balances   []Value    `json:"balances"`
 		Pagination Pagination `json:"pagination"`
 	}
 
@@ -65,7 +64,7 @@ func (c *HTTPClient) GetDelegations(address string, apr *big.Float) ([]Delegatio
 				ValidatorAddress string `json:"validator_address"`
 				Shares           string `json:"shares"`
 			} `json:"delegation"`
-			Balance sdk.Coin `json:"balance"`
+			Balance Value `json:"balance"`
 		} `json:"delegation_responses"`
 		Pagination Pagination `json:"pagination"`
 	}
@@ -86,7 +85,7 @@ func (c *HTTPClient) GetDelegations(address string, apr *big.Float) ([]Delegatio
 			Validator: validator,
 			Shares:    r.Delegation.Shares,
 			Balance: Value{
-				Amount: r.Balance.Amount.String(),
+				Amount: r.Balance.Amount,
 				Denom:  r.Balance.Denom,
 			},
 		}
@@ -248,15 +247,15 @@ func (c *HTTPClient) GetRewards(address string, apr *big.Float) ([]Reward, error
 	return rewards, nil
 }
 
-func balance(balances sdk.Coins, baseDenom string) (*BalanceResponse, error) {
+func balance(balances []Value, baseDenom string) (*BalanceResponse, error) {
 	balance := "0"
 	assets := []Value{}
 	for _, b := range balances {
 		if b.Denom == baseDenom {
-			balance = b.Amount.String()
+			balance = b.Amount
 			continue
 		}
-		assets = append(assets, Value{Amount: b.Amount.String(), Denom: b.Denom})
+		assets = append(assets, Value{Amount: b.Amount, Denom: b.Denom})
 	}
 
 	b := &BalanceResponse{

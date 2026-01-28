@@ -1,4 +1,4 @@
-package cosmos
+package cosmossdk
 
 import (
 	"github.com/shapeshift/unchained/shared/api"

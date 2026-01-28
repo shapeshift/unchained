@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/shapeshift/unchained/shared/api"
+	"github.com/shapeshift/unchained/shared/cosmossdk"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -18,7 +19,7 @@ type Handler struct {
 // swagger:model Info
 type Info struct {
 	// swagger:allOf
-	cosmos.Info
+	cosmossdk.Info
 	// required: true
 	// example: 291107634956378
 	TotalSupply string `json:"totalSupply"`
@@ -48,7 +49,7 @@ func (h *Handler) GetInfo() (api.Info, error) {
 	}
 
 	i := Info{
-		Info:             info.(cosmos.Info),
+		Info:             info.(cosmossdk.Info),
 		TotalSupply:      aprData.totalSupply,
 		BondedTokens:     aprData.bondedTokens,
 		AnnualProvisions: aprData.annualProvisions,
@@ -63,9 +64,9 @@ func (h *Handler) GetInfo() (api.Info, error) {
 // swagger:model Account
 type Account struct {
 	// swagger:allOf
-	cosmos.Account
+	cosmossdk.Account
 	// swagger:allOf
-	*cosmos.Staking
+	*cosmossdk.Staking
 }
 
 func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
@@ -84,7 +85,7 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 			return err
 		}
 
-		a.Account = account.(cosmos.Account)
+		a.Account = account.(cosmossdk.Account)
 
 		return nil
 	})
@@ -107,7 +108,7 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 	return a, nil
 }
 
-func (h *Handler) GetValidators(cursor string, pageSize int) (*cosmos.Validators, error) {
+func (h *Handler) GetValidators(cursor string, pageSize int) (*cosmossdk.Validators, error) {
 	aprData, err := h.getAPRData()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get apr data")
@@ -118,7 +119,7 @@ func (h *Handler) GetValidators(cursor string, pageSize int) (*cosmos.Validators
 		return nil, errors.Wrap(err, "failed to get validators")
 	}
 
-	v := &cosmos.Validators{
+	v := &cosmossdk.Validators{
 		Validators: res.Validators,
 		Pagination: api.Pagination{
 			Cursor: res.Pagination.NextKey,
@@ -128,7 +129,7 @@ func (h *Handler) GetValidators(cursor string, pageSize int) (*cosmos.Validators
 	return v, nil
 }
 
-func (h *Handler) GetValidator(address string) (*cosmos.Validator, error) {
+func (h *Handler) GetValidator(address string) (*cosmossdk.Validator, error) {
 	aprData, err := h.getAPRData()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get apr data")
@@ -137,11 +138,11 @@ func (h *Handler) GetValidator(address string) (*cosmos.Validator, error) {
 	return h.HTTPClient.GetValidator(address, aprData.bRate)
 }
 
-func (h *Handler) ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Message {
+func (h *Handler) ParseMessages(msgs []sdk.Msg, events cosmossdk.EventsByMsgIndex) []cosmossdk.Message {
 	return cosmos.ParseMessages(msgs, events)
 }
 
-func (h *Handler) ParseFee(tx cosmos.SigningTx, txid string) cosmos.Value {
+func (h *Handler) ParseFee(tx cosmos.SigningTx, txid string) cosmossdk.Value {
 	return cosmos.Fee(tx, txid, h.Denom)
 }
 

@@ -27,6 +27,7 @@ import (
 	"github.com/rs/cors"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/shapeshift/unchained/shared/api"
+	"github.com/shapeshift/unchained/shared/cosmossdk"
 	"github.com/shapeshift/unchained/shared/log"
 	"github.com/shapeshift/unchained/shared/metrics"
 	"github.com/shapeshift/unchained/shared/websocket"
@@ -52,20 +53,24 @@ var PORT = func() int {
 }()
 
 type API struct {
-	*cosmos.API
+	*cosmossdk.API
 	handler *Handler
 }
 
-func New(cfg cosmos.Config, httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, swaggerPath string, prometheus *metrics.Prometheus) *API {
+func New(cfg cosmossdk.Config, httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService *cosmossdk.BlockService, swaggerPath string, prometheus *metrics.Prometheus) *API {
 	r := mux.NewRouter()
 
 	handler := &Handler{
 		Handler: &cosmos.Handler{
-			HTTPClient:   httpClient,
-			WSClient:     wsClient,
-			BlockService: blockService,
-			Denom:        cfg.Denom,
-			NativeFee:    cfg.NativeFee,
+			Handler: &cosmossdk.Handler{
+				HTTPClient:   httpClient,
+				BlockService: blockService,
+				Denom:        cfg.Denom,
+				NativeFee:    cfg.NativeFee,
+			},
+			HTTPClient:    httpClient,
+			ParseMessages: cosmos.ParseMessages,
+			WSClient:      wsClient,
 		},
 	}
 
@@ -80,7 +85,7 @@ func New(cfg cosmos.Config, httpClient *cosmos.HTTPClient, wsClient *cosmos.WSCl
 	}
 
 	a := &API{
-		API:     cosmos.New(handler, manager, server),
+		API:     cosmossdk.New(handler, manager, server),
 		handler: handler,
 	}
 
@@ -100,7 +105,7 @@ func New(cfg cosmos.Config, httpClient *cosmos.HTTPClient, wsClient *cosmos.WSCl
 
 	r.Use(api.Scheme, api.Logger(prometheus))
 
-	r.HandleFunc("/", a.Root).Methods("GET")
+	r.HandleFunc("/", a.API.Root).Methods("GET")
 
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		api.HandleResponse(w, http.StatusOK, map[string]string{"status": "up", "coinstack": "cosmos", "connections": strconv.Itoa(manager.ConnectionCount())})
@@ -112,14 +117,14 @@ func New(cfg cosmos.Config, httpClient *cosmos.HTTPClient, wsClient *cosmos.WSCl
 		http.ServeFile(w, r, filepath.FromSlash(swaggerPath))
 	}).Methods("GET")
 
-	r.PathPrefix("/docs/").Handler(http.StripPrefix("/docs/", http.FileServer(http.Dir("./static/swaggerui"))))
+	r.PathPrefix("/docs/").Handler(http.StripPrefix("/docs/", http.FileServer(http.Dir("../../static/swaggerui"))))
 
 	v1 := r.PathPrefix("/api/v1").Subrouter()
 	v1.HandleFunc("/info", a.Info).Methods("GET")
 	v1.HandleFunc("/send", a.SendTx).Methods("POST")
 
 	v1Account := v1.PathPrefix("/account").Subrouter()
-	v1Account.Use(cosmos.ValidatePubkey)
+	v1Account.Use(cosmossdk.ValidatePubkeyMiddleware(cosmos.IsValidAddress))
 	v1Account.HandleFunc("/{pubkey}", a.Account).Methods("GET")
 	v1Account.HandleFunc("/{pubkey}/txs", a.TxHistory).Methods("GET")
 
@@ -134,7 +139,7 @@ func New(cfg cosmos.Config, httpClient *cosmos.HTTPClient, wsClient *cosmos.WSCl
 	v1ValidatorsRoot.HandleFunc("", a.GetValidators).Methods("GET")
 
 	v1Validators := v1.PathPrefix("/validators").Subrouter()
-	v1Validators.Use(cosmos.ValidateValidatorPubkey)
+	v1Validators.Use(cosmossdk.ValidateValidatorPubkeyMiddleware(cosmos.IsValidValidatorAddress))
 	v1Validators.HandleFunc("/{pubkey}", a.GetValidator).Methods("GET")
 	v1Validators.HandleFunc("/{pubkey}/txs", a.ValidatorTxHistory).Methods("GET")
 
@@ -242,7 +247,7 @@ func (a *API) EstimateGas(w http.ResponseWriter, r *http.Request) {
 //	200: Validators
 //	500: InternalServerError
 func (a *API) GetValidators(w http.ResponseWriter, r *http.Request) {
-	cursor, pageSize, err := a.ValidatePagingParams(w, r, cosmos.DEFAULT_PAGE_SIZE_VALIDATORS, nil)
+	cursor, pageSize, err := a.ValidatePagingParams(w, r, cosmossdk.DEFAULT_PAGE_SIZE_VALIDATORS, nil)
 	if err != nil {
 		return
 	}
@@ -289,8 +294,8 @@ func (a *API) GetValidator(w http.ResponseWriter, r *http.Request) {
 func (a *API) ValidatorTxHistory(w http.ResponseWriter, r *http.Request) {
 	validatorAddr := mux.Vars(r)["pubkey"]
 
-	maxPageSize := cosmos.MAX_PAGE_SIZE_TX_HISTORY
-	cursor, pageSize, err := a.ValidatePagingParams(w, r, cosmos.DEFAULT_PAGE_SIZE_TX_HISTORY, &maxPageSize)
+	maxPageSize := cosmossdk.MAX_PAGE_SIZE_TX_HISTORY
+	cursor, pageSize, err := a.ValidatePagingParams(w, r, cosmossdk.DEFAULT_PAGE_SIZE_TX_HISTORY, &maxPageSize)
 	if err != nil {
 		return
 	}

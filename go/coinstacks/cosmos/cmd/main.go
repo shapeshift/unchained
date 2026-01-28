@@ -6,9 +6,11 @@ import (
 	"os/signal"
 	"syscall"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/shapeshift/unchained/coinstacks/cosmos/api"
 	"github.com/shapeshift/unchained/pkg/cosmos"
 	"github.com/shapeshift/unchained/shared/config"
+	"github.com/shapeshift/unchained/shared/cosmossdk"
 	"github.com/shapeshift/unchained/shared/log"
 	"github.com/shapeshift/unchained/shared/metrics"
 )
@@ -17,7 +19,7 @@ var (
 	logger = log.WithoutFields()
 
 	envPath     = flag.String("env", "", "path to env file (default: use os env)")
-	swaggerPath = flag.String("swagger", "coinstacks/cosmos/api/swagger.json", "path to swagger spec")
+	swaggerPath = flag.String("swagger", "api/swagger.json", "path to swagger spec")
 )
 
 // Config for running application
@@ -50,7 +52,7 @@ func main() {
 
 	encoding := cosmos.NewEncoding()
 
-	cfg := cosmos.Config{
+	cfg := cosmossdk.Config{
 		Bech32AddrPrefix:  "cosmos",
 		Bech32PkPrefix:    "cosmospub",
 		Bech32ValPrefix:   "cosmosvaloper",
@@ -67,12 +69,15 @@ func main() {
 
 	prometheus := metrics.NewPrometheus("cosmos")
 
+	sdk.GetConfig().SetBech32PrefixForAccount(cfg.Bech32AddrPrefix, cfg.Bech32PkPrefix)
+	sdk.GetConfig().SetBech32PrefixForValidator(cfg.Bech32ValPrefix, cfg.Bech32PkValPrefix)
+
 	httpClient, err := cosmos.NewHTTPClient(cfg)
 	if err != nil {
 		logger.Panicf("failed to create new http client: %+v", err)
 	}
 
-	blockService, err := cosmos.NewBlockService(httpClient)
+	blockService, err := cosmossdk.NewBlockService(httpClient)
 	if err != nil {
 		logger.Panicf("failed to create new block service: %+v", err)
 	}

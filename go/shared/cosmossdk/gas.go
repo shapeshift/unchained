@@ -1,11 +1,14 @@
-package cosmos
+package cosmossdk
 
 import (
 	"encoding/base64"
 
-	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
 	"github.com/pkg/errors"
 )
+
+type SimulateRequest struct {
+	TxBytes []byte `json:"tx_bytes"`
+}
 
 func (c *HTTPClient) GetEstimateGas(rawTx string) (string, error) {
 	txBytes, err := base64.StdEncoding.DecodeString(rawTx)
@@ -21,7 +24,7 @@ func (c *HTTPClient) GetEstimateGas(rawTx string) (string, error) {
 
 	e := &ErrorResponse{}
 
-	r, err := c.LCD.R().SetBody(txtypes.SimulateRequest{TxBytes: txBytes}).SetResult(res).SetError(e).Post("/cosmos/tx/v1beta1/simulate")
+	r, err := c.LCD.R().SetBody(SimulateRequest{TxBytes: txBytes}).SetResult(res).SetError(e).Post("/cosmos/tx/v1beta1/simulate")
 	if err != nil {
 		return "", errors.Wrap(err, "failed to estimate gas")
 	}
