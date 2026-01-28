@@ -3,10 +3,8 @@ module github.com/shapeshift/unchained/pkg/mayachain
 go 1.23.4
 
 require (
-	cosmossdk.io/math v1.5.3
 	github.com/cosmos/cosmos-sdk v0.53.4
 	github.com/go-resty/resty/v2 v2.17.1
-	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/websocket v1.5.3
 	github.com/pkg/errors v0.9.1
 	github.com/shapeshift/unchained/shared v0.0.0
@@ -56,6 +54,7 @@ require (
 	github.com/golang/snappy v0.0.5-0.20220116011046-fa5810519dcb // indirect
 	github.com/google/btree v1.1.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
 	github.com/gsterjov/go-libsecret v0.0.0-20161001094733-a6f4afe4910c // indirect

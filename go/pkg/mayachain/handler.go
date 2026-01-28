@@ -1,9 +1,8 @@
-package cosmos
+package mayachain
 
 import (
 	"crypto/sha256"
 	"fmt"
-	"math/big"
 	"reflect"
 	"strconv"
 
@@ -11,43 +10,25 @@ import (
 	ws "github.com/gorilla/websocket"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/shared/api"
+	"github.com/shapeshift/unchained/shared/cosmossdk"
 	"github.com/shapeshift/unchained/shared/websocket"
 	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 	"github.com/tendermint/tendermint/types"
-	"golang.org/x/sync/errgroup"
 )
 
-type RouteHandler interface {
-	// WS
-	StartWebsocket() error
-	StopWebsocket()
-	NewWebsocketConnection(conn *ws.Conn, manager *websocket.Manager)
-
-	// REST
-	GetInfo() (api.Info, error)
-	GetAccount(pubkey string) (api.Account, error)
-	GetTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error)
-	GetTx(txid string) (api.Tx, error)
-	SendTx(hex string) (string, error)
-	EstimateGas(rawTx string) (string, error)
-}
-
 type CoinSpecificHandler interface {
-	ParseMessages([]sdk.Msg, EventsByMsgIndex) []Message
-	ParseFee(tx SigningTx, txid string) Value
+	ParseMessages([]sdk.Msg, cosmossdk.EventsByMsgIndex) []cosmossdk.Message
+	ParseFee(tx SigningTx, txid string) cosmossdk.Value
 }
 
 type Handler struct {
-	// coin specific handler methods
-	ParseMessages func([]sdk.Msg, EventsByMsgIndex) []Message
-	ParseFee      func(tx SigningTx, txid string) Value
+	*cosmossdk.Handler
 
-	// common cosmossdk values
-	HTTPClient   APIClient
-	WSClient     *WSClient
-	BlockService *BlockService
-	Denom        string
-	NativeFee    int
+	HTTPClient APIClient
+	WSClient   *WSClient
+
+	ParseMessages func([]sdk.Msg, cosmossdk.EventsByMsgIndex) []cosmossdk.Message
+	ParseFee      func(tx SigningTx, txid string) cosmossdk.Value
 }
 
 // ValidateCoinSpecific performs runtime validation of a handler to ensure it fully implements
@@ -78,7 +59,27 @@ func (h *Handler) NewWebsocketConnection(conn *ws.Conn, manager *websocket.Manag
 }
 
 func (h *Handler) StartWebsocket() error {
-	h.WSClient.TxHandler(func(tx types.EventDataTx, block *BlockResponse) (interface{}, []string, error) {
+	h.WSClient.BlockEventHandler(func(eventCache map[string]interface{}, blockHeader types.Header, blockEvents []cosmossdk.ABCIEvent, eventIndex int) (interface{}, []string, error) {
+		tx, err := GetTxFromBlockEvents(eventCache, blockHeader, blockEvents, eventIndex, h.BlockService.Latest.Height, h.Denom, h.NativeFee)
+		if err != nil {
+			return nil, nil, errors.Wrap(err, "failed to get txs from end block events")
+		}
+
+		if tx == nil {
+			return nil, nil, nil
+		}
+
+		t, err := tx.FormatTx()
+		if err != nil {
+			return nil, nil, errors.Wrapf(err, "failed to format transaction: %s", tx.TxID)
+		}
+
+		addrs := cosmossdk.GetTxAddrs(tx.Events, tx.Messages)
+
+		return t, addrs, nil
+	})
+
+	h.WSClient.TxHandler(func(tx types.EventDataTx, block *cosmossdk.BlockResponse) (interface{}, []string, error) {
 		decodedTx, signingTx, err := DecodeTx(h.WSClient.EncodingConfig(), tx.Tx)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "failed to handle tx: %v", tx.Tx)
@@ -87,7 +88,7 @@ func (h *Handler) StartWebsocket() error {
 		txid := fmt.Sprintf("%X", sha256.Sum256(tx.Tx))
 		events := ParseEvents(tx.Result)
 
-		t := Tx{
+		t := cosmossdk.Tx{
 			BaseTx: api.BaseTx{
 				TxID:        txid,
 				BlockHash:   &block.Hash,
@@ -104,7 +105,7 @@ func (h *Handler) StartWebsocket() error {
 			Messages:      h.ParseMessages(decodedTx.GetMsgs(), events),
 		}
 
-		addrs := GetTxAddrs(t.Events, t.Messages)
+		addrs := cosmossdk.GetTxAddrs(t.Events, t.Messages)
 
 		return t, addrs, nil
 	})
@@ -121,54 +122,6 @@ func (h *Handler) StopWebsocket() {
 	h.WSClient.Stop()
 }
 
-func (h *Handler) GetInfo() (api.Info, error) {
-	info := Info{
-		BaseInfo: api.BaseInfo{
-			Network: "mainnet",
-		},
-	}
-
-	return info, nil
-}
-
-func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
-	account := Account{}
-
-	g := new(errgroup.Group)
-
-	g.Go(func() error {
-		a, err := h.HTTPClient.GetAccount(pubkey)
-		if err != nil {
-			return err
-		}
-
-		account.Pubkey = a.Address
-		account.AccountNumber = int(a.AccountNumber)
-		account.Sequence = int(a.Sequence)
-
-		return nil
-	})
-
-	g.Go(func() error {
-		b, err := h.HTTPClient.GetBalance(pubkey, h.Denom)
-		if err != nil {
-			return err
-		}
-
-		account.Balance = b.Amount
-		account.UnconfirmedBalance = "0"
-		account.Assets = b.Assets
-
-		return err
-	})
-
-	if err := g.Wait(); err != nil {
-		return nil, err
-	}
-
-	return account, nil
-}
-
 func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
 	sources := TxHistorySources(h.HTTPClient, pubkey, h.FormatTx)
 
@@ -177,28 +130,7 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 		return nil, errors.Wrapf(err, "failed to get tx history")
 	}
 
-	txHistory := TxHistory{
-		BaseTxHistory: api.BaseTxHistory{
-			Pagination: api.Pagination{
-				Cursor: res.Cursor,
-			},
-			Pubkey: pubkey,
-		},
-		Txs: res.Txs,
-	}
-
-	return txHistory, nil
-}
-
-func (h *Handler) GetValidatorTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
-	sources := ValidatorTxHistorySources(h.HTTPClient, pubkey, h.FormatTx)
-
-	res, err := h.HTTPClient.GetTxHistory(pubkey, cursor, pageSize, sources)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get tx history")
-	}
-
-	txHistory := TxHistory{
+	txHistory := cosmossdk.TxHistory{
 		BaseTxHistory: api.BaseTxHistory{
 			Pagination: api.Pagination{
 				Cursor: res.Cursor,
@@ -225,67 +157,7 @@ func (h *Handler) GetTx(txid string) (api.Tx, error) {
 	return t, nil
 }
 
-func (h *Handler) SendTx(hex string) (string, error) {
-	return h.HTTPClient.BroadcastTx(hex)
-}
-
-func (h Handler) EstimateGas(rawTx string) (string, error) {
-	return h.HTTPClient.GetEstimateGas(rawTx)
-}
-
-func (h *Handler) GetStaking(pubkey string, apr *big.Float) (*Staking, error) {
-	staking := &Staking{}
-
-	g := new(errgroup.Group)
-
-	g.Go(func() error {
-		delegations, err := h.HTTPClient.GetDelegations(pubkey, apr)
-		if err != nil {
-			return err
-		}
-
-		staking.Delegations = delegations
-		return nil
-	})
-
-	g.Go(func() error {
-		redelegations, err := h.HTTPClient.GetRedelegations(pubkey, apr)
-		if err != nil {
-			return err
-		}
-
-		staking.Redelegations = redelegations
-		return nil
-	})
-
-	g.Go(func() error {
-		unbondings, err := h.HTTPClient.GetUnbondings(pubkey, h.Denom, apr)
-		if err != nil {
-			return err
-		}
-
-		staking.Unbondings = unbondings
-		return nil
-	})
-
-	g.Go(func() error {
-		rewards, err := h.HTTPClient.GetRewards(pubkey, apr)
-		if err != nil {
-			return err
-		}
-
-		staking.Rewards = rewards
-		return nil
-	})
-
-	if err := g.Wait(); err != nil {
-		return nil, err
-	}
-
-	return staking, nil
-}
-
-func (h *Handler) FormatTx(tx *coretypes.ResultTx) (*Tx, error) {
+func (h *Handler) FormatTx(tx *coretypes.ResultTx) (*cosmossdk.Tx, error) {
 	height := int(tx.Height)
 
 	block, err := h.BlockService.GetBlock(height)
@@ -300,7 +172,7 @@ func (h *Handler) FormatTx(tx *coretypes.ResultTx) (*Tx, error) {
 
 	events := ParseEvents(tx.TxResult)
 
-	t := &Tx{
+	t := &cosmossdk.Tx{
 		BaseTx: api.BaseTx{
 			TxID:        tx.Hash.String(),
 			BlockHash:   &block.Hash,

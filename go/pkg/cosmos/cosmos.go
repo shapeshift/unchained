@@ -28,7 +28,7 @@ import (
 var logger = log.WithoutFields()
 
 type HTTPClient struct {
-	cosmossdk.HTTPClient
+	*cosmossdk.HTTPClient
 }
 
 type APIClient interface {
@@ -56,7 +56,7 @@ func NewHTTPClient(conf cosmossdk.Config) (*HTTPClient, error) {
 	}
 
 	c := &HTTPClient{
-		HTTPClient: *httpClient,
+		HTTPClient: httpClient,
 	}
 
 	return c, nil

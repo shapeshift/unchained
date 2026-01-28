@@ -1,8 +1,9 @@
 package mayachain
 
 import (
-	"github.com/shapeshift/unchained/pkg/mayachain/cosmos"
-	"github.com/tendermint/tendermint/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/shapeshift/unchained/shared/cosmossdk"
+	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 	tenderminttypes "github.com/tendermint/tendermint/types"
 )
 
@@ -29,7 +30,7 @@ func (b *ResultBlock) Timestamp() int64 {
 }
 
 type NewBlock struct {
-	types.EventDataNewBlock
+	tenderminttypes.EventDataNewBlock
 }
 
 func (b *NewBlock) Hash() string {
@@ -45,33 +46,80 @@ func (b *NewBlock) Timestamp() int64 {
 }
 
 // ResultTx represents a tx_search ResultTx created from block_result block events
-type ResultTx struct {
+type BlockResultTx struct {
 	BlockHash    string
 	BlockHeight  int64
 	Timestamp    int
 	Index        int
 	TxID         string
 	Memo         string
-	Fee          cosmos.Value
-	Events       cosmos.EventsByMsgIndex
-	Messages     []cosmos.Message
+	Fee          cosmossdk.Value
+	Events       cosmossdk.EventsByMsgIndex
+	Messages     []cosmossdk.Message
 	TypedEvent   TypedEvent
 	latestHeight int
-	formatTx     func(tx *ResultTx) (*cosmos.Tx, error)
+	formatTx     func(tx *BlockResultTx) (*cosmossdk.Tx, error)
 }
 
-func (r *ResultTx) GetHeight() int64 {
+func (r *BlockResultTx) GetHeight() int64 {
 	return r.BlockHeight
 }
 
-func (r *ResultTx) GetIndex() int {
+func (r *BlockResultTx) GetIndex() int {
 	return r.Index
 }
 
-func (r *ResultTx) GetTxID() string {
+func (r *BlockResultTx) GetTxID() string {
 	return r.TxID
 }
 
-func (r *ResultTx) FormatTx() (*cosmos.Tx, error) {
+func (r *BlockResultTx) FormatTx() (*cosmossdk.Tx, error) {
 	return r.formatTx(r)
+}
+
+type ResultBlockResults struct {
+	*coretypes.ResultBlockResults
+}
+
+func (r *ResultBlockResults) GetBlockEvents() []cosmossdk.ABCIEvent {
+	return ConvertABCIEvents(r.EndBlockEvents)
+}
+
+type ResultTx struct {
+	*coretypes.ResultTx
+	formatTx func(tx *coretypes.ResultTx) (*cosmossdk.Tx, error)
+}
+
+func (r *ResultTx) GetHeight() int64 {
+	return r.Height
+}
+
+func (r *ResultTx) GetIndex() int {
+	return int(r.Index)
+}
+
+func (r *ResultTx) GetTxID() string {
+	return r.Hash.String()
+}
+
+func (r *ResultTx) FormatTx() (*cosmossdk.Tx, error) {
+	return r.formatTx(r.ResultTx)
+}
+
+type SigningTx interface {
+	GetMemo() string
+	GetFee() sdk.Coins
+}
+
+type signingTx struct {
+	memo string
+	fee  sdk.Coins
+}
+
+func (t *signingTx) GetMemo() string {
+	return t.memo
+}
+
+func (t *signingTx) GetFee() sdk.Coins {
+	return t.fee
 }

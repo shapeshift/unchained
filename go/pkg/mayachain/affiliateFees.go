@@ -1,4 +1,4 @@
-package api
+package mayachain
 
 import (
 	"fmt"
@@ -8,8 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/shapeshift/unchained/pkg/mayachain"
-	"github.com/shapeshift/unchained/pkg/mayachain/cosmos"
+	"github.com/shapeshift/unchained/shared/cosmossdk"
 	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 	"github.com/tendermint/tendermint/types"
 	"golang.org/x/sync/errgroup"
@@ -25,7 +24,7 @@ type AffiliateFeeIndexer struct {
 	AffiliateAddresses []string
 	AffiliateFeeDenoms []string
 	AffiliateFees      []*AffiliateFee
-	httpClient         *cosmos.HTTPClient
+	httpClient         *HTTPClient
 	mu                 sync.Mutex
 }
 
@@ -39,7 +38,7 @@ type AffiliateFee struct {
 	TxID        string `json:"txId"`
 }
 
-func NewAffiliateFeeIndexer(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient) *AffiliateFeeIndexer {
+func NewAffiliateFeeIndexer(httpClient *HTTPClient, wsClient *WSClient) *AffiliateFeeIndexer {
 	affiliateAddresses := []string{"maya122h9hlrugzdny9ct95z6g7afvpzu34s73tgnyv"}
 	affilateFeeDenoms := []string{"MAYA.CACAO"}
 
@@ -50,8 +49,8 @@ func NewAffiliateFeeIndexer(httpClient *cosmos.HTTPClient, wsClient *cosmos.WSCl
 		httpClient:         httpClient,
 	}
 
-	wsClient.NewBlockHandler(func(newBlock types.EventDataNewBlock, blockEvents []cosmos.ABCIEvent) {
-		i.processAffiliateFees(&mayachain.NewBlock{EventDataNewBlock: newBlock}, blockEvents, i.AffiliateAddresses)
+	wsClient.NewBlockHandler(func(newBlock types.EventDataNewBlock, blockEvents []cosmossdk.ABCIEvent) {
+		i.processAffiliateFees(&NewBlock{EventDataNewBlock: newBlock}, blockEvents, i.AffiliateAddresses)
 	})
 
 	return i
@@ -136,7 +135,7 @@ func (i *AffiliateFeeIndexer) handleBlocks(affiliateAddress string, resultCh <-c
 						logger.Panicf("failed to handle block: %d: %+v", b.Block.Height, err)
 					}
 
-					i.processAffiliateFees(&mayachain.ResultBlock{Block: b.Block}, blockResult.GetBlockEvents(), []string{affiliateAddress})
+					i.processAffiliateFees(&ResultBlock{Block: b.Block}, blockResult.GetBlockEvents(), []string{affiliateAddress})
 				}
 			}
 		}()
@@ -145,17 +144,17 @@ func (i *AffiliateFeeIndexer) handleBlocks(affiliateAddress string, resultCh <-c
 	return wg
 }
 
-func (i *AffiliateFeeIndexer) processAffiliateFees(block mayachain.Block, blockEvents []cosmos.ABCIEvent, affiliateAddresses []string) {
-	_, typedEvents, err := mayachain.ParseBlockEvents(blockEvents)
+func (i *AffiliateFeeIndexer) processAffiliateFees(block Block, blockEvents []cosmossdk.ABCIEvent, affiliateAddresses []string) {
+	_, typedEvents, err := ParseBlockEvents(blockEvents)
 	if err != nil {
 		logger.Panicf("failed to parse block events for block: %d: %+v", block.Height(), err)
 	}
 
-	swaps := make(map[string]*mayachain.EventSwap)
+	swaps := make(map[string]*EventSwap)
 	affiliateFees := make([]*AffiliateFee, 0)
 	for _, event := range typedEvents {
 		switch v := event.(type) {
-		case *mayachain.EventOutbound:
+		case *EventOutbound:
 			coinParts := strings.Fields(v.Coin)
 			if slices.Contains(affiliateAddresses, v.To) && slices.Contains(i.AffiliateFeeDenoms, coinParts[1]) {
 				affiliateFee := &AffiliateFee{
@@ -169,7 +168,7 @@ func (i *AffiliateFeeIndexer) processAffiliateFees(block mayachain.Block, blockE
 				}
 				affiliateFees = append(affiliateFees, affiliateFee)
 			}
-		case *mayachain.EventSwap:
+		case *EventSwap:
 			parts := strings.Split(v.Memo, ":")
 			if len(parts) > 4 && parts[4] == "ssmaya" {
 				swaps[v.Id] = v

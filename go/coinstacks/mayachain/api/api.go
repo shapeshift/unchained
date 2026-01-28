@@ -18,21 +18,18 @@ import (
 	"fmt"
 	"net/http"
 	_ "net/http/pprof"
-	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/gorilla/mux"
-	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/cors"
-	"github.com/shapeshift/unchained/pkg/mayachain/cosmos"
+	"github.com/shapeshift/unchained/pkg/mayachain"
 	"github.com/shapeshift/unchained/shared/api"
+	"github.com/shapeshift/unchained/shared/cosmossdk"
 	"github.com/shapeshift/unchained/shared/log"
 	"github.com/shapeshift/unchained/shared/metrics"
 	"github.com/shapeshift/unchained/shared/websocket"
@@ -57,57 +54,25 @@ var PORT = func() int {
 	return 3000
 }()
 
-type HTTPClient struct {
-	*cosmos.HTTPClient
-	Indexer *resty.Client
-}
-
 type API struct {
-	*cosmos.API
+	*cosmossdk.API
 	handler    *Handler
-	httpClient *HTTPClient
+	httpClient *mayachain.HTTPClient
 }
 
-type Config struct {
-	cosmos.Config
-	INDEXERURL    string
-	INDEXERAPIKEY string
-}
-
-func NewHTTPClient(conf Config) (*HTTPClient, error) {
-	httpClient, err := cosmos.NewHTTPClient(conf.Config)
-	if err != nil {
-		logger.Panicf("failed to create new http client: %+v", err)
-	}
-
-	indexerURL, err := url.Parse(conf.INDEXERURL)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse INDEXERURL: %s", conf.INDEXERURL)
-	}
-
-	if conf.INDEXERAPIKEY != "" {
-		indexerURL.Path = path.Join(indexerURL.Path, fmt.Sprintf("api=%s", conf.INDEXERAPIKEY))
-	}
-
-	headers := map[string]string{"Accept": "application/json"}
-	indexer := resty.New().SetBaseURL(indexerURL.String()).SetHeaders(headers)
-
-	return &HTTPClient{
-		HTTPClient: httpClient,
-		Indexer:    indexer,
-	}, nil
-}
-
-func New(cfg cosmos.Config, httpClient *HTTPClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, indexer *AffiliateFeeIndexer, swaggerPath string, prometheus *metrics.Prometheus) *API {
+func New(cfg cosmossdk.Config, httpClient *mayachain.HTTPClient, wsClient *mayachain.WSClient, blockService *cosmossdk.BlockService, indexer *mayachain.AffiliateFeeIndexer, swaggerPath string, prometheus *metrics.Prometheus) *API {
 	r := mux.NewRouter()
 
 	handler := &Handler{
-		Handler: &cosmos.Handler{
-			HTTPClient:   httpClient,
-			WSClient:     wsClient,
-			BlockService: blockService,
-			Denom:        cfg.Denom,
-			NativeFee:    cfg.NativeFee,
+		Handler: &mayachain.Handler{
+			Handler: &cosmossdk.Handler{
+				HTTPClient:   httpClient,
+				BlockService: blockService,
+				Denom:        cfg.Denom,
+				NativeFee:    cfg.NativeFee,
+			},
+			HTTPClient: httpClient,
+			WSClient:   wsClient,
 		},
 		indexer: indexer,
 	}
@@ -123,14 +88,14 @@ func New(cfg cosmos.Config, httpClient *HTTPClient, wsClient *cosmos.WSClient, b
 	}
 
 	a := &API{
-		API:        cosmos.New(handler, manager, server),
+		API:        cosmossdk.New(handler, manager, server),
 		handler:    handler,
 		httpClient: httpClient,
 	}
 
 	// compile check to ensure Handler implements necessary interfaces
 	var _ api.BaseAPI = handler
-	var _ cosmos.CoinSpecificHandler = handler
+	var _ mayachain.CoinSpecificHandler = handler
 
 	// runtime check to ensure Handler implements CoinSpecific functionality
 	if err := handler.ValidateCoinSpecific(handler); err != nil {
@@ -156,14 +121,14 @@ func New(cfg cosmos.Config, httpClient *HTTPClient, wsClient *cosmos.WSClient, b
 		http.ServeFile(w, r, filepath.FromSlash(swaggerPath))
 	}).Methods("GET")
 
-	r.PathPrefix("/docs/").Handler(http.StripPrefix("/docs/", http.FileServer(http.Dir("./static/swaggerui"))))
+	r.PathPrefix("/docs/").Handler(http.StripPrefix("/docs/", http.FileServer(http.Dir("../../static/swaggerui"))))
 
 	v1 := r.PathPrefix("/api/v1").Subrouter()
 	v1.HandleFunc("/info", a.Info).Methods("GET")
 	v1.HandleFunc("/send", a.SendTx).Methods("POST")
 
 	v1Account := v1.PathPrefix("/account").Subrouter()
-	v1Account.Use(cosmos.ValidatePubkey)
+	v1Account.Use(cosmossdk.ValidatePubkeyMiddleware(mayachain.IsValidAddress))
 	v1Account.HandleFunc("/{pubkey}", a.Account).Methods("GET")
 	v1Account.HandleFunc("/{pubkey}/txs", a.TxHistory).Methods("GET")
 

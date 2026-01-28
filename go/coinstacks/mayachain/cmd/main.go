@@ -6,9 +6,11 @@ import (
 	"os/signal"
 	"syscall"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/shapeshift/unchained/coinstacks/mayachain/api"
-	"github.com/shapeshift/unchained/pkg/mayachain/cosmos"
+	"github.com/shapeshift/unchained/pkg/mayachain"
 	"github.com/shapeshift/unchained/shared/config"
+	"github.com/shapeshift/unchained/shared/cosmossdk"
 	"github.com/shapeshift/unchained/shared/log"
 	"github.com/shapeshift/unchained/shared/metrics"
 
@@ -19,7 +21,7 @@ var (
 	logger = log.WithoutFields()
 
 	envPath     = flag.String("env", "", "path to env file (default: use os env)")
-	swaggerPath = flag.String("swagger", "coinstacks/mayachain/api/swagger.json", "path to swagger spec")
+	swaggerPath = flag.String("swagger", "api/swagger.json", "path to swagger spec")
 )
 
 type Config struct {
@@ -51,23 +53,21 @@ func main() {
 		}
 	}
 
-	encoding := cosmos.NewEncoding(mayatypes.RegisterInterfaces)
+	encoding := mayachain.NewEncoding(mayatypes.RegisterInterfaces)
 
-	cfg := api.Config{
-		Config: cosmos.Config{
-			Bech32AddrPrefix:  "maya",
-			Bech32PkPrefix:    "mayapub",
-			Bech32ValPrefix:   "mayav",
-			Bech32PkValPrefix: "mayavpub",
-			Denom:             "cacao",
-			NativeFee:         2000000000, // https://daemon.mayachain.shapeshift.com/lcd/mayachain/constants
-			Encoding:          encoding,
-			LCDAPIKEY:         conf.LCDAPIKEY,
-			LCDURL:            conf.LCDURL,
-			RPCAPIKEY:         conf.RPCAPIKEY,
-			RPCURL:            conf.RPCURL,
-			WSURL:             conf.WSURL,
-			WSAPIKEY:          conf.WSAPIKEY,
+	cfg := mayachain.Config{
+		Config: cosmossdk.Config{
+			Bech32AddrPrefix: "maya",
+			Bech32PkPrefix:   "mayapub",
+			Denom:            "cacao",
+			NativeFee:        2000000000, // https://daemon.mayachain.shapeshift.com/lcd/mayachain/constants
+			Encoding:         encoding,
+			LCDAPIKEY:        conf.LCDAPIKEY,
+			LCDURL:           conf.LCDURL,
+			RPCAPIKEY:        conf.RPCAPIKEY,
+			RPCURL:           conf.RPCURL,
+			WSURL:            conf.WSURL,
+			WSAPIKEY:         conf.WSAPIKEY,
 		},
 		INDEXERURL:    conf.INDEXERURL,
 		INDEXERAPIKEY: conf.INDEXERAPIKEY,
@@ -75,22 +75,24 @@ func main() {
 
 	prometheus := metrics.NewPrometheus("mayachain")
 
-	httpClient, err := api.NewHTTPClient(cfg)
+	sdk.GetConfig().SetBech32PrefixForAccount(cfg.Bech32AddrPrefix, cfg.Bech32PkPrefix)
+
+	httpClient, err := mayachain.NewHTTPClient(cfg)
 	if err != nil {
 		logger.Panicf("failed to create new http client: %+v", err)
 	}
 
-	blockService, err := cosmos.NewBlockService(httpClient)
+	blockService, err := cosmossdk.NewBlockService(httpClient)
 	if err != nil {
 		logger.Panicf("failed to create new block service: %+v", err)
 	}
 
-	wsClient, err := cosmos.NewWebsocketClient(cfg.Config, blockService, errChan)
+	wsClient, err := mayachain.NewWebsocketClient(cfg, blockService, errChan)
 	if err != nil {
 		logger.Panicf("failed to create new websocket client: %+v", err)
 	}
 
-	indexer := api.NewAffiliateFeeIndexer(httpClient.HTTPClient, wsClient)
+	indexer := mayachain.NewAffiliateFeeIndexer(httpClient, wsClient)
 	if err := indexer.Sync(); err != nil {
 		logger.Panicf("failed to index affiliate fees: %+v", err)
 	}
