@@ -6,8 +6,6 @@ COPY go/shared/go.mod go/shared/go.sum go/shared/
 COPY go/pkg/mayachain/go.mod go/pkg/mayachain/go.sum go/pkg/mayachain/
 COPY go/coinstacks/mayachain/go.mod go/coinstacks/mayachain/go.sum go/coinstacks/mayachain/
 
-RUN go mod download
-
 COPY go/lib go/lib
 COPY go/radix go/radix
 COPY go/static go/static
