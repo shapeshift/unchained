@@ -57,7 +57,7 @@ type API struct {
 	handler *Handler
 }
 
-func New(cfg cosmossdk.Config, httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService *cosmossdk.BlockService, swaggerPath string, prometheus *metrics.Prometheus) *API {
+func New(cfg cosmossdk.Config, httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService *cosmossdk.BlockService, swaggerPath string, swaggeruiPath string, prometheus *metrics.Prometheus) *API {
 	r := mux.NewRouter()
 
 	handler := &Handler{
@@ -117,7 +117,7 @@ func New(cfg cosmossdk.Config, httpClient *cosmos.HTTPClient, wsClient *cosmos.W
 		http.ServeFile(w, r, filepath.FromSlash(swaggerPath))
 	}).Methods("GET")
 
-	r.PathPrefix("/docs/").Handler(http.StripPrefix("/docs/", http.FileServer(http.Dir("../../static/swaggerui"))))
+	r.PathPrefix("/docs/").Handler(http.StripPrefix("/docs/", http.FileServer(http.Dir(swaggeruiPath))))
 
 	v1 := r.PathPrefix("/api/v1").Subrouter()
 	v1.HandleFunc("/info", a.Info).Methods("GET")

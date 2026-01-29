@@ -6,8 +6,6 @@ COPY go/shared/go.mod go/shared/go.sum go/shared/
 COPY go/pkg/cosmos/go.mod go/pkg/cosmos/go.sum go/pkg/cosmos/
 COPY go/coinstacks/cosmos/go.mod go/coinstacks/cosmos/go.sum go/coinstacks/cosmos/
 
-RUN go mod download
-
 COPY go/static go/static
 COPY go/shared go/shared
 COPY go/pkg/cosmos go/pkg/cosmos

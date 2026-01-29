@@ -18,8 +18,9 @@ import (
 var (
 	logger = log.WithoutFields()
 
-	envPath     = flag.String("env", "", "path to env file (default: use os env)")
-	swaggerPath = flag.String("swagger", "api/swagger.json", "path to swagger spec")
+	envPath       = flag.String("env", "", "path to env file (default: use os env)")
+	swaggerPath   = flag.String("swagger", "api/swagger.json", "path to swagger spec")
+	swaggeruiPath = flag.String("swaggerui", "../../static/swaggerui", "path to swaggerui")
 )
 
 // Config for running application
@@ -87,7 +88,7 @@ func main() {
 		logger.Panicf("failed to create new websocket client: %+v", err)
 	}
 
-	api := api.New(cfg, httpClient, wsClient, blockService, *swaggerPath, prometheus)
+	api := api.New(cfg, httpClient, wsClient, blockService, *swaggerPath, *swaggeruiPath, prometheus)
 	defer api.Shutdown()
 
 	go api.Serve(errChan)
