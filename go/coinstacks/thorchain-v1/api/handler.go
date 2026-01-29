@@ -4,12 +4,12 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
 	"github.com/shapeshift/unchained/pkg/thorchain"
-	"github.com/shapeshift/unchained/pkg/thorchain/cosmos"
 	"github.com/shapeshift/unchained/shared/api"
+	"github.com/shapeshift/unchained/shared/cosmossdk"
 )
 
 type Handler struct {
-	*cosmos.Handler
+	*thorchain.Handler
 }
 
 func (h *Handler) StartWebsocket() error {
@@ -25,7 +25,7 @@ func (h *Handler) StartWebsocket() error {
 // swagger:model Info
 type Info struct {
 	// swagger:allOf
-	cosmos.Info
+	cosmossdk.Info
 }
 
 func (h *Handler) GetInfo() (api.Info, error) {
@@ -34,7 +34,7 @@ func (h *Handler) GetInfo() (api.Info, error) {
 		return nil, err
 	}
 
-	i := Info{Info: info.(cosmos.Info)}
+	i := Info{Info: info.(cosmossdk.Info)}
 
 	return i, nil
 }
@@ -43,10 +43,10 @@ func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.
 	return thorchain.GetTxHistory(h.Handler, pubkey, cursor, pageSize)
 }
 
-func (h *Handler) ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Message {
+func (h *Handler) ParseMessages(msgs []sdk.Msg, events cosmossdk.EventsByMsgIndex) []cosmossdk.Message {
 	return thorchain.ParseMessages(msgs, events)
 }
 
-func (h *Handler) ParseFee(tx cosmos.SigningTx, txid string) cosmos.Value {
+func (h *Handler) ParseFee(tx thorchain.SigningTx, txid string) cosmossdk.Value {
 	return thorchain.ParseFee(tx, txid, h.Denom, h.NativeFee)
 }

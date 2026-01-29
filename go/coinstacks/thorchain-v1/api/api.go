@@ -26,8 +26,9 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/cors"
 	thorchainV1 "github.com/shapeshift/unchained/coinstacks/thorchain-v1"
-	"github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+	"github.com/shapeshift/unchained/pkg/thorchain"
 	"github.com/shapeshift/unchained/shared/api"
+	"github.com/shapeshift/unchained/shared/cosmossdk"
 	"github.com/shapeshift/unchained/shared/log"
 	"github.com/shapeshift/unchained/shared/metrics"
 	"github.com/shapeshift/unchained/shared/websocket"
@@ -53,20 +54,23 @@ var PORT = func() int {
 }()
 
 type API struct {
-	*cosmos.API
+	*cosmossdk.API
 	handler *Handler
 }
 
-func New(cfg cosmos.Config, httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, swaggerPath string, prometheus *metrics.Prometheus) *API {
+func New(cfg thorchain.Config, httpClient *thorchain.HTTPClient, wsClient *thorchain.WSClient, blockService *cosmossdk.BlockService, swaggerPath string, prometheus *metrics.Prometheus) *API {
 	r := mux.NewRouter()
 
 	handler := &Handler{
-		Handler: &cosmos.Handler{
-			HTTPClient:   thorchainV1.NewHTTPClient(httpClient),
-			WSClient:     wsClient,
-			BlockService: blockService,
-			Denom:        cfg.Denom,
-			NativeFee:    cfg.NativeFee,
+		Handler: &thorchain.Handler{
+			Handler: &cosmossdk.Handler{
+				HTTPClient:   httpClient,
+				BlockService: blockService,
+				Denom:        cfg.Denom,
+				NativeFee:    cfg.NativeFee,
+			},
+			HTTPClient: thorchainV1.NewHTTPClient(httpClient),
+			WSClient:   wsClient,
 		},
 	}
 
@@ -81,13 +85,13 @@ func New(cfg cosmos.Config, httpClient *cosmos.HTTPClient, wsClient *cosmos.WSCl
 	}
 
 	a := &API{
-		API:     cosmos.New(handler, manager, server),
+		API:     cosmossdk.New(handler, manager, server),
 		handler: handler,
 	}
 
 	// runtime check to ensure Handler implements CoinSpecific functionality
 	var _ api.BaseAPI = handler
-	var _ cosmos.CoinSpecificHandler = handler
+	var _ thorchain.CoinSpecificHandler = handler
 
 	// runtime check to ensure Handler implements CoinSpecificHandler
 	if err := handler.ValidateCoinSpecific(handler); err != nil {
@@ -119,7 +123,7 @@ func New(cfg cosmos.Config, httpClient *cosmos.HTTPClient, wsClient *cosmos.WSCl
 	v1.HandleFunc("/info", a.Info).Methods("GET")
 
 	v1Account := v1.PathPrefix("/account").Subrouter()
-	v1Account.Use(cosmos.ValidatePubkey)
+	v1Account.Use(cosmossdk.ValidatePubkeyMiddleware(thorchain.IsValidAddress))
 	v1Account.HandleFunc("/{pubkey}/txs", a.TxHistory).Methods("GET")
 
 	v1Transaction := v1.PathPrefix("/tx").Subrouter()

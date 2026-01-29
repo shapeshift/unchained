@@ -6,9 +6,11 @@ import (
 	"os/signal"
 	"syscall"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/shapeshift/unchained/coinstacks/thorchain-v1/api"
-	"github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+	"github.com/shapeshift/unchained/pkg/thorchain"
 	"github.com/shapeshift/unchained/shared/config"
+	"github.com/shapeshift/unchained/shared/cosmossdk"
 	"github.com/shapeshift/unchained/shared/log"
 	"github.com/shapeshift/unchained/shared/metrics"
 
@@ -19,7 +21,7 @@ var (
 	logger = log.WithoutFields()
 
 	envPath     = flag.String("env", "", "path to env file (default: use os env)")
-	swaggerPath = flag.String("swagger", "coinstacks/thorchain-v1/api/swagger.json", "path to swagger spec")
+	swaggerPath = flag.String("swagger", "api/swagger.json", "path to swagger spec")
 )
 
 type Config struct {
@@ -49,37 +51,39 @@ func main() {
 		}
 	}
 
-	encoding := cosmos.NewEncoding(thortypes.RegisterInterfaces)
+	encoding := thorchain.NewEncoding(thortypes.RegisterInterfaces)
 
-	cfg := cosmos.Config{
-		Bech32AddrPrefix:  "thor",
-		Bech32PkPrefix:    "thorpub",
-		Bech32ValPrefix:   "thorv",
-		Bech32PkValPrefix: "thorvpub",
-		Denom:             "rune",
-		NativeFee:         2000000, // https://daemon.thorchain.shapeshift.com/lcd/thorchain/constants
-		Encoding:          encoding,
-		LCDURL:            conf.LCDURL,
-		LCDAPIKEY:         conf.LCDAPIKEY,
-		RPCURL:            conf.RPCURL,
-		RPCAPIKEY:         conf.RPCAPIKEY,
-		WSURL:             conf.WSURL,
-		WSAPIKEY:          conf.WSAPIKEY,
+	cfg := thorchain.Config{
+		Config: cosmossdk.Config{
+			Bech32AddrPrefix: "thor",
+			Bech32PkPrefix:   "thorpub",
+			Denom:            "rune",
+			NativeFee:        2000000, // https://daemon.thorchain.shapeshift.com/lcd/thorchain/constants
+			Encoding:         encoding,
+			LCDURL:           conf.LCDURL,
+			LCDAPIKEY:        conf.LCDAPIKEY,
+			RPCURL:           conf.RPCURL,
+			RPCAPIKEY:        conf.RPCAPIKEY,
+			WSURL:            conf.WSURL,
+			WSAPIKEY:         conf.WSAPIKEY,
+		},
 	}
 
 	prometheus := metrics.NewPrometheus("thorchain-v1")
 
-	httpClient, err := cosmos.NewHTTPClient(cfg)
+	sdk.GetConfig().SetBech32PrefixForAccount(cfg.Bech32AddrPrefix, cfg.Bech32PkPrefix)
+
+	httpClient, err := thorchain.NewHTTPClient(cfg)
 	if err != nil {
 		logger.Panicf("failed to create new http client: %+v", err)
 	}
 
-	blockService, err := cosmos.NewBlockService(httpClient)
+	blockService, err := cosmossdk.NewBlockService(httpClient)
 	if err != nil {
 		logger.Panicf("failed to create new block service: %+v", err)
 	}
 
-	wsClient, err := cosmos.NewWebsocketClient(cfg, blockService, errChan)
+	wsClient, err := thorchain.NewWebsocketClient(cfg, blockService, errChan)
 	if err != nil {
 		logger.Panicf("failed to create new websocket client: %+v", err)
 	}
