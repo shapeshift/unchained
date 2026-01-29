@@ -80,7 +80,7 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 }
 
 func (c *HTTPClient) GetEncoding() *params.EncodingConfig {
-	return c.HTTPClient.Encoding.(*params.EncodingConfig)
+	return c.Encoding.(*params.EncodingConfig)
 }
 
 // NewEncoding registers all base protobuf types by default as well as any custom types passed in

@@ -13,7 +13,6 @@ import (
 	cometbftjson "github.com/cometbft/cometbft/libs/json"
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	rpctypes "github.com/cometbft/cometbft/rpc/jsonrpc/types"
-	"github.com/cometbft/cometbft/types"
 	cometbfttypes "github.com/cometbft/cometbft/types"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -432,7 +431,7 @@ func DecodeTx(encoding params.EncodingConfig, rawTx interface{}) (sdk.Tx, Signin
 	}
 }
 
-func GetTxFromBlockEvents(eventCache map[string]interface{}, blockHeader types.Header, blockEvents []cosmossdk.ABCIEvent, eventIndex int, latestHeight int, denom string, nativeFee int) (*BlockResultTx, error) {
+func GetTxFromBlockEvents(eventCache map[string]interface{}, blockHeader cometbfttypes.Header, blockEvents []cosmossdk.ABCIEvent, eventIndex int, latestHeight int, denom string, nativeFee int) (*BlockResultTx, error) {
 	// attempt to find matching fee event for txid or use native fee
 	matchFee := func(txid string, events []TypedEvent) cosmossdk.Value {
 		for _, e := range events {
