@@ -1,80 +1,17 @@
-package cosmos
+package thorchain
 
 import (
 	"strconv"
 	"strings"
-	"sync"
 
 	cometbftjson "github.com/cometbft/cometbft/libs/json"
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	rpctypes "github.com/cometbft/cometbft/rpc/jsonrpc/types"
 	"github.com/pkg/errors"
+	"github.com/shapeshift/unchained/shared/cosmossdk"
 )
 
-type BlockFetcher interface {
-	GetBlock(height *int) (*coretypes.ResultBlock, error)
-}
-
-type BlockService struct {
-	Latest     *BlockResponse
-	Blocks     map[int]*BlockResponse
-	m          sync.RWMutex
-	httpClient BlockFetcher
-}
-
-func NewBlockService(httpClient BlockFetcher) (*BlockService, error) {
-	s := &BlockService{
-		Blocks:     make(map[int]*BlockResponse),
-		httpClient: httpClient,
-	}
-
-	result, err := s.httpClient.GetBlock(nil)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	block := &BlockResponse{
-		Height:    int(result.Block.Height),
-		Hash:      result.Block.Hash().String(),
-		Timestamp: int(result.Block.Time.Unix()),
-	}
-
-	s.WriteBlock(block, true)
-
-	return s, nil
-}
-
-func (s *BlockService) WriteBlock(block *BlockResponse, latest bool) {
-	s.m.Lock()
-	if latest {
-		s.Latest = block
-	}
-	s.Blocks[block.Height] = block
-	s.m.Unlock()
-}
-
-func (s *BlockService) GetBlock(height int) (*BlockResponse, error) {
-	if block, ok := s.Blocks[height]; ok {
-		return block, nil
-	}
-
-	result, err := s.httpClient.GetBlock(&height)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	block := &BlockResponse{
-		Height:    int(result.Block.Height),
-		Hash:      result.Block.Hash().String(),
-		Timestamp: int(result.Block.Time.Unix()),
-	}
-
-	s.WriteBlock(block, false)
-
-	return block, nil
-}
-
-func (c *HTTPClient) GetBlock(height *int) (*coretypes.ResultBlock, error) {
+func (c *HTTPClient) GetBlock(height *int) (*cosmossdk.ResultBlock, error) {
 	res := &rpctypes.RPCResponse{}
 
 	hs := ""
@@ -96,7 +33,13 @@ func (c *HTTPClient) GetBlock(height *int) (*coretypes.ResultBlock, error) {
 		return nil, errors.Errorf("failed to unmarshal block result: %v", res.Result)
 	}
 
-	return result, nil
+	b := &cosmossdk.ResultBlock{
+		Height: result.Block.Height,
+		Time:   result.Block.Time,
+		Hash:   result.Block.Hash().String(),
+	}
+
+	return b, nil
 }
 
 func (c *HTTPClient) BlockSearch(query string, page int, pageSize int) (*coretypes.ResultBlockSearch, error) {
@@ -129,7 +72,7 @@ func (c *HTTPClient) BlockSearch(query string, page int, pageSize int) (*coretyp
 	return result, nil
 }
 
-func (c *HTTPClient) BlockResults(height int) (BlockResults, error) {
+func (c *HTTPClient) BlockResults(height int) (cosmossdk.BlockResults, error) {
 	res := &rpctypes.RPCResponse{}
 
 	_, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParam("height", strconv.Itoa(height)).Get("/block_results")

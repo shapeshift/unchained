@@ -463,7 +463,7 @@
           "x-go-name": "TxID"
         }
       },
-      "x-go-package": "github.com/shapeshift/unchained/coinstacks/thorchain/api"
+      "x-go-package": "github.com/shapeshift/unchained/pkg/thorchain"
     },
     "AffiliateFees": {
       "description": "Contains info about affiliate fee history",
@@ -550,7 +550,7 @@
           "example": "/cosmos.bank.v1beta1.MsgSend"
         }
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+      "x-go-package": "github.com/shapeshift/unchained/shared/cosmossdk"
     },
     "AttributesByEvent": {
       "description": "Contains info about event attributes keyed by event type",
@@ -558,7 +558,7 @@
       "additionalProperties": {
         "$ref": "#/definitions/ValueByAttribute"
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+      "x-go-package": "github.com/shapeshift/unchained/shared/cosmossdk"
     },
     "BadRequestError": {
       "description": "Contains info about a 400 Bad Request response",
@@ -713,7 +713,7 @@
         }
       ],
       "x-go-name": "Account",
-      "x-go-package": "github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+      "x-go-package": "github.com/shapeshift/unchained/shared/cosmossdk"
     },
     "CosmosSDKInfo": {
       "description": "Contains common cosmossdk info about the running coinstack",
@@ -723,7 +723,7 @@
         }
       ],
       "x-go-name": "Info",
-      "x-go-package": "github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+      "x-go-package": "github.com/shapeshift/unchained/shared/cosmossdk"
     },
     "Delegation": {
       "description": "Contains info about a staking delegation",
@@ -746,7 +746,7 @@
           "$ref": "#/definitions/Validator"
         }
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+      "x-go-package": "github.com/shapeshift/unchained/shared/cosmossdk"
     },
     "Event": {
       "description": "Contains info about a transaction log event",
@@ -769,7 +769,7 @@
           "example": "message"
         }
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+      "x-go-package": "github.com/shapeshift/unchained/shared/cosmossdk"
     },
     "EventsByMsgIndex": {
       "description": "Contains info about transaction events keyed by message index",
@@ -777,7 +777,7 @@
       "additionalProperties": {
         "$ref": "#/definitions/AttributesByEvent"
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+      "x-go-package": "github.com/shapeshift/unchained/shared/cosmossdk"
     },
     "GasAmount": {
       "type": "string",
@@ -840,7 +840,7 @@
           "$ref": "#/definitions/Value"
         }
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+      "x-go-package": "github.com/shapeshift/unchained/shared/cosmossdk"
     },
     "Pagination": {
       "description": "Contains info about pagination metadata",
@@ -881,7 +881,7 @@
           "$ref": "#/definitions/Validator"
         }
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+      "x-go-package": "github.com/shapeshift/unchained/shared/cosmossdk"
     },
     "RedelegationEntry": {
       "description": "Contains info about a redelegation action",
@@ -908,7 +908,7 @@
           "example": "123456.789"
         }
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+      "x-go-package": "github.com/shapeshift/unchained/shared/cosmossdk"
     },
     "Reward": {
       "description": "Contains info about a validator reward",
@@ -929,7 +929,7 @@
           "$ref": "#/definitions/Validator"
         }
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+      "x-go-package": "github.com/shapeshift/unchained/shared/cosmossdk"
     },
     "Staking": {
       "description": "Contains info about current staking state",
@@ -970,7 +970,7 @@
           "x-go-name": "Unbondings"
         }
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+      "x-go-package": "github.com/shapeshift/unchained/shared/cosmossdk"
     },
     "TransactionHash": {
       "type": "string",
@@ -1065,7 +1065,7 @@
           }
         }
       ],
-      "x-go-package": "github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+      "x-go-package": "github.com/shapeshift/unchained/shared/cosmossdk"
     },
     "Unbonding": {
       "description": "Contains info about a staking unbonding",
@@ -1086,7 +1086,7 @@
           "$ref": "#/definitions/Validator"
         }
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+      "x-go-package": "github.com/shapeshift/unchained/shared/cosmossdk"
     },
     "UnbondingEntry": {
       "description": "Contains info about an unbonding action",
@@ -1105,7 +1105,7 @@
           "example": "1642533407592"
         }
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+      "x-go-package": "github.com/shapeshift/unchained/shared/cosmossdk"
     },
     "ValidationError": {
       "description": "Contains info about a 422 Validation Error response",
@@ -1198,7 +1198,7 @@
           "example": "http://superval.com"
         }
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+      "x-go-package": "github.com/shapeshift/unchained/shared/cosmossdk"
     },
     "ValidatorCommission": {
       "description": "Contains info about validator commission settings",
@@ -1225,7 +1225,7 @@
           "example": "0.050000000000000000"
         }
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+      "x-go-package": "github.com/shapeshift/unchained/shared/cosmossdk"
     },
     "ValidatorUnbonding": {
       "description": "Contains info about validator unbonding settings",
@@ -1248,7 +1248,7 @@
           "example": 1642776702
         }
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+      "x-go-package": "github.com/shapeshift/unchained/shared/cosmossdk"
     },
     "Validators": {
       "description": "Contains a list of validators",
@@ -1272,7 +1272,7 @@
           }
         }
       ],
-      "x-go-package": "github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+      "x-go-package": "github.com/shapeshift/unchained/shared/cosmossdk"
     },
     "Value": {
       "description": "Contains info about an asset value",
@@ -1293,7 +1293,7 @@
           "example": "udenom"
         }
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+      "x-go-package": "github.com/shapeshift/unchained/shared/cosmossdk"
     },
     "ValueByAttribute": {
       "description": "Contains info about an attribute value keyed by attribute type",
@@ -1301,7 +1301,7 @@
       "additionalProperties": {
         "type": "string"
       },
-      "x-go-package": "github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+      "x-go-package": "github.com/shapeshift/unchained/shared/cosmossdk"
     }
   }
 }

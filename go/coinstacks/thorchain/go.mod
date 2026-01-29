@@ -3,7 +3,6 @@ module github.com/shapeshift/unchained/coinstacks/thorchain
 go 1.25.0
 
 require (
-	github.com/cometbft/cometbft v1.0.1
 	github.com/cosmos/cosmos-sdk v0.54.0-beta.0
 	github.com/go-resty/resty/v2 v2.17.1
 	github.com/gorilla/mux v1.8.1
@@ -13,7 +12,6 @@ require (
 	github.com/shapeshift/unchained/pkg/thorchain v0.0.0
 	github.com/shapeshift/unchained/shared v0.0.0
 	gitlab.com/thorchain/thornode/v3 v3.12.0
-	golang.org/x/sync v0.17.0
 )
 
 require (
@@ -57,6 +55,7 @@ require (
 	github.com/cockroachdb/pebble v1.1.5 // indirect
 	github.com/cockroachdb/redact v1.1.6 // indirect
 	github.com/cockroachdb/tokenbucket v0.0.0-20250429170803-42689b6311bb // indirect
+	github.com/cometbft/cometbft v1.0.1 // indirect
 	github.com/cometbft/cometbft-db v0.14.1 // indirect
 	github.com/cosmos/btcutil v1.0.5 // indirect
 	github.com/cosmos/cosmos-db v1.1.3 // indirect
@@ -184,6 +183,7 @@ require (
 	golang.org/x/exp v0.0.0-20250506013437-ce4c2cf36ca6 // indirect
 	golang.org/x/net v0.46.0 // indirect
 	golang.org/x/oauth2 v0.31.0 // indirect
+	golang.org/x/sync v0.17.0 // indirect
 	golang.org/x/sys v0.37.0 // indirect
 	golang.org/x/term v0.36.0 // indirect
 	golang.org/x/text v0.30.0 // indirect

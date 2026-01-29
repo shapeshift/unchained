@@ -1,4 +1,4 @@
-package cosmos
+package thorchain
 
 import (
 	"context"
@@ -14,6 +14,7 @@ import (
 	cometbft "github.com/cometbft/cometbft/rpc/jsonrpc/client"
 	"github.com/cometbft/cometbft/types"
 	"github.com/pkg/errors"
+	"github.com/shapeshift/unchained/shared/cosmossdk"
 	"github.com/shapeshift/unchained/shared/websocket"
 )
 
@@ -24,13 +25,13 @@ const (
 	resetTimeout = 30 * time.Second
 )
 
-type TxHandlerFunc = func(tx types.EventDataTx, block *BlockResponse) (interface{}, []string, error)
-type BlockEventHandlerFunc = func(eventCache map[string]interface{}, blockHeader types.Header, blockEvents []ABCIEvent, eventIndex int) (interface{}, []string, error)
-type NewBlockHandlerFunc = func(newBlock types.EventDataNewBlock, blockEvents []ABCIEvent)
+type TxHandlerFunc = func(tx types.EventDataTx, block *cosmossdk.BlockResponse) (interface{}, []string, error)
+type BlockEventHandlerFunc = func(eventCache map[string]interface{}, blockHeader types.Header, blockEvents []cosmossdk.ABCIEvent, eventIndex int) (interface{}, []string, error)
+type NewBlockHandlerFunc = func(newBlock types.EventDataNewBlock, blockEvents []cosmossdk.ABCIEvent)
 
 type WSClient struct {
 	*websocket.Registry
-	blockService      *BlockService
+	blockService      *cosmossdk.BlockService
 	client            *cometbft.WSClient
 	encoding          *params.EncodingConfig
 	errChan           chan<- error
@@ -42,7 +43,7 @@ type WSClient struct {
 	unhandledTxs      map[int][]types.EventDataTx
 }
 
-func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- error) (*WSClient, error) {
+func NewWebsocketClient(conf Config, blockService *cosmossdk.BlockService, errChan chan<- error) (*WSClient, error) {
 	wsURL, err := url.Parse(conf.WSURL)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to parse WSURL: %s", conf.WSURL)
@@ -65,7 +66,7 @@ func NewWebsocketClient(conf Config, blockService *BlockService, errChan chan<- 
 		Registry:     websocket.NewRegistry(),
 		blockService: blockService,
 		client:       client,
-		encoding:     conf.Encoding,
+		encoding:     conf.Encoding.(*params.EncodingConfig),
 		errChan:      errChan,
 		unhandledTxs: make(map[int][]types.EventDataTx),
 	}
@@ -209,8 +210,8 @@ func (ws *WSClient) handleTx(tx types.EventDataTx) {
 	}
 }
 
-func (ws *WSClient) handleNewBlock(newBlock types.EventDataNewBlock, blockEvents []ABCIEvent) {
-	b := &BlockResponse{
+func (ws *WSClient) handleNewBlock(newBlock types.EventDataNewBlock, blockEvents []cosmossdk.ABCIEvent) {
+	b := &cosmossdk.BlockResponse{
 		Height:    int(newBlock.Block.Height),
 		Hash:      newBlock.Block.Hash().String(),
 		Timestamp: int(newBlock.Block.Time.Unix()),
@@ -219,7 +220,7 @@ func (ws *WSClient) handleNewBlock(newBlock types.EventDataNewBlock, blockEvents
 	ws.blockService.WriteBlock(b, true)
 
 	if ws.blockEventHandler != nil {
-		go func(newBlock types.EventDataNewBlock, blockEvents []ABCIEvent) {
+		go func(newBlock types.EventDataNewBlock, blockEvents []cosmossdk.ABCIEvent) {
 			eventCache := make(map[string]interface{})
 
 			for i := range blockEvents {

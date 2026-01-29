@@ -1,4 +1,4 @@
-package api
+package thorchain
 
 import (
 	"fmt"
@@ -10,8 +10,7 @@ import (
 
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	"github.com/cometbft/cometbft/types"
-	"github.com/shapeshift/unchained/pkg/thorchain"
-	"github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+	"github.com/shapeshift/unchained/shared/cosmossdk"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -25,7 +24,7 @@ type AffiliateFeeIndexer struct {
 	AffiliateAddresses []string
 	AffiliateFeeDenoms []string
 	AffiliateFees      []*AffiliateFee
-	httpClients        []*cosmos.HTTPClient
+	httpClients        []*HTTPClient
 	mu                 sync.Mutex
 }
 
@@ -39,7 +38,7 @@ type AffiliateFee struct {
 	TxID        string `json:"txId"`
 }
 
-func NewAffiliateFeeIndexer(httpClients []*cosmos.HTTPClient, wsClient *cosmos.WSClient) *AffiliateFeeIndexer {
+func NewAffiliateFeeIndexer(httpClients []*HTTPClient, wsClient *WSClient) *AffiliateFeeIndexer {
 	affiliateAddresses := []string{"thor1xmaggkcln5m5fnha2780xrdrulmplvfrz6wj3l", "thor1crs0y53jfg224mettqeg883e6ume49tllktg2s", "thor122h9hlrugzdny9ct95z6g7afvpzu34s73uklju"}
 	affilateFeeDenoms := []string{"THOR.RUNE", "ETH.WBTC-0X2260FAC5E5542A773AA44FBCFEDF7C193BC2C599"}
 
@@ -50,8 +49,8 @@ func NewAffiliateFeeIndexer(httpClients []*cosmos.HTTPClient, wsClient *cosmos.W
 		httpClients:        httpClients,
 	}
 
-	wsClient.NewBlockHandler(func(newBlock types.EventDataNewBlock, blockEvents []cosmos.ABCIEvent) {
-		i.processAffiliateFees(&thorchain.NewBlock{EventDataNewBlock: newBlock}, blockEvents, i.AffiliateAddresses)
+	wsClient.NewBlockHandler(func(newBlock types.EventDataNewBlock, blockEvents []cosmossdk.ABCIEvent) {
+		i.processAffiliateFees(&NewBlock{EventDataNewBlock: newBlock}, blockEvents, i.AffiliateAddresses)
 	})
 
 	return i
@@ -99,7 +98,7 @@ func (i *AffiliateFeeIndexer) Sync() error {
 	return nil
 }
 
-func (i *AffiliateFeeIndexer) fetchBlocks(httpClient *cosmos.HTTPClient, affiliateAddress string, pageCh <-chan int, resultCh chan<- *coretypes.ResultBlockSearch) {
+func (i *AffiliateFeeIndexer) fetchBlocks(httpClient *HTTPClient, affiliateAddress string, pageCh <-chan int, resultCh chan<- *coretypes.ResultBlockSearch) {
 	defer close(resultCh)
 
 	wg := new(sync.WaitGroup)
@@ -123,7 +122,7 @@ func (i *AffiliateFeeIndexer) fetchBlocks(httpClient *cosmos.HTTPClient, affilia
 	wg.Wait()
 }
 
-func (i *AffiliateFeeIndexer) handleBlocks(httpClient *cosmos.HTTPClient, affiliateAddress string, resultCh <-chan *coretypes.ResultBlockSearch) *sync.WaitGroup {
+func (i *AffiliateFeeIndexer) handleBlocks(httpClient *HTTPClient, affiliateAddress string, resultCh <-chan *coretypes.ResultBlockSearch) *sync.WaitGroup {
 	wg := new(sync.WaitGroup)
 	wg.Add(resultWorkers)
 
@@ -138,7 +137,7 @@ func (i *AffiliateFeeIndexer) handleBlocks(httpClient *cosmos.HTTPClient, affili
 						logger.Panicf("failed to handle block: %d: %+v", b.Block.Height, err)
 					}
 
-					i.processAffiliateFees(&thorchain.ResultBlock{Block: b.Block}, blockResult.GetBlockEvents(), []string{affiliateAddress})
+					i.processAffiliateFees(&ResultBlock{Block: b.Block}, blockResult.GetBlockEvents(), []string{affiliateAddress})
 				}
 			}
 		}()
@@ -147,17 +146,17 @@ func (i *AffiliateFeeIndexer) handleBlocks(httpClient *cosmos.HTTPClient, affili
 	return wg
 }
 
-func (i *AffiliateFeeIndexer) processAffiliateFees(block thorchain.Block, blockEvents []cosmos.ABCIEvent, affiliateAddresses []string) {
-	_, typedEvents, err := thorchain.ParseBlockEvents(blockEvents)
+func (i *AffiliateFeeIndexer) processAffiliateFees(block Block, blockEvents []cosmossdk.ABCIEvent, affiliateAddresses []string) {
+	_, typedEvents, err := ParseBlockEvents(blockEvents)
 	if err != nil {
 		logger.Panicf("failed to parse block events for block: %d: %+v", block.Height(), err)
 	}
 
-	swaps := make(map[string]*thorchain.EventSwap)
+	swaps := make(map[string]*EventSwap)
 	affiliateFees := make([]*AffiliateFee, 0)
 	for _, event := range typedEvents {
 		switch v := event.(type) {
-		case *thorchain.EventOutbound:
+		case *EventOutbound:
 			coinParts := strings.Fields(v.Coin)
 			if slices.Contains(affiliateAddresses, v.To) && slices.Contains(i.AffiliateFeeDenoms, coinParts[1]) {
 				affiliateFee := &AffiliateFee{
@@ -171,7 +170,7 @@ func (i *AffiliateFeeIndexer) processAffiliateFees(block thorchain.Block, blockE
 				}
 				affiliateFees = append(affiliateFees, affiliateFee)
 			}
-		case *thorchain.EventSwap:
+		case *EventSwap:
 			parts := strings.Split(v.Memo, ":")
 			if len(parts) > 4 && parts[4] == "ss" {
 				swaps[v.Id] = v

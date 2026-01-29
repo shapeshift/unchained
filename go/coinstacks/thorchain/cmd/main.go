@@ -6,10 +6,12 @@ import (
 	"os/signal"
 	"syscall"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	"github.com/shapeshift/unchained/coinstacks/thorchain/api"
-	"github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+	"github.com/shapeshift/unchained/pkg/thorchain"
 	"github.com/shapeshift/unchained/shared/config"
+	"github.com/shapeshift/unchained/shared/cosmossdk"
 	"github.com/shapeshift/unchained/shared/log"
 	"github.com/shapeshift/unchained/shared/metrics"
 
@@ -21,7 +23,7 @@ var (
 	logger = log.WithoutFields()
 
 	envPath     = flag.String("env", "", "path to env file (default: use os env)")
-	swaggerPath = flag.String("swagger", "coinstacks/thorchain/api/swagger.json", "path to swagger spec")
+	swaggerPath = flag.String("swagger", "api/swagger.json", "path to swagger spec")
 )
 
 type Config struct {
@@ -57,7 +59,7 @@ func main() {
 		}
 	}
 
-	encoding := cosmos.NewEncoding(thortypes.RegisterInterfaces)
+	encoding := thorchain.NewEncoding(thortypes.RegisterInterfaces)
 
 	// custom tx config options to support thorchain inject txs
 	opts := tx.ConfigOptions{
@@ -73,68 +75,68 @@ func main() {
 	// overwrite standard tx config with the custom inject tx config
 	encoding.TxConfig = txconfig
 
-	cfg := api.Config{
-		Config: cosmos.Config{
-			Bech32AddrPrefix:  "thor",
-			Bech32PkPrefix:    "thorpub",
-			Bech32ValPrefix:   "thorv",
-			Bech32PkValPrefix: "thorvpub",
-			Denom:             "rune",
-			NativeFee:         2000000, // https://daemon.thorchain.shapeshift.com/lcd/thorchain/constants
-			Encoding:          encoding,
-			LCDURL:            conf.LCDURL,
-			LCDAPIKEY:         conf.LCDAPIKEY,
-			RPCURL:            conf.RPCURL,
-			RPCAPIKEY:         conf.RPCAPIKEY,
-			WSURL:             conf.WSURL,
-			WSAPIKEY:          conf.WSAPIKEY,
+	cfg := thorchain.Config{
+		Config: cosmossdk.Config{
+			Bech32AddrPrefix: "thor",
+			Bech32PkPrefix:   "thorpub",
+			Denom:            "rune",
+			NativeFee:        2000000, // https://daemon.thorchain.shapeshift.com/lcd/thorchain/constants
+			Encoding:         encoding,
+			LCDURL:           conf.LCDURL,
+			LCDAPIKEY:        conf.LCDAPIKEY,
+			RPCURL:           conf.RPCURL,
+			RPCAPIKEY:        conf.RPCAPIKEY,
+			WSURL:            conf.WSURL,
+			WSAPIKEY:         conf.WSAPIKEY,
 		},
 		INDEXERURL:    conf.INDEXERURL,
 		INDEXERAPIKEY: conf.INDEXERAPIKEY,
 	}
 
-	cfgV1 := cosmos.Config{
-		Bech32AddrPrefix:  "thor",
-		Bech32PkPrefix:    "thorpub",
-		Bech32ValPrefix:   "thorv",
-		Bech32PkValPrefix: "thorvpub",
-		Denom:             "rune",
-		NativeFee:         2000000, // https://daemon.thorchain.shapeshift.com/lcd/thorchain/constants
-		Encoding:          encoding,
-		LCDURL:            conf.LCDV1URL,
-		LCDAPIKEY:         conf.LCDV1APIKEY,
-		RPCURL:            conf.RPCV1URL,
-		RPCAPIKEY:         conf.RPCV1APIKEY,
+	cfgV1 := thorchain.Config{
+		Config: cosmossdk.Config{
+			Bech32AddrPrefix: "thor",
+			Bech32PkPrefix:   "thorpub",
+			Denom:            "rune",
+			NativeFee:        2000000, // https://daemon.thorchain.shapeshift.com/lcd/thorchain/constants
+			Encoding:         encoding,
+			LCDURL:           conf.LCDV1URL,
+			LCDAPIKEY:        conf.LCDV1APIKEY,
+			RPCURL:           conf.RPCV1URL,
+			RPCAPIKEY:        conf.RPCV1APIKEY,
+		},
 	}
 
 	prometheus := metrics.NewPrometheus("thorchain")
 
-	httpClient, err := api.NewHTTPClient(cfg)
+	sdk.GetConfig().SetBech32PrefixForAccount(cfg.Bech32AddrPrefix, cfg.Bech32PkPrefix)
+
+	httpClient, err := thorchain.NewHTTPClient(cfg)
 	if err != nil {
 		logger.Panicf("failed to create new http client: %+v", err)
 	}
 
-	httpClientV1, err := cosmos.NewHTTPClient(cfgV1)
+	httpClientV1, err := thorchain.NewHTTPClient(cfgV1)
 	if err != nil {
 		logger.Panicf("failed to create new http client: %+v", err)
 	}
 
-	blockService, err := cosmos.NewBlockService(httpClient)
+	blockService, err := cosmossdk.NewBlockService(httpClient)
 	if err != nil {
 		logger.Panicf("failed to create new block service: %+v", err)
 	}
 
-	wsClient, err := cosmos.NewWebsocketClient(cfg.Config, blockService, errChan)
+	wsClient, err := thorchain.NewWebsocketClient(cfg, blockService, errChan)
 	if err != nil {
 		logger.Panicf("failed to create new websocket client: %+v", err)
 	}
 
-	indexer := api.NewAffiliateFeeIndexer([]*cosmos.HTTPClient{httpClientV1, httpClient.HTTPClient}, wsClient)
+	indexer := thorchain.NewAffiliateFeeIndexer([]*thorchain.HTTPClient{httpClientV1, httpClient}, wsClient)
 	if err := indexer.Sync(); err != nil {
 		logger.Panicf("failed to index affiliate fees: %+v", err)
 	}
 
-	api := api.New(cfg.Config, httpClient, wsClient, blockService, indexer, *swaggerPath, prometheus)
+	api := api.New(cfg, httpClient, wsClient, blockService, indexer, *swaggerPath, prometheus)
 	defer api.Shutdown()
 
 	go api.Serve(errChan)

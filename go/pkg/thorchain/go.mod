@@ -9,7 +9,6 @@ require (
 	github.com/cometbft/cometbft v1.0.1
 	github.com/cosmos/cosmos-sdk v0.54.0-beta.0
 	github.com/go-resty/resty/v2 v2.17.1
-	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/websocket v1.5.3
 	github.com/pkg/errors v0.9.1
 	github.com/shapeshift/unchained/shared v0.0.0
@@ -104,6 +103,7 @@ require (
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/handlers v1.5.2 // indirect
+	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
 	github.com/gsterjov/go-libsecret v0.0.0-20161001094733-a6f4afe4910c // indirect

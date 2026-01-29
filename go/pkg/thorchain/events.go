@@ -7,7 +7,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 	cometbftjson "github.com/cometbft/cometbft/libs/json"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/shapeshift/unchained/pkg/thorchain/cosmos"
+	"github.com/shapeshift/unchained/shared/cosmossdk"
 	"gitlab.com/thorchain/thornode/v3/common"
 )
 
@@ -39,9 +39,9 @@ type EventSwap struct {
 	Memo  string `json:"memo"`
 }
 
-func ParseBlockEvents(blockEvents []cosmos.ABCIEvent) (cosmos.EventsByMsgIndex, []TypedEvent, error) {
+func ParseBlockEvents(blockEvents []cosmossdk.ABCIEvent) (cosmossdk.EventsByMsgIndex, []TypedEvent, error) {
 	typedEvents := make([]TypedEvent, len(blockEvents))
-	eventsByMsgIndex := cosmos.EventsByMsgIndex{}
+	eventsByMsgIndex := cosmossdk.EventsByMsgIndex{}
 
 	var typedEvent TypedEvent
 	for i, event := range blockEvents {
@@ -57,7 +57,7 @@ func ParseBlockEvents(blockEvents []cosmos.ABCIEvent) (cosmos.EventsByMsgIndex, 
 		}
 
 		attrMap := make(map[string]json.RawMessage)
-		attributes := make(cosmos.ValueByAttribute)
+		attributes := make(cosmossdk.ValueByAttribute)
 		for _, a := range event.Attributes {
 			attributes[a.Key] = a.Value
 
@@ -75,7 +75,7 @@ func ParseBlockEvents(blockEvents []cosmos.ABCIEvent) (cosmos.EventsByMsgIndex, 
 		}
 
 		msgIndex := strconv.Itoa(i)
-		eventsByMsgIndex[msgIndex] = make(cosmos.AttributesByEvent)
+		eventsByMsgIndex[msgIndex] = make(cosmossdk.AttributesByEvent)
 		eventsByMsgIndex[msgIndex][event.Type] = attributes
 		typedEvents[i] = typedEvent
 	}
@@ -83,8 +83,8 @@ func ParseBlockEvents(blockEvents []cosmos.ABCIEvent) (cosmos.EventsByMsgIndex, 
 	return eventsByMsgIndex, typedEvents, nil
 }
 
-func typedEventsToMessages(events []TypedEvent) []cosmos.Message {
-	messages := []cosmos.Message{}
+func typedEventsToMessages(events []TypedEvent) []cosmossdk.Message {
+	messages := []cosmossdk.Message{}
 
 	for i, event := range events {
 		switch v := event.(type) {
@@ -94,14 +94,14 @@ func typedEventsToMessages(events []TypedEvent) []cosmos.Message {
 				logger.Error(err)
 			}
 
-			message := cosmos.Message{
+			message := cosmossdk.Message{
 				Addresses: []string{v.From, v.To},
 				Index:     strconv.Itoa(i),
 				Origin:    v.From,
 				From:      v.From,
 				To:        v.To,
 				Type:      "outbound",
-				Value: cosmos.CoinToValue(&sdk.Coin{
+				Value: CoinToValue(&sdk.Coin{
 					Denom:  coin.Asset.Native(),
 					Amount: sdkmath.NewIntFromBigInt(coin.Amount.BigInt()),
 				}),
