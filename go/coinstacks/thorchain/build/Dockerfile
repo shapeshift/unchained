@@ -6,8 +6,6 @@ COPY go/shared/go.mod go/shared/go.sum go/shared/
 COPY go/pkg/thorchain/go.mod go/pkg/thorchain/go.sum go/pkg/thorchain/
 COPY go/coinstacks/thorchain/go.mod go/coinstacks/thorchain/go.sum go/coinstacks/thorchain/
 
-RUN go mod download
-
 COPY go/static go/static
 COPY go/shared go/shared
 COPY go/pkg/thorchain go/pkg/thorchain

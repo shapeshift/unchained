@@ -1,20 +1,15 @@
 {
   "build": {
     "builder": "dockerfile",
-    "dockerfilePath": "go/build/Dockerfile",
+    "dockerfilePath": "go/coinstacks/thorchain-v1/build/Dockerfile",
     "watchPatterns": [
-      "go/internal/**",
-      "go/pkg/**",
-      "go/static/**",
-      "go/cmd/thorchain-v1/**",
-      "go/coinstacks/thorchain-v1/*.go",
-      "go/coinstacks/thorchain-v1/api/**",
-      "go.mod",
-      "go.sum"
+      "go/shared/**",
+      "go/pkg/thorchain-v1/**",
+      "go/coinstacks/thorchain-v1/**"
     ]
   },
   "deploy": {
-    "startCommand": "/go/bin/app -swagger swagger.json",
+    "startCommand": "/go/bin/app -swagger swagger.json -swaggerui static/swaggerui",
     "healthcheckPath": "/health",
     "restartPolicyType": "ALWAYS",
     "multiRegionConfig": {
