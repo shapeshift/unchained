@@ -6,6 +6,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
+	"github.com/shapeshift/unchained/shared/cosmossdk"
 )
 
 func (c *HTTPClient) GetGlobalMinimumGasPrices() (map[string]sdkmath.LegacyDec, error) {
@@ -18,9 +19,9 @@ func (c *HTTPClient) GetGlobalMinimumGasPrices() (map[string]sdkmath.LegacyDec, 
 		} `json:"price"`
 	}
 
-	e := &ErrorResponse{}
+	e := &cosmossdk.ErrorResponse{}
 
-	url := fmt.Sprintf("/feemarket/v1/gas_price/%s", c.denom)
+	url := fmt.Sprintf("/feemarket/v1/gas_price/%s", c.Denom)
 	r, err := c.LCD.R().SetResult(&res).SetError(e).Get(url)
 	if err != nil {
 		return gasPrices, errors.Wrap(err, "failed to get globalfee params")
@@ -47,7 +48,7 @@ func (c *HTTPClient) GetLocalMinimumGasPrices() (map[string]sdkmath.LegacyDec, e
 		MinimumGasPrice string `json:"minimum_gas_price"`
 	}
 
-	e := &ErrorResponse{}
+	e := &cosmossdk.ErrorResponse{}
 
 	r, err := c.LCD.R().SetResult(&res).SetError(e).Get("/cosmos/base/node/v1beta1/config")
 	if err != nil {

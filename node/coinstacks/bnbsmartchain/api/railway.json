@@ -1,0 +1,23 @@
+{
+  "build": {
+    "builder": "dockerfile",
+    "dockerfilePath": "node/Dockerfile",
+    "watchPatterns": [
+      "node/coinstacks/bnbsmartchain/api/**",
+      "node/coinstacks/common/api/**",
+      "!node/coinstacks/common/api/src/utxo/**",
+      "node/packages/**",
+      "yarn.lock"
+    ]
+  },
+  "deploy": {
+    "startCommand": "node dist/bnbsmartchain/api/src/app.js",
+    "healthcheckPath": "/health",
+    "restartPolicyType": "ALWAYS",
+    "multiRegionConfig": {
+      "us-west2": {
+        "numReplicas": 1
+      }
+    }
+  }
+}

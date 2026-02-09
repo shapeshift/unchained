@@ -1,0 +1,78 @@
+package cosmossdk
+
+import (
+	"fmt"
+	"math/big"
+	"strconv"
+
+	"github.com/pkg/errors"
+)
+
+func (c *HTTPClient) GetValidators(apr *big.Float, cursor string, pageSize int) (*ValidatorsResponse, error) {
+	var res QueryValidatorsResponse
+
+	queryParams := map[string]string{
+		"pagination.key":   cursor,
+		"pagination.limit": strconv.Itoa(pageSize),
+	}
+
+	_, err := c.LCD.R().SetResult(&res).SetQueryParams(queryParams).Get("/cosmos/staking/v1beta1/validators")
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get validators")
+	}
+
+	validators := []Validator{}
+	for _, v := range res.Validators {
+		validators = append(validators, *httpValidator(v, apr))
+	}
+
+	resp := &ValidatorsResponse{
+		validators,
+		res.Pagination,
+	}
+
+	return resp, nil
+}
+
+func (c *HTTPClient) GetValidator(addr string, apr *big.Float) (*Validator, error) {
+	var res QueryValidatorResponse
+
+	_, err := c.LCD.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/staking/v1beta1/validators/%s", addr))
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get validators")
+	}
+
+	return httpValidator(res.Validator, apr), nil
+}
+
+func httpValidator(validator ValidatorResponse, apr *big.Float) *Validator {
+	unbonding := ValidatorUnbonding{
+		Height:    validator.UnbondingHeight,
+		Timestamp: int(validator.UnbondingTime.Unix()),
+	}
+
+	commission := ValidatorCommission{
+		Rate:          validator.Commission.Rate,
+		MaxRate:       validator.Commission.MaxRate,
+		MaxChangeRate: validator.Commission.MaxChangeRate,
+	}
+
+	commissionRate, _, err := new(big.Float).Parse(commission.Rate, 10)
+	if err != nil {
+		commissionRate = big.NewFloat(0)
+	}
+
+	return &Validator{
+		Address:     validator.OperatorAddress,
+		Moniker:     validator.Description.Moniker,
+		Jailed:      validator.Jailed,
+		Status:      validator.Status,
+		Tokens:      validator.Tokens,
+		Shares:      validator.DelegatorShares,
+		Website:     validator.Description.Website,
+		Description: validator.Description.Details,
+		APR:         new(big.Float).Mul(apr, new(big.Float).Sub(big.NewFloat(1), commissionRate)).String(),
+		Unbonding:   unbonding,
+		Commission:  commission,
+	}
+}

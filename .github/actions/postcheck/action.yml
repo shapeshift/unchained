@@ -1,0 +1,16 @@
+name: Postcheck
+description: Check and commit generated swagger.json files
+
+runs:
+  using: composite
+  steps:
+    - name: Commit swagger.json changes if outdated
+      shell: bash
+      run: |
+        if git diff --name-only | grep -q 'swagger.json'; then
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add '**/swagger.json'
+          git commit -m "chore: update openapi spec [skip ci]"
+          git push
+        fi

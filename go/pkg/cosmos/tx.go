@@ -2,6 +2,7 @@ package cosmos
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -20,40 +21,11 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v10/modules/apps/transfer/types"
+	ibcchanneltypes "github.com/cosmos/ibc-go/v10/modules/core/04-channel/types"
 	"github.com/pkg/errors"
+	"github.com/shapeshift/unchained/shared/cosmossdk"
 )
-
-func (c *HTTPClient) GetTxHistory(address string, cursor string, pageSize int, sources map[string]*TxState) (*TxHistoryResponse, error) {
-	history := &History{
-		cursor:   &Cursor{State: make(map[string]*CursorState)},
-		pageSize: pageSize,
-		state:    make(map[string]*TxState),
-	}
-
-	// set initial source state
-	for source, s := range sources {
-		history.cursor.State[source] = &CursorState{Page: 1}
-		history.state[source] = s
-	}
-
-	if cursor != "" {
-		if err := history.cursor.decode(cursor); err != nil {
-			return nil, errors.Wrapf(err, "failed to decode cursor: %s", cursor)
-		}
-	}
-
-	// update sources with current cursor state
-	for source, s := range sources {
-		s.page = history.cursor.State[source].Page
-	}
-
-	txHistory, err := history.get()
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get tx history for address: %s", address)
-	}
-
-	return txHistory, nil
-}
 
 func (c *HTTPClient) GetTx(txid string) (*coretypes.ResultTx, error) {
 	res := &rpctypes.RPCResponse{}
@@ -145,24 +117,24 @@ func (c *HTTPClient) BroadcastTx(rawTx string) (string, error) {
 	return res.TxResponse.TxHash, nil
 }
 
-func ParseEvents(txResult abcitypes.ExecTxResult) EventsByMsgIndex {
-	events := make(EventsByMsgIndex)
+func ParseEvents(txResult abcitypes.ExecTxResult) cosmossdk.EventsByMsgIndex {
+	events := make(cosmossdk.EventsByMsgIndex)
 
 	if txResult.Log != "" {
 		logs, err := sdk.ParseABCILogs(txResult.Log)
 		if err != nil {
 			// transaction error logs are not in json format and will fail to parse
 			// return error event with the log message
-			events["0"] = AttributesByEvent{"error": ValueByAttribute{"message": txResult.Log}}
+			events["0"] = cosmossdk.AttributesByEvent{"error": cosmossdk.ValueByAttribute{"message": txResult.Log}}
 			return events
 		}
 
 		for _, l := range logs {
 			msgIndex := strconv.Itoa(int(l.GetMsgIndex()))
-			events[msgIndex] = make(AttributesByEvent)
+			events[msgIndex] = make(cosmossdk.AttributesByEvent)
 
 			for _, e := range l.GetEvents() {
-				attributes := make(ValueByAttribute)
+				attributes := make(cosmossdk.ValueByAttribute)
 				for _, a := range e.Attributes {
 					attributes[a.Key] = a.Value
 				}
@@ -172,7 +144,7 @@ func ParseEvents(txResult abcitypes.ExecTxResult) EventsByMsgIndex {
 		}
 	} else {
 		for _, e := range txResult.Events {
-			attributes := make(ValueByAttribute)
+			attributes := make(cosmossdk.ValueByAttribute)
 			for _, a := range e.Attributes {
 				attributes[a.Key] = a.Value
 			}
@@ -189,7 +161,7 @@ func ParseEvents(txResult abcitypes.ExecTxResult) EventsByMsgIndex {
 			delete(attributes, "msg_index")
 
 			if events[msgIndex] == nil {
-				events[msgIndex] = make(AttributesByEvent)
+				events[msgIndex] = make(cosmossdk.AttributesByEvent)
 			}
 
 			events[msgIndex][e.Type] = attributes
@@ -199,8 +171,8 @@ func ParseEvents(txResult abcitypes.ExecTxResult) EventsByMsgIndex {
 	return events
 }
 
-func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
-	messages := []Message{}
+func ParseMessages(msgs []sdk.Msg, events cosmossdk.EventsByMsgIndex) []cosmossdk.Message {
+	messages := []cosmossdk.Message{}
 
 	if _, ok := events["0"]["error"]; ok {
 		return messages
@@ -209,7 +181,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 	for i, msg := range msgs {
 		switch v := msg.(type) {
 		case *banktypes.MsgSend:
-			message := Message{
+			message := cosmossdk.Message{
 				Addresses: []string{v.FromAddress, v.ToAddress},
 				Index:     strconv.Itoa(i),
 				Origin:    v.FromAddress,
@@ -220,7 +192,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 			}
 			messages = append(messages, message)
 		case *stakingtypes.MsgDelegate:
-			message := Message{
+			message := cosmossdk.Message{
 				Addresses: []string{v.DelegatorAddress, v.ValidatorAddress},
 				Index:     strconv.Itoa(i),
 				Origin:    v.DelegatorAddress,
@@ -231,7 +203,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 			}
 			messages = append(messages, message)
 		case *stakingtypes.MsgUndelegate:
-			message := Message{
+			message := cosmossdk.Message{
 				Addresses: []string{v.DelegatorAddress, v.ValidatorAddress},
 				Index:     strconv.Itoa(i),
 				Origin:    v.DelegatorAddress,
@@ -242,7 +214,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 			}
 			messages = append(messages, message)
 		case *stakingtypes.MsgBeginRedelegate:
-			message := Message{
+			message := cosmossdk.Message{
 				Addresses: []string{v.DelegatorAddress, v.ValidatorSrcAddress, v.ValidatorDstAddress},
 				Index:     strconv.Itoa(i),
 				Origin:    v.DelegatorAddress,
@@ -261,7 +233,7 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 			}
 
 			for _, coin := range coins {
-				message := Message{
+				message := cosmossdk.Message{
 					Addresses: []string{v.DelegatorAddress, v.ValidatorAddress},
 					Index:     strconv.Itoa(i),
 					Origin:    v.DelegatorAddress,
@@ -272,13 +244,60 @@ func ParseMessages(msgs []sdk.Msg, events EventsByMsgIndex) []Message {
 				}
 				messages = append(messages, message)
 			}
+		case *ibctransfertypes.MsgTransfer:
+			message := cosmossdk.Message{
+				Addresses: []string{v.Sender, v.Receiver},
+				Index:     strconv.Itoa(i),
+				Origin:    v.Sender,
+				From:      v.Sender,
+				To:        v.Receiver,
+				Type:      "transfer",
+				Value:     CoinToValue(&v.Token),
+			}
+			messages = append(messages, message)
+		case *ibcchanneltypes.MsgRecvPacket:
+			type PacketData struct {
+				Amount   string `json:"amount"`
+				Denom    string `json:"denom"`
+				Receiver string `json:"receiver"`
+				Sender   string `json:"sender"`
+			}
+
+			d := &PacketData{}
+
+			err := json.Unmarshal(v.Packet.Data, &d)
+			if err != nil {
+				logger.Error(err)
+			}
+
+			amount := events[strconv.Itoa(i)]["transfer"]["amount"]
+
+			value := func() cosmossdk.Value {
+				coin, err := sdk.ParseCoinNormalized(amount)
+				if err != nil {
+					return cosmossdk.Value{Amount: d.Amount, Denom: d.Denom}
+				}
+
+				return CoinToValue(&coin)
+			}()
+
+			message := cosmossdk.Message{
+				Addresses: []string{d.Sender, d.Receiver},
+				Index:     strconv.Itoa(i),
+				Origin:    d.Sender,
+				From:      d.Sender,
+				To:        d.Receiver,
+				Type:      "recv_packet",
+				Value:     value,
+			}
+			messages = append(messages, message)
 		}
 	}
 
 	return messages
 }
 
-func Fee(tx SigningTx, txid string, denom string) Value {
+func Fee(tx SigningTx, txid string, denom string) cosmossdk.Value {
 	fees := tx.GetFee()
 
 	if len(fees) == 0 {
@@ -287,7 +306,7 @@ func Fee(tx SigningTx, txid string, denom string) Value {
 		logger.Warnf("txid: %s - multiple fees detected (defaulting to index 0): %+v", txid, fees)
 	}
 
-	return Value{
+	return cosmossdk.Value{
 		Amount: fees[0].Amount.String(),
 		Denom:  fees[0].Denom,
 	}
@@ -329,42 +348,4 @@ func DecodeTx(encoding params.EncodingConfig, rawTx interface{}) (sdk.Tx, Signin
 	} else {
 		return tx, &signingTx{}, nil
 	}
-}
-
-func GetTxAddrs(events EventsByMsgIndex, messages []Message) []string {
-	seen := make(map[string]bool)
-	addrs := []string{}
-
-	// check events for addresses
-	for _, e := range events {
-		for _, attributes := range e {
-			for key, val := range attributes {
-				switch key {
-				case "spender", "sender", "receiver", "recipient", "validator":
-					if _, ok := seen[val]; !ok {
-						addrs = append(addrs, val)
-						seen[val] = true
-					}
-				}
-
-			}
-		}
-	}
-
-	// check messages for addresses
-	for _, m := range messages {
-		if m.Addresses == nil {
-			continue
-		}
-
-		// unique set of addresses
-		for _, addr := range m.Addresses {
-			if _, ok := seen[addr]; !ok {
-				addrs = append(addrs, addr)
-				seen[addr] = true
-			}
-		}
-	}
-
-	return addrs
 }

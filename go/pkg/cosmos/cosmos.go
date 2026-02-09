@@ -2,12 +2,6 @@
 package cosmos
 
 import (
-	"context"
-	"fmt"
-	"math/big"
-	"net/url"
-	"path"
-
 	sdkmath "cosmossdk.io/math"
 	"cosmossdk.io/simapp/params"
 	abci "github.com/cometbft/cometbft/abci/types"
@@ -23,119 +17,53 @@ import (
 	govv1types "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	govv1beta1types "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/go-resty/resty/v2"
-	"github.com/pkg/errors"
-	"github.com/shapeshift/unchained/internal/log"
+	metaprotocolstypes "github.com/cosmos/gaia/v23/x/metaprotocols/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v10/modules/apps/transfer/types"
+	ibccoretypes "github.com/cosmos/ibc-go/v10/modules/core/types"
+	ibclightclientstypes "github.com/cosmos/ibc-go/v10/modules/light-clients/07-tendermint"
+	"github.com/shapeshift/unchained/shared/cosmossdk"
+	"github.com/shapeshift/unchained/shared/log"
 )
 
 var logger = log.WithoutFields()
 
-type APIClient interface {
-	// Account
-	GetAccount(address string) (*AccountResponse, error)
-	GetBalance(address string, baseDenom string) (*BalanceResponse, error)
-	GetDelegations(address string, apr *big.Float) ([]Delegation, error)
-	GetRedelegations(address string, apr *big.Float) ([]Redelegation, error)
-	GetUnbondings(address string, baseDenom string, apr *big.Float) ([]Unbonding, error)
-	GetRewards(address string, apr *big.Float) ([]Reward, error)
+type HTTPClient struct {
+	*cosmossdk.HTTPClient
+}
 
-	// Bank
-	GetTotalSupply(denom string) (string, error)
-	GetAnnualProvisions() (string, error)
-	GetCommunityTax() (string, error)
-	GetBondedTokens() (string, error)
+type APIClient interface {
+	cosmossdk.APIClient
 
 	// Block
-	GetBlock(height *int) (*coretypes.ResultBlock, error)
 	BlockSearch(query string, page int, pageSize int) (*coretypes.ResultBlockSearch, error)
-	BlockResults(height int) (BlockResults, error)
 
 	// Fees/Gas
 	GetGlobalMinimumGasPrices() (map[string]sdkmath.LegacyDec, error)
 	GetLocalMinimumGasPrices() (map[string]sdkmath.LegacyDec, error)
-	GetEstimateGas(rawTx string) (string, error)
-
-	// Staking
-	GetValidators(apr *big.Float, cursor string, pageSize int) (*ValidatorsResponse, error)
-	GetValidator(addr string, apr *big.Float) (*Validator, error)
 
 	// Transactions
-	GetTxHistory(address string, cursor string, pageSize int, sources map[string]*TxState) (*TxHistoryResponse, error)
 	GetTx(txid string) (*coretypes.ResultTx, error)
 	TxSearch(query string, page int, pageSize int) (*coretypes.ResultTxSearch, error)
-	BroadcastTx(rawTx string) (string, error)
 
 	// Utility
 	GetEncoding() *params.EncodingConfig
 }
 
-// Config for cosmos
-type Config struct {
-	Bech32AddrPrefix  string
-	Bech32ValPrefix   string
-	Bech32PkPrefix    string
-	Bech32PkValPrefix string
-	Denom             string
-	NativeFee         int
-	Encoding          *params.EncodingConfig
-	LCDAPIKEY         string
-	LCDURL            string
-	RPCAPIKEY         string
-	RPCURL            string
-	WSURL             string
-	WSAPIKEY          string
-}
-
-// HTTPClient allows communicating over http
-type HTTPClient struct {
-	ctx      context.Context
-	denom    string
-	encoding *params.EncodingConfig
-	LCD      *resty.Client
-	RPC      *resty.Client
-}
-
-// NewHTTPClient configures and creates an HTTPClient
-func NewHTTPClient(conf Config) (*HTTPClient, error) {
-	sdk.GetConfig().SetBech32PrefixForAccount(conf.Bech32AddrPrefix, conf.Bech32PkPrefix)
-	sdk.GetConfig().SetBech32PrefixForValidator(conf.Bech32ValPrefix, conf.Bech32PkValPrefix)
-
-	lcdURL, err := url.Parse(conf.LCDURL)
+func NewHTTPClient(conf cosmossdk.Config) (*HTTPClient, error) {
+	httpClient, err := cosmossdk.NewHTTPClient(conf)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse LCDURL: %s", conf.LCDURL)
+		logger.Panicf("failed to create new http client: %+v", err)
 	}
-
-	rpcURL, err := url.Parse(conf.RPCURL)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse RPCURL: %s", conf.RPCURL)
-	}
-
-	if conf.LCDAPIKEY != "" {
-		lcdURL.Path = path.Join(lcdURL.Path, fmt.Sprintf("api=%s", conf.LCDAPIKEY))
-	}
-
-	if conf.RPCAPIKEY != "" {
-		rpcURL.Path = path.Join(rpcURL.Path, fmt.Sprintf("api=%s", conf.RPCAPIKEY))
-	}
-
-	headers := map[string]string{"Accept": "application/json"}
-
-	lcd := resty.New().SetBaseURL(lcdURL.String()).SetHeaders(headers)
-	rpc := resty.New().SetBaseURL(rpcURL.String()).SetHeaders(headers)
 
 	c := &HTTPClient{
-		ctx:      context.Background(),
-		denom:    conf.Denom,
-		encoding: conf.Encoding,
-		LCD:      lcd,
-		RPC:      rpc,
+		HTTPClient: httpClient,
 	}
 
 	return c, nil
 }
 
 func (c *HTTPClient) GetEncoding() *params.EncodingConfig {
-	return c.encoding
+	return c.Encoding.(*params.EncodingConfig)
 }
 
 // NewEncoding registers all base protobuf types by default as well as any custom types passed in
@@ -148,6 +76,10 @@ func NewEncoding(registerInterfaces ...func(r codectypes.InterfaceRegistry)) *pa
 	distributiontypes.RegisterInterfaces(registry)
 	govv1types.RegisterInterfaces(registry)
 	govv1beta1types.RegisterInterfaces(registry)
+	metaprotocolstypes.RegisterInterfaces(registry)
+	ibccoretypes.RegisterInterfaces(registry)
+	ibctransfertypes.RegisterInterfaces(registry)
+	ibclightclientstypes.RegisterInterfaces(registry)
 	stakingtypes.RegisterInterfaces(registry)
 	stdtypes.RegisterInterfaces(registry)
 
@@ -166,12 +98,12 @@ func NewEncoding(registerInterfaces ...func(r codectypes.InterfaceRegistry)) *pa
 	}
 }
 
-func CoinToValue(c *sdk.Coin) Value {
+func CoinToValue(c *sdk.Coin) cosmossdk.Value {
 	if c == nil {
-		return Value{}
+		return cosmossdk.Value{}
 	}
 
-	return Value{
+	return cosmossdk.Value{
 		Amount: c.Amount.String(),
 		Denom:  c.Denom,
 	}
@@ -193,17 +125,17 @@ func IsValidValidatorAddress(address string) bool {
 	return true
 }
 
-func ConvertABCIEvents(events []abci.Event) []ABCIEvent {
-	abciEvents := make([]ABCIEvent, len(events))
+func ConvertABCIEvents(events []abci.Event) []cosmossdk.ABCIEvent {
+	abciEvents := make([]cosmossdk.ABCIEvent, len(events))
 	for i, event := range events {
-		attributes := make([]ABCIEventAttribute, len(event.Attributes))
+		attributes := make([]cosmossdk.ABCIEventAttribute, len(event.Attributes))
 		for j, attribute := range event.Attributes {
-			attributes[j] = ABCIEventAttribute{
+			attributes[j] = cosmossdk.ABCIEventAttribute{
 				Key:   attribute.Key,
 				Value: attribute.Value,
 			}
 		}
-		abciEvents[i] = ABCIEvent{
+		abciEvents[i] = cosmossdk.ABCIEvent{
 			Type:       event.Type,
 			Attributes: attributes,
 		}

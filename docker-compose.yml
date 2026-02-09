@@ -5,12 +5,6 @@ services:
       context: ./node
       dockerfile: Dockerfile.local
 
-  unchained-local-go:
-    image: unchained-local-go
-    build:
-      context: ./go/build
-      dockerfile: Dockerfile.local
-
   watcher:
     build:
       context: ./node
@@ -41,14 +35,16 @@ services:
       - bitcoin_default
       - bitcoincash_default
       - bnbsmartchain_default
+      - cosmos
       - dogecoin_default
       - ethereum_default
       - gnosis_default
       - litecoin_default
+      - mayachain
       - optimism_default
       - polygon_default
-      - thorchain_default
-      - thorchain-v1_default
+      - thorchain
+      - thorchain-v1
       - solana_default
       - zcash_default
       - proxy_default
@@ -76,6 +72,8 @@ networks:
     name: bitcoincash_default
   bnbsmartchain_default:
     name: bnbsmartchain_default
+  cosmos:
+    name: cosmos
   dogecoin_default:
     name: dogecoin_default
   ethereum_default:
@@ -84,14 +82,16 @@ networks:
     name: gnosis_default
   litecoin_default:
     name: litecoin_default
+  mayachain:
+    name: mayachain
   optimism_default:
     name: optimism_default
   polygon_default:
     name: polygon_default
-  thorchain_default:
-    name: thorchain_default
-  thorchain-v1_default:
-    name: thorchain-v1_default
+  thorchain:
+    name: thorchain
+  thorchain-v1:
+    name: thorchain-v1
   solana_default:
     name: solana_default
   zcash_default:

@@ -4,17 +4,18 @@ import (
 	"strconv"
 
 	"github.com/pkg/errors"
-	"github.com/shapeshift/unchained/pkg/cosmos"
+	"github.com/shapeshift/unchained/pkg/thorchain"
+	"github.com/shapeshift/unchained/shared/cosmossdk"
 	tendermintjson "github.com/tendermint/tendermint/libs/json"
 	coretypes "github.com/tendermint/tendermint/rpc/core/types"
 	rpctypes "github.com/tendermint/tendermint/rpc/jsonrpc/types"
 )
 
 type HTTPClient struct {
-	*cosmos.HTTPClient
+	*thorchain.HTTPClient
 }
 
-func NewHTTPClient(httpClient *cosmos.HTTPClient) *HTTPClient {
+func NewHTTPClient(httpClient *thorchain.HTTPClient) *HTTPClient {
 	return &HTTPClient{
 		HTTPClient: httpClient,
 	}
@@ -24,17 +25,17 @@ type ResultBlockResults struct {
 	*coretypes.ResultBlockResults
 }
 
-func (r *ResultBlockResults) GetBlockEvents() []cosmos.ABCIEvent {
-	blockEvents := make([]cosmos.ABCIEvent, len(r.EndBlockEvents))
+func (r *ResultBlockResults) GetBlockEvents() []cosmossdk.ABCIEvent {
+	blockEvents := make([]cosmossdk.ABCIEvent, len(r.EndBlockEvents))
 	for i, event := range r.EndBlockEvents {
-		attributes := make([]cosmos.ABCIEventAttribute, len(event.Attributes))
+		attributes := make([]cosmossdk.ABCIEventAttribute, len(event.Attributes))
 		for j, attribute := range event.Attributes {
-			attributes[j] = cosmos.ABCIEventAttribute{
+			attributes[j] = cosmossdk.ABCIEventAttribute{
 				Key:   string(attribute.Key),
 				Value: string(attribute.Value),
 			}
 		}
-		blockEvents[i] = cosmos.ABCIEvent{
+		blockEvents[i] = cosmossdk.ABCIEvent{
 			Type:       event.Type,
 			Attributes: attributes,
 		}
@@ -42,7 +43,7 @@ func (r *ResultBlockResults) GetBlockEvents() []cosmos.ABCIEvent {
 	return blockEvents
 }
 
-func (c *HTTPClient) BlockResults(height int) (cosmos.BlockResults, error) {
+func (c *HTTPClient) BlockResults(height int) (cosmossdk.BlockResults, error) {
 	res := &rpctypes.RPCResponse{}
 
 	_, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParam("height", strconv.Itoa(height)).Get("/block_results")

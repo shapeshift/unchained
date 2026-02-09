@@ -1,28 +1,129 @@
 package thorchain
 
 import (
+	"encoding/base64"
 	"fmt"
 	"strconv"
+	"strings"
 
+	sdkerrors "cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
-	"github.com/cometbft/cometbft/types"
+	"cosmossdk.io/simapp/params"
+	abcitypes "github.com/cometbft/cometbft/abci/types"
+	cometbftjson "github.com/cometbft/cometbft/libs/json"
+	coretypes "github.com/cometbft/cometbft/rpc/core/types"
+	rpctypes "github.com/cometbft/cometbft/rpc/jsonrpc/types"
+	cometbfttypes "github.com/cometbft/cometbft/types"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	txtypes "github.com/cosmos/cosmos-sdk/types/tx"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/pkg/errors"
-	"github.com/shapeshift/unchained/pkg/api"
-	"github.com/shapeshift/unchained/pkg/cosmos"
+	"github.com/shapeshift/unchained/shared/api"
+	"github.com/shapeshift/unchained/shared/cosmossdk"
 	"gitlab.com/thorchain/thornode/v3/common"
 	thorchaintypes "gitlab.com/thorchain/thornode/v3/x/thorchain/types"
 )
 
-func GetTxHistory(handler *cosmos.Handler, pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
-	request := func(query string, page int, pageSize int) ([]cosmos.HistoryTx, error) {
+func (c *HTTPClient) GetTx(txid string) (*coretypes.ResultTx, error) {
+	res := &rpctypes.RPCResponse{}
+
+	if !strings.HasPrefix(txid, "0x") {
+		txid = "0x" + txid
+	}
+
+	_, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParam("hash", txid).Get("/tx")
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to get tx: %s", txid)
+	}
+
+	if res.Error != nil {
+		return nil, errors.Wrapf(errors.New(res.Error.Error()), "failed to get tx: %s", txid)
+	}
+
+	tx := &coretypes.ResultTx{}
+	if err := cometbftjson.Unmarshal(res.Result, tx); err != nil {
+		return nil, errors.Errorf("failed to unmarshal tx result: %v: %s", res.Result, res.Error.Error())
+	}
+
+	return tx, nil
+}
+
+func (c *HTTPClient) TxSearch(query string, page int, pageSize int) (*coretypes.ResultTxSearch, error) {
+	res := &rpctypes.RPCResponse{}
+
+	queryParams := map[string]string{
+		"query":    query,
+		"page":     strconv.Itoa(page),
+		"per_page": strconv.Itoa(pageSize),
+		"order_by": "\"desc\"",
+	}
+
+	_, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParams(queryParams).Get("/tx_search")
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to search txs")
+	}
+
+	if res.Error != nil {
+		if strings.Contains(res.Error.Data, "page should be within") {
+			return &coretypes.ResultTxSearch{Txs: []*coretypes.ResultTx{}, TotalCount: 0}, nil
+		}
+		return nil, errors.Wrap(errors.New(res.Error.Error()), "failed to search txs")
+	}
+
+	result := &coretypes.ResultTxSearch{}
+	if err := cometbftjson.Unmarshal(res.Result, result); err != nil {
+		return nil, errors.Wrapf(err, "failed to unmarshal tx search result: %v", res.Result)
+	}
+
+	return result, nil
+}
+
+func (c *HTTPClient) BroadcastTx(rawTx string) (string, error) {
+	txBytes, err := base64.StdEncoding.DecodeString(rawTx)
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to decode rawTx: %s", rawTx)
+	}
+
+	var res struct {
+		TxResponse struct {
+			Height    int64               `json:"height,string"`
+			TxHash    string              `json:"txhash"`
+			Codespace string              `json:"codespace"`
+			Code      uint32              `json:"code"`
+			Data      string              `json:"data"`
+			RawLog    string              `json:"raw_log"`
+			Logs      sdk.ABCIMessageLogs `json:"logs"`
+			Tx        *codectypes.Any     `json:"tx"`
+			Info      string              `json:"info"`
+			GasWanted int64               `json:"gas_wanted,string"`
+			GasUsed   int64               `json:"gas_used,string"`
+			Timestamp string              `json:"timestamp"`
+		} `json:"tx_response"`
+	}
+
+	_, err = c.LCD.R().SetBody(&txtypes.BroadcastTxRequest{TxBytes: txBytes, Mode: txtypes.BroadcastMode_BROADCAST_MODE_SYNC}).SetResult(&res).Post("/cosmos/tx/v1beta1/txs")
+	if err != nil {
+		return "", errors.Wrap(err, "failed to broadcast transaction")
+	}
+
+	if res.TxResponse.Code != 0 {
+		message := fmt.Sprintf("failed to broadcast transaction: codespace: %s, code: %d, description", res.TxResponse.Codespace, res.TxResponse.Code)
+		return "", sdkerrors.ABCIError(res.TxResponse.Codespace, res.TxResponse.Code, message)
+	}
+
+	return res.TxResponse.TxHash, nil
+}
+
+func GetTxHistory(handler *Handler, pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
+	request := func(query string, page int, pageSize int) ([]cosmossdk.HistoryTx, error) {
 		// search for any blocks where pubkey was associated with an indexed block event
 		result, err := handler.HTTPClient.BlockSearch(query, page, pageSize)
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
 
-		txs := []cosmos.HistoryTx{}
+		txs := []cosmossdk.HistoryTx{}
 		for _, b := range result.Blocks {
 			// fetch block results for each block found so we can inspect the block events
 			blockResult, err := handler.HTTPClient.BlockResults(int(b.Block.Height))
@@ -44,7 +145,7 @@ func GetTxHistory(handler *cosmos.Handler, pubkey string, cursor string, pageSiz
 
 				// track all addresses associated with the transaction
 				addrs := make(map[string]struct{})
-				for _, addr := range cosmos.GetTxAddrs(tx.Events, tx.Messages) {
+				for _, addr := range cosmossdk.GetTxAddrs(tx.Events, tx.Messages) {
 					addrs[addr] = struct{}{}
 				}
 
@@ -60,15 +161,15 @@ func GetTxHistory(handler *cosmos.Handler, pubkey string, cursor string, pageSiz
 		return txs, nil
 	}
 
-	sources := cosmos.TxHistorySources(handler.HTTPClient, pubkey, handler.FormatTx)
-	sources["swap"] = cosmos.NewTxState(true, fmt.Sprintf(`"outbound.to='%s'"`, pubkey), request)
+	sources := TxHistorySources(handler.HTTPClient, pubkey, handler.FormatTx)
+	sources["swap"] = cosmossdk.NewTxState(true, fmt.Sprintf(`"outbound.to='%s'"`, pubkey), request)
 
 	res, err := handler.HTTPClient.GetTxHistory(pubkey, cursor, pageSize, sources)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get tx history")
 	}
 
-	txHistory := cosmos.TxHistory{
+	txHistory := cosmossdk.TxHistory{
 		BaseTxHistory: api.BaseTxHistory{
 			Pagination: api.Pagination{
 				Cursor: res.Cursor,
@@ -81,26 +182,78 @@ func GetTxHistory(handler *cosmos.Handler, pubkey string, cursor string, pageSiz
 	return txHistory, nil
 }
 
-// ParseMessages will parse any thorchain or cosmos-sdk message types
-func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Message {
-	messages := []cosmos.Message{}
+func ParseEvents(txResult abcitypes.ExecTxResult) cosmossdk.EventsByMsgIndex {
+	events := make(cosmossdk.EventsByMsgIndex)
+
+	if txResult.Log != "" {
+		logs, err := sdk.ParseABCILogs(txResult.Log)
+		if err != nil {
+			// transaction error logs are not in json format and will fail to parse
+			// return error event with the log message
+			events["0"] = cosmossdk.AttributesByEvent{"error": cosmossdk.ValueByAttribute{"message": txResult.Log}}
+			return events
+		}
+
+		for _, l := range logs {
+			msgIndex := strconv.Itoa(int(l.GetMsgIndex()))
+			events[msgIndex] = make(cosmossdk.AttributesByEvent)
+
+			for _, e := range l.GetEvents() {
+				attributes := make(cosmossdk.ValueByAttribute)
+				for _, a := range e.Attributes {
+					attributes[a.Key] = a.Value
+				}
+
+				events[msgIndex][e.Type] = attributes
+			}
+		}
+	} else {
+		for _, e := range txResult.Events {
+			attributes := make(cosmossdk.ValueByAttribute)
+			for _, a := range e.Attributes {
+				attributes[a.Key] = a.Value
+			}
+
+			msgIndex := attributes["msg_index"]
+			if msgIndex == "" {
+				continue
+			}
+
+			if e.Type == "message" && attributes["action"] == "" {
+				continue
+			}
+
+			delete(attributes, "msg_index")
+
+			if events[msgIndex] == nil {
+				events[msgIndex] = make(cosmossdk.AttributesByEvent)
+			}
+
+			events[msgIndex][e.Type] = attributes
+		}
+	}
+
+	return events
+}
+
+func ParseMessages(msgs []sdk.Msg, events cosmossdk.EventsByMsgIndex) []cosmossdk.Message {
+	messages := []cosmossdk.Message{}
 
 	if _, ok := events["0"]["error"]; ok {
 		return messages
 	}
 
-	unhandledMsgs := []sdk.Msg{}
 	for i, msg := range msgs {
 		switch v := msg.(type) {
 		case *thorchaintypes.MsgSend:
-			message := cosmos.Message{
+			message := cosmossdk.Message{
 				Addresses: []string{v.FromAddress.String(), v.ToAddress.String()},
 				Index:     strconv.Itoa(i),
 				Origin:    v.FromAddress.String(),
 				From:      v.FromAddress.String(),
 				To:        v.ToAddress.String(),
 				Type:      "send",
-				Value:     cosmos.CoinToValue(&v.Amount[0]),
+				Value:     CoinToValue(&v.Amount[0]),
 			}
 			messages = append(messages, message)
 		case *thorchaintypes.MsgDeposit:
@@ -121,14 +274,14 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 				to = refund["to"]
 			}
 
-			message := cosmos.Message{
+			message := cosmossdk.Message{
 				Addresses: []string{v.Signer.String(), to},
 				Index:     strconv.Itoa(i),
 				Origin:    v.Signer.String(),
 				From:      v.Signer.String(),
 				To:        to,
 				Type:      "deposit",
-				Value: cosmos.CoinToValue(&sdk.Coin{
+				Value: CoinToValue(&sdk.Coin{
 					Denom:  coin.Asset.Native(),
 					Amount: sdkmath.NewIntFromBigInt(coin.Amount.BigInt()),
 				}),
@@ -143,14 +296,14 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 					logger.Error(err)
 				}
 
-				message := cosmos.Message{
+				message := cosmossdk.Message{
 					Addresses: []string{outbound["from"], outbound["to"]},
 					Index:     strconv.Itoa(i),
 					Origin:    outbound["from"],
 					From:      outbound["from"],
 					To:        outbound["to"],
 					Type:      "outbound",
-					Value: cosmos.CoinToValue(&sdk.Coin{
+					Value: CoinToValue(&sdk.Coin{
 						Denom:  coin.Asset.Native(),
 						Amount: sdkmath.NewIntFromBigInt(coin.Amount.BigInt()),
 					}),
@@ -177,14 +330,14 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 						logger.Error(err)
 					}
 
-					message := cosmos.Message{
+					message := cosmossdk.Message{
 						Addresses: []string{transfer["sender"], transfer["recipient"]},
 						Index:     strconv.Itoa(i),
 						Origin:    transfer["sender"],
 						From:      transfer["sender"],
 						To:        transfer["recipient"],
 						Type:      msgType,
-						Value:     cosmos.CoinToValue(&coin),
+						Value:     CoinToValue(&coin),
 					}
 					messages = append(messages, message)
 				}
@@ -197,30 +350,90 @@ func ParseMessages(msgs []sdk.Msg, events cosmos.EventsByMsgIndex) []cosmos.Mess
 					logger.Error(err)
 				}
 
-				message := cosmos.Message{
+				message := cosmossdk.Message{
 					Addresses: []string{transfer["sender"], transfer["recipient"]},
 					Index:     strconv.Itoa(i),
 					Origin:    transfer["sender"],
 					From:      transfer["sender"],
 					To:        transfer["recipient"],
 					Type:      "tcy_claim",
-					Value:     cosmos.CoinToValue(&coin),
+					Value:     CoinToValue(&coin),
 				}
 				messages = append(messages, message)
 			}
-		default:
-			unhandledMsgs = append(unhandledMsgs, msg)
+		case *banktypes.MsgSend:
+			message := cosmossdk.Message{
+				Addresses: []string{v.FromAddress, v.ToAddress},
+				Index:     strconv.Itoa(i),
+				Origin:    v.FromAddress,
+				From:      v.FromAddress,
+				To:        v.ToAddress,
+				Type:      "send",
+				Value:     CoinToValue(&v.Amount[0]),
+			}
+			messages = append(messages, message)
 		}
 	}
-
-	messages = append(messages, cosmos.ParseMessages(unhandledMsgs, events)...)
 
 	return messages
 }
 
-func GetTxFromBlockEvents(eventCache map[string]interface{}, blockHeader types.Header, blockEvents []cosmos.ABCIEvent, eventIndex int, latestHeight int, denom string, nativeFee int) (*ResultTx, error) {
+func Fee(tx SigningTx, txid string, denom string) cosmossdk.Value {
+	fees := tx.GetFee()
+
+	if len(fees) == 0 {
+		fees = []sdk.Coin{{Denom: denom, Amount: sdkmath.NewInt(0)}}
+	} else if len(fees) > 1 {
+		logger.Warnf("txid: %s - multiple fees detected (defaulting to index 0): %+v", txid, fees)
+	}
+
+	return cosmossdk.Value{
+		Amount: fees[0].Amount.String(),
+		Denom:  fees[0].Denom,
+	}
+}
+
+// DecodeTx will attempt to decode a raw transaction in the form of
+// a base64 encoded string or a protobuf encoded byte slice
+func DecodeTx(encoding params.EncodingConfig, rawTx interface{}) (sdk.Tx, SigningTx, error) {
+	var txBytes []byte
+
+	switch rawTx := rawTx.(type) {
+	case string:
+		var err error
+
+		txBytes, err = base64.StdEncoding.DecodeString(rawTx)
+		if err != nil {
+			return nil, nil, errors.Wrapf(err, "error decoding transaction from base64")
+		}
+	case []byte:
+		txBytes = rawTx
+	case cometbfttypes.Tx:
+		txBytes = rawTx
+	default:
+		return nil, nil, errors.New("rawTx must be string or []byte")
+	}
+
+	tx, err := encoding.TxConfig.TxDecoder()(txBytes)
+	if err != nil {
+		return nil, nil, errors.Wrapf(err, "error decoding transaction from protobuf")
+	}
+
+	if _, ok := tx.(SigningTx); ok {
+		builder, err := encoding.TxConfig.WrapTxBuilder(tx)
+		if err != nil {
+			return nil, nil, errors.Wrapf(err, "error making transaction builder")
+		}
+
+		return tx, builder.GetTx(), nil
+	} else {
+		return tx, &signingTx{}, nil
+	}
+}
+
+func GetTxFromBlockEvents(eventCache map[string]interface{}, blockHeader cometbfttypes.Header, blockEvents []cosmossdk.ABCIEvent, eventIndex int, latestHeight int, denom string, nativeFee int) (*BlockResultTx, error) {
 	// attempt to find matching fee event for txid or use native fee
-	matchFee := func(txid string, events []TypedEvent) cosmos.Value {
+	matchFee := func(txid string, events []TypedEvent) cosmossdk.Value {
 		for _, e := range events {
 			switch v := e.(type) {
 			case *EventFee:
@@ -230,7 +443,7 @@ func GetTxFromBlockEvents(eventCache map[string]interface{}, blockHeader types.H
 						logger.Error(err)
 					}
 
-					return cosmos.CoinToValue(&sdk.Coin{
+					return CoinToValue(&sdk.Coin{
 						Denom:  coin.Asset.Native(),
 						Amount: sdkmath.NewIntFromBigInt(coin.Amount.BigInt()),
 					})
@@ -238,7 +451,7 @@ func GetTxFromBlockEvents(eventCache map[string]interface{}, blockHeader types.H
 			}
 		}
 
-		return cosmos.Value{Amount: strconv.Itoa(nativeFee), Denom: denom}
+		return cosmossdk.Value{Amount: strconv.Itoa(nativeFee), Denom: denom}
 	}
 
 	// cache parsed block events for use in all subsequent event indices within the block
@@ -252,20 +465,20 @@ func GetTxFromBlockEvents(eventCache map[string]interface{}, blockHeader types.H
 		eventCache["typedEvents"] = typedEvents
 	}
 
-	events := eventCache["events"].(cosmos.EventsByMsgIndex)
+	events := eventCache["events"].(cosmossdk.EventsByMsgIndex)
 	typedEvents := eventCache["typedEvents"].([]TypedEvent)
 	typedEvent := typedEvents[eventIndex]
 
-	tx := &ResultTx{
+	tx := &BlockResultTx{
 		BlockHash:    blockHeader.Hash().String(),
 		BlockHeight:  blockHeader.Height,
 		Timestamp:    int(blockHeader.Time.Unix()),
 		Index:        -1, // synthetic transactions don't have a real tx index
-		Events:       cosmos.EventsByMsgIndex{"0": events[strconv.Itoa(eventIndex)]},
+		Events:       cosmossdk.EventsByMsgIndex{"0": events[strconv.Itoa(eventIndex)]},
 		Messages:     typedEventsToMessages([]TypedEvent{typedEvent}),
 		TypedEvent:   typedEvent,
 		latestHeight: latestHeight,
-		formatTx:     formatTx,
+		formatTx:     formatBlockTx,
 	}
 
 	switch v := typedEvent.(type) {
@@ -279,9 +492,9 @@ func GetTxFromBlockEvents(eventCache map[string]interface{}, blockHeader types.H
 	}
 }
 
-// formatTx creates a synthetic transaction from a BlockEndEvent
-func formatTx(tx *ResultTx) (*cosmos.Tx, error) {
-	t := &cosmos.Tx{
+// formatBlockTx creates a synthetic transaction from a BlockEndEvent
+func formatBlockTx(tx *BlockResultTx) (*cosmossdk.Tx, error) {
+	t := &cosmossdk.Tx{
 		BaseTx: api.BaseTx{
 			TxID:        tx.TxID,
 			BlockHash:   &tx.BlockHash,

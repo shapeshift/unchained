@@ -1,0 +1,21 @@
+{
+  "build": {
+    "builder": "dockerfile",
+    "dockerfilePath": "go/coinstacks/cosmos/build/Dockerfile",
+    "watchPatterns": [
+      "go/shared/**",
+      "go/pkg/cosmos/**",
+      "go/coinstacks/cosmos/**"
+    ]
+  },
+  "deploy": {
+    "startCommand": "/go/bin/app -swagger swagger.json -swaggerui static/swaggerui",
+    "healthcheckPath": "/health",
+    "restartPolicyType": "ALWAYS",
+    "multiRegionConfig": {
+      "us-west2": {
+        "numReplicas": 1
+      }
+    }
+  }
+}

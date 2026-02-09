@@ -1,8 +1,13 @@
-IMAGE=unchained-local-go
+IMAGE=unchained-local-go-thorchain-v1
 USER=$(shell id -u):$(shell id -g)
 ROOTDIR=$(shell git rev-parse --show-toplevel)/go
 
-.PHONY: generate
+.PHONY: all install generate
+
+all: install generate
+
+install:
+	docker build -t $(IMAGE) -f ./build/Dockerfile.local .
 
 generate:
 	- docker run --platform=linux/amd64 --rm --user $(USER) -e GOCACHE=/tmp -v "$(ROOTDIR):$(ROOTDIR)" -w $(CURDIR) $(IMAGE) \

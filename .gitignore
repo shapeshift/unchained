@@ -15,10 +15,6 @@ node_modules/
 *.tsbuildinfo
 routes.ts
 
-# Pulumi
-Pulumi.*.yaml
-!Pulumi.sample.yaml
-
 # Editors
 .vscode/
 .idea/

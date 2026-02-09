@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
 	"path/filepath"
 	"strconv"
 	"time"
@@ -25,15 +26,15 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/cors"
 	thorchainV1 "github.com/shapeshift/unchained/coinstacks/thorchain-v1"
-	"github.com/shapeshift/unchained/internal/log"
-	"github.com/shapeshift/unchained/pkg/api"
-	"github.com/shapeshift/unchained/pkg/cosmos"
-	"github.com/shapeshift/unchained/pkg/metrics"
-	"github.com/shapeshift/unchained/pkg/websocket"
+	"github.com/shapeshift/unchained/pkg/thorchain"
+	"github.com/shapeshift/unchained/shared/api"
+	"github.com/shapeshift/unchained/shared/cosmossdk"
+	"github.com/shapeshift/unchained/shared/log"
+	"github.com/shapeshift/unchained/shared/metrics"
+	"github.com/shapeshift/unchained/shared/websocket"
 )
 
 const (
-	PORT              = 3000
 	PPROF_PORT        = 3001
 	GRACEFUL_SHUTDOWN = 15 * time.Second
 	WRITE_TIMEOUT     = 15 * time.Second
@@ -43,21 +44,33 @@ const (
 
 var logger = log.WithoutFields()
 
+var PORT = func() int {
+	if port := os.Getenv("PORT"); port != "" {
+		if p, err := strconv.Atoi(port); err == nil {
+			return p
+		}
+	}
+	return 3000
+}()
+
 type API struct {
-	*cosmos.API
+	*cosmossdk.API
 	handler *Handler
 }
 
-func New(cfg cosmos.Config, httpClient *cosmos.HTTPClient, wsClient *cosmos.WSClient, blockService *cosmos.BlockService, swaggerPath string, prometheus *metrics.Prometheus) *API {
+func New(cfg thorchain.Config, httpClient *thorchain.HTTPClient, wsClient *thorchain.WSClient, blockService *cosmossdk.BlockService, swaggerPath string, swaggeruiPath string, prometheus *metrics.Prometheus) *API {
 	r := mux.NewRouter()
 
 	handler := &Handler{
-		Handler: &cosmos.Handler{
-			HTTPClient:   thorchainV1.NewHTTPClient(httpClient),
-			WSClient:     wsClient,
-			BlockService: blockService,
-			Denom:        cfg.Denom,
-			NativeFee:    cfg.NativeFee,
+		Handler: &thorchain.Handler{
+			Handler: &cosmossdk.Handler{
+				HTTPClient:   httpClient,
+				BlockService: blockService,
+				Denom:        cfg.Denom,
+				NativeFee:    cfg.NativeFee,
+			},
+			HTTPClient: thorchainV1.NewHTTPClient(httpClient),
+			WSClient:   wsClient,
 		},
 	}
 
@@ -72,13 +85,13 @@ func New(cfg cosmos.Config, httpClient *cosmos.HTTPClient, wsClient *cosmos.WSCl
 	}
 
 	a := &API{
-		API:     cosmos.New(handler, manager, server),
+		API:     cosmossdk.New(handler, manager, server),
 		handler: handler,
 	}
 
 	// runtime check to ensure Handler implements CoinSpecific functionality
 	var _ api.BaseAPI = handler
-	var _ cosmos.CoinSpecificHandler = handler
+	var _ thorchain.CoinSpecificHandler = handler
 
 	// runtime check to ensure Handler implements CoinSpecificHandler
 	if err := handler.ValidateCoinSpecific(handler); err != nil {
@@ -104,13 +117,13 @@ func New(cfg cosmos.Config, httpClient *cosmos.HTTPClient, wsClient *cosmos.WSCl
 		http.ServeFile(w, r, filepath.FromSlash(swaggerPath))
 	}).Methods("GET")
 
-	r.PathPrefix("/docs/").Handler(http.StripPrefix("/docs/", http.FileServer(http.Dir("./static/swaggerui"))))
+	r.PathPrefix("/docs/").Handler(http.StripPrefix("/docs/", http.FileServer(http.Dir(swaggeruiPath))))
 
 	v1 := r.PathPrefix("/api/v1").Subrouter()
 	v1.HandleFunc("/info", a.Info).Methods("GET")
 
 	v1Account := v1.PathPrefix("/account").Subrouter()
-	v1Account.Use(cosmos.ValidatePubkey)
+	v1Account.Use(cosmossdk.ValidatePubkeyMiddleware(thorchain.IsValidAddress))
 	v1Account.HandleFunc("/{pubkey}/txs", a.TxHistory).Methods("GET")
 
 	v1Transaction := v1.PathPrefix("/tx").Subrouter()
