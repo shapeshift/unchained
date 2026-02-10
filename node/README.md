@@ -9,7 +9,6 @@
 - `packages` - shared internal packages across coinstacks
 - `coinstacks/common` - common coinstack logic to reduce duplication
 - `coinstacks/{coin}` - coin specific logic
-- `**/pulumi` - pulumi infrastructure logic for deployment
 
 ## Dependencies
 
