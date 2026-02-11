@@ -3,13 +3,13 @@ module github.com/shapeshift/unchained/pkg/mayachain
 go 1.23.4
 
 require (
-	github.com/cosmos/cosmos-sdk v0.53.4
+	github.com/cosmos/cosmos-sdk v0.45.9
 	github.com/go-resty/resty/v2 v2.17.1
 	github.com/gorilla/websocket v1.5.3
 	github.com/pkg/errors v0.9.1
 	github.com/shapeshift/unchained/shared v0.0.0
-	github.com/tendermint/tendermint v0.35.9
-	gitlab.com/mayachain/mayanode v1.124.0
+	github.com/tendermint/tendermint v0.34.21
+	gitlab.com/mayachain/mayanode v1.127.0
 	golang.org/x/sync v0.16.0
 )
 
@@ -70,8 +70,6 @@ require (
 	github.com/jmhodges/levigo v1.0.0 // indirect
 	github.com/keybase/go-keychain v0.0.0-20190712205309-48d3d31d256d // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
-	github.com/kr/pretty v0.3.1 // indirect
-	github.com/kr/text v0.2.0 // indirect
 	github.com/kzahedi/goent v0.0.0-20190403094137-49773660fa36 // indirect
 	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
@@ -90,7 +88,6 @@ require (
 	github.com/radixdlt/radix-engine-toolkit-go/v2 v2.1.1 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/regen-network/cosmos-proto v0.3.1 // indirect
-	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/rs/cors v1.11.1 // indirect
 	github.com/rs/zerolog v1.29.0 // indirect
 	github.com/sagikazarmark/locafero v0.11.0 // indirect
@@ -130,16 +127,12 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231120223509-83a465c0220f // indirect
 	google.golang.org/grpc v1.60.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
-	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 replace (
-	github.com/btcsuite/btcd => github.com/btcsuite/btcd v0.22.1
-	github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.45.9
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.2-alpha.regen.4
 	github.com/radixdlt/radix-engine-toolkit-go/v2 => ../../radix
 	github.com/shapeshift/unchained/shared => ../../shared
-	github.com/tendermint/tendermint => github.com/tendermint/tendermint v0.34.21
 )
