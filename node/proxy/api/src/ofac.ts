@@ -33,7 +33,7 @@ export class Ofac {
         }
       }, REFRESH_INTERVAL_MS)
     } catch (err) {
-      this.logger.error({ err }, 'Failed to initialize OFAC service, failing open')
+      this.logger.error({ err }, 'Failed to initialize OFAC service')
       throw err
     }
   }
