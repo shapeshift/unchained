@@ -6,13 +6,13 @@ require (
 	cosmossdk.io/errors v1.0.2
 	cosmossdk.io/math v1.5.3
 	cosmossdk.io/simapp v0.0.0-20251103172611-84e841aea2cc
-	github.com/cometbft/cometbft v1.0.1
+	github.com/cometbft/cometbft v0.39.0-beta.2
 	github.com/cosmos/cosmos-sdk v0.54.0-beta.0
 	github.com/go-resty/resty/v2 v2.17.1
 	github.com/gorilla/websocket v1.5.3
 	github.com/pkg/errors v0.9.1
 	github.com/shapeshift/unchained/shared v0.0.0
-	gitlab.com/thorchain/thornode/v3 v3.12.0
+	gitlab.com/thorchain/thornode/v3 v3.15.2
 	golang.org/x/sync v0.17.0
 )
 
@@ -29,8 +29,8 @@ require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
 	github.com/99designs/keyring v1.2.2 // indirect
-	github.com/CosmWasm/wasmd v0.53.0 // indirect
-	github.com/CosmWasm/wasmvm/v2 v2.1.2 // indirect
+	github.com/CosmWasm/wasmd v0.54.0 // indirect
+	github.com/CosmWasm/wasmvm/v2 v2.2.1 // indirect
 	github.com/DataDog/datadog-go v4.8.3+incompatible // indirect
 	github.com/DataDog/zstd v1.5.7 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
@@ -201,11 +201,9 @@ require (
 )
 
 replace (
-	cosmossdk.io/core => cosmossdk.io/core v0.11.3
 	github.com/btcsuite/btcd => github.com/btcsuite/btcd v0.22.1
-	github.com/cometbft/cometbft => github.com/cometbft/cometbft v0.38.19
+	github.com/cometbft/cometbft => github.com/cometbft/cometbft v0.38.21
 	github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.53.0
-	github.com/cosmos/iavl => github.com/cosmos/iavl v1.2.4
 	github.com/gogo/protobuf => github.com/gogo/protobuf v1.3.2
 	github.com/shapeshift/unchained/shared => ../../shared
 )

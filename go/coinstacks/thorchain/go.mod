@@ -11,7 +11,7 @@ require (
 	github.com/rs/cors v1.11.1
 	github.com/shapeshift/unchained/pkg/thorchain v0.0.0
 	github.com/shapeshift/unchained/shared v0.0.0
-	gitlab.com/thorchain/thornode/v3 v3.12.0
+	gitlab.com/thorchain/thornode/v3 v3.15.2
 )
 
 require (
@@ -30,8 +30,8 @@ require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
 	github.com/99designs/keyring v1.2.2 // indirect
-	github.com/CosmWasm/wasmd v0.53.0 // indirect
-	github.com/CosmWasm/wasmvm/v2 v2.1.2 // indirect
+	github.com/CosmWasm/wasmd v0.54.0 // indirect
+	github.com/CosmWasm/wasmvm/v2 v2.2.1 // indirect
 	github.com/DataDog/datadog-go v4.8.3+incompatible // indirect
 	github.com/DataDog/zstd v1.5.7 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
@@ -203,9 +203,8 @@ require (
 
 replace (
 	github.com/btcsuite/btcd => github.com/btcsuite/btcd v0.22.1
-	github.com/cometbft/cometbft => github.com/cometbft/cometbft v0.38.19
+	github.com/cometbft/cometbft => github.com/cometbft/cometbft v0.38.21
 	github.com/cosmos/cosmos-sdk => github.com/cosmos/cosmos-sdk v0.53.0
-	github.com/cosmos/iavl => github.com/cosmos/iavl v1.2.4
 	github.com/gogo/protobuf => github.com/gogo/protobuf v1.3.2
 	github.com/shapeshift/unchained/pkg/thorchain => ../../pkg/thorchain
 	github.com/shapeshift/unchained/shared => ../../shared
