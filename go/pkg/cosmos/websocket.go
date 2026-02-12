@@ -84,7 +84,9 @@ func NewWebsocketClient(conf cosmossdk.Config, blockService *cosmossdk.BlockServ
 	cometbft.MaxReconnectAttempts(10)(client)
 	cometbft.OnReconnect(func() {
 		logger.Info("OnReconnect triggered: resubscribing")
+		ws.m.Lock()
 		ws.unhandledTxs = make(map[int][]types.EventDataTx)
+		ws.m.Unlock()
 		_ = client.Subscribe(context.Background(), types.EventQueryTx.String())
 		_ = client.Subscribe(context.Background(), types.EventQueryNewBlock.String())
 	})(client)
@@ -184,7 +186,7 @@ func (ws *WSClient) listen() {
 
 func (ws *WSClient) handleTx(tx types.EventDataTx) {
 	// queue up any transactions detected before block details are available
-	block, ok := ws.blockService.Blocks[int(tx.Height)]
+	block, ok := ws.blockService.ReadBlock(int(tx.Height))
 	if !ok {
 		ws.m.Lock()
 		ws.unhandledTxs[int(tx.Height)] = append(ws.unhandledTxs[int(tx.Height)], tx)
@@ -213,9 +215,12 @@ func (ws *WSClient) handleNewBlock(newBlock types.EventDataNewBlock) {
 	ws.blockService.WriteBlock(b, true)
 
 	// process any unhandled transactions
-	for _, tx := range ws.unhandledTxs[b.Height] {
+	ws.m.Lock()
+	unhandledTxs := ws.unhandledTxs[b.Height]
+	delete(ws.unhandledTxs, b.Height)
+	ws.m.Unlock()
+
+	for _, tx := range unhandledTxs {
 		go ws.handleTx(tx)
 	}
-
-	delete(ws.unhandledTxs, b.Height)
 }

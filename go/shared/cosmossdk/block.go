@@ -55,8 +55,18 @@ func (s *BlockService) WriteBlock(block *BlockResponse, latest bool) {
 	s.m.Unlock()
 }
 
+func (s *BlockService) ReadBlock(height int) (*BlockResponse, bool) {
+	s.m.RLock()
+	block, ok := s.Blocks[height]
+	s.m.RUnlock()
+	return block, ok
+}
+
 func (s *BlockService) GetBlock(height int) (*BlockResponse, error) {
-	if block, ok := s.Blocks[height]; ok {
+	s.m.RLock()
+	block, ok := s.Blocks[height]
+	s.m.RUnlock()
+	if ok {
 		return block, nil
 	}
 
@@ -65,7 +75,7 @@ func (s *BlockService) GetBlock(height int) (*BlockResponse, error) {
 		return nil, errors.WithStack(err)
 	}
 
-	block := &BlockResponse{
+	block = &BlockResponse{
 		Height:    int(result.Height),
 		Hash:      result.Hash,
 		Timestamp: int(result.Time.Unix()),
