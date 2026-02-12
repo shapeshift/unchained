@@ -133,7 +133,7 @@ export class Ofac {
   }
 
   private normalizeAddress(address: string): string {
-    if (isAddress(address)) return getAddress(address)
+    if (isAddress(address, { strict: false })) return getAddress(address)
     return address
   }
 
