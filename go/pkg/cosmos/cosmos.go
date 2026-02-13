@@ -4,6 +4,7 @@ package cosmos
 import (
 	sdkmath "cosmossdk.io/math"
 	"cosmossdk.io/simapp/params"
+	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	abci "github.com/cometbft/cometbft/abci/types"
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -86,6 +87,7 @@ func NewEncoding(registerInterfaces ...func(r codectypes.InterfaceRegistry)) *pa
 	metaprotocolstypes.RegisterInterfaces(registry)
 	stakingtypes.RegisterInterfaces(registry)
 	stdtypes.RegisterInterfaces(registry)
+	wasmtypes.RegisterInterfaces(registry)
 
 	// register custom protobuf types
 	for _, r := range registerInterfaces {
