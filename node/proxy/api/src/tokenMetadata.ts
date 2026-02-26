@@ -53,9 +53,7 @@ export class TokenMetadata {
       }
 
       if (chainId === SOLANA_CHAIN_ID) {
-        const solanaUrl =
-          process.env.ALCHEMY_SOLANA_RPC_URL ?? `https://solana-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`
-        const { data } = await this.axiosInstance.post(solanaUrl, {
+        const { data } = await this.axiosInstance.post(`https://solana-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`, {
           jsonrpc: '2.0',
           id: 1,
           method: 'getAsset',
