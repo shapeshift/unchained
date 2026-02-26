@@ -2,7 +2,7 @@ import axios, { isAxiosError } from 'axios'
 import type { Request, Response } from 'express'
 
 const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY
-if (!ALCHEMY_API_KEY) throw new Error('ALCHEMY_API_KEY env var not set')
+if (!ALCHEMY_API_KEY) console.warn('ALCHEMY_API_KEY env var not set — /api/v1/tokens/metadata will be unavailable')
 
 const ALCHEMY_NETWORK_BY_CHAIN_ID: Record<string, string> = {
   'eip155:1': 'eth-mainnet',
@@ -20,6 +20,11 @@ export class TokenMetadata {
   async handler(req: Request, res: Response): Promise<void> {
     const chainId = typeof req.query.chainId === 'string' ? req.query.chainId : ''
     const tokenAddress = typeof req.query.tokenAddress === 'string' ? req.query.tokenAddress : ''
+
+    if (!ALCHEMY_API_KEY) {
+      res.status(503).json({ error: 'Token metadata service is not configured' })
+      return
+    }
 
     if (!chainId || !tokenAddress) {
       res.status(400).json({ error: 'Both chainId and tokenAddress query params are required' })
@@ -43,7 +48,7 @@ export class TokenMetadata {
           res.status(404).json({ error: 'Token not found' })
           return
         }
-        res.json({ chainId, tokenAddress, name: r.name, symbol: r.symbol, decimals: r.decimals, logo: r.logo })
+        res.set('Cache-Control', 'public, max-age=86400').json({ chainId, tokenAddress, name: r.name, symbol: r.symbol, decimals: r.decimals, logo: r.logo })
         return
       }
 
@@ -65,7 +70,7 @@ export class TokenMetadata {
           res.status(404).json({ error: 'Token not found' })
           return
         }
-        res.json({
+        res.set('Cache-Control', 'public, max-age=86400').json({
           chainId,
           tokenAddress,
           name: r.content?.metadata?.name,
