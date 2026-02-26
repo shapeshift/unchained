@@ -20,7 +20,46 @@ const ALCHEMY_NETWORK_BY_CHAIN_ID: Record<string, string> = {
   'eip155:42161': 'arb-mainnet',
 }
 
-const isValidSolanaAddress = (address: string): boolean => /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)
+const SOLANA_BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+const SOLANA_BASE58_MAP = new Map(SOLANA_BASE58_ALPHABET.split('').map((char, index) => [char, index]))
+const SOLANA_ADDRESS_REGEX = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/
+const SOLANA_PUBLIC_KEY_LENGTH = 32
+
+const decodeBase58 = (value: string): Uint8Array | null => {
+  if (!value.length) return null
+
+  let decodedValue = 0n
+
+  for (const char of value) {
+    const charValue = SOLANA_BASE58_MAP.get(char)
+    if (charValue === undefined) return null
+
+    decodedValue = decodedValue * 58n + BigInt(charValue)
+  }
+
+  let leadingZeroes = 0
+  while (leadingZeroes < value.length && value[leadingZeroes] === '1') {
+    leadingZeroes += 1
+  }
+
+  const bytes: number[] = []
+  while (decodedValue > 0n) {
+    bytes.push(Number(decodedValue & 0xffn))
+    decodedValue >>= 8n
+  }
+  bytes.reverse()
+
+  const decoded = new Uint8Array(leadingZeroes + bytes.length)
+  decoded.set(bytes, leadingZeroes)
+
+  return decoded
+}
+
+const isValidSolanaAddress = (address: string): boolean => {
+  if (!SOLANA_ADDRESS_REGEX.test(address)) return false
+  const decoded = decodeBase58(address)
+  return decoded?.length === SOLANA_PUBLIC_KEY_LENGTH
+}
 
 const sendValidationError = (res: Response, details: Record<string, string>): void => {
   res.status(422).json({
@@ -31,6 +70,8 @@ const sendValidationError = (res: Response, details: Record<string, string>): vo
 
 export class TokenMetadata {
   private readonly windowMs = 60_000
+  private readonly cleanupIntervalMs = this.windowMs
+  private nextCleanupAt = Date.now() + this.cleanupIntervalMs
   private readonly maxRequestsPerWindow = (() => {
     const parsed = Number.parseInt(process.env.TOKEN_METADATA_RATE_LIMIT_MAX ?? '60', 10)
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 60
@@ -81,6 +122,17 @@ export class TokenMetadata {
 
   private isRateLimited(req: Request, res: Response): boolean {
     const now = Date.now()
+
+    if (now >= this.nextCleanupAt) {
+      for (const [ip, state] of this.requestsByIp.entries()) {
+        if (state.resetAt <= now) {
+          this.requestsByIp.delete(ip)
+        }
+      }
+
+      this.nextCleanupAt = now + this.cleanupIntervalMs
+    }
+
     const key = req.ip || 'unknown'
     const existing = this.requestsByIp.get(key)
 

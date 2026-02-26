@@ -31,6 +31,7 @@ const main = async () => {
   await ofac.initialize()
 
   const app = express()
+  app.set('trust proxy', 1)
 
   app.use(...middleware.common(prometheus))
 
