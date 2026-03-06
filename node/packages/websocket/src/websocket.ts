@@ -60,7 +60,7 @@ export abstract class BaseWebsocketClient {
       this.logger.error({ error, fn: 'ws.onerror' }, 'websocket error')
     }
     this.socket.onclose = ({ code, reason }) => {
-      this.logger.error({ code, reason, fn: 'ws.close' }, 'websocket closed')
+      this.logger.debug({ code, reason, fn: 'ws.close' }, 'websocket closed')
       this.close(code)
     }
     this.socket.onmessage = (msg) => this.onMessage(msg)
