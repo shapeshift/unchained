@@ -71,9 +71,9 @@ const registry = new Registry({ addressFormatter: formatAddress, blockHandler, t
 const blockbook = new WebsocketClient(
   INDEXER_WS_URL,
   {
+    apiKey: INDEXER_API_KEY,
     blockHandler: registry.onBlock.bind(registry),
     transactionHandler: registry.onTransaction.bind(registry),
-    apiKey: INDEXER_API_KEY,
   },
   { resetInterval: 15 * 60 * 1000 } // 15 minutes
 )

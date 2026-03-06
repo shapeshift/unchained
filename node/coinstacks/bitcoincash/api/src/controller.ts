@@ -23,11 +23,7 @@ export const logger = new Logger({
   level: process.env.LOG_LEVEL,
 })
 
-const httpURL = `${INDEXER_URL}/api=${INDEXER_API_KEY}`
-const wsURL = `${INDEXER_WS_URL}/api=${INDEXER_API_KEY}`
-const rpcUrl = `${RPC_URL}/api=${RPC_API_KEY}`
-
-const blockbook = new Blockbook({ httpURL, wsURL, logger })
+const blockbook = new Blockbook({ httpURL: INDEXER_URL, wsURL: INDEXER_WS_URL, apiKey: INDEXER_API_KEY, logger })
 
 const isXpub = (pubkey: string): boolean => {
   return pubkey.startsWith('xpub') || pubkey.startsWith('ypub') || pubkey.startsWith('zpub')
@@ -51,7 +47,8 @@ export const formatAddress = (address: string): string => {
 
 export const service = new Service({
   blockbook,
-  rpcUrl,
+  rpcUrl: RPC_URL,
+  rpcApiKey: RPC_API_KEY,
   isXpub,
   addressFormatter: formatAddress,
 })
