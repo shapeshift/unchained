@@ -2,11 +2,7 @@
   "build": {
     "builder": "dockerfile",
     "dockerfilePath": "go/coinstacks/thorchain/build/Dockerfile",
-    "watchPatterns": [
-      "go/shared/**",
-      "go/pkg/thorchain/**",
-      "go/coinstacks/thorchain/**"
-    ]
+    "watchPatterns": ["go/shared/**", "go/pkg/thorchain/**", "go/coinstacks/thorchain/**"]
   },
   "deploy": {
     "startCommand": "/go/bin/app -swagger swagger.json -swaggerui static/swaggerui",

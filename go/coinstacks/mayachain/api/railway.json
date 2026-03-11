@@ -2,11 +2,7 @@
   "build": {
     "builder": "dockerfile",
     "dockerfilePath": "go/coinstacks/mayachain/build/Dockerfile",
-    "watchPatterns": [
-      "go/shared/**",
-      "go/pkg/mayachain/**",
-      "go/coinstacks/mayachain/**"
-    ]
+    "watchPatterns": ["go/shared/**", "go/pkg/mayachain/**", "go/coinstacks/mayachain/**"]
   },
   "deploy": {
     "startCommand": "/go/bin/app -swagger swagger.json -swaggerui static/swaggerui",
