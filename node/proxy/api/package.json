@@ -14,6 +14,7 @@
   "dependencies": {
     "@shapeshiftoss/common-api": "^10.0.0",
     "@shapeshiftoss/prometheus": "^10.0.0",
+    "@solana/web3.js": "^1.95.3",
     "bottleneck": "^2.19.5",
     "fast-xml-parser": "^4.3.0"
   }

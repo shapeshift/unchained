@@ -1962,6 +1962,7 @@ __metadata:
   dependencies:
     "@shapeshiftoss/common-api": "npm:^10.0.0"
     "@shapeshiftoss/prometheus": "npm:^10.0.0"
+    "@solana/web3.js": "npm:^1.95.3"
     bottleneck: "npm:^2.19.5"
     fast-xml-parser: "npm:^4.3.0"
   languageName: unknown

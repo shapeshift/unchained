@@ -13,6 +13,7 @@ import { Portals } from './portals'
 import { MarketDataConnectionHandler } from './marketData'
 import { CoincapWebsocketClient } from './coincap'
 import { Ofac } from './ofac'
+import { TokenMetadata } from './tokenMetadata'
 
 const PORT = process.env.PORT ?? 3000
 const COINCAP_API_KEY = process.env.COINCAP_API_KEY
@@ -64,6 +65,9 @@ const main = async () => {
 
   const portals = new Portals()
   app.get('/api/v1/portals/*', portals.handler.bind(portals))
+
+  const tokenMetadata = new TokenMetadata()
+  app.get('/api/v1/tokens/metadata', tokenMetadata.handler.bind(tokenMetadata))
 
   // redirect any unmatched routes to docs
   app.get('/', async (_, res) => {
