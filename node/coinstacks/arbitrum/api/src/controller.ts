@@ -31,7 +31,7 @@ const rpcUrl = `${RPC_URL}/${RPC_API_KEY}`
 const client = createPublicClient({ chain: arbitrum, transport: http(rpcUrl) })
 const infuraClient = createPublicClient({
   chain: arbitrum,
-  transport: http(`https://arbitrum-mainnet.infura.io/v3/${INFURA_API_KEY}`),
+  transport: http(`https://arb-mainnet.g.alchemy.com/v2/${INFURA_API_KEY}`),
 })
 
 export const service = new MoralisService({ chain: EvmChain.ARBITRUM, logger, client, rpcUrl })
