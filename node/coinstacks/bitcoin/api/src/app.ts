@@ -15,9 +15,7 @@ const INDEXER_WS_URL = process.env.INDEXER_WS_URL
 const INDEXER_API_KEY = process.env.INDEXER_API_KEY
 
 if (!INDEXER_WS_URL) throw new Error('INDEXER_WS_URL env var not set')
-
-const IS_LIQUIFY = INDEXER_WS_URL.toLowerCase().includes('liquify')
-const IS_NOWNODES = INDEXER_WS_URL.toLowerCase().includes('nownodes')
+if (!INDEXER_API_KEY) throw new Error('INDEXER_API_KEY env var not set')
 
 const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'bitcoin', 'api'],
@@ -70,15 +68,12 @@ const transactionHandler: TransactionHandler<BlockbookTx, utxo.Tx> = async (bloc
 
 const registry = new Registry({ addressFormatter: formatAddress, blockHandler, transactionHandler })
 
-const wsUrl = INDEXER_API_KEY && IS_LIQUIFY ? `${INDEXER_WS_URL}/api=${INDEXER_API_KEY}` : INDEXER_WS_URL
-const apiKey = INDEXER_API_KEY && IS_NOWNODES ? INDEXER_API_KEY : undefined
-
 const blockbook = new WebsocketClient(
-  wsUrl,
+  INDEXER_WS_URL,
   {
+    apiKey: INDEXER_API_KEY,
     blockHandler: registry.onBlock.bind(registry),
     transactionHandler: registry.onTransaction.bind(registry),
-    apiKey,
   },
   { resetInterval: 15 * 60 * 1000 } // 15 minutes
 )

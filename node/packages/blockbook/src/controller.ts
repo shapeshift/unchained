@@ -5,23 +5,15 @@ import type { Address, BalanceHistory, Block, BlockbookArgs, BlockIndex, Info, S
 import { ApiError } from './models'
 import { Logger } from '@shapeshiftoss/logger'
 
-const defaultArgs: BlockbookArgs = {
-  httpURL: 'https://indexer.ethereum.shapeshift.com',
-  wsURL: 'wss://indexer.ethereum.shapeshift.com/websocket',
-  logger: new Logger({ namespace: ['unchained', 'blockbook'], level: process.env.LOG_LEVEL }),
-}
-
 @Route('api/v2')
 @Tags('v2')
 export class Blockbook extends Controller {
   instance: AxiosInstance
-  wsURL: string
   logger: Logger
 
-  constructor(args: BlockbookArgs = defaultArgs, timeout?: number, retries = 3) {
+  constructor(args: BlockbookArgs = { httpURL: '', wsURL: '', logger: new Logger() }, timeout?: number, retries = 3) {
     super()
     this.logger = args.logger.child({ namespace: ['blockbook'] })
-    this.wsURL = args.apiKey ? `${args.wsURL}/${args.apiKey}` : args.wsURL
     this.instance = axios.create({
       timeout: timeout ?? 10000,
       baseURL: args.httpURL,

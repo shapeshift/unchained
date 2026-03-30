@@ -6,11 +6,9 @@ import cors from 'cors'
 import { ValidateError } from 'tsoa'
 import { ApiError, NotFoundError } from '.'
 
-export function errorHandler(err: Error, req: Request, res: Response, next: NextFunction): Response | void {
+export function errorHandler(err: Error, _: Request, res: Response, next: NextFunction): Response | void {
   if (err instanceof ValidateError) {
     const e = err as ValidateError
-
-    console.warn(`Caught Validation Error for ${req.path}:`, e.fields)
 
     return res.status(422).json({
       message: 'Validation Failed',
