@@ -103,7 +103,7 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 
 		isNownodes := strings.Contains(conf.RPCURL, "nownodes")
 		if isNownodes {
-			rpcHeaders["Authorization"] = fmt.Sprintf("Basic %s", conf.LCDAPIKEY)
+			rpcHeaders["Authorization"] = fmt.Sprintf("Basic %s", conf.RPCAPIKEY)
 		}
 	}
 

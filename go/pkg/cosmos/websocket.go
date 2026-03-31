@@ -46,16 +46,24 @@ func NewWebsocketClient(conf cosmossdk.Config, blockService *cosmossdk.BlockServ
 		return nil, errors.Wrapf(err, "failed to parse WSURL: %s", conf.WSURL)
 	}
 
-	client, err := cometbft.NewWS(wsURL.String(), "/wss")
+	endpoint := "/websocket"
+	if conf.WSAPIKEY != "" {
+		endpoint = "/wss"
+	}
+
+	client, err := cometbft.NewWS(wsURL.String(), endpoint)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create websocket client")
 	}
 
-	parts := strings.Split(conf.WSAPIKEY, ":")
-	username, password := parts[0], parts[1]
-
-	client.Username = username
-	client.Password = password
+	if conf.WSAPIKEY != "" {
+		username, password, ok := strings.Cut(conf.WSAPIKEY, ":")
+		if !ok {
+			return nil, errors.New("invalid WSAPIKEY format: expected 'username:password'")
+		}
+		client.Username = username
+		client.Password = password
+	}
 
 	// use default dialer
 	client.Dialer = net.Dial
