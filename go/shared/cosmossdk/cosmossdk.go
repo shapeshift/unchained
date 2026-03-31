@@ -6,6 +6,7 @@ import (
 	"math/big"
 	"net/url"
 	"path"
+	"strings"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
@@ -82,12 +83,28 @@ func NewHTTPClient(conf Config) (*HTTPClient, error) {
 
 	lcdHeaders := map[string]string{"Content-Type": "application/json"}
 	if conf.LCDAPIKEY != "" {
-		lcdURL.Path = path.Join(lcdURL.Path, fmt.Sprintf("api=%s", conf.LCDAPIKEY))
+		isLiquify := strings.Contains(conf.LCDURL, "liquify")
+		if isLiquify {
+			lcdURL.Path = path.Join(lcdURL.Path, fmt.Sprintf("api=%s", conf.LCDAPIKEY))
+		}
+
+		isNownodes := strings.Contains(conf.LCDURL, "nownodes")
+		if isNownodes {
+			lcdHeaders["Authorization"] = fmt.Sprintf("Basic %s", conf.LCDAPIKEY)
+		}
 	}
 
 	rpcHeaders := map[string]string{"Content-Type": "application/json"}
 	if conf.RPCAPIKEY != "" {
-		rpcURL.Path = path.Join(rpcURL.Path, fmt.Sprintf("api=%s", conf.RPCAPIKEY))
+		isLiquify := strings.Contains(conf.RPCURL, "liquify")
+		if isLiquify {
+			rpcURL.Path = path.Join(rpcURL.Path, fmt.Sprintf("api=%s", conf.RPCAPIKEY))
+		}
+
+		isNownodes := strings.Contains(conf.RPCURL, "nownodes")
+		if isNownodes {
+			rpcHeaders["Authorization"] = fmt.Sprintf("Basic %s", conf.LCDAPIKEY)
+		}
 	}
 
 	lcd := resty.New().SetBaseURL(lcdURL.String()).SetHeaders(lcdHeaders)

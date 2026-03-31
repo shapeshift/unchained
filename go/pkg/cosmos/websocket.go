@@ -41,30 +41,21 @@ type WSClient struct {
 }
 
 func NewWebsocketClient(conf cosmossdk.Config, blockService *cosmossdk.BlockService, errChan chan<- error) (*WSClient, error) {
-	isLiquify := strings.Contains(conf.WSURL, "liquify")
-	isNownodes := strings.Contains(conf.WSURL, "nownodes")
-
 	wsURL, err := url.Parse(conf.WSURL)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to parse WSURL: %s", conf.WSURL)
 	}
 
-	endpoint := "/websocket"
-	if conf.RPCAPIKEY != "" {
-		if isNownodes {
-			parts := strings.Split(conf.RPCAPIKEY, ":")
-			endpoint = fmt.Sprintf("/%s/websocket", parts[1])
-		}
-
-		if isLiquify {
-			endpoint = fmt.Sprintf("/api=%s/websocket", conf.RPCAPIKEY)
-		}
-	}
-
-	client, err := cometbft.NewWS(wsURL.String(), endpoint)
+	client, err := cometbft.NewWS(wsURL.String(), "/wss")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create websocket client")
 	}
+
+	parts := strings.Split(conf.WSAPIKEY, ":")
+	username, password := parts[0], parts[1]
+
+	client.Username = username
+	client.Password = password
 
 	// use default dialer
 	client.Dialer = net.Dial
