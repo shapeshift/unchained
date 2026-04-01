@@ -31,7 +31,7 @@ export abstract class BaseConnectionHandler {
   protected subscriptionIds = new Set<string>()
 
   abstract onSubscribe(subscriptionId: string, data?: unknown): void
-  abstract onUnsubscribe(subscriptionId: string): void
+  abstract onUnsubscribe(subscriptionId: string, data?: unknown): void
   abstract onClose(): void
 
   constructor(websocket: WebSocket, prometheus: Prometheus, logger: Logger) {
@@ -92,7 +92,7 @@ export abstract class BaseConnectionHandler {
           this.onSubscribe(payload.subscriptionId, payload.data)
           return
         case 'unsubscribe':
-          this.onUnsubscribe(payload.subscriptionId)
+          this.onUnsubscribe(payload.subscriptionId, payload.data)
           return
       }
     } catch (err) {
