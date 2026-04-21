@@ -324,7 +324,7 @@
         "tags": [
           "Proxy"
         ],
-        "summary": "Mayanode lcd rest api endpoints.",
+        "summary": "Mayachain lcd rest api endpoints.",
         "operationId": "LCD",
         "responses": {
           "200": {
@@ -340,6 +340,32 @@
         ],
         "summary": "Mayachain midgard rest api endpoints.",
         "operationId": "Midgard",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/rpc": {
+      "get": {
+        "tags": [
+          "Proxy"
+        ],
+        "summary": "Mayachain rpc rest api endpoints.",
+        "operationId": "GetRPC",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Proxy"
+        ],
+        "summary": "Mayachain rpc jsonrpc endpoints.",
+        "operationId": "PostRPC",
         "responses": {
           "200": {
             "description": ""

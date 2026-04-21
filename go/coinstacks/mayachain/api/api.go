@@ -16,6 +16,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -24,6 +25,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/cors"
@@ -143,6 +145,7 @@ func New(cfg cosmossdk.Config, httpClient *mayachain.HTTPClient, wsClient *mayac
 
 	// proxy endpoints
 	r.PathPrefix("/lcd").HandlerFunc(a.LCD).Methods("GET")
+	r.PathPrefix("/rpc").HandlerFunc(a.RPC).Methods("GET", "POST")
 	r.PathPrefix("/midgard").HandlerFunc(a.Midgard).Methods("GET")
 
 	// docs redirect paths
@@ -281,7 +284,7 @@ func (a *API) AffiliateFees(w http.ResponseWriter, r *http.Request) {
 
 // swagger:route GET /lcd Proxy LCD
 //
-// Mayanode lcd rest api endpoints.
+// Mayachain lcd rest api endpoints.
 //
 // responses:
 //
@@ -301,13 +304,66 @@ func (a *API) LCD(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var result any
-	if err := json.Unmarshal(res.Body(), &result); err != nil {
-		api.HandleError(w, http.StatusInternalServerError, err.Error())
+	a.handleProxyResponse(w, res)
+}
+
+// swagger:route GET /rpc Proxy GetRPC
+//
+// Mayachain rpc rest api endpoints.
+//
+// responses:
+//
+//	200:
+
+// swagger:route POST /rpc Proxy PostRPC
+//
+// Mayachain rpc jsonrpc endpoints.
+//
+// responses:
+//
+//	200:
+func (a *API) RPC(w http.ResponseWriter, r *http.Request) {
+	path := strings.TrimPrefix(r.URL.Path, "/rpc")
+	if path == "" {
+		path = "/"
+	}
+
+	req := a.httpClient.RPC.R()
+	req.QueryParam = r.URL.Query()
+
+	var res *resty.Response
+	var err error
+
+	switch r.Method {
+	case http.MethodGet:
+		res, err = req.Get(path)
+		if err != nil {
+			api.HandleError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+	case http.MethodPost:
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			api.HandleError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		if len(body) > 0 {
+			req.SetBody(body)
+		}
+
+		res, err = req.Post(path)
+		if err != nil {
+			api.HandleError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+	default:
+		w.Header().Set("Allow", "GET, POST")
+		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
-	api.HandleResponse(w, http.StatusOK, result)
+	a.handleProxyResponse(w, res)
 }
 
 // swagger:route GET /midgard Proxy Midgard
@@ -329,6 +385,15 @@ func (a *API) Midgard(w http.ResponseWriter, r *http.Request) {
 	res, err := req.Get(path)
 	if err != nil {
 		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	a.handleProxyResponse(w, res)
+}
+
+func (a *API) handleProxyResponse(w http.ResponseWriter, res *resty.Response) {
+	if res.StatusCode() != http.StatusOK {
+		api.HandleError(w, res.StatusCode(), string(res.Body()))
 		return
 	}
 
