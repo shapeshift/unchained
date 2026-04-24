@@ -6,6 +6,15 @@ import { getAddress, isAddress } from 'viem'
 const OFAC_SDN_URL = 'https://sanctionslistservice.ofac.treas.gov/api/PublicationPreview/exports/SDN_ADVANCED.XML'
 const REFRESH_INTERVAL_MS = 24 * 60 * 60 * 1000 // 24 hours
 
+const ADDITIONAL_SANCTIONED_ADDRESSES = [
+  '0x5d3919F12bCc35c26Eee5F8226A9bee90c257Ccc',
+  '0xBb6A6006Eb71205e977eCeb19FCaD1C8d631C787',
+  '0x1F4C1c2e610f089D6914c4448E6F21Cb0db3adeF',
+  '0xeBA786C9517a4823A5cFD9c72e4E80BF8168129B',
+  '0xCBb24A6B4DAfaAA1a759A2F413eA0eB6AE1455CC',
+  '0x8d11AeAC74267DD5C56D371bf4AE1AFA174C2d49',
+]
+
 interface OfacArgs {
   logger: Logger
 }
@@ -48,7 +57,13 @@ export class Ofac {
 
   private async fetchAndParseOfacList(): Promise<Set<string>> {
     const { data } = await axios.get<string>(OFAC_SDN_URL, { responseType: 'text' })
-    return this.parseXml(data)
+    const addresses = this.parseXml(data)
+
+    for (const address of ADDITIONAL_SANCTIONED_ADDRESSES) {
+      addresses.add(this.normalizeAddress(address))
+    }
+
+    return addresses
   }
 
   private parseXml(xmlData: string): Set<string> {
