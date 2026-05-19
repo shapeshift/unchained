@@ -12,12 +12,12 @@ import { EVM } from '../../../common/api/src/evm/controller'
 import { EventCache, StakingDuration } from './rfox'
 
 const INDEXER_URL = process.env.INDEXER_URL
-const INFURA_API_KEY = process.env.INFURA_API_KEY
+const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY
 const RPC_URL = process.env.RPC_URL
 const RPC_API_KEY = process.env.RPC_API_KEY
 
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
-if (!INFURA_API_KEY) throw new Error('INFURA_API_KEY env var not set')
+if (!ALCHEMY_API_KEY) throw new Error('ALCHEMY_API_KEY env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
 if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
 
@@ -29,13 +29,13 @@ export const logger = new Logger({
 const rpcUrl = `${RPC_URL}/${RPC_API_KEY}`
 
 const client = createPublicClient({ chain: arbitrum, transport: http(rpcUrl) })
-const infuraClient = createPublicClient({
+const alchemyClient = createPublicClient({
   chain: arbitrum,
-  transport: http(`https://arb-mainnet.g.alchemy.com/v2/${INFURA_API_KEY}`),
+  transport: http(`https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`),
 })
 
 export const service = new MoralisService({ chain: EvmChain.ARBITRUM, logger, client, rpcUrl })
-export const cache = new EventCache({ client, infuraClient, logger })
+export const cache = new EventCache({ client, alchemyClient, logger })
 
 // assign service to be used for all instances of EVM
 EVM.service = service

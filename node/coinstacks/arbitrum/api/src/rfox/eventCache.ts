@@ -15,13 +15,13 @@ interface Events {
 
 export interface EventCacheArgs {
   client: PublicClient
-  infuraClient: PublicClient
+  alchemyClient: PublicClient
   logger: Logger
 }
 
 export class EventCache {
   private client: PublicClient
-  private infuraClient: PublicClient
+  private alchemyClient: PublicClient
   private logger: Logger
 
   private cache: Map<Address, Events> = new Map([
@@ -31,7 +31,7 @@ export class EventCache {
 
   constructor(args: EventCacheArgs) {
     this.client = args.client
-    this.infuraClient = args.infuraClient
+    this.alchemyClient = args.alchemyClient
     this.logger = args.logger.child({ namespace: ['eventCache'] })
   }
 
@@ -90,7 +90,7 @@ export class EventCache {
       this.logger.info(`Fetching events for ${contractAddress} from ${startBlock} to ${endBlock}`)
 
       for (const eventName of ['Stake', 'Unstake'] as const) {
-        const contractEvents = await this.infuraClient.getContractEvents({
+        const contractEvents = await this.alchemyClient.getContractEvents({
           address: contractAddress,
           eventName,
           abi: RFOX_ABI,
