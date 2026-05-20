@@ -107,13 +107,17 @@ export class WebsocketClient extends AddressSubscriptionWebsocketClient {
   }
 
   private unsubscribe(subscriptionId: number): void {
-    this.socket?.send(
-      JSON.stringify({
-        jsonrpc: '2.0',
-        id: 'unsubscribe',
-        method: 'logsUnsubscribe',
-        params: [subscriptionId],
-      })
-    )
+    try {
+      this.socket?.send(
+        JSON.stringify({
+          jsonrpc: '2.0',
+          id: 'unsubscribe',
+          method: 'logsUnsubscribe',
+          params: [subscriptionId],
+        })
+      )
+    } catch (err) {
+      this.logger.debug(err, `failed to unsubscribe subscription: ${subscriptionId}`)
+    }
   }
 }
