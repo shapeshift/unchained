@@ -106,6 +106,11 @@ export interface Utxo {
 export interface Address {
   balance: string
   pubkey: string
+  /**
+   * BIP44 derivation path for the address (e.g. `m/84'/0'/0'/0/3`).
+   * Present only for xpub-derived addresses.
+   */
+  path?: string
 }
 
 /**
