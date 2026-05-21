@@ -28,6 +28,10 @@
 					},
 					"pubkey": {
 						"type": "string"
+					},
+					"path": {
+						"type": "string",
+						"description": "BIP44 derivation path for the address (e.g. `m/84'/0'/0'/0/3`).\nPresent only for xpub-derived addresses."
 					}
 				},
 				"required": [

@@ -50,6 +50,7 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
       const addresses = data.tokens?.map<Address>((token) => ({
         balance: token.balance ?? '0',
         pubkey: token.name,
+        path: token.path,
       })) ?? [
         {
           balance: data.balance,
