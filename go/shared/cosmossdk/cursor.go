@@ -40,5 +40,14 @@ func (c *Cursor) Decode(b64 string) error {
 		return errors.Wrapf(err, "failed to unmarshal cursor: %s", bytes)
 	}
 
+	// json.Unmarshal into the existing State map keeps caller-supplied keys and stores a JSON
+	// null pointer value as a nil *CursorState. Drop those nil entries so a malformed cursor
+	// (e.g. {"state":{"x":null}}) can't leave a nil pointer to be dereferenced downstream.
+	for source, state := range c.State {
+		if state == nil {
+			delete(c.State, source)
+		}
+	}
+
 	return nil
 }

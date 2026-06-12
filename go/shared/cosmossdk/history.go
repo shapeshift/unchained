@@ -81,6 +81,9 @@ func (h *History) filterByCursor(txs []HistoryTx) ([]HistoryTx, error) {
 		if tx.GetHeight() == h.Cursor.BlockHeight {
 			found := false
 			for _, s := range h.Cursor.State {
+				if s == nil {
+					continue
+				}
 				if tx.GetTxID() == s.TxID {
 					found = true
 					break
