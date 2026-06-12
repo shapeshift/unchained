@@ -9,7 +9,7 @@ import PQueue from 'p-queue'
 import { getAddress, isHex, parseUnits, PublicClient, toHex } from 'viem'
 import type { BaseAPI, EstimateGasBody, RPCRequest, RPCResponse, SendTxBody } from '..'
 import { ApiError, BadRequestError } from '..'
-import { createAxiosRetry, exponentialDelay, handleError, rpcId, validatePageSize } from '../utils'
+import { assertSafeOutboundUrl, createAxiosRetry, exponentialDelay, handleError, rpcId, validatePageSize } from '../utils'
 import type { Account, API, Tx, TxHistory, GasFees, InternalTx, GasEstimate, TokenMetadata } from './models'
 import { Fees, TokenBalance, TokenTransfer, TokenType } from './models'
 import type { BlockNativeResponse, ExplorerApiResponse, ExplorerInternalTxByAddress, TraceCall } from './types'
@@ -789,7 +789,10 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
         if (!mediaUrl) return
 
         try {
-          const { headers } = await axiosNoRetry.head(mediaUrl)
+          // mediaUrl is derived from attacker-controllable NFT metadata, so validate it before
+          // fetching and disable redirects to prevent SSRF into the internal network.
+          await assertSafeOutboundUrl(mediaUrl)
+          const { headers } = await axiosNoRetry.head(mediaUrl, { maxRedirects: 0 })
           return headers['content-type']?.includes('video') ? 'video' : 'image'
         } catch (err) {
           return

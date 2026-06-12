@@ -5,7 +5,7 @@ import BigNumber from 'bignumber.js'
 import { erc1155Abi, erc721Abi, getAddress, getContract, isHex, parseUnits, PublicClient, toHex } from 'viem'
 import type { BadRequestError, BaseAPI, EstimateGasBody, RPCRequest, RPCResponse, SendTxBody } from '..'
 import { ApiError } from '..'
-import { createAxiosRetry, exponentialDelay, handleError, rpcId, validatePageSize } from '../utils'
+import { assertSafeOutboundUrl, createAxiosRetry, exponentialDelay, handleError, rpcId, validatePageSize } from '../utils'
 import type {
   Account,
   API,
@@ -824,7 +824,11 @@ export class BlockbookService implements Omit<BaseAPI, 'getInfo'>, API {
 
         try {
           // attempt to get metadata using hex encoded id as per erc spec
-          const { data } = await axiosNoRetry.get(makeUrl(substitue(uri, id, true)))
+          // uri is derived from on-chain tokenURI(), which is attacker-controllable; validate
+          // before fetching and disable redirects to prevent SSRF into the internal network.
+          const hexUrl = makeUrl(substitue(uri, id, true))
+          await assertSafeOutboundUrl(hexUrl)
+          const { data } = await axiosNoRetry.get(hexUrl, { maxRedirects: 0 })
           return data
         } catch (err) {
           // don't retry on timeout, assume host is offline
@@ -832,7 +836,9 @@ export class BlockbookService implements Omit<BaseAPI, 'getInfo'>, API {
 
           try {
             // not everyone follows the spec, attempt to get metadata using id string
-            const { data } = await axiosNoRetry.get(makeUrl(substitue(uri, id, false)))
+            const strUrl = makeUrl(substitue(uri, id, false))
+            await assertSafeOutboundUrl(strUrl)
+            const { data } = await axiosNoRetry.get(strUrl, { maxRedirects: 0 })
             return data
           } catch (err) {
             // swallow error and return empty object if unable to fetch metadata
@@ -847,7 +853,8 @@ export class BlockbookService implements Omit<BaseAPI, 'getInfo'>, API {
         if (!mediaUrl) return
 
         try {
-          const { headers } = await axiosNoRetry.head(mediaUrl)
+          await assertSafeOutboundUrl(mediaUrl)
+          const { headers } = await axiosNoRetry.head(mediaUrl, { maxRedirects: 0 })
           return headers['content-type']?.includes('video') ? 'video' : 'image'
         } catch (err) {
           return
