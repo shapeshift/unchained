@@ -85,6 +85,22 @@ func (a *API) Root(w http.ResponseWriter, r *http.Request) {
 func (a *API) ValidatePagingParams(w http.ResponseWriter, r *http.Request, defaultPageSize int, maxPageSize *int) (string, int, error) {
 	cursor := r.URL.Query().Get("cursor")
 
+	if cursor != "" {
+		c := &Cursor{}
+		if err := c.Decode(cursor); err != nil {
+			api.HandleError(w, http.StatusBadRequest, "invalid cursor")
+			return cursor, 0, fmt.Errorf("invalid cursor: %w", err)
+		}
+
+		// reject nil state entries to avoid a downstream nil pointer dereference
+		for source, state := range c.State {
+			if state == nil {
+				api.HandleError(w, http.StatusBadRequest, "invalid cursor")
+				return cursor, 0, fmt.Errorf("invalid cursor: nil state for source %q", source)
+			}
+		}
+	}
+
 	pageSizeQ := r.URL.Query().Get("pageSize")
 	if pageSizeQ == "" {
 		pageSizeQ = strconv.Itoa(defaultPageSize)
