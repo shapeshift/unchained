@@ -1,8 +1,8 @@
 import type { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import type { Logger } from '@shapeshiftoss/logger'
-import axios, { AxiosError } from 'axios'
+import axios  from 'axios'
 import BigNumber from 'bignumber.js'
-import { erc1155Abi, erc721Abi, getAddress, getContract, isHex, parseUnits, PublicClient, toHex } from 'viem'
+import { getAddress, isHex, parseUnits, PublicClient, toHex } from 'viem'
 import type { BadRequestError, BaseAPI, EstimateGasBody, RPCRequest, RPCResponse, SendTxBody } from '..'
 import { ApiError } from '..'
 import { createAxiosRetry, exponentialDelay, handleError, rpcId, validatePageSize } from '../utils'
@@ -15,8 +15,6 @@ import type {
   GasFees,
   InternalTx,
   GasEstimate,
-  TokenMetadata,
-  TokenType,
 } from './models'
 import type {
   DebugCallStack,
@@ -777,105 +775,6 @@ export class BlockbookService implements Omit<BaseAPI, 'getInfo'>, API {
           ? true
           : false,
       txs: blockbookTxs,
-    }
-  }
-
-  async getTokenMetadata(address: string, id: string, type: TokenType): Promise<TokenMetadata> {
-    const substitue = (data: string, id: string, hexEncoded: boolean): string => {
-      if (!data.includes('{id}')) return data
-      if (!hexEncoded) return data.replace('{id}', id)
-      return data.replace('{id}', new BigNumber(id).toString(16).padStart(64, '0').toLowerCase())
-    }
-
-    const makeUrl = (url: string): string => {
-      if (url.startsWith('ipfs://')) {
-        return url.replace('ipfs://', 'https://gateway.shapeshift.com/ipfs/')
-      }
-
-      if (url.startsWith('ipns://')) {
-        return url.replace('ipns://', 'https://gateway.shapeshift.com/ipns/')
-      }
-
-      return url
-    }
-
-    try {
-      const uri = (await (() => {
-        switch (type) {
-          case 'erc721':
-            return getContract({ address: getAddress(address), abi: erc721Abi, client: this.client }).read.tokenURI([
-              BigInt(id),
-            ])
-          case 'erc1155':
-            return getContract({ address: getAddress(address), abi: erc1155Abi, client: this.client }).read.uri([
-              BigInt(id),
-            ])
-          default:
-            throw new Error(`invalid token type: ${type}`)
-        }
-      })()) as string
-
-      const metadata = await (async () => {
-        // handle base64 encoded metadata
-        if (uri.startsWith('data:application/json;base64')) {
-          const [, b64] = uri.split(',')
-          return JSON.parse(Buffer.from(b64, 'base64').toString())
-        }
-
-        try {
-          // attempt to get metadata using hex encoded id as per erc spec
-          const { data } = await axiosNoRetry.get(makeUrl(substitue(uri, id, true)))
-          return data
-        } catch (err) {
-          // don't retry on timeout, assume host is offline
-          if (err instanceof AxiosError && err.code === AxiosError.ECONNABORTED) return {}
-
-          try {
-            // not everyone follows the spec, attempt to get metadata using id string
-            const { data } = await axiosNoRetry.get(makeUrl(substitue(uri, id, false)))
-            return data
-          } catch (err) {
-            // swallow error and return empty object if unable to fetch metadata
-            return {}
-          }
-        }
-      })()
-
-      const mediaUrl = metadata?.image ? makeUrl(metadata.image) : ''
-
-      const mediaType = await (async () => {
-        if (!mediaUrl) return
-
-        try {
-          const { headers } = await axiosNoRetry.head(mediaUrl)
-          return headers['content-type']?.includes('video') ? 'video' : 'image'
-        } catch (err) {
-          return
-        }
-      })()
-
-      return {
-        address,
-        id,
-        type,
-        name: metadata?.name ?? '',
-        description: metadata?.description ?? '',
-        media: {
-          url: mediaUrl,
-          type: mediaType,
-        },
-      }
-    } catch (err) {
-      this.logger.error(err, 'failed to fetch token metadata')
-
-      return {
-        address,
-        id,
-        type,
-        name: '',
-        description: '',
-        media: { url: '' },
-      }
     }
   }
 
