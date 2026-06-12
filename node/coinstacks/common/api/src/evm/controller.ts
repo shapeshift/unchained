@@ -9,7 +9,7 @@ import {
   SendTxBody,
   ValidationError,
 } from '../'
-import { API, Account, Tx, TxHistory, TokenMetadata, TokenType } from './models'
+import { API, Account, Tx, TxHistory } from './models'
 import { BlockbookService } from './blockbookService'
 import { MoralisService } from './moralisService'
 import { Chain } from 'viem'
@@ -191,36 +191,5 @@ export class EVM extends Controller implements BaseAPI, Omit<API, 'getGasFees' |
   @Post('jsonrpc/')
   async doRpcRequest(@Body() body: RPCRequest | Array<RPCRequest>): Promise<RPCResponse | Array<RPCResponse>> {
     return EVM.service.doRpcRequest(body)
-  }
-
-  /**
-   * Get token metadata
-   *
-   * @param {string} contract contract address
-   * @param {string} id token identifier
-   * @param {TokenType} type token type (erc721 or erc1155)
-   *
-   * @returns {Promise<TokenMetadata>} token metadata
-   */
-  @Example<TokenMetadata>({
-    address: '0x0000000000000000000000000000000000000000',
-    id: '123456789',
-    type: 'ERC721',
-    name: 'FoxyFox',
-    description: 'FOXatars are a cyber-fox NFT project created by ShapeShift and Mercle',
-    media: {
-      url: 'https://storage.mercle.xyz/ipfs/bafybeifihbavnaqwmisq72nwqpmxy3qkfqxj5nvjg7wimluhisp7wkzcru',
-      type: 'image',
-    },
-  })
-  @Response<ValidationError>(422, 'Validation Error')
-  @Response<InternalServerError>(500, 'Internal Server Error')
-  @Get('/metadata/token')
-  async getTokenMetadata(
-    @Query() contract: string,
-    @Query() id: string,
-    @Query() type: TokenType
-  ): Promise<TokenMetadata> {
-    return EVM.service.getTokenMetadata(contract, id, type)
   }
 }

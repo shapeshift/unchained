@@ -10,8 +10,8 @@ import { getAddress, isHex, parseUnits, PublicClient, toHex } from 'viem'
 import type { BaseAPI, EstimateGasBody, RPCRequest, RPCResponse, SendTxBody } from '..'
 import { ApiError, BadRequestError } from '..'
 import { createAxiosRetry, exponentialDelay, handleError, rpcId, validatePageSize } from '../utils'
-import type { Account, API, Tx, TxHistory, GasFees, InternalTx, GasEstimate, TokenMetadata } from './models'
-import { Fees, TokenBalance, TokenTransfer, TokenType } from './models'
+import type { Account, API, Tx, TxHistory, GasFees, InternalTx, GasEstimate } from './models'
+import { Fees, TokenBalance, TokenTransfer } from './models'
 import type { BlockNativeResponse, ExplorerApiResponse, ExplorerInternalTxByAddress, TraceCall } from './types'
 import { formatAddress } from '.'
 
@@ -753,63 +753,6 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     }
 
     return { cursor: pagination.cursor, hasMore: Boolean(pagination.cursor), txs }
-  }
-
-  async getTokenMetadata(address: string, id: string, type: TokenType): Promise<TokenMetadata> {
-    const makeUrl = (url: string): string => {
-      if (url.startsWith('ipfs://')) {
-        return url.replace('ipfs://', 'https://gateway.shapeshift.com/ipfs/')
-      }
-
-      if (url.startsWith('ipns://')) {
-        return url.replace('ipns://', 'https://gateway.shapeshift.com/ipns/')
-      }
-
-      return url
-    }
-
-    try {
-      const data = await Moralis.EvmApi.nft.getNFTMetadata({
-        address,
-        tokenId: id,
-        chain: this.chain,
-        format: 'decimal',
-      })
-
-      if (!data || !data.raw.normalized_metadata || data.result.contractType !== type.toUpperCase()) {
-        throw new Error(`Metadata for ${address} (${id}) not found`)
-      }
-
-      const { contractType } = data.result
-      const { description, name, image, animation_url } = data.raw.normalized_metadata
-
-      const mediaUrl = makeUrl(animation_url || image || '')
-
-      const mediaType = await (async () => {
-        if (!mediaUrl) return
-
-        try {
-          const { headers } = await axiosNoRetry.head(mediaUrl)
-          return headers['content-type']?.includes('video') ? 'video' : 'image'
-        } catch (err) {
-          return
-        }
-      })()
-
-      return {
-        address,
-        id,
-        name: name ?? '',
-        description: description ?? '',
-        type: contractType,
-        media: {
-          url: mediaUrl,
-          type: mediaType,
-        },
-      }
-    } catch (err) {
-      throw handleError(err)
-    }
   }
 
   async doRpcRequest(req: RPCRequest | Array<RPCRequest>): Promise<RPCResponse | Array<RPCResponse>> {
