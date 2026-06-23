@@ -383,8 +383,9 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
         return filtered.reduce((sum, fee) => sum.plus(fee), BigNumber(0)).div(filtered.length).integerValue()
       }
 
+      let maxPriorityFeePerGas = BigNumber(this.minPriorityFee)
       const [slow, average, fast] = REWARD_PERCENTILES.map((_, index): Fees => {
-        const maxPriorityFeePerGas = BigNumber.max(estimatePriorityFee(index), this.minPriorityFee)
+        maxPriorityFeePerGas = BigNumber.max(estimatePriorityFee(index), maxPriorityFeePerGas)
         const maxFeePerGas = baseFeePerGas.times(BASE_FEE_MULTIPLIER).plus(maxPriorityFeePerGas)
 
         return {
