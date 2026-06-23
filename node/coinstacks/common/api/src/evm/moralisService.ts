@@ -12,17 +12,28 @@ import { ApiError, BadRequestError } from '..'
 import { createAxiosRetry, exponentialDelay, handleError, rpcId, validatePageSize } from '../utils'
 import type { Account, API, Tx, TxHistory, GasFees, InternalTx, GasEstimate } from './models'
 import { Fees, TokenBalance, TokenTransfer } from './models'
-import type { BlockNativeResponse, ExplorerApiResponse, ExplorerInternalTxByAddress, TraceCall } from './types'
+import type { ExplorerApiResponse, ExplorerInternalTxByAddress, TraceCall } from './types'
 import { formatAddress } from '.'
 
 const INDEXER_URL = process.env.INDEXER_URL as string
 const INDEXER_API_KEY = process.env.INDEXER_API_KEY as string
-const BLOCKNATIVE_API_KEY = process.env.BLOCKNATIVE_API_KEY as string
 const ENVIRONMENT = process.env.ENVIRONMENT as string
 const WEBHOOK_URL = process.env.WEBHOOK_URL as string
 
 const axiosNoRetry = axios.create({ timeout: 5000 })
 const axiosWithRetry = createAxiosRetry({}, { timeout: 10000 })
+
+// number of historical blocks to sample when estimating priority fees
+const FEE_HISTORY_BLOCK_COUNT = 100
+
+// reward percentiles used to estimate [slow, average, fast] priority fees respectively
+const REWARD_PERCENTILES = [50, 70, 90]
+
+// multiplier applied to the next base fee when calculating maxFeePerGas so the tx stays valid as the base fee rises
+const BASE_FEE_MULTIPLIER = 2
+
+// drop priority fees above the median by this factor to keep outliers (mev/overpayers) from skewing estimates
+const OUTLIER_THRESHOLD_MULTIPLIER = 10
 
 type TransactionHandler = (tx: Tx) => Promise<void>
 
@@ -62,7 +73,6 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
   constructor(args: MoralisServiceArgs) {
     if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
     if (!INDEXER_API_KEY) throw new Error('INDEXER_API_KEY env var not set')
-    if (!BLOCKNATIVE_API_KEY) throw new Error('BLOCKNATIVE_API_KEY env var not set')
     if (!WEBHOOK_URL) throw new Error('WEBHOOK_URL env var not set')
     if (!ENVIRONMENT) throw new Error('ENVIRONMENT env var not set')
 
@@ -344,46 +354,52 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
   async getGasFees(): Promise<GasFees> {
     try {
-      const { data } = await axiosNoRetry.get<BlockNativeResponse>(
-        'https://api.blocknative.com/gasprices/blockprices',
-        {
-          headers: {
-            Authorization: BLOCKNATIVE_API_KEY,
-          },
-          params: {
-            chainid: this.chain.decimal,
-            confidenceLevels: [50, 70, 95],
-          },
-          paramsSerializer: { indexes: null },
+      const feeHistory = await this.client.getFeeHistory({
+        blockCount: FEE_HISTORY_BLOCK_COUNT,
+        rewardPercentiles: REWARD_PERCENTILES,
+      })
+
+      // the last entry is the base fee for the next block, calculated deterministically by the protocol
+      const baseFeePerGas = BigNumber(feeHistory.baseFeePerGas[feeHistory.baseFeePerGas.length - 1].toString())
+
+      const rewards = feeHistory.reward ?? []
+
+      // average the priority fee at the given percentile index across all sampled blocks, ignoring empty blocks
+      // and clipping outliers above median * OUTLIER_THRESHOLD_MULTIPLIER so a few high tips don't skew the estimate
+      const estimatePriorityFee = (index: number): BigNumber => {
+        const fees = rewards
+          .map((reward) => BigNumber((reward[index] ?? 0n).toString()))
+          .filter((fee) => fee.gt(0))
+          .sort((a, b) => a.comparedTo(b))
+
+        if (!fees.length) return BigNumber(0)
+
+        const mid = Math.floor(fees.length / 2)
+        const median = fees.length % 2 === 0 ? fees[mid - 1].plus(fees[mid]).div(2) : fees[mid]
+        const threshold = median.times(OUTLIER_THRESHOLD_MULTIPLIER)
+
+        const filtered = fees.filter((fee) => fee.lte(threshold))
+
+        return filtered.reduce((sum, fee) => sum.plus(fee), BigNumber(0)).div(filtered.length).integerValue()
+      }
+
+      let maxPriorityFeePerGas = BigNumber(this.minPriorityFee)
+      const [slow, average, fast] = REWARD_PERCENTILES.map((_, index): Fees => {
+        maxPriorityFeePerGas = BigNumber.max(estimatePriorityFee(index), maxPriorityFeePerGas)
+        const maxFeePerGas = baseFeePerGas.times(BASE_FEE_MULTIPLIER).plus(maxPriorityFeePerGas)
+
+        return {
+          gasPrice: baseFeePerGas.plus(maxPriorityFeePerGas).toFixed(0),
+          maxFeePerGas: maxFeePerGas.toFixed(0),
+          maxPriorityFeePerGas: maxPriorityFeePerGas.toFixed(0),
         }
-      )
-
-      const blockPrices = data.blockPrices[0]
-
-      const baseFeePerGas = BigNumber(blockPrices.baseFeePerGas).times(1e9)
-
-      const estimatedFees = Object.fromEntries<Fees>(
-        blockPrices.estimatedPrices.map((v) => {
-          const maxPriorityFeePerGas = BigNumber.max(BigNumber(v.maxPriorityFeePerGas).times(1e9), this.minPriorityFee)
-          const minMaxFeePerGas = BigNumber(baseFeePerGas).plus(maxPriorityFeePerGas)
-          const maxFeePerGas = BigNumber.max(BigNumber(v.maxFeePerGas).times(1e9), minMaxFeePerGas)
-
-          return [
-            v.confidence,
-            {
-              gasPrice: BigNumber(v.price).times(1e9).toFixed(0),
-              maxFeePerGas: maxFeePerGas.toFixed(0),
-              maxPriorityFeePerGas: maxPriorityFeePerGas.toFixed(0),
-            },
-          ]
-        })
-      )
+      })
 
       return {
         baseFeePerGas: baseFeePerGas.toFixed(0),
-        slow: estimatedFees['50'],
-        average: estimatedFees['70'],
-        fast: estimatedFees['95'],
+        slow,
+        average,
+        fast,
       }
     } catch (err) {
       throw handleError(err)
