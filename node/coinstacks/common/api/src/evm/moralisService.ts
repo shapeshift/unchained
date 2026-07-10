@@ -30,10 +30,10 @@ const FEE_HISTORY_BLOCK_COUNT = 100
 const REWARD_PERCENTILES = [50, 70, 90]
 
 // default per-tier multipliers [slow, average, fast] for base fee
-const DEFAULT_BASE_FEE_MULTIPLIER = [2, 2, 2]
+const DEFAULT_BASE_FEE_MULTIPLIER: [number, number, number] = [2, 2, 2]
 
 // default per-tier multipliers [slow, average, fast] for gas price
-const DEFAULT_GAS_PRICE_MULTIPLIER = [1, 1, 1]
+const DEFAULT_GAS_PRICE_MULTIPLIER: [number, number, number] = [1, 1, 1]
 
 // drop priority fees above the median by this factor to keep outliers (mev/overpayers) from skewing estimates
 const OUTLIER_THRESHOLD_MULTIPLIER = 10
@@ -55,8 +55,8 @@ export interface MoralisServiceArgs {
   rpcUrl: string
   explorerApiUrl?: URL
   minPriorityFee?: string
-  baseFeeMultiplier?: number[]
-  gasPriceMultiplier?: number[]
+  baseFeeMultiplier?: [number, number, number]
+  gasPriceMultiplier?: [number, number, number]
 }
 
 export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSubscriptionClient {
@@ -66,8 +66,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
   private readonly rpcUrl: string
   private readonly explorerApiUrl: URL
   private readonly minPriorityFee: string
-  private readonly baseFeeMultiplier: number[]
-  private readonly gasPriceMultiplier: number[]
+  private readonly baseFeeMultiplier: [number, number, number]
+  private readonly gasPriceMultiplier: [number, number, number]
 
   private secret?: string
   private streamId?: string
