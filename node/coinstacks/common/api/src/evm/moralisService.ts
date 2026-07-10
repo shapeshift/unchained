@@ -29,8 +29,11 @@ const FEE_HISTORY_BLOCK_COUNT = 100
 // reward percentiles used to estimate [slow, average, fast] priority fees respectively
 const REWARD_PERCENTILES = [50, 70, 90]
 
-// multiplier applied to the next base fee when calculating maxFeePerGas so the tx stays valid as the base fee rises
-const BASE_FEE_MULTIPLIER = 2
+// default per-tier multipliers [slow, average, fast] for base fee
+const DEFAULT_BASE_FEE_MULTIPLIER: [number, number, number] = [2, 2, 2]
+
+// default per-tier multipliers [slow, average, fast] for gas price
+const DEFAULT_GAS_PRICE_MULTIPLIER: [number, number, number] = [1, 1, 1]
 
 // drop priority fees above the median by this factor to keep outliers (mev/overpayers) from skewing estimates
 const OUTLIER_THRESHOLD_MULTIPLIER = 10
@@ -52,6 +55,8 @@ export interface MoralisServiceArgs {
   rpcUrl: string
   explorerApiUrl?: URL
   minPriorityFee?: string
+  baseFeeMultiplier?: [number, number, number]
+  gasPriceMultiplier?: [number, number, number]
 }
 
 export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSubscriptionClient {
@@ -61,6 +66,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
   private readonly rpcUrl: string
   private readonly explorerApiUrl: URL
   private readonly minPriorityFee: string
+  private readonly baseFeeMultiplier: [number, number, number]
+  private readonly gasPriceMultiplier: [number, number, number]
 
   private secret?: string
   private streamId?: string
@@ -82,6 +89,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     this.rpcUrl = args.rpcUrl
     this.explorerApiUrl = args.explorerApiUrl ?? new URL('about:blank')
     this.minPriorityFee = args.minPriorityFee ?? '0'
+    this.baseFeeMultiplier = args.baseFeeMultiplier ?? DEFAULT_BASE_FEE_MULTIPLIER
+    this.gasPriceMultiplier = args.gasPriceMultiplier ?? DEFAULT_GAS_PRICE_MULTIPLIER
 
     void Moralis.start({ evmApiBaseUrl: INDEXER_URL, apiKey: INDEXER_API_KEY })
     void Moralis.Streams.setSettings({ region: 'us-east-1' })
@@ -386,10 +395,11 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
       let maxPriorityFeePerGas = BigNumber(this.minPriorityFee)
       const [slow, average, fast] = REWARD_PERCENTILES.map((_, index): Fees => {
         maxPriorityFeePerGas = BigNumber.max(estimatePriorityFee(index), maxPriorityFeePerGas)
-        const maxFeePerGas = baseFeePerGas.times(BASE_FEE_MULTIPLIER).plus(maxPriorityFeePerGas)
+        const maxFeePerGas = baseFeePerGas.times(this.baseFeeMultiplier[index]).plus(maxPriorityFeePerGas)
+        const gasPrice = baseFeePerGas.times(this.gasPriceMultiplier[index]).plus(maxPriorityFeePerGas)
 
         return {
-          gasPrice: baseFeePerGas.plus(maxPriorityFeePerGas).toFixed(0),
+          gasPrice: gasPrice.toFixed(0),
           maxFeePerGas: maxFeePerGas.toFixed(0),
           maxPriorityFeePerGas: maxPriorityFeePerGas.toFixed(0),
         }
