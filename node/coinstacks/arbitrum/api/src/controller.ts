@@ -34,7 +34,15 @@ const alchemyClient = createPublicClient({
   transport: http(`https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`),
 })
 
-export const service = new MoralisService({ chain: EvmChain.ARBITRUM, logger, client, rpcUrl })
+export const service = new MoralisService({
+  chain: EvmChain.ARBITRUM,
+  logger,
+  client,
+  rpcUrl,
+  baseFeeMultiplier: [1.5, 2, 3],
+  gasPriceMultiplier: [1.1, 1.2, 1.5],
+})
+
 export const cache = new EventCache({ client, alchemyClient, logger })
 
 // assign service to be used for all instances of EVM
