@@ -305,7 +305,11 @@ export class Solana implements BaseAPI, API {
   @Post('send/')
   async sendTx(@Body() body: SendTxBody): Promise<string> {
     try {
-      const txSig = await heliusSdk.connection.sendRawTransaction(Buffer.from(body.hex, 'base64'))
+      // Preflight against the confirmed bank - provider built txs (e.g. across) pin blockhashes at
+      // confirmed commitment, which the default finalized preflight won't know for ~30s
+      const txSig = await heliusSdk.connection.sendRawTransaction(Buffer.from(body.hex, 'base64'), {
+        preflightCommitment: 'confirmed',
+      })
 
       return txSig
     } catch (err) {
