@@ -9,7 +9,6 @@ import (
 
 type Handler struct {
 	*mayachain.Handler
-	indexer *mayachain.AffiliateFeeIndexer
 }
 
 // Contains info about the running coinstack
@@ -50,29 +49,6 @@ func (h *Handler) GetAccount(pubkey string) (api.Account, error) {
 
 func (h *Handler) GetTxHistory(pubkey string, cursor string, pageSize int) (api.TxHistory, error) {
 	return mayachain.GetTxHistory(h.Handler, pubkey, cursor, pageSize)
-}
-
-// Contains info about affiliate fee history
-// swagger:model AffiliateFees
-type AffiliateFees struct {
-	// Affiliate fees
-	// required: true
-	Fees []*mayachain.AffiliateFee `json:"fees"`
-}
-
-func (h *Handler) GetAffiliateFees(start int, end int) (*AffiliateFees, error) {
-	fees := []*mayachain.AffiliateFee{}
-	for _, fee := range h.indexer.AffiliateFees {
-		if fee.Timestamp >= int64(start) && fee.Timestamp <= int64(end) {
-			fees = append(fees, fee)
-		}
-	}
-
-	a := &AffiliateFees{
-		Fees: fees,
-	}
-
-	return a, nil
 }
 
 func (h *Handler) ParseMessages(msgs []sdk.Msg, events cosmossdk.EventsByMsgIndex) []cosmossdk.Message {

@@ -93,12 +93,7 @@ func main() {
 		logger.Panicf("failed to create new websocket client: %+v", err)
 	}
 
-	indexer := mayachain.NewAffiliateFeeIndexer(httpClient, wsClient)
-	if err := indexer.Sync(); err != nil {
-		logger.Panicf("failed to index affiliate fees: %+v", err)
-	}
-
-	api := api.New(cfg.Config, httpClient, wsClient, blockService, indexer, *swaggerPath, *swaggeruiPath, prometheus)
+	api := api.New(cfg.Config, httpClient, wsClient, blockService, *swaggerPath, *swaggeruiPath, prometheus)
 	defer api.Shutdown()
 
 	go api.Serve(errChan)

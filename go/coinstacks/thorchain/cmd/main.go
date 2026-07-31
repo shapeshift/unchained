@@ -30,12 +30,8 @@ var (
 type Config struct {
 	LCDURL        string `mapstructure:"LCD_URL"`
 	LCDAPIKEY     string `mapstructure:"LCD_API_KEY"`
-	LCDV1URL      string `mapstructure:"LCD_V1_URL"`
-	LCDV1APIKEY   string `mapstructure:"LCD_V1_API_KEY"`
 	RPCURL        string `mapstructure:"RPC_URL"`
 	RPCAPIKEY     string `mapstructure:"RPC_API_KEY"`
-	RPCV1URL      string `mapstructure:"RPC_V1_URL"`
-	RPCV1APIKEY   string `mapstructure:"RPC_V1_API_KEY"`
 	INDEXERURL    string `mapstructure:"INDEXER_URL"`
 	INDEXERAPIKEY string `mapstructure:"INDEXER_API_KEY"`
 	WSURL         string `mapstructure:"WS_URL"`
@@ -51,7 +47,7 @@ func main() {
 
 	conf := &Config{}
 	if *envPath == "" {
-		if err := config.LoadFromEnv(conf, "LCD_URL", "LCD_API_KEY", "LCD_V1_URL", "LCD_V1_API_KEY", "RPC_URL", "RPC_API_KEY", "RPC_V1_URL", "RPC_V1_API_KEY", "INDEXER_URL", "INDEXER_API_KEY", "WS_URL", "WS_API_KEY"); err != nil {
+		if err := config.LoadFromEnv(conf, "LCD_URL", "LCD_API_KEY", "RPC_URL", "RPC_API_KEY", "INDEXER_URL", "INDEXER_API_KEY", "WS_URL", "WS_API_KEY"); err != nil {
 			logger.Panicf("failed to load config from env: %+v", err)
 		}
 	} else {
@@ -94,30 +90,11 @@ func main() {
 		INDEXERAPIKEY: conf.INDEXERAPIKEY,
 	}
 
-	cfgV1 := thorchain.Config{
-		Config: cosmossdk.Config{
-			Bech32AddrPrefix: "thor",
-			Bech32PkPrefix:   "thorpub",
-			Denom:            "rune",
-			NativeFee:        2000000, // https://daemon.thorchain.shapeshift.com/lcd/thorchain/constants
-			Encoding:         encoding,
-			LCDURL:           conf.LCDV1URL,
-			LCDAPIKEY:        conf.LCDV1APIKEY,
-			RPCURL:           conf.RPCV1URL,
-			RPCAPIKEY:        conf.RPCV1APIKEY,
-		},
-	}
-
 	prometheus := metrics.NewPrometheus("thorchain")
 
 	sdk.GetConfig().SetBech32PrefixForAccount(cfg.Bech32AddrPrefix, cfg.Bech32PkPrefix)
 
 	httpClient, err := thorchain.NewHTTPClient(cfg)
-	if err != nil {
-		logger.Panicf("failed to create new http client: %+v", err)
-	}
-
-	httpClientV1, err := thorchain.NewHTTPClient(cfgV1)
 	if err != nil {
 		logger.Panicf("failed to create new http client: %+v", err)
 	}
@@ -132,12 +109,7 @@ func main() {
 		logger.Panicf("failed to create new websocket client: %+v", err)
 	}
 
-	indexer := thorchain.NewAffiliateFeeIndexer([]*thorchain.HTTPClient{httpClientV1, httpClient}, wsClient)
-	if err := indexer.Sync(); err != nil {
-		logger.Panicf("failed to index affiliate fees: %+v", err)
-	}
-
-	api := api.New(cfg, httpClient, wsClient, blockService, indexer, *swaggerPath, *swaggeruiPath, prometheus)
+	api := api.New(cfg, httpClient, wsClient, blockService, *swaggerPath, *swaggeruiPath, prometheus)
 	defer api.Shutdown()
 
 	go api.Serve(errChan)
