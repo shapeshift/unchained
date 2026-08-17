@@ -43,6 +43,7 @@ const OUTLIER_THRESHOLD_MULTIPLIER = 10
 const STREAM_ADD_LIMIT = 5
 const STREAM_ADD_WINDOW = 300_000
 const STREAM_ADD_INTERVAL = STREAM_ADD_WINDOW / STREAM_ADD_LIMIT
+const STREAM_REMOVE_INTERVAL = 60_000
 const STREAM_RETRY_INTERVAL = 5_000
 
 // moralis wraps request failures in a CoreError, exposing the http status on details
@@ -111,13 +112,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
     void Moralis.start({ evmApiBaseUrl: INDEXER_URL, apiKey: INDEXER_API_KEY })
 
-    // settings are applied before the stream is created, region is a request and not local config
-    this.queue
-      .add(async () => {
-        await Moralis.Streams.setSettings({ region: 'us-east-1' })
-        await this.initializeStream()
-      })
-      .catch(() => undefined)
+    this.queue.add(() => this.initializeStream()).catch(() => undefined)
 
     setInterval(() => {
       this.queue.add(() => this.updateStream()).catch(() => undefined)
@@ -137,6 +132,9 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     }
 
     try {
+      // region is a request rather than local config, so it is applied and retried alongside the stream
+      await Moralis.Streams.setSettings({ region: 'us-east-1' })
+
       const existing = await Moralis.Streams.add(args)
 
       await Moralis.Streams.delete({ id: existing.result.id, networkType: 'evm' })
@@ -849,8 +847,9 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
       const baseArgs = { id: this.streamId!, networkType: 'evm' } as const
 
+      // removals go first so the add reloads a smaller stream
       if (canRemove) {
-        this.nextStreamRemove = Date.now() + STREAM_ADD_INTERVAL
+        this.nextStreamRemove = Date.now() + STREAM_REMOVE_INTERVAL
         await Moralis.Streams.deleteAddress({ ...baseArgs, address: toRemove })
         toRemove.forEach((addr) => this.streamAddresses.delete(addr))
       }
@@ -869,7 +868,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
       if (err instanceof Error) {
         this.logger.error({ error: err.message, rateLimited, currentAddresses }, 'failed to update stream')
       } else {
-        this.logger.error({ currentAddresses }, 'failed to update stream')
+        this.logger.error({ rateLimited, currentAddresses }, 'failed to update stream')
       }
     }
   }
