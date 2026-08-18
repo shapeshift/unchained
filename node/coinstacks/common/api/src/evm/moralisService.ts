@@ -46,6 +46,8 @@ const STREAM_ADD_INTERVAL = STREAM_ADD_WINDOW / STREAM_ADD_LIMIT
 const STREAM_REMOVE_INTERVAL = 60_000
 const STREAM_RETRY_INTERVAL = 5_000
 
+const jitter = (ms: number): number => Math.round(ms / 2 + Math.random() * ms)
+
 // moralis wraps request failures in a CoreError, exposing the http status on details
 const isRateLimitError = (err: unknown): boolean => {
   if (!(err instanceof Error)) return false
@@ -132,12 +134,12 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     }
 
     try {
-      // region is a request rather than local config, so it is applied and retried alongside the stream
       await Moralis.Streams.setSettings({ region: 'us-east-1' })
 
-      const existing = await Moralis.Streams.add(args)
+      const streams = await Moralis.Streams.getAll({ limit: 100, networkType: 'evm' })
 
-      await Moralis.Streams.delete({ id: existing.result.id, networkType: 'evm' })
+      const existing = streams.result.find((stream) => stream.tag === args.tag)
+      if (existing) await Moralis.Streams.delete({ id: existing.id, networkType: 'evm' })
 
       const stream = await Moralis.Streams.add(args)
 
@@ -149,6 +151,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
       } else {
         this.logger.error('failed to initialize stream')
       }
+
+      this.nextStreamUpdate = Date.now() + jitter(STREAM_ADD_INTERVAL)
 
       throw err
     }
@@ -860,7 +864,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
         toAdd.forEach((addr) => this.streamAddresses.add(addr))
       }
     } catch (err) {
-      this.nextStreamUpdate = Date.now() + STREAM_ADD_INTERVAL
+      this.nextStreamUpdate = Date.now() + jitter(STREAM_ADD_INTERVAL)
 
       const rateLimited = isRateLimitError(err)
       const currentAddresses = Array.from(this.currentAddresses)
