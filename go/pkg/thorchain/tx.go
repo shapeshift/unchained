@@ -246,6 +246,10 @@ func ParseMessages(msgs []sdk.Msg, events cosmossdk.EventsByMsgIndex) []cosmossd
 	for i, msg := range msgs {
 		switch v := msg.(type) {
 		case *thorchaintypes.MsgSend:
+			if len(v.Amount) == 0 {
+				continue
+			}
+
 			message := cosmossdk.Message{
 				Addresses: []string{v.FromAddress.String(), v.ToAddress.String()},
 				Index:     strconv.Itoa(i),
@@ -362,6 +366,10 @@ func ParseMessages(msgs []sdk.Msg, events cosmossdk.EventsByMsgIndex) []cosmossd
 				messages = append(messages, message)
 			}
 		case *banktypes.MsgSend:
+			if len(v.Amount) == 0 {
+				continue
+			}
+
 			message := cosmossdk.Message{
 				Addresses: []string{v.FromAddress, v.ToAddress},
 				Index:     strconv.Itoa(i),

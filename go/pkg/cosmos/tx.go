@@ -181,6 +181,10 @@ func ParseMessages(msgs []sdk.Msg, events cosmossdk.EventsByMsgIndex) []cosmossd
 	for i, msg := range msgs {
 		switch v := msg.(type) {
 		case *banktypes.MsgSend:
+			if len(v.Amount) == 0 {
+				continue
+			}
+
 			message := cosmossdk.Message{
 				Addresses: []string{v.FromAddress, v.ToAddress},
 				Index:     strconv.Itoa(i),
