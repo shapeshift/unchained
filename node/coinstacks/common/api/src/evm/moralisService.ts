@@ -38,12 +38,10 @@ const DEFAULT_GAS_PRICE_MULTIPLIER: [number, number, number] = [1, 1, 1]
 // drop priority fees above the median by this factor to keep outliers (mev/overpayers) from skewing estimates
 const OUTLIER_THRESHOLD_MULTIPLIER = 10
 
-// moralis caps adding addresses to a stream at 5 requests per 5 minutes, removals are not rate limited
-// https://docs.moralis.com/streams/streams-concepts/rate-limits
-const STREAM_ADD_LIMIT = 5
-const STREAM_ADD_WINDOW = 300_000
-const STREAM_ADD_INTERVAL = STREAM_ADD_WINDOW / STREAM_ADD_LIMIT
+// removals are paced because every mutation reloads the stream
 const STREAM_REMOVE_INTERVAL = 60_000
+// stream creation triggers a webhook validation, which is rate limited across the whole account
+const STREAM_INIT_BACKOFF = 60_000
 const STREAM_RETRY_INTERVAL = 5_000
 
 const jitter = (ms: number): number => Math.round(ms / 2 + Math.random() * ms)
@@ -91,7 +89,6 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
   private queue = new PQueue({ concurrency: 1 })
   private currentAddresses = new Set<string>()
   private streamAddresses = new Set<string>()
-  private nextStreamAdd = 0
   private nextStreamRemove = 0
   private nextStreamUpdate = 0
 
@@ -152,7 +149,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
         this.logger.error('failed to initialize stream')
       }
 
-      this.nextStreamUpdate = Date.now() + jitter(STREAM_ADD_INTERVAL)
+      this.nextStreamUpdate = Date.now() + jitter(STREAM_INIT_BACKOFF)
 
       throw err
     }
@@ -844,28 +841,23 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
       const { toAdd, toRemove } = this.diffStream()
 
-      const canAdd = toAdd.length > 0 && Date.now() >= this.nextStreamAdd
       const canRemove = toRemove.length > 0 && Date.now() >= this.nextStreamRemove
 
-      if (!canAdd && !canRemove) return
+      if (!toAdd.length && !canRemove) return
 
       const baseArgs = { id: this.streamId!, networkType: 'evm' } as const
 
-      // removals go first so the add reloads a smaller stream
+      if (toAdd.length) {
+        await Moralis.Streams.addAddress({ ...baseArgs, address: toAdd })
+        toAdd.forEach((addr) => this.streamAddresses.add(addr))
+      }
+
       if (canRemove) {
         this.nextStreamRemove = Date.now() + STREAM_REMOVE_INTERVAL
         await Moralis.Streams.deleteAddress({ ...baseArgs, address: toRemove })
         toRemove.forEach((addr) => this.streamAddresses.delete(addr))
       }
-
-      if (canAdd) {
-        this.nextStreamAdd = Date.now() + STREAM_ADD_INTERVAL
-        await Moralis.Streams.addAddress({ ...baseArgs, address: toAdd })
-        toAdd.forEach((addr) => this.streamAddresses.add(addr))
-      }
     } catch (err) {
-      this.nextStreamUpdate = Date.now() + jitter(STREAM_ADD_INTERVAL)
-
       const rateLimited = isRateLimitError(err)
       const currentAddresses = Array.from(this.currentAddresses)
 
