@@ -1,7 +1,9 @@
 package thorchain
 
 import (
+	"bytes"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"strconv"
 	"strings"
@@ -38,12 +40,27 @@ func (c *HTTPClient) GetTx(txid string) (*coretypes.ResultTx, error) {
 	}
 
 	if res.Error != nil {
+		// Some providers retain transactions in the search index after /tx stops
+		// finding them. Use the same indexed transaction data as account history.
+		hash := strings.TrimPrefix(txid, "0x")
+		decodedHash, decodeErr := hex.DecodeString(hash)
+		if decodeErr == nil && len(decodedHash) == 32 && res.Error.Code == -32603 &&
+			strings.EqualFold(res.Error.Data, fmt.Sprintf("tx (%s) not found", hash)) {
+			result, err := c.TxSearch(fmt.Sprintf(`"tx.hash='%s'"`, strings.ToUpper(hash)), 1, 1)
+			if err != nil {
+				return nil, errors.Wrapf(err, "failed to search for tx: %s", txid)
+			}
+			if len(result.Txs) == 1 && result.Txs[0] != nil &&
+				bytes.Equal(result.Txs[0].Hash, decodedHash) && bytes.Equal(result.Txs[0].Tx.Hash(), decodedHash) {
+				return result.Txs[0], nil
+			}
+		}
 		return nil, errors.Wrapf(errors.New(res.Error.Error()), "failed to get tx: %s", txid)
 	}
 
 	tx := &coretypes.ResultTx{}
 	if err := cometbftjson.Unmarshal(res.Result, tx); err != nil {
-		return nil, errors.Errorf("failed to unmarshal tx result: %v: %s", res.Result, res.Error.Error())
+		return nil, errors.Wrapf(err, "failed to unmarshal tx result: %s", txid)
 	}
 
 	return tx, nil
