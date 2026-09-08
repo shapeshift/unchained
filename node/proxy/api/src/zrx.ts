@@ -74,6 +74,13 @@ export class Zrx {
       res.status(response.status).send(response.data)
     } catch (err) {
       if (isAxiosError(err)) {
+        // Preserve upstream backoff guidance and make it readable by browser clients.
+        const retryAfter = err.response?.headers['retry-after']
+        if (typeof retryAfter === 'string') {
+          res.set('Retry-After', retryAfter)
+          res.append('Access-Control-Expose-Headers', 'Retry-After')
+        }
+
         res.status(err.response?.status ?? 500).send(err.response?.data || 'Internal Server Error')
       } else if (err instanceof Error) {
         res.status(500).send(err.message || 'Internal Server Error')
