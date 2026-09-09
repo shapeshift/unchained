@@ -15,7 +15,9 @@ func CheckResponse(r *resty.Response) error {
 		return errors.New("no response from upstream")
 	}
 
-	if !r.IsError() {
+	// mirror the condition resty uses to populate the result, rather than IsError,
+	// which ignores 3xx. an unfollowed redirect leaves the result zero valued too.
+	if r.IsSuccess() {
 		return nil
 	}
 
