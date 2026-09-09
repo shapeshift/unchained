@@ -16,8 +16,12 @@ func (c *HTTPClient) GetValidators(apr *big.Float, cursor string, pageSize int) 
 		"pagination.limit": strconv.Itoa(pageSize),
 	}
 
-	_, err := c.LCD.R().SetResult(&res).SetQueryParams(queryParams).Get("/cosmos/staking/v1beta1/validators")
+	resp, err := c.LCD.R().SetResult(&res).SetQueryParams(queryParams).Get("/cosmos/staking/v1beta1/validators")
 	if err != nil {
+		return nil, errors.Wrap(err, "failed to get validators")
+	}
+
+	if err := CheckResponse(resp); err != nil {
 		return nil, errors.Wrap(err, "failed to get validators")
 	}
 
@@ -26,19 +30,21 @@ func (c *HTTPClient) GetValidators(apr *big.Float, cursor string, pageSize int) 
 		validators = append(validators, *httpValidator(v, apr))
 	}
 
-	resp := &ValidatorsResponse{
+	return &ValidatorsResponse{
 		validators,
 		res.Pagination,
-	}
-
-	return resp, nil
+	}, nil
 }
 
 func (c *HTTPClient) GetValidator(addr string, apr *big.Float) (*Validator, error) {
 	var res QueryValidatorResponse
 
-	_, err := c.LCD.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/staking/v1beta1/validators/%s", addr))
+	resp, err := c.LCD.R().SetResult(&res).Get(fmt.Sprintf("/cosmos/staking/v1beta1/validators/%s", addr))
 	if err != nil {
+		return nil, errors.Wrap(err, "failed to get validators")
+	}
+
+	if err := CheckResponse(resp); err != nil {
 		return nil, errors.Wrap(err, "failed to get validators")
 	}
 

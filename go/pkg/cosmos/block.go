@@ -19,13 +19,17 @@ func (c *HTTPClient) GetBlock(height *int) (*cosmossdk.ResultBlock, error) {
 		hs = strconv.Itoa(*height)
 	}
 
-	_, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParam("height", hs).Get("/block")
+	resp, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParam("height", hs).Get("/block")
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get block: %d", height)
+		return nil, errors.Wrapf(err, "failed to get block: %s", hs)
 	}
 
 	if res.Error != nil {
 		return nil, errors.Errorf("failed to get block: %s: %s", hs, res.Error.Error())
+	}
+
+	if err := cosmossdk.CheckResponse(resp); err != nil {
+		return nil, errors.Wrapf(err, "failed to get block: %s", hs)
 	}
 
 	result := &coretypes.ResultBlock{}
@@ -52,7 +56,7 @@ func (c *HTTPClient) BlockSearch(query string, page int, pageSize int) (*coretyp
 		"order_by": "\"desc\"",
 	}
 
-	_, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParams(queryParams).Get("/block_search")
+	resp, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParams(queryParams).Get("/block_search")
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to search blocks")
 	}
@@ -62,6 +66,10 @@ func (c *HTTPClient) BlockSearch(query string, page int, pageSize int) (*coretyp
 			return &coretypes.ResultBlockSearch{Blocks: []*coretypes.ResultBlock{}, TotalCount: 0}, nil
 		}
 		return nil, errors.Wrap(errors.New(res.Error.Error()), "failed to search blocks")
+	}
+
+	if err := cosmossdk.CheckResponse(resp); err != nil {
+		return nil, errors.Wrap(err, "failed to search blocks")
 	}
 
 	result := &coretypes.ResultBlockSearch{}
@@ -75,13 +83,17 @@ func (c *HTTPClient) BlockSearch(query string, page int, pageSize int) (*coretyp
 func (c *HTTPClient) BlockResults(height int) (cosmossdk.BlockResults, error) {
 	res := &rpctypes.RPCResponse{}
 
-	_, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParam("height", strconv.Itoa(height)).Get("/block_results")
+	resp, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParam("height", strconv.Itoa(height)).Get("/block_results")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get block results for block: %v", height)
 	}
 
 	if res.Error != nil {
 		return nil, errors.Wrapf(errors.New(res.Error.Error()), "failed to get block results for block: %v", height)
+	}
+
+	if err := cosmossdk.CheckResponse(resp); err != nil {
+		return nil, errors.Wrapf(err, "failed to get block results for block: %v", height)
 	}
 
 	result := &coretypes.ResultBlockResults{}

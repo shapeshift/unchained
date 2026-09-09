@@ -22,15 +22,13 @@ func (c *HTTPClient) GetEstimateGas(rawTx string) (string, error) {
 		} `json:"gas_info"`
 	}{}
 
-	e := &ErrorResponse{}
-
-	r, err := c.LCD.R().SetBody(SimulateRequest{TxBytes: txBytes}).SetResult(res).SetError(e).Post("/cosmos/tx/v1beta1/simulate")
+	resp, err := c.LCD.R().SetBody(SimulateRequest{TxBytes: txBytes}).SetResult(res).Post("/cosmos/tx/v1beta1/simulate")
 	if err != nil {
 		return "", errors.Wrap(err, "failed to estimate gas")
 	}
 
-	if r.Error() != nil {
-		return "", errors.Errorf("failed to estimate gas: %s", e.Msg)
+	if err := CheckResponse(resp); err != nil {
+		return "", errors.Wrap(err, "failed to estimate gas")
 	}
 
 	return res.GasInfo.GasUsed, nil

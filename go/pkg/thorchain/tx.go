@@ -32,7 +32,7 @@ func (c *HTTPClient) GetTx(txid string) (*coretypes.ResultTx, error) {
 		txid = "0x" + txid
 	}
 
-	_, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParam("hash", txid).Get("/tx")
+	resp, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParam("hash", txid).Get("/tx")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get tx: %s", txid)
 	}
@@ -41,9 +41,13 @@ func (c *HTTPClient) GetTx(txid string) (*coretypes.ResultTx, error) {
 		return nil, errors.Wrapf(errors.New(res.Error.Error()), "failed to get tx: %s", txid)
 	}
 
+	if err := cosmossdk.CheckResponse(resp); err != nil {
+		return nil, errors.Wrapf(err, "failed to get tx: %s", txid)
+	}
+
 	tx := &coretypes.ResultTx{}
 	if err := cometbftjson.Unmarshal(res.Result, tx); err != nil {
-		return nil, errors.Errorf("failed to unmarshal tx result: %v: %s", res.Result, res.Error.Error())
+		return nil, errors.Wrapf(err, "failed to unmarshal tx result: %v", res.Result)
 	}
 
 	return tx, nil
@@ -59,7 +63,7 @@ func (c *HTTPClient) TxSearch(query string, page int, pageSize int) (*coretypes.
 		"order_by": "\"desc\"",
 	}
 
-	_, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParams(queryParams).Get("/tx_search")
+	resp, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParams(queryParams).Get("/tx_search")
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to search txs")
 	}
@@ -69,6 +73,10 @@ func (c *HTTPClient) TxSearch(query string, page int, pageSize int) (*coretypes.
 			return &coretypes.ResultTxSearch{Txs: []*coretypes.ResultTx{}, TotalCount: 0}, nil
 		}
 		return nil, errors.Wrap(errors.New(res.Error.Error()), "failed to search txs")
+	}
+
+	if err := cosmossdk.CheckResponse(resp); err != nil {
+		return nil, errors.Wrap(err, "failed to search txs")
 	}
 
 	result := &coretypes.ResultTxSearch{}
@@ -102,8 +110,12 @@ func (c *HTTPClient) BroadcastTx(rawTx string) (string, error) {
 		} `json:"tx_response"`
 	}
 
-	_, err = c.LCD.R().SetBody(&txtypes.BroadcastTxRequest{TxBytes: txBytes, Mode: txtypes.BroadcastMode_BROADCAST_MODE_SYNC}).SetResult(&res).Post("/cosmos/tx/v1beta1/txs")
+	resp, err := c.LCD.R().SetBody(&txtypes.BroadcastTxRequest{TxBytes: txBytes, Mode: txtypes.BroadcastMode_BROADCAST_MODE_SYNC}).SetResult(&res).Post("/cosmos/tx/v1beta1/txs")
 	if err != nil {
+		return "", errors.Wrap(err, "failed to broadcast transaction")
+	}
+
+	if err := cosmossdk.CheckResponse(resp); err != nil {
 		return "", errors.Wrap(err, "failed to broadcast transaction")
 	}
 
