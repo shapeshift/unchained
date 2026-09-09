@@ -49,7 +49,7 @@ func (c *HTTPClient) GetTx(txid string) (*coretypes.ResultTx, error) {
 
 	tx := &coretypes.ResultTx{}
 	if err := cometbftjson.Unmarshal(res.Result, tx); err != nil {
-		return nil, errors.Wrapf(err, "failed to unmarshal tx result: %v", res.Result)
+		return nil, errors.Wrapf(err, "failed to unmarshal tx result: %s", res.Result)
 	}
 
 	return tx, nil
@@ -83,7 +83,7 @@ func (c *HTTPClient) TxSearch(query string, page int, pageSize int) (*coretypes.
 
 	result := &coretypes.ResultTxSearch{}
 	if err := cometbftjson.Unmarshal(res.Result, result); err != nil {
-		return nil, errors.Wrapf(err, "failed to unmarshal tx search result: %v", res.Result)
+		return nil, errors.Wrapf(err, "failed to unmarshal tx search result: %s", res.Result)
 	}
 
 	return result, nil

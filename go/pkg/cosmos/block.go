@@ -34,7 +34,7 @@ func (c *HTTPClient) GetBlock(height *int) (*cosmossdk.ResultBlock, error) {
 
 	result := &coretypes.ResultBlock{}
 	if err := cometbftjson.Unmarshal(res.Result, result); err != nil {
-		return nil, errors.Errorf("failed to unmarshal block result: %v", res.Result)
+		return nil, errors.Errorf("failed to unmarshal block result: %s", res.Result)
 	}
 
 	b := &cosmossdk.ResultBlock{
@@ -74,7 +74,7 @@ func (c *HTTPClient) BlockSearch(query string, page int, pageSize int) (*coretyp
 
 	result := &coretypes.ResultBlockSearch{}
 	if err := cometbftjson.Unmarshal(res.Result, result); err != nil {
-		return nil, errors.Wrapf(err, "failed to unmarshal block search result: %v", res.Result)
+		return nil, errors.Wrapf(err, "failed to unmarshal block search result: %s", res.Result)
 	}
 
 	return result, nil
@@ -98,7 +98,7 @@ func (c *HTTPClient) BlockResults(height int) (cosmossdk.BlockResults, error) {
 
 	result := &coretypes.ResultBlockResults{}
 	if err := cometbftjson.Unmarshal(res.Result, result); err != nil {
-		return nil, errors.Wrapf(err, "failed to unmarshal block result: %v", res.Result)
+		return nil, errors.Wrapf(err, "failed to unmarshal block result: %s", res.Result)
 	}
 
 	return &ResultBlockResults{result}, nil

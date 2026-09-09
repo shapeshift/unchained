@@ -61,7 +61,7 @@ func (c *HTTPClient) BlockResults(height int) (cosmossdk.BlockResults, error) {
 
 	result := &coretypes.ResultBlockResults{}
 	if err := tendermintjson.Unmarshal(res.Result, result); err != nil {
-		return nil, errors.Wrapf(err, "failed to unmarshal block result: %v", res.Result)
+		return nil, errors.Wrapf(err, "failed to unmarshal block result: %s", res.Result)
 	}
 
 	return &ResultBlockResults{result}, nil
