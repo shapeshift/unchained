@@ -16,8 +16,12 @@ func (c *HTTPClient) GetTotalSupply(denom string) (string, error) {
 		"denom": denom,
 	}
 
-	_, err := c.LCD.R().SetResult(&res).SetQueryParams(queryParams).Get("/cosmos/bank/v1beta1/supply/by_denom")
+	resp, err := c.LCD.R().SetResult(&res).SetQueryParams(queryParams).Get("/cosmos/bank/v1beta1/supply/by_denom")
 	if err != nil {
+		return "0", errors.Wrapf(err, "failed to get total supply of: %s", denom)
+	}
+
+	if err := CheckResponse(resp); err != nil {
 		return "0", errors.Wrapf(err, "failed to get total supply of: %s", denom)
 	}
 
@@ -29,8 +33,12 @@ func (c *HTTPClient) GetAnnualProvisions() (string, error) {
 		AnnualProvisions string `json:"annual_provisions"`
 	}
 
-	_, err := c.LCD.R().SetResult(&res).Get("/cosmos/mint/v1beta1/annual_provisions")
+	resp, err := c.LCD.R().SetResult(&res).Get("/cosmos/mint/v1beta1/annual_provisions")
 	if err != nil {
+		return "0", errors.Wrap(err, "failed to get annual provisions")
+	}
+
+	if err := CheckResponse(resp); err != nil {
 		return "0", errors.Wrap(err, "failed to get annual provisions")
 	}
 
@@ -44,8 +52,12 @@ func (c *HTTPClient) GetCommunityTax() (string, error) {
 		} `json:"params"`
 	}
 
-	_, err := c.LCD.R().SetResult(&res).Get("/cosmos/distribution/v1beta1/params")
+	resp, err := c.LCD.R().SetResult(&res).Get("/cosmos/distribution/v1beta1/params")
 	if err != nil {
+		return "0", errors.Wrap(err, "failed to get community tax")
+	}
+
+	if err := CheckResponse(resp); err != nil {
 		return "0", errors.Wrap(err, "failed to get community tax")
 	}
 
@@ -59,8 +71,12 @@ func (c *HTTPClient) GetBondedTokens() (string, error) {
 		} `json:"pool"`
 	}
 
-	_, err := c.LCD.R().SetResult(&res).Get("/cosmos/staking/v1beta1/pool")
+	resp, err := c.LCD.R().SetResult(&res).Get("/cosmos/staking/v1beta1/pool")
 	if err != nil {
+		return "0", errors.Wrap(err, "failed to get bonded tokens")
+	}
+
+	if err := CheckResponse(resp); err != nil {
 		return "0", errors.Wrap(err, "failed to get bonded tokens")
 	}
 

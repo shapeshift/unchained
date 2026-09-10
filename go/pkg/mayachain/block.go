@@ -15,22 +15,28 @@ func (c *HTTPClient) GetBlock(height *int) (*cosmossdk.ResultBlock, error) {
 	res := &rpctypes.RPCResponse{}
 
 	hs := ""
+	label := "latest"
 	if height != nil {
 		hs = strconv.Itoa(*height)
+		label = hs
 	}
 
-	_, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParam("height", hs).Get("/block")
+	resp, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParam("height", hs).Get("/block")
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get block: %d", height)
+		return nil, errors.Wrapf(err, "failed to get block: %s", label)
 	}
 
 	if res.Error != nil {
-		return nil, errors.Errorf("failed to get block: %s: %s", hs, res.Error.Error())
+		return nil, errors.Errorf("failed to get block: %s: %s", label, res.Error.Error())
+	}
+
+	if err := cosmossdk.CheckResponse(resp); err != nil {
+		return nil, errors.Wrapf(err, "failed to get block: %s", label)
 	}
 
 	result := &coretypes.ResultBlock{}
 	if err := tendermintjson.Unmarshal(res.Result, result); err != nil {
-		return nil, errors.Errorf("failed to unmarshal block result: %v: %s", res.Result, res.Error.Error())
+		return nil, errors.Wrapf(err, "failed to unmarshal block result: %s", res.Result)
 	}
 
 	b := &cosmossdk.ResultBlock{
@@ -52,7 +58,7 @@ func (c *HTTPClient) BlockSearch(query string, page int, pageSize int) (*coretyp
 		"order_by": "\"desc\"",
 	}
 
-	_, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParams(queryParams).Get("/block_search")
+	resp, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParams(queryParams).Get("/block_search")
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to search blocks")
 	}
@@ -64,9 +70,13 @@ func (c *HTTPClient) BlockSearch(query string, page int, pageSize int) (*coretyp
 		return nil, errors.Wrap(errors.New(res.Error.Error()), "failed to search blocks")
 	}
 
+	if err := cosmossdk.CheckResponse(resp); err != nil {
+		return nil, errors.Wrap(err, "failed to search blocks")
+	}
+
 	result := &coretypes.ResultBlockSearch{}
 	if err := tendermintjson.Unmarshal(res.Result, result); err != nil {
-		return nil, errors.Wrapf(err, "failed to unmarshal block search result: %v", res.Result)
+		return nil, errors.Wrapf(err, "failed to unmarshal block search result: %s", res.Result)
 	}
 
 	return result, nil
@@ -75,7 +85,7 @@ func (c *HTTPClient) BlockSearch(query string, page int, pageSize int) (*coretyp
 func (c *HTTPClient) BlockResults(height int) (cosmossdk.BlockResults, error) {
 	res := &rpctypes.RPCResponse{}
 
-	_, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParam("height", strconv.Itoa(height)).Get("/block_results")
+	resp, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParam("height", strconv.Itoa(height)).Get("/block_results")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get block results for block: %v", height)
 	}
@@ -84,9 +94,13 @@ func (c *HTTPClient) BlockResults(height int) (cosmossdk.BlockResults, error) {
 		return nil, errors.Wrapf(errors.New(res.Error.Error()), "failed to get block results for block: %v", height)
 	}
 
+	if err := cosmossdk.CheckResponse(resp); err != nil {
+		return nil, errors.Wrapf(err, "failed to get block results for block: %v", height)
+	}
+
 	result := &coretypes.ResultBlockResults{}
 	if err := tendermintjson.Unmarshal(res.Result, result); err != nil {
-		return nil, errors.Wrapf(err, "failed to unmarshal block result: %v", res.Result)
+		return nil, errors.Wrapf(err, "failed to unmarshal block result: %s", res.Result)
 	}
 
 	return &ResultBlockResults{result}, nil

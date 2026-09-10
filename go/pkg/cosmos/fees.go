@@ -19,16 +19,14 @@ func (c *HTTPClient) GetGlobalMinimumGasPrices() (map[string]sdkmath.LegacyDec, 
 		} `json:"price"`
 	}
 
-	e := &cosmossdk.ErrorResponse{}
-
 	url := fmt.Sprintf("/feemarket/v1/gas_price/%s", c.Denom)
-	r, err := c.LCD.R().SetResult(&res).SetError(e).Get(url)
+	resp, err := c.LCD.R().SetResult(&res).Get(url)
 	if err != nil {
 		return gasPrices, errors.Wrap(err, "failed to get globalfee params")
 	}
 
-	if r.Error() != nil {
-		return gasPrices, errors.Errorf("failed to get globalfee params: %s", e.Msg)
+	if err := cosmossdk.CheckResponse(resp); err != nil {
+		return gasPrices, errors.Wrap(err, "failed to get globalfee params")
 	}
 
 	amount, err := sdkmath.LegacyNewDecFromStr(res.Price.Amount)
@@ -48,15 +46,13 @@ func (c *HTTPClient) GetLocalMinimumGasPrices() (map[string]sdkmath.LegacyDec, e
 		MinimumGasPrice string `json:"minimum_gas_price"`
 	}
 
-	e := &cosmossdk.ErrorResponse{}
-
-	r, err := c.LCD.R().SetResult(&res).SetError(e).Get("/cosmos/base/node/v1beta1/config")
+	resp, err := c.LCD.R().SetResult(&res).Get("/cosmos/base/node/v1beta1/config")
 	if err != nil {
 		return gasPrices, errors.Wrap(err, "failed to get base node config")
 	}
 
-	if r.Error() != nil {
-		return gasPrices, errors.Errorf("failed to get base node config: %s", e.Msg)
+	if err := cosmossdk.CheckResponse(resp); err != nil {
+		return gasPrices, errors.Wrap(err, "failed to get base node config")
 	}
 
 	coins, err := sdk.ParseDecCoins(res.MinimumGasPrice)

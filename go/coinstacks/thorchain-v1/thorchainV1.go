@@ -46,7 +46,7 @@ func (r *ResultBlockResults) GetBlockEvents() []cosmossdk.ABCIEvent {
 func (c *HTTPClient) BlockResults(height int) (cosmossdk.BlockResults, error) {
 	res := &rpctypes.RPCResponse{}
 
-	_, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParam("height", strconv.Itoa(height)).Get("/block_results")
+	resp, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParam("height", strconv.Itoa(height)).Get("/block_results")
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get block results for block: %v", height)
 	}
@@ -55,9 +55,13 @@ func (c *HTTPClient) BlockResults(height int) (cosmossdk.BlockResults, error) {
 		return nil, errors.Wrapf(errors.New(res.Error.Error()), "failed to get block results for block: %v", height)
 	}
 
+	if err := cosmossdk.CheckResponse(resp); err != nil {
+		return nil, errors.Wrapf(err, "failed to get block results for block: %v", height)
+	}
+
 	result := &coretypes.ResultBlockResults{}
 	if err := tendermintjson.Unmarshal(res.Result, result); err != nil {
-		return nil, errors.Wrapf(err, "failed to unmarshal block result: %v", res.Result)
+		return nil, errors.Wrapf(err, "failed to unmarshal block result: %s", res.Result)
 	}
 
 	return &ResultBlockResults{result}, nil

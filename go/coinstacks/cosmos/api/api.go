@@ -14,6 +14,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	_ "net/http/pprof"
@@ -268,6 +269,7 @@ func (a *API) GetValidators(w http.ResponseWriter, r *http.Request) {
 // responses:
 //
 //	200: Validator
+//	404: ApiError
 //	500: InternalServerError
 func (a *API) GetValidator(w http.ResponseWriter, r *http.Request) {
 	// pubkey validated by ValidatePubkey middleware
@@ -275,7 +277,12 @@ func (a *API) GetValidator(w http.ResponseWriter, r *http.Request) {
 
 	validator, err := a.handler.GetValidator(pubkey)
 	if err != nil {
-		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		status := http.StatusInternalServerError
+		if errors.Is(err, cosmossdk.ErrNotFound) {
+			status = http.StatusNotFound
+		}
+
+		api.HandleError(w, status, err.Error())
 		return
 	}
 
