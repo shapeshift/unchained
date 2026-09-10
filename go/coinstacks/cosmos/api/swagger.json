@@ -367,6 +367,12 @@
               "$ref": "#/definitions/Validator"
             }
           },
+          "404": {
+            "description": "ApiError",
+            "schema": {
+              "$ref": "#/definitions/ApiError"
+            }
+          },
           "500": {
             "description": "InternalServerError",
             "schema": {

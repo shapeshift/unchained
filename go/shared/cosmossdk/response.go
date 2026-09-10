@@ -8,6 +8,9 @@ import (
 	"github.com/pkg/errors"
 )
 
+// grpc-gateway writes the grpc status code into the lcd error body, 5 is codes.NotFound
+const lcdNotFoundCode = 5
+
 var ErrNotFound = errors.New("404 Not Found")
 
 func CheckResponse(r *resty.Response) error {
@@ -15,20 +18,23 @@ func CheckResponse(r *resty.Response) error {
 		return errors.New("no response from upstream")
 	}
 
-	// mirror the condition resty uses to populate the result, rather than IsError,
-	// which ignores 3xx. an unfollowed redirect leaves the result zero valued too.
+	// resty only populates the result on a 2xx with a json or xml body
 	if r.IsSuccess() {
+		ct := r.Header().Get("Content-Type")
+		if !resty.IsJSONType(ct) && !resty.IsXMLType(ct) {
+			return errors.Errorf("%s: unexpected content type: %q", r.Status(), ct)
+		}
+
 		return nil
 	}
 
-	if r.StatusCode() == http.StatusNotFound {
-		return ErrNotFound
-	}
-
-	// cosmos sdk errors use a documented shape, so surface the reason when there is
-	// one. anything else, a proxy generated html page say, is reported by status alone.
 	e := &ErrorResponse{}
 	if err := json.Unmarshal(r.Body(), e); err == nil && e.Msg != "" {
+		// a bare 404 from a proxy or unrouted path is not a missing resource
+		if r.StatusCode() == http.StatusNotFound && e.Code == lcdNotFoundCode {
+			return errors.Wrap(ErrNotFound, e.Msg)
+		}
+
 		return errors.Errorf("%s: %s", r.Status(), e.Msg)
 	}
 

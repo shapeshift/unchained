@@ -15,21 +15,23 @@ func (c *HTTPClient) GetBlock(height *int) (*cosmossdk.ResultBlock, error) {
 	res := &rpctypes.RPCResponse{}
 
 	hs := ""
+	label := "latest"
 	if height != nil {
 		hs = strconv.Itoa(*height)
+		label = hs
 	}
 
 	resp, err := c.RPC.R().SetResult(res).SetError(res).SetQueryParam("height", hs).Get("/block")
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get block: %s", hs)
+		return nil, errors.Wrapf(err, "failed to get block: %s", label)
 	}
 
 	if res.Error != nil {
-		return nil, errors.Errorf("failed to get block: %s: %s", hs, res.Error.Error())
+		return nil, errors.Errorf("failed to get block: %s: %s", label, res.Error.Error())
 	}
 
 	if err := cosmossdk.CheckResponse(resp); err != nil {
-		return nil, errors.Wrapf(err, "failed to get block: %s", hs)
+		return nil, errors.Wrapf(err, "failed to get block: %s", label)
 	}
 
 	result := &coretypes.ResultBlock{}
