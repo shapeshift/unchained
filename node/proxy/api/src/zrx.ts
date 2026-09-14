@@ -6,6 +6,10 @@ const ZRX_API_KEY = process.env.ZRX_API_KEY
 
 if (!ZRX_API_KEY) throw new Error('ZRX_API_KEY env var not set')
 
+const BASE_URL = 'https://api.0x.org'
+
+const ALLOWED_PATHS = new Set(['/swap/permit2/price', '/swap/permit2/quote', '/trade-analytics/swap'])
+
 export class Zrx {
   private axiosInstance: Axios
 
@@ -13,63 +17,22 @@ export class Zrx {
     this.axiosInstance = axios.create({
       headers: {
         '0x-api-key': ZRX_API_KEY,
+        '0x-version': 'v2',
       },
     })
   }
 
   async handler(req: Request, res: Response): Promise<void> {
-    const parsedUrl = new URL('https://dummy.com'.concat(req.url))
-    const path = parsedUrl.pathname.replace('/api/v1/zrx/', '')
+    const parsedUrl = new URL(req.url, 'https://dummy.com')
+    const path = parsedUrl.pathname.replace(/^\/api\/v1\/zrx/, '').replace(/\/+$/, '')
 
-    const url = (() => {
-      if (path.includes('v1')) {
-        const [chain, ...parts] = path.split('/')
-        const url = parts.join('/').concat(parsedUrl.search)
-
-        const baseUrl = (() => {
-          switch (chain) {
-            case 'arbitrum':
-              return 'https://arbitrum.api.0x.org/'
-            case 'avalanche':
-              return 'https://avalanche.api.0x.org/'
-            case 'base':
-              return 'https://base.api.0x.org/'
-            case 'bnbsmartchain':
-              return 'https://bsc.api.0x.org/'
-            case 'ethereum':
-              return 'https://api.0x.org/'
-            case 'optimism':
-              return 'https://optimism.api.0x.org/'
-            case 'polygon':
-              return 'https://polygon.api.0x.org/'
-            default:
-              return
-          }
-        })()
-
-        if (!baseUrl) return
-
-        return baseUrl.concat(url)
-      } else {
-        const baseUrl = 'https://api.0x.org/'
-        const url = path.concat(parsedUrl.search)
-
-        return baseUrl.concat(url)
-      }
-    })()
-
-    const headers = (() => {
-      if (path.includes('v1')) return
-      return { '0x-version': 'v2' }
-    })()
-
-    if (!url) {
+    if (!ALLOWED_PATHS.has(path)) {
       res.status(404).send('Not Found')
       return
     }
 
     try {
-      const response = await this.axiosInstance.get(url, { headers })
+      const response = await this.axiosInstance.get(`${BASE_URL}${path}${parsedUrl.search}`)
       Object.entries(response.headers).forEach(([k, v]) => res.set(k, v))
       res.status(response.status).send(response.data)
     } catch (err) {
