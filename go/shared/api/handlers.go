@@ -3,11 +3,14 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"regexp"
 
 	"github.com/shapeshift/unchained/shared/log"
 )
 
 var logger = log.WithoutFields()
+
+var apiKeyPattern = regexp.MustCompile(`api=[^/\s"]+`)
 
 func HandleResponse(w http.ResponseWriter, status int, res interface{}) {
 	w.Header().Set("Content-Type", "application/json")
@@ -18,6 +21,8 @@ func HandleResponse(w http.ResponseWriter, status int, res interface{}) {
 }
 
 func HandleError(w http.ResponseWriter, status int, message string) {
+	message = apiKeyPattern.ReplaceAllString(message, "api=<redacted>")
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 
