@@ -10,7 +10,7 @@ import (
 
 var logger = log.WithoutFields()
 
-var apiKeyPattern = regexp.MustCompile(`api=[^/\s"]+`)
+var apiKeyPattern = regexp.MustCompile(`api=[^/\s"&?#]+`)
 
 func HandleResponse(w http.ResponseWriter, status int, res interface{}) {
 	w.Header().Set("Content-Type", "application/json")
