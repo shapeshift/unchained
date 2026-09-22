@@ -2,6 +2,7 @@ import { ApiError as BlockbookApiError } from '@shapeshiftoss/blockbook'
 import { ApiError } from '.'
 import axios, { CreateAxiosDefaults, isAxiosError } from 'axios'
 import axiosRetry, { isNetworkOrIdempotentRequestError } from 'axios-retry'
+import { BaseError as ViemError } from 'viem'
 
 const MAX_PAGE_SIZE = 100
 
@@ -27,6 +28,11 @@ export const handleError = (err: unknown): ApiError => {
 
   if (err instanceof BlockbookApiError) {
     return new ApiError(err.response?.statusText || 'Internal Server Error', err.response?.status ?? 500, err.message)
+  }
+
+  if (err instanceof ViemError) {
+    const message = err.details ? `${err.shortMessage} ${err.details}` : err.shortMessage
+    return new ApiError('Internal Server Error', 500, message || 'unknown error')
   }
 
   if (err instanceof Error) {
