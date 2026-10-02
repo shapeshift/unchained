@@ -32,7 +32,7 @@ export class EventCache {
     this.cache = new Map(
       Object.entries(args.contracts).map(([contractAddress, startBlock]) => [
         contractAddress as Address,
-        { eventsByAddress: new Map(), lastIndexedBlock: startBlock },
+        { eventsByAddress: new Map(), lastIndexedBlock: startBlock - 1n },
       ])
     )
   }
@@ -65,8 +65,11 @@ export class EventCache {
   }
 
   private async indexContractEvents(contractAddress: Address) {
-    const startBlock = this.cache.get(contractAddress)!.lastIndexedBlock
-    const endBlock = await this.client.getBlockNumber()
+    // fetch range is inclusive, so start after the last indexed block to avoid duplicate events
+    const startBlock = this.cache.get(contractAddress)!.lastIndexedBlock + 1n
+    const endBlock = await this.alchemyClient.getBlockNumber()
+
+    if (startBlock > endBlock) return
 
     const events = await this.fetchEvents(contractAddress, startBlock, endBlock)
 
@@ -137,7 +140,7 @@ export class EventCache {
 
         if (log.eventName === 'Unstake') {
           stakingBalance -= log.args.amount ?? 0n
-          if (stakingBalance === 0n) firstStakeBlock = undefined
+          if (stakingBalance <= 0n) firstStakeBlock = undefined
         }
       }
 
