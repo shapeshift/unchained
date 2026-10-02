@@ -2,9 +2,6 @@ import { PublicClient, Address, GetContractEventsReturnType } from 'viem'
 import { RFOX_ABI } from './abi'
 import { Logger } from '@shapeshiftoss/logger'
 
-const FOX_PROXY_CONTRACT: Address = '0xaC2a4fD70BCD8Bab0662960455c363735f0e2b56'
-const UNI_V2_ETH_FOX_PROXY_CONTRACT: Address = '0x83B51B7605d2E277E03A7D6451B1efc0e5253A2F'
-
 export type StakingDuration = Record<string, number>
 export type Event = GetContractEventsReturnType<typeof RFOX_ABI, 'Stake' | 'Unstake'>[number]
 
@@ -17,6 +14,8 @@ export interface EventCacheArgs {
   client: PublicClient
   alchemyClient: PublicClient
   logger: Logger
+  /** start block to index from, by staking contract address */
+  contracts: Record<Address, bigint>
 }
 
 export class EventCache {
@@ -24,15 +23,18 @@ export class EventCache {
   private alchemyClient: PublicClient
   private logger: Logger
 
-  private cache: Map<Address, Events> = new Map([
-    [FOX_PROXY_CONTRACT, { eventsByAddress: new Map(), lastIndexedBlock: 222913582n }],
-    [UNI_V2_ETH_FOX_PROXY_CONTRACT, { eventsByAddress: new Map(), lastIndexedBlock: 291163572n }],
-  ])
+  private cache: Map<Address, Events>
 
   constructor(args: EventCacheArgs) {
     this.client = args.client
     this.alchemyClient = args.alchemyClient
     this.logger = args.logger.child({ namespace: ['eventCache'] })
+    this.cache = new Map(
+      Object.entries(args.contracts).map(([contractAddress, startBlock]) => [
+        contractAddress as Address,
+        { eventsByAddress: new Map(), lastIndexedBlock: startBlock },
+      ])
+    )
   }
 
   async initialize() {
