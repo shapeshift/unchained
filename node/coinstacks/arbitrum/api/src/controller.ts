@@ -7,9 +7,8 @@ import { Body, Example, Get, Hidden, Post, Response, Request, Route, Tags, Path 
 import { createPublicClient, http, keccak256, toBytes } from 'viem'
 import { arbitrum } from 'viem/chains'
 import { BaseAPI, EstimateGasBody, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { API, GasEstimate, GasFees, MoralisService } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
+import { API, EventCache, GasEstimate, GasFees, MoralisService, StakingDuration } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { EVM } from '../../../common/api/src/evm/controller'
-import { EventCache, StakingDuration } from './rfox'
 
 const INDEXER_URL = process.env.INDEXER_URL
 const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY
@@ -43,7 +42,15 @@ export const service = new MoralisService({
   gasPriceMultiplier: [1.1, 1.2, 1.5],
 })
 
-export const cache = new EventCache({ client, alchemyClient, logger })
+export const cache = new EventCache({
+  client,
+  alchemyClient,
+  logger,
+  contracts: {
+    '0xaC2a4fD70BCD8Bab0662960455c363735f0e2b56': 222913582n, // FOX
+    '0x83B51B7605d2E277E03A7D6451B1efc0e5253A2F': 291163572n, // UNI-V2 ETH/FOX
+  },
+})
 
 // assign service to be used for all instances of EVM
 EVM.service = service
