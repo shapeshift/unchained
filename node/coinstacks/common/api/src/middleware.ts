@@ -57,12 +57,15 @@ export const metrics =
     const end = prometheus.metrics.httpRequestDurationSeconds.startTimer()
 
     res.on('finish', () => {
-      const route = req.originalUrl ?? req.url
+      if (!(req.originalUrl ?? req.url).startsWith('/api/v1/') || res.statusCode === 404) return
 
-      if (!route.startsWith('/api/v1/') || res.statusCode === 404) return
+      const route = typeof req.route?.path === 'string' ? req.route.path : 'unmatched'
+      const method = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'].includes(req.method)
+        ? req.method
+        : 'OTHER'
 
-      prometheus.metrics.httpRequestCounter.inc({ method: req.method, route, statusCode: res.statusCode }, 1)
-      end({ method: req.method, route, statusCode: res.statusCode })
+      prometheus.metrics.httpRequestCounter.inc({ method, route, statusCode: res.statusCode }, 1)
+      end({ method, route, statusCode: res.statusCode })
     })
 
     next()
