@@ -1,5 +1,4 @@
 import { Logger } from '@shapeshiftoss/logger'
-import { Prometheus } from '@shapeshiftoss/prometheus'
 import { v4 } from 'uuid'
 import WebSocket from 'ws'
 
@@ -23,7 +22,6 @@ export abstract class BaseConnectionHandler {
   public readonly clientId: string
 
   protected readonly websocket: WebSocket
-  private readonly prometheus?: Prometheus
   private readonly logger: Logger
   private readonly pingIntervalMs = 10000
 
@@ -34,13 +32,11 @@ export abstract class BaseConnectionHandler {
   abstract onUnsubscribe(subscriptionId: string, data?: unknown): void
   abstract onClose(): void
 
-  constructor(websocket: WebSocket, prometheus: Prometheus, logger: Logger) {
+  constructor(websocket: WebSocket, logger: Logger) {
     this.clientId = v4()
-    this.prometheus = prometheus
     this.logger = logger.child({ namespace: ['websocket'] })
 
     this.pingTimeout = undefined
-    this.prometheus?.metrics.websocketCount.inc()
     this.websocket = websocket
     this.websocket.ping()
     this.heartbeat()
@@ -54,7 +50,6 @@ export abstract class BaseConnectionHandler {
       this.close(pingInterval)
     }
     this.websocket.onclose = ({ code, reason }) => {
-      this.prometheus?.metrics.websocketCount.dec()
       this.logger.debug({ clientId: this.clientId, code, reason, fn: 'ws.close' }, 'websocket closed')
       this.close(pingInterval)
     }

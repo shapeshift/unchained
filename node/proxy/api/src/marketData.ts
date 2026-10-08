@@ -2,7 +2,6 @@ import { Logger } from '@shapeshiftoss/logger'
 import WebSocket from 'ws'
 
 import { BaseConnectionHandler, MessageResponse } from '@shapeshiftoss/websocket'
-import { Prometheus } from '@shapeshiftoss/prometheus'
 
 export interface MarketDataMessage extends MessageResponse {
   type: 'price_update'
@@ -32,14 +31,14 @@ export interface MarketDataClient {
 export class MarketDataConnectionHandler extends BaseConnectionHandler {
   private readonly client: MarketDataClient
 
-  private constructor(websocket: WebSocket, client: MarketDataClient, prometheus: Prometheus, logger: Logger) {
-    super(websocket, prometheus, logger)
+  private constructor(websocket: WebSocket, client: MarketDataClient, logger: Logger) {
+    super(websocket, logger)
 
     this.client = client
   }
 
-  static start(websocket: WebSocket, client: MarketDataClient, prometheus: Prometheus, logger: Logger): void {
-    new MarketDataConnectionHandler(websocket, client, prometheus, logger)
+  static start(websocket: WebSocket, client: MarketDataClient, logger: Logger): void {
+    new MarketDataConnectionHandler(websocket, client, logger)
   }
 
   onSubscribe(subscriptionId: string, data?: unknown): void {

@@ -3,7 +3,6 @@ import { join } from 'path'
 import swaggerUi from 'swagger-ui-express'
 import { middleware } from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
-import { Prometheus } from '@shapeshiftoss/prometheus'
 import { Server } from 'ws'
 import { RegisterRoutes } from './routes'
 import { CoinGecko } from './coingecko'
@@ -25,21 +24,14 @@ export const logger = new Logger({
 
 export const ofac = new Ofac({ logger })
 
-const prometheus = new Prometheus({ coinstack: 'proxy' })
-
 const main = async () => {
   await ofac.initialize()
 
   const app = express()
 
-  app.use(...middleware.common(prometheus))
+  app.use(...middleware.common())
 
   app.get('/health', async (_, res) => res.json({ status: 'ok' }))
-
-  app.get('/metrics', async (_, res) => {
-    res.setHeader('Content-Type', prometheus.register.contentType)
-    res.send(await prometheus.register.metrics())
-  })
 
   const options: swaggerUi.SwaggerUiOptions = {
     customCss: '.swagger-ui .topbar { display: none }',
@@ -85,7 +77,7 @@ const main = async () => {
   const wsServer = new Server({ server })
 
   wsServer.on('connection', (connection) => {
-    MarketDataConnectionHandler.start(connection, coincap, prometheus, logger)
+    MarketDataConnectionHandler.start(connection, coincap, logger)
   })
 }
 

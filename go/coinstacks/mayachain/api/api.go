@@ -27,13 +27,11 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/gorilla/mux"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/cors"
 	"github.com/shapeshift/unchained/pkg/mayachain"
 	"github.com/shapeshift/unchained/shared/api"
 	"github.com/shapeshift/unchained/shared/cosmossdk"
 	"github.com/shapeshift/unchained/shared/log"
-	"github.com/shapeshift/unchained/shared/metrics"
 	"github.com/shapeshift/unchained/shared/websocket"
 )
 
@@ -62,7 +60,7 @@ type API struct {
 	httpClient *mayachain.HTTPClient
 }
 
-func New(cfg cosmossdk.Config, httpClient *mayachain.HTTPClient, wsClient *mayachain.WSClient, blockService *cosmossdk.BlockService, swaggerPath string, swaggeruiPath string, prometheus *metrics.Prometheus) *API {
+func New(cfg cosmossdk.Config, httpClient *mayachain.HTTPClient, wsClient *mayachain.WSClient, blockService *cosmossdk.BlockService, swaggerPath string, swaggeruiPath string) *API {
 	r := mux.NewRouter()
 
 	handler := &Handler{
@@ -78,7 +76,7 @@ func New(cfg cosmossdk.Config, httpClient *mayachain.HTTPClient, wsClient *mayac
 		},
 	}
 
-	manager := websocket.NewManager(prometheus)
+	manager := websocket.NewManager()
 
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", PORT),
@@ -108,15 +106,13 @@ func New(cfg cosmossdk.Config, httpClient *mayachain.HTTPClient, wsClient *mayac
 		logger.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", PPROF_PORT), http.DefaultServeMux))
 	}()
 
-	r.Use(api.Scheme, api.Logger(prometheus))
+	r.Use(api.Scheme, api.Logger())
 
 	r.HandleFunc("/", a.Root).Methods("GET")
 
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		api.HandleResponse(w, http.StatusOK, map[string]string{"status": "up", "coinstack": "mayachain", "connections": strconv.Itoa(manager.ConnectionCount())})
 	}).Methods("GET")
-
-	r.Handle("/metrics", promhttp.HandlerFor(prometheus.Registry, promhttp.HandlerOpts{}))
 
 	r.HandleFunc("/swagger", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.FromSlash(swaggerPath))

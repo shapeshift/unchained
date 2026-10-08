@@ -12,7 +12,6 @@ import (
 	"github.com/shapeshift/unchained/shared/config"
 	"github.com/shapeshift/unchained/shared/cosmossdk"
 	"github.com/shapeshift/unchained/shared/log"
-	"github.com/shapeshift/unchained/shared/metrics"
 
 	mayatypes "gitlab.com/mayachain/mayanode/x/mayachain/types"
 )
@@ -74,8 +73,6 @@ func main() {
 		INDEXERAPIKEY: conf.INDEXERAPIKEY,
 	}
 
-	prometheus := metrics.NewPrometheus("mayachain")
-
 	sdk.GetConfig().SetBech32PrefixForAccount(cfg.Bech32AddrPrefix, cfg.Bech32PkPrefix)
 
 	httpClient, err := mayachain.NewHTTPClient(cfg)
@@ -93,7 +90,7 @@ func main() {
 		logger.Panicf("failed to create new websocket client: %+v", err)
 	}
 
-	api := api.New(cfg.Config, httpClient, wsClient, blockService, *swaggerPath, *swaggeruiPath, prometheus)
+	api := api.New(cfg.Config, httpClient, wsClient, blockService, *swaggerPath, *swaggeruiPath)
 	defer api.Shutdown()
 
 	go api.Serve(errChan)

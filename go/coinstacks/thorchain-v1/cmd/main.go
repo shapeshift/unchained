@@ -12,7 +12,6 @@ import (
 	"github.com/shapeshift/unchained/shared/config"
 	"github.com/shapeshift/unchained/shared/cosmossdk"
 	"github.com/shapeshift/unchained/shared/log"
-	"github.com/shapeshift/unchained/shared/metrics"
 
 	thortypes "gitlab.com/thorchain/thornode/v3/x/thorchain/types"
 )
@@ -70,8 +69,6 @@ func main() {
 		},
 	}
 
-	prometheus := metrics.NewPrometheus("thorchain-v1")
-
 	sdk.GetConfig().SetBech32PrefixForAccount(cfg.Bech32AddrPrefix, cfg.Bech32PkPrefix)
 
 	httpClient, err := thorchain.NewHTTPClient(cfg)
@@ -89,7 +86,7 @@ func main() {
 		logger.Panicf("failed to create new websocket client: %+v", err)
 	}
 
-	api := api.New(cfg, httpClient, wsClient, blockService, *swaggerPath, *swaggeruiPath, prometheus)
+	api := api.New(cfg, httpClient, wsClient, blockService, *swaggerPath, *swaggeruiPath)
 	defer api.Shutdown()
 
 	go api.Serve(errChan)
