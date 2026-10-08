@@ -1,20 +1,22 @@
 import { EvmChain } from '@moralisweb3/common-evm-utils'
 import { EvmStreamResult, EvmStreamResultish } from '@moralisweb3/common-streams-utils'
-import { ApiError } from '@shapeshiftoss/common-api'
+import { ApiError, handleError } from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
 import express from 'express'
-import { Body, Example, Get, Hidden, Post, Response, Request, Route, Tags } from 'tsoa'
+import { Body, Example, Get, Hidden, Post, Response, Request, Route, Tags, Path } from 'tsoa'
 import { createPublicClient, http, keccak256, toBytes } from 'viem'
 import { mainnet } from 'viem/chains'
 import { BaseAPI, EstimateGasBody, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { API, GasEstimate, GasFees, MoralisService } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
+import { API, EventCache, GasEstimate, GasFees, MoralisService, StakingDuration } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { EVM } from '../../../common/api/src/evm/controller'
 
 const INDEXER_URL = process.env.INDEXER_URL
+const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY
 const RPC_URL = process.env.RPC_URL
 const RPC_API_KEY = process.env.RPC_API_KEY
 
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
+if (!ALCHEMY_API_KEY) throw new Error('ALCHEMY_API_KEY env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
 if (!RPC_API_KEY) throw new Error('RPC_API_KEY env var not set')
 
@@ -26,8 +28,21 @@ export const logger = new Logger({
 const rpcUrl = `${RPC_URL}/${RPC_API_KEY}`
 
 const client = createPublicClient({ chain: mainnet, transport: http(rpcUrl) })
+const alchemyClient = createPublicClient({
+  chain: mainnet,
+  transport: http(`https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`),
+})
 
 export const service = new MoralisService({ chain: EvmChain.ETHEREUM, logger, client, rpcUrl })
+
+export const cache = new EventCache({
+  client,
+  alchemyClient,
+  logger,
+  contracts: {
+    '0x7AC9c77263473A9e1DC9621F97b886c1e90Ddd33': 25906046n, // FOX
+  },
+})
 
 // assign service to be used for all instances of EVM
 EVM.service = service
@@ -87,6 +102,26 @@ export class Ethereum extends EVM implements BaseAPI, API {
   @Get('/gas/fees')
   async getGasFees(): Promise<GasFees> {
     return service.getGasFees()
+  }
+
+  /**
+   * Get rFOX staking duration by contract address
+   *
+   * @param {string} address account address
+   *
+   * @returns {Promise<StakingDuration>} staking duration in seconds by staking contract address
+   */
+  @Example<StakingDuration>({
+    '0x7AC9c77263473A9e1DC9621F97b886c1e90Ddd33': 0,
+  })
+  @Response<InternalServerError>(500, 'Internal Server Error')
+  @Get('/rfox/staking-duration/{address}')
+  async getRfoxStakingDuration(@Path() address: string): Promise<StakingDuration> {
+    try {
+      return await cache.getStakingDuration(address)
+    } catch (err) {
+      throw handleError(err)
+    }
   }
 
   @Hidden()
