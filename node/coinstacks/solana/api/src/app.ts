@@ -1,6 +1,5 @@
 import { ConnectionHandler, middleware, Registry, TransactionHandler } from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
-import { Prometheus } from '@shapeshiftoss/prometheus'
 import { Logs } from '@solana/web3.js'
 import express from 'express'
 import { join } from 'path'
@@ -23,18 +22,11 @@ export const logger = new Logger({
   level: process.env.LOG_LEVEL,
 })
 
-const prometheus = new Prometheus({ coinstack: 'solana' })
-
 const app = express()
 
-app.use(...middleware.common(prometheus))
+app.use(...middleware.common())
 
 app.get('/health', async (_, res) => res.json({ status: 'up', asset: 'solana' }))
-
-app.get('/metrics', async (_, res) => {
-  res.setHeader('Content-Type', prometheus.register.contentType)
-  res.send(await prometheus.register.metrics())
-})
 
 const options: swaggerUi.SwaggerUiOptions = {
   customCss: '.swagger-ui .topbar { display: none }',
@@ -78,5 +70,5 @@ const server = app.listen(PORT, () => logger.info('Server started'))
 const wsServer = new Server({ server })
 
 wsServer.on('connection', (connection) => {
-  ConnectionHandler.start(connection, registry, helius, prometheus, logger)
+  ConnectionHandler.start(connection, registry, helius, logger)
 })

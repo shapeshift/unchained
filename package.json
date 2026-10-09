@@ -6,12 +6,9 @@
     "node": ">=20"
   },
   "workspaces": [
-    "monitoring",
-    "pulumi",
     "node/proxy/**/*",
     "node/packages/**/*",
-    "node/coinstacks/**/*",
-    "go/coinstacks/**/pulumi"
+    "node/coinstacks/**/*"
   ],
   "scripts": {
     "build": "yarn workspaces foreach -Apt run build",

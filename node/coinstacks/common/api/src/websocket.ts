@@ -1,5 +1,4 @@
 import { Logger } from '@shapeshiftoss/logger'
-import { Prometheus } from '@shapeshiftoss/prometheus'
 import { AddressSubscriptionClient, BaseConnectionHandler } from '@shapeshiftoss/websocket'
 import WebSocket from 'ws'
 import { Registry } from './registry'
@@ -28,14 +27,8 @@ export class ConnectionHandler extends BaseConnectionHandler {
   private readonly client: AddressSubscriptionClient
   private readonly routes: Record<Topics, Methods>
 
-  private constructor(
-    websocket: WebSocket,
-    registry: Registry,
-    client: AddressSubscriptionClient,
-    prometheus: Prometheus,
-    logger: Logger
-  ) {
-    super(websocket, prometheus, logger)
+  private constructor(websocket: WebSocket, registry: Registry, client: AddressSubscriptionClient, logger: Logger) {
+    super(websocket, logger)
 
     this.registry = registry
     this.client = client
@@ -47,14 +40,8 @@ export class ConnectionHandler extends BaseConnectionHandler {
     }
   }
 
-  static start(
-    websocket: WebSocket,
-    registry: Registry,
-    client: AddressSubscriptionClient,
-    prometheus: Prometheus,
-    logger: Logger
-  ): void {
-    new ConnectionHandler(websocket, registry, client, prometheus, logger)
+  static start(websocket: WebSocket, registry: Registry, client: AddressSubscriptionClient, logger: Logger): void {
+    new ConnectionHandler(websocket, registry, client, logger)
   }
 
   onSubscribe(subscriptionId: string, data?: unknown): void {

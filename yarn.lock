@@ -1659,13 +1659,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opentelemetry/api@npm:^1.4.0":
-  version: 1.7.0
-  resolution: "@opentelemetry/api@npm:1.7.0"
-  checksum: 10c0/b5468115d1cec45dd2b86b39210fdc03620a93b9f07c3d20b14081f75e2f7c9b37ceceeb60d5f35c6d4f9819ae07eee0b4874e53e7362376db21db1e00f483f8
-  languageName: node
-  linkType: hard
-
 "@pkgjs/parseargs@npm:^0.11.0":
   version: 0.11.0
   resolution: "@pkgjs/parseargs@npm:0.11.0"
@@ -1786,7 +1779,6 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
-    "@shapeshiftoss/prometheus": "npm:^10.0.0"
   languageName: unknown
   linkType: soft
 
@@ -1796,7 +1788,6 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
-    "@shapeshiftoss/prometheus": "npm:^10.0.0"
   languageName: unknown
   linkType: soft
 
@@ -1806,7 +1797,6 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
-    "@shapeshiftoss/prometheus": "npm:^10.0.0"
   languageName: unknown
   linkType: soft
 
@@ -1816,7 +1806,6 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
-    "@shapeshiftoss/prometheus": "npm:^10.0.0"
     bech32: "npm:^2.0.0"
   languageName: unknown
   linkType: soft
@@ -1827,7 +1816,6 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
-    "@shapeshiftoss/prometheus": "npm:^10.0.0"
     bech32: "npm:^2.0.0"
   languageName: unknown
   linkType: soft
@@ -1848,7 +1836,6 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
-    "@shapeshiftoss/prometheus": "npm:^10.0.0"
   languageName: unknown
   linkType: soft
 
@@ -1857,12 +1844,9 @@ __metadata:
   resolution: "@shapeshiftoss/common-api@workspace:node/coinstacks/common/api"
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
-    "@shapeshiftoss/prometheus": "npm:^10.0.0"
     "@shapeshiftoss/websocket": "npm:^10.0.0"
-    "@types/uuid": "npm:^9.0.7"
     "@types/ws": "npm:^8.5.10"
     bignumber.js: "npm:^9.1.2"
-    uuid: "npm:^9.0.1"
     ws: "npm:^8.15.0"
   languageName: unknown
   linkType: soft
@@ -1873,7 +1857,6 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
-    "@shapeshiftoss/prometheus": "npm:^10.0.0"
     bech32: "npm:^2.0.0"
   languageName: unknown
   linkType: soft
@@ -1884,7 +1867,6 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
-    "@shapeshiftoss/prometheus": "npm:^10.0.0"
   languageName: unknown
   linkType: soft
 
@@ -1894,7 +1876,6 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
-    "@shapeshiftoss/prometheus": "npm:^10.0.0"
   languageName: unknown
   linkType: soft
 
@@ -1904,7 +1885,6 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
-    "@shapeshiftoss/prometheus": "npm:^10.0.0"
     bech32: "npm:^2.0.0"
   languageName: unknown
   linkType: soft
@@ -1922,7 +1902,6 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
-    "@shapeshiftoss/prometheus": "npm:^10.0.0"
   languageName: unknown
   linkType: soft
 
@@ -1932,15 +1911,6 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
-    "@shapeshiftoss/prometheus": "npm:^10.0.0"
-  languageName: unknown
-  linkType: soft
-
-"@shapeshiftoss/prometheus@npm:^10.0.0, @shapeshiftoss/prometheus@workspace:node/packages/prometheus":
-  version: 0.0.0-use.local
-  resolution: "@shapeshiftoss/prometheus@workspace:node/packages/prometheus"
-  dependencies:
-    prom-client: "npm:^15.0.0"
   languageName: unknown
   linkType: soft
 
@@ -1949,7 +1919,6 @@ __metadata:
   resolution: "@shapeshiftoss/solana-api@workspace:node/coinstacks/solana/api"
   dependencies:
     "@shapeshiftoss/common-api": "npm:^10.0.0"
-    "@shapeshiftoss/prometheus": "npm:^10.0.0"
     "@shapeshiftoss/websocket": "npm:^10.0.0"
     "@solana/web3.js": "npm:^1.95.3"
     helius-sdk: "npm:^1.4.0"
@@ -1961,7 +1930,6 @@ __metadata:
   resolution: "@shapeshiftoss/unchained-proxy@workspace:node/proxy/api"
   dependencies:
     "@shapeshiftoss/common-api": "npm:^10.0.0"
-    "@shapeshiftoss/prometheus": "npm:^10.0.0"
     "@solana/web3.js": "npm:^1.95.3"
     bottleneck: "npm:^2.19.5"
     fast-xml-parser: "npm:^4.3.0"
@@ -1972,8 +1940,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@shapeshiftoss/websocket@workspace:node/packages/websocket"
   dependencies:
-    "@shapeshiftoss/prometheus": "npm:^10.0.0"
+    "@types/uuid": "npm:^9.0.7"
     "@types/ws": "npm:^8.5.10"
+    uuid: "npm:^9.0.1"
     ws: "npm:^8.15.0"
   languageName: unknown
   linkType: soft
@@ -1984,7 +1953,6 @@ __metadata:
   dependencies:
     "@shapeshiftoss/blockbook": "npm:^10.0.0"
     "@shapeshiftoss/common-api": "npm:^10.0.0"
-    "@shapeshiftoss/prometheus": "npm:^10.0.0"
     bech32: "npm:^2.0.0"
   languageName: unknown
   linkType: soft
@@ -3226,13 +3194,6 @@ __metadata:
   dependencies:
     file-uri-to-path: "npm:1.0.0"
   checksum: 10c0/3dab2491b4bb24124252a91e656803eac24292473e56554e35bbfe3cc1875332cfa77600c3bac7564049dc95075bf6fcc63a4609920ff2d64d0fe405fcf0d4ba
-  languageName: node
-  linkType: hard
-
-"bintrees@npm:1.0.2":
-  version: 1.0.2
-  resolution: "bintrees@npm:1.0.2"
-  checksum: 10c0/132944b20c93c1a8f97bf8aa25980a76c6eb4291b7f2df2dbcd01cb5b417c287d3ee0847c7260c9f05f3d5a4233aaa03dec95114e97f308abe9cc3f72bed4a44
   languageName: node
   linkType: hard
 
@@ -7435,16 +7396,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prom-client@npm:^15.0.0":
-  version: 15.0.0
-  resolution: "prom-client@npm:15.0.0"
-  dependencies:
-    "@opentelemetry/api": "npm:^1.4.0"
-    tdigest: "npm:^0.1.1"
-  checksum: 10c0/4d69d4a6e086a80f1e7b5716c53d6be49d99dba8451f2a8117708f581f69648f47df68060cbea1c18e24fc1efe675868f85c5da89d0ef8d6f962a52b5f50c356
-  languageName: node
-  linkType: hard
-
 "promise-retry@npm:^2.0.1":
   version: 2.0.1
   resolution: "promise-retry@npm:2.0.1"
@@ -8415,15 +8366,6 @@ __metadata:
     minizlib: "npm:^3.1.0"
     yallist: "npm:^5.0.0"
   checksum: 10c0/0dad0596a61586180981133b20c32cfd93c5863c5b7140d646714e6ea8ec84583b879e5dc3928a4d683be6e6109ad7ea3de1cf71986d5194f81b3a016c8858c9
-  languageName: node
-  linkType: hard
-
-"tdigest@npm:^0.1.1":
-  version: 0.1.2
-  resolution: "tdigest@npm:0.1.2"
-  dependencies:
-    bintrees: "npm:1.0.2"
-  checksum: 10c0/10187b8144b112fcdfd3a5e4e9068efa42c990b1e30cd0d4f35ee8f58f16d1b41bc587e668fa7a6f6ca31308961cbd06cd5d4a4ae1dc388335902ae04f7d57df
   languageName: node
   linkType: hard
 

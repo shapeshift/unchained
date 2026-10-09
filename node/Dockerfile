@@ -11,7 +11,6 @@ COPY .yarn .yarn/
 
 # Package.json files for dependency resolution
 COPY node/packages/websocket/package.json node/packages/websocket/
-COPY node/packages/prometheus/package.json node/packages/prometheus/
 COPY node/packages/blockbook/package.json node/packages/blockbook/
 COPY node/coinstacks/common/api/package.json node/coinstacks/common/api/
 COPY node/${DIR}/package.json node/${DIR}/

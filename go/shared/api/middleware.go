@@ -3,13 +3,11 @@ package api
 import (
 	"net/http"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/shapeshift/unchained/shared/log"
-	"github.com/shapeshift/unchained/shared/metrics"
 )
 
 type statusWriter struct {
@@ -26,8 +24,8 @@ func (w *statusWriter) WriteHeader(status int) {
 	w.ResponseWriter.WriteHeader(status)
 }
 
-// Logger middleware for request details and metrics
-func Logger(prometheus *metrics.Prometheus) mux.MiddlewareFunc {
+// Logger middleware for request details
+func Logger() mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			sw := newStatusWriter(w)
@@ -47,11 +45,6 @@ func Logger(prometheus *metrics.Prometheus) mux.MiddlewareFunc {
 			statusLogger := log.WithFields(log.Fields{"method": r.Method, "statusCode": sw.status, "responseTime": duration.String()})
 
 			if strings.HasPrefix(r.RequestURI, "/api/v1/") && sw.status != 404 {
-				labels := metrics.Labels{"method": r.Method, "route": r.RequestURI, "statusCode": strconv.Itoa(sw.status)}
-
-				prometheus.Metrics.HTTPRequestCounter.With(labels).Inc()
-				prometheus.Metrics.HTTPRequestDurationSeconds.With(labels).Observe(duration.Seconds())
-
 				if sw.status < http.StatusOK || sw.status >= http.StatusBadRequest {
 					statusLogger.Errorf("%s", r.RequestURI)
 				} else {

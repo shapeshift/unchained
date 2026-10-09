@@ -25,10 +25,5 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Monitoring external/generated files
-monitoring/my-kube-prometheus/vendor
-monitoring/my-kube-prometheus/manifests
-monitoring/my-kube-prometheus/alertmanager-config.yaml
-
 # misc
 .DS_Store

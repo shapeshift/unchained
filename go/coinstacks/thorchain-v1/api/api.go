@@ -16,26 +16,22 @@ package api
 import (
 	"fmt"
 	"net/http"
-	_ "net/http/pprof"
 	"os"
 	"path/filepath"
 	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/cors"
 	thorchainV1 "github.com/shapeshift/unchained/coinstacks/thorchain-v1"
 	"github.com/shapeshift/unchained/pkg/thorchain"
 	"github.com/shapeshift/unchained/shared/api"
 	"github.com/shapeshift/unchained/shared/cosmossdk"
 	"github.com/shapeshift/unchained/shared/log"
-	"github.com/shapeshift/unchained/shared/metrics"
 	"github.com/shapeshift/unchained/shared/websocket"
 )
 
 const (
-	PPROF_PORT        = 3001
 	GRACEFUL_SHUTDOWN = 15 * time.Second
 	WRITE_TIMEOUT     = 15 * time.Second
 	READ_TIMEOUT      = 15 * time.Second
@@ -58,7 +54,7 @@ type API struct {
 	handler *Handler
 }
 
-func New(cfg thorchain.Config, httpClient *thorchain.HTTPClient, wsClient *thorchain.WSClient, blockService *cosmossdk.BlockService, swaggerPath string, swaggeruiPath string, prometheus *metrics.Prometheus) *API {
+func New(cfg thorchain.Config, httpClient *thorchain.HTTPClient, wsClient *thorchain.WSClient, blockService *cosmossdk.BlockService, swaggerPath string, swaggeruiPath string) *API {
 	r := mux.NewRouter()
 
 	handler := &Handler{
@@ -74,7 +70,7 @@ func New(cfg thorchain.Config, httpClient *thorchain.HTTPClient, wsClient *thorc
 		},
 	}
 
-	manager := websocket.NewManager(prometheus)
+	manager := websocket.NewManager()
 
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", PORT),
@@ -98,20 +94,13 @@ func New(cfg thorchain.Config, httpClient *thorchain.HTTPClient, wsClient *thorc
 		logger.Panicf("%+v", err)
 	}
 
-	// pprof server
-	go func() {
-		logger.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", PPROF_PORT), http.DefaultServeMux))
-	}()
-
-	r.Use(api.Scheme, api.Logger(prometheus))
+	r.Use(api.Scheme, api.Logger())
 
 	r.HandleFunc("/", api.DocsRedirect).Methods("GET")
 
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		api.HandleResponse(w, http.StatusOK, map[string]string{"status": "up", "coinstack": "thorchain-v1", "connections": strconv.Itoa(manager.ConnectionCount())})
 	}).Methods("GET")
-
-	r.Handle("/metrics", promhttp.HandlerFor(prometheus.Registry, promhttp.HandlerOpts{}))
 
 	r.HandleFunc("/swagger", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.FromSlash(swaggerPath))

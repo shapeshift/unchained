@@ -1,4 +1,3 @@
-import { Prometheus } from '@shapeshiftoss/prometheus'
 import { json, urlencoded, NextFunction, Request, Response } from 'express'
 import compression from 'compression'
 import morgan from 'morgan'
@@ -51,26 +50,10 @@ export const requestLogger = morgan('short', {
   skip: (req, res) => !req.url?.startsWith('/api/v1') || res.statusCode === 404,
 })
 
-export const metrics =
-  (prometheus: Prometheus) =>
-  (req: Request, res: Response, next: NextFunction): void => {
-    const end = prometheus.metrics.httpRequestDurationSeconds.startTimer()
-
-    res.on('finish', () => {
-      const route = req.originalUrl ?? req.url
-
-      if (!route.startsWith('/api/v1/') || res.statusCode === 404) return
-
-      prometheus.metrics.httpRequestCounter.inc({ method: req.method, route, statusCode: res.statusCode }, 1)
-      end({ method: req.method, route, statusCode: res.statusCode })
-    })
-
-    next()
-  }
-
-export const common = (prometheus?: Prometheus) => {
-  const _default = [compression(), json({ limit: '1mb' }), urlencoded({ extended: false }), cors(), requestLogger]
-
-  if (!prometheus) return _default
-  return _default.concat(metrics(prometheus))
-}
+export const common = () => [
+  compression(),
+  json({ limit: '1mb' }),
+  urlencoded({ extended: false }),
+  cors(),
+  requestLogger,
+]

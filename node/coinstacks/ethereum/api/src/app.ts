@@ -4,7 +4,6 @@ import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
 import { evm, middleware, ConnectionHandler, Registry, TransactionHandler } from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
-import { Prometheus } from '@shapeshiftoss/prometheus'
 import { cache, service } from './controller'
 import { RegisterRoutes } from './routes'
 
@@ -15,21 +14,14 @@ export const logger = new Logger({
   level: process.env.LOG_LEVEL,
 })
 
-const prometheus = new Prometheus({ coinstack: 'ethereum' })
-
 const main = async () => {
   const app = express()
 
-  app.use(...middleware.common(prometheus))
+  app.use(...middleware.common())
 
   app.get('/health', async (_, res) =>
     res.json({ status: 'up', asset: 'ethereum', connections: wsServer.clients.size })
   )
-
-  app.get('/metrics', async (_, res) => {
-    res.setHeader('Content-Type', prometheus.register.contentType)
-    res.send(await prometheus.register.metrics())
-  })
 
   const options: swaggerUi.SwaggerUiOptions = {
     customCss: '.swagger-ui .topbar { display: none }',
@@ -65,7 +57,7 @@ const main = async () => {
   const wsServer = new Server({ server })
 
   wsServer.on('connection', (connection) => {
-    ConnectionHandler.start(connection, registry, service, prometheus, logger)
+    ConnectionHandler.start(connection, registry, service, logger)
   })
 }
 

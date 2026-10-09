@@ -12,7 +12,6 @@ import (
 	"github.com/shapeshift/unchained/shared/config"
 	"github.com/shapeshift/unchained/shared/cosmossdk"
 	"github.com/shapeshift/unchained/shared/log"
-	"github.com/shapeshift/unchained/shared/metrics"
 )
 
 var (
@@ -68,8 +67,6 @@ func main() {
 		WSAPIKEY:          conf.WSAPIKEY,
 	}
 
-	prometheus := metrics.NewPrometheus("cosmos")
-
 	sdk.GetConfig().SetBech32PrefixForAccount(cfg.Bech32AddrPrefix, cfg.Bech32PkPrefix)
 	sdk.GetConfig().SetBech32PrefixForValidator(cfg.Bech32ValPrefix, cfg.Bech32PkValPrefix)
 
@@ -88,7 +85,7 @@ func main() {
 		logger.Panicf("failed to create new websocket client: %+v", err)
 	}
 
-	api := api.New(cfg, httpClient, wsClient, blockService, *swaggerPath, *swaggeruiPath, prometheus)
+	api := api.New(cfg, httpClient, wsClient, blockService, *swaggerPath, *swaggeruiPath)
 	defer api.Shutdown()
 
 	go api.Serve(errChan)
