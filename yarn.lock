@@ -1942,7 +1942,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@shapeshiftoss/websocket@workspace:node/packages/websocket"
   dependencies:
+    "@shapeshiftoss/logger": "npm:^1.1.2"
+    "@types/uuid": "npm:^9.0.7"
     "@types/ws": "npm:^8.5.10"
+    uuid: "npm:^9.0.1"
     ws: "npm:^8.15.0"
   languageName: unknown
   linkType: soft

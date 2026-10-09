@@ -15,9 +15,12 @@
     "watch": "yarn run -T nodemon -e ts --watch src -x yarn build"
   },
   "dependencies": {
+    "@shapeshiftoss/logger": "^1.1.2",
+    "uuid": "^9.0.1",
     "ws": "^8.15.0"
   },
   "devDependencies": {
+    "@types/uuid": "^9.0.7",
     "@types/ws": "^8.5.10"
   }
 }
