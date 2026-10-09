@@ -13,7 +13,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/shapeshift/unchained/shared v0.0.0
 	gitlab.com/thorchain/thornode/v3 v3.15.2
-	golang.org/x/sync v0.17.0
 )
 
 require (
@@ -183,6 +182,7 @@ require (
 	golang.org/x/exp v0.0.0-20250506013437-ce4c2cf36ca6 // indirect
 	golang.org/x/net v0.46.0 // indirect
 	golang.org/x/oauth2 v0.31.0 // indirect
+	golang.org/x/sync v0.17.0 // indirect
 	golang.org/x/sys v0.37.0 // indirect
 	golang.org/x/term v0.36.0 // indirect
 	golang.org/x/text v0.30.0 // indirect

@@ -4,6 +4,7 @@ go 1.23.4
 
 require (
 	github.com/cosmos/cosmos-sdk v0.45.9
+	github.com/go-resty/resty/v2 v2.17.1
 	github.com/gorilla/mux v1.8.1
 	github.com/rs/cors v1.11.1
 	github.com/shapeshift/unchained/pkg/mayachain v0.0.0
@@ -44,7 +45,6 @@ require (
 	github.com/go-kit/kit v0.12.0 // indirect
 	github.com/go-kit/log v0.2.1 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
-	github.com/go-resty/resty/v2 v2.17.1 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/godbus/dbus v0.0.0-20190726142602-4481cbc300e2 // indirect
 	github.com/gogo/protobuf v1.3.3 // indirect
