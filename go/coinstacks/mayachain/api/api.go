@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	_ "net/http/pprof"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -36,7 +35,6 @@ import (
 )
 
 const (
-	PPROF_PORT        = 3001
 	GRACEFUL_SHUTDOWN = 15 * time.Second
 	WRITE_TIMEOUT     = 15 * time.Second
 	READ_TIMEOUT      = 15 * time.Second
@@ -100,11 +98,6 @@ func New(cfg cosmossdk.Config, httpClient *mayachain.HTTPClient, wsClient *mayac
 	if err := handler.ValidateCoinSpecific(handler); err != nil {
 		logger.Panicf("%+v", err)
 	}
-
-	// pprof server
-	go func() {
-		logger.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", PPROF_PORT), http.DefaultServeMux))
-	}()
 
 	r.Use(api.Scheme, api.Logger())
 
