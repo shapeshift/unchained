@@ -1,45 +1,37 @@
 import axios, { isAxiosError } from 'axios'
-import { Axios } from 'axios'
 import { Request, Response } from 'express'
-import {
-  Address,
-  Hex,
-  bytesToHex,
-  decodeFunctionData,
-  getAddress,
-  hashTypedData,
-  hexToBytes,
-  isHex,
-  keccak256,
-  parseAbi,
-} from 'viem'
+import { Address, Hex, decodeFunctionData, isAddress, isAddressEqual, isHex, keccak256, parseAbi } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 
 const FYND_API_KEY = process.env.FYND_API_KEY
-// The fee receiver's key: the router credits fees to this address and checks its signature
 const FYND_FEE_SIGNER_KEY = process.env.FYND_FEE_SIGNER_KEY
 
 if (!FYND_API_KEY) throw new Error('FYND_API_KEY env var not set')
+if (!FYND_FEE_SIGNER_KEY) throw new Error('FYND_FEE_SIGNER_KEY env var not set')
 
 const BASE_URL = 'https://fynd-api.propellerheads.xyz/v1'
+
 const FEE_DEADLINE_SECONDS = 15 * 60
+const MAX_FEE_BPS = 10_000
+const FEE_UNITS_PER_BPS = 10_000
 const SIGNATURE_BYTES = 65
-// The router takes the fee in FeeCalculator units: 1 bps = 10,000
-const FEE_UNITS_PER_BPS = 10_000n
+const ZERO_SIGNATURE = '00'.repeat(SIGNATURE_BYTES)
+
+type Chain = { chainId: number; router: Address }
 
 // Hosted Fynd chain slugs and their TychoRouterV3 deployments
 // https://docs.propellerheads.xyz/tycho/for-solvers/execution/contract-addresses
-const CHAINS: Record<string, { chainId: number; router: Address }> = {
-  ethereum: { chainId: 1, router: '0x1644D2477f809cc2C71bCCFd6Dc9497E3F83210d' },
-  base: { chainId: 8453, router: '0xAbA5B53b03eAfaD1C5fc8BD5Fc765fC85Bb3de67' },
-  arbitrum: { chainId: 42161, router: '0x924F147c50eA59f5180a26031A8b65B2aA1e81Cd' },
-  bsc: { chainId: 56, router: '0x7f3D12BBaFb8955E51B3ab9588b34c8ad95BDA4e' },
-  polygon: { chainId: 137, router: '0xbd4e6011F03355C2A377Fd9Af939322A7d0A1bC1' },
-  unichain: { chainId: 130, router: '0xCba5574597Ad00EA250Fd106DAB4Fc7461949635' },
-  robinhood: { chainId: 4663, router: '0x09215a470bD585E59EB3F4B612fBD2678131fF9e' },
-}
+const CHAINS = new Map<string, Chain>([
+  ['ethereum', { chainId: 1, router: '0x1644D2477f809cc2C71bCCFd6Dc9497E3F83210d' }],
+  ['base', { chainId: 8453, router: '0xAbA5B53b03eAfaD1C5fc8BD5Fc765fC85Bb3de67' }],
+  ['arbitrum', { chainId: 42161, router: '0x924F147c50eA59f5180a26031A8b65B2aA1e81Cd' }],
+  ['bsc', { chainId: 56, router: '0x7f3D12BBaFb8955E51B3ab9588b34c8ad95BDA4e' }],
+  ['polygon', { chainId: 137, router: '0xbd4e6011F03355C2A377Fd9Af939322A7d0A1bC1' }],
+  ['unichain', { chainId: 130, router: '0xCba5574597Ad00EA250Fd106DAB4Fc7461949635' }],
+  ['robinhood', { chainId: 4663, router: '0x09215a470bD585E59EB3F4B612fBD2678131fF9e' }],
+])
 
-// Entry points Fynd encodes for transfer_from quotes. Permit2 and vault variants are never requested, so they are not signed.
+// Entry points Fynd encodes for transfer_from quotes; permit2 and vault variants are never requested
 const ROUTER_ABI = parseAbi([
   'struct ClientFeeParams { uint32 clientFeeBps; address clientFeeReceiver; uint256 maxClientContribution; uint256 deadline; bytes clientSignature; }',
   'function singleSwap(uint256 amountIn, address tokenIn, address tokenOut, uint256 expectedAmountOut, uint256 minAmountOut, address receiver, ClientFeeParams clientFeeParams, bytes swapData)',
@@ -63,58 +55,75 @@ const CLIENT_FEE_TYPES = {
   ],
 } as const
 
-type ClientFee = { bps: number; receiver: Address; deadline: number }
+type ClientFee = { bps: number; deadline: number }
+
+type FyndTransaction = { to?: string; data?: string; client_fee_signature_offset?: number | null }
 
 type FyndOrder = {
   status?: string
-  transaction?: { to?: string; data?: string; client_fee_signature_offset?: number | null }
+  transaction?: FyndTransaction
   fee_breakdown?: { swaps_hash?: string | null }
   client_fee_deadline?: number
 }
 
-export class Fynd {
-  private axiosInstance: Axios
-  private signer = FYND_FEE_SIGNER_KEY ? privateKeyToAccount(FYND_FEE_SIGNER_KEY as Hex) : undefined
+type FyndQuote = { orders?: FyndOrder[] }
 
-  constructor() {
-    this.axiosInstance = axios.create({
-      headers: { Authorization: FYND_API_KEY },
-      timeout: 10_000,
-    })
+// Signing failures carry our own messages, so they are safe to relay to the client
+class FeeSigningError extends Error {}
+
+const isNonNegativeInteger = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isInteger(value) && value >= 0
+
+const isFeeBps = (value: unknown): value is number => isNonNegativeInteger(value) && value <= MAX_FEE_BPS
+
+// splitSwap carries nTokens at index 5; the other entry points share one argument shape
+const decodeSwap = (calldata: Hex) => {
+  const decoded = (() => {
+    try {
+      return decodeFunctionData({ abi: ROUTER_ABI, data: calldata })
+    } catch {
+      throw new FeeSigningError('quote calls an unsupported router function')
+    }
+  })()
+
+  if (decoded.functionName === 'splitSwap') {
+    const [amountIn, tokenIn, tokenOut, expectedAmountOut, minAmountOut, , receiver, params, swaps] = decoded.args
+    return { params, swap: { amountIn, tokenIn, tokenOut, expectedAmountOut, minAmountOut, receiver, swaps } }
   }
 
-  async handler(req: Request, res: Response): Promise<void> {
-    const parsedUrl = new URL(req.url, 'https://dummy.com')
-    const [, chain, endpoint, ...rest] = parsedUrl.pathname.replace(/^\/api\/v1\/fynd/, '').split('/')
+  const [amountIn, tokenIn, tokenOut, expectedAmountOut, minAmountOut, receiver, params, swaps] = decoded.args
 
-    if (!CHAINS[chain] || endpoint !== 'quote' || rest.length) {
+  return { params, swap: { amountIn, tokenIn, tokenOut, expectedAmountOut, minAmountOut, receiver, swaps } }
+}
+
+export class Fynd {
+  private axiosInstance = axios.create({ headers: { Authorization: FYND_API_KEY }, timeout: 10_000 })
+  private signer = privateKeyToAccount(FYND_FEE_SIGNER_KEY as Hex)
+
+  async handler(req: Request, res: Response): Promise<void> {
+    const slug = req.path.match(/^\/api\/v1\/fynd\/([^/]+)\/quote$/)?.[1] ?? ''
+
+    const chain = CHAINS.get(slug)
+    if (!chain) {
       res.status(404).send('Not Found')
       return
     }
 
-    const encodingOptions = req.body?.options?.encoding_options
-    const requestedBps: unknown = encodingOptions?.client_fee_params?.bps
-    let fee: ClientFee | undefined
+    const requestedBps: unknown = req.body?.options?.encoding_options?.client_fee_params?.bps
+    if (requestedBps !== undefined && !isFeeBps(requestedBps)) {
+      res.status(400).send('Invalid client fee bps')
+      return
+    }
 
-    if (requestedBps !== undefined) {
-      if (!this.signer) {
-        res.status(503).send('Fynd fee signing is not configured')
-        return
-      }
-      if (!Number.isInteger(requestedBps) || (requestedBps as number) < 0 || (requestedBps as number) > 10_000) {
-        res.status(400).send('Invalid client fee bps')
-        return
-      }
-      fee = {
-        bps: requestedBps as number,
-        receiver: this.signer.address,
-        deadline: Math.floor(Date.now() / 1000) + FEE_DEADLINE_SECONDS,
-      }
-      // Callers choose the bps; the receiver, contribution cap and deadline are ours
-      // An empty signature makes Fynd encode a zeroed placeholder and report its offset
-      encodingOptions.client_fee_params = {
+    const fee: ClientFee | undefined = isFeeBps(requestedBps)
+      ? { bps: requestedBps, deadline: Math.floor(Date.now() / 1000) + FEE_DEADLINE_SECONDS }
+      : undefined
+
+    // Callers choose the bps; the empty signature makes Fynd encode a zeroed placeholder and report its offset
+    if (fee) {
+      req.body.options.encoding_options.client_fee_params = {
         bps: fee.bps,
-        receiver: fee.receiver,
+        receiver: this.signer.address,
         max_contribution: '0',
         deadline: fee.deadline,
         signature: '0x',
@@ -122,118 +131,110 @@ export class Fynd {
     }
 
     try {
-      const response = await this.axiosInstance.post(`${BASE_URL}/${chain}/quote`, req.body)
+      const response = await this.axiosInstance.post<FyndQuote>(`${BASE_URL}/${slug}/quote`, req.body)
 
-      if (fee) {
-        try {
-          await this.signClientFees(response.data, CHAINS[chain], fee)
-        } catch (err) {
-          res.status(502).send(`Fynd fee signing failed: ${err instanceof Error ? err.message : 'unknown error'}`)
-          return
-        }
-      }
+      if (fee) await this.signClientFees(response.data, chain, fee)
 
       Object.entries(response.headers).forEach(([k, v]) => res.set(k, v))
       res.status(response.status).send(response.data)
     } catch (err) {
-      if (isAxiosError(err)) {
-        // Preserve upstream backoff guidance and make it readable by browser clients.
-        const retryAfter = err.response?.headers['retry-after']
-        if (typeof retryAfter === 'string') {
-          res.set('Retry-After', retryAfter)
-          res.append('Access-Control-Expose-Headers', 'Retry-After')
-        }
-
-        res.status(err.response?.status ?? 500).send(err.response?.data || 'Internal Server Error')
-      } else if (err instanceof Error) {
-        res.status(500).send(err.message || 'Internal Server Error')
-      } else {
-        res.status(500).send('Internal Server Error')
-      }
+      this.relayError(res, err)
     }
   }
 
-  // Signs the EIP-712 ClientFee message over the swap exactly as Fynd encoded it and patches the
-  // signature into the calldata placeholder. Rejects any quote whose encoded fee params differ
-  // from the ones this proxy injected.
-  private async signClientFees(data: unknown, chain: { chainId: number; router: Address }, fee: ClientFee) {
-    if (!this.signer) throw new Error('fee signer not configured')
-    const orders: FyndOrder[] = Array.isArray((data as { orders?: unknown })?.orders)
-      ? (data as { orders: FyndOrder[] }).orders
-      : []
+  private relayError(res: Response, err: unknown): void {
+    if (err instanceof FeeSigningError) {
+      res.status(502).send(`Fynd fee signing failed: ${err.message}`)
+      return
+    }
 
-    for (const order of orders) {
+    if (!isAxiosError(err)) {
+      res.status(500).send((err instanceof Error && err.message) || 'Internal Server Error')
+      return
+    }
+
+    // Preserve upstream backoff guidance and make it readable by browser clients
+    const retryAfter = err.response?.headers['retry-after']
+    if (typeof retryAfter === 'string') {
+      res.set('Retry-After', retryAfter)
+      res.append('Access-Control-Expose-Headers', 'Retry-After')
+    }
+
+    res.status(err.response?.status ?? 500).send(err.response?.data || 'Internal Server Error')
+  }
+
+  // Signs the fee over each successful order exactly as Fynd encoded it; anything the proxy did not request is rejected
+  private async signClientFees(quote: FyndQuote, chain: Chain, fee: ClientFee): Promise<void> {
+    for (const order of quote.orders ?? []) {
       if (order.status !== 'success' || !order.transaction) continue
-      const { to, data: calldata, client_fee_signature_offset: offset } = order.transaction
 
-      if (typeof to !== 'string' || getAddress(to) !== chain.router) throw new Error('quote targets an unpinned router')
-      if (!isHex(calldata, { strict: true }) || calldata.length % 2 !== 0) throw new Error('quote calldata is not hex')
-      if (!Number.isInteger(offset) || (offset as number) < 0)
-        throw new Error('quote has no client fee signature offset')
+      order.transaction.data = await this.signTransaction(
+        order.transaction,
+        order.fee_breakdown?.swaps_hash,
+        chain,
+        fee
+      )
 
-      const { functionName, args } = decodeFunctionData({ abi: ROUTER_ABI, data: calldata })
-      const isSplit = functionName === 'splitSwap'
-      const decoded = args as unknown as readonly unknown[]
-      const [amountIn, tokenIn, tokenOut, expectedAmountOut, minAmountOut] = decoded as [
-        bigint,
-        Address,
-        Address,
-        bigint,
-        bigint,
-      ]
-      const receiver = decoded[isSplit ? 6 : 5] as Address
-      const params = decoded[isSplit ? 7 : 6] as {
-        clientFeeBps: number
-        clientFeeReceiver: Address
-        maxClientContribution: bigint
-        deadline: bigint
-        clientSignature: Hex
-      }
-      const swaps = decoded[isSplit ? 8 : 7] as Hex
-
-      if (
-        BigInt(params.clientFeeBps) !== BigInt(fee.bps) * FEE_UNITS_PER_BPS ||
-        getAddress(params.clientFeeReceiver) !== fee.receiver ||
-        params.maxClientContribution !== 0n ||
-        params.deadline !== BigInt(fee.deadline)
-      ) {
-        throw new Error('encoded client fee params do not match the request')
-      }
-      const swapsHash = order.fee_breakdown?.swaps_hash
-      if (typeof swapsHash === 'string' && swapsHash.toLowerCase() !== keccak256(swaps)) {
-        throw new Error('encoded swaps do not match swaps_hash')
-      }
-
-      const bytes = hexToBytes(calldata)
-      const end = (offset as number) + SIGNATURE_BYTES
-      if (end > bytes.length) throw new Error('signature offset does not fit the calldata')
-      if (bytes.subarray(offset as number, end).some((byte) => byte !== 0)) {
-        throw new Error('signature offset does not point at the zeroed placeholder')
-      }
-
-      const digest = hashTypedData({
-        domain: { name: 'TychoRouter', version: '1', chainId: chain.chainId, verifyingContract: chain.router },
-        types: CLIENT_FEE_TYPES,
-        primaryType: 'ClientFee',
-        message: {
-          clientFeeBps: params.clientFeeBps,
-          clientFeeReceiver: fee.receiver,
-          maxClientContribution: 0n,
-          deadline: BigInt(fee.deadline),
-          amountIn,
-          tokenIn,
-          tokenOut,
-          expectedAmountOut,
-          minAmountOut,
-          receiver,
-          swaps,
-        },
-      })
-      const signature = await this.signer.sign({ hash: digest })
-
-      bytes.set(hexToBytes(signature), offset as number)
-      order.transaction.data = bytesToHex(bytes)
       order.client_fee_deadline = fee.deadline
     }
+  }
+
+  // Returns the calldata with the EIP-712 ClientFee signature patched into the zeroed placeholder
+  private async signTransaction(
+    tx: FyndTransaction,
+    swapsHash: string | null | undefined,
+    chain: Chain,
+    fee: ClientFee
+  ): Promise<Hex> {
+    const { to, data: calldata, client_fee_signature_offset: offset } = tx
+
+    if (typeof to !== 'string' || !isAddress(to) || !isAddressEqual(to, chain.router)) {
+      throw new FeeSigningError('quote targets an unpinned router')
+    }
+
+    if (!isHex(calldata, { strict: true }) || calldata.length % 2 !== 0) {
+      throw new FeeSigningError('quote calldata is not hex')
+    }
+
+    if (!isNonNegativeInteger(offset)) throw new FeeSigningError('quote has no client fee signature offset')
+
+    const { params, swap } = decodeSwap(calldata)
+
+    if (
+      params.clientFeeBps !== fee.bps * FEE_UNITS_PER_BPS ||
+      !isAddressEqual(params.clientFeeReceiver, this.signer.address) ||
+      params.maxClientContribution !== 0n ||
+      params.deadline !== BigInt(fee.deadline)
+    ) {
+      throw new FeeSigningError('encoded client fee params do not match the request')
+    }
+
+    if (typeof swapsHash === 'string' && swapsHash.toLowerCase() !== keccak256(swap.swaps)) {
+      throw new FeeSigningError('encoded swaps do not match swaps_hash')
+    }
+
+    const start = 2 + offset * 2
+    const end = start + SIGNATURE_BYTES * 2
+
+    if (end > calldata.length) throw new FeeSigningError('signature offset does not fit the calldata')
+
+    if (calldata.slice(start, end) !== ZERO_SIGNATURE) {
+      throw new FeeSigningError('signature offset does not point at the zeroed placeholder')
+    }
+
+    const signature = await this.signer.signTypedData({
+      domain: { name: 'TychoRouter', version: '1', chainId: chain.chainId, verifyingContract: chain.router },
+      types: CLIENT_FEE_TYPES,
+      primaryType: 'ClientFee',
+      message: {
+        clientFeeBps: params.clientFeeBps,
+        clientFeeReceiver: params.clientFeeReceiver,
+        maxClientContribution: params.maxClientContribution,
+        deadline: params.deadline,
+        ...swap,
+      },
+    })
+
+    return `0x${calldata.slice(2, start)}${signature.slice(2)}${calldata.slice(end)}`
   }
 }
