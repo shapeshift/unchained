@@ -121,11 +121,13 @@ export class Fynd {
         deadline: Math.floor(Date.now() / 1000) + FEE_DEADLINE_SECONDS,
       }
       // Callers choose the bps; the receiver, contribution cap and deadline are ours
+      // An empty signature makes Fynd encode a zeroed placeholder and report its offset
       encodingOptions.client_fee_params = {
         bps: fee.bps,
         receiver: fee.receiver,
         max_contribution: '0',
         deadline: fee.deadline,
+        signature: '0x',
       }
     }
 
