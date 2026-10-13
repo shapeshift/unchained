@@ -16,10 +16,8 @@ import {
 import { privateKeyToAccount } from 'viem/accounts'
 
 const FYND_API_KEY = process.env.FYND_API_KEY
-// Signs client fees. Sealed in railway, generated in-platform; see the fee receiver notes in web.
+// The fee receiver's key: the router credits fees to this address and checks its signature
 const FYND_FEE_SIGNER_KEY = process.env.FYND_FEE_SIGNER_KEY
-// Defaults to the signer address; set to an ERC-1271 receiver contract once one is deployed.
-const FYND_FEE_RECEIVER = process.env.FYND_FEE_RECEIVER
 
 if (!FYND_API_KEY) throw new Error('FYND_API_KEY env var not set')
 
@@ -77,14 +75,12 @@ type FyndOrder = {
 export class Fynd {
   private axiosInstance: Axios
   private signer = FYND_FEE_SIGNER_KEY ? privateKeyToAccount(FYND_FEE_SIGNER_KEY as Hex) : undefined
-  private feeReceiver: Address | undefined
 
   constructor() {
     this.axiosInstance = axios.create({
       headers: { Authorization: FYND_API_KEY },
       timeout: 10_000,
     })
-    this.feeReceiver = this.signer ? getAddress(FYND_FEE_RECEIVER ?? this.signer.address) : undefined
   }
 
   async handler(req: Request, res: Response): Promise<void> {
@@ -101,7 +97,7 @@ export class Fynd {
     let fee: ClientFee | undefined
 
     if (requestedBps !== undefined) {
-      if (!this.signer || !this.feeReceiver) {
+      if (!this.signer) {
         res.status(503).send('Fynd fee signing is not configured')
         return
       }
@@ -111,7 +107,7 @@ export class Fynd {
       }
       fee = {
         bps: requestedBps as number,
-        receiver: this.feeReceiver,
+        receiver: this.signer.address,
         deadline: Math.floor(Date.now() / 1000) + FEE_DEADLINE_SECONDS,
       }
       // Callers choose the bps; the receiver, contribution cap and deadline are ours
