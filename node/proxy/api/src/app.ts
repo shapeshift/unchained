@@ -59,7 +59,7 @@ const main = async () => {
   const portals = new Portals()
   app.get('/api/v1/portals/*', portals.handler.bind(portals))
 
-  const fynd = new Fynd()
+  const fynd = new Fynd(logger)
   app.post('/api/v1/fynd/*', fynd.handler.bind(fynd))
 
   const tokenMetadata = new TokenMetadata()

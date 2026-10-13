@@ -1,3 +1,4 @@
+import { Logger } from '@shapeshiftoss/logger'
 import axios, { isAxiosError } from 'axios'
 import { Request, Response } from 'express'
 import { Address, Hex, decodeFunctionData, isAddress, isAddressEqual, isHex, keccak256, parseAbi } from 'viem'
@@ -100,6 +101,8 @@ export class Fynd {
   private axiosInstance = axios.create({ headers: { Authorization: FYND_API_KEY }, timeout: 10_000 })
   private signer = privateKeyToAccount(FYND_FEE_SIGNER_KEY as Hex)
 
+  constructor(private logger: Logger) {}
+
   async handler(req: Request, res: Response): Promise<void> {
     const slug = req.path.match(/^\/api\/v1\/fynd\/([^/]+)\/quote$/)?.[1] ?? ''
 
@@ -149,7 +152,8 @@ export class Fynd {
     }
 
     if (!isAxiosError(err)) {
-      res.status(500).send((err instanceof Error && err.message) || 'Internal Server Error')
+      this.logger.error({ err }, 'Fynd proxy request failed')
+      res.status(500).send('Internal Server Error')
       return
     }
 
