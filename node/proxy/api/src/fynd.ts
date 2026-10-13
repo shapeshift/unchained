@@ -41,12 +41,6 @@ const CHAINS: Record<string, { chainId: number; router: Address }> = {
   robinhood: { chainId: 4663, router: '0x09215a470bD585E59EB3F4B612fBD2678131fF9e' },
 }
 
-// Fynd License 1.0 §3.4 requires this notice wherever Fynd quotes are supplied to others.
-const LICENSE_NOTICE =
-  'Fynd quotes are licensed under the Fynd License 1.0 (https://github.com/propeller-heads/fynd/blob/main/LICENSE.md). ' +
-  'Trades must settle through the Fynd router listed in the Router Registry ' +
-  "(https://docs.propellerheads.xyz/tycho/for-solvers/execution/contract-addresses), and the router's fees may not be bypassed."
-
 // Entry points Fynd encodes for transfer_from quotes. Permit2 and vault variants are never requested, so they are not signed.
 const ROUTER_ABI = parseAbi([
   'struct ClientFeeParams { uint32 clientFeeBps; address clientFeeReceiver; uint256 maxClientContribution; uint256 deadline; bytes clientSignature; }',
@@ -144,8 +138,6 @@ export class Fynd {
       }
 
       Object.entries(response.headers).forEach(([k, v]) => res.set(k, v))
-      res.set('Fynd-License-Notice', LICENSE_NOTICE)
-      res.append('Access-Control-Expose-Headers', 'Fynd-License-Notice')
       res.status(response.status).send(response.data)
     } catch (err) {
       if (isAxiosError(err)) {
