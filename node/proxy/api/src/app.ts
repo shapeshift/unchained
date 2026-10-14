@@ -9,6 +9,7 @@ import { CoinGecko } from './coingecko'
 import { Zerion } from './zerion'
 import { Zrx } from './zrx'
 import { Portals } from './portals'
+import { Fynd } from './fynd'
 import { MarketDataConnectionHandler } from './marketData'
 import { CoincapWebsocketClient } from './coincap'
 import { Ofac } from './ofac'
@@ -57,6 +58,9 @@ const main = async () => {
 
   const portals = new Portals()
   app.get('/api/v1/portals/*', portals.handler.bind(portals))
+
+  const fynd = new Fynd(logger)
+  app.post('/api/v1/fynd/*', fynd.handler.bind(fynd))
 
   const tokenMetadata = new TokenMetadata()
   app.get('/api/v1/tokens/metadata', tokenMetadata.handler.bind(tokenMetadata))
