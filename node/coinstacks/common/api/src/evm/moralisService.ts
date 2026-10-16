@@ -38,6 +38,38 @@ const DEFAULT_GAS_PRICE_MULTIPLIER: [number, number, number] = [1, 1, 1]
 // drop priority fees above the median by this factor to keep outliers (mev/overpayers) from skewing estimates
 const OUTLIER_THRESHOLD_MULTIPLIER = 10
 
+const RPC_ALLOWED_METHODS = new Set([
+  'eth_blockNumber',
+  'eth_call',
+  'eth_chainId',
+  'eth_createAccessList',
+  'eth_estimateGas',
+  'eth_feeHistory',
+  'eth_gasPrice',
+  'eth_getBalance',
+  'eth_getBlockByHash',
+  'eth_getBlockByNumber',
+  'eth_getCode',
+  'eth_getLogs',
+  'eth_getStorageAt',
+  'eth_getTransactionByHash',
+  'eth_getTransactionCount',
+  'eth_getTransactionReceipt',
+  'eth_maxPriorityFeePerGas',
+  'eth_sendRawTransaction',
+  'net_version',
+])
+
+const isRpcAllowed = (request: RPCRequest): boolean => RPC_ALLOWED_METHODS.has(request?.method)
+
+const rpcMethodNotFound = (request: RPCRequest): RPCResponse => ({
+  jsonrpc: '2.0',
+  id: request?.id,
+  error: { code: -32601, message: 'Method not found' },
+})
+
+const RPC_TIMEOUT = 10_000
+
 // temporary: how often aggregated jsonrpc passthrough counts are flushed to the logs
 const RPC_USAGE_FLUSH_INTERVAL = 60_000
 // temporary: bound the number of distinct keys, since clients control the method and call target strings
@@ -802,9 +834,19 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
   async doRpcRequest(req: RPCRequest | Array<RPCRequest>): Promise<RPCResponse | Array<RPCResponse>> {
     this.trackRpcUsage(req)
 
+    if (!Array.isArray(req) && !isRpcAllowed(req)) return rpcMethodNotFound(req)
+
+    const allowed = Array.isArray(req) ? req.filter(isRpcAllowed) : req
+    const notFound = Array.isArray(req) ? req.filter((request) => !isRpcAllowed(request)).map(rpcMethodNotFound) : []
+
+    if (Array.isArray(allowed) && !allowed.length) return notFound
+
     try {
-      const { data } = await axiosWithRetry.post<RPCResponse>(this.rpcUrl, req)
-      return data
+      const { data } = await axiosNoRetry.post<RPCResponse | Array<RPCResponse>>(this.rpcUrl, allowed, {
+        timeout: RPC_TIMEOUT,
+      })
+
+      return Array.isArray(data) ? [...data, ...notFound] : data
     } catch (err) {
       throw handleError(err)
     }
