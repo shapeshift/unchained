@@ -38,7 +38,6 @@ const DEFAULT_GAS_PRICE_MULTIPLIER: [number, number, number] = [1, 1, 1]
 // drop priority fees above the median by this factor to keep outliers (mev/overpayers) from skewing estimates
 const OUTLIER_THRESHOLD_MULTIPLIER = 10
 
-// jsonrpc methods the passthrough forwards: what web's viem and ethers clients send (reads, fee estimation, broadcast)
 const RPC_ALLOWED_METHODS = new Set([
   'eth_blockNumber',
   'eth_call',
@@ -69,7 +68,6 @@ const rpcMethodNotFound = (request: RPCRequest): RPCResponse => ({
   error: { code: -32601, message: 'Method not found' },
 })
 
-// matches the viem http transport default, which retries on its own
 const RPC_TIMEOUT = 10_000
 
 // temporary: how often aggregated jsonrpc passthrough counts are flushed to the logs
