@@ -1,0 +1,90 @@
+diff --git a/lib/cjs/index.cjs b/lib/cjs/index.cjs
+index c7073648293de67cc80b951d7292db7dfecaccd5..98c31f44af766d063fd0c8e41d67ecefa212eca2 100644
+--- a/lib/cjs/index.cjs
++++ b/lib/cjs/index.cjs
+@@ -1866,7 +1866,7 @@ var StreamEvmTransaction = /** @class */ (function () {
+         var signature = data.r != null && data.s != null && data.v != null
+             ? commonEvmUtils.EvmSignature.create({ r: data.r, s: data.s, v: data.v })
+             : undefined;
+-        return __assign(__assign({}, data), { chain: commonEvmUtils.EvmChain.create(data.chain), gas: commonCore.maybe(data.gas, commonCore.BigNumber.create), gasPrice: commonCore.maybe(data.gasPrice, commonCore.BigNumber.create), nonce: commonCore.maybe(data.nonce, commonCore.BigNumber.create), input: commonCore.maybe(data.input), fromAddress: commonEvmUtils.EvmAddress.create(data.fromAddress), toAddress: commonCore.maybe(data.toAddress, function (address) { return commonEvmUtils.EvmAddress.create(address); }), value: commonCore.maybe(data.value, commonCore.BigNumber.create), type: commonCore.maybe(data.type, function (type) { return +type; }), receiptCumulativeGasUsed: commonCore.maybe(data.receiptCumulativeGasUsed, commonCore.BigNumber.create), receiptGasUsed: commonCore.maybe(data.receiptGasUsed, commonCore.BigNumber.create), receiptContractAddress: commonCore.maybe(data.receiptContractAddress, function (address) { return commonEvmUtils.EvmAddress.create(address); }), receiptRoot: commonCore.maybe(data.receiptRoot), receiptStatus: commonCore.maybe(data.receiptStatus, function (status) { return +status; }), signature: signature, transactionIndex: +data.transactionIndex, triggers: commonCore.maybe(data.triggers, function (triggers) { return triggers.map(function (trigger) { return StreamTriggerOutput.create(trigger); }); }) });
++        return __assign(__assign({}, data), { chain: commonEvmUtils.EvmChain.create(data.chain), gas: commonCore.maybe(data.gas, commonCore.BigNumber.create), gasPrice: commonCore.maybe(data.gasPrice, commonCore.BigNumber.create), nonce: commonCore.maybe(data.nonce, commonCore.BigNumber.create), input: commonCore.maybe(data.input), fromAddress: commonEvmUtils.EvmAddress.create(data.fromAddress), toAddress: commonCore.maybe(data.toAddress, function (address) { return commonEvmUtils.EvmAddress.create(address); }), value: commonCore.maybe(data.value, commonCore.BigNumber.create), type: commonCore.maybe(data.type, function (type) { return +type; }), receiptCumulativeGasUsed: commonCore.maybe(data.receiptCumulativeGasUsed, commonCore.BigNumber.create), receiptGasUsed: commonCore.maybe(data.receiptGasUsed, commonCore.BigNumber.create), receiptContractAddress: commonCore.maybe(data.receiptContractAddress, function (address) { return commonEvmUtils.EvmAddress.create(address); }), receiptRoot: commonCore.maybe(data.receiptRoot), receiptStatus: commonCore.maybe(data.receiptStatus, function (status) { return +status; }), signature: signature, transactionFee: data.transactionFee, transactionIndex: +data.transactionIndex, triggers: commonCore.maybe(data.triggers, function (triggers) { return triggers.map(function (trigger) { return StreamTriggerOutput.create(trigger); }); }) });
+     };
+     /**
+      * Compares two StreamEvmTransaction data. It checks a deep equality check of both values.
+@@ -2064,6 +2064,13 @@ var StreamEvmTransaction = /** @class */ (function () {
+         enumerable: false,
+         configurable: true
+     });
++    Object.defineProperty(StreamEvmTransaction.prototype, "transactionFee", {
++        get: function () {
++            return this._data.transactionFee;
++        },
++        enumerable: false,
++        configurable: true
++    });
+     Object.defineProperty(StreamEvmTransaction.prototype, "triggers", {
+         get: function () {
+             return this._data.triggers;
+diff --git a/lib/esm/index.js b/lib/esm/index.js
+index e8e8fa30aa4e34012051e80460e7ad03a56223e8..411e9404cae6d000d5bcee2cdfcfbb4aa1db15b7 100644
+--- a/lib/esm/index.js
++++ b/lib/esm/index.js
+@@ -1864,7 +1864,7 @@ var StreamEvmTransaction = /** @class */ (function () {
+         var signature = data.r != null && data.s != null && data.v != null
+             ? EvmSignature.create({ r: data.r, s: data.s, v: data.v })
+             : undefined;
+-        return __assign(__assign({}, data), { chain: EvmChain.create(data.chain), gas: maybe(data.gas, BigNumber.create), gasPrice: maybe(data.gasPrice, BigNumber.create), nonce: maybe(data.nonce, BigNumber.create), input: maybe(data.input), fromAddress: EvmAddress.create(data.fromAddress), toAddress: maybe(data.toAddress, function (address) { return EvmAddress.create(address); }), value: maybe(data.value, BigNumber.create), type: maybe(data.type, function (type) { return +type; }), receiptCumulativeGasUsed: maybe(data.receiptCumulativeGasUsed, BigNumber.create), receiptGasUsed: maybe(data.receiptGasUsed, BigNumber.create), receiptContractAddress: maybe(data.receiptContractAddress, function (address) { return EvmAddress.create(address); }), receiptRoot: maybe(data.receiptRoot), receiptStatus: maybe(data.receiptStatus, function (status) { return +status; }), signature: signature, transactionIndex: +data.transactionIndex, triggers: maybe(data.triggers, function (triggers) { return triggers.map(function (trigger) { return StreamTriggerOutput.create(trigger); }); }) });
++        return __assign(__assign({}, data), { chain: EvmChain.create(data.chain), gas: maybe(data.gas, BigNumber.create), gasPrice: maybe(data.gasPrice, BigNumber.create), nonce: maybe(data.nonce, BigNumber.create), input: maybe(data.input), fromAddress: EvmAddress.create(data.fromAddress), toAddress: maybe(data.toAddress, function (address) { return EvmAddress.create(address); }), value: maybe(data.value, BigNumber.create), type: maybe(data.type, function (type) { return +type; }), receiptCumulativeGasUsed: maybe(data.receiptCumulativeGasUsed, BigNumber.create), receiptGasUsed: maybe(data.receiptGasUsed, BigNumber.create), receiptContractAddress: maybe(data.receiptContractAddress, function (address) { return EvmAddress.create(address); }), receiptRoot: maybe(data.receiptRoot), receiptStatus: maybe(data.receiptStatus, function (status) { return +status; }), signature: signature, transactionFee: data.transactionFee, transactionIndex: +data.transactionIndex, triggers: maybe(data.triggers, function (triggers) { return triggers.map(function (trigger) { return StreamTriggerOutput.create(trigger); }); }) });
+     };
+     /**
+      * Compares two StreamEvmTransaction data. It checks a deep equality check of both values.
+@@ -2062,6 +2062,13 @@ var StreamEvmTransaction = /** @class */ (function () {
+         enumerable: false,
+         configurable: true
+     });
++    Object.defineProperty(StreamEvmTransaction.prototype, "transactionFee", {
++        get: function () {
++            return this._data.transactionFee;
++        },
++        enumerable: false,
++        configurable: true
++    });
+     Object.defineProperty(StreamEvmTransaction.prototype, "triggers", {
+         get: function () {
+             return this._data.triggers;
+diff --git a/lib/index.d.ts b/lib/index.d.ts
+index bb436f2f78ed578a5675402f3de1709b5c59cd77..10216eedc0e47fbcca6e9987252f1cdbba0296a2 100644
+--- a/lib/index.d.ts
++++ b/lib/index.d.ts
+@@ -1197,6 +1197,7 @@ interface StreamEvmTransactionInput {
+     r?: string | null;
+     s?: string | null;
+     v?: number | string | null;
++    transactionFee: string;
+     triggers?: StreamTriggerOutputish[];
+ }
+ interface StreamEvmTransactionData {
+@@ -1217,6 +1218,7 @@ interface StreamEvmTransactionData {
+     receiptRoot?: string;
+     receiptStatus?: number;
+     signature?: EvmSignature;
++    transactionFee: string;
+     triggers?: StreamTriggerOutput[];
+ }
+ type StreamEvmTransactionJSON = {
+@@ -1239,6 +1241,7 @@ type StreamEvmTransactionJSON = {
+     r?: string;
+     s?: string;
+     v?: number;
++    transactionFee: string;
+     triggers?: StreamTriggerOutputJSON[];
+ };
+ 
+@@ -1314,6 +1317,7 @@ declare class StreamEvmTransaction implements MoralisDataObject {
+     get type(): number | undefined;
+     get receiptRoot(): string | undefined;
+     get receiptStatus(): number | undefined;
++    get transactionFee(): string;
+     get triggers(): StreamTriggerOutput[] | undefined;
+ }
+ 

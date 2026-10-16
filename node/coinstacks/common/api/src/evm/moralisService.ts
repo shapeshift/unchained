@@ -419,7 +419,10 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
         const filtered = fees.filter((fee) => fee.lte(threshold))
 
-        return filtered.reduce((sum, fee) => sum.plus(fee), BigNumber(0)).div(filtered.length).integerValue()
+        return filtered
+          .reduce((sum, fee) => sum.plus(fee), BigNumber(0))
+          .div(filtered.length)
+          .integerValue()
       }
 
       let maxPriorityFeePerGas = BigNumber(this.minPriorityFee)
@@ -491,49 +494,24 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
     this.logger.debug({ result }, 'handleStreamResult')
 
-    await Promise.allSettled(
-      result.txs.map(async (tx) => {
-        const getTransaction = async (retryCount = 0) => {
-          try {
-            const transaction = await Moralis.EvmApi.transaction.getTransaction({
-              chain: this.chain,
-              transactionHash: tx.hash,
-            })
-
-            this.logger.debug({ retryCount, tx: transaction?.raw }, 'getTransaction')
-
-            if (!transaction) throw Error()
-
-            return transaction
-          } catch (err) {
-            if (++retryCount >= 5) throw new Error(`failed to get transaction: ${tx.hash}`)
-            await exponentialDelay(retryCount, 1_000)
-            return getTransaction(retryCount)
-          }
-        }
-
-        const transaction = await getTransaction()
-
-        txs[tx.hash] = {
-          blockHash: result.block.hash,
-          blockHeight: Number(result.block.number.toString()),
-          timestamp: Number(result.block.timestamp),
-          confirmations: Number(currentBlock - result.block.number.toBigInt() + 1n),
-          fee: BigNumber(transaction.result.transactionFee ?? '0')
-            .times(1e18)
-            .toFixed(0),
-          from: tx.fromAddress.checksum,
-          to: tx.toAddress?.checksum ?? '',
-          gasLimit: tx.gas?.toString() ?? '',
-          gasPrice: tx.gasPrice?.toString() ?? '',
-          status: tx.receiptStatus ?? 0,
-          txid: tx.hash,
-          value: tx.value?.toString() ?? '0',
-          gasUsed: tx.receiptGasUsed?.toString() ?? '0',
-          inputData: tx.input ?? '0x',
-        }
-      })
-    )
+    result.txs.forEach((tx) => {
+      txs[tx.hash] = {
+        blockHash: result.block.hash,
+        blockHeight: Number(result.block.number.toString()),
+        timestamp: Number(result.block.timestamp),
+        confirmations: Number(currentBlock - result.block.number.toBigInt() + 1n),
+        fee: BigNumber(tx.transactionFee).times(1e18).toFixed(0),
+        from: tx.fromAddress.checksum,
+        to: tx.toAddress?.checksum ?? '',
+        gasLimit: tx.gas?.toString() ?? '',
+        gasPrice: tx.gasPrice?.toString() ?? '',
+        status: tx.receiptStatus ?? 0,
+        txid: tx.hash,
+        value: tx.value?.toString() ?? '0',
+        gasUsed: tx.receiptGasUsed?.toString() ?? '0',
+        inputData: tx.input ?? '0x',
+      }
+    })
 
     result.erc20Transfers.forEach((transfer) => {
       const tx = txs[transfer.transactionHash]
