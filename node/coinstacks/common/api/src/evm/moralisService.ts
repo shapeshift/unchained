@@ -38,6 +38,11 @@ const DEFAULT_GAS_PRICE_MULTIPLIER: [number, number, number] = [1, 1, 1]
 // drop priority fees above the median by this factor to keep outliers (mev/overpayers) from skewing estimates
 const OUTLIER_THRESHOLD_MULTIPLIER = 10
 
+// temporary: how often aggregated jsonrpc passthrough counts are flushed to the logs
+const RPC_USAGE_FLUSH_INTERVAL = 60_000
+// temporary: bound the number of distinct keys, since clients control the method and call target strings
+const RPC_USAGE_MAX_KEYS = 1000
+
 // removals are paced because every mutation reloads the stream
 const STREAM_REMOVE_INTERVAL = 60_000
 // stream creation triggers a webhook validation, which is rate limited across the whole account
@@ -94,6 +99,9 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
   transactionHandler?: TransactionHandler
 
+  // temporary: jsonrpc passthrough call counts since the last flush
+  private rpcUsage = new Map<string, number>()
+
   constructor(args: MoralisServiceArgs) {
     if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
     if (!INDEXER_API_KEY) throw new Error('INDEXER_API_KEY env var not set')
@@ -116,6 +124,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     setInterval(() => {
       this.queue.add(() => this.updateStream()).catch(() => undefined)
     }, STREAM_RETRY_INTERVAL)
+
+    setInterval(() => this.flushRpcUsage(), RPC_USAGE_FLUSH_INTERVAL)
   }
 
   private async initializeStream() {
@@ -419,7 +429,10 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
         const filtered = fees.filter((fee) => fee.lte(threshold))
 
-        return filtered.reduce((sum, fee) => sum.plus(fee), BigNumber(0)).div(filtered.length).integerValue()
+        return filtered
+          .reduce((sum, fee) => sum.plus(fee), BigNumber(0))
+          .div(filtered.length)
+          .integerValue()
       }
 
       let maxPriorityFeePerGas = BigNumber(this.minPriorityFee)
@@ -491,49 +504,24 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
     this.logger.debug({ result }, 'handleStreamResult')
 
-    await Promise.allSettled(
-      result.txs.map(async (tx) => {
-        const getTransaction = async (retryCount = 0) => {
-          try {
-            const transaction = await Moralis.EvmApi.transaction.getTransaction({
-              chain: this.chain,
-              transactionHash: tx.hash,
-            })
-
-            this.logger.debug({ retryCount, tx: transaction?.raw }, 'getTransaction')
-
-            if (!transaction) throw Error()
-
-            return transaction
-          } catch (err) {
-            if (++retryCount >= 5) throw new Error(`failed to get transaction: ${tx.hash}`)
-            await exponentialDelay(retryCount, 1_000)
-            return getTransaction(retryCount)
-          }
-        }
-
-        const transaction = await getTransaction()
-
-        txs[tx.hash] = {
-          blockHash: result.block.hash,
-          blockHeight: Number(result.block.number.toString()),
-          timestamp: Number(result.block.timestamp),
-          confirmations: Number(currentBlock - result.block.number.toBigInt() + 1n),
-          fee: BigNumber(transaction.result.transactionFee ?? '0')
-            .times(1e18)
-            .toFixed(0),
-          from: tx.fromAddress.checksum,
-          to: tx.toAddress?.checksum ?? '',
-          gasLimit: tx.gas?.toString() ?? '',
-          gasPrice: tx.gasPrice?.toString() ?? '',
-          status: tx.receiptStatus ?? 0,
-          txid: tx.hash,
-          value: tx.value?.toString() ?? '0',
-          gasUsed: tx.receiptGasUsed?.toString() ?? '0',
-          inputData: tx.input ?? '0x',
-        }
-      })
-    )
+    result.txs.forEach((tx) => {
+      txs[tx.hash] = {
+        blockHash: result.block.hash,
+        blockHeight: Number(result.block.number.toString()),
+        timestamp: Number(result.block.timestamp),
+        confirmations: Number(currentBlock - result.block.number.toBigInt() + 1n),
+        fee: BigNumber(tx.transactionFee).times(1e18).toFixed(0),
+        from: tx.fromAddress.checksum,
+        to: tx.toAddress?.checksum ?? '',
+        gasLimit: tx.gas?.toString() ?? '',
+        gasPrice: tx.gasPrice?.toString() ?? '',
+        status: tx.receiptStatus ?? 0,
+        txid: tx.hash,
+        value: tx.value?.toString() ?? '0',
+        gasUsed: tx.receiptGasUsed?.toString() ?? '0',
+        inputData: tx.input ?? '0x',
+      }
+    })
 
     result.erc20Transfers.forEach((transfer) => {
       const tx = txs[transfer.transactionHash]
@@ -812,12 +800,46 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
   }
 
   async doRpcRequest(req: RPCRequest | Array<RPCRequest>): Promise<RPCResponse | Array<RPCResponse>> {
+    this.trackRpcUsage(req)
+
     try {
       const { data } = await axiosWithRetry.post<RPCResponse>(this.rpcUrl, req)
       return data
     } catch (err) {
       throw handleError(err)
     }
+  }
+
+  // temporary: count passthrough calls by method, plus call target and selector for eth_call/eth_estimateGas, to attribute node usage
+  private trackRpcUsage(req: RPCRequest | Array<RPCRequest>): void {
+    const requests = Array.isArray(req) ? req : [req]
+
+    if (Array.isArray(req)) {
+      this.rpcUsage.set('batch', (this.rpcUsage.get('batch') ?? 0) + 1)
+      this.rpcUsage.set('batchRequests', (this.rpcUsage.get('batchRequests') ?? 0) + req.length)
+    }
+
+    for (const request of requests) {
+      const method = String(request?.method).slice(0, 64)
+      const call = request?.params?.[0] as { to?: unknown; data?: unknown } | undefined
+
+      const to = typeof call?.to === 'string' ? call.to.slice(0, 42) : ''
+      const selector = typeof call?.data === 'string' ? call.data.slice(0, 10) : ''
+
+      const key = method === 'eth_call' || method === 'eth_estimateGas' ? `${method} ${to} ${selector}` : method
+      const bucket = this.rpcUsage.has(key) || this.rpcUsage.size < RPC_USAGE_MAX_KEYS ? key : 'other'
+
+      this.rpcUsage.set(bucket, (this.rpcUsage.get(bucket) ?? 0) + 1)
+    }
+  }
+
+  private flushRpcUsage(): void {
+    if (!this.rpcUsage.size) return
+
+    const usage = Object.fromEntries([...this.rpcUsage.entries()].sort((a, b) => b[1] - a[1]))
+    this.rpcUsage.clear()
+
+    this.logger.info({ usage }, 'rpcUsage')
   }
 
   subscribeAddresses(addresses: Array<string>): void {

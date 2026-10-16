@@ -1285,7 +1285,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@moralisweb3/common-streams-utils@npm:^2.27.2":
+"@moralisweb3/common-streams-utils@npm:2.27.2":
   version: 2.27.2
   resolution: "@moralisweb3/common-streams-utils@npm:2.27.2"
   dependencies:
@@ -1295,6 +1295,19 @@ __metadata:
     "@moralisweb3/common-evm-utils": "npm:^2.27.2"
     "@moralisweb3/streams-typings": "npm:^1.0.7"
   checksum: 10c0/3d347eb2ec81e12c25e23a6b80d73a10da5eece81d31b4206c947ca605c4fb1387e72fc5bbe06663323799028e2c60a9ebf531f69f681a71359e616501e025dc
+  languageName: node
+  linkType: hard
+
+"@moralisweb3/common-streams-utils@patch:@moralisweb3/common-streams-utils@npm%3A2.27.2#~/.yarn/patches/@moralisweb3-common-streams-utils-npm-2.27.2-1db32e3f51.patch":
+  version: 2.27.2
+  resolution: "@moralisweb3/common-streams-utils@patch:@moralisweb3/common-streams-utils@npm%3A2.27.2#~/.yarn/patches/@moralisweb3-common-streams-utils-npm-2.27.2-1db32e3f51.patch::version=2.27.2&hash=b62a4b"
+  dependencies:
+    "@ethersproject/abi": "npm:^5.7.0"
+    "@moralisweb3/common-aptos-utils": "npm:^2.27.2"
+    "@moralisweb3/common-core": "npm:^2.27.2"
+    "@moralisweb3/common-evm-utils": "npm:^2.27.2"
+    "@moralisweb3/streams-typings": "npm:^1.0.7"
+  checksum: 10c0/b9ef65595c7ca08df2f64c45e3d404b62ddc80fbe80dfe791b9c702936348f7e03d8cf15ccc7de3628c6270846d171fd8a6415b4522f08394f7b30bcf840495b
   languageName: node
   linkType: hard
 

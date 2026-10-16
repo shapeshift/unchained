@@ -55,6 +55,7 @@
     "typescript": "5.9.3"
   },
   "resolutions": {
-    "@moralisweb3/common-evm-utils@npm:^2.27.2": "patch:@moralisweb3/common-evm-utils@npm%3A2.27.2#~/.yarn/patches/@moralisweb3-common-evm-utils-npm-2.27.2-e6cbe4fc9a.patch"
+    "@moralisweb3/common-evm-utils@npm:^2.27.2": "patch:@moralisweb3/common-evm-utils@npm%3A2.27.2#~/.yarn/patches/@moralisweb3-common-evm-utils-npm-2.27.2-e6cbe4fc9a.patch",
+    "@moralisweb3/common-streams-utils@npm:^2.27.2": "patch:@moralisweb3/common-streams-utils@npm%3A2.27.2#~/.yarn/patches/@moralisweb3-common-streams-utils-npm-2.27.2-1db32e3f51.patch"
   }
 }
