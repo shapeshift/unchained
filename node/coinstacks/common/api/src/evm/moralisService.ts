@@ -61,8 +61,8 @@ const RPC_ALLOWED_METHODS = new Set([
   'net_version',
 ])
 
-// matches the ethers JsonRpcProvider default batch size
-const RPC_MAX_BATCH_SIZE = 100
+// matches the viem http transport default, which retries on its own
+const RPC_TIMEOUT = 10_000
 
 // temporary: how often aggregated jsonrpc passthrough counts are flushed to the logs
 const RPC_USAGE_FLUSH_INTERVAL = 60_000
@@ -825,72 +825,35 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     return { cursor: pagination.cursor, hasMore: Boolean(pagination.cursor), txs }
   }
 
-  async doRpcRequest(req: RPCRequest | Array<RPCRequest>): Promise<RPCResponse | Array<RPCResponse>> {
+  async doRpcRequest(req: RPCRequest): Promise<RPCResponse> {
+    if (Array.isArray(req)) throw new ApiError('Bad Request', 400, 'batch requests are not supported')
+
     this.trackRpcUsage(req)
 
-    if (Array.isArray(req) && !req.length) throw new ApiError('Bad Request', 400, 'empty batch')
-
-    if (Array.isArray(req) && req.length > RPC_MAX_BATCH_SIZE) {
-      throw new ApiError('Bad Request', 400, `Max allowed batch size is ${RPC_MAX_BATCH_SIZE}`)
+    if (!RPC_ALLOWED_METHODS.has(req?.method)) {
+      return { jsonrpc: '2.0', id: req?.id, error: { code: -32601, message: 'Method not found' } }
     }
 
-    const isAllowed = (request: RPCRequest) => RPC_ALLOWED_METHODS.has(request?.method)
-
-    const errorResponse = (request: RPCRequest, code: number, message: string): RPCResponse => ({
-      jsonrpc: '2.0',
-      id: request?.id,
-      error: { code, message },
-    })
-
     try {
-      if (!Array.isArray(req)) {
-        if (!isAllowed(req)) return errorResponse(req, -32601, 'Method not found')
-
-        const { data } = await axiosWithRetry.post<RPCResponse>(this.rpcUrl, req)
-        return data
-      }
-
-      const allowed = req.filter(isAllowed)
-
-      const { data } = allowed.length
-        ? await axiosWithRetry.post<Array<RPCResponse>>(this.rpcUrl, allowed)
-        : { data: [] }
-
-      if (allowed.length === req.length) return data
-
-      // forward only the allowed calls and answer the rest locally, keeping the batch order
-      const responses = new Map((Array.isArray(data) ? data : []).map((response) => [response.id, response]))
-
-      return req.map((request) => {
-        if (!isAllowed(request)) return errorResponse(request, -32601, 'Method not found')
-        return responses.get(request.id) ?? errorResponse(request, -32603, 'Internal error')
-      })
+      const { data } = await axiosNoRetry.post<RPCResponse>(this.rpcUrl, req, { timeout: RPC_TIMEOUT })
+      return data
     } catch (err) {
       throw handleError(err)
     }
   }
 
   // temporary: count passthrough calls by method, plus call target and selector for eth_call/eth_estimateGas, to attribute node usage
-  private trackRpcUsage(req: RPCRequest | Array<RPCRequest>): void {
-    const requests = Array.isArray(req) ? req : [req]
+  private trackRpcUsage(req: RPCRequest): void {
+    const method = String(req?.method).slice(0, 64)
+    const call = req?.params?.[0] as { to?: unknown; data?: unknown } | undefined
 
-    if (Array.isArray(req)) {
-      this.rpcUsage.set('batch', (this.rpcUsage.get('batch') ?? 0) + 1)
-      this.rpcUsage.set('batchRequests', (this.rpcUsage.get('batchRequests') ?? 0) + req.length)
-    }
+    const to = typeof call?.to === 'string' ? call.to.slice(0, 42) : ''
+    const selector = typeof call?.data === 'string' ? call.data.slice(0, 10) : ''
 
-    for (const request of requests) {
-      const method = String(request?.method).slice(0, 64)
-      const call = request?.params?.[0] as { to?: unknown; data?: unknown } | undefined
+    const key = method === 'eth_call' || method === 'eth_estimateGas' ? `${method} ${to} ${selector}` : method
+    const bucket = this.rpcUsage.has(key) || this.rpcUsage.size < RPC_USAGE_MAX_KEYS ? key : 'other'
 
-      const to = typeof call?.to === 'string' ? call.to.slice(0, 42) : ''
-      const selector = typeof call?.data === 'string' ? call.data.slice(0, 10) : ''
-
-      const key = method === 'eth_call' || method === 'eth_estimateGas' ? `${method} ${to} ${selector}` : method
-      const bucket = this.rpcUsage.has(key) || this.rpcUsage.size < RPC_USAGE_MAX_KEYS ? key : 'other'
-
-      this.rpcUsage.set(bucket, (this.rpcUsage.get(bucket) ?? 0) + 1)
-    }
+    this.rpcUsage.set(bucket, (this.rpcUsage.get(bucket) ?? 0) + 1)
   }
 
   private flushRpcUsage(): void {

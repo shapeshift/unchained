@@ -167,9 +167,9 @@ export class EVM extends Controller implements BaseAPI, Omit<API, 'getGasFees' |
   /**
    * Makes a jsonrpc request to the node.
    *
-   * @param {RPCRequest | Array<RPCRequest>} body jsonrpc request or batch requests
+   * @param {RPCRequest} body jsonrpc request (batch requests are not supported)
    *
-   * @returns {Promise<RPCResponse | Array<RPCResponse>>} jsonrpc response or batch responses
+   * @returns {Promise<RPCResponse>} jsonrpc response
    *
    * @example body {
    *    "jsonrpc": "2.0",
@@ -184,7 +184,7 @@ export class EVM extends Controller implements BaseAPI, Omit<API, 'getGasFees' |
     result: '0x1a4',
   })
   @Post('jsonrpc/')
-  async doRpcRequest(@Body() body: RPCRequest | Array<RPCRequest>): Promise<RPCResponse | Array<RPCResponse>> {
+  async doRpcRequest(@Body() body: RPCRequest): Promise<RPCResponse> {
     return EVM.service.doRpcRequest(body)
   }
 }
