@@ -38,6 +38,9 @@ const DEFAULT_GAS_PRICE_MULTIPLIER: [number, number, number] = [1, 1, 1]
 // drop priority fees above the median by this factor to keep outliers (mev/overpayers) from skewing estimates
 const OUTLIER_THRESHOLD_MULTIPLIER = 10
 
+// temporary: how often aggregated jsonrpc passthrough counts are flushed to the logs
+const RPC_USAGE_FLUSH_INTERVAL = 60_000
+
 // removals are paced because every mutation reloads the stream
 const STREAM_REMOVE_INTERVAL = 60_000
 // stream creation triggers a webhook validation, which is rate limited across the whole account
@@ -94,6 +97,9 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
   transactionHandler?: TransactionHandler
 
+  // temporary: jsonrpc passthrough call counts since the last flush
+  private rpcUsage = new Map<string, number>()
+
   constructor(args: MoralisServiceArgs) {
     if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
     if (!INDEXER_API_KEY) throw new Error('INDEXER_API_KEY env var not set')
@@ -116,6 +122,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     setInterval(() => {
       this.queue.add(() => this.updateStream()).catch(() => undefined)
     }, STREAM_RETRY_INTERVAL)
+
+    setInterval(() => this.flushRpcUsage(), RPC_USAGE_FLUSH_INTERVAL)
   }
 
   private async initializeStream() {
@@ -790,12 +798,45 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
   }
 
   async doRpcRequest(req: RPCRequest | Array<RPCRequest>): Promise<RPCResponse | Array<RPCResponse>> {
+    this.trackRpcUsage(req)
+
     try {
       const { data } = await axiosWithRetry.post<RPCResponse>(this.rpcUrl, req)
       return data
     } catch (err) {
       throw handleError(err)
     }
+  }
+
+  // temporary: count passthrough calls by method, plus call target and selector for eth_call/eth_estimateGas, to attribute node usage
+  private trackRpcUsage(req: RPCRequest | Array<RPCRequest>): void {
+    const requests = Array.isArray(req) ? req : [req]
+
+    if (Array.isArray(req)) {
+      this.rpcUsage.set('batch', (this.rpcUsage.get('batch') ?? 0) + 1)
+      this.rpcUsage.set('batchRequests', (this.rpcUsage.get('batchRequests') ?? 0) + req.length)
+    }
+
+    for (const request of requests) {
+      const method = String(request?.method)
+      const call = request?.params?.[0] as { to?: string; data?: string } | undefined
+
+      const key =
+        (method === 'eth_call' || method === 'eth_estimateGas') && call && typeof call === 'object'
+          ? `${method} ${call.to ?? ''} ${call.data?.slice(0, 10) ?? ''}`
+          : method
+
+      this.rpcUsage.set(key, (this.rpcUsage.get(key) ?? 0) + 1)
+    }
+  }
+
+  private flushRpcUsage(): void {
+    if (!this.rpcUsage.size) return
+
+    const usage = Object.fromEntries([...this.rpcUsage.entries()].sort((a, b) => b[1] - a[1]))
+    this.rpcUsage.clear()
+
+    this.logger.info({ usage }, 'rpcUsage')
   }
 
   subscribeAddresses(addresses: Array<string>): void {
