@@ -40,6 +40,8 @@ const OUTLIER_THRESHOLD_MULTIPLIER = 10
 
 // temporary: how often aggregated jsonrpc passthrough counts are flushed to the logs
 const RPC_USAGE_FLUSH_INTERVAL = 60_000
+// temporary: bound the number of distinct keys, since clients control the method and call target strings
+const RPC_USAGE_MAX_KEYS = 1000
 
 // removals are paced because every mutation reloads the stream
 const STREAM_REMOVE_INTERVAL = 60_000
@@ -818,15 +820,16 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     }
 
     for (const request of requests) {
-      const method = String(request?.method)
-      const call = request?.params?.[0] as { to?: string; data?: string } | undefined
+      const method = String(request?.method).slice(0, 64)
+      const call = request?.params?.[0] as { to?: unknown; data?: unknown } | undefined
 
-      const key =
-        (method === 'eth_call' || method === 'eth_estimateGas') && call && typeof call === 'object'
-          ? `${method} ${call.to ?? ''} ${call.data?.slice(0, 10) ?? ''}`
-          : method
+      const to = typeof call?.to === 'string' ? call.to.slice(0, 42) : ''
+      const selector = typeof call?.data === 'string' ? call.data.slice(0, 10) : ''
 
-      this.rpcUsage.set(key, (this.rpcUsage.get(key) ?? 0) + 1)
+      const key = method === 'eth_call' || method === 'eth_estimateGas' ? `${method} ${to} ${selector}` : method
+      const bucket = this.rpcUsage.has(key) || this.rpcUsage.size < RPC_USAGE_MAX_KEYS ? key : 'other'
+
+      this.rpcUsage.set(bucket, (this.rpcUsage.get(bucket) ?? 0) + 1)
     }
   }
 
