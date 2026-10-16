@@ -38,6 +38,32 @@ const DEFAULT_GAS_PRICE_MULTIPLIER: [number, number, number] = [1, 1, 1]
 // drop priority fees above the median by this factor to keep outliers (mev/overpayers) from skewing estimates
 const OUTLIER_THRESHOLD_MULTIPLIER = 10
 
+// jsonrpc methods the passthrough forwards: what web's viem and ethers clients send (reads, fee estimation, broadcast)
+const RPC_ALLOWED_METHODS = new Set([
+  'eth_blockNumber',
+  'eth_call',
+  'eth_chainId',
+  'eth_createAccessList',
+  'eth_estimateGas',
+  'eth_feeHistory',
+  'eth_gasPrice',
+  'eth_getBalance',
+  'eth_getBlockByHash',
+  'eth_getBlockByNumber',
+  'eth_getCode',
+  'eth_getLogs',
+  'eth_getStorageAt',
+  'eth_getTransactionByHash',
+  'eth_getTransactionCount',
+  'eth_getTransactionReceipt',
+  'eth_maxPriorityFeePerGas',
+  'eth_sendRawTransaction',
+  'net_version',
+])
+
+// matches the ethers JsonRpcProvider default batch size
+const RPC_MAX_BATCH_SIZE = 100
+
 // temporary: how often aggregated jsonrpc passthrough counts are flushed to the logs
 const RPC_USAGE_FLUSH_INTERVAL = 60_000
 // temporary: bound the number of distinct keys, since clients control the method and call target strings
@@ -802,9 +828,43 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
   async doRpcRequest(req: RPCRequest | Array<RPCRequest>): Promise<RPCResponse | Array<RPCResponse>> {
     this.trackRpcUsage(req)
 
+    if (Array.isArray(req) && !req.length) throw new ApiError('Bad Request', 400, 'empty batch')
+
+    if (Array.isArray(req) && req.length > RPC_MAX_BATCH_SIZE) {
+      throw new ApiError('Bad Request', 400, `Max allowed batch size is ${RPC_MAX_BATCH_SIZE}`)
+    }
+
+    const isAllowed = (request: RPCRequest) => RPC_ALLOWED_METHODS.has(request?.method)
+
+    const errorResponse = (request: RPCRequest, code: number, message: string): RPCResponse => ({
+      jsonrpc: '2.0',
+      id: request?.id,
+      error: { code, message },
+    })
+
     try {
-      const { data } = await axiosWithRetry.post<RPCResponse>(this.rpcUrl, req)
-      return data
+      if (!Array.isArray(req)) {
+        if (!isAllowed(req)) return errorResponse(req, -32601, 'Method not found')
+
+        const { data } = await axiosWithRetry.post<RPCResponse>(this.rpcUrl, req)
+        return data
+      }
+
+      const allowed = req.filter(isAllowed)
+
+      const { data } = allowed.length
+        ? await axiosWithRetry.post<Array<RPCResponse>>(this.rpcUrl, allowed)
+        : { data: [] }
+
+      if (allowed.length === req.length) return data
+
+      // forward only the allowed calls and answer the rest locally, keeping the batch order
+      const responses = new Map((Array.isArray(data) ? data : []).map((response) => [response.id, response]))
+
+      return req.map((request) => {
+        if (!isAllowed(request)) return errorResponse(request, -32601, 'Method not found')
+        return responses.get(request.id) ?? errorResponse(request, -32603, 'Internal error')
+      })
     } catch (err) {
       throw handleError(err)
     }
