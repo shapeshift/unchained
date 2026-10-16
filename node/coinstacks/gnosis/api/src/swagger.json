@@ -892,11 +892,21 @@
 				"operationId": "DoRpcRequest",
 				"responses": {
 					"200": {
-						"description": "jsonrpc response",
+						"description": "jsonrpc response or batch responses",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/RPCResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/RPCResponse"
+										},
+										{
+											"items": {
+												"$ref": "#/components/schemas/RPCResponse"
+											},
+											"type": "array"
+										}
+									]
 								},
 								"examples": {
 									"Example 1": {
@@ -918,13 +928,23 @@
 				"security": [],
 				"parameters": [],
 				"requestBody": {
-					"description": "jsonrpc request (batch requests are not supported)",
+					"description": "jsonrpc request or batch requests",
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/RPCRequest",
-								"description": "jsonrpc request (batch requests are not supported)"
+								"anyOf": [
+									{
+										"$ref": "#/components/schemas/RPCRequest"
+									},
+									{
+										"items": {
+											"$ref": "#/components/schemas/RPCRequest"
+										},
+										"type": "array"
+									}
+								],
+								"description": "jsonrpc request or batch requests"
 							},
 							"example": {
 								"jsonrpc": "2.0",

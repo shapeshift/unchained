@@ -61,6 +61,14 @@ const RPC_ALLOWED_METHODS = new Set([
   'net_version',
 ])
 
+const isRpcAllowed = (request: RPCRequest): boolean => RPC_ALLOWED_METHODS.has(request?.method)
+
+const rpcMethodNotFound = (request: RPCRequest): RPCResponse => ({
+  jsonrpc: '2.0',
+  id: request?.id,
+  error: { code: -32601, message: 'Method not found' },
+})
+
 // matches the viem http transport default, which retries on its own
 const RPC_TIMEOUT = 10_000
 
@@ -825,35 +833,48 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     return { cursor: pagination.cursor, hasMore: Boolean(pagination.cursor), txs }
   }
 
-  async doRpcRequest(req: RPCRequest): Promise<RPCResponse> {
-    if (Array.isArray(req)) throw new ApiError('Bad Request', 400, 'batch requests are not supported')
-
+  async doRpcRequest(req: RPCRequest | Array<RPCRequest>): Promise<RPCResponse | Array<RPCResponse>> {
     this.trackRpcUsage(req)
 
-    if (!RPC_ALLOWED_METHODS.has(req?.method)) {
-      return { jsonrpc: '2.0', id: req?.id, error: { code: -32601, message: 'Method not found' } }
-    }
+    if (!Array.isArray(req) && !isRpcAllowed(req)) return rpcMethodNotFound(req)
+
+    const allowed = Array.isArray(req) ? req.filter(isRpcAllowed) : req
+    const notFound = Array.isArray(req) ? req.filter((request) => !isRpcAllowed(request)).map(rpcMethodNotFound) : []
+
+    if (Array.isArray(allowed) && !allowed.length) return notFound
 
     try {
-      const { data } = await axiosNoRetry.post<RPCResponse>(this.rpcUrl, req, { timeout: RPC_TIMEOUT })
-      return data
+      const { data } = await axiosNoRetry.post<RPCResponse | Array<RPCResponse>>(this.rpcUrl, allowed, {
+        timeout: RPC_TIMEOUT,
+      })
+
+      return Array.isArray(data) ? [...data, ...notFound] : data
     } catch (err) {
       throw handleError(err)
     }
   }
 
   // temporary: count passthrough calls by method, plus call target and selector for eth_call/eth_estimateGas, to attribute node usage
-  private trackRpcUsage(req: RPCRequest): void {
-    const method = String(req?.method).slice(0, 64)
-    const call = req?.params?.[0] as { to?: unknown; data?: unknown } | undefined
+  private trackRpcUsage(req: RPCRequest | Array<RPCRequest>): void {
+    const requests = Array.isArray(req) ? req : [req]
 
-    const to = typeof call?.to === 'string' ? call.to.slice(0, 42) : ''
-    const selector = typeof call?.data === 'string' ? call.data.slice(0, 10) : ''
+    if (Array.isArray(req)) {
+      this.rpcUsage.set('batch', (this.rpcUsage.get('batch') ?? 0) + 1)
+      this.rpcUsage.set('batchRequests', (this.rpcUsage.get('batchRequests') ?? 0) + req.length)
+    }
 
-    const key = method === 'eth_call' || method === 'eth_estimateGas' ? `${method} ${to} ${selector}` : method
-    const bucket = this.rpcUsage.has(key) || this.rpcUsage.size < RPC_USAGE_MAX_KEYS ? key : 'other'
+    for (const request of requests) {
+      const method = String(request?.method).slice(0, 64)
+      const call = request?.params?.[0] as { to?: unknown; data?: unknown } | undefined
 
-    this.rpcUsage.set(bucket, (this.rpcUsage.get(bucket) ?? 0) + 1)
+      const to = typeof call?.to === 'string' ? call.to.slice(0, 42) : ''
+      const selector = typeof call?.data === 'string' ? call.data.slice(0, 10) : ''
+
+      const key = method === 'eth_call' || method === 'eth_estimateGas' ? `${method} ${to} ${selector}` : method
+      const bucket = this.rpcUsage.has(key) || this.rpcUsage.size < RPC_USAGE_MAX_KEYS ? key : 'other'
+
+      this.rpcUsage.set(bucket, (this.rpcUsage.get(bucket) ?? 0) + 1)
+    }
   }
 
   private flushRpcUsage(): void {
