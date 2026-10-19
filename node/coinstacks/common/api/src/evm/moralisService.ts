@@ -537,8 +537,6 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
   async handleStreamResult(result: EvmStreamResult): Promise<Array<Tx>> {
     const txs: Record<string, Tx> = {}
 
-    const currentBlock = await this.client.getBlockNumber()
-
     this.logger.debug({ result }, 'handleStreamResult')
 
     result.txs.forEach((tx) => {
@@ -546,7 +544,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
         blockHash: result.block.hash,
         blockHeight: Number(result.block.number.toString()),
         timestamp: Number(result.block.timestamp),
-        confirmations: Number(currentBlock - result.block.number.toBigInt() + 1n),
+        // stream results are for transactions in a newly mined block
+        confirmations: 1,
         fee: BigNumber(tx.transactionFee).times(1e18).toFixed(0),
         from: tx.fromAddress.checksum,
         to: tx.toAddress?.checksum ?? '',
