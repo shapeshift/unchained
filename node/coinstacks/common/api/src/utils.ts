@@ -1,6 +1,7 @@
 import { ApiError as BlockbookApiError } from '@shapeshiftoss/blockbook'
 import { ApiError } from '.'
-import axios, { CreateAxiosDefaults, isAxiosError } from 'axios'
+import type { Logger } from '@shapeshiftoss/logger'
+import axios, { AxiosInstance, CreateAxiosDefaults, InternalAxiosRequestConfig, isAxiosError } from 'axios'
 import axiosRetry, { isNetworkOrIdempotentRequestError } from 'axios-retry'
 import { BaseError as ViemError } from 'viem'
 
@@ -70,6 +71,55 @@ export const createAxiosRetry = (config: RetryConfig, axiosParams?: CreateAxiosD
 
 export const exponentialDelay = async (retryCount: number, delayFactor = 500) =>
   new Promise((resolve) => setTimeout(resolve, axiosRetry.exponentialDelay(retryCount, undefined, delayFactor)))
+
+const SLOW_REQUEST_THRESHOLD_MS = 1000
+
+const requestStartTimes = new WeakMap<InternalAxiosRequestConfig, number>()
+const loggedInstances = new WeakSet<AxiosInstance>()
+
+// log upstream requests slower than the threshold to attribute api latency to its source
+// the query is dropped and long path segments are masked since some upstreams take api keys in the url
+export const logSlowRequests = (instance: AxiosInstance, logger: Logger): void => {
+  if (loggedInstances.has(instance)) return
+  loggedInstances.add(instance)
+
+  const log = (config: InternalAxiosRequestConfig | undefined, status: number | string | undefined) => {
+    const start = config && requestStartTimes.get(config)
+    if (!config || !start) return
+
+    const duration = Date.now() - start
+    if (duration < SLOW_REQUEST_THRESHOLD_MS) return
+
+    const url = (() => {
+      try {
+        return new URL(config.url ?? '', config.baseURL ?? 'http://unknown')
+      } catch {
+        return undefined
+      }
+    })()
+
+    logger.warn(
+      { method: config.method, host: url?.host, path: url?.pathname.replace(/[^/]{20,}/g, ':id'), status, duration },
+      'slow upstream request'
+    )
+  }
+
+  instance.interceptors.request.use((config) => {
+    requestStartTimes.set(config, Date.now())
+    return config
+  })
+
+  instance.interceptors.response.use(
+    (response) => {
+      log(response.config, response.status)
+      return response
+    },
+    (err) => {
+      if (isAxiosError(err)) log(err.config, err.response?.status ?? err.code)
+      return Promise.reject(err)
+    }
+  )
+}
 
 let _rpcId = Math.floor(Math.random() * 1e6)
 export const rpcId = (): number => {

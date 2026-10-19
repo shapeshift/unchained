@@ -42,7 +42,15 @@ func Logger() mux.MiddlewareFunc {
 
 			duration := time.Since(t)
 
-			statusLogger := log.WithFields(log.Fields{"method": r.Method, "statusCode": sw.status, "responseTime": duration.String()})
+			statusLogger := log.WithFields(log.Fields{
+				"method":         r.Method,
+				"statusCode":     sw.status,
+				"responseTime":   duration.String(),
+				"responseTimeMs": float64(duration.Microseconds()) / 1000,
+				"ip":             clientIP(r),
+				"userAgent":      r.UserAgent(),
+				"origin":         origin(r),
+			})
 
 			if strings.HasPrefix(r.RequestURI, "/api/v1/") && sw.status != 404 {
 				if sw.status < http.StatusOK || sw.status >= http.StatusBadRequest {
@@ -53,6 +61,27 @@ func Logger() mux.MiddlewareFunc {
 			}
 		})
 	}
+}
+
+// clientIP prefers the cloudflare client ip since RemoteAddr is the railway proxy
+func clientIP(r *http.Request) string {
+	if ip := r.Header.Get("CF-Connecting-IP"); ip != "" {
+		return ip
+	}
+
+	if ip := r.Header.Get("X-Real-IP"); ip != "" {
+		return ip
+	}
+
+	return r.RemoteAddr
+}
+
+func origin(r *http.Request) string {
+	if o := r.Header.Get("Origin"); o != "" {
+		return o
+	}
+
+	return r.Referer()
 }
 
 func Scheme(next http.Handler) http.Handler {
