@@ -62,6 +62,11 @@ const RPC_ALLOWED_METHODS = new Set([
 
 const isRpcAllowed = (request: RPCRequest): boolean => RPC_ALLOWED_METHODS.has(request?.method)
 
+// constant per chain, so answered locally instead of paying a node round trip
+const RPC_LOCAL_METHODS = new Set(['eth_chainId', 'net_version'])
+
+const isRpcLocal = (request: RPCRequest): boolean => RPC_LOCAL_METHODS.has(request?.method)
+
 const rpcMethodNotFound = (request: RPCRequest): RPCResponse => ({
   jsonrpc: '2.0',
   id: request?.id,
@@ -833,13 +838,25 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     return { cursor: pagination.cursor, hasMore: Boolean(pagination.cursor), txs }
   }
 
+  private localRpcResponse(request: RPCRequest): RPCResponse {
+    const result = request.method === 'eth_chainId' ? this.chain.hex : String(this.chain.decimal)
+    return { jsonrpc: '2.0', id: request.id, result }
+  }
+
   async doRpcRequest(req: RPCRequest | Array<RPCRequest>): Promise<RPCResponse | Array<RPCResponse>> {
     this.trackRpcUsage(req)
 
     if (!Array.isArray(req) && !isRpcAllowed(req)) return rpcMethodNotFound(req)
+    if (!Array.isArray(req) && isRpcLocal(req)) return this.localRpcResponse(req)
 
-    const allowed = Array.isArray(req) ? req.filter(isRpcAllowed) : req
-    const notFound = Array.isArray(req) ? req.filter((request) => !isRpcAllowed(request)).map(rpcMethodNotFound) : []
+    const allowed = Array.isArray(req) ? req.filter((request) => isRpcAllowed(request) && !isRpcLocal(request)) : req
+    // responses for batch entries that aren't forwarded: answered locally or not allowed
+    const notFound = Array.isArray(req)
+      ? [
+          ...req.filter(isRpcLocal).map((request) => this.localRpcResponse(request)),
+          ...req.filter((request) => !isRpcAllowed(request)).map(rpcMethodNotFound),
+        ]
+      : []
 
     if (Array.isArray(allowed) && !allowed.length) return notFound
 
