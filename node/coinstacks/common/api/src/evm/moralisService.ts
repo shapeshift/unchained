@@ -211,17 +211,25 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
   async getAccount(pubkey: string): Promise<Account> {
     try {
-      let response = await Moralis.EvmApi.wallets.getWalletTokenBalancesPrice({
-        chain: this.chain,
-        address: pubkey,
-        excludeSpam: true,
-      })
+      const address = getAddress(pubkey)
 
-      const result = response.result
-      while (response.hasNext()) {
-        response = await response.next()
-        result.push(...response.result)
+      const getBalances = async () => {
+        let response = await Moralis.EvmApi.wallets.getWalletTokenBalancesPrice({
+          chain: this.chain,
+          address: pubkey,
+          excludeSpam: true,
+        })
+
+        const result = response.result
+        while (response.hasNext()) {
+          response = await response.next()
+          result.push(...response.result)
+        }
+
+        return result
       }
+
+      const [result, nonce] = await Promise.all([getBalances(), this.client.getTransactionCount({ address })])
 
       const balance = result.find((data) => data.nativeToken)?.balance.wei ?? '0'
 
@@ -244,7 +252,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
       return {
         balance,
         unconfirmedBalance: '0',
-        nonce: await this.client.getTransactionCount({ address: getAddress(pubkey) }),
+        nonce,
         pubkey,
         tokens,
       }
@@ -257,16 +265,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     validatePageSize(pageSize)
 
     try {
-      const currentBlock = await this.client.getBlockNumber()
-
-      const moralis = await this.getTxs(
-        pubkey,
-        { explorerPage: 0, moralisCursor: cursor },
-        currentBlock,
-        pageSize,
-        from,
-        to
-      )
+      const moralis = await this.getTxs(pubkey, { explorerPage: 0, moralisCursor: cursor }, pageSize, from, to)
 
       if (!moralis.txs.size) return { pubkey: pubkey, txs: [] }
 
@@ -297,10 +296,10 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     })()
 
     try {
-      const currentBlock = await this.client.getBlockNumber()
-
-      let moralis = await this.getTxs(pubkey, curCursor, currentBlock, pageSize, from, to)
-      let internal = await this.getInternalTxs(pubkey, curCursor, pageSize, from, to)
+      let [moralis, internal] = await Promise.all([
+        this.getTxs(pubkey, curCursor, pageSize, from, to),
+        this.getInternalTxs(pubkey, curCursor, pageSize, from, to),
+      ])
 
       if (!moralis.txs.size && !internal.txs.size) return { pubkey: pubkey, txs: [] }
 
@@ -308,7 +307,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
       for (let i = 0; i < pageSize; i++) {
         if (!moralis.txs.size && moralis.hasMore) {
           curCursor.moralisCursor = moralis.cursor
-          moralis = await this.getTxs(pubkey, curCursor, currentBlock, pageSize, from, to)
+          moralis = await this.getTxs(pubkey, curCursor, pageSize, from, to)
         }
 
         if (!internal.txs.size && internal.hasMore) {
@@ -374,15 +373,16 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
   async getTransaction(txid: string): Promise<Tx> {
     try {
-      const data = await Moralis.EvmApi.transaction.getTransaction({
-        chain: this.chain,
-        transactionHash: txid,
-        include: 'internal_transactions',
-      })
+      const [data, currentBlock] = await Promise.all([
+        Moralis.EvmApi.transaction.getTransaction({
+          chain: this.chain,
+          transactionHash: txid,
+          include: 'internal_transactions',
+        }),
+        this.client.getBlockNumber(),
+      ])
 
       if (!data) throw new Error(`Transaction ${txid} not found`)
-
-      const currentBlock = await this.client.getBlockNumber()
 
       const tx = data.result
 
@@ -398,7 +398,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
         blockHeight: Number(tx.blockNumber.toString()),
         timestamp: Math.floor(tx.blockTimestamp.getTime() / 1000),
         status: Number(tx.receiptStatus),
-        confirmations: Number(currentBlock - tx.blockNumber.toBigInt() + 1n),
+        confirmations: Math.max(1, Number(currentBlock - tx.blockNumber.toBigInt() + 1n)),
         from: tx.from.checksum,
         to: tx.to?.checksum ?? '',
         value: tx.value?.wei ?? '0',
@@ -744,22 +744,24 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
   async getTxs(
     pubkey: string,
     cursor: Cursor,
-    currentBlock: bigint,
     pageSize: number,
     from?: number,
     to?: number
   ): Promise<{ cursor?: string; hasMore: boolean; txs: Map<string, Tx> }> {
-    const { pagination, result } = await Moralis.EvmApi.wallets.getWalletHistory({
-      address: pubkey,
-      chain: this.chain,
-      cursor: cursor.moralisCursor,
-      fromBlock: from,
-      includeInputData: true,
-      includeInternalTransactions: true,
-      limit: pageSize,
-      order: 'DESC',
-      toBlock: to,
-    })
+    const [{ pagination, result }, currentBlock] = await Promise.all([
+      Moralis.EvmApi.wallets.getWalletHistory({
+        address: pubkey,
+        chain: this.chain,
+        cursor: cursor.moralisCursor,
+        fromBlock: from,
+        includeInputData: true,
+        includeInternalTransactions: true,
+        limit: pageSize,
+        order: 'DESC',
+        toBlock: to,
+      }),
+      this.client.getBlockNumber(),
+    ])
 
     if (!result.length) return { hasMore: false, txs: new Map<string, Tx>() }
 
@@ -804,7 +806,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
         blockHeight: Number(tx.blockNumber.toString()),
         timestamp: Math.floor(new Date(tx.blockTimestamp).getTime() / 1000),
         status: Number(tx.receiptStatus),
-        confirmations: Number(currentBlock - tx.blockNumber.toBigInt() + 1n),
+        confirmations: Math.max(1, Number(currentBlock - tx.blockNumber.toBigInt() + 1n)),
         from: tx.fromAddress.checksum,
         to: tx.toAddress?.checksum ?? '',
         value: tx.value,
@@ -825,7 +827,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     // if no txs exist after filtering out already seen transactions, fetch the next page
     if (!txs.size) {
       cursor.moralisCursor = pagination.cursor
-      return this.getTxs(pubkey, cursor, currentBlock, pageSize, from, to)
+      return this.getTxs(pubkey, cursor, pageSize, from, to)
     }
 
     return { cursor: pagination.cursor, hasMore: Boolean(pagination.cursor), txs }
