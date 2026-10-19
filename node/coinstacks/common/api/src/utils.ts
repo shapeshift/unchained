@@ -74,7 +74,13 @@ export const exponentialDelay = async (retryCount: number, delayFactor = 500) =>
 
 const SLOW_REQUEST_THRESHOLD_MS = 1000
 
-const requestStartTimes = new WeakMap<InternalAxiosRequestConfig, number>()
+// custom config keys are copied onto every retry attempt, so timing spans all attempts and is logged once
+type TimedRequestConfig = InternalAxiosRequestConfig & {
+  slowRequestStart?: number
+  slowRequestLogged?: boolean
+  'axios-retry'?: { retryCount?: number }
+}
+
 const loggedInstances = new WeakSet<AxiosInstance>()
 
 // log upstream requests slower than the threshold to attribute api latency to its source
@@ -83,29 +89,36 @@ export const logSlowRequests = (instance: AxiosInstance, logger: Logger): void =
   if (loggedInstances.has(instance)) return
   loggedInstances.add(instance)
 
-  const log = (config: InternalAxiosRequestConfig | undefined, status: number | string | undefined) => {
-    const start = config && requestStartTimes.get(config)
-    if (!config || !start) return
+  const log = (config: TimedRequestConfig | undefined, status: number | string | undefined) => {
+    if (!config?.slowRequestStart || config.slowRequestLogged) return
+    config.slowRequestLogged = true
 
-    const duration = Date.now() - start
+    const duration = Date.now() - config.slowRequestStart
     if (duration < SLOW_REQUEST_THRESHOLD_MS) return
 
     const url = (() => {
       try {
-        return new URL(config.url ?? '', config.baseURL ?? 'http://unknown')
+        return new URL(instance.getUri(config), 'http://unknown')
       } catch {
         return undefined
       }
     })()
 
     logger.warn(
-      { method: config.method, host: url?.host, path: url?.pathname.replace(/[^/]{20,}/g, ':id'), status, duration },
+      {
+        method: config.method,
+        host: url?.host,
+        path: url?.pathname.replace(/[^/]{20,}/g, ':id'),
+        status,
+        duration,
+        retries: config['axios-retry']?.retryCount ?? 0,
+      },
       'slow upstream request'
     )
   }
 
-  instance.interceptors.request.use((config) => {
-    requestStartTimes.set(config, Date.now())
+  instance.interceptors.request.use((config: TimedRequestConfig) => {
+    config.slowRequestStart ??= Date.now()
     return config
   })
 

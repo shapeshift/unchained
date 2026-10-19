@@ -166,8 +166,10 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
     setInterval(() => this.flushRpcUsage(), RPC_USAGE_FLUSH_INTERVAL)
 
-    // the moralis sdk uses the default axios instance
-    logSlowRequests(axios, this.logger)
+    // the moralis sdk loads its own axios dependency (currently a nested copy), so hook the instance it resolves
+    const moralisCore = require.resolve('@moralisweb3/common-core', { paths: [require.resolve('moralis')] })
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    logSlowRequests(require(require.resolve('axios', { paths: [moralisCore] })), this.logger)
     logSlowRequests(axiosNoRetry, this.logger)
     logSlowRequests(axiosWithRetry, this.logger)
   }
@@ -878,7 +880,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     } catch (err) {
       throw handleError(err)
     } finally {
-      this.trackRpcLatency(Array.isArray(req) ? 'batch' : String(req?.method).slice(0, 64), Date.now() - start)
+      this.trackRpcLatency(Array.isArray(req) ? 'batch' : req.method, Date.now() - start)
     }
   }
 

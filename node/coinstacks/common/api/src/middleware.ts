@@ -48,17 +48,19 @@ export function notFoundHandler(_req: Request, res: Response): void {
 
 // json lines are parsed into filterable fields by railway
 export const requestLogger = morgan<Request, Response>(
-  (tokens, req, res) => {
-    // total-time is also recorded for client aborted requests, unlike response-time
-    const responseTime = Number(tokens['total-time'](req, res))
+  (_tokens, req, res) => {
+    // morgan stamps every request on arrival, unlike its timing tokens which need response headers (unset if aborted)
+    const [seconds, nanoseconds] = process.hrtime((req as Request & { _startAt: [number, number] })._startAt)
+    const responseTimeMs = Math.round(seconds * 1e6 + nanoseconds / 1e3) / 1e3
 
+    // field names match the go request logs so one filter covers every service
     return JSON.stringify({
       level: 'info',
-      message: `${req.method} ${req.originalUrl} ${res.statusCode} ${responseTime} ms`,
+      message: `${req.method} ${req.originalUrl} ${res.statusCode} ${responseTimeMs} ms`,
       method: req.method,
       path: req.originalUrl,
-      status: res.statusCode,
-      responseTime,
+      statusCode: res.statusCode,
+      responseTimeMs,
       aborted: !res.writableFinished,
       cache: res.getHeader('x-cache'),
       requestBytes: Number(req.headers['content-length'] ?? 0),
