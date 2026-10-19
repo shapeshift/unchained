@@ -109,7 +109,7 @@ export const logSlowRequests = (instance: AxiosInstance, logger: Logger): void =
         method: config.method,
         host: url?.host,
         path: url?.pathname.replace(/[^/]{20,}/g, ':id'),
-        status,
+        statusCode: status,
         duration,
         retries: config['axios-retry']?.retryCount ?? 0,
       },
