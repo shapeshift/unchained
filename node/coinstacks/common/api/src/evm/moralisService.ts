@@ -878,7 +878,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     } catch (err) {
       throw handleError(err)
     } finally {
-      this.trackRpcLatency(Array.isArray(allowed) ? 'batch' : String(allowed?.method).slice(0, 64), Date.now() - start)
+      this.trackRpcLatency(Array.isArray(req) ? 'batch' : String(req?.method).slice(0, 64), Date.now() - start)
     }
   }
 
