@@ -1,6 +1,7 @@
 import { ApiError as BlockbookApiError } from '@shapeshiftoss/blockbook'
 import { ApiError } from '.'
-import axios, { CreateAxiosDefaults, isAxiosError } from 'axios'
+import type { Logger } from '@shapeshiftoss/logger'
+import axios, { AxiosInstance, CreateAxiosDefaults, InternalAxiosRequestConfig, isAxiosError } from 'axios'
 import axiosRetry, { isNetworkOrIdempotentRequestError } from 'axios-retry'
 import { BaseError as ViemError } from 'viem'
 
@@ -70,6 +71,68 @@ export const createAxiosRetry = (config: RetryConfig, axiosParams?: CreateAxiosD
 
 export const exponentialDelay = async (retryCount: number, delayFactor = 500) =>
   new Promise((resolve) => setTimeout(resolve, axiosRetry.exponentialDelay(retryCount, undefined, delayFactor)))
+
+const SLOW_REQUEST_THRESHOLD_MS = 1000
+
+// custom config keys are copied onto every retry attempt, so timing spans all attempts and is logged once
+type TimedRequestConfig = InternalAxiosRequestConfig & {
+  slowRequestStart?: number
+  slowRequestLogged?: boolean
+  'axios-retry'?: { retryCount?: number }
+}
+
+const loggedInstances = new WeakSet<AxiosInstance>()
+
+// log upstream requests slower than the threshold to attribute api latency to its source
+// the query is dropped and long path segments are masked since some upstreams take api keys in the url
+export const logSlowRequests = (instance: AxiosInstance, logger: Logger): void => {
+  if (loggedInstances.has(instance)) return
+  loggedInstances.add(instance)
+
+  const log = (config: TimedRequestConfig | undefined, status: number | string | undefined) => {
+    if (!config?.slowRequestStart || config.slowRequestLogged) return
+    config.slowRequestLogged = true
+
+    const duration = Date.now() - config.slowRequestStart
+    if (duration < SLOW_REQUEST_THRESHOLD_MS) return
+
+    const url = (() => {
+      try {
+        return new URL(instance.getUri(config), 'http://unknown')
+      } catch {
+        return undefined
+      }
+    })()
+
+    logger.warn(
+      {
+        method: config.method,
+        host: url?.host,
+        path: url?.pathname.replace(/[^/]{20,}/g, ':id'),
+        statusCode: status,
+        duration,
+        retries: config['axios-retry']?.retryCount ?? 0,
+      },
+      'slow upstream request'
+    )
+  }
+
+  instance.interceptors.request.use((config: TimedRequestConfig) => {
+    config.slowRequestStart ??= Date.now()
+    return config
+  })
+
+  instance.interceptors.response.use(
+    (response) => {
+      log(response.config, response.status)
+      return response
+    },
+    (err) => {
+      if (isAxiosError(err)) log(err.config, err.response?.status ?? err.code)
+      return Promise.reject(err)
+    }
+  )
+}
 
 let _rpcId = Math.floor(Math.random() * 1e6)
 export const rpcId = (): number => {

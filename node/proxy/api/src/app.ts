@@ -53,10 +53,10 @@ const main = async () => {
   const zerion = new Zerion()
   app.get('/api/v1/zerion/*', zerion.handler.bind(zerion))
 
-  const zrx = new Zrx()
+  const zrx = new Zrx(logger)
   app.get('/api/v1/zrx/*', zrx.handler.bind(zrx))
 
-  const portals = new Portals()
+  const portals = new Portals(logger)
   app.get('/api/v1/portals/*', portals.handler.bind(portals))
 
   const fynd = new Fynd(logger)

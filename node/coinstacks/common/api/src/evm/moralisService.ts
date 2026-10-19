@@ -9,7 +9,7 @@ import PQueue from 'p-queue'
 import { getAddress, isHex, parseUnits, PublicClient, toHex } from 'viem'
 import type { BaseAPI, EstimateGasBody, RPCRequest, RPCResponse, SendTxBody } from '..'
 import { ApiError, BadRequestError } from '..'
-import { createAxiosRetry, exponentialDelay, handleError, rpcId, validatePageSize } from '../utils'
+import { createAxiosRetry, exponentialDelay, handleError, logSlowRequests, rpcId, validatePageSize } from '../utils'
 import type { Account, API, Tx, TxHistory, GasFees, InternalTx, GasEstimate } from './models'
 import { Fees, TokenBalance, TokenTransfer } from './models'
 import type { ExplorerApiResponse, ExplorerInternalTxByAddress, TraceCall } from './types'
@@ -138,6 +138,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
   // temporary: jsonrpc passthrough call counts since the last flush
   private rpcUsage = new Map<string, number>()
+  // temporary: forwarded jsonrpc passthrough latency by method (or batch) since the last flush
+  private rpcLatency = new Map<string, { count: number; total: number; max: number }>()
 
   constructor(args: MoralisServiceArgs) {
     if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
@@ -163,6 +165,13 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     }, STREAM_RETRY_INTERVAL)
 
     setInterval(() => this.flushRpcUsage(), RPC_USAGE_FLUSH_INTERVAL)
+
+    // the moralis sdk loads its own axios dependency (currently a nested copy), so hook the instance it resolves
+    const moralisCore = require.resolve('@moralisweb3/common-core', { paths: [require.resolve('moralis')] })
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    logSlowRequests(require(require.resolve('axios', { paths: [moralisCore] })), this.logger)
+    logSlowRequests(axiosNoRetry, this.logger)
+    logSlowRequests(axiosWithRetry, this.logger)
   }
 
   private async initializeStream() {
@@ -859,6 +868,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
     if (Array.isArray(allowed) && !allowed.length) return notFound
 
+    const start = Date.now()
+
     try {
       const { data } = await axiosNoRetry.post<RPCResponse | Array<RPCResponse>>(this.rpcUrl, allowed, {
         timeout: RPC_TIMEOUT,
@@ -867,7 +878,19 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
       return Array.isArray(data) ? [...data, ...notFound] : data
     } catch (err) {
       throw handleError(err)
+    } finally {
+      this.trackRpcLatency(Array.isArray(req) ? 'batch' : req.method, Date.now() - start)
     }
+  }
+
+  private trackRpcLatency(key: string, duration: number): void {
+    const latency = this.rpcLatency.get(key) ?? { count: 0, total: 0, max: 0 }
+
+    latency.count++
+    latency.total += duration
+    latency.max = Math.max(latency.max, duration)
+
+    this.rpcLatency.set(key, latency)
   }
 
   // temporary: count passthrough calls by method, plus call target and selector for eth_call/eth_estimateGas, to attribute node usage
@@ -899,7 +922,14 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     const usage = Object.fromEntries([...this.rpcUsage.entries()].sort((a, b) => b[1] - a[1]))
     this.rpcUsage.clear()
 
-    this.logger.info({ usage }, 'rpcUsage')
+    const latency = Object.fromEntries(
+      [...this.rpcLatency.entries()]
+        .sort((a, b) => b[1].total - a[1].total)
+        .map(([key, { count, total, max }]) => [key, { count, avg: Math.round(total / count), max }])
+    )
+    this.rpcLatency.clear()
+
+    this.logger.info({ usage, latency }, 'rpcUsage')
   }
 
   subscribeAddresses(addresses: Array<string>): void {
