@@ -104,19 +104,6 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"NotFoundError": {
-				"description": "Contains info about a 404 Not Found response",
-				"properties": {
-					"message": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"message"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
 			"ValidationError": {
 				"description": "Contains info about a 422 Validation Error response",
 				"properties": {
@@ -324,6 +311,19 @@
 			"TxHistory": {
 				"$ref": "#/components/schemas/BaseTxHistory_Tx_",
 				"description": "Contains info about EVM transaction history"
+			},
+			"NotFoundError": {
+				"description": "Contains info about a 404 Not Found response",
+				"properties": {
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"message"
+				],
+				"type": "object",
+				"additionalProperties": false
 			},
 			"SendTxBody": {
 				"description": "Contains the serialized raw transaction hex",
