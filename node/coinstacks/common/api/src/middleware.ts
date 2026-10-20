@@ -17,7 +17,8 @@ export function errorHandler(err: Error, _: Request, res: Response, next: NextFu
 
   if (err.constructor.name === ApiError.prototype.constructor.name) {
     const e = err as ApiError
-    console.error(e)
+    // client errors are already captured by the request log
+    if ((e.statusCode ?? 500) >= 500) console.error(e)
     return res.status(e.statusCode ?? 500).json({ message: e.message })
   }
 

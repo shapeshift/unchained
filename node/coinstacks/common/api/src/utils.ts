@@ -1,4 +1,3 @@
-import { isMoralisError } from '@moralisweb3/common-core'
 import { ApiError as BlockbookApiError } from '@shapeshiftoss/blockbook'
 import { ApiError } from '.'
 import type { Logger } from '@shapeshiftoss/logger'
@@ -8,6 +7,10 @@ import { STATUS_CODES } from 'http'
 import { BaseError as ViemError } from 'viem'
 
 const MAX_PAGE_SIZE = 100
+
+// matches the moralis sdk error shape without depending on @moralisweb3/common-core directly
+const isMoralisError = (err: unknown): err is Error & { details?: { status?: number } } =>
+  err instanceof Error && (err as { isMoralisError?: boolean }).isMoralisError === true
 
 export function validatePageSize(pageSize: number): void {
   if (pageSize <= 0) throw new ApiError('Bad Request', 422, 'page size must be greater than 0')
