@@ -7,6 +7,17 @@ import type { Account, Address, API, NetworkFee, NetworkFees, RawTx, Tx, TxHisto
 import { handleError, rpcId, validatePageSize } from '../utils'
 import type { Cursor } from './types'
 
+const validateTxid = (txid: string): void => {
+  if (!/^[0-9a-fA-F]{64}$/.test(txid)) throw new ApiError('Bad Request', 400, `Invalid txid: ${txid}`)
+}
+
+// blockbook responds with a 400 for a missing tx
+const handleTxError = (err: unknown): ApiError => {
+  const apiError = handleError(err)
+  if (apiError.statusCode !== 400 || !/not found/i.test(apiError.message)) return apiError
+  return new ApiError('Not Found', 404, apiError.message)
+}
+
 const axiosNoRetry = axios.create({ timeout: 5000 })
 
 export interface ServiceArgs {
@@ -129,20 +140,24 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
   }
 
   async getTransaction(txid: string): Promise<Tx> {
+    validateTxid(txid)
+
     try {
       const data = await this.blockbook.getTransaction(txid)
       return this.handleTransaction(data)
     } catch (err) {
-      throw handleError(err)
+      throw handleTxError(err)
     }
   }
 
   async getRawTransaction(txid: string): Promise<RawTx> {
+    validateTxid(txid)
+
     try {
       const data = await this.blockbook.getTransactionSpecific(txid)
       return data as RawTx
     } catch (err) {
-      throw handleError(err)
+      throw handleTxError(err)
     }
   }
 

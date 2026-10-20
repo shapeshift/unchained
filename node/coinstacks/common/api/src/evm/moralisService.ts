@@ -9,7 +9,7 @@ import PQueue from 'p-queue'
 import { getAddress, isHex, parseUnits, PublicClient, toHex } from 'viem'
 import type { BaseAPI, EstimateGasBody, RPCRequest, RPCResponse, SendTxBody } from '..'
 import { ApiError, BadRequestError } from '..'
-import { createAxiosRetry, exponentialDelay, handleError, rpcId, validatePageSize } from '../utils'
+import { createAxiosRetry, exponentialDelay, handleError, logSlowRequests, rpcId, validatePageSize } from '../utils'
 import type { Account, API, Tx, TxHistory, GasFees, InternalTx, GasEstimate } from './models'
 import { Fees, TokenBalance, TokenTransfer } from './models'
 import type { ExplorerApiResponse, ExplorerInternalTxByAddress, TraceCall } from './types'
@@ -61,6 +61,11 @@ const RPC_ALLOWED_METHODS = new Set([
 ])
 
 const isRpcAllowed = (request: RPCRequest): boolean => RPC_ALLOWED_METHODS.has(request?.method)
+
+// constant per chain, so answered locally instead of paying a node round trip
+const RPC_LOCAL_METHODS = new Set(['eth_chainId', 'net_version'])
+
+const isRpcLocal = (request: RPCRequest): boolean => RPC_LOCAL_METHODS.has(request?.method)
 
 const rpcMethodNotFound = (request: RPCRequest): RPCResponse => ({
   jsonrpc: '2.0',
@@ -133,6 +138,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
   // temporary: jsonrpc passthrough call counts since the last flush
   private rpcUsage = new Map<string, number>()
+  // temporary: forwarded jsonrpc passthrough latency by method (or batch) since the last flush
+  private rpcLatency = new Map<string, { count: number; total: number; max: number }>()
 
   constructor(args: MoralisServiceArgs) {
     if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
@@ -158,6 +165,13 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     }, STREAM_RETRY_INTERVAL)
 
     setInterval(() => this.flushRpcUsage(), RPC_USAGE_FLUSH_INTERVAL)
+
+    // the moralis sdk loads its own axios dependency (currently a nested copy), so hook the instance it resolves
+    const moralisCore = require.resolve('@moralisweb3/common-core', { paths: [require.resolve('moralis')] })
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    logSlowRequests(require(require.resolve('axios', { paths: [moralisCore] })), this.logger)
+    logSlowRequests(axiosNoRetry, this.logger)
+    logSlowRequests(axiosWithRetry, this.logger)
   }
 
   private async initializeStream() {
@@ -211,17 +225,25 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
   async getAccount(pubkey: string): Promise<Account> {
     try {
-      let response = await Moralis.EvmApi.wallets.getWalletTokenBalancesPrice({
-        chain: this.chain,
-        address: pubkey,
-        excludeSpam: true,
-      })
+      const address = getAddress(pubkey)
 
-      const result = response.result
-      while (response.hasNext()) {
-        response = await response.next()
-        result.push(...response.result)
+      const getBalances = async () => {
+        let response = await Moralis.EvmApi.wallets.getWalletTokenBalancesPrice({
+          chain: this.chain,
+          address: pubkey,
+          excludeSpam: true,
+        })
+
+        const result = response.result
+        while (response.hasNext()) {
+          response = await response.next()
+          result.push(...response.result)
+        }
+
+        return result
       }
+
+      const [result, nonce] = await Promise.all([getBalances(), this.client.getTransactionCount({ address })])
 
       const balance = result.find((data) => data.nativeToken)?.balance.wei ?? '0'
 
@@ -244,7 +266,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
       return {
         balance,
         unconfirmedBalance: '0',
-        nonce: await this.client.getTransactionCount({ address: getAddress(pubkey) }),
+        nonce,
         pubkey,
         tokens,
       }
@@ -257,16 +279,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     validatePageSize(pageSize)
 
     try {
-      const currentBlock = await this.client.getBlockNumber()
-
-      const moralis = await this.getTxs(
-        pubkey,
-        { explorerPage: 0, moralisCursor: cursor },
-        currentBlock,
-        pageSize,
-        from,
-        to
-      )
+      const moralis = await this.getTxs(pubkey, { explorerPage: 0, moralisCursor: cursor }, pageSize, from, to)
 
       if (!moralis.txs.size) return { pubkey: pubkey, txs: [] }
 
@@ -297,10 +310,10 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     })()
 
     try {
-      const currentBlock = await this.client.getBlockNumber()
-
-      let moralis = await this.getTxs(pubkey, curCursor, currentBlock, pageSize, from, to)
-      let internal = await this.getInternalTxs(pubkey, curCursor, pageSize, from, to)
+      let [moralis, internal] = await Promise.all([
+        this.getTxs(pubkey, curCursor, pageSize, from, to),
+        this.getInternalTxs(pubkey, curCursor, pageSize, from, to),
+      ])
 
       if (!moralis.txs.size && !internal.txs.size) return { pubkey: pubkey, txs: [] }
 
@@ -308,7 +321,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
       for (let i = 0; i < pageSize; i++) {
         if (!moralis.txs.size && moralis.hasMore) {
           curCursor.moralisCursor = moralis.cursor
-          moralis = await this.getTxs(pubkey, curCursor, currentBlock, pageSize, from, to)
+          moralis = await this.getTxs(pubkey, curCursor, pageSize, from, to)
         }
 
         if (!internal.txs.size && internal.hasMore) {
@@ -373,16 +386,19 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
   }
 
   async getTransaction(txid: string): Promise<Tx> {
+    if (!isHex(txid) || txid.length !== 66) throw new ApiError('Bad Request', 400, `Invalid txid: ${txid}`)
+
     try {
-      const data = await Moralis.EvmApi.transaction.getTransaction({
-        chain: this.chain,
-        transactionHash: txid,
-        include: 'internal_transactions',
-      })
+      const [data, currentBlock] = await Promise.all([
+        Moralis.EvmApi.transaction.getTransaction({
+          chain: this.chain,
+          transactionHash: txid,
+          include: 'internal_transactions',
+        }),
+        this.client.getBlockNumber(),
+      ])
 
-      if (!data) throw new Error(`Transaction ${txid} not found`)
-
-      const currentBlock = await this.client.getBlockNumber()
+      if (!data) throw new ApiError('Not Found', 404, `Transaction ${txid} not found`)
 
       const tx = data.result
 
@@ -398,7 +414,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
         blockHeight: Number(tx.blockNumber.toString()),
         timestamp: Math.floor(tx.blockTimestamp.getTime() / 1000),
         status: Number(tx.receiptStatus),
-        confirmations: Number(currentBlock - tx.blockNumber.toBigInt() + 1n),
+        confirmations: Math.max(1, Number(currentBlock - tx.blockNumber.toBigInt() + 1n)),
         from: tx.from.checksum,
         to: tx.to?.checksum ?? '',
         value: tx.value?.wei ?? '0',
@@ -532,8 +548,6 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
   async handleStreamResult(result: EvmStreamResult): Promise<Array<Tx>> {
     const txs: Record<string, Tx> = {}
 
-    const currentBlock = await this.client.getBlockNumber()
-
     this.logger.debug({ result }, 'handleStreamResult')
 
     result.txs.forEach((tx) => {
@@ -541,7 +555,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
         blockHash: result.block.hash,
         blockHeight: Number(result.block.number.toString()),
         timestamp: Number(result.block.timestamp),
-        confirmations: Number(currentBlock - result.block.number.toBigInt() + 1n),
+        // stream results are for transactions in a newly mined block
+        confirmations: 1,
         fee: BigNumber(tx.transactionFee).times(1e18).toFixed(0),
         from: tx.fromAddress.checksum,
         to: tx.toAddress?.checksum ?? '',
@@ -744,22 +759,24 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
   async getTxs(
     pubkey: string,
     cursor: Cursor,
-    currentBlock: bigint,
     pageSize: number,
     from?: number,
     to?: number
   ): Promise<{ cursor?: string; hasMore: boolean; txs: Map<string, Tx> }> {
-    const { pagination, result } = await Moralis.EvmApi.wallets.getWalletHistory({
-      address: pubkey,
-      chain: this.chain,
-      cursor: cursor.moralisCursor,
-      fromBlock: from,
-      includeInputData: true,
-      includeInternalTransactions: true,
-      limit: pageSize,
-      order: 'DESC',
-      toBlock: to,
-    })
+    const [{ pagination, result }, currentBlock] = await Promise.all([
+      Moralis.EvmApi.wallets.getWalletHistory({
+        address: pubkey,
+        chain: this.chain,
+        cursor: cursor.moralisCursor,
+        fromBlock: from,
+        includeInputData: true,
+        includeInternalTransactions: true,
+        limit: pageSize,
+        order: 'DESC',
+        toBlock: to,
+      }),
+      this.client.getBlockNumber(),
+    ])
 
     if (!result.length) return { hasMore: false, txs: new Map<string, Tx>() }
 
@@ -804,7 +821,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
         blockHeight: Number(tx.blockNumber.toString()),
         timestamp: Math.floor(new Date(tx.blockTimestamp).getTime() / 1000),
         status: Number(tx.receiptStatus),
-        confirmations: Number(currentBlock - tx.blockNumber.toBigInt() + 1n),
+        confirmations: Math.max(1, Number(currentBlock - tx.blockNumber.toBigInt() + 1n)),
         from: tx.fromAddress.checksum,
         to: tx.toAddress?.checksum ?? '',
         value: tx.value,
@@ -825,21 +842,35 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     // if no txs exist after filtering out already seen transactions, fetch the next page
     if (!txs.size) {
       cursor.moralisCursor = pagination.cursor
-      return this.getTxs(pubkey, cursor, currentBlock, pageSize, from, to)
+      return this.getTxs(pubkey, cursor, pageSize, from, to)
     }
 
     return { cursor: pagination.cursor, hasMore: Boolean(pagination.cursor), txs }
+  }
+
+  private localRpcResponse(request: RPCRequest): RPCResponse {
+    const result = request.method === 'eth_chainId' ? this.chain.hex : String(this.chain.decimal)
+    return { jsonrpc: '2.0', id: request.id, result }
   }
 
   async doRpcRequest(req: RPCRequest | Array<RPCRequest>): Promise<RPCResponse | Array<RPCResponse>> {
     this.trackRpcUsage(req)
 
     if (!Array.isArray(req) && !isRpcAllowed(req)) return rpcMethodNotFound(req)
+    if (!Array.isArray(req) && isRpcLocal(req)) return this.localRpcResponse(req)
 
-    const allowed = Array.isArray(req) ? req.filter(isRpcAllowed) : req
-    const notFound = Array.isArray(req) ? req.filter((request) => !isRpcAllowed(request)).map(rpcMethodNotFound) : []
+    const allowed = Array.isArray(req) ? req.filter((request) => isRpcAllowed(request) && !isRpcLocal(request)) : req
+    // responses for batch entries that aren't forwarded: answered locally or not allowed
+    const notFound = Array.isArray(req)
+      ? [
+          ...req.filter(isRpcLocal).map((request) => this.localRpcResponse(request)),
+          ...req.filter((request) => !isRpcAllowed(request)).map(rpcMethodNotFound),
+        ]
+      : []
 
     if (Array.isArray(allowed) && !allowed.length) return notFound
+
+    const start = Date.now()
 
     try {
       const { data } = await axiosNoRetry.post<RPCResponse | Array<RPCResponse>>(this.rpcUrl, allowed, {
@@ -849,7 +880,19 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
       return Array.isArray(data) ? [...data, ...notFound] : data
     } catch (err) {
       throw handleError(err)
+    } finally {
+      this.trackRpcLatency(Array.isArray(req) ? 'batch' : req.method, Date.now() - start)
     }
+  }
+
+  private trackRpcLatency(key: string, duration: number): void {
+    const latency = this.rpcLatency.get(key) ?? { count: 0, total: 0, max: 0 }
+
+    latency.count++
+    latency.total += duration
+    latency.max = Math.max(latency.max, duration)
+
+    this.rpcLatency.set(key, latency)
   }
 
   // temporary: count passthrough calls by method, plus call target and selector for eth_call/eth_estimateGas, to attribute node usage
@@ -881,7 +924,14 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     const usage = Object.fromEntries([...this.rpcUsage.entries()].sort((a, b) => b[1] - a[1]))
     this.rpcUsage.clear()
 
-    this.logger.info({ usage }, 'rpcUsage')
+    const latency = Object.fromEntries(
+      [...this.rpcLatency.entries()]
+        .sort((a, b) => b[1].total - a[1].total)
+        .map(([key, { count, total, max }]) => [key, { count, avg: Math.round(total / count), max }])
+    )
+    this.rpcLatency.clear()
+
+    this.logger.info({ usage, latency }, 'rpcUsage')
   }
 
   subscribeAddresses(addresses: Array<string>): void {

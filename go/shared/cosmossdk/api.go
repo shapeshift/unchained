@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -23,6 +24,8 @@ const (
 )
 
 var (
+	txidPattern = regexp.MustCompile(`^(0x)?[0-9a-fA-F]{64}$`)
+
 	upgrader = ws.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -186,9 +189,19 @@ func (a *API) Tx(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !txidPattern.MatchString(txid) {
+		api.HandleError(w, http.StatusBadRequest, fmt.Sprintf("invalid txid: %s", txid))
+		return
+	}
+
 	tx, err := a.handler.GetTx(txid)
 	if err != nil {
-		api.HandleError(w, http.StatusInternalServerError, err.Error())
+		status := http.StatusInternalServerError
+		if errors.Is(err, ErrNotFound) {
+			status = http.StatusNotFound
+		}
+
+		api.HandleError(w, status, err.Error())
 		return
 	}
 

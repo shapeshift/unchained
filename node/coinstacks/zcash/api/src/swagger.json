@@ -329,6 +329,19 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"NotFoundError": {
+				"description": "Contains info about a 404 Not Found response",
+				"properties": {
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"message"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"RawTx": {
 				"description": "Contains info about a transaction as returned from the node",
 				"properties": {
@@ -808,6 +821,16 @@
 							}
 						}
 					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/NotFoundError"
+								}
+							}
+						}
+					},
 					"422": {
 						"description": "Validation Error",
 						"content": {
@@ -867,6 +890,16 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/NotFoundError"
 								}
 							}
 						}

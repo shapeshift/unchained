@@ -1,3 +1,5 @@
+import { logSlowRequests } from '@shapeshiftoss/common-api'
+import { Logger } from '@shapeshiftoss/logger'
 import axios, { isAxiosError } from 'axios'
 import { Axios } from 'axios'
 import { Request, Response } from 'express'
@@ -13,13 +15,17 @@ const ALLOWED_PATHS = new Set(['/swap/permit2/price', '/swap/permit2/quote', '/t
 export class Zrx {
   private axiosInstance: Axios
 
-  constructor() {
-    this.axiosInstance = axios.create({
+  constructor(logger: Logger) {
+    const axiosInstance = axios.create({
       headers: {
         '0x-api-key': ZRX_API_KEY,
         '0x-version': 'v2',
       },
     })
+
+    logSlowRequests(axiosInstance, logger)
+
+    this.axiosInstance = axiosInstance
   }
 
   async handler(req: Request, res: Response): Promise<void> {
@@ -27,6 +33,7 @@ export class Zrx {
     const path = parsedUrl.pathname.replace(/^\/api\/v1\/zrx/, '').replace(/\/+$/, '')
 
     if (!ALLOWED_PATHS.has(path)) {
+      res.locals.unrouted = true
       res.status(404).send('Not Found')
       return
     }

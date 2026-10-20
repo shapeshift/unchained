@@ -312,6 +312,19 @@
 				"$ref": "#/components/schemas/BaseTxHistory_Tx_",
 				"description": "Contains info about EVM transaction history"
 			},
+			"NotFoundError": {
+				"description": "Contains info about a 404 Not Found response",
+				"properties": {
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"message"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"SendTxBody": {
 				"description": "Contains the serialized raw transaction hex",
 				"properties": {
@@ -779,6 +792,16 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/BadRequestError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/NotFoundError"
 								}
 							}
 						}
