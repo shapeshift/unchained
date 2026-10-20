@@ -1,4 +1,4 @@
-import { createAxiosRetry, exponentialDelay, handleError } from '@shapeshiftoss/common-api'
+import { ApiError, createAxiosRetry, exponentialDelay, handleError } from '@shapeshiftoss/common-api'
 import axios from 'axios'
 import { EnrichedTransaction } from 'helius-sdk'
 import { Tx } from './models'
@@ -20,6 +20,9 @@ export const axiosWithRetry = createAxiosRetry(
 )
 
 export const getTransaction = async (txid: string, shouldRetry?: boolean, retryCount = 0): Promise<Tx> => {
+  // base58 encoded 64 byte signature
+  if (!/^[1-9A-HJ-NP-Za-km-z]{64,88}$/.test(txid)) throw new ApiError('Bad Request', 400, `Invalid txid: ${txid}`)
+
   try {
     const axiosInstance = shouldRetry ? axiosWithRetry : axiosNoRetry
 
@@ -30,7 +33,7 @@ export const getTransaction = async (txid: string, shouldRetry?: boolean, retryC
     const tx = data[0]
 
     if (!tx) {
-      if (!shouldRetry || ++retryCount >= 5) throw new Error('Transaction not found')
+      if (!shouldRetry || ++retryCount >= 5) throw new ApiError('Not Found', 404, `Transaction ${txid} not found`)
       await exponentialDelay(retryCount)
       return getTransaction(txid, true, retryCount)
     }

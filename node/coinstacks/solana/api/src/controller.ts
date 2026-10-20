@@ -7,6 +7,7 @@ import {
   BaseAPI,
   BaseInfo,
   InternalServerError,
+  NotFoundError,
   RPCRequest,
   RPCResponse,
   SendTxBody,
@@ -285,6 +286,7 @@ export class Solana implements BaseAPI, API {
     },
   })
   @Response<BadRequestError>(400, 'Bad Request')
+  @Response<NotFoundError>(404, 'Not Found')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('tx/{txid}')

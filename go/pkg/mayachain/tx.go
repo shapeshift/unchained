@@ -37,6 +37,10 @@ func (c *HTTPClient) GetTx(txid string) (*coretypes.ResultTx, error) {
 	}
 
 	if res.Error != nil {
+		if strings.HasSuffix(res.Error.Data, "not found") {
+			return nil, errors.Wrapf(cosmossdk.ErrNotFound, "tx not found: %s", txid)
+		}
+
 		return nil, errors.Wrapf(errors.New(res.Error.Error()), "failed to get tx: %s", txid)
 	}
 

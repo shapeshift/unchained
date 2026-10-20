@@ -1,8 +1,10 @@
+import { isMoralisError } from '@moralisweb3/common-core'
 import { ApiError as BlockbookApiError } from '@shapeshiftoss/blockbook'
 import { ApiError } from '.'
 import type { Logger } from '@shapeshiftoss/logger'
 import axios, { AxiosInstance, CreateAxiosDefaults, InternalAxiosRequestConfig, isAxiosError } from 'axios'
 import axiosRetry, { isNetworkOrIdempotentRequestError } from 'axios-retry'
+import { STATUS_CODES } from 'http'
 import { BaseError as ViemError } from 'viem'
 
 const MAX_PAGE_SIZE = 100
@@ -29,6 +31,14 @@ export const handleError = (err: unknown): ApiError => {
 
   if (err instanceof BlockbookApiError) {
     return new ApiError(err.response?.statusText || 'Internal Server Error', err.response?.status ?? 500, err.message)
+  }
+
+  // moralis sdk request errors carry the upstream status, pass client errors through instead of masking them as 500
+  if (isMoralisError(err)) {
+    const status = err.details?.status
+    if (status === 400 || status === 404) {
+      return new ApiError(STATUS_CODES[status] ?? 'Bad Request', status, err.message)
+    }
   }
 
   if (err instanceof ViemError) {

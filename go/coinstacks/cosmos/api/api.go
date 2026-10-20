@@ -197,6 +197,7 @@ func (a *API) TxHistory(w http.ResponseWriter, r *http.Request) {
 //
 //	200: Tx
 //	400: BadRequestError
+//	404: ApiError
 //	500: InternalServerError
 func (a *API) Tx(w http.ResponseWriter, r *http.Request) {
 	a.API.Tx(w, r)
