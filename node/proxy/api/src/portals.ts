@@ -18,7 +18,8 @@ const ttlByPath: Partial<Record<string, number>> = {
 
 const BASE_URL = 'https://api.portals.fi/'
 
-type RequestCache = Partial<Record<string, AxiosResponse>>
+type CachedResponse = Pick<AxiosResponse<Buffer>, 'status' | 'headers' | 'data'>
+type RequestCache = Map<string, { response: CachedResponse; expires: number }>
 
 export class Portals {
   private axiosInstance: Axios
@@ -26,9 +27,11 @@ export class Portals {
   private limiter: Bottleneck
 
   constructor(logger: Logger) {
-    this.requestCache = {}
+    this.requestCache = new Map()
 
     const axiosInstance = axios.create({
+      // keep raw bodies so cached responses are served without re-serializing
+      responseType: 'arraybuffer',
       headers: {
         Authorization: `Bearer ${PORTALS_API_KEY}`,
       },
@@ -44,6 +47,11 @@ export class Portals {
       reservoirRefreshInterval: 60 * 1000,
       maxConcurrent: 50,
     })
+
+    setInterval(() => {
+      const now = Date.now()
+      this.requestCache.forEach(({ expires }, key) => expires <= now && this.requestCache.delete(key))
+    }, 60_000)
   }
 
   async handler(req: Request, res: Response): Promise<void> {
@@ -54,10 +62,10 @@ export class Portals {
     const ttl = ttlByPath[path]
 
     if (ttl) {
-      const cachedResponse = this.requestCache[req.url]
-      if (cachedResponse) {
-        Object.entries(cachedResponse.headers).forEach(([k, v]) => res.set(k, v))
-        res.set('X-Cache', 'HIT').status(cachedResponse.status).send(cachedResponse.data)
+      const cached = this.requestCache.get(req.url)
+      if (cached && cached.expires > Date.now()) {
+        Object.entries(cached.response.headers).forEach(([k, v]) => res.set(k, v))
+        res.set('X-Cache', 'HIT').status(cached.response.status).send(cached.response.data)
         return
       }
 
@@ -65,17 +73,20 @@ export class Portals {
     }
 
     try {
-      const response = await this.limiter.schedule(() => this.axiosInstance.get(`${BASE_URL}${url}`))
+      const { status, headers, data } = await this.limiter.schedule(() =>
+        this.axiosInstance.get<Buffer>(`${BASE_URL}${url}`)
+      )
 
       if (ttl) {
-        this.requestCache[req.url] = response
-        setTimeout(() => delete this.requestCache[req.url], ttl)
+        this.requestCache.set(req.url, { response: { status, headers, data }, expires: Date.now() + ttl })
       }
 
-      Object.entries(response.headers).forEach(([k, v]) => res.set(k, v))
-      res.status(response.status).send(response.data)
+      Object.entries(headers).forEach(([k, v]) => res.set(k, v))
+      res.status(status).send(data)
     } catch (err) {
       if (isAxiosError(err)) {
+        const contentType = err.response?.headers['content-type']
+        if (contentType) res.type(contentType)
         res.status(err.response?.status ?? 500).send(err.response?.data || 'Internal Server Error')
       } else if (err instanceof Error) {
         res.status(500).send(err.message || 'Internal Server Error')
