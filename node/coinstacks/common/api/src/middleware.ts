@@ -17,7 +17,8 @@ export function errorHandler(err: Error, _: Request, res: Response, next: NextFu
 
   if (err.constructor.name === ApiError.prototype.constructor.name) {
     const e = err as ApiError
-    console.error(e)
+    // client errors are already captured by the request log
+    if ((e.statusCode ?? 500) >= 500) console.error(e)
     return res.status(e.statusCode ?? 500).json({ message: e.message })
   }
 
@@ -43,6 +44,8 @@ export function notFoundHandler(_req: Request, res: Response): void {
     message: 'Not Found',
   }
 
+  // unrouted paths are mostly scanners, so they are left out of the request log
+  res.locals.unrouted = true
   res.status(404).send(err)
 }
 
@@ -69,7 +72,7 @@ export const requestLogger = morgan<Request, Response>(
       origin: req.headers['origin'] ?? req.headers['referer'],
     })
   },
-  { skip: (req, res) => !req.originalUrl?.startsWith('/api/v1') || res.statusCode === 404 }
+  { skip: (req, res) => !req.originalUrl?.startsWith('/api/v1') || res.locals.unrouted === true }
 )
 
 export const common = () => [

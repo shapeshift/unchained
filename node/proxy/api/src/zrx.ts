@@ -33,6 +33,7 @@ export class Zrx {
     const path = parsedUrl.pathname.replace(/^\/api\/v1\/zrx/, '').replace(/\/+$/, '')
 
     if (!ALLOWED_PATHS.has(path)) {
+      res.locals.unrouted = true
       res.status(404).send('Not Found')
       return
     }

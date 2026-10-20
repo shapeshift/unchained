@@ -1,5 +1,13 @@
 import { Body, Controller, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
-import { BadRequestError, BaseAPI, BaseInfo, InternalServerError, SendTxBody, ValidationError } from '../'
+import {
+  BadRequestError,
+  BaseAPI,
+  BaseInfo,
+  InternalServerError,
+  NotFoundError,
+  SendTxBody,
+  ValidationError,
+} from '../'
 import { API, Account, Tx, RawTx, Utxo, TxHistory } from './models'
 import { Service } from './service'
 
@@ -79,6 +87,7 @@ export class UTXO extends Controller implements BaseAPI, Omit<API, 'getNetworkFe
    * @returns {Promise<Tx>} transaction payload
    */
   @Response<BadRequestError>(400, 'Bad Request')
+  @Response<NotFoundError>(404, 'Not Found')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('tx/{txid}')
@@ -94,6 +103,7 @@ export class UTXO extends Controller implements BaseAPI, Omit<API, 'getNetworkFe
    * @returns {Promise<RawTx>} transaction payload
    */
   @Response<BadRequestError>(400, 'Bad Request')
+  @Response<NotFoundError>(404, 'Not Found')
   @Response<ValidationError>(422, 'Validation Error')
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('tx/{txid}/raw')

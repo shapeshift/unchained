@@ -386,6 +386,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
   }
 
   async getTransaction(txid: string): Promise<Tx> {
+    if (!isHex(txid) || txid.length !== 66) throw new ApiError('Bad Request', 400, `Invalid txid: ${txid}`)
+
     try {
       const [data, currentBlock] = await Promise.all([
         Moralis.EvmApi.transaction.getTransaction({
@@ -396,7 +398,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
         this.client.getBlockNumber(),
       ])
 
-      if (!data) throw new Error(`Transaction ${txid} not found`)
+      if (!data) throw new ApiError('Not Found', 404, `Transaction ${txid} not found`)
 
       const tx = data.result
 
