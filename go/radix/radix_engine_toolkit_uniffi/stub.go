@@ -34,5 +34,5 @@ func DeriveVirtualAccountAddressFromPublicKey(publicKey PublicKey, networkId uin
 
 // Mayanode v1.129 uses the renamed API; this replacement does not implement Radix derivation.
 func DerivePreallocatedAccountAddressFromPublicKey(publicKey PublicKey, networkId uint8) (*Address, error) {
-	return nil, errors.New("Radix address derivation is not supported by Unchained")
+	return nil, errors.New("radix address derivation is not supported by Unchained")
 }
