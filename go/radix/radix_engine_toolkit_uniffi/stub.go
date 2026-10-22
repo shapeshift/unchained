@@ -1,5 +1,7 @@
 package radix_engine_toolkit_uniffi
 
+import "errors"
+
 type Address struct {
 }
 
@@ -28,4 +30,9 @@ type PublicKeyEd25519 struct {
 
 func DeriveVirtualAccountAddressFromPublicKey(publicKey PublicKey, networkId uint8) (*Address, error) {
 	return nil, nil
+}
+
+// Mayanode v1.129 uses the renamed API; this replacement does not implement Radix derivation.
+func DerivePreallocatedAccountAddressFromPublicKey(publicKey PublicKey, networkId uint8) (*Address, error) {
+	return nil, errors.New("Radix address derivation is not supported by Unchained")
 }
