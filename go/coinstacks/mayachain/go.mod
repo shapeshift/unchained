@@ -1,6 +1,6 @@
 module github.com/shapeshift/unchained/coinstacks/mayachain
 
-go 1.23.4
+go 1.26.10
 
 require (
 	github.com/cosmos/cosmos-sdk v0.45.9
@@ -68,7 +68,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jmhodges/levigo v1.0.0 // indirect
 	github.com/keybase/go-keychain v0.0.0-20190712205309-48d3d31d256d // indirect
-	github.com/klauspost/compress v1.18.0 // indirect
+	github.com/klauspost/compress v1.18.7 // indirect
 	github.com/kzahedi/goent v0.0.0-20190403094137-49773660fa36 // indirect
 	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

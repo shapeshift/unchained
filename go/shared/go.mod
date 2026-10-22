@@ -1,6 +1,6 @@
 module github.com/shapeshift/unchained/shared
 
-go 1.23.4
+go 1.26.10
 
 require (
 	github.com/go-resty/resty/v2 v2.17.1

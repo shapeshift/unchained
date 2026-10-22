@@ -13,13 +13,13 @@ generate:
 install:
 	go install gotest.tools/gotestsum@latest
 	go install golang.org/x/tools/cmd/goimports@latest
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /tmp v2.6.1 && mv /tmp/golangci-lint $(GOPATH)/bin/golangci-lint-2.6.1
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /tmp v2.15.0 && mv /tmp/golangci-lint $(GOPATH)/bin/golangci-lint-2.15.0
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /tmp v1.62.2 && mv /tmp/golangci-lint $(GOPATH)/bin/golangci-lint-1.62.2
 
 define build_mod
 build-$(subst /,-,$(1)):
 	@if echo $(1) | grep -q 'mayachain'; then \
-		cd $(1) && CGO_ENABLED=1 CGO_LDFLAGS="-L$(CURDIR)/lib -lzec" go1.23.4 build ./...; \
+		cd $(1) && CGO_ENABLED=1 CGO_LDFLAGS="-L$(CURDIR)/lib -lzec" go build ./...; \
 	else \
 		cd $(1) && go build ./...; \
 	fi
@@ -32,7 +32,7 @@ build:
 define lint_mod
 lint-$(subst /,-,$(1)):
 	@if ! echo $(1) | grep -q 'mayachain'; then \
-		cd $(1) && golangci-lint-2.6.1 run --allow-parallel-runners; \
+		cd $(1) && golangci-lint-2.15.0 run --allow-parallel-runners; \
 	fi
 endef
 
