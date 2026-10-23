@@ -85,6 +85,8 @@ const STREAM_REMOVE_INTERVAL = 60_000
 // stream creation triggers a webhook validation, which is rate limited across the whole account
 const STREAM_INIT_BACKOFF = 60_000
 const STREAM_RETRY_INTERVAL = 5_000
+const EXPLORER_PAGE_SIZE = 100
+const TX_LOOKUP_CONCURRENCY = 5
 
 const jitter = (ms: number): number => Math.round(ms / 2 + Math.random() * ms)
 
@@ -101,8 +103,10 @@ interface Cursor {
   blockHeight?: number
   moralisCursor?: string
   moralisTxid?: string
+  moralisComplete?: boolean
   explorerPage: number
   explorerTxid?: string
+  explorerComplete?: boolean
 }
 
 export interface MoralisServiceArgs {
@@ -121,7 +125,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
   private readonly logger: Logger
   private readonly client: PublicClient
   private readonly rpcUrl: string
-  private readonly explorerApiUrl: URL
+  private readonly explorerApiUrl?: URL
   private readonly minPriorityFee: string
   private readonly baseFeeMultiplier: [number, number, number]
   private readonly gasPriceMultiplier: [number, number, number]
@@ -129,6 +133,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
   private secret?: string
   private streamId?: string
   private queue = new PQueue({ concurrency: 1 })
+  private txLookupQueue = new PQueue({ concurrency: TX_LOOKUP_CONCURRENCY })
   private currentAddresses = new Set<string>()
   private streamAddresses = new Set<string>()
   private nextStreamRemove = 0
@@ -151,7 +156,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     this.logger = args.logger.child({ namespace: ['moralisService'] })
     this.client = args.client
     this.rpcUrl = args.rpcUrl
-    this.explorerApiUrl = args.explorerApiUrl ?? new URL('about:blank')
+    this.explorerApiUrl = args.explorerApiUrl
     this.minPriorityFee = args.minPriorityFee ?? '0'
     this.baseFeeMultiplier = args.baseFeeMultiplier ?? DEFAULT_BASE_FEE_MULTIPLIER
     this.gasPriceMultiplier = args.gasPriceMultiplier ?? DEFAULT_GAS_PRICE_MULTIPLIER
@@ -289,7 +294,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     }
   }
 
-  async getTxHistoryWithEtherscanInternalTxs(
+  async getTxHistoryWithInternalTxs(
     pubkey: string,
     cursor?: string,
     pageSize = 10,
@@ -309,24 +314,34 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
       }
     })()
 
+    let currentBlock: Promise<bigint> | undefined
+    const getCurrentBlock = () => (currentBlock ??= this.client.getBlockNumber())
+
+    const txLookupController = new AbortController()
+    const pending: Array<Promise<Tx>> = []
+
     try {
       let [moralis, internal] = await Promise.all([
-        this.getTxs(pubkey, curCursor, pageSize, from, to),
-        this.getInternalTxs(pubkey, curCursor, pageSize, from, to),
+        curCursor.moralisComplete
+          ? { cursor: undefined, hasMore: false, txs: new Map<string, Tx>() }
+          : this.getTxs(pubkey, curCursor, pageSize, from, to, getCurrentBlock),
+        curCursor.explorerComplete
+          ? { hasMore: false, txs: new Map<string, { blockHeight: number; txid: string; txs: Array<InternalTx> }>() }
+          : this.getInternalTxs(pubkey, curCursor, from, to),
       ])
 
       if (!moralis.txs.size && !internal.txs.size) return { pubkey: pubkey, txs: [] }
 
-      const txs: Array<Tx> = []
       for (let i = 0; i < pageSize; i++) {
         if (!moralis.txs.size && moralis.hasMore) {
           curCursor.moralisCursor = moralis.cursor
-          moralis = await this.getTxs(pubkey, curCursor, pageSize, from, to)
+          curCursor.moralisTxid = undefined
+          moralis = await this.getTxs(pubkey, curCursor, pageSize, from, to, getCurrentBlock)
         }
 
         if (!internal.txs.size && internal.hasMore) {
           curCursor.explorerPage++
-          internal = await this.getInternalTxs(pubkey, curCursor, pageSize, from, to)
+          internal = await this.getInternalTxs(pubkey, curCursor, from, to)
         }
 
         if (!internal.txs.size && !moralis.txs.size) break
@@ -335,7 +350,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
         const [moralisTx] = moralis.txs.values()
 
         if (moralisTx && moralisTx.blockHeight >= (internalTx?.blockHeight ?? -2)) {
-          txs.push({ ...moralisTx, internalTxs: internal.txs.get(moralisTx.txid)?.txs })
+          pending.push(Promise.resolve({ ...moralisTx, internalTxs: internal.txs.get(moralisTx.txid)?.txs }))
 
           moralis.txs.delete(moralisTx.txid)
           curCursor.moralisTxid = moralisTx.txid
@@ -347,13 +362,17 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
             curCursor.explorerTxid = moralisTx.txid
           }
         } else {
-          try {
-            const moralisTx = moralis.txs.get(internalTx.txid) ?? (await this.getTransaction(internalTx.txid))
+          const { txid, txs: internalTxs } = internalTx
 
-            txs.push({ ...moralisTx, internalTxs: internalTx.txs })
-          } catch (err) {
-            this.logger.warn(err, `failed to get tx: ${internalTx.txid}`)
-          }
+          const moralisTx = moralis.txs.get(txid)
+
+          const tx = moralisTx
+            ? Promise.resolve(moralisTx)
+            : this.txLookupQueue.add(() => this.getTransaction(txid, getCurrentBlock), {
+                signal: txLookupController.signal,
+              })
+
+          pending.push(tx.then((tx) => ({ ...tx, internalTxs })))
 
           internal.txs.delete(internalTx.txid)
           curCursor.explorerTxid = internalTx.txid
@@ -367,25 +386,34 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
         }
       }
 
+      const txs = await Promise.all(pending)
+
       // if we processed through the whole set of transactions, update cursor/page for next fetch
-      if (!moralis.txs.size) curCursor.moralisCursor = moralis.cursor
+      if (!moralis.txs.size) {
+        curCursor.moralisCursor = moralis.cursor
+        curCursor.moralisTxid = undefined
+      }
       if (!internal.txs.size) curCursor.explorerPage++
 
       curCursor.blockHeight = txs[txs.length - 1]?.blockHeight
+      curCursor.moralisComplete = !moralis.txs.size && !moralis.hasMore
+      curCursor.explorerComplete = !internal.txs.size && !internal.hasMore
 
       const nextCursor = (() => {
-        if (!moralis.txs.size && !moralis.hasMore) return
-        if (!internal.txs.size && !internal.hasMore) return
+        if (curCursor.moralisComplete && curCursor.explorerComplete) return
         return Buffer.from(JSON.stringify(curCursor), 'binary').toString('base64')
       })()
 
       return { pubkey, cursor: nextCursor, txs }
     } catch (err) {
+      // drop queued lookups and mark every pending lookup as handled, the first error is what gets returned
+      txLookupController.abort()
+      void Promise.allSettled(pending)
       throw handleError(err)
     }
   }
 
-  async getTransaction(txid: string): Promise<Tx> {
+  async getTransaction(txid: string, getCurrentBlock = () => this.client.getBlockNumber()): Promise<Tx> {
     if (!isHex(txid) || txid.length !== 66) throw new ApiError('Bad Request', 400, `Invalid txid: ${txid}`)
 
     try {
@@ -395,7 +423,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
           transactionHash: txid,
           include: 'internal_transactions',
         }),
-        this.client.getBlockNumber(),
+        getCurrentBlock(),
       ])
 
       if (!data) throw new ApiError('Not Found', 404, `Transaction ${txid} not found`)
@@ -674,32 +702,31 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
   private async getInternalTxs(
     address: string,
     cursor: Cursor,
-    pageSize: number,
     from?: number,
     to?: number
   ): Promise<{
     hasMore: boolean
     txs: Map<string, { blockHeight: number; txid: string; txs: Array<InternalTx> }>
   }> {
-    const internalTxs = await this.fetchInternalTxsByAddress(address, cursor.explorerPage, pageSize, from, to)
+    const internalTxs = await this.fetchInternalTxsByAddress(address, cursor.explorerPage, from, to)
 
     const data = new Map<string, { blockHeight: number; txid: string; txs: Array<InternalTx> }>()
 
     if (!internalTxs?.length) return { hasMore: false, txs: data }
 
-    let doneFiltering = false
+    let seenExplorerTxid = false
     const filteredInternalTxs = internalTxs.reduce((prev, internalTx) => {
       if (!internalTx.value || internalTx.value === '0') return prev
 
-      if (!doneFiltering && cursor.blockHeight && cursor.explorerTxid) {
+      if (cursor.blockHeight && cursor.explorerTxid) {
         // skip any transactions from blocks that we have already returned
         if (Number(internalTx.blockNumber) > cursor.blockHeight) return prev
 
-        // skip any transaction that we have already returned within the same block
+        // skip any transaction that we have already returned within the same block, including every row of the last one
         // this assumes transactions are ordered in the same position within the block on every request
         if (Number(internalTx.blockNumber) === cursor.blockHeight) {
-          if (cursor.explorerTxid === internalTx.hash) doneFiltering = true
-          return prev
+          if (cursor.explorerTxid === internalTx.transactionHash) seenExplorerTxid = true
+          if (cursor.explorerTxid === internalTx.transactionHash || !seenExplorerTxid) return prev
         }
       }
 
@@ -709,41 +736,42 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
         value: internalTx.value,
       }
 
-      prev.set(internalTx.hash, {
+      prev.set(internalTx.transactionHash, {
         blockHeight: Number(internalTx.blockNumber),
-        txid: internalTx.hash,
-        txs: [...(prev.get(internalTx.hash)?.txs ?? []), formattedInternalTx],
+        txid: internalTx.transactionHash,
+        txs: [...(prev.get(internalTx.transactionHash)?.txs ?? []), formattedInternalTx],
       })
 
       return prev
     }, data)
 
+    const hasMore = internalTxs.length >= EXPLORER_PAGE_SIZE
+
     // if no txs exist after filtering out already seen transactions, fetch the next page
     if (!filteredInternalTxs.size) {
+      if (!hasMore) return { hasMore, txs: filteredInternalTxs }
       cursor.explorerPage++
-      return this.getInternalTxs(address, cursor, pageSize, from, to)
+      return this.getInternalTxs(address, cursor, from, to)
     }
 
-    return {
-      hasMore: internalTxs.length < pageSize ? false : true,
-      txs: filteredInternalTxs,
-    }
+    return { hasMore, txs: filteredInternalTxs }
   }
 
   private async fetchInternalTxsByAddress(
     address: string,
     page: number,
-    pageSize: number,
     from?: number,
     to?: number
   ): Promise<Array<ExplorerInternalTxByAddress> | undefined> {
+    if (!this.explorerApiUrl) return []
+
     const url = new URL(this.explorerApiUrl.toString())
 
     url.searchParams.append('module', 'account')
     url.searchParams.append('action', 'txlistinternal')
     url.searchParams.append('address', address)
     url.searchParams.append('page', page.toString())
-    url.searchParams.append('offset', pageSize.toString())
+    url.searchParams.append('offset', EXPLORER_PAGE_SIZE.toString())
     url.searchParams.append('sort', 'desc')
 
     if (from) url.searchParams.append('startblock', from.toString())
@@ -751,7 +779,11 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
     const { data } = await axiosWithRetry.get<ExplorerApiResponse<Array<ExplorerInternalTxByAddress>>>(url.toString())
 
-    if (data.status === '0') return []
+    if (data.status === '0') {
+      // status 0 is returned for both empty results and errors
+      if (/^no .* found$/i.test(data.message)) return []
+      throw new Error(`failed to get internal txs for address: ${address}: ${data.message}`)
+    }
 
     return data.result
   }
@@ -761,7 +793,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     cursor: Cursor,
     pageSize: number,
     from?: number,
-    to?: number
+    to?: number,
+    getCurrentBlock = () => this.client.getBlockNumber()
   ): Promise<{ cursor?: string; hasMore: boolean; txs: Map<string, Tx> }> {
     const [{ pagination, result }, currentBlock] = await Promise.all([
       Moralis.EvmApi.wallets.getWalletHistory({
@@ -775,7 +808,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
         order: 'DESC',
         toBlock: to,
       }),
-      this.client.getBlockNumber(),
+      getCurrentBlock(),
     ])
 
     if (!result.length) return { hasMore: false, txs: new Map<string, Tx>() }
@@ -841,8 +874,10 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
     // if no txs exist after filtering out already seen transactions, fetch the next page
     if (!txs.size) {
+      if (!pagination.cursor) return { hasMore: false, txs }
       cursor.moralisCursor = pagination.cursor
-      return this.getTxs(pubkey, cursor, pageSize, from, to)
+      cursor.moralisTxid = undefined
+      return this.getTxs(pubkey, cursor, pageSize, from, to, getCurrentBlock)
     }
 
     return { cursor: pagination.cursor, hasMore: Boolean(pagination.cursor), txs }

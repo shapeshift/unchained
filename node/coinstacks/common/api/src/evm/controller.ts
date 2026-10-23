@@ -114,7 +114,7 @@ export class EVM extends Controller implements BaseAPI, Omit<API, 'getGasFees' |
     @Query() to?: number
   ): Promise<TxHistory> {
     if (EVM.chain === gnosis) {
-      return EVM.service.getTxHistoryWithEtherscanInternalTxs(pubkey, cursor, pageSize, from, to)
+      return EVM.service.getTxHistoryWithInternalTxs(pubkey, cursor, pageSize, from, to)
     }
 
     return EVM.service.getTxHistory(pubkey, cursor, pageSize, from, to)

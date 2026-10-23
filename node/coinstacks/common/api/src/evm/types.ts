@@ -29,7 +29,7 @@ export interface ExplorerApiResponse<T> {
 export interface ExplorerInternalTxByAddress {
   blockNumber: string
   timeStamp: string
-  hash: string
+  transactionHash: string
   from: string
   to: string
   value: string
