@@ -372,7 +372,10 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
                 signal: txLookupController.signal,
               })
 
-          pending.push(tx.then((tx) => ({ ...tx, internalTxs })))
+          const lookup = tx.then((tx) => ({ ...tx, internalTxs }))
+          // mark handled now, since a lookup can reject while the loop awaits the next page
+          lookup.catch(() => undefined)
+          pending.push(lookup)
 
           internal.txs.delete(internalTx.txid)
           curCursor.explorerTxid = internalTx.txid
@@ -406,9 +409,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
       return { pubkey, cursor: nextCursor, txs }
     } catch (err) {
-      // drop queued lookups and mark every pending lookup as handled, the first error is what gets returned
+      // drop queued lookups, the first error is what gets returned
       txLookupController.abort()
-      void Promise.allSettled(pending)
       throw handleError(err)
     }
   }
