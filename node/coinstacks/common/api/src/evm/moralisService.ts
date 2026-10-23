@@ -144,7 +144,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
   // temporary: jsonrpc passthrough call counts since the last flush
   private rpcUsage = new Map<string, number>()
-  // temporary: forwarded jsonrpc passthrough latency by method (or batch) since the last flush
+  // temporary: forwarded jsonrpc passthrough latency by method since the last flush
   private rpcLatency = new Map<string, { count: number; total: number; max: number }>()
 
   constructor(args: MoralisServiceArgs) {
@@ -874,7 +874,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     } catch (err) {
       throw handleError(err)
     } finally {
-      this.trackRpcLatency(Array.isArray(req) ? 'batch' : req.method, Date.now() - start)
+      this.trackRpcLatency(req.method, Date.now() - start)
     }
   }
 
