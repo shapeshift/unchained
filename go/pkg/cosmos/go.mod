@@ -6,6 +6,7 @@ require (
 	cosmossdk.io/errors v1.0.2
 	cosmossdk.io/math v1.5.3
 	cosmossdk.io/simapp v0.0.0-20240118210941-3897926e722e
+	cosmossdk.io/x/feegrant v0.2.0
 	github.com/CosmWasm/wasmd v0.60.9
 	github.com/cometbft/cometbft v0.38.23
 	github.com/cosmos/cosmos-sdk v0.53.6

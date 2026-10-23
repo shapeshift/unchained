@@ -23,6 +23,7 @@ require (
 	cosmossdk.io/schema v1.1.0 // indirect
 	cosmossdk.io/simapp v0.0.0-20240118210941-3897926e722e // indirect
 	cosmossdk.io/store v1.3.0-beta.0 // indirect
+	cosmossdk.io/x/feegrant v0.2.0 // indirect
 	cosmossdk.io/x/tx v0.14.0 // indirect
 	cosmossdk.io/x/upgrade v0.2.0 // indirect
 	filippo.io/edwards25519 v1.1.1 // indirect

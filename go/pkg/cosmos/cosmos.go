@@ -4,6 +4,7 @@ package cosmos
 import (
 	sdkmath "cosmossdk.io/math"
 	"cosmossdk.io/simapp/params"
+	feegranttypes "cosmossdk.io/x/feegrant"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	abci "github.com/cometbft/cometbft/abci/types"
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
@@ -77,6 +78,7 @@ func NewEncoding(registerInterfaces ...func(r codectypes.InterfaceRegistry)) *pa
 	authztypes.RegisterInterfaces(registry)
 	banktypes.RegisterInterfaces(registry)
 	distributiontypes.RegisterInterfaces(registry)
+	feegranttypes.RegisterInterfaces(registry)
 	govv1beta1types.RegisterInterfaces(registry)
 	govv1types.RegisterInterfaces(registry)
 	ibccoretypes.RegisterInterfaces(registry)
