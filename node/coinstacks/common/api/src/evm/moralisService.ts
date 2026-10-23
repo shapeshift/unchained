@@ -9,7 +9,15 @@ import PQueue from 'p-queue'
 import { getAddress, isHex, parseUnits, PublicClient, toHex } from 'viem'
 import type { BaseAPI, EstimateGasBody, RPCRequest, RPCResponse, SendTxBody } from '..'
 import { ApiError, BadRequestError } from '..'
-import { createAxiosRetry, exponentialDelay, handleError, logSlowRequests, rpcId, validatePageSize } from '../utils'
+import {
+  AsyncCache,
+  createAxiosRetry,
+  exponentialDelay,
+  handleError,
+  logSlowRequests,
+  rpcId,
+  validatePageSize,
+} from '../utils'
 import type { Account, API, Tx, TxHistory, GasFees, InternalTx, GasEstimate } from './models'
 import { Fees, TokenBalance, TokenTransfer } from './models'
 import type { ExplorerApiResponse, ExplorerInternalTxByAddress, TraceCall } from './types'
@@ -37,6 +45,8 @@ const DEFAULT_GAS_PRICE_MULTIPLIER: [number, number, number] = [1, 1, 1]
 
 // drop priority fees above the median by this factor to keep outliers (mev/overpayers) from skewing estimates
 const OUTLIER_THRESHOLD_MULTIPLIER = 10
+
+export const GAS_FEES_CACHE_TTL = 5_000
 
 const RPC_ALLOWED_METHODS = new Set([
   'eth_blockNumber',
@@ -151,6 +161,8 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
   private rpcUsage = new Map<string, number>()
   // temporary: forwarded jsonrpc passthrough latency by method since the last flush
   private rpcLatency = new Map<string, { count: number; total: number; max: number }>()
+
+  private readonly gasFeesCache = new AsyncCache(() => this.fetchGasFees(), GAS_FEES_CACHE_TTL)
 
   constructor(args: MoralisServiceArgs) {
     if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
@@ -486,6 +498,10 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
   }
 
   async getGasFees(): Promise<GasFees> {
+    return this.gasFeesCache.get()
+  }
+
+  private async fetchGasFees(): Promise<GasFees> {
     try {
       const feeHistory = await this.client.getFeeHistory({
         blockCount: FEE_HISTORY_BLOCK_COUNT,
