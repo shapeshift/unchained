@@ -73,6 +73,12 @@ const rpcMethodNotFound = (request: RPCRequest): RPCResponse => ({
   error: { code: -32601, message: 'Method not found' },
 })
 
+const rpcBatchNotSupported = (request: RPCRequest): RPCResponse => ({
+  jsonrpc: '2.0',
+  id: request?.id,
+  error: { code: -32600, message: 'Batch requests are not supported' },
+})
+
 const RPC_TIMEOUT = 10_000
 
 // temporary: how often aggregated jsonrpc passthrough counts are flushed to the logs
@@ -138,7 +144,7 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
   // temporary: jsonrpc passthrough call counts since the last flush
   private rpcUsage = new Map<string, number>()
-  // temporary: forwarded jsonrpc passthrough latency by method (or batch) since the last flush
+  // temporary: forwarded jsonrpc passthrough latency by method since the last flush
   private rpcLatency = new Map<string, { count: number; total: number; max: number }>()
 
   constructor(args: MoralisServiceArgs) {
@@ -856,32 +862,19 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
   async doRpcRequest(req: RPCRequest | Array<RPCRequest>): Promise<RPCResponse | Array<RPCResponse>> {
     this.trackRpcUsage(req)
 
-    if (!Array.isArray(req) && !isRpcAllowed(req)) return rpcMethodNotFound(req)
-    if (!Array.isArray(req) && isRpcLocal(req)) return this.localRpcResponse(req)
-
-    const allowed = Array.isArray(req) ? req.filter((request) => isRpcAllowed(request) && !isRpcLocal(request)) : req
-    // responses for batch entries that aren't forwarded: answered locally or not allowed
-    const notFound = Array.isArray(req)
-      ? [
-          ...req.filter(isRpcLocal).map((request) => this.localRpcResponse(request)),
-          ...req.filter((request) => !isRpcAllowed(request)).map(rpcMethodNotFound),
-        ]
-      : []
-
-    if (Array.isArray(allowed) && !allowed.length) return notFound
+    if (Array.isArray(req)) return req.map(rpcBatchNotSupported)
+    if (!isRpcAllowed(req)) return rpcMethodNotFound(req)
+    if (isRpcLocal(req)) return this.localRpcResponse(req)
 
     const start = Date.now()
 
     try {
-      const { data } = await axiosNoRetry.post<RPCResponse | Array<RPCResponse>>(this.rpcUrl, allowed, {
-        timeout: RPC_TIMEOUT,
-      })
-
-      return Array.isArray(data) ? [...data, ...notFound] : data
+      const { data } = await axiosNoRetry.post<RPCResponse>(this.rpcUrl, req, { timeout: RPC_TIMEOUT })
+      return data
     } catch (err) {
       throw handleError(err)
     } finally {
-      this.trackRpcLatency(Array.isArray(req) ? 'batch' : req.method, Date.now() - start)
+      this.trackRpcLatency(req.method, Date.now() - start)
     }
   }
 
