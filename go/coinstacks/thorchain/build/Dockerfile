@@ -1,4 +1,4 @@
-FROM golang:1.25.0 AS builder
+FROM golang:1.26.10 AS builder
 
 WORKDIR /app
 
@@ -8,6 +8,7 @@ COPY go/coinstacks/thorchain/go.mod go/coinstacks/thorchain/go.sum go/coinstacks
 
 COPY go/static go/static
 COPY go/shared go/shared
+COPY go/tsslib go/tsslib
 COPY go/pkg/thorchain go/pkg/thorchain
 COPY go/coinstacks/thorchain go/coinstacks/thorchain
 

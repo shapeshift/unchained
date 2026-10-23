@@ -1,4 +1,4 @@
-FROM golang:1.25.0 AS builder
+FROM golang:1.26.10 AS builder
 
 ARG COINSTACK
 
@@ -10,6 +10,7 @@ COPY go/coinstacks/thorchain-v1/go.mod go/coinstacks/thorchain-v1/go.sum go/coin
 
 COPY go/static go/static
 COPY go/shared go/shared
+COPY go/tsslib go/tsslib
 COPY go/pkg/thorchain go/pkg/thorchain
 COPY go/coinstacks/thorchain-v1 go/coinstacks/thorchain-v1
 

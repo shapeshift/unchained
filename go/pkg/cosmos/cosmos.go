@@ -4,6 +4,7 @@ package cosmos
 import (
 	sdkmath "cosmossdk.io/math"
 	"cosmossdk.io/simapp/params"
+	feegranttypes "cosmossdk.io/x/feegrant"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	abci "github.com/cometbft/cometbft/abci/types"
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
@@ -18,8 +19,8 @@ import (
 	govv1types "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	govv1beta1types "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	liquidtypes "github.com/cosmos/gaia/v25/x/liquid/types"
-	metaprotocolstypes "github.com/cosmos/gaia/v25/x/metaprotocols/types"
+	liquidtypes "github.com/cosmos/gaia/v28/x/liquid/types"
+	metaprotocolstypes "github.com/cosmos/gaia/v28/x/metaprotocols/types"
 	ibclightclientswasmtypes "github.com/cosmos/ibc-go/modules/light-clients/08-wasm/v10/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v10/modules/apps/transfer/types"
 	ibccoretypes "github.com/cosmos/ibc-go/v10/modules/core/types"
@@ -77,6 +78,7 @@ func NewEncoding(registerInterfaces ...func(r codectypes.InterfaceRegistry)) *pa
 	authztypes.RegisterInterfaces(registry)
 	banktypes.RegisterInterfaces(registry)
 	distributiontypes.RegisterInterfaces(registry)
+	feegranttypes.RegisterInterfaces(registry)
 	govv1beta1types.RegisterInterfaces(registry)
 	govv1types.RegisterInterfaces(registry)
 	ibccoretypes.RegisterInterfaces(registry)

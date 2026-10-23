@@ -1,5 +1,10 @@
 package radix_engine_toolkit_uniffi
 
+import "errors"
+
+// Unchained never parses or derives Radix addresses, so every call reports the toolkit as unsupported
+var errUnsupported = errors.New("radix engine toolkit is not supported by Unchained")
+
 type Address struct {
 }
 
@@ -12,7 +17,7 @@ func (a *Address) AsStr() string {
 }
 
 func NewAddress(address string) (*Address, error) {
-	return nil, nil
+	return nil, errUnsupported
 }
 
 type PublicKey interface {
@@ -26,6 +31,6 @@ type PublicKeyEd25519 struct {
 	Value []byte
 }
 
-func DeriveVirtualAccountAddressFromPublicKey(publicKey PublicKey, networkId uint8) (*Address, error) {
-	return nil, nil
+func DerivePreallocatedAccountAddressFromPublicKey(publicKey PublicKey, networkId uint8) (*Address, error) {
+	return nil, errUnsupported
 }
