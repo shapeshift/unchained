@@ -10,6 +10,7 @@ COPY go/coinstacks/thorchain-v1/go.mod go/coinstacks/thorchain-v1/go.sum go/coin
 
 COPY go/static go/static
 COPY go/shared go/shared
+COPY go/tsslib go/tsslib
 COPY go/pkg/thorchain go/pkg/thorchain
 COPY go/coinstacks/thorchain-v1 go/coinstacks/thorchain-v1
 

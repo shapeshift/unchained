@@ -86,7 +86,7 @@ export class Portals {
     } catch (err) {
       if (isAxiosError(err)) {
         const contentType = err.response?.headers['content-type']
-        if (contentType) res.type(contentType)
+        if (typeof contentType === 'string') res.type(contentType)
         res.status(err.response?.status ?? 500).send(err.response?.data || 'Internal Server Error')
       } else if (err instanceof Error) {
         res.status(500).send(err.message || 'Internal Server Error')
