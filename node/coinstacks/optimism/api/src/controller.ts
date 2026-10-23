@@ -2,7 +2,6 @@ import { EvmChain } from '@moralisweb3/common-evm-utils'
 import { EvmStreamResult, EvmStreamResultish } from '@moralisweb3/common-streams-utils'
 import { ApiError } from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
-import { BigNumber } from 'bignumber.js'
 import express from 'express'
 import { Body, Example, Get, Hidden, Post, Response, Request, Route, Tags } from 'tsoa'
 import {
@@ -20,7 +19,7 @@ import {
 } from 'viem'
 import { optimism } from 'viem/chains'
 import { BaseAPI, EstimateGasBody, InternalServerError, ValidationError } from '../../../common/api/src' // unable to import models from a module with tsoa
-import { API, GAS_PRICE_ORACLE_ABI, MoralisService } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
+import { API, GAS_PRICE_ORACLE_ABI, L1GasPrice, MoralisService } from '../../../common/api/src/evm' // unable to import models from a module with tsoa
 import { EVM } from '../../../common/api/src/evm/controller'
 import { OptimismGasEstimate, OptimismGasFees } from './models'
 
@@ -52,6 +51,8 @@ const gpo = getContract({
   abi: GAS_PRICE_ORACLE_ABI,
   client: client,
 })
+
+const l1GasPriceCache = new L1GasPrice(gpo)
 
 @Route('api/v1')
 @Tags('v1')
@@ -123,39 +124,8 @@ export class Optimism extends EVM implements BaseAPI, API {
   @Response<InternalServerError>(500, 'Internal Server Error')
   @Get('/gas/fees')
   async getGasFees(): Promise<OptimismGasFees> {
-    const gasFees = await service.getGasFees()
-    const isEcotone = await gpo.read.isEcotone()
-
-    // ecotone l1GasPrice = ((l1BaseFee * baseFeeScalar * 16) + (blobBaseFee * baseFeeScalar)) / (16 * 10^decimals)
-    if (isEcotone) {
-      const [l1BaseFee, baseFeeScalar, blobBaseFee, blobBaseFeeScalar, decimals] = (
-        await Promise.all([
-          gpo.read.l1BaseFee(),
-          gpo.read.baseFeeScalar(),
-          gpo.read.blobBaseFee(),
-          gpo.read.blobBaseFeeScalar(),
-          gpo.read.decimals(),
-        ])
-      ).map((value) => BigNumber(value.toString()))
-
-      const scaledBaseFee = l1BaseFee.times(baseFeeScalar).times(16)
-      const scaledBlobBaseFee = blobBaseFee.times(blobBaseFeeScalar)
-
-      const l1GasPrice = BigNumber(scaledBaseFee.plus(scaledBlobBaseFee).toString()).div(
-        BigNumber(16).times(BigNumber(10).exponentiatedBy(decimals.toString()))
-      )
-
-      return { l1GasPrice: l1GasPrice.toFixed(), ...gasFees }
-    }
-
-    // legacy l1GasPrice = l1BaseFee * scalar
-    const [l1BaseFee, scalar] = (await Promise.all([gpo.read.l1BaseFee(), gpo.read.scalar()])).map((value) =>
-      BigNumber(value.toString())
-    )
-
-    const l1GasPrice = l1BaseFee.times(scalar)
-
-    return { l1GasPrice: l1GasPrice.toFixed(), ...gasFees }
+    const [gasFees, l1GasPrice] = await Promise.all([service.getGasFees(), l1GasPriceCache.get()])
+    return { l1GasPrice, ...gasFees }
   }
 
   @Hidden()

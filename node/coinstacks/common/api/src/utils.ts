@@ -85,6 +85,40 @@ export const createAxiosRetry = (config: RetryConfig, axiosParams?: CreateAxiosD
 export const exponentialDelay = async (retryCount: number, delayFactor = 500) =>
   new Promise((resolve) => setTimeout(resolve, axiosRetry.exponentialDelay(retryCount, undefined, delayFactor)))
 
+// caches a successful result for ttl ms and shares one in-flight fetch between concurrent callers, failures are not cached
+export class AsyncCache<T> {
+  private readonly fetch: () => Promise<T>
+  private readonly ttl: number
+
+  private cached?: { value: T; expires: number }
+  private inflight?: Promise<T>
+
+  constructor(fetch: () => Promise<T>, ttl: number) {
+    this.fetch = fetch
+    this.ttl = ttl
+  }
+
+  async get(): Promise<T> {
+    if (this.cached && this.cached.expires > Date.now()) return this.cached.value
+
+    if (!this.inflight) {
+      this.inflight = this.refresh().finally(() => {
+        this.inflight = undefined
+      })
+    }
+
+    return this.inflight
+  }
+
+  private async refresh(): Promise<T> {
+    // the ttl runs from the start of the fetch, which is when the data was sampled
+    const fetchedAt = Date.now()
+    const value = await this.fetch()
+    this.cached = { value, expires: fetchedAt + this.ttl }
+    return value
+  }
+}
+
 const SLOW_REQUEST_THRESHOLD_MS = 1000
 
 // custom config keys are copied onto every retry attempt, so timing spans all attempts and is logged once
