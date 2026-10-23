@@ -4,8 +4,10 @@ import type { Blockbook, Tx as BlockbookTx } from '@shapeshiftoss/blockbook'
 import type { AddressFormatter, BadRequestError, BaseAPI, RPCRequest, RPCResponse, SendTxBody } from '../'
 import { ApiError } from '../'
 import type { Account, Address, API, NetworkFee, NetworkFees, RawTx, Tx, TxHistory, Utxo } from './models'
-import { handleError, rpcId, validatePageSize } from '../utils'
+import { exponentialDelay, handleError, rpcId, validatePageSize } from '../utils'
 import type { Cursor } from './types'
+
+const BLOCK_FETCH_ATTEMPTS = 5
 
 const validateTxid = (txid: string): void => {
   if (!/^[0-9a-fA-F]{64}$/.test(txid)) throw new ApiError('Bad Request', 400, `Invalid txid: ${txid}`)
@@ -209,16 +211,25 @@ export class Service implements Omit<BaseAPI, 'getInfo'>, API {
     }
   }
 
-  async handleBlock(hash: string): Promise<Array<BlockbookTx>> {
+  async handleBlock(hash: string, retryCount = 0): Promise<Array<BlockbookTx>> {
     try {
       const { txs = [], totalPages = 1 } = await this.blockbook.getBlock(hash)
-      for (let page = 1; page < totalPages; ++page) {
+      // blockbook pages are 1-based and the first request returns page 1
+      for (let page = 2; page <= totalPages; ++page) {
         const data = await this.blockbook.getBlock(hash, page)
         data.txs && txs.push(...data.txs)
       }
       return txs
     } catch (err) {
-      throw handleError(err)
+      const apiError = handleError(err)
+
+      // a new block can be announced before the indexer serving the request has it, so retry briefly
+      if (/block not found/i.test(apiError.message) && ++retryCount < BLOCK_FETCH_ATTEMPTS) {
+        await exponentialDelay(retryCount)
+        return this.handleBlock(hash, retryCount)
+      }
+
+      throw apiError
     }
   }
 
