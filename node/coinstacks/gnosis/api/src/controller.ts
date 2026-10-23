@@ -11,13 +11,13 @@ import { EVM } from '../../../common/api/src/evm/controller'
 
 const MIN_PRIORITY_FEE = '1000000000' // 1 gwei in wei
 
-const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
+const BLOCKSCOUT_API_KEY = process.env.BLOCKSCOUT_API_KEY
 const INDEXER_URL = process.env.INDEXER_URL
 const NETWORK = process.env.NETWORK
 const RPC_URL = process.env.RPC_URL
 const RPC_API_KEY = process.env.RPC_API_KEY
 
-if (!ETHERSCAN_API_KEY) throw new Error('ETHERSCAN_API_KEY env var not set')
+if (!BLOCKSCOUT_API_KEY) throw new Error('BLOCKSCOUT_API_KEY env var not set')
 if (!INDEXER_URL) throw new Error('INDEXER_URL env var not set')
 if (!NETWORK) throw new Error('NETWORK env var not set')
 if (!RPC_URL) throw new Error('RPC_URL env var not set')
@@ -36,7 +36,7 @@ export const service = new MoralisService({
   chain: EvmChain.GNOSIS,
   logger,
   client,
-  explorerApiUrl: new URL(`https://api.etherscan.io/v2/api?chainid=100&apikey=${ETHERSCAN_API_KEY}`),
+  explorerApiUrl: new URL(`https://api.blockscout.com/v2/api?chain_id=100&apikey=${BLOCKSCOUT_API_KEY}`),
   rpcUrl,
   minPriorityFee: MIN_PRIORITY_FEE,
 })
