@@ -46,7 +46,7 @@ const DEFAULT_GAS_PRICE_MULTIPLIER: [number, number, number] = [1, 1, 1]
 // drop priority fees above the median by this factor to keep outliers (mev/overpayers) from skewing estimates
 const OUTLIER_THRESHOLD_MULTIPLIER = 10
 
-export const GAS_FEES_CACHE_TTL = 5_000
+export const GAS_FEES_CACHE_TTL = 3_000
 
 const RPC_ALLOWED_METHODS = new Set([
   'eth_blockNumber',

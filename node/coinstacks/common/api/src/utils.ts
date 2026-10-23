@@ -111,8 +111,10 @@ export class AsyncCache<T> {
   }
 
   private async refresh(): Promise<T> {
+    // the ttl runs from the start of the fetch, which is when the data was sampled
+    const fetchedAt = Date.now()
     const value = await this.fetch()
-    this.cached = { value, expires: Date.now() + this.ttl }
+    this.cached = { value, expires: fetchedAt + this.ttl }
     return value
   }
 }
