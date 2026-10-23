@@ -3,7 +3,7 @@ COINSTACKS := $(filter ./coinstacks/%,$(MODULES))
 MAKEFLAGS += --no-print-directory
 GOPATH=$(firstword $(subst :, ,$(shell go env GOPATH)))
 
-.PHONY: all build clean generate install lint tidy test-mayachain
+.PHONY: all build clean generate install lint tidy
 
 all: install generate
 
@@ -28,14 +28,9 @@ $(foreach mod,$(MODULES),$(eval $(call build_mod,$(mod))))
 build:
 	@$(MAKE) -j $(foreach mod,$(MODULES),build-$(subst /,-,$(mod)))
 
-test-mayachain:
-	cd pkg/mayachain && CGO_ENABLED=1 CGO_LDFLAGS="-L$(CURDIR)/lib -lzec" LD_LIBRARY_PATH="$(CURDIR)/lib" go test ./...
-
 define lint_mod
 lint-$(subst /,-,$(1)):
-	@if ! echo $(1) | grep -q 'mayachain'; then \
-		cd $(1) && golangci-lint-2.15.0 run --allow-parallel-runners; \
-	fi
+	@cd $(1) && golangci-lint-2.15.0 run --allow-parallel-runners
 endef
 
 $(foreach mod,$(MODULES),$(eval $(call lint_mod,$(mod))))
