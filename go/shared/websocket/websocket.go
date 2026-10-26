@@ -134,10 +134,7 @@ func (c *Connection) Stop() {
 		c.handler.Unsubscribe(c.clientID, subscriptionID, nil, c.msgChan)
 	}
 
-	// ensure connection has not already been unregistered before unregistering.
-	if _, ok := c.manager.connections[c]; ok {
-		c.manager.unregister <- c
-	}
+	c.manager.unregister <- c
 
 	logger.Debugf("Stop: clientID: %s (total: %d)", c.clientID, c.manager.ConnectionCount())
 }

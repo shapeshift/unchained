@@ -21,6 +21,9 @@ func (m *Manager) Start() {
 		case c := <-m.register:
 			m.connections[c] = true
 		case c := <-m.unregister:
+			if _, ok := m.connections[c]; !ok {
+				continue
+			}
 			delete(m.connections, c)
 			close(c.doneChan)
 		}
