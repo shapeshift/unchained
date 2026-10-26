@@ -134,13 +134,20 @@ export class Zerion {
   }
 
   private async fetchFungibles(implementations: Array<string>): Promise<Map<string, Fungible>> {
-    const { data } = await this.axiosInstance.get<{ data: Array<Fungible> }>(`${BASE_URL}fungibles`, {
-      params: { [IMPLEMENTATIONS_FILTER]: implementations.join(',') },
-      responseType: 'json',
-    })
+    const fungibles = await this.axiosInstance
+      .get<{ data: Array<Fungible> }>(`${BASE_URL}fungibles`, {
+        params: { [IMPLEMENTATIONS_FILTER]: implementations.join(',') },
+        responseType: 'json',
+      })
+      .then(({ data }) => data.data)
+      // zerion answers 404 instead of an empty list when none of the implementations are known
+      .catch((err) => {
+        if (isAxiosError(err) && err.response?.status === 404) return []
+        throw err
+      })
 
     const found = new Map<string, Fungible>()
-    for (const fungible of data.data) {
+    for (const fungible of fungibles) {
       for (const { chain_id, address } of fungible.attributes.implementations) {
         if (address) found.set(toImplementationKey(chain_id, address), fungible)
       }
