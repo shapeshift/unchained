@@ -155,7 +155,10 @@ export class Zerion {
 
     // every implementation of a found fungible is cached, so lookups on its other chains hit too
     const expires = Date.now() + CACHE_TTL_MS
-    found.forEach((fungible, implementation) => this.fungibleCache.set(implementation, { fungible, expires }))
+    found.forEach((fungible, implementation) => {
+      this.fungibleCache.set(implementation, { fungible, expires })
+      this.unknownCache.delete(implementation)
+    })
     implementations.forEach((implementation) => !found.has(implementation) && this.cacheUnknown(implementation))
 
     return found
