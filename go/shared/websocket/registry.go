@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"sync"
 )
 
 type Registrar interface {
@@ -13,6 +14,7 @@ type Registrar interface {
 }
 
 type Registry struct {
+	m sync.RWMutex
 	// ID to addresses
 	clients map[string]map[string]struct{}
 	// addresses to ID to msgChan
@@ -39,6 +41,9 @@ func fromID(id string) (string, string) {
 func (r *Registry) Subscribe(clientID string, subscriptionID string, addrs []string, msgChan chan<- []byte) {
 	id := toID(clientID, subscriptionID)
 
+	r.m.Lock()
+	defer r.m.Unlock()
+
 	if _, ok := r.clients[id]; !ok {
 		r.clients[id] = make(map[string]struct{})
 	}
@@ -57,6 +62,9 @@ func (r *Registry) Subscribe(clientID string, subscriptionID string, addrs []str
 // If no addresses are provided, unregister the client and all associated addresses.
 func (r *Registry) Unsubscribe(clientID string, subscriptionID string, addrs []string, msgChan chan<- []byte) {
 	id := toID(clientID, subscriptionID)
+
+	r.m.Lock()
+	defer r.m.Unlock()
 
 	if _, ok := r.clients[id]; !ok {
 		return
@@ -90,6 +98,10 @@ func (r *Registry) Unsubscribe(clientID string, subscriptionID string, addrs []s
 
 // Publish message to all clients subscribed to any of the addresses provided
 func (r *Registry) Publish(addrs []string, data interface{}) {
+	// held while sending, so a client can't unsubscribe and close its msgChan mid publish
+	r.m.RLock()
+	defer r.m.RUnlock()
+
 	for _, addr := range addrs {
 		if _, ok := r.addresses[addr]; !ok {
 			continue
