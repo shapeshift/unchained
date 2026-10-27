@@ -91,11 +91,6 @@ const rpcBatchNotSupported = (request: RPCRequest): RPCResponse => ({
 
 const RPC_TIMEOUT = 10_000
 
-// temporary: how often aggregated jsonrpc passthrough counts are flushed to the logs
-const RPC_USAGE_FLUSH_INTERVAL = 60_000
-// temporary: bound the number of distinct keys, since clients control the method and call target strings
-const RPC_USAGE_MAX_KEYS = 1000
-
 // removals are paced because every mutation reloads the stream
 const STREAM_REMOVE_INTERVAL = 60_000
 // stream creation triggers a webhook validation, which is rate limited across the whole account
@@ -157,11 +152,6 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
 
   transactionHandler?: TransactionHandler
 
-  // temporary: jsonrpc passthrough call counts since the last flush
-  private rpcUsage = new Map<string, number>()
-  // temporary: forwarded jsonrpc passthrough latency by method since the last flush
-  private rpcLatency = new Map<string, { count: number; total: number; max: number }>()
-
   private readonly gasFeesCache = new AsyncCache(() => this.fetchGasFees(), GAS_FEES_CACHE_TTL)
 
   constructor(args: MoralisServiceArgs) {
@@ -186,8 +176,6 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     setInterval(() => {
       this.queue.add(() => this.updateStream()).catch(() => undefined)
     }, STREAM_RETRY_INTERVAL)
-
-    setInterval(() => this.flushRpcUsage(), RPC_USAGE_FLUSH_INTERVAL)
 
     // the moralis sdk loads its own axios dependency (currently a nested copy), so hook the instance it resolves
     const moralisCore = require.resolve('@moralisweb3/common-core', { paths: [require.resolve('moralis')] })
@@ -913,71 +901,16 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
   }
 
   async doRpcRequest(req: RPCRequest | Array<RPCRequest>): Promise<RPCResponse | Array<RPCResponse>> {
-    this.trackRpcUsage(req)
-
     if (Array.isArray(req)) return req.map(rpcBatchNotSupported)
     if (!isRpcAllowed(req)) return rpcMethodNotFound(req)
     if (isRpcLocal(req)) return this.localRpcResponse(req)
-
-    const start = Date.now()
 
     try {
       const { data } = await axiosNoRetry.post<RPCResponse>(this.rpcUrl, req, { timeout: RPC_TIMEOUT })
       return data
     } catch (err) {
       throw handleError(err)
-    } finally {
-      this.trackRpcLatency(req.method, Date.now() - start)
     }
-  }
-
-  private trackRpcLatency(key: string, duration: number): void {
-    const latency = this.rpcLatency.get(key) ?? { count: 0, total: 0, max: 0 }
-
-    latency.count++
-    latency.total += duration
-    latency.max = Math.max(latency.max, duration)
-
-    this.rpcLatency.set(key, latency)
-  }
-
-  // temporary: count passthrough calls by method, plus call target and selector for eth_call/eth_estimateGas, to attribute node usage
-  private trackRpcUsage(req: RPCRequest | Array<RPCRequest>): void {
-    const requests = Array.isArray(req) ? req : [req]
-
-    if (Array.isArray(req)) {
-      this.rpcUsage.set('batch', (this.rpcUsage.get('batch') ?? 0) + 1)
-      this.rpcUsage.set('batchRequests', (this.rpcUsage.get('batchRequests') ?? 0) + req.length)
-    }
-
-    for (const request of requests) {
-      const method = String(request?.method).slice(0, 64)
-      const call = request?.params?.[0] as { to?: unknown; data?: unknown } | undefined
-
-      const to = typeof call?.to === 'string' ? call.to.slice(0, 42) : ''
-      const selector = typeof call?.data === 'string' ? call.data.slice(0, 10) : ''
-
-      const key = method === 'eth_call' || method === 'eth_estimateGas' ? `${method} ${to} ${selector}` : method
-      const bucket = this.rpcUsage.has(key) || this.rpcUsage.size < RPC_USAGE_MAX_KEYS ? key : 'other'
-
-      this.rpcUsage.set(bucket, (this.rpcUsage.get(bucket) ?? 0) + 1)
-    }
-  }
-
-  private flushRpcUsage(): void {
-    if (!this.rpcUsage.size) return
-
-    const usage = Object.fromEntries([...this.rpcUsage.entries()].sort((a, b) => b[1] - a[1]))
-    this.rpcUsage.clear()
-
-    const latency = Object.fromEntries(
-      [...this.rpcLatency.entries()]
-        .sort((a, b) => b[1].total - a[1].total)
-        .map(([key, { count, total, max }]) => [key, { count, avg: Math.round(total / count), max }])
-    )
-    this.rpcLatency.clear()
-
-    this.logger.info({ usage, latency }, 'rpcUsage')
   }
 
   subscribeAddresses(addresses: Array<string>): void {
