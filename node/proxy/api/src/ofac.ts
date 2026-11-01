@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { bech32, bech32m } from 'bech32'
 import { XMLParser } from 'fast-xml-parser'
 import { Logger } from '@shapeshiftoss/logger'
 import { getAddress, isAddress } from 'viem'
@@ -663,6 +664,9 @@ const ADDITIONAL_SANCTIONED_ADDRESSES = [
   'bc1qrg025e2pgx0rwya2kpgtj30972p64jt0hn6zyt',
   'bc1qxg0l4p6xc50zuv9cl5f0l0wmaxjpg8wcy7s9ra',
   'AffzFDKZbyMiU11zmVBoAqD25ugpr7xoWWyRyGigBEaU',
+  // direct recipients of funds from the fbi list, traced on-chain
+  '0xe2b7314748ef21A603A33Ff5738fc011F8aAD4b0',
+  '0x87a9960886865dC6679989861F197A2F8d1dD04E',
 ]
 
 interface OfacArgs {
@@ -799,6 +803,7 @@ export class Ofac {
 
   private normalizeAddress(address: string): string {
     if (isAddress(address, { strict: false })) return getAddress(address)
+    if (bech32.decodeUnsafe(address) || bech32m.decodeUnsafe(address)) return address.toLowerCase()
     return address
   }
 
