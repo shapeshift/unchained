@@ -14,6 +14,7 @@ import { MarketDataConnectionHandler } from './marketData'
 import { CoincapWebsocketClient } from './coincap'
 import { Ofac } from './ofac'
 import { TokenMetadata } from './tokenMetadata'
+import { Rfox } from './rfox'
 
 const PORT = process.env.PORT ?? 3000
 const COINCAP_API_KEY = process.env.COINCAP_API_KEY
@@ -64,6 +65,11 @@ const main = async () => {
 
   const tokenMetadata = new TokenMetadata()
   app.get('/api/v1/tokens/metadata', tokenMetadata.handler.bind(tokenMetadata))
+
+  const rfox = new Rfox(logger)
+  app.get('/api/v1/rfox/metadata', rfox.metadataHandler.bind(rfox))
+  app.get('/api/v1/rfox/closing-block/:chainId', rfox.closingBlockHandler.bind(rfox))
+  app.get('/api/v1/rfox/epochs/:address', rfox.epochsHandler.bind(rfox))
 
   // redirect any unmatched routes to docs
   app.get('/', async (_, res) => {
