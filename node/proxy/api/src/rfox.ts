@@ -199,15 +199,16 @@ export class Rfox {
 
     if (!blockNumber || !/^\d+$/.test(blockNumber)) throw new Error('Invalid closing block number')
 
-    const { timeStamp } = await this.blockscout<{ timeStamp: number }>({
+    const { timeStamp } = await this.blockscout<{ timeStamp: number | string }>({
       module: 'block',
       action: 'getblockreward',
       blockno: blockNumber,
     })
 
-    if (!isNumber(timeStamp)) throw new Error('Invalid closing block timestamp')
+    const timestamp = Number(timeStamp)
+    if (!isNumber(timestamp) || timestamp <= 0) throw new Error('Invalid closing block timestamp')
 
-    return { blockNumber, timestamp: timeStamp }
+    return { blockNumber, timestamp }
   }
 
   async metadataHandler(_: Request, res: Response): Promise<void> {
