@@ -9,15 +9,7 @@ import PQueue from 'p-queue'
 import { getAddress, isHex, parseUnits, PublicClient, toHex } from 'viem'
 import type { BaseAPI, EstimateGasBody, RPCRequest, RPCResponse, SendTxBody } from '..'
 import { ApiError, BadRequestError } from '..'
-import {
-  AsyncCache,
-  createAxiosRetry,
-  exponentialDelay,
-  handleError,
-  logSlowRequests,
-  rpcId,
-  validatePageSize,
-} from '../utils'
+import { AsyncCache, createAxiosRetry, exponentialDelay, handleError, rpcId, validatePageSize } from '../utils'
 import type { Account, API, Tx, TxHistory, GasFees, InternalTx, GasEstimate } from './models'
 import { Fees, TokenBalance, TokenTransfer } from './models'
 import type { ExplorerApiResponse, ExplorerInternalTxByAddress, TraceCall } from './types'
@@ -176,13 +168,6 @@ export class MoralisService implements Omit<BaseAPI, 'getInfo'>, API, AddressSub
     setInterval(() => {
       this.queue.add(() => this.updateStream()).catch(() => undefined)
     }, STREAM_RETRY_INTERVAL)
-
-    // the moralis sdk loads its own axios dependency (currently a nested copy), so hook the instance it resolves
-    const moralisCore = require.resolve('@moralisweb3/common-core', { paths: [require.resolve('moralis')] })
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    logSlowRequests(require(require.resolve('axios', { paths: [moralisCore] })), this.logger)
-    logSlowRequests(axiosNoRetry, this.logger)
-    logSlowRequests(axiosWithRetry, this.logger)
   }
 
   private async initializeStream() {

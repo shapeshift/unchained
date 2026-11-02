@@ -1,5 +1,3 @@
-import { logSlowRequests } from '@shapeshiftoss/common-api'
-import { Logger } from '@shapeshiftoss/logger'
 import axios, { isAxiosError } from 'axios'
 import { Axios } from 'axios'
 import { Request, Response } from 'express'
@@ -15,17 +13,13 @@ const ALLOWED_PATHS = new Set(['/swap/permit2/price', '/swap/permit2/quote', '/t
 export class Zrx {
   private axiosInstance: Axios
 
-  constructor(logger: Logger) {
-    const axiosInstance = axios.create({
+  constructor() {
+    this.axiosInstance = axios.create({
       headers: {
         '0x-api-key': ZRX_API_KEY,
         '0x-version': 'v2',
       },
     })
-
-    logSlowRequests(axiosInstance, logger)
-
-    this.axiosInstance = axiosInstance
   }
 
   async handler(req: Request, res: Response): Promise<void> {
