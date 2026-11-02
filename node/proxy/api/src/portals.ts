@@ -1,5 +1,3 @@
-import { logSlowRequests } from '@shapeshiftoss/common-api'
-import { Logger } from '@shapeshiftoss/logger'
 import axios, { AxiosResponse, isAxiosError } from 'axios'
 import { Axios } from 'axios'
 import Bottleneck from 'bottleneck'
@@ -26,21 +24,16 @@ export class Portals {
   private requestCache: RequestCache
   private limiter: Bottleneck
 
-  constructor(logger: Logger) {
+  constructor() {
     this.requestCache = new Map()
 
-    const axiosInstance = axios.create({
+    this.axiosInstance = axios.create({
       // keep raw bodies so cached responses are served without re-serializing
       responseType: 'arraybuffer',
       headers: {
         Authorization: `Bearer ${PORTALS_API_KEY}`,
       },
     })
-
-    // upstream time is measured inside the limiter, so the request log minus this is limiter queue time
-    logSlowRequests(axiosInstance, logger)
-
-    this.axiosInstance = axiosInstance
     this.limiter = new Bottleneck({
       reservoir: 3000,
       reservoirRefreshAmount: 3000,
