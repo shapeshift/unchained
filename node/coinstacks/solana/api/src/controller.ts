@@ -194,7 +194,7 @@ export class Solana implements BaseAPI, API {
 
     try {
       const { data } = await axiosNoRetry.get<EnrichedTransaction[]>(
-        `${INDEXER_URL}/v0/addresses/${pubkey}/transactions/`,
+        `${INDEXER_URL}/v0/addresses/${pubkey}/transactions`,
         {
           params: {
             limit: pageSize,

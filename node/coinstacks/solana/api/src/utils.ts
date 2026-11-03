@@ -26,7 +26,7 @@ export const getTransaction = async (txid: string, shouldRetry?: boolean, retryC
   try {
     const axiosInstance = shouldRetry ? axiosWithRetry : axiosNoRetry
 
-    const { data } = await axiosInstance.post<EnrichedTransaction[]>(`${INDEXER_URL}/v0/transactions/`, {
+    const { data } = await axiosInstance.post<EnrichedTransaction[]>(`${INDEXER_URL}/v0/transactions`, {
       transactions: [txid],
     })
 
