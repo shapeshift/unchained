@@ -10,6 +10,7 @@ import { Zerion } from './zerion'
 import { Zrx } from './zrx'
 import { Portals } from './portals'
 import { Fynd } from './fynd'
+import { Kyber } from './kyber'
 import { MarketDataConnectionHandler } from './marketData'
 import { CoincapWebsocketClient } from './coincap'
 import { Ofac } from './ofac'
@@ -62,6 +63,10 @@ const main = async () => {
 
   const fynd = new Fynd(logger)
   app.post('/api/v1/fynd/*', fynd.handler.bind(fynd))
+
+  const kyber = new Kyber(logger)
+  app.get('/api/v1/kyber/*', kyber.handler.bind(kyber))
+  app.post('/api/v1/kyber/*', kyber.handler.bind(kyber))
 
   const tokenMetadata = new TokenMetadata()
   app.get('/api/v1/tokens/metadata', tokenMetadata.handler.bind(tokenMetadata))
