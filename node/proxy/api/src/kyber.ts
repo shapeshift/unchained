@@ -16,6 +16,7 @@ export class Kyber {
   private logger: Logger
   private axiosInstance = axios.create({
     headers: { 'X-Api-Key': KYBER_API_KEY, 'X-Client-Id': CLIENT_ID },
+    responseType: 'arraybuffer',
     timeout: 10_000,
   })
 
@@ -26,7 +27,13 @@ export class Kyber {
   // Routes pin the chain slug to [a-z0-9-]+, so the path cannot escape the /swap gateway
   async handler(req: Request, res: Response): Promise<void> {
     const { search } = new URL(req.url, 'https://dummy.com')
-    const path = req.path.replace(/^\/api\/v1\/kyber/, '').replace(/\/+$/, '')
+
+    // Express matches routes case-insensitively, while kyber paths and chain slugs are lowercase
+    const path = req.path
+      .toLowerCase()
+      .replace(/^\/api\/v1\/kyber/, '')
+      .replace(/\/+$/, '')
+
     const isPost = req.method === 'POST'
 
     try {
