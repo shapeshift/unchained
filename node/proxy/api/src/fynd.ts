@@ -1,6 +1,7 @@
 import { Logger } from '@shapeshiftoss/logger'
-import axios, { isAxiosError } from 'axios'
+import axios from 'axios'
 import { Request, Response } from 'express'
+import { relayError, relayHeaders } from './utils'
 import { Address, Hex, decodeFunctionData, isAddress, isAddressEqual, isHex, keccak256, parseAbi } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 
@@ -98,10 +99,13 @@ const decodeSwap = (calldata: Hex) => {
 }
 
 export class Fynd {
+  private logger: Logger
   private axiosInstance = axios.create({ headers: { Authorization: FYND_API_KEY }, timeout: 10_000 })
   private signer = privateKeyToAccount(FYND_FEE_SIGNER_KEY as Hex)
 
-  constructor(private logger: Logger) {}
+  constructor(logger: Logger) {
+    this.logger = logger.child({ namespace: ['fynd'] })
+  }
 
   async handler(req: Request, res: Response): Promise<void> {
     const slug = req.path.match(/^\/api\/v1\/fynd\/([^/]+)\/quote$/)?.[1] ?? ''
@@ -138,7 +142,7 @@ export class Fynd {
 
       if (fee) await this.signClientFees(response.data, chain, fee)
 
-      Object.entries(response.headers).forEach(([k, v]) => res.set(k, v))
+      relayHeaders(res, response.headers)
       res.status(response.status).send(response.data)
     } catch (err) {
       this.relayError(res, err)
@@ -151,20 +155,7 @@ export class Fynd {
       return
     }
 
-    if (!isAxiosError(err)) {
-      this.logger.error({ err }, 'Fynd proxy request failed')
-      res.status(500).send('Internal Server Error')
-      return
-    }
-
-    // Preserve upstream backoff guidance and make it readable by browser clients
-    const retryAfter = err.response?.headers['retry-after']
-    if (typeof retryAfter === 'string') {
-      res.set('Retry-After', retryAfter)
-      res.append('Access-Control-Expose-Headers', 'Retry-After')
-    }
-
-    res.status(err.response?.status ?? 500).send(err.response?.data || 'Internal Server Error')
+    relayError(res, err, this.logger)
   }
 
   // Signs the fee over each successful order exactly as Fynd encoded it; anything the proxy did not request is rejected

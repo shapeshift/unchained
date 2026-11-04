@@ -10,6 +10,7 @@ import { Zerion } from './zerion'
 import { Zrx } from './zrx'
 import { Portals } from './portals'
 import { Fynd } from './fynd'
+import { Kyber } from './kyber'
 import { MarketDataConnectionHandler } from './marketData'
 import { CoincapWebsocketClient } from './coincap'
 import { Ofac } from './ofac'
@@ -48,20 +49,24 @@ const main = async () => {
 
   RegisterRoutes(app)
 
-  const coingecko = new CoinGecko()
+  const coingecko = new CoinGecko(logger)
   app.get('/api/v1/markets/*', coingecko.handler.bind(coingecko))
 
-  const zerion = new Zerion()
+  const zerion = new Zerion(logger)
   app.get('/api/v1/zerion/*', zerion.handler.bind(zerion))
 
-  const zrx = new Zrx()
+  const zrx = new Zrx(logger)
   app.get('/api/v1/zrx/*', zrx.handler.bind(zrx))
 
-  const portals = new Portals()
+  const portals = new Portals(logger)
   app.get('/api/v1/portals/*', portals.handler.bind(portals))
 
   const fynd = new Fynd(logger)
   app.post('/api/v1/fynd/*', fynd.handler.bind(fynd))
+
+  const kyber = new Kyber(logger)
+  app.get('/api/v1/kyber/:chain([a-z0-9-]+)/api/v1/routes', kyber.handler.bind(kyber))
+  app.post('/api/v1/kyber/:chain([a-z0-9-]+)/api/v1/route/build', kyber.handler.bind(kyber))
 
   const tokenMetadata = new TokenMetadata()
   app.get('/api/v1/tokens/metadata', tokenMetadata.handler.bind(tokenMetadata))

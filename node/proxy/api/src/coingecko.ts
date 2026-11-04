@@ -1,6 +1,8 @@
+import { Logger } from '@shapeshiftoss/logger'
 import axios, { AxiosResponse, isAxiosError } from 'axios'
 import { Axios } from 'axios'
 import { Request, Response } from 'express'
+import { relayError, relayHeaders } from './utils'
 
 const COINGECKO_API_KEY = process.env.COINGECKO_API_KEY
 
@@ -42,24 +44,14 @@ const normalize = (url: string): { url: string; ttl: number } => {
 type CachedResponse = Pick<AxiosResponse<Buffer>, 'status' | 'headers' | 'data'>
 type RequestCache = Map<string, { response: CachedResponse; expires: number }>
 
-const sendError = (res: Response, err: unknown) => {
-  if (isAxiosError(err)) {
-    const contentType = err.response?.headers['content-type']
-    if (typeof contentType === 'string') res.type(contentType)
-    res.status(err.response?.status ?? 500).send(err.response?.data || 'Internal Server Error')
-  } else if (err instanceof Error) {
-    res.status(500).send(err.message || 'Internal Server Error')
-  } else {
-    res.status(500).send('Internal Server Error')
-  }
-}
-
 export class CoinGecko {
+  private logger: Logger
   private axiosInstance: Axios
   private requestCache: RequestCache
   private inflight = new Map<string, Promise<CachedResponse>>()
 
-  constructor() {
+  constructor(logger: Logger) {
+    this.logger = logger.child({ namespace: ['coingecko'] })
     this.requestCache = new Map()
     this.axiosInstance = axios.create({
       timeout: 10_000,
@@ -81,7 +73,7 @@ export class CoinGecko {
 
     const cached = this.requestCache.get(url)
     if (cached && cached.expires > Date.now()) {
-      Object.entries(cached.response.headers).forEach(([k, v]) => res.set(k, v))
+      relayHeaders(res, cached.response.headers)
       res.set('X-Cache', 'HIT').status(cached.response.status).send(cached.response.data)
       return
     }
@@ -98,10 +90,10 @@ export class CoinGecko {
 
       const response = await request
 
-      Object.entries(response.headers).forEach(([k, v]) => res.set(k, v))
+      relayHeaders(res, response.headers)
       res.status(response.status).send(response.data)
     } catch (err) {
-      sendError(res, err)
+      relayError(res, err, this.logger)
     }
   }
 

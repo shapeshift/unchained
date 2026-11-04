@@ -1,7 +1,9 @@
-import axios, { AxiosResponse, isAxiosError } from 'axios'
+import { Logger } from '@shapeshiftoss/logger'
+import axios, { AxiosResponse } from 'axios'
 import { Axios } from 'axios'
 import Bottleneck from 'bottleneck'
 import { Request, Response } from 'express'
+import { relayError, relayHeaders } from './utils'
 
 const PORTALS_API_KEY = process.env.PORTALS_API_KEY
 
@@ -20,11 +22,13 @@ type CachedResponse = Pick<AxiosResponse<Buffer>, 'status' | 'headers' | 'data'>
 type RequestCache = Map<string, { response: CachedResponse; expires: number }>
 
 export class Portals {
+  private logger: Logger
   private axiosInstance: Axios
   private requestCache: RequestCache
   private limiter: Bottleneck
 
-  constructor() {
+  constructor(logger: Logger) {
+    this.logger = logger.child({ namespace: ['portals'] })
     this.requestCache = new Map()
 
     this.axiosInstance = axios.create({
@@ -57,7 +61,7 @@ export class Portals {
     if (ttl) {
       const cached = this.requestCache.get(req.url)
       if (cached && cached.expires > Date.now()) {
-        Object.entries(cached.response.headers).forEach(([k, v]) => res.set(k, v))
+        relayHeaders(res, cached.response.headers)
         res.set('X-Cache', 'HIT').status(cached.response.status).send(cached.response.data)
         return
       }
@@ -74,18 +78,10 @@ export class Portals {
         this.requestCache.set(req.url, { response: { status, headers, data }, expires: Date.now() + ttl })
       }
 
-      Object.entries(headers).forEach(([k, v]) => res.set(k, v))
+      relayHeaders(res, headers)
       res.status(status).send(data)
     } catch (err) {
-      if (isAxiosError(err)) {
-        const contentType = err.response?.headers['content-type']
-        if (typeof contentType === 'string') res.type(contentType)
-        res.status(err.response?.status ?? 500).send(err.response?.data || 'Internal Server Error')
-      } else if (err instanceof Error) {
-        res.status(500).send(err.message || 'Internal Server Error')
-      } else {
-        res.status(500).send('Internal Server Error')
-      }
+      relayError(res, err, this.logger)
     }
   }
 }

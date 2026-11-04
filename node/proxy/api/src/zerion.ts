@@ -1,6 +1,8 @@
+import { Logger } from '@shapeshiftoss/logger'
 import axios, { AxiosResponse, isAxiosError } from 'axios'
 import { Axios } from 'axios'
 import { Request, Response } from 'express'
+import { relayError, relayHeaders } from './utils'
 
 const ZERION_API_KEY = process.env.ZERION_API_KEY
 
@@ -28,12 +30,14 @@ const toImplementationKey = (chainId: string, address: string): string =>
   `${chainId}:${address.startsWith('0x') ? address.toLowerCase() : address}`
 
 export class Zerion {
+  private logger: Logger
   private axiosInstance: Axios
   private requestCache: RequestCache
   private fungibleCache: FungibleCache
   private unknownCache: UnknownCache
 
-  constructor() {
+  constructor(logger: Logger) {
+    this.logger = logger.child({ namespace: ['zerion'] })
     this.requestCache = new Map()
     this.fungibleCache = new Map()
     this.unknownCache = new Map()
@@ -61,7 +65,7 @@ export class Zerion {
 
     const cached = this.requestCache.get(req.url)
     if (cached && cached.expires > Date.now()) {
-      Object.entries(cached.response.headers).forEach(([k, v]) => res.set(k, v))
+      relayHeaders(res, cached.response.headers)
       res.set('X-Cache', 'HIT').status(cached.response.status).send(cached.response.data)
       return
     }
@@ -71,10 +75,10 @@ export class Zerion {
     try {
       const { status, headers, data } = await this.axiosInstance.get<Buffer>(`${BASE_URL}${url}`)
       this.requestCache.set(req.url, { response: { status, headers, data }, expires: Date.now() + CACHE_TTL_MS })
-      Object.entries(headers).forEach(([k, v]) => res.set(k, v))
+      relayHeaders(res, headers)
       res.status(status).send(data)
     } catch (err) {
-      this.sendError(res, err)
+      relayError(res, err, this.logger)
     }
   }
 
@@ -119,7 +123,7 @@ export class Zerion {
         const found = await this.fetchFungibles(misses)
         found.forEach((fungible, implementation) => results.set(implementation, fungible))
       } catch (err) {
-        return this.sendError(res, err)
+        return relayError(res, err, this.logger)
       }
     }
 
@@ -174,17 +178,5 @@ export class Zerion {
     }
 
     this.unknownCache.set(implementation, Date.now() + UNKNOWN_CACHE_TTL_MS)
-  }
-
-  private sendError(res: Response, err: unknown): void {
-    if (isAxiosError(err)) {
-      const contentType = err.response?.headers['content-type']
-      if (typeof contentType === 'string') res.type(contentType)
-      res.status(err.response?.status ?? 500).send(err.response?.data || 'Internal Server Error')
-    } else if (err instanceof Error) {
-      res.status(500).send(err.message || 'Internal Server Error')
-    } else {
-      res.status(500).send('Internal Server Error')
-    }
   }
 }
