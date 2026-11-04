@@ -2,6 +2,7 @@ import axios, { AxiosResponse, isAxiosError } from 'axios'
 import { Axios } from 'axios'
 import Bottleneck from 'bottleneck'
 import { Request, Response } from 'express'
+import { relayHeaders } from './utils'
 
 const PORTALS_API_KEY = process.env.PORTALS_API_KEY
 
@@ -57,7 +58,7 @@ export class Portals {
     if (ttl) {
       const cached = this.requestCache.get(req.url)
       if (cached && cached.expires > Date.now()) {
-        Object.entries(cached.response.headers).forEach(([k, v]) => res.set(k, v))
+        relayHeaders(res, cached.response.headers)
         res.set('X-Cache', 'HIT').status(cached.response.status).send(cached.response.data)
         return
       }
@@ -74,7 +75,7 @@ export class Portals {
         this.requestCache.set(req.url, { response: { status, headers, data }, expires: Date.now() + ttl })
       }
 
-      Object.entries(headers).forEach(([k, v]) => res.set(k, v))
+      relayHeaders(res, headers)
       res.status(status).send(data)
     } catch (err) {
       if (isAxiosError(err)) {

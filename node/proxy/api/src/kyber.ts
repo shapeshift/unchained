@@ -1,6 +1,7 @@
 import { Logger } from '@shapeshiftoss/logger'
 import axios, { isAxiosError } from 'axios'
 import { Request, Response } from 'express'
+import { relayHeaders } from './utils'
 
 const KYBER_API_KEY = process.env.KYBER_API_KEY
 
@@ -31,7 +32,7 @@ export class Kyber {
         data: req.method === 'POST' ? req.body : undefined,
       })
 
-      Object.entries(response.headers).forEach(([k, v]) => res.set(k, v))
+      relayHeaders(res, response.headers)
       res.status(response.status).send(response.data)
     } catch (err) {
       this.relayError(res, err)

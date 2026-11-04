@@ -1,6 +1,7 @@
 import { Logger } from '@shapeshiftoss/logger'
 import axios, { isAxiosError } from 'axios'
 import { Request, Response } from 'express'
+import { relayHeaders } from './utils'
 import { Address, Hex, decodeFunctionData, isAddress, isAddressEqual, isHex, keccak256, parseAbi } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 
@@ -138,7 +139,7 @@ export class Fynd {
 
       if (fee) await this.signClientFees(response.data, chain, fee)
 
-      Object.entries(response.headers).forEach(([k, v]) => res.set(k, v))
+      relayHeaders(res, response.headers)
       res.status(response.status).send(response.data)
     } catch (err) {
       this.relayError(res, err)

@@ -1,6 +1,7 @@
 import axios, { AxiosResponse, isAxiosError } from 'axios'
 import { Axios } from 'axios'
 import { Request, Response } from 'express'
+import { relayHeaders } from './utils'
 
 const COINGECKO_API_KEY = process.env.COINGECKO_API_KEY
 
@@ -81,7 +82,7 @@ export class CoinGecko {
 
     const cached = this.requestCache.get(url)
     if (cached && cached.expires > Date.now()) {
-      Object.entries(cached.response.headers).forEach(([k, v]) => res.set(k, v))
+      relayHeaders(res, cached.response.headers)
       res.set('X-Cache', 'HIT').status(cached.response.status).send(cached.response.data)
       return
     }
@@ -98,7 +99,7 @@ export class CoinGecko {
 
       const response = await request
 
-      Object.entries(response.headers).forEach(([k, v]) => res.set(k, v))
+      relayHeaders(res, response.headers)
       res.status(response.status).send(response.data)
     } catch (err) {
       sendError(res, err)

@@ -1,6 +1,7 @@
 import axios, { AxiosResponse, isAxiosError } from 'axios'
 import { Axios } from 'axios'
 import { Request, Response } from 'express'
+import { relayHeaders } from './utils'
 
 const ZERION_API_KEY = process.env.ZERION_API_KEY
 
@@ -61,7 +62,7 @@ export class Zerion {
 
     const cached = this.requestCache.get(req.url)
     if (cached && cached.expires > Date.now()) {
-      Object.entries(cached.response.headers).forEach(([k, v]) => res.set(k, v))
+      relayHeaders(res, cached.response.headers)
       res.set('X-Cache', 'HIT').status(cached.response.status).send(cached.response.data)
       return
     }
@@ -71,7 +72,7 @@ export class Zerion {
     try {
       const { status, headers, data } = await this.axiosInstance.get<Buffer>(`${BASE_URL}${url}`)
       this.requestCache.set(req.url, { response: { status, headers, data }, expires: Date.now() + CACHE_TTL_MS })
-      Object.entries(headers).forEach(([k, v]) => res.set(k, v))
+      relayHeaders(res, headers)
       res.status(status).send(data)
     } catch (err) {
       this.sendError(res, err)

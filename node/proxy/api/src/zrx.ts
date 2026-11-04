@@ -1,6 +1,7 @@
 import axios, { isAxiosError } from 'axios'
 import { Axios } from 'axios'
 import { Request, Response } from 'express'
+import { relayHeaders } from './utils'
 
 const ZRX_API_KEY = process.env.ZRX_API_KEY
 
@@ -34,7 +35,7 @@ export class Zrx {
 
     try {
       const response = await this.axiosInstance.get(`${BASE_URL}${path}${parsedUrl.search}`)
-      Object.entries(response.headers).forEach(([k, v]) => res.set(k, v))
+      relayHeaders(res, response.headers)
       res.status(response.status).send(response.data)
     } catch (err) {
       if (isAxiosError(err)) {
