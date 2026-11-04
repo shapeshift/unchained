@@ -1,5 +1,5 @@
 import { Logger } from '@shapeshiftoss/logger'
-import axios, { isAxiosError } from 'axios'
+import axios from 'axios'
 import { Request, Response } from 'express'
 import { relayError, relayHeaders } from './utils'
 
@@ -40,18 +40,7 @@ export class Kyber {
       relayHeaders(res, response.headers)
       res.status(response.status).send(response.data)
     } catch (err) {
-      this.relayError(res, err)
+      relayError(res, err, this.logger)
     }
-  }
-
-  private relayError(res: Response, err: unknown): void {
-    // Auth failures mean our server key is bad, which the client cannot fix
-    if (isAxiosError(err) && (err.response?.status === 401 || err.response?.status === 403)) {
-      this.logger.error({ status: err.response.status, data: err.response.data }, 'Kyber rejected the proxy api key')
-      res.status(502).send('Bad Gateway')
-      return
-    }
-
-    relayError(res, err, this.logger)
   }
 }

@@ -17,6 +17,15 @@ export const relayError = (res: Response, err: unknown, logger: Logger): void =>
     return
   }
 
+  // Callers never send upstream credentials, so auth failures mean our server key or plan is bad
+  const status = err.response?.status
+  if (status === 401 || status === 403) {
+    const data = Buffer.isBuffer(err.response?.data) ? err.response?.data.toString() : err.response?.data
+    logger.error({ statusCode: status, data, path: res.req.path }, 'upstream rejected the proxy api key')
+    res.status(502).send('Bad Gateway')
+    return
+  }
+
   // Raw buffer bodies need the upstream type restored, otherwise express sends them as octet-stream
   const contentType = err.response?.headers['content-type']
   if (typeof contentType === 'string') res.type(contentType)
@@ -28,5 +37,5 @@ export const relayError = (res: Response, err: unknown, logger: Logger): void =>
     res.append('Access-Control-Expose-Headers', 'Retry-After')
   }
 
-  res.status(err.response?.status ?? 500).send(err.response?.data || 'Internal Server Error')
+  res.status(status ?? 500).send(err.response?.data || 'Internal Server Error')
 }
