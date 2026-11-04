@@ -45,11 +45,13 @@ type CachedResponse = Pick<AxiosResponse<Buffer>, 'status' | 'headers' | 'data'>
 type RequestCache = Map<string, { response: CachedResponse; expires: number }>
 
 export class CoinGecko {
+  private logger: Logger
   private axiosInstance: Axios
   private requestCache: RequestCache
   private inflight = new Map<string, Promise<CachedResponse>>()
 
-  constructor(private logger: Logger) {
+  constructor(logger: Logger) {
+    this.logger = logger.child({ namespace: ['coingecko'] })
     this.requestCache = new Map()
     this.axiosInstance = axios.create({
       timeout: 10_000,

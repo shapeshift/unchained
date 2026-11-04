@@ -99,10 +99,13 @@ const decodeSwap = (calldata: Hex) => {
 }
 
 export class Fynd {
+  private logger: Logger
   private axiosInstance = axios.create({ headers: { Authorization: FYND_API_KEY }, timeout: 10_000 })
   private signer = privateKeyToAccount(FYND_FEE_SIGNER_KEY as Hex)
 
-  constructor(private logger: Logger) {}
+  constructor(logger: Logger) {
+    this.logger = logger.child({ namespace: ['fynd'] })
+  }
 
   async handler(req: Request, res: Response): Promise<void> {
     const slug = req.path.match(/^\/api\/v1\/fynd\/([^/]+)\/quote$/)?.[1] ?? ''

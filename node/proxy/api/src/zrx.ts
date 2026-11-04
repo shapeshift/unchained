@@ -13,9 +13,11 @@ const BASE_URL = 'https://api.0x.org'
 const ALLOWED_PATHS = new Set(['/swap/permit2/price', '/swap/permit2/quote', '/trade-analytics/swap'])
 
 export class Zrx {
+  private logger: Logger
   private axiosInstance: Axios
 
-  constructor(private logger: Logger) {
+  constructor(logger: Logger) {
+    this.logger = logger.child({ namespace: ['zrx'] })
     this.axiosInstance = axios.create({
       headers: {
         '0x-api-key': ZRX_API_KEY,

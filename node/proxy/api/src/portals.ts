@@ -22,11 +22,13 @@ type CachedResponse = Pick<AxiosResponse<Buffer>, 'status' | 'headers' | 'data'>
 type RequestCache = Map<string, { response: CachedResponse; expires: number }>
 
 export class Portals {
+  private logger: Logger
   private axiosInstance: Axios
   private requestCache: RequestCache
   private limiter: Bottleneck
 
-  constructor(private logger: Logger) {
+  constructor(logger: Logger) {
+    this.logger = logger.child({ namespace: ['portals'] })
     this.requestCache = new Map()
 
     this.axiosInstance = axios.create({

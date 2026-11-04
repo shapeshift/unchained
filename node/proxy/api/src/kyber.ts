@@ -13,12 +13,15 @@ const BASE_URL = 'https://api.kyberswap.com/swap'
 const CLIENT_ID = 'shapeshift'
 
 export class Kyber {
+  private logger: Logger
   private axiosInstance = axios.create({
     headers: { 'X-Api-Key': KYBER_API_KEY, 'X-Client-Id': CLIENT_ID },
     timeout: 10_000,
   })
 
-  constructor(private logger: Logger) {}
+  constructor(logger: Logger) {
+    this.logger = logger.child({ namespace: ['kyber'] })
+  }
 
   // Routes pin the chain slug to [a-z0-9-]+, so the path cannot escape the /swap gateway
   async handler(req: Request, res: Response): Promise<void> {

@@ -12,7 +12,7 @@ export const relayHeaders = (res: Response, headers: object): void => {
 // Relays upstream failures as-is; anything else is ours, so it is logged and kept out of the response
 export const relayError = (res: Response, err: unknown, logger: Logger): void => {
   if (!isAxiosError(err)) {
-    logger.error({ err }, 'proxy request failed')
+    logger.error({ err, path: res.req.path }, 'proxy request failed')
     res.status(500).send('Internal Server Error')
     return
   }

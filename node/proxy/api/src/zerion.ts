@@ -30,12 +30,14 @@ const toImplementationKey = (chainId: string, address: string): string =>
   `${chainId}:${address.startsWith('0x') ? address.toLowerCase() : address}`
 
 export class Zerion {
+  private logger: Logger
   private axiosInstance: Axios
   private requestCache: RequestCache
   private fungibleCache: FungibleCache
   private unknownCache: UnknownCache
 
-  constructor(private logger: Logger) {
+  constructor(logger: Logger) {
+    this.logger = logger.child({ namespace: ['zerion'] })
     this.requestCache = new Map()
     this.fungibleCache = new Map()
     this.unknownCache = new Map()
