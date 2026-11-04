@@ -1,7 +1,7 @@
 import { Logger } from '@shapeshiftoss/logger'
 import axios, { isAxiosError } from 'axios'
 import { Request, Response } from 'express'
-import { relayHeaders } from './utils'
+import { relayError, relayHeaders } from './utils'
 
 const KYBER_API_KEY = process.env.KYBER_API_KEY
 
@@ -24,12 +24,14 @@ export class Kyber {
   async handler(req: Request, res: Response): Promise<void> {
     const { search } = new URL(req.url, 'https://dummy.com')
     const path = req.path.replace(/^\/api\/v1\/kyber/, '').replace(/\/+$/, '')
+    const isPost = req.method === 'POST'
 
     try {
+      // Express routes HEAD to GET handlers, so anything but POST is forwarded as GET like the other proxies
       const response = await this.axiosInstance.request({
-        method: req.method,
+        method: isPost ? 'POST' : 'GET',
         url: `${BASE_URL}${path}${search}`,
-        data: req.method === 'POST' ? req.body : undefined,
+        data: isPost ? req.body : undefined,
       })
 
       relayHeaders(res, response.headers)
@@ -40,28 +42,13 @@ export class Kyber {
   }
 
   private relayError(res: Response, err: unknown): void {
-    if (!isAxiosError(err)) {
-      this.logger.error({ err }, 'Kyber proxy request failed')
-      res.status(500).send('Internal Server Error')
-      return
-    }
-
-    const status = err.response?.status
-
     // Auth failures mean our server key is bad, which the client cannot fix
-    if (status === 401 || status === 403) {
-      this.logger.error({ status, data: err.response?.data }, 'Kyber rejected the proxy api key')
+    if (isAxiosError(err) && (err.response?.status === 401 || err.response?.status === 403)) {
+      this.logger.error({ status: err.response.status, data: err.response.data }, 'Kyber rejected the proxy api key')
       res.status(502).send('Bad Gateway')
       return
     }
 
-    // Preserve upstream backoff guidance and make it readable by browser clients
-    const retryAfter = err.response?.headers['retry-after']
-    if (typeof retryAfter === 'string') {
-      res.set('Retry-After', retryAfter)
-      res.append('Access-Control-Expose-Headers', 'Retry-After')
-    }
-
-    res.status(status ?? 500).send(err.response?.data || 'Internal Server Error')
+    relayError(res, err, this.logger)
   }
 }

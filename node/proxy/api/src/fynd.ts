@@ -1,7 +1,7 @@
 import { Logger } from '@shapeshiftoss/logger'
-import axios, { isAxiosError } from 'axios'
+import axios from 'axios'
 import { Request, Response } from 'express'
-import { relayHeaders } from './utils'
+import { relayError, relayHeaders } from './utils'
 import { Address, Hex, decodeFunctionData, isAddress, isAddressEqual, isHex, keccak256, parseAbi } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 
@@ -152,20 +152,7 @@ export class Fynd {
       return
     }
 
-    if (!isAxiosError(err)) {
-      this.logger.error({ err }, 'Fynd proxy request failed')
-      res.status(500).send('Internal Server Error')
-      return
-    }
-
-    // Preserve upstream backoff guidance and make it readable by browser clients
-    const retryAfter = err.response?.headers['retry-after']
-    if (typeof retryAfter === 'string') {
-      res.set('Retry-After', retryAfter)
-      res.append('Access-Control-Expose-Headers', 'Retry-After')
-    }
-
-    res.status(err.response?.status ?? 500).send(err.response?.data || 'Internal Server Error')
+    relayError(res, err, this.logger)
   }
 
   // Signs the fee over each successful order exactly as Fynd encoded it; anything the proxy did not request is rejected

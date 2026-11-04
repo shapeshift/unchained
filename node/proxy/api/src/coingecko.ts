@@ -1,7 +1,8 @@
+import { Logger } from '@shapeshiftoss/logger'
 import axios, { AxiosResponse, isAxiosError } from 'axios'
 import { Axios } from 'axios'
 import { Request, Response } from 'express'
-import { relayHeaders } from './utils'
+import { relayError, relayHeaders } from './utils'
 
 const COINGECKO_API_KEY = process.env.COINGECKO_API_KEY
 
@@ -43,24 +44,12 @@ const normalize = (url: string): { url: string; ttl: number } => {
 type CachedResponse = Pick<AxiosResponse<Buffer>, 'status' | 'headers' | 'data'>
 type RequestCache = Map<string, { response: CachedResponse; expires: number }>
 
-const sendError = (res: Response, err: unknown) => {
-  if (isAxiosError(err)) {
-    const contentType = err.response?.headers['content-type']
-    if (typeof contentType === 'string') res.type(contentType)
-    res.status(err.response?.status ?? 500).send(err.response?.data || 'Internal Server Error')
-  } else if (err instanceof Error) {
-    res.status(500).send(err.message || 'Internal Server Error')
-  } else {
-    res.status(500).send('Internal Server Error')
-  }
-}
-
 export class CoinGecko {
   private axiosInstance: Axios
   private requestCache: RequestCache
   private inflight = new Map<string, Promise<CachedResponse>>()
 
-  constructor() {
+  constructor(private logger: Logger) {
     this.requestCache = new Map()
     this.axiosInstance = axios.create({
       timeout: 10_000,
@@ -102,7 +91,7 @@ export class CoinGecko {
       relayHeaders(res, response.headers)
       res.status(response.status).send(response.data)
     } catch (err) {
-      sendError(res, err)
+      relayError(res, err, this.logger)
     }
   }
 

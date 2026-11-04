@@ -1,8 +1,9 @@
-import axios, { AxiosResponse, isAxiosError } from 'axios'
+import { Logger } from '@shapeshiftoss/logger'
+import axios, { AxiosResponse } from 'axios'
 import { Axios } from 'axios'
 import Bottleneck from 'bottleneck'
 import { Request, Response } from 'express'
-import { relayHeaders } from './utils'
+import { relayError, relayHeaders } from './utils'
 
 const PORTALS_API_KEY = process.env.PORTALS_API_KEY
 
@@ -25,7 +26,7 @@ export class Portals {
   private requestCache: RequestCache
   private limiter: Bottleneck
 
-  constructor() {
+  constructor(private logger: Logger) {
     this.requestCache = new Map()
 
     this.axiosInstance = axios.create({
@@ -78,15 +79,7 @@ export class Portals {
       relayHeaders(res, headers)
       res.status(status).send(data)
     } catch (err) {
-      if (isAxiosError(err)) {
-        const contentType = err.response?.headers['content-type']
-        if (typeof contentType === 'string') res.type(contentType)
-        res.status(err.response?.status ?? 500).send(err.response?.data || 'Internal Server Error')
-      } else if (err instanceof Error) {
-        res.status(500).send(err.message || 'Internal Server Error')
-      } else {
-        res.status(500).send('Internal Server Error')
-      }
+      relayError(res, err, this.logger)
     }
   }
 }

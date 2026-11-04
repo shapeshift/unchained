@@ -49,16 +49,16 @@ const main = async () => {
 
   RegisterRoutes(app)
 
-  const coingecko = new CoinGecko()
+  const coingecko = new CoinGecko(logger)
   app.get('/api/v1/markets/*', coingecko.handler.bind(coingecko))
 
-  const zerion = new Zerion()
+  const zerion = new Zerion(logger)
   app.get('/api/v1/zerion/*', zerion.handler.bind(zerion))
 
-  const zrx = new Zrx()
+  const zrx = new Zrx(logger)
   app.get('/api/v1/zrx/*', zrx.handler.bind(zrx))
 
-  const portals = new Portals()
+  const portals = new Portals(logger)
   app.get('/api/v1/portals/*', portals.handler.bind(portals))
 
   const fynd = new Fynd(logger)
