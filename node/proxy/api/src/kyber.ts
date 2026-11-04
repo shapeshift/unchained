@@ -8,31 +8,28 @@ if (!KYBER_API_KEY) throw new Error('KYBER_API_KEY env var not set')
 
 const BASE_URL = 'https://api.kyberswap.com/swap'
 
-// Aggregator endpoints are scoped by chain slug, e.g. /monad/api/v1/routes
-const ROUTES_PATH = /^\/[a-z0-9-]+\/api\/v1\/routes$/
-const BUILD_PATH = /^\/[a-z0-9-]+\/api\/v1\/route\/build$/
+// Matches the `source` web sends on route/build, so routes and builds attribute to the same client
+const CLIENT_ID = 'shapeshift'
 
 export class Kyber {
-  private axiosInstance = axios.create({ headers: { 'X-Api-Key': KYBER_API_KEY }, timeout: 10_000 })
+  private axiosInstance = axios.create({
+    headers: { 'X-Api-Key': KYBER_API_KEY, 'X-Client-Id': CLIENT_ID },
+    timeout: 10_000,
+  })
 
   constructor(private logger: Logger) {}
 
+  // Routes pin the chain slug to [a-z0-9-]+, so the path cannot escape the /swap gateway
   async handler(req: Request, res: Response): Promise<void> {
-    const parsedUrl = new URL(req.url, 'https://dummy.com')
-    const path = parsedUrl.pathname.replace(/^\/api\/v1\/kyber/, '').replace(/\/+$/, '')
-
-    const isRoutes = req.method === 'GET' && ROUTES_PATH.test(path)
-    const isBuild = req.method === 'POST' && BUILD_PATH.test(path)
-
-    if (!isRoutes && !isBuild) {
-      res.locals.unrouted = true
-      res.status(404).send('Not Found')
-      return
-    }
+    const { search } = new URL(req.url, 'https://dummy.com')
+    const path = req.path.replace(/^\/api\/v1\/kyber/, '').replace(/\/+$/, '')
 
     try {
-      const url = `${BASE_URL}${path}${parsedUrl.search}`
-      const response = isBuild ? await this.axiosInstance.post(url, req.body) : await this.axiosInstance.get(url)
+      const response = await this.axiosInstance.request({
+        method: req.method,
+        url: `${BASE_URL}${path}${search}`,
+        data: req.method === 'POST' ? req.body : undefined,
+      })
 
       Object.entries(response.headers).forEach(([k, v]) => res.set(k, v))
       res.status(response.status).send(response.data)
@@ -48,6 +45,15 @@ export class Kyber {
       return
     }
 
+    const status = err.response?.status
+
+    // Auth failures mean our server key is bad, which the client cannot fix
+    if (status === 401 || status === 403) {
+      this.logger.error({ status, data: err.response?.data }, 'Kyber rejected the proxy api key')
+      res.status(502).send('Bad Gateway')
+      return
+    }
+
     // Preserve upstream backoff guidance and make it readable by browser clients
     const retryAfter = err.response?.headers['retry-after']
     if (typeof retryAfter === 'string') {
@@ -55,6 +61,6 @@ export class Kyber {
       res.append('Access-Control-Expose-Headers', 'Retry-After')
     }
 
-    res.status(err.response?.status ?? 500).send(err.response?.data || 'Internal Server Error')
+    res.status(status ?? 500).send(err.response?.data || 'Internal Server Error')
   }
 }

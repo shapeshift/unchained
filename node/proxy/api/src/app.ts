@@ -65,8 +65,8 @@ const main = async () => {
   app.post('/api/v1/fynd/*', fynd.handler.bind(fynd))
 
   const kyber = new Kyber(logger)
-  app.get('/api/v1/kyber/*', kyber.handler.bind(kyber))
-  app.post('/api/v1/kyber/*', kyber.handler.bind(kyber))
+  app.get('/api/v1/kyber/:chain([a-z0-9-]+)/api/v1/routes', kyber.handler.bind(kyber))
+  app.post('/api/v1/kyber/:chain([a-z0-9-]+)/api/v1/route/build', kyber.handler.bind(kyber))
 
   const tokenMetadata = new TokenMetadata()
   app.get('/api/v1/tokens/metadata', tokenMetadata.handler.bind(tokenMetadata))
