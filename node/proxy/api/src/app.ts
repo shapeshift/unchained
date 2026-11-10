@@ -11,6 +11,7 @@ import { Zrx } from './zrx'
 import { Portals } from './portals'
 import { Fynd } from './fynd'
 import { Kyber } from './kyber'
+import { Symbiosis } from './symbiosis'
 import { MarketDataConnectionHandler } from './marketData'
 import { CoincapWebsocketClient } from './coincap'
 import { Ofac } from './ofac'
@@ -67,6 +68,13 @@ const main = async () => {
   const kyber = new Kyber(logger)
   app.get('/api/v1/kyber/:chain([a-z0-9-]+)/api/v1/routes', kyber.handler.bind(kyber))
   app.post('/api/v1/kyber/:chain([a-z0-9-]+)/api/v1/route/build', kyber.handler.bind(kyber))
+
+  const symbiosis = new Symbiosis(logger)
+  app.post('/api/v1/symbiosis/v2/quote', symbiosis.quoteHandler.bind(symbiosis))
+  app.get(
+    '/api/v1/symbiosis/v2/tx/:chainId([0-9]+)/:txHash(0x[0-9a-fA-F]{64}|[0-9a-fA-F]{64})',
+    symbiosis.txHandler.bind(symbiosis)
+  )
 
   const tokenMetadata = new TokenMetadata()
   app.get('/api/v1/tokens/metadata', tokenMetadata.handler.bind(tokenMetadata))
