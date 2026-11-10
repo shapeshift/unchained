@@ -71,7 +71,10 @@ const main = async () => {
 
   const symbiosis = new Symbiosis(logger)
   app.post('/api/v1/symbiosis/v2/quote', symbiosis.quoteHandler.bind(symbiosis))
-  app.get('/api/v1/symbiosis/v2/tx/:chainId([0-9]+)/:txHash([0-9a-zA-Z]+)', symbiosis.txHandler.bind(symbiosis))
+  app.get(
+    '/api/v1/symbiosis/v2/tx/:chainId([0-9]+)/:txHash(0x[0-9a-fA-F]{64}|[0-9a-fA-F]{64})',
+    symbiosis.txHandler.bind(symbiosis)
+  )
 
   const tokenMetadata = new TokenMetadata()
   app.get('/api/v1/tokens/metadata', tokenMetadata.handler.bind(tokenMetadata))
