@@ -7,6 +7,7 @@ import { privateKeyToAccount } from 'viem/accounts'
 
 const FYND_API_KEY = process.env.FYND_API_KEY
 const FYND_FEE_SIGNER_KEY = process.env.FYND_FEE_SIGNER_KEY
+const FYND_ENABLED = process.env.FYND_ENABLED !== 'false'
 
 if (!FYND_API_KEY) throw new Error('FYND_API_KEY env var not set')
 if (!FYND_FEE_SIGNER_KEY) throw new Error('FYND_FEE_SIGNER_KEY env var not set')
@@ -113,6 +114,11 @@ export class Fynd {
     const chain = CHAINS.get(slug)
     if (!chain) {
       res.status(404).send('Not Found')
+      return
+    }
+
+    if (!FYND_ENABLED) {
+      res.status(422).send({ error: 'Fynd is disabled', code: 'no_route_found' })
       return
     }
 
