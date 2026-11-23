@@ -26,6 +26,14 @@ export class Across {
     await this.relay(res, { method: 'POST', url: `${BASE_URL}/quotes`, data: req.body })
   }
 
+  async executionHandler(req: Request, res: Response): Promise<void> {
+    await this.relay(res, {
+      method: 'POST',
+      url: `${BASE_URL}/quotes/${req.params.orderId}/executions`,
+      data: req.body,
+    })
+  }
+
   async transferHandler(req: Request, res: Response): Promise<void> {
     await this.relay(res, { method: 'GET', url: `${BASE_URL}/transfers/${req.params.orderId}` })
   }
