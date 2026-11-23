@@ -667,6 +667,14 @@ const ADDITIONAL_SANCTIONED_ADDRESSES = [
   // direct recipients of funds from the fbi list, traced on-chain
   '0xe2b7314748ef21A603A33Ff5738fc011F8aAD4b0',
   '0x87a9960886865dC6679989861F197A2F8d1dD04E',
+  // https://chainflip.io/blog/incident-report-vault-exploit-21-november-2026-part-1
+  'bc1qm777twlzmelyutungyfw65ykn2l5kn68e6v4g6',
+  'bc1qp5r8aemhg8pxytlhcn43k8ptc6l6y03vxud5pr',
+  // chainflip exploit addresses, traced on-chain from the reported exploit txs
+  'bc1qmj0x9pkyup07j09axvvr6aquqfsdw254nlz5lz', // btc exploit tx recipient, forwarded to bc1qm777...
+  '0x78fa4aC270DB14886033e95b9B9E93F887aA2db0', // tornado-funded eoa that broadcast the eth exploit tx
+  '0x7d14a719072DA80076b4edcec3e3401209d21Eaf', // eth exploit tx recipient (eth, usdc, usdt)
+  '0xfd24197eF8503dd5dd18F30C7B86A77910D3B080', // received swapped eth, deposited 2,909 eth to tornado cash
 ]
 
 interface OfacArgs {
