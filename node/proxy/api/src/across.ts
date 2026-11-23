@@ -41,7 +41,7 @@ export class Across {
   async transfersHandler(req: Request, res: Response): Promise<void> {
     const { txnRef } = req.query
 
-    if (typeof txnRef !== 'string' || !/^(0x[0-9a-fA-F]{64}|[1-9A-HJ-NP-Za-km-z]{86,88})$/.test(txnRef)) {
+    if (typeof txnRef !== 'string' || !/^(0x[0-9a-fA-F]{64}|[1-9A-HJ-NP-Za-km-z]{64,88})$/.test(txnRef)) {
       res.status(400).send('Bad Request')
       return
     }
