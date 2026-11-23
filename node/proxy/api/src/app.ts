@@ -12,6 +12,7 @@ import { Portals } from './portals'
 import { Fynd } from './fynd'
 import { Kyber } from './kyber'
 import { Symbiosis } from './symbiosis'
+import { Across } from './across'
 import { MarketDataConnectionHandler } from './marketData'
 import { CoincapWebsocketClient } from './coincap'
 import { Ofac } from './ofac'
@@ -75,6 +76,11 @@ const main = async () => {
     '/api/v1/symbiosis/v2/tx/:chainId([0-9]+)/:txHash(0x[0-9a-fA-F]{64}|[0-9a-fA-F]{64})',
     symbiosis.txHandler.bind(symbiosis)
   )
+
+  const across = new Across(logger)
+  app.post('/api/v1/across/v1/quotes', across.quoteHandler.bind(across))
+  app.get('/api/v1/across/v1/transfers', across.transfersHandler.bind(across))
+  app.get('/api/v1/across/v1/transfers/:orderId(0x[0-9a-fA-F]{64})', across.transferHandler.bind(across))
 
   const tokenMetadata = new TokenMetadata()
   app.get('/api/v1/tokens/metadata', tokenMetadata.handler.bind(tokenMetadata))
