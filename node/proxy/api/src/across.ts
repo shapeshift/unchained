@@ -1,5 +1,5 @@
 import { Logger } from '@shapeshiftoss/logger'
-import axios from 'axios'
+import axios, { isAxiosError } from 'axios'
 import { Request, Response } from 'express'
 import { relayError, relayHeaders } from './utils'
 
@@ -8,6 +8,22 @@ const ACROSS_API_KEY = process.env.ACROSS_API_KEY
 if (!ACROSS_API_KEY) throw new Error('ACROSS_API_KEY env var not set')
 
 const BASE_URL = 'https://api.across.to/v1'
+
+// The API wraps errors in `error` while its gateway (401/429) returns them flat, so callers always get the flat shape
+const flattenError = (err: unknown): unknown => {
+  if (!isAxiosError(err) || !Buffer.isBuffer(err.response?.data)) return err
+
+  try {
+    const body = JSON.parse(err.response.data.toString())
+    if (typeof body?.error === 'object' && body.error !== null) {
+      err.response.data = Buffer.from(JSON.stringify(body.error))
+    }
+  } catch {
+    // Non-JSON bodies are relayed untouched
+  }
+
+  return err
+}
 
 export class Across {
   private logger: Logger
@@ -46,7 +62,7 @@ export class Across {
 
       res.status(response.status).send(response.data)
     } catch (err) {
-      relayError(res, err, this.logger)
+      relayError(res, flattenError(err), this.logger)
     }
   }
 }
