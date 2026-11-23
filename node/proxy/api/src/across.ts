@@ -38,21 +38,7 @@ export class Across {
     await this.relay(res, { method: 'GET', url: `${BASE_URL}/transfers/${req.params.orderId}` })
   }
 
-  async transfersHandler(req: Request, res: Response): Promise<void> {
-    const { txnRef } = req.query
-
-    if (typeof txnRef !== 'string' || !/^(0x[0-9a-fA-F]{64}|[1-9A-HJ-NP-Za-km-z]{64,88})$/.test(txnRef)) {
-      res.status(400).send('Bad Request')
-      return
-    }
-
-    await this.relay(res, { method: 'GET', url: `${BASE_URL}/transfers`, params: { txnRef } })
-  }
-
-  private async relay(
-    res: Response,
-    config: { method: 'GET' | 'POST'; url: string; data?: unknown; params?: Record<string, string> }
-  ): Promise<void> {
+  private async relay(res: Response, config: { method: 'GET' | 'POST'; url: string; data?: unknown }): Promise<void> {
     try {
       const response = await this.axiosInstance.request(config)
 

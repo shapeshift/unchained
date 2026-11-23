@@ -80,7 +80,6 @@ const main = async () => {
   const across = new Across(logger)
   app.post('/api/v1/across/v1/quotes', across.quoteHandler.bind(across))
   app.post('/api/v1/across/v1/quotes/:orderId(0x[0-9a-fA-F]{64})/executions', across.executionHandler.bind(across))
-  app.get('/api/v1/across/v1/transfers', across.transfersHandler.bind(across))
   app.get('/api/v1/across/v1/transfers/:orderId(0x[0-9a-fA-F]{64})', across.transferHandler.bind(across))
 
   const tokenMetadata = new TokenMetadata()
