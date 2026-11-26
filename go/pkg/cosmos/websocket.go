@@ -20,10 +20,13 @@ import (
 )
 
 const (
-	writeWait    = 15 * time.Second
-	readWait     = 15 * time.Second
-	pingPeriod   = (readWait * 9) / 10
-	resetTimeout = 30 * time.Second
+	writeWait        = 15 * time.Second
+	resetTimeout     = 30 * time.Second
+	subscribeTimeout = 10 * time.Second
+
+	// pongs don't extend the client's read deadline, so quiet connections are kept alive by the reset timer's resubscribe responses
+	readWait   = 2 * resetTimeout
+	pingPeriod = (readWait * 9) / 10
 )
 
 type TxHandlerFunc = func(tx types.EventDataTx, block *cosmossdk.BlockResponse) (interface{}, []string, error)
@@ -51,7 +54,12 @@ func NewWebsocketClient(conf cosmossdk.Config, blockService *cosmossdk.BlockServ
 		endpoint = "/wss"
 	}
 
-	client, err := cometbft.NewWS(wsURL.String(), endpoint)
+	client, err := cometbft.NewWS(wsURL.String(), endpoint,
+		cometbft.ReadWait(readWait),
+		cometbft.WriteWait(writeWait),
+		cometbft.PingPeriod(pingPeriod),
+		cometbft.MaxReconnectAttempts(10),
+	)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create websocket client")
 	}
@@ -77,17 +85,14 @@ func NewWebsocketClient(conf cosmossdk.Config, blockService *cosmossdk.BlockServ
 		unhandledTxs: make(map[int][]types.EventDataTx),
 	}
 
-	cometbft.ReadWait(readWait)
-	cometbft.WriteWait(writeWait)
-	cometbft.PingPeriod(pingPeriod)
-	cometbft.MaxReconnectAttempts(10)(client)
 	cometbft.OnReconnect(func() {
 		logger.Info("OnReconnect triggered: resubscribing")
 		ws.m.Lock()
 		ws.unhandledTxs = make(map[int][]types.EventDataTx)
 		ws.m.Unlock()
-		_ = client.Subscribe(context.Background(), types.EventQueryTx.String())
-		_ = client.Subscribe(context.Background(), types.EventQueryNewBlock.String())
+		if err := ws.subscribe(); err != nil {
+			logger.Error(errors.Wrap(err, "failed to resubscribe on reconnect"))
+		}
 	})(client)
 
 	return ws, nil
@@ -102,7 +107,10 @@ func (ws *WSClient) Start() error {
 		return errors.Wrap(err, "failed to subscribe")
 	}
 
+	ws.t = time.AfterFunc(resetTimeout, ws.reset)
+
 	go ws.listen()
+	go ws.blockService.MonitorLatest(ws.errChan)
 
 	return nil
 }
@@ -122,25 +130,34 @@ func (ws *WSClient) EncodingConfig() params.EncodingConfig {
 }
 
 func (ws *WSClient) subscribe() error {
-	if err := ws.client.Subscribe(context.Background(), types.EventQueryTx.String()); err != nil {
+	if err := ws.subscribeWithTimeout(types.EventQueryTx.String()); err != nil {
 		return errors.Wrap(err, "failed to subscribe to txs")
 	}
 
-	if err := ws.client.Subscribe(context.Background(), types.EventQueryNewBlock.String()); err != nil {
+	if err := ws.subscribeWithTimeout(types.EventQueryNewBlock.String()); err != nil {
 		return errors.Wrap(err, "failed to subscribe to newBlocks")
 	}
 
-	ws.t = time.AfterFunc(resetTimeout, ws.reset)
-
 	return nil
+}
+
+func (ws *WSClient) subscribeWithTimeout(query string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), subscribeTimeout)
+	defer cancel()
+
+	return ws.client.Subscribe(ctx, query)
 }
 
 func (ws *WSClient) reset() {
 	logger.Debugln("reset websocket")
 
 	ws.t.Stop()
+	defer ws.t.Reset(resetTimeout)
 
-	if err := ws.client.UnsubscribeAll(context.Background()); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), subscribeTimeout)
+	defer cancel()
+
+	if err := ws.client.UnsubscribeAll(ctx); err != nil {
 		logger.Error(errors.Wrap(err, "failed to unsubscribe from all subscriptions"))
 	}
 
@@ -181,17 +198,23 @@ func (ws *WSClient) listen() {
 			}
 		}
 	}
+
+	select {
+	case ws.errChan <- errors.New("websocket client stopped"):
+	default:
+	}
 }
 
 func (ws *WSClient) handleTx(tx types.EventDataTx) {
 	// queue up any transactions detected before block details are available
+	ws.m.Lock()
 	block, ok := ws.blockService.ReadBlock(int(tx.Height))
 	if !ok {
-		ws.m.Lock()
 		ws.unhandledTxs[int(tx.Height)] = append(ws.unhandledTxs[int(tx.Height)], tx)
 		ws.m.Unlock()
 		return
 	}
+	ws.m.Unlock()
 
 	if ws.txHandler != nil {
 		data, addrs, err := ws.txHandler(tx, block)
@@ -211,6 +234,7 @@ func (ws *WSClient) handleNewBlock(newBlock types.EventDataNewBlock) {
 		Timestamp: int(newBlock.Block.Time.Unix()),
 	}
 
+	// write before draining unhandledTxs so handleTx can never queue a tx for an already drained block
 	ws.blockService.WriteBlock(b, true)
 
 	// process any unhandled transactions

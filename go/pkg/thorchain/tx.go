@@ -147,10 +147,12 @@ func GetTxHistory(handler *Handler, pubkey string, cursor string, pageSize int) 
 				return nil, errors.WithStack(err)
 			}
 
+			latestHeight := max(handler.BlockService.LatestHeight(), int(b.Block.Height))
+
 			eventCache := make(map[string]interface{})
 
 			for i := range blockResult.GetBlockEvents() {
-				tx, err := GetTxFromBlockEvents(eventCache, b.Block.Header, blockResult.GetBlockEvents(), i, handler.BlockService.Latest.Height, handler.Denom, handler.NativeFee)
+				tx, err := GetTxFromBlockEvents(eventCache, b.Block.Header, blockResult.GetBlockEvents(), i, latestHeight, handler.Denom, handler.NativeFee)
 				if err != nil {
 					return nil, errors.Wrap(err, "failed to get tx from block events")
 				}

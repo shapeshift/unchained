@@ -181,7 +181,7 @@ func (h *Handler) FormatTx(tx *coretypes.ResultTx) (*cosmossdk.Tx, error) {
 			BlockHeight: block.Height,
 			Timestamp:   block.Timestamp,
 		},
-		Confirmations: h.BlockService.Latest.Height - height + 1,
+		Confirmations: h.BlockService.LatestHeight() - height + 1,
 		Events:        events,
 		Fee:           h.ParseFee(signingTx, tx.Hash.String()),
 		GasWanted:     strconv.Itoa(int(tx.TxResult.GasWanted)),
