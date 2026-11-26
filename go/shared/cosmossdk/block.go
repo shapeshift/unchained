@@ -20,8 +20,8 @@ type BlockFetcher interface {
 }
 
 type BlockService struct {
-	Latest           *BlockResponse
-	Blocks           map[int]*BlockResponse
+	latest           *BlockResponse
+	blocks           map[int]*BlockResponse
 	m                sync.RWMutex
 	httpClient       BlockFetcher
 	latestAdvancedAt time.Time
@@ -29,7 +29,7 @@ type BlockService struct {
 
 func NewBlockService(httpClient BlockFetcher) (*BlockService, error) {
 	s := &BlockService{
-		Blocks:     make(map[int]*BlockResponse),
+		blocks:     make(map[int]*BlockResponse),
 		httpClient: httpClient,
 	}
 
@@ -51,26 +51,30 @@ func NewBlockService(httpClient BlockFetcher) (*BlockService, error) {
 
 func (s *BlockService) WriteBlock(block *BlockResponse, latest bool) {
 	s.m.Lock()
-	if latest && (s.Latest == nil || block.Height > s.Latest.Height) {
-		s.Latest = block
+	if latest && (s.latest == nil || block.Height > s.latest.Height) {
+		s.latest = block
 		s.latestAdvancedAt = time.Now()
 	}
-	s.Blocks[block.Height] = block
+	s.blocks[block.Height] = block
 	s.m.Unlock()
+}
+
+func (s *BlockService) LatestHeight() int {
+	s.m.RLock()
+	defer s.m.RUnlock()
+
+	return s.latest.Height
 }
 
 func (s *BlockService) ReadBlock(height int) (*BlockResponse, bool) {
 	s.m.RLock()
-	block, ok := s.Blocks[height]
+	block, ok := s.blocks[height]
 	s.m.RUnlock()
 	return block, ok
 }
 
 func (s *BlockService) GetBlock(height int) (*BlockResponse, error) {
-	s.m.RLock()
-	block, ok := s.Blocks[height]
-	s.m.RUnlock()
-	if ok {
+	if block, ok := s.ReadBlock(height); ok {
 		return block, nil
 	}
 
@@ -79,7 +83,7 @@ func (s *BlockService) GetBlock(height int) (*BlockResponse, error) {
 		return nil, errors.WithStack(err)
 	}
 
-	block = &BlockResponse{
+	block := &BlockResponse{
 		Height:    int(result.Height),
 		Hash:      result.Hash,
 		Timestamp: int(result.Time.Unix()),
@@ -96,7 +100,7 @@ func (s *BlockService) MonitorLatest(errChan chan<- error) {
 
 	for range ticker.C {
 		s.m.RLock()
-		height, advancedAt := s.Latest.Height, s.latestAdvancedAt
+		height, advancedAt := s.latest.Height, s.latestAdvancedAt
 		s.m.RUnlock()
 
 		if time.Since(advancedAt) < latestBlockStaleAfter {

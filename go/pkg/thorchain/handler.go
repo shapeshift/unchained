@@ -60,7 +60,7 @@ func (h *Handler) NewWebsocketConnection(conn *ws.Conn, manager *websocket.Manag
 
 func (h *Handler) StartWebsocket() error {
 	h.WSClient.BlockEventHandler(func(eventCache map[string]interface{}, blockHeader types.Header, blockEvents []cosmossdk.ABCIEvent, eventIndex int) (interface{}, []string, error) {
-		tx, err := GetTxFromBlockEvents(eventCache, blockHeader, blockEvents, eventIndex, h.BlockService.Latest.Height, h.Denom, h.NativeFee)
+		tx, err := GetTxFromBlockEvents(eventCache, blockHeader, blockEvents, eventIndex, h.BlockService.LatestHeight(), h.Denom, h.NativeFee)
 		if err != nil {
 			return nil, nil, errors.Wrap(err, "failed to get txs from end block events")
 		}
@@ -179,7 +179,7 @@ func (h *Handler) FormatTx(tx *coretypes.ResultTx) (*cosmossdk.Tx, error) {
 			BlockHeight: block.Height,
 			Timestamp:   block.Timestamp,
 		},
-		Confirmations: h.BlockService.Latest.Height - height + 1,
+		Confirmations: h.BlockService.LatestHeight() - height + 1,
 		Events:        events,
 		Fee:           h.ParseFee(signingTx, tx.Hash.String()),
 		GasWanted:     strconv.Itoa(int(tx.TxResult.GasWanted)),
