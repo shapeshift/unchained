@@ -1947,6 +1947,7 @@ __metadata:
     bech32: "npm:^2.0.0"
     bottleneck: "npm:^2.19.5"
     fast-xml-parser: "npm:^4.3.0"
+    lru-cache: "npm:^10.0.1"
   languageName: unknown
   linkType: soft
 
