@@ -139,8 +139,6 @@ func GetTxHistory(handler *Handler, pubkey string, cursor string, pageSize int) 
 			return nil, errors.WithStack(err)
 		}
 
-		latestHeight := handler.BlockService.LatestHeight()
-
 		txs := []cosmossdk.HistoryTx{}
 		for _, b := range result.Blocks {
 			// fetch block results for each block found so we can inspect the block events
@@ -148,6 +146,8 @@ func GetTxHistory(handler *Handler, pubkey string, cursor string, pageSize int) 
 			if err != nil {
 				return nil, errors.WithStack(err)
 			}
+
+			latestHeight := max(handler.BlockService.LatestHeight(), int(b.Block.Height))
 
 			eventCache := make(map[string]interface{})
 
