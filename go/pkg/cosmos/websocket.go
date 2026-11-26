@@ -206,6 +206,8 @@ func (ws *WSClient) listen() {
 }
 
 func (ws *WSClient) handleTx(tx types.EventDataTx) {
+	defer websocket.RecoverPublish()
+
 	// queue up any transactions detected before block details are available
 	ws.m.Lock()
 	block, ok := ws.blockService.ReadBlock(int(tx.Height))
