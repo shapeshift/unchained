@@ -74,9 +74,13 @@ describe('doRpcRequest', () => {
     assert.equal(calls.length, 0)
   })
 
-  it('answers an empty batch with an empty array', async () => {
+  it('answers an empty batch with a single invalid request error', async () => {
     const { calls, forward } = forwarder()
-    assert.deepEqual(await doRpcRequest([], forward), [])
+    assert.deepEqual(await doRpcRequest([], forward), {
+      jsonrpc: '2.0',
+      id: null,
+      error: { code: -32600, message: 'Batch requests are not supported' },
+    })
     assert.equal(calls.length, 0)
   })
 

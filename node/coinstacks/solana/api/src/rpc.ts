@@ -44,6 +44,8 @@ export const doRpcRequest = async (
   req: RPCRequest | Array<RPCRequest>,
   forward: (req: RPCRequest) => Promise<RPCResponse>
 ): Promise<RPCResponse | Array<RPCResponse>> => {
+  // per json-rpc 2.0, an empty batch is answered with a single invalid request error
+  if (Array.isArray(req) && req.length === 0) return rpcBatchNotSupported(null)
   if (Array.isArray(req)) return req.map(rpcBatchNotSupported)
   if (!isRpcAllowed(req)) return rpcMethodNotFound(req)
   return forward(req)
