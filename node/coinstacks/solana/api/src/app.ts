@@ -1,10 +1,17 @@
-import { ConnectionHandler, middleware, Registry, TransactionHandler } from '@shapeshiftoss/common-api'
+import {
+  ConnectionHandler,
+  middleware,
+  Registry,
+  TransactionHandler,
+  handleProcessErrors,
+} from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
 import { Logs } from '@solana/web3.js'
 import express from 'express'
 import { join } from 'path'
 import swaggerUi from 'swagger-ui-express'
 import { Server } from 'ws'
+import { validateAddress } from './address'
 import { Tx } from './models'
 import { RegisterRoutes } from './routes'
 import { getTransaction } from './utils'
@@ -21,6 +28,8 @@ export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'solana', 'api'],
   level: process.env.LOG_LEVEL,
 })
+
+handleProcessErrors(logger)
 
 const app = express()
 
@@ -58,6 +67,7 @@ const transactionHandler: TransactionHandler<Logs, Tx> = async (log) => {
 
 const registry = new Registry({
   addressFormatter: (address: string) => address,
+  addressValidator: validateAddress,
   transactionHandler,
 })
 

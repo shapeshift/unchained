@@ -98,9 +98,16 @@ export class ConnectionHandler extends BaseConnectionHandler {
       return
     }
 
+    const validAddresses = data.addresses.filter((address) => this.registry.toValidAddress(address))
+    const invalidCount = data.addresses.length - validAddresses.length
+
+    if (invalidCount) this.sendError(`invalid addresses ignored: ${invalidCount}`, subscriptionId)
+
+    if (!validAddresses.length) return
+
     this.subscriptionIds.add(subscriptionId)
 
-    const subscribedAddresses = this.registry.subscribe(this.clientId, subscriptionId, this, data.addresses)
+    const subscribedAddresses = this.registry.subscribe(this.clientId, subscriptionId, this, validAddresses)
 
     this.client.subscribeAddresses(this.registry.getAddresses(), subscribedAddresses)
   }

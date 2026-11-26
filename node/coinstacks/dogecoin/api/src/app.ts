@@ -3,7 +3,14 @@ import { join } from 'path'
 import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
 import { Logger } from '@shapeshiftoss/logger'
-import { middleware, ConnectionHandler, Registry, BlockHandler, TransactionHandler } from '@shapeshiftoss/common-api'
+import {
+  middleware,
+  ConnectionHandler,
+  Registry,
+  BlockHandler,
+  TransactionHandler,
+  handleProcessErrors,
+} from '@shapeshiftoss/common-api'
 import { getAddresses, NewBlock, Tx as BlockbookTx, WebsocketClient } from '@shapeshiftoss/blockbook'
 import { utxo } from '@shapeshiftoss/common-api'
 import { formatAddress, service } from './controller'
@@ -20,6 +27,8 @@ const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'dogecoin', 'api'],
   level: process.env.LOG_LEVEL,
 })
+
+handleProcessErrors(logger)
 
 const app = express()
 
@@ -60,7 +69,12 @@ const transactionHandler: TransactionHandler<BlockbookTx, utxo.Tx> = async (bloc
   return { addresses, tx }
 }
 
-const registry = new Registry({ addressFormatter: formatAddress, blockHandler, transactionHandler })
+const registry = new Registry({
+  addressFormatter: formatAddress,
+  addressValidator: utxo.validateDogecoinAddress,
+  blockHandler,
+  transactionHandler,
+})
 
 const blockbook = new WebsocketClient(
   INDEXER_WS_URL,

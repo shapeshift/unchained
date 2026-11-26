@@ -98,8 +98,15 @@ export abstract class BaseConnectionHandler {
   private close(interval: NodeJS.Timeout): void {
     this.pingTimeout && clearTimeout(this.pingTimeout)
     clearInterval(interval)
-    this.onClose()
-    this.subscriptionIds.clear()
+
+    // close is invoked from websocket event listeners, so any error thrown here would be uncaught
+    try {
+      this.onClose()
+    } catch (err) {
+      this.logger.error(err, { clientId: this.clientId, fn: 'close' }, 'Error closing connection')
+    } finally {
+      this.subscriptionIds.clear()
+    }
   }
 
   publish(subscriptionId: string, payload: { data: unknown } & Record<string, unknown>): void {

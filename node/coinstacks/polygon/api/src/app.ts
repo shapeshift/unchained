@@ -2,7 +2,14 @@ import express from 'express'
 import { join } from 'path'
 import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
-import { evm, middleware, ConnectionHandler, Registry, TransactionHandler } from '@shapeshiftoss/common-api'
+import {
+  evm,
+  middleware,
+  ConnectionHandler,
+  Registry,
+  TransactionHandler,
+  handleProcessErrors,
+} from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
 import { service } from './controller'
 import { RegisterRoutes } from './routes'
@@ -13,6 +20,8 @@ export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'polygon', 'api'],
   level: process.env.LOG_LEVEL,
 })
+
+handleProcessErrors(logger)
 
 const app = express()
 

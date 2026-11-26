@@ -11,6 +11,7 @@
 .env*
 .eslintcache
 dist
+dist-test
 node_modules/
 *.tsbuildinfo
 routes.ts

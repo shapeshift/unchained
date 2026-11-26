@@ -10,12 +10,14 @@
   ],
   "scripts": {
     "build": "yarn run -T tsc",
-    "clean": "rm -rf dist node_modules",
-    "watch": "yarn run -T tsc --watch"
+    "clean": "rm -rf dist dist-test node_modules",
+    "watch": "yarn run -T tsc --watch",
+    "test": "rm -rf dist-test && yarn run -T tsc -p tsconfig.test.json && node --test dist-test/__tests__/*.test.js"
   },
   "dependencies": {
     "@shapeshiftoss/blockbook": "^10.0.0",
     "@shapeshiftoss/websocket": "^10.0.0",
+    "bech32": "^2.0.0",
     "bignumber.js": "^9.1.2",
     "ws": "^8.15.0"
   },
