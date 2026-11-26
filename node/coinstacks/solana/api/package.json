@@ -9,7 +9,8 @@
   "scripts": {
     "build": "yarn generate && yarn run -T tsc",
     "clean": "rm -rf dist node_modules src/routes.ts src/swagger.json",
-    "generate": "yarn run -T tsoa spec-and-routes"
+    "generate": "yarn run -T tsoa spec-and-routes",
+    "test": "yarn run -T tsc -p tsconfig.test.json && node --test 'dist/test/solana/api/src/**/*.test.js'"
   },
   "dependencies": {
     "@shapeshiftoss/common-api": "^10.0.0",

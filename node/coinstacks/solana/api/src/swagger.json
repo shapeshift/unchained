@@ -2007,7 +2007,7 @@
 				"operationId": "DoRpcRequest",
 				"responses": {
 					"200": {
-						"description": "jsonrpc response or batch responses",
+						"description": "jsonrpc response",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -2028,7 +2028,12 @@
 										"value": {
 											"jsonrpc": "2.0",
 											"id": "test",
-											"result": 274885350
+											"result": {
+												"context": {
+													"slot": 274885350
+												},
+												"value": 1000000000
+											}
 										}
 									}
 								}
@@ -2036,14 +2041,14 @@
 						}
 					}
 				},
-				"description": "Makes a jsonrpc request to the node.",
+				"description": "Makes a jsonrpc request to the node.\nOnly a limited set of methods is supported and batch requests are rejected.",
 				"tags": [
 					"v1"
 				],
 				"security": [],
 				"parameters": [],
 				"requestBody": {
-					"description": "jsonrpc request or batch requests",
+					"description": "jsonrpc request",
 					"required": true,
 					"content": {
 						"application/json": {
@@ -2059,13 +2064,15 @@
 										"type": "array"
 									}
 								],
-								"description": "jsonrpc request or batch requests"
+								"description": "jsonrpc request"
 							},
 							"example": {
 								"jsonrpc": "2.0",
 								"id": "test",
-								"method": "getBlockHeight",
-								"params": []
+								"method": "getBalance",
+								"params": [
+									"9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+								]
 							}
 						}
 					}

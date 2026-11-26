@@ -1,4 +1,5 @@
 import { validatePageSize } from '@shapeshiftoss/common-api'
+import axios from 'axios'
 import { VersionedTransaction } from '@solana/web3.js'
 import { DAS, EnrichedTransaction, Helius, Interface, Source, TransactionType } from 'helius-sdk'
 import { Body, Example, Get, Path, Post, Query, Response, Route, Tags } from 'tsoa'
@@ -15,7 +16,8 @@ import {
   handleError,
 } from '../../../common/api/src' // unable to import models from a module with tsoa
 import { Account, API, EstimateFeesBody, PriorityFees, TokenDetails, TokenBalance, Tx, TxHistory } from './models'
-import { axiosNoRetry, axiosWithRetry, getTransaction } from './utils'
+import { axiosNoRetry, getTransaction } from './utils'
+import { RPC_TIMEOUT, doRpcRequest } from './rpc'
 import { NativeBalance } from './types'
 
 const INDEXER_URL = process.env.INDEXER_URL
@@ -384,28 +386,31 @@ export class Solana implements BaseAPI, API {
 
   /**
    * Makes a jsonrpc request to the node.
+   * Only a limited set of methods is supported and batch requests are rejected.
    *
-   * @param {RPCRequest | Array<RPCRequest>} body jsonrpc request or batch requests
+   * @param {RPCRequest | Array<RPCRequest>} body jsonrpc request
    *
-   * @returns {Promise<RPCResponse | Array<RPCResponse>>} jsonrpc response or batch responses
+   * @returns {Promise<RPCResponse | Array<RPCResponse>>} jsonrpc response
    *
    * @example body {
    *    "jsonrpc": "2.0",
    *    "id": "test",
-   *    "method": "getBlockHeight",
-   *    "params": []
+   *    "method": "getBalance",
+   *    "params": ["9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"]
    * }
    */
   @Example<RPCResponse>({
     jsonrpc: '2.0',
     id: 'test',
-    result: 274885350,
+    result: { context: { slot: 274885350 }, value: 1000000000 },
   })
   @Post('jsonrpc/')
   async doRpcRequest(@Body() body: RPCRequest | Array<RPCRequest>): Promise<RPCResponse | Array<RPCResponse>> {
     try {
-      const { data } = await axiosWithRetry.post<RPCResponse>(rpcUrl, body)
-      return data
+      return await doRpcRequest(body, async (req) => {
+        const { data } = await axios.post<RPCResponse>(rpcUrl, req, { timeout: RPC_TIMEOUT })
+        return data
+      })
     } catch (err) {
       throw handleError(err)
     }
