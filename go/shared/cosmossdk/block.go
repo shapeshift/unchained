@@ -7,6 +7,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+const latestBlockStaleAfter = 5 * time.Minute
+
 type ResultBlock struct {
 	Height int64     `json:"height"`
 	Time   time.Time `json:"time"`
@@ -18,10 +20,11 @@ type BlockFetcher interface {
 }
 
 type BlockService struct {
-	Latest     *BlockResponse
-	Blocks     map[int]*BlockResponse
-	m          sync.RWMutex
-	httpClient BlockFetcher
+	Latest           *BlockResponse
+	Blocks           map[int]*BlockResponse
+	m                sync.RWMutex
+	httpClient       BlockFetcher
+	latestAdvancedAt time.Time
 }
 
 func NewBlockService(httpClient BlockFetcher) (*BlockService, error) {
@@ -48,8 +51,9 @@ func NewBlockService(httpClient BlockFetcher) (*BlockService, error) {
 
 func (s *BlockService) WriteBlock(block *BlockResponse, latest bool) {
 	s.m.Lock()
-	if latest {
+	if latest && (s.Latest == nil || block.Height > s.Latest.Height) {
 		s.Latest = block
+		s.latestAdvancedAt = time.Now()
 	}
 	s.Blocks[block.Height] = block
 	s.m.Unlock()
@@ -84,4 +88,26 @@ func (s *BlockService) GetBlock(height int) (*BlockResponse, error) {
 	s.WriteBlock(block, false)
 
 	return block, nil
+}
+
+func (s *BlockService) MonitorLatest(errChan chan<- error) {
+	ticker := time.NewTicker(latestBlockStaleAfter / 10)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		s.m.RLock()
+		height, advancedAt := s.Latest.Height, s.latestAdvancedAt
+		s.m.RUnlock()
+
+		if time.Since(advancedAt) < latestBlockStaleAfter {
+			continue
+		}
+
+		select {
+		case errChan <- errors.Errorf("latest block height %d has not advanced since %s", height, advancedAt.Format(time.RFC3339)):
+		default:
+		}
+
+		return
+	}
 }
