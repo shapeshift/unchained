@@ -215,13 +215,14 @@ func (ws *WSClient) listen() {
 
 func (ws *WSClient) handleTx(tx types.EventDataTx) {
 	// queue up any transactions detected before block details are available
+	ws.m.Lock()
 	block, ok := ws.blockService.ReadBlock(int(tx.Height))
 	if !ok {
-		ws.m.Lock()
 		ws.unhandledTxs[int(tx.Height)] = append(ws.unhandledTxs[int(tx.Height)], tx)
 		ws.m.Unlock()
 		return
 	}
+	ws.m.Unlock()
 
 	if ws.txHandler != nil {
 		data, addrs, err := ws.txHandler(tx, block)
@@ -241,6 +242,7 @@ func (ws *WSClient) handleNewBlock(newBlock types.EventDataNewBlock, blockEvents
 		Timestamp: int(newBlock.Block.Time.Unix()),
 	}
 
+	// write before draining unhandledTxs so handleTx can never queue a tx for an already drained block
 	ws.blockService.WriteBlock(b, true)
 
 	if ws.blockEventHandler != nil {
