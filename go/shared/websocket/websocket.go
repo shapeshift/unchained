@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"maps"
+	"slices"
 	"sync"
 	"time"
 
@@ -46,7 +47,7 @@ type MessageResponse struct {
 type Connection struct {
 	clientID        string
 	conn            *websocket.Conn
-	doneChan        chan interface{}
+	doneChan        chan struct{}
 	handler         Registrar
 	manager         *Manager
 	msgChan         chan []byte
@@ -60,7 +61,7 @@ func NewConnection(conn *websocket.Conn, handler Registrar, manager *Manager) *C
 	c := &Connection{
 		clientID:        uuid.NewString(),
 		conn:            conn,
-		doneChan:        make(chan interface{}),
+		doneChan:        make(chan struct{}),
 		handler:         handler,
 		manager:         manager,
 		msgChan:         make(chan []byte),
@@ -130,9 +131,8 @@ func (c *Connection) Start() {
 
 // Stop the websocket connection by unsubscribing all client subscriptions and unregistering the client from the manager.
 func (c *Connection) Stop() {
-	for subscriptionID := range c.subscriptionIDs {
-		c.handler.Unsubscribe(c.clientID, subscriptionID, nil, c.msgChan)
-	}
+	c.handler.UnsubscribeClient(c.clientID)
+	clear(c.subscriptionIDs)
 
 	c.manager.unregister <- c
 
@@ -144,7 +144,6 @@ func (c *Connection) cleanup() {
 	c.ticker.Stop()
 	_ = c.send(websocket.CloseMessage, []byte{})
 	_ = c.conn.Close()
-	close(c.msgChan)
 }
 
 func (c *Connection) send(messageType int, data []byte) error {
@@ -177,17 +176,19 @@ func (c *Connection) read() {
 		case "subscribe":
 			logger.Debugf("Subscribe: clientID: %s, subscriptionID: %s, addresses: %v", c.clientID, r.SubscriptionID, r.Data.Addresses)
 			c.subscriptionIDs[r.SubscriptionID] = struct{}{}
-			c.handler.Subscribe(c.clientID, r.SubscriptionID, r.Data.Addresses, c.msgChan)
+			c.handler.Subscribe(c.clientID, r.SubscriptionID, r.Data.Addresses, c.msgChan, c.doneChan)
 		case "unsubscribe":
 			logger.Debugf("Unsubscribe: clientID: %s, subscriptionID: %s, addresses: %v", c.clientID, r.SubscriptionID, r.Data.Addresses)
 			if r.SubscriptionID != "" {
-				delete(c.subscriptionIDs, r.SubscriptionID)
-				c.handler.Unsubscribe(c.clientID, r.SubscriptionID, r.Data.Addresses, c.msgChan)
+				if c.handler.Unsubscribe(c.clientID, r.SubscriptionID, r.Data.Addresses) {
+					delete(c.subscriptionIDs, r.SubscriptionID)
+				}
 			} else {
-				subscriptionIDs := maps.Keys(c.subscriptionIDs)
-				for subscriptionID := range subscriptionIDs {
-					delete(c.subscriptionIDs, subscriptionID)
-					c.handler.Unsubscribe(c.clientID, subscriptionID, r.Data.Addresses, c.msgChan)
+				subscriptionIDs := slices.Collect(maps.Keys(c.subscriptionIDs))
+				for _, subscriptionID := range subscriptionIDs {
+					if c.handler.Unsubscribe(c.clientID, subscriptionID, r.Data.Addresses) {
+						delete(c.subscriptionIDs, subscriptionID)
+					}
 				}
 			}
 		default:
@@ -196,8 +197,16 @@ func (c *Connection) read() {
 	}
 }
 
+// msgChan is never closed: publishers may still hold a reference to it, so write exits on doneChan instead
 func (c *Connection) write() {
-	for msg := range c.msgChan {
+	for {
+		var msg []byte
+		select {
+		case msg = <-c.msgChan:
+		case <-c.doneChan:
+			return
+		}
+
 		if err := c.conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
 			logger.Errorf("failed to set write deadline: %+v", err)
 		}
