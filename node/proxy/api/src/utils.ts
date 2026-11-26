@@ -12,9 +12,12 @@ const UNRELAYED_HEADERS = new Set([
   'x-cache',
 ])
 
-const isRelayedHeader = (key: string): boolean => {
+// Quota, plan and rate limit headers describe our upstream accounts, not the caller's
+const ACCOUNT_HEADER = /rate-?limit|quota|credit|(^|-)plan($|-)|^x-cg-|^x-api-/
+
+export const isRelayedHeader = (key: string): boolean => {
   const header = key.toLowerCase()
-  return !UNRELAYED_HEADERS.has(header) && !header.startsWith('access-control-')
+  return !UNRELAYED_HEADERS.has(header) && !header.startsWith('access-control-') && !ACCOUNT_HEADER.test(header)
 }
 
 export const relayHeaders = (res: Response, headers: object): void => {

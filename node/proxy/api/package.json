@@ -9,13 +9,15 @@
   "scripts": {
     "build": "yarn generate && yarn run -T tsc",
     "clean": "rm -rf dist node_modules src/routes.ts src/swagger.json",
-    "generate": "yarn run -T tsoa spec-and-routes"
+    "generate": "yarn run -T tsoa spec-and-routes",
+    "test": "yarn run -T tsc -p tsconfig.test.json && node --test 'dist/test/proxy/api/src/**/*.test.js'"
   },
   "dependencies": {
     "@shapeshiftoss/common-api": "^10.0.0",
     "@solana/web3.js": "^1.95.3",
     "bech32": "^2.0.0",
     "bottleneck": "^2.19.5",
-    "fast-xml-parser": "^4.3.0"
+    "fast-xml-parser": "^4.3.0",
+    "lru-cache": "^10.0.1"
   }
 }

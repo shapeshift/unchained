@@ -18,9 +18,12 @@ import { CoincapWebsocketClient } from './coincap'
 import { Ofac } from './ofac'
 import { TokenMetadata } from './tokenMetadata'
 import { Rfox } from './rfox'
+import { rateLimit } from './rateLimit'
 
 const PORT = process.env.PORT ?? 3000
 const COINCAP_API_KEY = process.env.COINCAP_API_KEY
+// per client, per minute, across the relays that spend paid upstream quota
+const UPSTREAM_RATE_LIMIT = Number(process.env.UPSTREAM_RATE_LIMIT_PER_MINUTE) || 1200
 
 export const logger = new Logger({
   namespace: ['unchained', 'proxy', 'api'],
@@ -51,17 +54,19 @@ const main = async () => {
 
   RegisterRoutes(app)
 
+  const upstreamRateLimit = rateLimit({ limit: UPSTREAM_RATE_LIMIT, windowMs: 60_000 })
+
   const coingecko = new CoinGecko(logger)
-  app.get('/api/v1/markets/*', coingecko.handler.bind(coingecko))
+  app.get('/api/v1/markets/*', upstreamRateLimit, coingecko.handler.bind(coingecko))
 
   const zerion = new Zerion(logger)
-  app.get('/api/v1/zerion/*', zerion.handler.bind(zerion))
+  app.get('/api/v1/zerion/*', upstreamRateLimit, zerion.handler.bind(zerion))
 
   const zrx = new Zrx(logger)
   app.get('/api/v1/zrx/*', zrx.handler.bind(zrx))
 
   const portals = new Portals(logger)
-  app.get('/api/v1/portals/*', portals.handler.bind(portals))
+  app.get('/api/v1/portals/*', upstreamRateLimit, portals.handler.bind(portals))
 
   const fynd = new Fynd(logger)
   app.post('/api/v1/fynd/*', fynd.handler.bind(fynd))
