@@ -9,6 +9,7 @@ import {
   Registry,
   TransactionHandler,
   handleProcessErrors,
+  WS_MAX_PAYLOAD,
 } from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
 import { service } from './controller'
@@ -58,7 +59,7 @@ const registry = new Registry({ addressFormatter: evm.formatAddress, transaction
 service.transactionHandler = registry.onTransaction.bind(registry)
 
 const server = app.listen(PORT, () => logger.info('Server started'))
-const wsServer = new Server({ server })
+const wsServer = new Server({ server, maxPayload: WS_MAX_PAYLOAD })
 
 wsServer.on('connection', (connection) => {
   ConnectionHandler.start(connection, registry, service, logger)

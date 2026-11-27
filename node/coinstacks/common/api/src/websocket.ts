@@ -3,6 +3,12 @@ import { AddressSubscriptionClient, BaseConnectionHandler } from '@shapeshiftoss
 import WebSocket from 'ws'
 import { Registry } from './registry'
 
+/**
+ * Maximum client websocket message size in bytes (ws defaults to 100 MiB).
+ * Leaves room for subscribe messages with tens of thousands of addresses.
+ */
+export const WS_MAX_PAYLOAD = 4 * 1024 * 1024
+
 export type Topics = 'txs'
 
 export interface TxsTopicData {

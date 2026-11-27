@@ -26,6 +26,8 @@ describe('solana address validation', () => {
       'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1vv',
       'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt10',
       '0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed',
+      '1'.repeat(45),
+      'z'.repeat(100000),
     ]
     for (const address of invalid) assert.equal(validateAddress(address), false, address)
   })

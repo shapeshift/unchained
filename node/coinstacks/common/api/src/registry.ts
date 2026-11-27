@@ -1,6 +1,10 @@
 import { Logger } from '@shapeshiftoss/logger'
 import { ConnectionHandler } from './websocket'
 
+// generous upper bound on the length of any supported address or extended public key (the longest are zcash unified
+// addresses), checked before any formatting or decoding work is done
+export const MAX_ADDRESS_LENGTH = 1024
+
 export type AddressFormatter = (address: string) => string
 export type AddressValidator = (address: string) => boolean
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -64,7 +68,7 @@ export class Registry {
    * @returns the formatted address, or undefined if the address is not valid for this chain
    */
   toValidAddress(address: unknown): string | undefined {
-    if (typeof address !== 'string' || !address) return
+    if (typeof address !== 'string' || !address || address.length > MAX_ADDRESS_LENGTH) return
 
     try {
       const formatted = this.formatAddress(address)

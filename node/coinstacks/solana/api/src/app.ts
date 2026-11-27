@@ -4,6 +4,7 @@ import {
   Registry,
   TransactionHandler,
   handleProcessErrors,
+  WS_MAX_PAYLOAD,
 } from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
 import { Logs } from '@solana/web3.js'
@@ -77,7 +78,7 @@ const helius = new WebsocketClient(WS_URL, {
 })
 
 const server = app.listen(PORT, () => logger.info('Server started'))
-const wsServer = new Server({ server })
+const wsServer = new Server({ server, maxPayload: WS_MAX_PAYLOAD })
 
 wsServer.on('connection', (connection) => {
   ConnectionHandler.start(connection, registry, helius, logger)

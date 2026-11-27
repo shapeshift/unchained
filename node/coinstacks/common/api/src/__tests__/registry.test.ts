@@ -4,7 +4,7 @@ import { afterEach, describe, it } from 'node:test'
 import { Logger } from '@shapeshiftoss/logger'
 import { AddressSubscriptionClient, BaseConnectionHandler } from '@shapeshiftoss/websocket'
 import WebSocket from 'ws'
-import { Registry } from '../registry'
+import { MAX_ADDRESS_LENGTH, Registry } from '../registry'
 import { getAddress } from 'viem'
 import { formatAddress as formatEvmAddress } from '../evm'
 import { ConnectionHandler } from '../websocket'
@@ -107,6 +107,23 @@ describe('Registry', () => {
     assert.deepEqual(registry.getAddresses(), [getAddress(valid)])
     assert.deepEqual(registry.unsubscribe('a', '1', ['constructor', valid]), [getAddress(valid)])
     assert.deepEqual(registry.getAddresses(), [])
+  })
+
+  it('rejects oversized addresses before formatting or validating', () => {
+    const seen: Array<string> = []
+    const registry = new Registry({
+      addressFormatter: (address) => {
+        seen.push(address)
+        return address
+      },
+      transactionHandler,
+    })
+
+    assert.equal(registry.toValidAddress('z'.repeat(MAX_ADDRESS_LENGTH + 1)), undefined)
+    assert.deepEqual(seen, [])
+
+    const longest = 'u'.repeat(MAX_ADDRESS_LENGTH)
+    assert.equal(registry.toValidAddress(longest), longest)
   })
 
   it('does not register a client when no addresses are valid', async () => {

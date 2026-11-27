@@ -10,6 +10,7 @@ import {
   BlockHandler,
   TransactionHandler,
   handleProcessErrors,
+  WS_MAX_PAYLOAD,
 } from '@shapeshiftoss/common-api'
 import { getAddresses, NewBlock, Tx as BlockbookTx, WebsocketClient } from '@shapeshiftoss/blockbook'
 import { utxo } from '@shapeshiftoss/common-api'
@@ -87,7 +88,7 @@ const blockbook = new WebsocketClient(
 )
 
 const server = app.listen(PORT, () => logger.info('Server started'))
-const wsServer = new Server({ server })
+const wsServer = new Server({ server, maxPayload: WS_MAX_PAYLOAD })
 
 wsServer.on('connection', (connection) => {
   ConnectionHandler.start(connection, registry, blockbook, logger)
