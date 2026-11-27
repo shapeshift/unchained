@@ -3,6 +3,12 @@ import { AddressSubscriptionClient, BaseConnectionHandler } from '@shapeshiftoss
 import WebSocket from 'ws'
 import { Registry } from './registry'
 
+/**
+ * Maximum client websocket message size in bytes (ws defaults to 100 MiB).
+ * Leaves room for subscribe messages with tens of thousands of addresses.
+ */
+export const WS_MAX_PAYLOAD = 4 * 1024 * 1024
+
 export type Topics = 'txs'
 
 export interface TxsTopicData {
@@ -98,9 +104,16 @@ export class ConnectionHandler extends BaseConnectionHandler {
       return
     }
 
+    const validAddresses = data.addresses.filter((address) => this.registry.toValidAddress(address))
+    const invalidCount = data.addresses.length - validAddresses.length
+
+    if (invalidCount) this.sendError(`invalid addresses ignored: ${invalidCount}`, subscriptionId)
+
+    if (!validAddresses.length) return
+
     this.subscriptionIds.add(subscriptionId)
 
-    const subscribedAddresses = this.registry.subscribe(this.clientId, subscriptionId, this, data.addresses)
+    const subscribedAddresses = this.registry.subscribe(this.clientId, subscriptionId, this, validAddresses)
 
     this.client.subscribeAddresses(this.registry.getAddresses(), subscribedAddresses)
   }

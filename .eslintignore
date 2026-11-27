@@ -1,5 +1,6 @@
 coverage
 dist
+dist-test
 node_modules
 *.go
 swaggerui

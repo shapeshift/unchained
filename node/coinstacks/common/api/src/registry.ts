@@ -1,7 +1,12 @@
 import { Logger } from '@shapeshiftoss/logger'
 import { ConnectionHandler } from './websocket'
 
+// generous upper bound on the length of any supported address or extended public key (the longest are zcash unified
+// addresses), checked before any formatting or decoding work is done
+export const MAX_ADDRESS_LENGTH = 1024
+
 export type AddressFormatter = (address: string) => string
+export type AddressValidator = (address: string) => boolean
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type BlockHandler<T = any, T2 = Array<unknown>> = (block: T) => Promise<{ txs: T2 }>
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -13,6 +18,8 @@ const isTxWithAddresses = (tx: unknown): tx is { addresses: Array<string>; tx: u
 
 export interface RegistryArgs {
   addressFormatter?: AddressFormatter
+  /** Returns true if the (formatted) address is a valid address for the chain. Invalid addresses are not registered. */
+  addressValidator?: AddressValidator
   blockHandler?: BlockHandler
   transactionHandler: TransactionHandler
 }
@@ -23,12 +30,14 @@ export interface RegistryArgs {
  * unchained transaction payloads will be sent to any clients that have an address registered that was found in the transaction.
  */
 export class Registry {
-  private clients: Record<string, Set<string>> = {}
-  private addresses: Record<string, Map<string, ConnectionHandler>> = {}
+  // Map (not plain objects) so that client supplied strings can never collide with inherited object properties
+  private clients = new Map<string, Set<string>>()
+  private addresses = new Map<string, Map<string, ConnectionHandler>>()
 
   private handleBlock?: BlockHandler
   private handleTransaction: TransactionHandler
   private formatAddress: AddressFormatter = (address: string) => address.toLowerCase()
+  private validateAddress: AddressValidator = () => true
 
   private logger = new Logger({ namespace: ['unchained', 'common', 'api', 'registry'], level: process.env.LOG_LEVEL })
 
@@ -37,6 +46,7 @@ export class Registry {
     this.handleTransaction = args.transactionHandler
 
     if (args.addressFormatter) this.formatAddress = args.addressFormatter
+    if (args.addressValidator) this.validateAddress = args.addressValidator
   }
 
   private static toId(clientId: string, subscriptionId: string): string {
@@ -49,7 +59,24 @@ export class Registry {
   }
 
   getAddresses(): Array<string> {
-    return Object.keys(this.addresses)
+    return Array.from(this.addresses.keys())
+  }
+
+  /**
+   * Format and validate a client supplied address
+   *
+   * @returns the formatted address, or undefined if the address is not valid for this chain
+   */
+  toValidAddress(address: unknown): string | undefined {
+    if (typeof address !== 'string' || !address || address.length > MAX_ADDRESS_LENGTH) return
+
+    try {
+      const formatted = this.formatAddress(address)
+      if (!formatted || !this.validateAddress(formatted)) return
+      return formatted
+    } catch (err) {
+      return
+    }
   }
 
   /**
@@ -58,7 +85,7 @@ export class Registry {
    * @param clientId unique client uuid
    * @param subscriptionId unique identifier for a set of addresses
    * @param connection websocket client connection
-   * @param addresses list of addresses to subscribe to
+   * @param addresses list of addresses to subscribe to (invalid addresses are ignored)
    */
   subscribe(
     clientId: string,
@@ -68,21 +95,28 @@ export class Registry {
   ): Array<string> {
     const id = Registry.toId(clientId, subscriptionId)
 
-    if (!this.clients[id]) this.clients[id] = new Set<string>()
-
     const subscribedAddresses: Array<string> = []
 
-    addresses.forEach((address) => {
-      address = this.formatAddress(address)
+    for (const rawAddress of addresses) {
+      const address = this.toValidAddress(rawAddress)
+      if (!address) continue
 
-      if (!this.addresses[address]) {
-        this.addresses[address] = new Map<string, ConnectionHandler>()
+      let clientAddresses = this.clients.get(id)
+      if (!clientAddresses) {
+        clientAddresses = new Set<string>()
+        this.clients.set(id, clientAddresses)
+      }
+
+      let connections = this.addresses.get(address)
+      if (!connections) {
+        connections = new Map<string, ConnectionHandler>()
+        this.addresses.set(address, connections)
         subscribedAddresses.push(address)
       }
 
-      this.clients[id].add(address)
-      this.addresses[address].set(id, connection)
-    })
+      clientAddresses.add(address)
+      connections.set(id, connection)
+    }
 
     return subscribedAddresses
   }
@@ -97,47 +131,42 @@ export class Registry {
   unsubscribe(clientId: string, subscriptionId: string, addresses: Array<string>): Array<string> {
     const id = Registry.toId(clientId, subscriptionId)
 
-    if (!this.clients[id]) return []
+    const clientAddresses = this.clients.get(id)
+    if (!clientAddresses) return []
 
     const unsubscribedAddresses: Array<string> = []
 
-    const unregister = (id: string, address: string) => {
-      address = this.formatAddress(address)
+    // addresses stored in the registry are already formatted, so only client supplied addresses are formatted
+    const toUnregister = addresses.length
+      ? addresses.map((address) => this.toValidAddress(address)).filter((address): address is string => !!address)
+      : Array.from(clientAddresses)
 
+    for (const address of toUnregister) {
       // unregister address from client
-      this.clients[id].delete(address)
+      if (!clientAddresses.delete(address)) continue
 
-      // delete client from registery if no addresses are registered anymore
-      if (!this.clients[id].size) delete this.clients[id]
+      const connections = this.addresses.get(address)
+      if (!connections) continue
 
-      if (this.addresses[address]) {
-        // unregister client from address
-        this.addresses[address].delete(id)
+      // unregister client from address
+      connections.delete(id)
 
-        // delete address from registery if no clients are registered anymore
-        if (!this.addresses[address].size) {
-          delete this.addresses[address]
-          unsubscribedAddresses.push(address)
-        }
+      // delete address from registery if no clients are registered anymore
+      if (!connections.size) {
+        this.addresses.delete(address)
+        unsubscribedAddresses.push(address)
       }
     }
 
-    if (!addresses.length) {
-      for (const address of this.clients[id]) {
-        unregister(id, address)
-      }
-    } else {
-      for (const address of addresses) {
-        unregister(id, address)
-      }
-    }
+    // delete client from registery if no addresses are registered anymore
+    if (!clientAddresses.size) this.clients.delete(id)
 
     return unsubscribedAddresses
   }
 
   async onBlock(msg: unknown): Promise<void> {
     if (!this.handleBlock) return
-    if (!Object.keys(this.clients).length) return
+    if (!this.clients.size) return
 
     try {
       const { txs } = await this.handleBlock(msg)
@@ -155,7 +184,7 @@ export class Registry {
   }
 
   async onTransaction(msg: unknown): Promise<void> {
-    if (!Object.keys(this.clients).length) return
+    if (!this.clients.size) return
 
     try {
       const { addresses, tx } = await this.handleTransaction(msg)
@@ -169,9 +198,10 @@ export class Registry {
     addresses.forEach((address) => {
       address = this.formatAddress(address)
 
-      if (!this.addresses[address]) return
+      const connections = this.addresses.get(address)
+      if (!connections) return
 
-      for (const [id, connection] of this.addresses[address].entries()) {
+      for (const [id, connection] of connections.entries()) {
         const { subscriptionId } = Registry.fromId(id)
         connection.publish(subscriptionId, { address, data: tx })
       }

@@ -3,7 +3,15 @@ import { join } from 'path'
 import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
 import { Logger } from '@shapeshiftoss/logger'
-import { middleware, ConnectionHandler, Registry, BlockHandler, TransactionHandler } from '@shapeshiftoss/common-api'
+import {
+  middleware,
+  ConnectionHandler,
+  Registry,
+  BlockHandler,
+  TransactionHandler,
+  handleProcessErrors,
+  WS_MAX_PAYLOAD,
+} from '@shapeshiftoss/common-api'
 import { getAddresses, NewBlock, Tx as BlockbookTx, WebsocketClient } from '@shapeshiftoss/blockbook'
 import { utxo } from '@shapeshiftoss/common-api'
 import { service, formatAddress } from './controller'
@@ -20,6 +28,8 @@ const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'litecoin', 'api'],
   level: process.env.LOG_LEVEL,
 })
+
+handleProcessErrors(logger)
 
 const app = express()
 
@@ -60,7 +70,12 @@ const transactionHandler: TransactionHandler<BlockbookTx, utxo.Tx> = async (bloc
   return { addresses, tx }
 }
 
-const registry = new Registry({ addressFormatter: formatAddress, blockHandler, transactionHandler })
+const registry = new Registry({
+  addressFormatter: formatAddress,
+  addressValidator: utxo.validateLitecoinAddress,
+  blockHandler,
+  transactionHandler,
+})
 
 const blockbook = new WebsocketClient(
   INDEXER_WS_URL,
@@ -73,7 +88,7 @@ const blockbook = new WebsocketClient(
 )
 
 const server = app.listen(PORT, () => logger.info('Server started'))
-const wsServer = new Server({ server })
+const wsServer = new Server({ server, maxPayload: WS_MAX_PAYLOAD })
 
 wsServer.on('connection', (connection) => {
   ConnectionHandler.start(connection, registry, blockbook, logger)

@@ -8,8 +8,9 @@
   ],
   "scripts": {
     "build": "yarn generate && yarn run -T tsc",
-    "clean": "rm -rf dist node_modules src/routes.ts src/swagger.json",
-    "generate": "yarn run -T tsoa spec-and-routes"
+    "clean": "rm -rf dist dist-test node_modules src/routes.ts src/swagger.json",
+    "generate": "yarn run -T tsoa spec-and-routes",
+    "test": "rm -rf dist-test && yarn run -T tsc -p tsconfig.test.json && node --test dist-test/__tests__/*.test.js"
   },
   "dependencies": {
     "@shapeshiftoss/common-api": "^10.0.0",

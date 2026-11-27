@@ -2,7 +2,15 @@ import express from 'express'
 import { join } from 'path'
 import { Server } from 'ws'
 import swaggerUi from 'swagger-ui-express'
-import { evm, middleware, ConnectionHandler, Registry, TransactionHandler } from '@shapeshiftoss/common-api'
+import {
+  evm,
+  middleware,
+  ConnectionHandler,
+  Registry,
+  TransactionHandler,
+  handleProcessErrors,
+  WS_MAX_PAYLOAD,
+} from '@shapeshiftoss/common-api'
 import { Logger } from '@shapeshiftoss/logger'
 import { cache, service } from './controller'
 import { RegisterRoutes } from './routes'
@@ -13,6 +21,8 @@ export const logger = new Logger({
   namespace: ['unchained', 'coinstacks', 'ethereum', 'api'],
   level: process.env.LOG_LEVEL,
 })
+
+handleProcessErrors(logger)
 
 const main = async () => {
   const app = express()
@@ -54,7 +64,7 @@ const main = async () => {
   await cache.initialize()
 
   const server = app.listen(PORT, () => logger.info('Server started'))
-  const wsServer = new Server({ server })
+  const wsServer = new Server({ server, maxPayload: WS_MAX_PAYLOAD })
 
   wsServer.on('connection', (connection) => {
     ConnectionHandler.start(connection, registry, service, logger)
